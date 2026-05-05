@@ -106,7 +106,17 @@ CREATE TABLE IF NOT EXISTS logbook_entries (
   updated_at INTEGER DEFAULT (unixepoch())
 );
 
+CREATE TABLE IF NOT EXISTS push_subscriptions (
+  id INTEGER PRIMARY KEY,
+  vehicle_id INTEGER NOT NULL REFERENCES vehicles(id),
+  subscription_json TEXT NOT NULL,
+  created_at INTEGER DEFAULT (unixepoch()),
+  UNIQUE(vehicle_id, subscription_json)
+);
+
 CREATE INDEX IF NOT EXISTS idx_trips_vehicle ON trips(vehicle_id, start_time DESC);
 CREATE INDEX IF NOT EXISTS idx_charging_vehicle ON charging_sessions(vehicle_id, start_time DESC);
 CREATE INDEX IF NOT EXISTS idx_battery_vehicle ON battery_snapshots(vehicle_id, timestamp DESC);
 CREATE INDEX IF NOT EXISTS idx_logbook_vehicle ON logbook_entries(vehicle_id, entry_date DESC);
+CREATE INDEX IF NOT EXISTS idx_trip_points ON trip_points(trip_id, timestamp);
+CREATE INDEX IF NOT EXISTS idx_charging_points ON charging_points(session_id, timestamp);
