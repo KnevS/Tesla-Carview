@@ -15,19 +15,19 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <select v-if="appStore.vehicles.length > 1"
-          v-model="appStore.selectedVehicleId"
-          class="bg-gray-700 text-white text-sm rounded-lg px-3 py-1.5 border border-gray-600"
-        >
+        <select v-if="appStore.vehicles.length > 1" v-model="appStore.selectedVehicleId"
+          class="bg-gray-700 text-white text-sm rounded-lg px-3 py-1.5 border border-gray-600">
           <option v-for="v in appStore.vehicles" :key="v.id" :value="v.id">{{ v.display_name }}</option>
         </select>
         <span v-else-if="appStore.selectedVehicle" class="text-sm text-gray-300">
           {{ appStore.selectedVehicle.display_name }}
         </span>
+        <RouterLink to="/settings" class="text-gray-400 hover:text-white transition" title="Einstellungen">
+          ⚙️
+        </RouterLink>
       </div>
     </div>
 
-    <!-- Mobile Menu -->
     <div class="md:hidden flex overflow-x-auto gap-1 px-4 pb-2">
       <RouterLink v-for="link in links" :key="link.to" :to="link.to"
         class="flex-shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition"
@@ -41,15 +41,13 @@
 
 <script setup>
 import { useAppStore } from '../store/index.js';
-
 const appStore = useAppStore();
-
 const links = [
-  { to: '/', icon: '🏠', label: 'Dashboard' },
-  { to: '/trips', icon: '🗺️', label: 'Fahrten' },
+  { to: '/',         icon: '🏠', label: 'Dashboard' },
+  { to: '/trips',    icon: '🗺️', label: 'Fahrten' },
   { to: '/charging', icon: '🔋', label: 'Laden' },
-  { to: '/battery', icon: '📊', label: 'Batterie' },
-  { to: '/logbook', icon: '📓', label: 'Betriebsbuch' },
-  { to: '/export', icon: '💾', label: 'Export' },
+  { to: '/battery',  icon: '📊', label: 'Batterie' },
+  { to: '/logbook',  icon: '📓', label: 'Betriebsbuch' },
+  { to: '/export',   icon: '💾', label: 'Export' },
 ];
 </script>

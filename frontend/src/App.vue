@@ -1,31 +1,35 @@
 <template>
   <div class="min-h-screen bg-tesla-dark">
-    <NavBar />
-    <main class="max-w-7xl mx-auto px-4 py-6">
-      <div v-if="!appStore.authStatus" class="flex flex-col items-center justify-center min-h-[60vh] gap-6">
-        <div class="text-6xl">⚡</div>
-        <h1 class="text-3xl font-bold">Tesla Carview</h1>
-        <p class="text-gray-400 text-center max-w-md">
-          Verbinde dein Tesla-Fahrzeug, um Fahrten, Ladevorgänge und Batterie-Statistiken zu verfolgen.
-        </p>
-        <button @click="appStore.login()" class="btn-primary text-lg px-8 py-3">
-          Mit Tesla verbinden
-        </button>
-      </div>
-      <RouterView v-else />
-    </main>
+    <template v-if="ready">
+      <NavBar v-if="authStore.isAuthenticated" />
+      <main :class="authStore.isAuthenticated ? 'max-w-7xl mx-auto px-4 py-6' : ''">
+        <RouterView />
+      </main>
+    </template>
+    <div v-else class="flex items-center justify-center min-h-screen">
+      <div class="text-gray-400 animate-pulse">Lade...</div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import NavBar from './components/NavBar.vue';
-import { useAppStore } from './store/index.js';
+import { useAuthStore } from './store/auth.js';
+import { useAppStore }  from './store/index.js';
 
-const appStore = useAppStore();
+const authStore = useAuthStore();
+const appStore  = useAppStore();
+const router    = useRouter();
+const ready     = ref(false);
 
 onMounted(async () => {
-  await appStore.checkAuth();
-  if (appStore.authStatus) await appStore.loadVehicles();
+  // Session aus Refresh-Cookie wiederherstellen
+  const restored = await authStore.tryRestoreSession();
+  if (restored) {
+    await appStore.loadVehicles().catch(() => {});
+  }
+  ready.value = true;
 });
 </script>
