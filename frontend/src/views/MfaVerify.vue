@@ -13,12 +13,13 @@
         <div>
           <input
             v-model="code"
-            :type="useBackup ? 'text' : 'text'"
+            type="text"
             :placeholder="useBackup ? 'XXXX-XXXX' : '000000'"
             :maxlength="useBackup ? 9 : 6"
             inputmode="numeric"
             autocomplete="one-time-code"
             required
+            v-tooltip="useBackup ? 'Einer deiner Backup-Codes (Format XXXX-XXXX). Jeder Code kann nur einmal verwendet werden.' : '6-stelliger Code aus deiner Authenticator-App. Wechselt alle 30 Sekunden.'"
             class="w-full bg-gray-700 rounded-lg px-3 py-3 text-white text-center text-2xl tracking-widest focus:outline-none focus:ring-2 focus:ring-tesla-red"
           />
         </div>
@@ -32,13 +33,14 @@
         </button>
 
         <button type="button" @click="useBackup = !useBackup"
+          v-tooltip="useBackup ? 'Wechseln zurück zur Authenticator-App-Eingabe' : 'Falls du keinen Zugriff auf deine Authenticator-App hast (Handy verloren, App gelöscht), kannst du einen deiner Backup-Codes verwenden.'"
           class="w-full text-sm text-gray-400 hover:text-white transition"
         >
           {{ useBackup ? 'Authenticator-App nutzen' : 'Backup-Code nutzen' }}
         </button>
 
         <RouterLink to="/login" class="block text-center text-sm text-gray-500 hover:text-gray-300">
-          Zurueck zum Login
+          Zurück zum Login
         </RouterLink>
       </form>
     </div>

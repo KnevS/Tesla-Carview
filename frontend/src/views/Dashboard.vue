@@ -5,31 +5,41 @@
     <div v-if="loading" class="text-gray-400">Lade Daten...</div>
 
     <template v-else>
-      <!-- Stat Cards -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Gesamtstrecke" :value="fmt(stats.total_km, 0) + ' km'" icon="🛣️" />
-        <StatCard label="Fahrten" :value="stats.total_trips" icon="🗺️" />
-        <StatCard label="Geladen" :value="fmt(chargingStats.total_energy_kwh, 1) + ' kWh'" icon="⚡" />
-        <StatCard label="Ladekosten" :value="fmt(chargingStats.total_cost, 2) + ' €'" icon="💶" />
+        <StatCard label="Gesamtstrecke"
+          :value="fmt(stats.total_km, 0) + ' km'"
+          icon="🛣️"
+          tooltip="Summe aller aufgezeichneten Fahrtkilometer für das aktuell gewählte Fahrzeug." />
+        <StatCard label="Fahrten"
+          :value="stats.total_trips"
+          icon="🗺️"
+          tooltip="Anzahl der vom System automatisch erkannten Einzelfahrten (jede Fahrt von Park bis Park)." />
+        <StatCard label="Geladen"
+          :value="fmt(chargingStats.total_energy_kwh, 1) + ' kWh'"
+          icon="⚡"
+          tooltip="Insgesamt nachgeladene Energie über alle Ladesessions." />
+        <StatCard label="Ladekosten"
+          :value="fmt(chargingStats.total_cost, 2) + ' €'"
+          icon="💶"
+          tooltip="Summierte Kosten aller Ladevorgänge mit hinterlegtem Preis. Bei kostenlosen oder unbekannten Ladungen wird 0 € angesetzt." />
       </div>
 
-      <!-- Last Trip -->
       <div v-if="lastTrip" class="card">
         <h2 class="text-lg font-semibold mb-3">Letzte Fahrt</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-          <div>
+          <div v-tooltip="'Startadresse oder GPS-Koordinaten der zuletzt aufgezeichneten Fahrt'">
             <p class="text-gray-400">Von</p>
             <p>{{ lastTrip.start_address || 'Unbekannt' }}</p>
           </div>
-          <div>
+          <div v-tooltip="'Zieladresse oder GPS-Koordinaten der zuletzt aufgezeichneten Fahrt'">
             <p class="text-gray-400">Nach</p>
             <p>{{ lastTrip.end_address || 'Unbekannt' }}</p>
           </div>
-          <div>
+          <div v-tooltip="'Zurückgelegte Strecke der letzten Fahrt in Kilometern'">
             <p class="text-gray-400">Strecke</p>
             <p>{{ fmt(lastTrip.distance_km, 1) }} km</p>
           </div>
-          <div>
+          <div v-tooltip="'Energieverbrauch pro 100 km – niedrige Werte bedeuten effizientes Fahren. Tesla-Durchschnitt: 15–20 kWh/100km'">
             <p class="text-gray-400">Verbrauch</p>
             <p>{{ lastTrip.distance_km ? fmt(lastTrip.energy_used_kwh / lastTrip.distance_km * 100, 1) : '–' }} kWh/100km</p>
           </div>
@@ -39,9 +49,11 @@
         </RouterLink>
       </div>
 
-      <!-- Monthly Chart -->
       <div class="card">
-        <h2 class="text-lg font-semibold mb-4">Monatsübersicht – Strecke (km)</h2>
+        <h2 class="text-lg font-semibold mb-4"
+          v-tooltip="'Gefahrene Kilometer pro Monat – zeigt deine Mobilitätsmuster und saisonale Unterschiede'">
+          Monatsübersicht – Strecke (km)
+        </h2>
         <div style="height: 200px">
           <Bar v-if="chartData" :data="chartData" :options="chartOptions" />
         </div>
@@ -68,8 +80,7 @@ const lastTrip = ref(null);
 const chartData = ref(null);
 
 const chartOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
+  responsive: true, maintainAspectRatio: false,
   plugins: { legend: { display: false } },
   scales: {
     x: { ticks: { color: '#9ca3af' }, grid: { color: '#374151' } },

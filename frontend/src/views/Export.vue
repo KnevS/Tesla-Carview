@@ -3,51 +3,53 @@
     <h1 class="text-2xl font-bold">Daten exportieren</h1>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Fahrten -->
       <div class="card space-y-4">
         <h2 class="text-lg font-semibold">🗺️ Fahrten</h2>
         <p class="text-gray-400 text-sm">Alle Fahrtdaten mit Strecke, Verbrauch und SoC.</p>
         <div class="flex gap-3">
-          <a :href="exportUrl('trips.csv')" class="btn-primary flex-1 text-center" download>CSV</a>
-          <a :href="exportUrl('trips.json')" class="btn-secondary flex-1 text-center" download>JSON</a>
+          <a :href="exportUrl('trips.csv')" class="btn-primary flex-1 text-center" download
+            v-tooltip="'CSV-Format mit BOM – öffnet sich direkt in Excel und LibreOffice Calc. Trennzeichen ist Semikolon.'">CSV</a>
+          <a :href="exportUrl('trips.json')" class="btn-secondary flex-1 text-center" download
+            v-tooltip="'JSON-Format inklusive aller GPS-Punkte je Fahrt. Ideal für eigene Auswertungen, Skripte oder Datenmigration.'">JSON</a>
         </div>
       </div>
 
-      <!-- Laden -->
       <div class="card space-y-4">
         <h2 class="text-lg font-semibold">🔋 Ladevorgänge</h2>
         <p class="text-gray-400 text-sm">Alle Ladesessions mit Energie, Kosten und Ladertyp.</p>
         <div class="flex gap-3">
-          <a :href="exportUrl('charging.csv')" class="btn-primary flex-1 text-center" download>CSV</a>
+          <a :href="exportUrl('charging.csv')" class="btn-primary flex-1 text-center" download
+            v-tooltip="'CSV-Datei mit allen Ladesessions – Energie, Kosten, Ladertyp, SoC-Bereich. Excel-kompatibel.'">CSV</a>
         </div>
       </div>
 
-      <!-- Vollbackup -->
       <div class="card space-y-4 md:col-span-2">
         <h2 class="text-lg font-semibold">💾 Vollständiges Backup</h2>
         <p class="text-gray-400 text-sm">
           Alle Daten (Fahrten, Laden, Batterie, Betriebsbuch) als eine JSON-Datei.
           Kann für Backups oder den Umzug auf einen anderen Server genutzt werden.
         </p>
-        <a :href="exportUrl('backup.json')" class="btn-primary inline-block" download>
+        <a :href="exportUrl('backup.json')" class="btn-primary inline-block" download
+          v-tooltip="'Komplette Datenbank-Sicherung im JSON-Format.\nEnthält: Fahrzeuge, Fahrten + GPS-Punkte, Ladevorgänge + Ladekurven, Batterie-Snapshots, Betriebsbuch.\nKeine Passwörter oder Tokens enthalten.'">
           💾 Backup herunterladen
         </a>
       </div>
     </div>
 
-    <!-- Push-Benachrichtigungen -->
     <div class="card space-y-4">
       <h2 class="text-lg font-semibold">🔔 Benachrichtigungen</h2>
       <p class="text-gray-400 text-sm">
         Erhalte eine Browser-Benachrichtigung wenn dein Tesla fertig geladen hat.
       </p>
       <div v-if="notifSupported">
-        <button v-if="!subscribed" @click="subscribe" class="btn-primary">
+        <button v-if="!subscribed" @click="subscribe" class="btn-primary"
+          v-tooltip="'Aktiviert Web-Push-Benachrichtigungen. Funktioniert auch wenn der Browser geschlossen ist (auf unterstützten Systemen). Browser fragt nach Erlaubnis.'">
           Benachrichtigungen aktivieren
         </button>
         <div v-else class="flex items-center gap-3">
           <span class="text-green-400">✓ Benachrichtigungen aktiv</span>
-          <button @click="unsubscribe" class="btn-secondary text-sm">Deaktivieren</button>
+          <button @click="unsubscribe" class="btn-secondary text-sm"
+            v-tooltip="'Push-Benachrichtigungen für dieses Fahrzeug abmelden'">Deaktivieren</button>
         </div>
       </div>
       <p v-else class="text-gray-500 text-sm">Dein Browser unterstützt keine Web-Push-Benachrichtigungen.</p>
@@ -56,7 +58,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
 

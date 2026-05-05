@@ -15,6 +15,7 @@
             type="text"
             autocomplete="username"
             required
+            v-tooltip="'Dein Anmeldename. Groß-/Kleinschreibung wird ignoriert.'"
             class="w-full bg-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-tesla-red"
           />
         </div>
@@ -25,6 +26,7 @@
             type="password"
             autocomplete="current-password"
             required
+            v-tooltip="'Dein persönliches Passwort. Achtung: Nach 5 Fehlversuchen wird das Konto 15 Minuten gesperrt.'"
             class="w-full bg-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-tesla-red"
           />
         </div>

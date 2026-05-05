@@ -5,18 +5,21 @@
       <div class="text-sm text-gray-400">{{ trips.length }} Fahrten geladen</div>
     </div>
 
-    <!-- Stats Row -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <StatCard label="Gesamt km" :value="fmt(stats.total_km, 0) + ' km'" icon="🛣️" />
-      <StatCard label="Ø Verbrauch" :value="fmt(stats.avg_consumption, 1) + ' kWh/100km'" icon="⚡" />
-      <StatCard label="Ø Streckenlänge" :value="fmt(stats.avg_km, 1) + ' km'" icon="📍" />
-      <StatCard label="Gesamt Energie" :value="fmt(stats.total_energy_kwh, 1) + ' kWh'" icon="🔋" />
+      <StatCard label="Gesamt km" :value="fmt(stats.total_km, 0) + ' km'" icon="🛣️"
+        tooltip="Summe aller aufgezeichneten Fahrtkilometer" />
+      <StatCard label="Ø Verbrauch" :value="fmt(stats.avg_consumption, 1) + ' kWh/100km'" icon="⚡"
+        tooltip="Durchschnittlicher Energieverbrauch pro 100 km über alle Fahrten. Tesla-Schnitt: 15–20 kWh/100km. Höher im Winter, niedriger im Sommer." />
+      <StatCard label="Ø Streckenlänge" :value="fmt(stats.avg_km, 1) + ' km'" icon="📍"
+        tooltip="Durchschnittliche Länge einer Einzelfahrt" />
+      <StatCard label="Gesamt Energie" :value="fmt(stats.total_energy_kwh, 1) + ' kWh'" icon="🔋"
+        tooltip="Summe der verbrauchten Energie über alle Fahrten" />
     </div>
 
-    <!-- Trip List -->
     <div class="space-y-3">
       <div v-if="loading" class="text-gray-400">Lade Fahrten...</div>
       <RouterLink v-for="trip in trips" :key="trip.id" :to="'/trips/' + trip.id"
+        v-tooltip="'Klicken für Detailansicht: GPS-Karte, Geschwindigkeitskurve, Verbrauch'"
         class="card block hover:bg-gray-600 transition cursor-pointer"
       >
         <div class="flex items-center justify-between">
@@ -49,7 +52,8 @@
       </RouterLink>
     </div>
 
-    <button v-if="trips.length >= limit" @click="loadMore" class="btn-secondary w-full">
+    <button v-if="trips.length >= limit" @click="loadMore" class="btn-secondary w-full"
+      v-tooltip="'Lädt die nächsten 50 Fahrten nach'">
       Mehr laden
     </button>
   </div>

@@ -1,5 +1,5 @@
 <template>
-  <div class="card">
+  <div class="card" :class="{ 'cursor-help': tooltip }" v-tooltip="tooltip">
     <div class="flex items-start justify-between">
       <div>
         <p class="text-gray-400 text-sm">{{ label }}</p>
@@ -13,9 +13,10 @@
 
 <script setup>
 defineProps({
-  label: String,
-  value: [String, Number],
-  sub: String,
-  icon: String,
+  label:   String,
+  value:  [String, Number],
+  sub:     String,
+  icon:    String,
+  tooltip: String,
 });
 </script>
