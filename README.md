@@ -1,75 +1,110 @@
-# Tesla Carview
+# ⚡ Tesla Carview
 
-Eine selbst gehostete Tesla-Datenlogger-Lösung ähnlich [TeslaLogger](https://teslalogger.de).
+Eine **selbst gehostete** Tesla-Datenlogger-Applikation, betrieben auf deinem eigenen Server.
+Keine Cloud, keine Datenweitergabe an Dritte – alle Fahrzeugdaten bleiben bei dir.
 
 ## Features
 
-- **Dashboard** – Übersicht über Fahrzeugstatus, Verbrauch, letzte Fahrt
-- **Fahrten** – GPS-Aufzeichnung, Verbrauch, Dauer, Strecke
-- **Laden** – Ladevorgänge, Ladekurven, Kosten, Effizienz
-- **Batterie** – Degradations-Tracking, Reichweite, Zellgesundheit
-- **Betriebsbuch** – Notizen, Wartungen, Ereignisse zum Fahrzeug
+| Bereich | Beschreibung |
+|---|---|
+| **Dashboard** | Gesamtstatistiken, letzte Fahrt, monatliches Kilometerdiagramm |
+| **Fahrten** | GPS-Track auf Karte, Verbrauch, Geschwindigkeit, SoC-Verlauf |
+| **Laden** | Ladesessions, Ladekurven, Kosten, Aufschlüsselung nach Ladertyp |
+| **Batterie** | Degradations-Tracking, Reichweiten-Verlauf über Zeit |
+| **Betriebsbuch** | Notizen, Wartungen, Reparaturen, Reifen, Inspektionen mit Kosten |
+| **Export** | CSV/JSON-Export für Fahrten & Laden, Vollbackup |
+| **Benachrichtigungen** | Web Push bei Ladeende |
+
+## Sicherheit
+
+- Benutzer-Login mit **JWT** (Access-Token 15 min, Refresh-Token 7 Tage als httpOnly-Cookie)
+- **TOTP-MFA** kompatibel mit Google Authenticator, Authy, 1Password etc.
+- **10 Backup-Codes** (bcrypt-gehasht, einmalig verwendbar)
+- **Account-Lockout** nach 5 Fehlversuchen
+- **HTTPS** mit TLS 1.2/1.3, HSTS, OCSP-Stapling
+- **CSP, X-Frame-Options, Permissions-Policy** und weitere Security-Header
+- **Rate-Limiting** auf Login- und API-Endpunkten
+- **Audit-Log** aller sicherheitsrelevanten Aktionen
 
 ## Tech Stack
 
-| Bereich | Technologie |
+| Schicht | Technologie |
 |---|---|
-| Frontend | Vue 3 + Vite + Pinia + Tailwind CSS |
+| Frontend | Vue 3 + Vite + Pinia + Tailwind CSS + Chart.js + Leaflet |
 | Backend | Node.js + Express |
-| Datenbank | SQLite (via better-sqlite3) |
-| API | Tesla Fleet API (OAuth2) |
-| Charts | Chart.js |
-| Karte | Leaflet.js |
+| Datenbank | SQLite (better-sqlite3) |
+| Auth | JWT + bcrypt + TOTP (otpauth) |
+| Tesla-Daten | Tesla Fleet API (OAuth2) |
+| Deployment | Docker Compose + Nginx + Let’s Encrypt |
 
-## Schnellstart mit Docker
+## Schnellstart (Entwicklung)
 
 ```bash
-cp backend/.env.example backend/.env
-# .env mit Tesla API Credentials befüllen
-docker compose up -d
+# 1. Repository klonen
+git clone https://github.com/KnevS/Tesla-Carview.git
+cd Tesla-Carview
+
+# 2. Backend starten
+cd backend && cp .env.example .env   # .env befüllen!
+npm install && npm run dev
+
+# 3. Frontend starten (neues Terminal)
+cd frontend && npm install && npm run dev
 ```
 
-Die App ist dann erreichbar unter: http://localhost:5173
+App unter http://localhost:5173 – beim ersten Start wird das Admin-Passwort in der Backend-Konsole ausgegeben.
 
-## Lokale Entwicklung
+## Produktiv-Deployment (tesla.iland.krische.com)
 
-### Backend
 ```bash
-cd backend
-npm install
-npm run dev
+# Auf dem Server als root:
+bash deploy/setup.sh
+
+# Tesla-API-Zugangsdaten eintragen:
+nano /opt/tesla-carview/backend/.env
+
+# Container neu starten:
+cd /opt/tesla-carview
+docker compose -f docker-compose.prod.yml up -d
+
+# Admin-Passwort aus Log lesen:
+docker logs tesla-carview-backend | grep -A3 'ERSTER START'
 ```
 
-### Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-## Tesla Fleet API einrichten
-
-1. Tesla Developer Account erstellen: https://developer.tesla.com
-2. App registrieren und Client ID + Secret erhalten
-3. Redirect URI setzen: `http://localhost:3000/api/auth/callback`
-4. Credentials in `backend/.env` eintragen
+Detaillierte Anleitungen in [`docs/`](./docs/).
 
 ## Projektstruktur
 
 ```
 tesla-carview/
-├── backend/           # Node.js + Express API
+├── backend/
 │   ├── src/
-│   │   ├── routes/    # API-Routen
-│   │   ├── services/  # Tesla API, DB-Services
-│   │   └── db/        # Datenbank-Schema und Setup
-│   └── package.json
-├── frontend/          # Vue 3 App
-│   ├── src/
-│   │   ├── views/     # Seiten (Dashboard, Fahrten, etc.)
-│   │   ├── components/# Wiederverwendbare Komponenten
-│   │   ├── store/     # Pinia Stores
-│   │   └── router/    # Vue Router
-│   └── package.json
-└── docker-compose.yml
+│   │   ├── db/            # Schema + DB-Init
+│   │   ├── middleware/    # auth.js, security.js, validate.js
+│   │   ├── routes/        # auth, mfa, users, trips, charging, battery, logbook, export
+│   │   └── services/      # teslaApi, poller, dataSync, userService, mfaService, auditService
+│   └── .env.example
+├── frontend/
+│   └── src/
+│       ├── views/         # Login, MfaVerify, MfaSetup, Settings, Dashboard, Trips, ...
+│       ├── components/    # NavBar, StatCard
+│       ├── store/         # auth.js, index.js
+│       └── router/
+├── deploy/
+│   ├── nginx-host.conf  # Produktiv-Nginx mit TLS-Hardening
+│   ├── setup.sh         # Vollautomatisches Server-Setup
+│   └── update.sh        # Zero-Downtime-Update
+├── docs/              # Detaillierte Anleitungen
+├── docker-compose.yml      # Entwicklung
+└── docker-compose.prod.yml # Produktion
 ```
+
+## Dokumentation
+
+| Dokument | Inhalt |
+|---|---|
+| [Quickstart](docs/01-quickstart.md) | Lokale Entwicklungsumgebung einrichten |
+| [Deployment](docs/02-deployment.md) | Produktiv-Deployment auf dem Netcup-Server |
+| [Authentifizierung & MFA](docs/03-authentication.md) | Login-System, MFA einrichten und verwalten |
+| [Tesla Fleet API](docs/04-tesla-api.md) | Tesla Developer Account + API-Schlüssel einrichten |
+| [Sicherheitsarchitektur](docs/05-security-architecture.md) | Threat-Model, alle Sicherheitsmassnahmen im Detail |

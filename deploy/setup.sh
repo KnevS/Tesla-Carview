@@ -1,62 +1,102 @@
 #!/bin/bash
-# ============================================================
-# Tesla Carview – Server Setup für iland.krische.com (Netcup)
-# Ausführen als root oder mit sudo
-# ============================================================
-set -e
+# =================================================================
+# Tesla Carview - Server-Setup fuer iland.krische.com (Netcup)
+# Ausfuehren als root: bash deploy/setup.sh
+# =================================================================
+set -euo pipefail
 
-APP_DIR="/opt/tesla-carview"
 DOMAIN="tesla.iland.krische.com"
-APP_USER="tesla"
+APP_DIR="/opt/tesla-carview"
+CERT_EMAIL="admin@krische.com"
 
-echo "==> [1/7] System-Pakete aktualisieren"
+echo "==> [1/8] Systempakete aktualisieren"
 apt-get update -qq
-apt-get install -y -qq curl git nginx certbot python3-certbot-nginx ufw
+apt-get install -y -qq curl git nginx certbot python3-certbot-nginx ufw fail2ban
 
-echo "==> [2/7] Docker installieren (falls nicht vorhanden)"
+echo "==> [2/8] Docker installieren"
 if ! command -v docker &>/dev/null; then
     curl -fsSL https://get.docker.com | sh
-    systemctl enable docker
-    systemctl start docker
+    systemctl enable --now docker
 fi
 
-echo "==> [3/7] App-Benutzer und Verzeichnis anlegen"
-useradd -r -s /bin/bash -d $APP_DIR $APP_USER 2>/dev/null || true
-mkdir -p $APP_DIR
-chown $APP_USER:$APP_USER $APP_DIR
+echo "==> [3/8] Firewall konfigurieren (UFW)"
+ufw --force reset
+ufw default deny incoming
+ufw default allow outgoing
+ufw allow ssh
+ufw allow 80/tcp
+ufw allow 443/tcp
+ufw --force enable
+echo "Firewall aktiv: nur SSH, HTTP und HTTPS erlaubt"
 
-echo "==> [4/7] Repository klonen"
+echo "==> [4/8] fail2ban konfigurieren (SSH-Brute-Force-Schutz)"
+cat > /etc/fail2ban/jail.local <<'EOF'
+[DEFAULT]
+bantime  = 3600
+findtime = 600
+maxretry = 5
+
+[sshd]
+enabled = true
+EOF
+systemctl enable --now fail2ban
+
+echo "==> [5/8] Repository klonen"
 if [ ! -d "$APP_DIR/.git" ]; then
-    git clone https://github.com/KnevS/Tesla-Carview.git $APP_DIR
+    git clone https://github.com/KnevS/Tesla-Carview.git "$APP_DIR"
 else
-    git -C $APP_DIR pull
+    git -C "$APP_DIR" pull origin main
 fi
-chown -R $APP_USER:$APP_USER $APP_DIR
 
-echo "==> [5/7] .env konfigurieren"
+echo "==> [6/8] .env anlegen"
 if [ ! -f "$APP_DIR/backend/.env" ]; then
-    cp $APP_DIR/backend/.env.example $APP_DIR/backend/.env
+    cp "$APP_DIR/backend/.env.example" "$APP_DIR/backend/.env"
+    # Sicheres JWT_SECRET automatisch generieren
+    JWT=$(openssl rand -hex 64)
+    sed -i "s|change-me-to-a-very-long-random-secret-min-64-chars|$JWT|" "$APP_DIR/backend/.env"
+    sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=https://$DOMAIN|" "$APP_DIR/backend/.env"
+    sed -i "s|TESLA_REDIRECT_URI=.*|TESLA_REDIRECT_URI=https://$DOMAIN/api/auth/callback|" "$APP_DIR/backend/.env"
     echo ""
-    echo "WICHTIG: Bitte $APP_DIR/backend/.env mit deinen Tesla API Credentials befüllen!"
-    echo "  TESLA_CLIENT_ID=..."
-    echo "  TESLA_CLIENT_SECRET=..."
-    echo "  TESLA_REDIRECT_URI=https://$DOMAIN/api/auth/callback"
-    echo "  JWT_SECRET=$(openssl rand -hex 32)"
+    echo "WICHTIG: Trage deine Tesla-API-Zugangsdaten ein:"
+    echo "  nano $APP_DIR/backend/.env"
 fi
 
-echo "==> [6/7] Nginx konfigurieren"
-cp $APP_DIR/deploy/nginx-host.conf /etc/nginx/sites-available/tesla-carview
-ln -sf /etc/nginx/sites-available/tesla-carview /etc/nginx/sites-enabled/tesla-carview
+echo "==> [7/8] Nginx + SSL konfigurieren"
+# Temporaere HTTP-Config fuer certbot-Challenge
+cat > /etc/nginx/sites-available/tesla-carview-tmp <<EOF
+server {
+    listen 80;
+    server_name $DOMAIN;
+    root /var/www/html;
+}
+EOF
+ln -sf /etc/nginx/sites-available/tesla-carview-tmp /etc/nginx/sites-enabled/tesla-carview
 nginx -t && systemctl reload nginx
 
-echo "==> [7/7] SSL-Zertifikat via Let's Encrypt holen"
-certbot --nginx -d $DOMAIN --non-interactive --agree-tos --email admin@krische.com --redirect
+# SSL-Zertifikat holen
+certbot certonly --nginx -d "$DOMAIN" --non-interactive --agree-tos \
+    --email "$CERT_EMAIL" --redirect || true
+
+# Haertete Nginx-Config einsetzen
+cp "$APP_DIR/deploy/nginx-host.conf" /etc/nginx/sites-available/tesla-carview
+nginx -t && systemctl reload nginx
+
+# Certbot Auto-Renewal als systemd-Timer aktivieren
+systemctl enable certbot.timer
+systemctl start  certbot.timer
+
+echo "==> [8/8] App-Container starten"
+cd "$APP_DIR"
+mkdir -p data
+docker compose -f docker-compose.prod.yml up -d --build
 
 echo ""
-echo "============================================================"
+echo "================================================================"
 echo " Setup abgeschlossen!"
-echo " Nächste Schritte:"
-echo "   1. $APP_DIR/backend/.env befüllen"
-echo "   2. cd $APP_DIR && docker compose -f docker-compose.prod.yml up -d --build"
-echo "   3. https://$DOMAIN aufrufen"
-echo "============================================================"
+echo " URL: https://$DOMAIN"
+echo " "
+echo " Naechste Schritte:"
+echo "   1. Tesla-API-Daten eintragen: nano $APP_DIR/backend/.env"
+echo "   2. Container neu starten:     cd $APP_DIR && docker compose -f docker-compose.prod.yml up -d"
+echo "   3. Admin-Passwort aus Logs:   docker logs tesla-carview-backend | grep -A3 'ERSTER START'"
+echo "================================================================"
