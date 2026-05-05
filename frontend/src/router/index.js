@@ -5,6 +5,7 @@ import TripDetail from '../views/TripDetail.vue';
 import Charging from '../views/Charging.vue';
 import Battery from '../views/Battery.vue';
 import Logbook from '../views/Logbook.vue';
+import Export from '../views/Export.vue';
 
 const routes = [
   { path: '/', component: Dashboard, meta: { title: 'Dashboard' } },
@@ -13,6 +14,7 @@ const routes = [
   { path: '/charging', component: Charging, meta: { title: 'Laden' } },
   { path: '/battery', component: Battery, meta: { title: 'Batterie' } },
   { path: '/logbook', component: Logbook, meta: { title: 'Betriebsbuch' } },
+  { path: '/export', component: Export, meta: { title: 'Export' } },
 ];
 
 const router = createRouter({

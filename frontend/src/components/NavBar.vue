@@ -50,5 +50,6 @@ const links = [
   { to: '/charging', icon: '🔋', label: 'Laden' },
   { to: '/battery', icon: '📊', label: 'Batterie' },
   { to: '/logbook', icon: '📓', label: 'Betriebsbuch' },
+  { to: '/export', icon: '💾', label: 'Export' },
 ];
 </script>
