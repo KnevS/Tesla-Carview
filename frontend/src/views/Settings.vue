@@ -2,6 +2,60 @@
   <div class="max-w-2xl space-y-6">
     <h1 class="text-2xl font-bold">Einstellungen</h1>
 
+    <!-- Vehicle profile -->
+    <div class="card space-y-4">
+      <h2 class="font-semibold" v-tooltip="'Kennzeichen, Farbe und Modell des Fahrzeugs einstellen – wird auf Dashboard und Technik-Seite angezeigt'">
+        🚗 Fahrzeugprofil
+      </h2>
+      <div v-if="appStore.selectedVehicle" class="space-y-4">
+        <div class="flex gap-4 items-center">
+          <img :src="vehicleImageUrl" :alt="appStore.selectedVehicle.display_name"
+            class="h-20 object-contain bg-gray-800 rounded-lg px-2"
+            v-tooltip="'Fahrzeugvorschau basierend auf Modell und Farbe'" />
+          <div class="text-sm">
+            <p class="font-semibold text-white text-base">{{ appStore.selectedVehicle.display_name }}</p>
+            <p class="text-gray-400">{{ vProfile.license_plate || 'Kein Kennzeichen' }}</p>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label">Kennzeichen</label>
+            <input v-model="vProfile.license_plate" type="text" class="input" placeholder="MU-TC 1337E"
+              v-tooltip="'Amtliches Kennzeichen – wird auf dem Dashboard angezeigt. Format: Stadt-Buchstaben Zahl'" />
+          </div>
+          <div>
+            <label class="label">Modell</label>
+            <select v-model="vProfile.model" class="input"
+              v-tooltip="'Tesla-Modell – bestimmt die Fahrzeugsilhouette in der Darstellung'">
+              <option value="ms">Model S</option>
+              <option value="mx">Model X</option>
+              <option value="m3">Model 3</option>
+              <option value="my">Model Y</option>
+              <option value="ct">Cybertruck</option>
+            </select>
+          </div>
+          <div class="col-span-2">
+            <label class="label">Farbe</label>
+            <select v-model="vProfile.image_color" class="input"
+              v-tooltip="'Lackfarbe – Tesla-Farbcode für die korrekte Abbildung des Fahrzeugs'">
+              <option value="PPSW">Pearl White Multi-Coat</option>
+              <option value="PMNG">Midnight Silver Metallic</option>
+              <option value="PBSB">Obsidian Black Metallic</option>
+              <option value="PPMR">Ultra Red</option>
+              <option value="PPSB">Deep Blue Metallic</option>
+              <option value="PPW">Solid White</option>
+            </select>
+          </div>
+        </div>
+        <p v-if="vMsg" :class="vOk ? 'text-green-400' : 'text-red-400'" class="text-sm">{{ vMsg }}</p>
+        <button @click="saveVehicle" class="btn-primary text-sm"
+          v-tooltip="'Fahrzeugprofil speichern – Änderungen werden sofort auf dem Dashboard sichtbar'">
+          Speichern
+        </button>
+      </div>
+      <p v-else class="text-gray-400 text-sm">Kein Fahrzeug verbunden.</p>
+    </div>
+
     <div class="card space-y-3">
       <h2 class="font-semibold"
         v-tooltip="'Zwei-Faktor-Authentifizierung schützt dein Konto: auch wenn dein Passwort gestohlen wird, kann sich niemand ohne deinen zweiten Faktor anmelden.'">
@@ -82,13 +136,40 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../api.js';
 import { useAuthStore } from '../store/auth.js';
+import { useAppStore } from '../store/index.js';
 
-const auth   = useAuthStore();
-const router = useRouter();
+const auth     = useAuthStore();
+const appStore = useAppStore();
+const router   = useRouter();
+
+// Vehicle profile
+const vProfile = ref({ license_plate: '', model: 'm3', image_color: 'PPSW' });
+const vMsg = ref('');
+const vOk  = ref(false);
+
+const vehicleImageUrl = computed(() => {
+  const v = appStore.selectedVehicle;
+  if (!v) return '';
+  return `https://static-assets.tesla.com/configurator/compositor?&options=${vProfile.value.image_color || 'PPSW'}&view=STUD_3QTR&model=${vProfile.value.model || 'm3'}&size=400`;
+});
+
+async function saveVehicle() {
+  vMsg.value = ''; vOk.value = false;
+  const v = appStore.selectedVehicle;
+  if (!v) return;
+  try {
+    const { data } = await api.put(`/vehicles/${v.id}`, vProfile.value);
+    Object.assign(v, data);
+    vMsg.value = 'Fahrzeugprofil gespeichert ✓';
+    vOk.value = true;
+  } catch (e) {
+    vMsg.value = e.response?.data?.error ?? 'Fehler beim Speichern';
+  }
+}
 
 const mfaStatus       = ref({ mfaEnabled: false, unusedBackupCodes: 0 });
 const showDisableForm = ref(false);
@@ -121,6 +202,15 @@ onMounted(async () => {
   ]);
   mfaStatus.value = mfa.data;
   auditLog.value  = audit.data;
+
+  const v = appStore.selectedVehicle;
+  if (v) {
+    vProfile.value = {
+      license_plate: v.license_plate ?? '',
+      model:         v.model ?? 'm3',
+      image_color:   v.image_color ?? 'PPSW',
+    };
+  }
 });
 
 async function disableMfa() {

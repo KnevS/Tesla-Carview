@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS vehicles (
   display_name TEXT,
   model TEXT,
   color TEXT,
+  license_plate TEXT,
+  image_color   TEXT,
   created_at INTEGER DEFAULT (unixepoch())
 );
 

@@ -11,6 +11,8 @@ import Login       from '../views/Login.vue';
 import MfaVerify   from '../views/MfaVerify.vue';
 import MfaSetup    from '../views/MfaSetup.vue';
 import Settings    from '../views/Settings.vue';
+import Telemetry  from '../views/Telemetry.vue';
+import System     from '../views/System.vue';
 
 const routes = [
   // Oeffentlich
@@ -26,6 +28,8 @@ const routes = [
   { path: '/export',     component: Export,     meta: { title: 'Export' } },
   { path: '/mfa/setup',  component: MfaSetup,   meta: { title: 'MFA einrichten' } },
   { path: '/settings',   component: Settings,   meta: { title: 'Einstellungen' } },
+  { path: '/telemetry',  component: Telemetry,  meta: { title: 'Fahrzeugtechnik' } },
+  { path: '/system',     component: System,     meta: { title: 'System' } },
 ];
 
 const router = createRouter({ history: createWebHistory(), routes });

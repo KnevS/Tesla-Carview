@@ -49,11 +49,13 @@
 import { useAppStore } from '../store/index.js';
 const appStore = useAppStore();
 const links = [
-  { to: '/',         icon: '🏠', label: 'Dashboard',    tooltip: 'Übersicht mit Kennzahlen, letzter Fahrt und Monatsstatistik' },
-  { to: '/trips',    icon: '🗺️', label: 'Fahrten',      tooltip: 'Liste aller aufgezeichneten Fahrten mit GPS-Track auf einer Karte' },
-  { to: '/charging', icon: '🔋', label: 'Laden',        tooltip: 'Alle Ladevorgänge mit Ladekurven, Kosten und Aufschlüsselung nach Ladertyp' },
-  { to: '/battery',  icon: '📊', label: 'Batterie',     tooltip: 'Reichweiten-Verlauf und Degradations-Analyse über Zeit' },
-  { to: '/logbook',  icon: '📓', label: 'Betriebsbuch', tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },
-  { to: '/export',   icon: '💾', label: 'Export',       tooltip: 'Daten als CSV/JSON exportieren, Vollbackup erstellen, Push-Benachrichtigungen' },
+  { to: '/',          icon: '🏠', label: 'Dashboard',    tooltip: 'Übersicht mit Kennzahlen, letzter Fahrt und Monatsstatistik' },
+  { to: '/trips',     icon: '🗺️', label: 'Fahrten',      tooltip: 'Liste aller aufgezeichneten Fahrten mit GPS-Track auf einer Karte' },
+  { to: '/charging',  icon: '🔋', label: 'Laden',        tooltip: 'Alle Ladevorgänge mit Ladekurven, Kosten und Aufschlüsselung nach Ladertyp' },
+  { to: '/battery',   icon: '📊', label: 'Batterie',     tooltip: 'Reichweiten-Verlauf und Degradations-Analyse über Zeit' },
+  { to: '/logbook',   icon: '📓', label: 'Betriebsbuch', tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },
+  { to: '/telemetry', icon: '🏎', label: 'Technik',      tooltip: 'Live-Fahrzeugdaten: Reifendruck, Klima, Leistung, SOC – wie der Track-Mode' },
+  { to: '/export',    icon: '💾', label: 'Export',       tooltip: 'Daten als CSV/JSON exportieren, Vollbackup erstellen, Push-Benachrichtigungen' },
+  { to: '/system',    icon: '📈', label: 'System',       tooltip: 'Versionsinformationen, CPU-/RAM-Auslastung und Datenbankstatistiken' },
 ];
 </script>

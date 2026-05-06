@@ -18,6 +18,8 @@ import batteryRoutes     from './routes/battery.js';
 import logbookRoutes     from './routes/logbook.js';
 import notificationRoutes from './routes/notifications.js';
 import exportRoutes      from './routes/export.js';
+import systemRoutes      from './routes/system.js';
+import telemetryRoutes   from './routes/telemetry.js';
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
@@ -52,6 +54,8 @@ app.use('/api/battery',       batteryRoutes);
 app.use('/api/logbook',       logbookRoutes);
 app.use('/api/notifications',  notificationRoutes);
 app.use('/api/export',        exportRoutes);
+app.use('/api/system',        systemRoutes);
+app.use('/api/telemetry',     telemetryRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', version: '1.0.0' }));
 

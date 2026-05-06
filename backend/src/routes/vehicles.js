@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import { z } from 'zod';
+import { validate } from '../middleware/validate.js';
 import { getVehicles, getVehicleData } from '../services/teslaApi.js';
 import { getDb } from '../db/database.js';
 
@@ -48,6 +50,33 @@ router.get('/summary', async (_req, res) => {
       return { ...v, lastTrip, totalKm, totalEnergy };
     });
     res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const patchSchema = z.object({
+  display_name:  z.string().max(100).optional(),
+  license_plate: z.string().max(20).optional(),
+  image_color:   z.string().max(50).optional(),
+  color:         z.string().max(50).optional(),
+  model:         z.string().max(100).optional(),
+});
+
+router.put('/:vehicleId', validate(patchSchema), (req, res) => {
+  try {
+    const db = getDb();
+    const { display_name, license_plate, image_color, color, model } = req.body;
+    db.prepare(
+      `UPDATE vehicles SET
+         display_name  = COALESCE(?, display_name),
+         license_plate = COALESCE(?, license_plate),
+         image_color   = COALESCE(?, image_color),
+         color         = COALESCE(?, color),
+         model         = COALESCE(?, model)
+       WHERE id = ?`
+    ).run(display_name, license_plate, image_color, color, model, req.params.vehicleId);
+    res.json(db.prepare('SELECT * FROM vehicles WHERE id = ?').get(req.params.vehicleId));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
