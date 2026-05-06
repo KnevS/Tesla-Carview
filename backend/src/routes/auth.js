@@ -170,7 +170,8 @@ router.get('/me', requireAuth, (req, res) => {
 });
 
 // --- Tesla Fleet OAuth (wird vom Benutzer initiiert) ---
-router.get('/tesla/login', requireAuth, (_req, res) => res.redirect(getAuthUrl()));
+router.get('/tesla/auth-url', requireAuth, (_req, res) => res.json({ url: getAuthUrl() }));
+router.get('/tesla/login',    requireAuth, (_req, res) => res.redirect(getAuthUrl()));
 
 router.get('/callback', async (req, res) => {
   const { code, error } = req.query;

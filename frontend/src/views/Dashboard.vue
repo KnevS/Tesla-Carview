@@ -9,10 +9,10 @@
       <div class="text-6xl">🚗</div>
       <h2 class="text-xl font-semibold">Kein Fahrzeug verbunden</h2>
       <p class="text-gray-400 text-sm">Verbinde deinen Tesla-Account um Fahrtdaten zu sehen.</p>
-      <a :href="teslaLoginUrl" class="btn-primary inline-block"
+      <button @click="connectTesla" class="btn-primary"
         v-tooltip="'Leitet zur Tesla-Anmeldeseite weiter. Nach der Genehmigung wird das Fahrzeug automatisch erkannt.'">
         Tesla verbinden →
-      </a>
+      </button>
     </div>
 
     <template v-else>
@@ -85,7 +85,11 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const appStore = useAppStore();
 const loading = ref(true);
-const teslaLoginUrl = `${window.location.origin}/api/auth/tesla/login`;
+
+async function connectTesla() {
+  const { data } = await api.get('/auth/tesla/auth-url');
+  window.location.href = data.url;
+}
 const stats = ref({});
 const chargingStats = ref({});
 const lastTrip = ref(null);
