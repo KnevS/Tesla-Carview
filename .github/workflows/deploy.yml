@@ -1,0 +1,33 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Secrets (in GitHub Repository Settings → Secrets):
+#   DEPLOY_HOST      – IP oder Hostname des Zielservers
+#   DEPLOY_USER      – SSH-Benutzer (z.B. root oder deploy)
+#   DEPLOY_SSH_KEY   – privater SSH-Key (ed25519 empfohlen)
+#   DEPLOY_APP_DIR   – Pfad auf dem Server (z.B. /opt/tesla-carview)
+
+jobs:
+  deploy:
+    name: Deploy via SSH
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            APP_DIR="${{ secrets.DEPLOY_APP_DIR || '/opt/tesla-carview' }}"
+            cd "$APP_DIR"
+            git pull origin main
+            docker compose -f docker-compose.prod.yml up -d --build
+            docker system prune -f
+            echo "Deployment erfolgreich: $(date)"
