@@ -15,9 +15,10 @@ services:
       - tesla-net
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
-      interval: 30s
+      interval: 15s
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 30s
 
   frontend:
     build:
@@ -28,8 +29,7 @@ services:
     networks:
       - tesla-net
     depends_on:
-      backend:
-        condition: service_healthy
+      - backend
 
   nginx:
     image: nginx:alpine
