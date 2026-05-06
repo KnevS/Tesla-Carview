@@ -6,7 +6,7 @@ import { initDb } from './db/database.js';
 import { securityHeaders, apiRateLimit } from './middleware/security.js';
 import { requireAuth } from './middleware/auth.js';
 import { startPoller } from './services/poller.js';
-import { findUserByUsername } from './services/userService.js';
+import { getDb } from './db/database.js';
 import authRoutes        from './routes/auth.js';
 import mfaRoutes         from './routes/mfa.js';
 import userRoutes        from './routes/users.js';
@@ -63,7 +63,7 @@ app.get('/api/health', (_req, res) => res.json({ status: 'ok', version: '1.0.0' 
 app.listen(PORT, () => {
   console.log(`Tesla Carview Backend laeuft auf Port ${PORT}`);
 
-  const adminExists = !!findUserByUsername('admin');
+  const adminExists = !!getDb().prepare('SELECT 1 FROM users WHERE is_active=1 LIMIT 1').get();
   if (!adminExists) {
     const frontendUrl = process.env.FRONTEND_URL || `http://localhost:${PORT}`;
     console.log('\n' + '='.repeat(56));

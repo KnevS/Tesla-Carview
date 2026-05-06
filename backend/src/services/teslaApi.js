@@ -2,7 +2,7 @@ import axios from 'axios';
 import { getDb } from '../db/database.js';
 
 const TESLA_AUTH_URL = 'https://auth.tesla.com/oauth2/v3';
-const FLEET_API_URL = process.env.TESLA_AUDIENCE || 'https://fleet-api.prd.na.vn.cloud.tesla.com';
+const getFleetApiUrl = () => process.env.TESLA_AUDIENCE || 'https://fleet-api.prd.eu.vn.cloud.tesla.com';
 
 export function getAuthUrl() {
   const params = new URLSearchParams({
@@ -22,7 +22,7 @@ export async function exchangeCode(code) {
     client_secret: process.env.TESLA_CLIENT_SECRET,
     code,
     redirect_uri: process.env.TESLA_REDIRECT_URI,
-    audience: FLEET_API_URL,
+    audience: getFleetApiUrl(),
   });
   saveTokens(res.data);
   return res.data;
@@ -59,7 +59,7 @@ export async function getAccessToken() {
 
 export async function apiGet(path) {
   const token = await getAccessToken();
-  const res = await axios.get(`${FLEET_API_URL}${path}`, {
+  const res = await axios.get(`${getFleetApiUrl()}${path}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
