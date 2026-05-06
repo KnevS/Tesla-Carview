@@ -8,16 +8,55 @@
     <div v-if="loading" class="text-gray-400">Lade...</div>
     <template v-else-if="trip">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Strecke" :value="fmt(trip.distance_km, 1) + ' km'" icon="🛣️" />
-        <StatCard label="Dauer" :value="duration" icon="⏱️" />
-        <StatCard label="Ø Geschw." :value="fmt(trip.avg_speed_kmh, 0) + ' km/h'" icon="🏎️" />
-        <StatCard label="Verbrauch" :value="consumption + ' kWh/100km'" icon="⚡" />
+        <StatCard label="Strecke"    :value="fmt(trip.distance_km, 1) + ' km'" icon="🛣️" />
+        <StatCard label="Dauer"      :value="duration"                          icon="⏱️" />
+        <StatCard label="Ø Geschw."  :value="fmt(trip.avg_speed_kmh, 0) + ' km/h'" icon="🏎️" />
+        <StatCard label="Verbrauch"  :value="consumption + ' kWh/100km'"        icon="⚡" />
       </div>
 
-      <!-- GPS-Karte -->
-      <div class="card">
-        <h2 class="text-lg font-semibold mb-3">GPS-Track</h2>
-        <div v-if="hasPoints" id="trip-map" style="height: 350px; border-radius: 12px;"></div>
+      <!-- GPS-Karte + Schieber -->
+      <div class="card space-y-3">
+        <h2 class="text-lg font-semibold">GPS-Track</h2>
+
+        <div v-if="hasPoints">
+          <!-- Karte -->
+          <div id="trip-map" style="height: 380px; border-radius: 12px;"></div>
+
+          <!-- Datenpanel am Slider-Punkt -->
+          <div class="grid grid-cols-4 gap-3 mt-3 text-center text-sm">
+            <div class="bg-gray-800 rounded-xl p-3">
+              <p class="text-gray-400 text-xs mb-1">Geschwindigkeit</p>
+              <p class="text-white font-bold text-lg">{{ sliderPt.speed_kmh ?? '–' }} <span class="text-xs font-normal text-gray-400">km/h</span></p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3">
+              <p class="text-gray-400 text-xs mb-1">Leistung</p>
+              <p class="font-bold text-lg" :class="(sliderPt.power_kw ?? 0) >= 0 ? 'text-red-400' : 'text-green-400'">
+                {{ sliderPt.power_kw !== undefined ? (sliderPt.power_kw >= 0 ? '+' : '') + sliderPt.power_kw : '–' }}
+                <span class="text-xs font-normal text-gray-400">kW</span>
+              </p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3">
+              <p class="text-gray-400 text-xs mb-1">Batterie</p>
+              <p class="text-white font-bold text-lg">{{ sliderPt.battery_level ?? '–' }} <span class="text-xs font-normal text-gray-400">%</span></p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-3">
+              <p class="text-gray-400 text-xs mb-1">Uhrzeit</p>
+              <p class="text-white font-bold text-lg text-sm">{{ sliderPt.timestamp ? fmtTime(sliderPt.timestamp) : '–' }}</p>
+            </div>
+          </div>
+
+          <!-- Schieber -->
+          <div class="mt-2 space-y-1">
+            <input type="range" min="0" :max="trip.points.length - 1" v-model.number="sliderIdx"
+              @input="onSlider"
+              class="w-full accent-tesla-red cursor-pointer" />
+            <div class="flex justify-between text-xs text-gray-500">
+              <span>{{ fmtDateTime(trip.start_time) }}</span>
+              <span>{{ fmtDateTime(trip.end_time) }}</span>
+            </div>
+          </div>
+        </div>
+
         <p v-else class="text-gray-400 text-sm">Keine GPS-Daten für diese Fahrt vorhanden.</p>
       </div>
 
@@ -78,15 +117,24 @@ import api from '../api.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip);
 
-const route = useRoute();
-const trip = ref(null);
+const route   = useRoute();
+const trip    = ref(null);
 const loading = ref(true);
-let leafletMap = null;
+const sliderIdx = ref(0);
+let leafletMap  = null;
+let sliderMarker = null;
 
-const fmt = (v, d = 0) => (+(v || 0)).toFixed(d);
+const fmt         = (v, d = 0) => (+(v || 0)).toFixed(d);
 const fmtDateTime = ts => ts ? new Date(ts * 1000).toLocaleString('de-DE') : '–';
+const fmtTime     = ts => new Date(ts * 1000).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
 const hasPoints = computed(() => trip.value?.points?.length >= 2);
+
+const sliderPt = computed(() => {
+  const pts = trip.value?.points;
+  if (!pts?.length) return {};
+  return pts[Math.min(sliderIdx.value, pts.length - 1)];
+});
 
 const duration = computed(() => {
   if (!trip.value?.start_time || !trip.value?.end_time) return '–';
@@ -114,13 +162,19 @@ const speedChart = computed(() => {
   if (!trip.value?.points) return null;
   const pts = trip.value.points;
   return {
-    labels: pts.map(p => new Date(p.timestamp * 1000).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })),
+    labels: pts.map(p => fmtTime(p.timestamp)),
     datasets: [
-      { label: 'km/h', data: pts.map(p => p.speed_kmh || 0), borderColor: '#E31937', tension: 0.4, pointRadius: 0, fill: false, yAxisID: 'y' },
-      { label: 'kW', data: pts.map(p => p.power_kw || 0), borderColor: '#10b981', tension: 0.4, pointRadius: 0, fill: false, yAxisID: 'y' },
+      { label: 'km/h', data: pts.map(p => p.speed_kmh || 0), borderColor: '#E31937', tension: 0.4, pointRadius: 0, fill: false },
+      { label: 'kW',   data: pts.map(p => p.power_kw  || 0), borderColor: '#10b981', tension: 0.4, pointRadius: 0, fill: false },
     ],
   };
 });
+
+function onSlider() {
+  const pt = sliderPt.value;
+  if (!pt?.lat || !sliderMarker) return;
+  sliderMarker.setLatLng([pt.lat, pt.lon]);
+}
 
 async function initMap(points) {
   await nextTick();
@@ -143,28 +197,30 @@ async function initMap(points) {
   // Track nach Geschwindigkeit einfärben
   const maxSpeed = Math.max(...points.map(p => p.speed_kmh || 0), 1);
   for (let i = 1; i < points.length; i++) {
-    const speed = points[i].speed_kmh || 0;
-    const ratio = speed / maxSpeed;
+    const ratio = (points[i].speed_kmh || 0) / maxSpeed;
     const r = Math.round(227 * ratio);
     const g = Math.round(183 * (1 - ratio));
-    const color = `rgb(${r},${g},50)`;
     L.polyline([[points[i-1].lat, points[i-1].lon], [points[i].lat, points[i].lon]], {
-      color, weight: 4, opacity: 0.85,
+      color: `rgb(${r},${g},50)`, weight: 4, opacity: 0.85,
     }).addTo(leafletMap);
   }
 
   // Start- und Endmarker
-  const first = points[0];
-  const last  = points[points.length - 1];
-  L.marker([first.lat, first.lon]).bindPopup('▶ Start').addTo(leafletMap);
-  L.marker([last.lat, last.lon]).bindPopup('🏁 Ziel').addTo(leafletMap);
+  L.marker([points[0].lat, points[0].lon]).bindPopup('▶ Start').addTo(leafletMap);
+  L.marker([points[points.length - 1].lat, points[points.length - 1].lon]).bindPopup('🏁 Ziel').addTo(leafletMap);
+
+  // Schieber-Marker (roter Kreis)
+  sliderMarker = L.circleMarker([points[0].lat, points[0].lon], {
+    radius: 10, color: '#E31937', fillColor: '#E31937',
+    fillOpacity: 0.9, weight: 3,
+  }).addTo(leafletMap);
 
   leafletMap.fitBounds(L.latLngBounds(latlngs), { padding: [20, 20] });
 }
 
 onMounted(async () => {
   const { data } = await api.get(`/trips/${route.params.id}`);
-  trip.value = data;
+  trip.value    = data;
   loading.value = false;
   if (data.points?.length >= 2) {
     await initMap(data.points);

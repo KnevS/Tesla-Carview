@@ -4,6 +4,17 @@
 
     <div v-if="loading" class="text-gray-400">Lade Daten...</div>
 
+    <!-- Kein Fahrzeug verbunden -->
+    <div v-else-if="!appStore.selectedVehicle" class="card text-center space-y-4 py-10">
+      <div class="text-6xl">🚗</div>
+      <h2 class="text-xl font-semibold">Kein Fahrzeug verbunden</h2>
+      <p class="text-gray-400 text-sm">Verbinde deinen Tesla-Account um Fahrtdaten zu sehen.</p>
+      <a :href="teslaLoginUrl" class="btn-primary inline-block"
+        v-tooltip="'Leitet zur Tesla-Anmeldeseite weiter. Nach der Genehmigung wird das Fahrzeug automatisch erkannt.'">
+        Tesla verbinden →
+      </a>
+    </div>
+
     <template v-else>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Gesamtstrecke"
@@ -74,6 +85,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const appStore = useAppStore();
 const loading = ref(true);
+const teslaLoginUrl = `${window.location.origin}/api/auth/tesla/login`;
 const stats = ref({});
 const chargingStats = ref({});
 const lastTrip = ref(null);
