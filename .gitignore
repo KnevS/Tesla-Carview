@@ -7,3 +7,6 @@ dist/
 *.log
 .vite/
 coverage/
+data/
+*.key
+*.pem

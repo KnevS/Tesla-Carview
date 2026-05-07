@@ -145,6 +145,39 @@ CREATE TABLE IF NOT EXISTS push_subscriptions (
   UNIQUE(vehicle_id, subscription_json)
 );
 
+-- Fahrzeugstatus-Cache (fuer Odometer-basiertes Trip-Tracking)
+CREATE TABLE IF NOT EXISTS vehicle_state_cache (
+  vehicle_id INTEGER PRIMARY KEY REFERENCES vehicles(id),
+  is_user_present INTEGER NOT NULL DEFAULT 0,
+  odometer_km REAL,
+  battery_level INTEGER,
+  shift_state TEXT,
+  updated_at INTEGER DEFAULT (unixepoch())
+);
+
+-- Fleet-Telemetry-Punkte (GPS + Speed von Tesla Fleet Telemetry API)
+CREATE TABLE IF NOT EXISTS telemetry_points (
+  id INTEGER PRIMARY KEY,
+  vehicle_id INTEGER NOT NULL REFERENCES vehicles(id),
+  trip_id INTEGER REFERENCES trips(id) ON DELETE SET NULL,
+  timestamp INTEGER NOT NULL,
+  lat REAL,
+  lon REAL,
+  speed_kmh REAL,
+  gear TEXT,
+  power_kw REAL,
+  soc INTEGER,
+  odometer_km REAL
+);
+
+-- Virtual Key fuer Fleet Telemetry
+CREATE TABLE IF NOT EXISTS virtual_key (
+  id INTEGER PRIMARY KEY,
+  private_key_pem TEXT NOT NULL,
+  public_key_pem TEXT NOT NULL,
+  created_at INTEGER DEFAULT (unixepoch())
+);
+
 -- Indizes
 CREATE INDEX IF NOT EXISTS idx_trips_vehicle    ON trips(vehicle_id, start_time DESC);
 CREATE INDEX IF NOT EXISTS idx_charging_vehicle ON charging_sessions(vehicle_id, start_time DESC);

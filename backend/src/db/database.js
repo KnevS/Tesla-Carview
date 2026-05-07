@@ -17,5 +17,17 @@ export function initDb() {
   const db = getDb();
   const schema = readFileSync(join(__dirname, 'schema.sql'), 'utf8');
   db.exec(schema);
+  runMigrations(db);
   console.log('Datenbank initialisiert');
+}
+
+function runMigrations(db) {
+  const tripCols = db.prepare('PRAGMA table_info(trips)').all().map(c => c.name);
+  if (!tripCols.includes('start_odometer_km')) {
+    db.exec('ALTER TABLE trips ADD COLUMN start_odometer_km REAL');
+    db.exec('ALTER TABLE trips ADD COLUMN end_odometer_km REAL');
+    db.exec('ALTER TABLE trips ADD COLUMN source TEXT DEFAULT \'odometer\'');
+  }
+  db.exec('CREATE INDEX IF NOT EXISTS idx_telemetry_vehicle ON telemetry_points(vehicle_id, timestamp DESC)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_telemetry_trip ON telemetry_points(trip_id, timestamp)');
 }

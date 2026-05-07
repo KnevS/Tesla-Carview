@@ -65,10 +65,18 @@ export async function apiGet(path) {
   return res.data;
 }
 
+export async function apiPost(path, body) {
+  const token = await getAccessToken();
+  const res = await axios.post(`${getFleetApiUrl()}${path}`, body, {
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+  });
+  return res.data;
+}
+
 export async function getVehicles() {
   return apiGet('/api/1/vehicles');
 }
 
 export async function getVehicleData(vehicleId) {
-  return apiGet(`/api/1/vehicles/${vehicleId}/vehicle_data?endpoints=drive_state;charge_state;vehicle_state;climate_state`);
+  return apiGet(`/api/1/vehicles/${vehicleId}/vehicle_data`);
 }
