@@ -46,9 +46,17 @@ router.get('/:id', (req, res) => {
   try {
     const trip = db.prepare('SELECT * FROM trips WHERE id = ?').get(req.params.id);
     if (!trip) return res.status(404).json({ error: 'Fahrt nicht gefunden' });
-    const points = db.prepare(
-      'SELECT * FROM trip_points WHERE trip_id = ? ORDER BY timestamp ASC'
-    ).all(trip.id);
+
+    const points = trip.source === 'telemetry'
+      ? db.prepare(
+          `SELECT timestamp, lat, lon, speed_kmh, power_kw, soc AS battery_level
+           FROM telemetry_points WHERE trip_id = ? ORDER BY timestamp ASC`
+        ).all(trip.id)
+      : db.prepare(
+          `SELECT timestamp, lat, lon, speed_kmh, power_kw, soc AS battery_level
+           FROM trip_points WHERE trip_id = ? ORDER BY timestamp ASC`
+        ).all(trip.id);
+
     res.json({ ...trip, points });
   } catch (err) {
     res.status(500).json({ error: err.message });

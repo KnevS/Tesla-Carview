@@ -53,6 +53,12 @@
         </div>
       </div>
 
+      <!-- Live GPS Position -->
+      <div class="card space-y-3" v-if="data.drive?.lat && data.drive?.lon">
+        <h2 class="font-semibold">📍 Live-Position</h2>
+        <div id="live-map" style="height: 280px; border-radius: 10px;"></div>
+      </div>
+
       <!-- Power flow bar -->
       <div class="card space-y-2">
         <div class="flex justify-between text-xs text-gray-400 mb-1">
@@ -144,7 +150,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch, h, resolveDirective, withDirectives } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick, h, resolveDirective, withDirectives } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
 
@@ -186,7 +192,9 @@ const DataRow = {
 const data    = ref(null);
 const loading = ref(false);
 const offline = ref(false);
-let   timer   = null;
+let   timer      = null;
+let   leafletMap = null;
+let   posMarker  = null;
 
 const online   = computed(() => !!data.value && !offline.value);
 const MAX_P    = 300;
@@ -206,18 +214,41 @@ function fmtH(h) {
   return hrs ? `${hrs}h ${mins}min` : `${mins}min`;
 }
 
+async function updateMap(lat, lon) {
+  await nextTick();
+  const mapEl = document.getElementById('live-map');
+  if (!mapEl) return;
+  const L = (await import('leaflet')).default;
+  await import('leaflet/dist/leaflet.css');
+  if (!leafletMap) {
+    leafletMap = L.map('live-map').setView([lat, lon], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors', maxZoom: 19,
+    }).addTo(leafletMap);
+    posMarker = L.circleMarker([lat, lon], {
+      radius: 10, color: '#E31937', fillColor: '#E31937', fillOpacity: 0.9, weight: 3,
+    }).bindPopup('Fahrzeugposition').addTo(leafletMap);
+  } else {
+    posMarker.setLatLng([lat, lon]);
+    leafletMap.panTo([lat, lon]);
+  }
+}
+
 async function refresh() {
   if (!vehicle.value) return;
   loading.value = true; offline.value = false;
   try {
     const { data: d } = await api.get(`/telemetry/${vehicle.value.id}/live`);
     data.value = d;
+    if (d.drive?.lat && d.drive?.lon) {
+      await updateMap(d.drive.lat, d.drive.lon);
+    }
   } catch (e) {
     if (e.response?.status === 503) offline.value = true;
   } finally { loading.value = false; }
 }
 
 onMounted(() => { refresh(); timer = setInterval(refresh, 30000); });
-onUnmounted(() => clearInterval(timer));
-watch(() => vehicle.value?.id, () => refresh());
+onUnmounted(() => { clearInterval(timer); if (leafletMap) { leafletMap.remove(); leafletMap = null; } });
+watch(() => vehicle.value?.id, () => { if (leafletMap) { leafletMap.remove(); leafletMap = null; posMarker = null; } refresh(); });
 </script>
