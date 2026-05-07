@@ -5,6 +5,7 @@ import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { requireAuth } from '../middleware/auth.js';
+import https from 'https';
 
 const router = Router();
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -88,6 +89,33 @@ router.get('/stats', requireAuth, (req, res) => {
     version: getVersion(),
     git: getGitInfo(),
   });
+});
+
+function fetchJson(url) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, { headers: { 'User-Agent': 'tesla-carview' } }, res => {
+      let body = '';
+      res.on('data', d => body += d);
+      res.on('end', () => { try { resolve(JSON.parse(body)); } catch(e) { reject(e); } });
+    });
+    req.on('error', reject);
+    req.setTimeout(8000, () => { req.destroy(); reject(new Error('timeout')); });
+  });
+}
+
+router.get('/update-check', requireAuth, async (req, res) => {
+  if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Nur für Administratoren' });
+  const current = getGitInfo();
+  try {
+    const data = await fetchJson('https://api.github.com/repos/KnevS/Tesla-Carview/commits/main');
+    const latestHash   = data.sha?.slice(0, 7) ?? null;
+    const latestDate   = data.commit?.committer?.date ?? null;
+    const latestMsg    = data.commit?.message?.split('\n')[0] ?? null;
+    const updateAvailable = latestHash && current.hash !== 'unknown' && latestHash !== current.hash;
+    res.json({ current: current.hash, currentDate: current.date, latest: latestHash, latestDate, latestMsg, updateAvailable });
+  } catch (e) {
+    res.status(502).json({ error: 'GitHub nicht erreichbar', current: current.hash });
+  }
 });
 
 export default router;

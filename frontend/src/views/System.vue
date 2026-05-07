@@ -19,6 +19,70 @@
       </div>
     </div>
 
+    <!-- Update-Status (admin only) -->
+    <div v-if="isAdmin" class="card space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="font-semibold" v-tooltip="'Vergleicht den aktuell laufenden Build mit dem neuesten Commit auf GitHub'">
+          🔄 Software-Update
+        </h2>
+        <button @click="checkUpdate" :disabled="updateChecking"
+          class="btn-secondary text-xs px-3 py-1"
+          v-tooltip="'GitHub nach neuen Commits abfragen'">
+          {{ updateChecking ? 'Prüfe…' : 'Jetzt prüfen' }}
+        </button>
+      </div>
+
+      <div v-if="updateError" class="text-yellow-400 text-sm">{{ updateError }}</div>
+
+      <template v-else-if="updateInfo">
+        <div v-if="updateInfo.updateAvailable"
+          class="flex items-start gap-3 bg-green-900/30 border border-green-700/50 rounded-xl p-4">
+          <div class="text-2xl">🆕</div>
+          <div class="space-y-1 text-sm">
+            <p class="font-semibold text-green-300">Update verfügbar!</p>
+            <p class="text-gray-300">Neuer Commit: <code class="text-green-300">{{ updateInfo.latest }}</code>
+              <span v-if="updateInfo.latestDate" class="text-gray-500 ml-2">{{ fmtDate(updateInfo.latestDate) }}</span>
+            </p>
+            <p v-if="updateInfo.latestMsg" class="text-gray-400 italic">„{{ updateInfo.latestMsg }}"</p>
+            <div class="mt-3 bg-gray-900 rounded-lg p-3 text-xs font-mono text-gray-300 space-y-1">
+              <p class="text-gray-500"># Auf dem Server ausführen:</p>
+              <p>bash /opt/tesla-carview/deploy/update.sh</p>
+            </div>
+            <p class="text-xs text-gray-500 mt-2">
+              ✅ Alle Daten bleiben erhalten – die Datenbanken liegen im Docker-Volume
+              <code>tesla_data</code> und werden beim Update nicht berührt.
+            </p>
+          </div>
+        </div>
+
+        <div v-else class="flex items-center gap-2 text-green-400 text-sm">
+          <span>✓</span>
+          <span>Aktuell – du läufst den neuesten Build
+            (<code class="text-gray-300">{{ updateInfo.current }}</code>).
+          </span>
+        </div>
+      </template>
+
+      <div v-else class="text-sm text-gray-500">
+        Klicke „Jetzt prüfen" um nach Updates zu suchen.
+      </div>
+
+      <!-- Auto-Update Hinweis -->
+      <details class="text-xs text-gray-500 border-t border-gray-800 pt-3">
+        <summary class="cursor-pointer hover:text-gray-300 transition">
+          ⏰ Automatische Updates einrichten (optional)
+        </summary>
+        <div class="mt-3 bg-gray-900 rounded-lg p-3 font-mono space-y-1 text-gray-300">
+          <p class="text-gray-500"># Täglich um 03:00 Uhr automatisch updaten:</p>
+          <p>crontab -e</p>
+          <p class="text-yellow-300">0 3 * * * bash /opt/tesla-carview/deploy/update.sh >> /var/log/tesla-carview-update.log 2>&1</p>
+        </div>
+        <p class="mt-2 text-gray-600">
+          Daten sind auch bei automatischen Updates sicher – Docker-Volumes bleiben immer erhalten.
+        </p>
+      </details>
+    </div>
+
     <!-- System stats (admin only) -->
     <template v-if="stats">
       <div class="grid md:grid-cols-2 gap-4">
@@ -114,6 +178,23 @@ const isAdmin = computed(() => auth.user?.role === 'admin');
 
 const ver   = ref({});
 const stats = ref(null);
+
+const updateInfo     = ref(null);
+const updateChecking = ref(false);
+const updateError    = ref('');
+
+async function checkUpdate() {
+  updateChecking.value = true;
+  updateError.value    = '';
+  try {
+    const { data } = await api.get('/system/update-check');
+    updateInfo.value = data;
+  } catch (e) {
+    updateError.value = e.response?.data?.error ?? 'GitHub konnte nicht erreicht werden';
+  } finally {
+    updateChecking.value = false;
+  }
+}
 
 const DataRow = {
   props: ['label', 'value', 'tooltip'],
