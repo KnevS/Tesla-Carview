@@ -19,9 +19,8 @@ body {
   background-color: var(--accent);
   @apply text-white font-semibold py-2 px-4 rounded-xl transition;
 }
-.btn-primary:hover {
-  background-color: var(--accent-hover);
-}
+.btn-primary:hover { background-color: var(--accent-hover); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .btn-secondary {
   @apply bg-tesla-gray hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-xl transition;

@@ -4,9 +4,9 @@ export default {
     extend: {
       colors: {
         tesla: {
-          red: '#E31937',
-          dark: '#171A20',
-          gray: '#393C41',
+          red:   'var(--accent)',
+          dark:  '#171A20',
+          gray:  '#393C41',
           light: '#F4F4F4',
         },
       },

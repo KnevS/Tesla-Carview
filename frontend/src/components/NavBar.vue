@@ -51,6 +51,11 @@
           v-tooltip="'Einstellungen, Passwort und Zwei-Faktor-Authentifizierung verwalten'">
           ⚙️
         </RouterLink>
+        <button @click="logout"
+          class="text-gray-400 hover:text-red-400 transition text-lg leading-none"
+          v-tooltip="'Abmelden'">
+          ⏻
+        </button>
       </div>
     </div>
 
@@ -68,10 +73,17 @@
 </template>
 
 <script setup>
+import { useRouter }    from 'vue-router';
 import { useAppStore }  from '../store/index.js';
 import { useAuthStore } from '../store/auth.js';
 import { useNavStore }  from '../store/nav.js';
 const appStore  = useAppStore();
 const authStore = useAuthStore();
 const navStore  = useNavStore();
+const router    = useRouter();
+
+async function logout() {
+  await authStore.logout().catch(() => {});
+  router.push('/login');
+}
 </script>
