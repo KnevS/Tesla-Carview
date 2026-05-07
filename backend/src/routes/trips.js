@@ -32,10 +32,62 @@ router.get('/stats', (req, res) => {
          COALESCE(SUM(distance_km), 0) as total_km,
          COALESCE(AVG(distance_km), 0) as avg_km,
          COALESCE(SUM(energy_used_kwh), 0) as total_energy_kwh,
-         COALESCE(AVG(energy_used_kwh / NULLIF(distance_km, 0) * 100), 0) as avg_consumption
+         COALESCE(AVG(energy_used_kwh / NULLIF(distance_km, 0) * 100), 0) as avg_consumption,
+         COALESCE(SUM(CASE WHEN trip_type='private'  THEN distance_km ELSE 0 END), 0) as private_km,
+         COALESCE(SUM(CASE WHEN trip_type='business' THEN distance_km ELSE 0 END), 0) as business_km,
+         COALESCE(SUM(CASE WHEN trip_type='commute'  THEN distance_km ELSE 0 END), 0) as commute_km,
+         COUNT(CASE WHEN trip_type != 'private' THEN 1 END) as classified_trips
        FROM trips ${where}`
     ).get(...params);
     res.json(stats);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Fahrtenbuch: Fahrten mit Klassifikations-Filter + Monatsgruppen
+router.get('/logbook', (req, res) => {
+  const db = getDb();
+  const { vehicle_id, year, month, trip_type } = req.query;
+  try {
+    const conds = [];
+    const params = [];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+    if (trip_type)  { conds.push('trip_type = ?');  params.push(trip_type); }
+    if (year)  { conds.push("strftime('%Y', datetime(start_time,'unixepoch')) = ?"); params.push(year); }
+    if (month) { conds.push("strftime('%m', datetime(start_time,'unixepoch')) = ?"); params.push(month.padStart(2,'0')); }
+    const where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
+    const trips = db.prepare(
+      `SELECT id, start_time, end_time, start_lat, start_lon, end_lat, end_lon,
+              start_address, end_address, distance_km, energy_used_kwh,
+              start_soc, end_soc, trip_type, purpose
+       FROM trips ${where} ORDER BY start_time DESC`
+    ).all(...params);
+    res.json(trips);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Monatsübersicht für Fahrtenbuch-Auswertung
+router.get('/logbook/months', (req, res) => {
+  const db = getDb();
+  const { vehicle_id } = req.query;
+  try {
+    const where = vehicle_id ? 'WHERE vehicle_id = ?' : '';
+    const params = vehicle_id ? [vehicle_id] : [];
+    const rows = db.prepare(
+      `SELECT
+         strftime('%Y-%m', datetime(start_time,'unixepoch')) as month,
+         COUNT(*) as trips,
+         COALESCE(SUM(distance_km), 0) as total_km,
+         COALESCE(SUM(CASE WHEN trip_type='private'  THEN distance_km ELSE 0 END), 0) as private_km,
+         COALESCE(SUM(CASE WHEN trip_type='business' THEN distance_km ELSE 0 END), 0) as business_km,
+         COALESCE(SUM(CASE WHEN trip_type='commute'  THEN distance_km ELSE 0 END), 0) as commute_km
+       FROM trips ${where}
+       GROUP BY month ORDER BY month DESC`
+    ).all(...params);
+    res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -80,6 +132,23 @@ router.post('/', (req, res) => {
       start_address, end_address, distance_km, energy_used_kwh, avg_speed_kmh,
       max_speed_kmh, start_soc, end_soc);
     res.status(201).json({ id: result.lastInsertRowid });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Fahrt klassifizieren
+router.patch('/:id/classify', (req, res) => {
+  const db = getDb();
+  const { trip_type, purpose } = req.body;
+  const allowed = ['private', 'business', 'commute'];
+  if (!allowed.includes(trip_type)) {
+    return res.status(400).json({ error: 'Ungültiger Typ. Erlaubt: private, business, commute' });
+  }
+  try {
+    db.prepare('UPDATE trips SET trip_type=?, purpose=? WHERE id=?')
+      .run(trip_type, purpose ?? null, req.params.id);
+    res.json({ ok: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

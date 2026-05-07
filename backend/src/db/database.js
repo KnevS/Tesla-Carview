@@ -30,6 +30,11 @@ function runMigrations(db) {
   }
   db.exec('CREATE INDEX IF NOT EXISTS idx_telemetry_vehicle ON telemetry_points(vehicle_id, timestamp DESC)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_telemetry_trip ON telemetry_points(trip_id, timestamp)');
+  const tripCols2 = db.prepare('PRAGMA table_info(trips)').all().map(c => c.name);
+  if (!tripCols2.includes('trip_type')) {
+    db.exec("ALTER TABLE trips ADD COLUMN trip_type TEXT NOT NULL DEFAULT 'private'");
+    db.exec('ALTER TABLE trips ADD COLUMN purpose TEXT');
+  }
   db.exec(`CREATE TABLE IF NOT EXISTS oauth_pkce (
     state        TEXT PRIMARY KEY,
     code_verifier TEXT NOT NULL,

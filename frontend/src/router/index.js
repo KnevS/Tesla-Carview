@@ -12,8 +12,9 @@ import Login       from '../views/Login.vue';
 import MfaVerify   from '../views/MfaVerify.vue';
 import MfaSetup    from '../views/MfaSetup.vue';
 import Settings    from '../views/Settings.vue';
-import Telemetry   from '../views/Telemetry.vue';
-import Control     from '../views/Control.vue';
+import Telemetry    from '../views/Telemetry.vue';
+import Control      from '../views/Control.vue';
+import Fahrtenbuch  from '../views/Fahrtenbuch.vue';
 import System      from '../views/System.vue';
 import Setup       from '../views/Setup.vue';
 
@@ -26,7 +27,8 @@ const routes = [
   // Geschuetzt
   { path: '/',           component: Dashboard,  meta: { title: 'Dashboard' } },
   { path: '/trips',      component: Trips,      meta: { title: 'Fahrten' } },
-  { path: '/trips/:id',  component: TripDetail, meta: { title: 'Fahrtdetail' } },
+  { path: '/trips/:id',      component: TripDetail,   meta: { title: 'Fahrtdetail' } },
+  { path: '/fahrtenbuch',    component: Fahrtenbuch,  meta: { title: 'Fahrtenbuch' } },
   { path: '/charging',   component: Charging,   meta: { title: 'Laden' } },
   { path: '/battery',    component: Battery,    meta: { title: 'Batterie' } },
   { path: '/logbook',    component: Logbook,    meta: { title: 'Betriebsbuch' } },
