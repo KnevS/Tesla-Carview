@@ -13,6 +13,7 @@ import MfaVerify   from '../views/MfaVerify.vue';
 import MfaSetup    from '../views/MfaSetup.vue';
 import Settings    from '../views/Settings.vue';
 import Telemetry   from '../views/Telemetry.vue';
+import Control     from '../views/Control.vue';
 import System      from '../views/System.vue';
 import Setup       from '../views/Setup.vue';
 
@@ -33,6 +34,7 @@ const routes = [
   { path: '/mfa/setup',  component: MfaSetup,   meta: { title: 'MFA einrichten' } },
   { path: '/settings',   component: Settings,   meta: { title: 'Einstellungen' } },
   { path: '/telemetry',  component: Telemetry,  meta: { title: 'Fahrzeugtechnik' } },
+  { path: '/control',   component: Control,    meta: { title: 'Steuerung' } },
   { path: '/system',     component: System,     meta: { title: 'System' } },
 ];
 

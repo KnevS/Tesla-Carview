@@ -23,6 +23,7 @@ import exportRoutes        from './routes/export.js';
 import systemRoutes        from './routes/system.js';
 import telemetryRoutes     from './routes/telemetry.js';
 import telemetryConfigRoutes from './routes/telemetryConfig.js';
+import commandRoutes       from './routes/commands.js';
 import setupRoutes         from './routes/setup.js';
 
 const app    = express();
@@ -65,6 +66,7 @@ app.use('/api/export',         exportRoutes);
 app.use('/api/system',         systemRoutes);
 app.use('/api/telemetry',      telemetryRoutes);
 app.use('/api/fleet',          telemetryConfigRoutes);
+app.use('/api/commands',       commandRoutes);
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', version: '1.0.0' }));
 

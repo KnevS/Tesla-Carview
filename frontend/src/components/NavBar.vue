@@ -55,6 +55,7 @@ const links = [
   { to: '/battery',   icon: '📊', label: 'Batterie',     tooltip: 'Reichweiten-Verlauf und Degradations-Analyse über Zeit' },
   { to: '/logbook',   icon: '📓', label: 'Betriebsbuch', tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },
   { to: '/telemetry', icon: '🏎', label: 'Technik',      tooltip: 'Live-Fahrzeugdaten: Reifendruck, Klima, Leistung, SOC – wie der Track-Mode' },
+  { to: '/control',   icon: '🎮', label: 'Steuerung',   tooltip: 'Fahrzeug steuern: Klima, Türen, Laden, Navigation' },
   { to: '/export',    icon: '💾', label: 'Export',       tooltip: 'Daten als CSV/JSON exportieren, Vollbackup erstellen, Push-Benachrichtigungen' },
   { to: '/system',    icon: '📈', label: 'System',       tooltip: 'Versionsinformationen, CPU-/RAM-Auslastung und Datenbankstatistiken' },
 ];
