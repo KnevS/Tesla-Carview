@@ -9,7 +9,7 @@ router.get('/:vehicleId/live', async (req, res) => {
   if (!vehicle) return res.status(404).json({ error: 'Fahrzeug nicht gefunden' });
 
   try {
-    const data = await getVehicleData(vehicle.tesla_id);
+    const data = await getVehicleData(db, vehicle.tesla_id);
     const resp = data.response ?? data;
     const { drive_state: d, charge_state: c, vehicle_state: vs, climate_state: cl } = resp;
 
