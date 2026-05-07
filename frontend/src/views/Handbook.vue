@@ -114,8 +114,10 @@
         <li class="flex gap-3">
           <span class="w-7 h-7 rounded-full bg-tesla-red text-white flex-shrink-0 flex items-center justify-center font-bold">5</span>
           <div>
-            <p class="font-semibold text-white">Fahrzeug importieren</p>
-            <p class="text-gray-400">Gehe zu <strong>Fahrzeuge</strong> — dein Fahrzeug wird automatisch aus der Tesla API importiert.</p>
+            <p class="font-semibold text-white">Fahrzeuge importieren</p>
+            <p class="text-gray-400">Gehe zu <strong>Einstellungen → Tesla-Verbindung → Fahrzeuge synchronisieren</strong>.
+            Alle Fahrzeuge des verbundenen Tesla-Accounts werden automatisch übernommen.
+            Hast du mehrere Teslas unter einem Account, erscheinen alle auf einmal.</p>
           </div>
         </li>
       </ol>
@@ -174,6 +176,20 @@
           <p class="text-gray-400 mt-1">In der Ladeliste: Klick auf eine Session → Kosten bearbeiten.
           Kosten können auch auf 0 gesetzt werden (z.B. Gratis-Laden).</p>
         </div>
+        <div class="bg-gray-800 rounded-lg p-3 border border-gray-600">
+          <p class="font-semibold text-white">✕ Ladung als kostenlos markieren</p>
+          <p class="text-gray-400 mt-1">
+            In der <strong>Ladehistorie</strong> hat jede Session einen kleinen Button <em>"✕ kostenlos"</em>.
+            Damit markierte Ladungen erscheinen ausgegraut mit dem Badge <em>"kostenlos"</em> und werden
+            <strong>automatisch aus der Heimladen-Abrechnung ausgeschlossen</strong> — sowohl aus den
+            Monatszusammenfassungen als auch aus der Einzelauswertung.
+          </p>
+          <p class="text-gray-500 mt-1 text-xs">
+            Typischer Anwendungsfall: Laden am Arbeitsplatz, das vom Arbeitgeber gestellt wird und nicht
+            in die private Abrechnung einfließen soll. Mit dem Button <em>"↩ kostenpflichtig"</em>
+            lässt sich die Markierung jederzeit rückgängig machen.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -206,9 +222,22 @@
       </p>
       <div class="space-y-3 text-sm">
         <div class="bg-gray-800 rounded-lg p-3">
-          <p class="font-semibold">Mandanten anlegen</p>
-          <p class="text-gray-400 mt-1">Öffne <code>/register</code> oder klicke auf "Neuen Mandanten registrieren"
-          auf der Login-Seite. Jeder kann sich selbst registrieren.</p>
+          <p class="font-semibold">Mandanten anlegen (Einladungslink)</p>
+          <p class="text-gray-400 mt-1">
+            Neue Mandanten können nur über einen <strong>Einladungslink</strong> registriert werden.
+            Ein Administrator generiert den Link unter <strong>Admin → Benutzer → Einladungslink erstellen</strong>.
+            Der Link ist 7 Tage gültig und kann nur einmal verwendet werden.
+            Ohne gültigen Link ist <code>/register</code> gesperrt.
+          </p>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-3">
+          <p class="font-semibold">Mehrere Fahrzeuge pro Mandant</p>
+          <p class="text-gray-400 mt-1">
+            Alle Fahrzeuge eines Tesla-Accounts werden beim Synchronisieren automatisch importiert.
+            Unter <strong>Einstellungen → Tesla-Verbindung → 🔄 Fahrzeuge synchronisieren</strong>
+            lässt sich der Sync jederzeit manuell anstoßen — nützlich wenn ein neues Fahrzeug zum
+            Account hinzugefügt wurde. Zwischen Fahrzeugen wechselst du oben rechts in der Navigationsleiste.
+          </p>
         </div>
         <div class="bg-gray-800 rounded-lg p-3">
           <p class="font-semibold">Login mit Mandanten-Kürzel</p>

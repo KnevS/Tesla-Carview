@@ -11,7 +11,7 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 |---|---|
 | **Dashboard** | Gesamtstatistiken, letzte Fahrt, monatliches Kilometerdiagramm |
 | **Fahrten** | GPS-Track auf Karte, Verbrauch, Geschwindigkeit, SoC-Verlauf |
-| **Laden** | Ladesessions mit Kosten, GPS-basierter Ladeort-Zuordnung, Ladekurven |
+| **Laden** | Ladesessions mit Kosten, GPS-basierter Ladeort-Zuordnung, kostenlose Ladungen markierbar |
 | **Ladeorte** | Definierbare Standorte mit GPS-Radius, Preis/kWh, Auto-Erkennung |
 | **Batterie** | Degradations-Tracking, Reichweiten-Verlauf über Zeit |
 | **Technik** | Live-Telemetrie: TPMS, Leistungsfluss, Klimaanlage, Ladestatus |
@@ -28,10 +28,12 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 Seit v2.0 unterstützt Tesla Carview **mehrere Mandanten** mit vollständiger Datenisolierung:
 
 - Jeder Mandant hat seine eigene SQLite-Datenbank
-- Mandanten-Selbstregistrierung über `/register`
+- Neue Mandanten nur per **Einladungslink** (Admin → Benutzer → Einladungslink erstellen, 7 Tage, einmalig)
+- **Mehrere Fahrzeuge** pro Mandant: Sync über Einstellungen → 🔄 Fahrzeuge synchronisieren
 - **Benutzerverwaltung** pro Mandant (Rollen, Fahrzeugzuweisung, Sperren)
 - **Passkey-Authentifizierung** (Touch ID, Face ID, Windows Hello, FIDO2)
 - **Passwort-Reset** via Admin-generiertem Link
+- **Kostenlose Ladungen**: in der Ladehistorie markierbar, werden aus der Abrechnung ausgeschlossen
 
 ## Schnellstart
 
