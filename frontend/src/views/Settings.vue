@@ -321,7 +321,7 @@ async function addPasskey() {
     passkeySuccess.value = 'Passkey erfolgreich registriert';
     await loadPasskeys();
   } catch (err) {
-    passkeyError.value = err.message ?? 'Fehler beim Registrieren';
+    passkeyError.value = err.response?.data?.error ?? err.message ?? 'Fehler beim Registrieren';
   } finally {
     passkeyRegistering.value = false;
   }

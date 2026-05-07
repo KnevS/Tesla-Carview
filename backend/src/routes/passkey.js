@@ -58,32 +58,37 @@ function getAndDeleteChallenge(challengeId) {
 
 // POST /api/passkey/register-options
 router.post('/register-options', requireAuth, async (req, res) => {
-  ensurePasskeyTable(req.db);
-  const user = req.db.prepare('SELECT * FROM users WHERE id=?').get(req.user.sub);
-  if (!user) return res.status(404).json({ error: 'Benutzer nicht gefunden' });
+  try {
+    ensurePasskeyTable(req.db);
+    const user = req.db.prepare('SELECT * FROM users WHERE id=?').get(req.user.sub);
+    if (!user) return res.status(404).json({ error: 'Benutzer nicht gefunden' });
 
-  const existingCredentials = req.db.prepare(
-    'SELECT credential_id FROM passkey_credentials WHERE user_id=?'
-  ).all(user.id);
+    const existingCredentials = req.db.prepare(
+      'SELECT credential_id FROM passkey_credentials WHERE user_id=?'
+    ).all(user.id);
 
-  const options = await generateRegistrationOptions({
-    rpName:  RP_NAME,
-    rpID:    RP_ID,
-    userID:  Buffer.from(String(user.id)),
-    userName: user.username,
-    userDisplayName: user.username,
-    excludeCredentials: existingCredentials.map(c => ({
-      id: Buffer.from(c.credential_id, 'base64url'),
-      type: 'public-key',
-    })),
-    authenticatorSelection: {
-      residentKey: 'preferred',
-      userVerification: 'preferred',
-    },
-  });
+    const options = await generateRegistrationOptions({
+      rpName:  RP_NAME,
+      rpID:    RP_ID,
+      userID:  new TextEncoder().encode(String(user.id)),
+      userName: user.username,
+      userDisplayName: user.username,
+      excludeCredentials: existingCredentials.map(c => ({
+        id: Buffer.from(c.credential_id, 'base64url'),
+        type: 'public-key',
+      })),
+      authenticatorSelection: {
+        residentKey: 'preferred',
+        userVerification: 'preferred',
+      },
+    });
 
-  const challengeId = storeChallenge(req.tenantId, user.id, options.challenge);
-  res.json({ ...options, challengeId });
+    const challengeId = storeChallenge(req.tenantId, user.id, options.challenge);
+    res.json({ ...options, challengeId });
+  } catch (err) {
+    console.error('[Passkey] register-options Fehler:', err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // POST /api/passkey/register-verify
@@ -105,23 +110,24 @@ router.post('/register-verify', requireAuth, async (req, res) => {
 
     if (!verification.verified) return res.status(400).json({ error: 'Verifikation fehlgeschlagen' });
 
-    const { credential } = verification.registrationInfo;
+    const { credentialID, credentialPublicKey, counter, credentialDeviceType } = verification.registrationInfo;
     req.db.prepare(
       `INSERT OR REPLACE INTO passkey_credentials
        (user_id, credential_id, public_key, counter, device_type, transports)
        VALUES (?, ?, ?, ?, ?, ?)`
     ).run(
       req.user.sub,
-      Buffer.from(credential.id).toString('base64url'),
-      Buffer.from(credential.publicKey).toString('base64url'),
-      credential.counter,
-      deviceName ?? credential.authenticatorAttachment ?? null,
+      credentialID,
+      Buffer.from(credentialPublicKey).toString('base64url'),
+      counter,
+      deviceName ?? credentialDeviceType ?? null,
       response.response?.transports ? JSON.stringify(response.response.transports) : null,
     );
 
     auditLog(req.db, req.user.sub, 'passkey_registered', req, { device: deviceName });
     res.json({ success: true });
   } catch (err) {
+    console.error('[Passkey] register-verify Fehler:', err.message, '| Origin erwartet:', RP_ORIGIN, '| RP_ID:', RP_ID);
     res.status(400).json({ error: err.message });
   }
 });
@@ -175,11 +181,11 @@ router.post('/login-verify', async (req, res) => {
       expectedChallenge: stored.challenge,
       expectedOrigin:    RP_ORIGIN,
       expectedRPID:      RP_ID,
-      credential: {
-        id:         Buffer.from(credential.credential_id, 'base64url'),
-        publicKey:  Buffer.from(credential.public_key, 'base64url'),
-        counter:    credential.counter,
-        transports: credential.transports ? JSON.parse(credential.transports) : undefined,
+      authenticator: {
+        credentialID:        Buffer.from(credential.credential_id, 'base64url'),
+        credentialPublicKey: Buffer.from(credential.public_key, 'base64url'),
+        counter:             credential.counter,
+        transports:          credential.transports ? JSON.parse(credential.transports) : undefined,
       },
     });
 
