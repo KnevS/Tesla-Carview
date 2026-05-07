@@ -95,6 +95,40 @@
       </div>
     </div>
 
+    <!-- Tesla Verbindung -->
+    <div class="card space-y-4">
+      <h2 class="font-semibold">⚡ Tesla-Verbindung</h2>
+
+      <div class="flex items-center gap-3">
+        <span class="text-sm" :class="teslaConnected ? 'text-green-400' : 'text-red-400'">
+          {{ teslaConnected ? '● Verbunden' : '● Nicht verbunden' }}
+        </span>
+        <a :href="teslaLoginUrl" class="btn-primary text-sm"
+          v-tooltip="'Tesla-Account neu verbinden – holt einen neuen Token mit allen benötigten Scopes'">
+          Tesla neu verbinden
+        </a>
+      </div>
+
+      <!-- Virtual Key -->
+      <div class="border-t border-gray-700 pt-4 space-y-3">
+        <div>
+          <p class="font-medium text-sm">Virtual Key (Fahrzeugbefehle)</p>
+          <p class="text-xs text-gray-400 mt-0.5">Einmalig am Fahrzeug registrieren damit Klima, Türen und Laden funktionieren</p>
+        </div>
+        <div class="bg-gray-800 rounded-xl p-4 space-y-3 text-sm">
+          <ol class="space-y-2 text-gray-300">
+            <li class="flex gap-2"><span class="text-tesla-red font-bold">1.</span> iPhone nahe am Auto, Bluetooth ein, Tesla-App offen</li>
+            <li class="flex gap-2"><span class="text-tesla-red font-bold">2.</span> Diesen Link im iPhone-Browser öffnen:</li>
+          </ol>
+          <a href="https://tesla.com/_ak/your-domain.example.com" target="_blank"
+            class="block w-full text-center py-2 rounded-lg bg-tesla-red hover:bg-red-700 text-white font-medium transition">
+            tesla.com/_ak/your-domain.example.com
+          </a>
+          <p class="text-xs text-gray-500">Tesla-App zeigt "Drittanbieter-Schlüssel hinzufügen" → Allow tippen. Danach funktionieren alle Steuerbefehle.</p>
+        </div>
+      </div>
+    </div>
+
     <div class="card space-y-3">
       <h2 class="font-semibold">🔑 Passwort ändern</h2>
       <div class="space-y-2">
@@ -146,6 +180,9 @@ const auth     = useAuthStore();
 const appStore = useAppStore();
 const router   = useRouter();
 
+const teslaConnected = ref(false);
+const teslaLoginUrl  = ref('/api/auth/tesla/login');
+
 // Vehicle profile
 const vProfile = ref({ license_plate: '', model: 'm3', image_color: 'PPSW' });
 const vMsg = ref('');
@@ -196,12 +233,14 @@ const actionTooltips = {
 const actionTooltip = a => actionTooltips[a] || a;
 
 onMounted(async () => {
-  const [mfa, audit] = await Promise.all([
+  const [mfa, audit, teslaStatus] = await Promise.all([
     api.get('/mfa/status'),
     api.get('/users/me/audit'),
+    api.get('/auth/tesla/status').catch(() => ({ data: { connected: false } })),
   ]);
-  mfaStatus.value = mfa.data;
-  auditLog.value  = audit.data;
+  mfaStatus.value      = mfa.data;
+  auditLog.value       = audit.data;
+  teslaConnected.value = teslaStatus.data.connected;
 
   const v = appStore.selectedVehicle;
   if (v) {
