@@ -87,7 +87,7 @@
             <p class="font-mono text-xs text-gray-400">{{ inv.token.slice(0, 16) }}…</p>
             <p class="text-xs text-gray-500">
               {{ inv.used_at ? 'Verwendet' : 'Offen' }} ·
-              Läuft ab: {{ fmtDate(inv.expires_at) }}
+              Läuft ab: {{ formatDate(inv.expires_at) }}
             </p>
           </div>
           <button v-if="!inv.used_at" @click="revokeInvite(inv.token)"
