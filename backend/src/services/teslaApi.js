@@ -1,28 +1,49 @@
+import { randomBytes, createHash } from 'crypto';
 import axios from 'axios';
 import { getDb } from '../db/database.js';
 
-const TESLA_AUTH_URL = 'https://auth.tesla.com/oauth2/v3';
+const getAuthBase  = () => process.env.TESLA_AUTH_BASE  || 'https://auth.tesla.com/oauth2/v3';
 const getFleetApiUrl = () => process.env.TESLA_AUDIENCE || 'https://fleet-api.prd.eu.vn.cloud.tesla.com';
 
+const SCOPES = 'openid offline_access user_data vehicle_device_data vehicle_cmds vehicle_charging_cmds vehicle_location';
+
 export function getAuthUrl() {
+  // PKCE: code_verifier zufaellig, code_challenge = SHA256(verifier) als base64url
+  const codeVerifier  = randomBytes(32).toString('base64url');
+  const codeChallenge = createHash('sha256').update(codeVerifier).digest('base64url');
+  const state         = randomBytes(16).toString('hex');
+
+  // Verifier und State fuer Callback speichern (10 Min TTL)
+  const db = getDb();
+  db.prepare('DELETE FROM oauth_pkce WHERE created_at < unixepoch() - 600').run();
+  db.prepare('INSERT OR REPLACE INTO oauth_pkce (state, code_verifier) VALUES (?, ?)').run(state, codeVerifier);
+
   const params = new URLSearchParams({
-    response_type: 'code',
-    client_id: process.env.TESLA_CLIENT_ID,
-    redirect_uri: process.env.TESLA_REDIRECT_URI,
-    scope: 'openid vehicle_device_data vehicle_cmds offline_access',
-    state: crypto.randomUUID(),
+    response_type:         'code',
+    client_id:             process.env.TESLA_CLIENT_ID,
+    redirect_uri:          process.env.TESLA_REDIRECT_URI,
+    scope:                 SCOPES,
+    state,
+    code_challenge:        codeChallenge,
+    code_challenge_method: 'S256',
   });
-  return `${TESLA_AUTH_URL}/authorize?${params}`;
+  return `${getAuthBase()}/authorize?${params}`;
 }
 
-export async function exchangeCode(code) {
-  const res = await axios.post(`${TESLA_AUTH_URL}/token`, {
-    grant_type: 'authorization_code',
-    client_id: process.env.TESLA_CLIENT_ID,
+export async function exchangeCode(code, state) {
+  const db = getDb();
+  const row = db.prepare('SELECT code_verifier FROM oauth_pkce WHERE state=?').get(state);
+  if (!row) throw new Error('PKCE-State nicht gefunden oder abgelaufen');
+  db.prepare('DELETE FROM oauth_pkce WHERE state=?').run(state);
+
+  const res = await axios.post(`${getAuthBase()}/token`, {
+    grant_type:    'authorization_code',
+    client_id:     process.env.TESLA_CLIENT_ID,
     client_secret: process.env.TESLA_CLIENT_SECRET,
     code,
-    redirect_uri: process.env.TESLA_REDIRECT_URI,
-    audience: getFleetApiUrl(),
+    redirect_uri:  process.env.TESLA_REDIRECT_URI,
+    code_verifier: row.code_verifier,
+    audience:      getFleetApiUrl(),
   });
   saveTokens(res.data);
   return res.data;

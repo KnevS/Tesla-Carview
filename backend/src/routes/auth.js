@@ -174,14 +174,18 @@ router.get('/tesla/auth-url', requireAuth, (_req, res) => res.json({ url: getAut
 router.get('/tesla/login',    requireAuth, (_req, res) => res.redirect(getAuthUrl()));
 
 router.get('/callback', async (req, res) => {
-  const { code, error } = req.query;
+  const { code, state, error } = req.query;
   if (error || !code) {
     return res.redirect(`${process.env.FRONTEND_URL}/?auth_error=${error || 'no_code'}`);
   }
+  if (!state) {
+    return res.redirect(`${process.env.FRONTEND_URL}/?auth_error=missing_state`);
+  }
   try {
-    await exchangeCode(code);
+    await exchangeCode(code, state);
     res.redirect(`${process.env.FRONTEND_URL}/?tesla_connected=1`);
-  } catch {
+  } catch (e) {
+    console.error('[Auth] Token-Exchange fehlgeschlagen:', e.response?.data || e.message);
     res.redirect(`${process.env.FRONTEND_URL}/?auth_error=exchange_failed`);
   }
 });

@@ -30,4 +30,9 @@ function runMigrations(db) {
   }
   db.exec('CREATE INDEX IF NOT EXISTS idx_telemetry_vehicle ON telemetry_points(vehicle_id, timestamp DESC)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_telemetry_trip ON telemetry_points(trip_id, timestamp)');
+  db.exec(`CREATE TABLE IF NOT EXISTS oauth_pkce (
+    state        TEXT PRIMARY KEY,
+    code_verifier TEXT NOT NULL,
+    created_at   INTEGER DEFAULT (unixepoch())
+  )`);
 }
