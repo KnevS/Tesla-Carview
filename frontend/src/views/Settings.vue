@@ -18,6 +18,31 @@
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
+          <div class="col-span-2">
+            <label class="label">Fahrzeugkategorie</label>
+            <div class="flex gap-3">
+              <label class="flex-1 flex items-center gap-2 bg-gray-700 rounded-xl p-3 cursor-pointer border-2 transition"
+                :class="vProfile.category === 'private' ? 'border-tesla-red' : 'border-transparent'">
+                <input type="radio" v-model="vProfile.category" value="private" class="accent-tesla-red" />
+                <div>
+                  <p class="font-medium text-sm">🏠 Privatfahrzeug</p>
+                  <p class="text-xs text-gray-400">Nur Privatfahrten, kein Fahrtenbuch nötig</p>
+                </div>
+              </label>
+              <label class="flex-1 flex items-center gap-2 bg-gray-700 rounded-xl p-3 cursor-pointer border-2 transition"
+                :class="vProfile.category === 'company' ? 'border-tesla-red' : 'border-transparent'">
+                <input type="radio" v-model="vProfile.category" value="company" class="accent-tesla-red" />
+                <div>
+                  <p class="font-medium text-sm">💼 Dienstwagen</p>
+                  <p class="text-xs text-gray-400">Fahrtenbuch + Kostenabrechnung aktiv</p>
+                </div>
+              </label>
+            </div>
+          </div>
+          <div v-if="vProfile.category === 'company'" class="col-span-2">
+            <label class="label">Firmenname (Arbeitgeber)</label>
+            <input v-model="vProfile.company_name" type="text" class="input" placeholder="Musterfirma AG" />
+          </div>
           <div>
             <label class="label">Kennzeichen</label>
             <input v-model="vProfile.license_plate" type="text" class="input" placeholder="MU-TC 1337E"
@@ -45,6 +70,25 @@
               <option value="PPSB">Deep Blue Metallic</option>
               <option value="PPW">Solid White</option>
             </select>
+          </div>
+        </div>
+        <!-- Monta-Konfiguration (nur Dienstwagen) -->
+        <div v-if="vProfile.category === 'company'" class="col-span-2 border-t border-gray-700 pt-3 space-y-3">
+          <p class="text-sm font-medium text-gray-300">Heimladen / Monta-Konfiguration</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="label">Strompreis Wallbox (€/kWh)</label>
+              <input v-model.number="vProfile.electricity_rate_kwh" type="number" step="0.01" min="0" max="5" class="input" placeholder="0.30" />
+            </div>
+            <div>
+              <label class="label">Monta Charge-Point-ID</label>
+              <input v-model="vProfile.monta_charge_point_id" type="text" class="input" placeholder="cp_12345" />
+            </div>
+            <div class="col-span-2">
+              <label class="label">Monta API-Key</label>
+              <input v-model="vProfile.monta_api_key" type="password" class="input" placeholder="monta_…" />
+              <p class="text-xs text-gray-500 mt-1">Monta → Einstellungen → API → Key erstellen. Wird verschlüsselt gespeichert.</p>
+            </div>
           </div>
         </div>
         <p v-if="vMsg" :class="vOk ? 'text-green-400' : 'text-red-400'" class="text-sm">{{ vMsg }}</p>
@@ -184,7 +228,7 @@ const teslaConnected = ref(false);
 const teslaLoginUrl  = ref('/api/auth/tesla/login');
 
 // Vehicle profile
-const vProfile = ref({ license_plate: '', model: 'm3', image_color: 'PPSW' });
+const vProfile = ref({ license_plate: '', model: 'm3', image_color: 'PPSW', category: 'private', company_name: '', electricity_rate_kwh: 0.30, monta_api_key: '', monta_charge_point_id: '' });
 const vMsg = ref('');
 const vOk  = ref(false);
 
@@ -245,9 +289,14 @@ onMounted(async () => {
   const v = appStore.selectedVehicle;
   if (v) {
     vProfile.value = {
-      license_plate: v.license_plate ?? '',
-      model:         v.model ?? 'm3',
-      image_color:   v.image_color ?? 'PPSW',
+      license_plate:         v.license_plate         ?? '',
+      model:                 v.model                 ?? 'm3',
+      image_color:           v.image_color           ?? 'PPSW',
+      category:              v.category              ?? 'private',
+      company_name:          v.company_name          ?? '',
+      electricity_rate_kwh:  v.electricity_rate_kwh  ?? 0.30,
+      monta_api_key:         v.monta_api_key         ?? '',
+      monta_charge_point_id: v.monta_charge_point_id ?? '',
     };
   }
 });

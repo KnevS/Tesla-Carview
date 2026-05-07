@@ -56,26 +56,41 @@ router.get('/summary', async (_req, res) => {
 });
 
 const patchSchema = z.object({
-  display_name:  z.string().max(100).optional(),
-  license_plate: z.string().max(20).optional(),
-  image_color:   z.string().max(50).optional(),
-  color:         z.string().max(50).optional(),
-  model:         z.string().max(100).optional(),
+  display_name:           z.string().max(100).optional(),
+  license_plate:          z.string().max(20).optional(),
+  image_color:            z.string().max(50).optional(),
+  color:                  z.string().max(50).optional(),
+  model:                  z.string().max(100).optional(),
+  category:               z.enum(['private','company']).optional(),
+  company_name:           z.string().max(200).optional().nullable(),
+  electricity_rate_kwh:   z.number().min(0).max(5).optional().nullable(),
+  monta_api_key:          z.string().max(500).optional().nullable(),
+  monta_charge_point_id:  z.string().max(100).optional().nullable(),
 });
 
 router.put('/:vehicleId', validate(patchSchema), (req, res) => {
   try {
     const db = getDb();
-    const { display_name, license_plate, image_color, color, model } = req.body;
+    const { display_name, license_plate, image_color, color, model,
+            category, company_name, electricity_rate_kwh,
+            monta_api_key, monta_charge_point_id } = req.body;
     db.prepare(
       `UPDATE vehicles SET
-         display_name  = COALESCE(?, display_name),
-         license_plate = COALESCE(?, license_plate),
-         image_color   = COALESCE(?, image_color),
-         color         = COALESCE(?, color),
-         model         = COALESCE(?, model)
+         display_name          = COALESCE(?, display_name),
+         license_plate         = COALESCE(?, license_plate),
+         image_color           = COALESCE(?, image_color),
+         color                 = COALESCE(?, color),
+         model                 = COALESCE(?, model),
+         category              = COALESCE(?, category),
+         company_name          = COALESCE(?, company_name),
+         electricity_rate_kwh  = COALESCE(?, electricity_rate_kwh),
+         monta_api_key         = COALESCE(?, monta_api_key),
+         monta_charge_point_id = COALESCE(?, monta_charge_point_id)
        WHERE id = ?`
-    ).run(display_name, license_plate, image_color, color, model, req.params.vehicleId);
+    ).run(display_name, license_plate, image_color, color, model,
+          category, company_name, electricity_rate_kwh,
+          monta_api_key, monta_charge_point_id,
+          req.params.vehicleId);
     res.json(db.prepare('SELECT * FROM vehicles WHERE id = ?').get(req.params.vehicleId));
   } catch (err) {
     res.status(500).json({ error: err.message });
