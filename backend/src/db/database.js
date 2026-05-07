@@ -185,6 +185,9 @@ function runTenantMigrations(db) {
     db.exec('ALTER TABLE charging_sessions ADD COLUMN monta_session_id TEXT');
     db.exec("ALTER TABLE charging_sessions ADD COLUMN billing_status TEXT DEFAULT 'pending'");
   }
+  if (!csCols.includes('is_free')) {
+    db.exec('ALTER TABLE charging_sessions ADD COLUMN is_free INTEGER NOT NULL DEFAULT 0');
+  }
 
   // charging_locations (mit lat/lon/radius)
   db.exec(`CREATE TABLE IF NOT EXISTS charging_locations (

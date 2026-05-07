@@ -58,6 +58,45 @@
       <button @click="resetLink = ''" class="text-xs text-gray-500 hover:text-gray-300 ml-3">Schließen</button>
     </div>
 
+    <!-- Einladungslink für neue Mandanten -->
+    <div class="card space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="font-semibold">🔗 Neuen Mandanten einladen</h2>
+        <button @click="generateInvite" :disabled="inviteLoading" class="btn-secondary text-sm">
+          {{ inviteLoading ? 'Generiere…' : '+ Einladungslink erstellen' }}
+        </button>
+      </div>
+      <p class="text-xs text-gray-400">
+        Nur wer diesen Link besitzt, kann einen neuen Mandanten registrieren. Jeder Link ist 7 Tage gültig und kann nur einmal verwendet werden.
+      </p>
+
+      <!-- Neu erzeugter Link -->
+      <div v-if="newInviteUrl" class="bg-gray-900 rounded-lg p-3 space-y-2">
+        <p class="text-xs text-gray-400">Link (7 Tage gültig, einmalig verwendbar):</p>
+        <div class="font-mono text-xs text-green-400 break-all select-all">{{ newInviteUrl }}</div>
+        <button @click="copyInvite" class="btn-secondary text-sm">Kopieren</button>
+        <button @click="newInviteUrl = ''" class="text-xs text-gray-500 hover:text-gray-300 ml-3">Schließen</button>
+      </div>
+
+      <!-- Aktive Einladungen -->
+      <div v-if="invites.length" class="space-y-2">
+        <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Offene Einladungen</p>
+        <div v-for="inv in invites" :key="inv.token"
+          class="flex items-center justify-between bg-gray-800 rounded-lg px-3 py-2 text-sm">
+          <div>
+            <p class="font-mono text-xs text-gray-400">{{ inv.token.slice(0, 16) }}…</p>
+            <p class="text-xs text-gray-500">
+              {{ inv.used_at ? 'Verwendet' : 'Offen' }} ·
+              Läuft ab: {{ fmtDate(inv.expires_at) }}
+            </p>
+          </div>
+          <button v-if="!inv.used_at" @click="revokeInvite(inv.token)"
+            class="text-xs text-gray-500 hover:text-red-400 transition">Widerrufen</button>
+          <span v-else class="text-xs text-gray-600">✓ genutzt</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Fahrzeugzuweisung -->
     <div v-if="assignTarget" class="card space-y-3 border border-blue-700">
       <h3 class="font-semibold">Fahrzeug zuweisen an: {{ assignTarget.username }}</h3>
@@ -124,6 +163,33 @@ const createError = ref('');
 const creating   = ref(false);
 const newUser    = ref({ username: '', password: '', email: '', role: 'user' });
 
+const invites     = ref([]);
+const inviteLoading = ref(false);
+const newInviteUrl  = ref('');
+
+async function loadInvites() {
+  try { invites.value = (await api.get('/invites')).data; } catch { invites.value = []; }
+}
+
+async function generateInvite() {
+  inviteLoading.value = true;
+  try {
+    const { data } = await api.post('/invites');
+    newInviteUrl.value = data.url;
+    await loadInvites();
+  } catch { /* ignore */ } finally { inviteLoading.value = false; }
+}
+
+function copyInvite() {
+  navigator.clipboard.writeText(newInviteUrl.value);
+}
+
+async function revokeInvite(token) {
+  if (!confirm('Einladungslink widerrufen?')) return;
+  await api.delete(`/invites/${token}`);
+  invites.value = invites.value.filter(i => i.token !== token);
+}
+
 function formatDate(unix) {
   return new Date(unix * 1000).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
@@ -144,6 +210,7 @@ async function loadUsers() {
 
 onMounted(async () => {
   await loadUsers();
+  loadInvites();
   vehicles.value = app.vehicles;
   if (!vehicles.value.length) {
     const { data } = await api.get('/vehicles');

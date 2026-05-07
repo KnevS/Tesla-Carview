@@ -31,10 +31,19 @@
 
     <div class="space-y-3">
       <div v-if="loading" class="text-gray-400">Lade Sessions...</div>
-      <div v-for="s in sessions" :key="s.id" class="card">
+      <div v-for="s in sessions" :key="s.id"
+        class="card"
+        :class="s.is_free ? 'opacity-60 border border-gray-600' : ''">
         <div class="flex items-start justify-between">
           <div>
-            <p class="font-semibold">{{ s.location_name || 'Unbekannter Ort' }}</p>
+            <div class="flex items-center gap-2">
+              <p class="font-semibold">{{ s.location_name || 'Unbekannter Ort' }}</p>
+              <span v-if="s.is_free"
+                class="text-xs bg-gray-700 text-gray-400 px-2 py-0.5 rounded-full"
+                v-tooltip="'Diese Ladung ist als kostenlos markiert und wird nicht in der Abrechnung berücksichtigt'">
+                kostenlos
+              </span>
+            </div>
             <p class="text-sm text-gray-400">{{ fmtDate(s.start_time) }}</p>
             <div class="flex gap-3 mt-2 text-sm">
               <span class="bg-gray-700 rounded-lg px-2 py-0.5"
@@ -42,13 +51,21 @@
               <span v-tooltip="'Batterie-Stand vor und nach dem Laden'">SoC {{ s.start_soc }}% → {{ s.end_soc }}%</span>
             </div>
           </div>
-          <div class="text-right">
+          <div class="text-right space-y-1">
             <p class="text-2xl font-bold text-green-400"
               v-tooltip="'Tatsächlich nachgeladene Energie. Kann durch Ladeverluste etwas niedriger sein als die vom Lader abgegebene Energie.'">
               +{{ fmt(s.energy_added_kwh, 1) }} kWh
             </p>
             <p class="text-sm text-gray-400">{{ fmt(s.max_power_kw, 0) }} kW max</p>
-            <p v-if="s.cost" class="text-sm text-gray-400">{{ fmt(s.cost, 2) }} {{ s.currency }}</p>
+            <p v-if="s.cost != null && !s.is_free" class="text-sm text-gray-400">{{ fmt(s.cost, 2) }} {{ s.currency }}</p>
+            <button @click="toggleFree(s)"
+              class="text-xs px-2 py-0.5 rounded transition"
+              :class="s.is_free
+                ? 'bg-gray-700 text-gray-300 hover:bg-green-900 hover:text-green-300'
+                : 'bg-gray-800 text-gray-500 hover:bg-gray-700 hover:text-gray-300'"
+              v-tooltip="s.is_free ? 'Als kostenpflichtig markieren' : 'Als kostenlos markieren (wird aus Abrechnung ausgeschlossen)'">
+              {{ s.is_free ? '↩ kostenpflichtig' : '✕ kostenlos' }}
+            </button>
           </div>
         </div>
       </div>
@@ -88,6 +105,12 @@ async function load() {
   sessions.value = s.data;
   stats.value = st.data;
   loading.value = false;
+}
+
+async function toggleFree(session) {
+  const newVal = !session.is_free;
+  await api.patch(`/charging/${session.id}`, { is_free: newVal });
+  session.is_free = newVal;
 }
 
 onMounted(load);

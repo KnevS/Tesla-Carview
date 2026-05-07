@@ -16,6 +16,7 @@ router.get('/:vehicleId/sessions', (req, res) => {
     OR (cs.location_id IS NULL AND cs.charger_type NOT IN ('Supercharger','DC'))
   )`);
   params.push(req.params.vehicleId);
+  conds.push('cs.is_free = 0');
 
   if (from) { conds.push('cs.start_time >= ?'); params.push(+from); }
   if (to)   { conds.push('cs.start_time <= ?'); params.push(+to); }
@@ -52,6 +53,7 @@ router.get('/:vehicleId/summary', (req, res) => {
     FROM charging_sessions cs
     LEFT JOIN charging_locations cl ON cl.id = cs.location_id
     WHERE cs.vehicle_id = ?
+      AND cs.is_free = 0
       AND (cs.location_id IN (SELECT id FROM charging_locations WHERE vehicle_id=? AND type='home')
            OR cs.location_id IS NULL)
     GROUP BY month ORDER BY month DESC

@@ -75,23 +75,25 @@ router.patch('/:id', (req, res) => {
     const session = req.db.prepare('SELECT * FROM charging_sessions WHERE id=?').get(req.params.id);
     if (!session) return res.status(404).json({ error: 'Ladesession nicht gefunden' });
 
-    const { cost, location_id, billing_rate_kwh, billing_status, location_name } = req.body;
+    const { cost, location_id, billing_rate_kwh, billing_status, location_name, is_free } = req.body;
 
     // cost darf explizit auf 0 gesetzt werden
     const newCost   = cost !== undefined ? cost : session.cost;
     const newStatus = cost !== undefined
       ? (cost === null ? 'pending' : 'calculated')
       : (billing_status ?? session.billing_status);
+    const newIsFree = is_free !== undefined ? (is_free ? 1 : 0) : session.is_free;
 
     req.db.prepare(
       `UPDATE charging_sessions SET
-         cost            = ?,
+         cost             = ?,
          billing_rate_kwh = COALESCE(?, billing_rate_kwh),
-         billing_status  = ?,
-         location_id     = COALESCE(?, location_id),
-         location_name   = COALESCE(?, location_name)
+         billing_status   = ?,
+         location_id      = COALESCE(?, location_id),
+         location_name    = COALESCE(?, location_name),
+         is_free          = ?
        WHERE id=?`
-    ).run(newCost, billing_rate_kwh ?? null, newStatus, location_id ?? null, location_name ?? null, req.params.id);
+    ).run(newCost, billing_rate_kwh ?? null, newStatus, location_id ?? null, location_name ?? null, newIsFree, req.params.id);
 
     res.json(req.db.prepare('SELECT * FROM charging_sessions WHERE id=?').get(req.params.id));
   } catch (err) {

@@ -9,6 +9,18 @@
       </div>
 
       <!-- Schritt-Indikator -->
+      <!-- Invite-Prüfung -->
+      <div v-if="inviteChecking" class="card text-center text-gray-400 text-sm py-6">
+        Einladungslink wird geprüft…
+      </div>
+      <div v-else-if="inviteError" class="card space-y-3 text-center">
+        <p class="text-4xl">🔒</p>
+        <p class="text-red-400 font-semibold">{{ inviteError }}</p>
+        <p class="text-sm text-gray-400">Bitte wende dich an einen Administrator um einen Einladungslink zu erhalten.</p>
+        <RouterLink to="/login" class="btn-secondary inline-block text-sm">← Zum Login</RouterLink>
+      </div>
+
+      <template v-if="inviteValid">
       <div class="flex items-center justify-center gap-2">
         <div v-for="i in 3" :key="i"
           class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors"
@@ -97,19 +109,49 @@
         <RouterLink to="/login" class="btn-primary inline-block w-full text-center">Zum Login →</RouterLink>
       </div>
 
+      </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useRoute } from 'vue-router';
 import api from '../api.js';
 
+const route = useRoute();
 const step    = ref(1);
 const loading = ref(false);
 const error   = ref('');
 const slugChecked   = ref(false);
 const slugAvailable = ref(false);
+
+const inviteToken   = ref('');
+const inviteValid   = ref(false);
+const inviteChecking = ref(true);
+const inviteError   = ref('');
+
+onMounted(async () => {
+  const token = route.query.invite;
+  if (!token) {
+    inviteChecking.value = false;
+    inviteError.value = 'Registrierung nur mit einem gültigen Einladungslink möglich.';
+    return;
+  }
+  try {
+    const { data } = await api.get(`/invites/validate/${token}`);
+    if (data.valid) {
+      inviteToken.value = token;
+      inviteValid.value = true;
+    } else {
+      inviteError.value = data.reason;
+    }
+  } catch {
+    inviteError.value = 'Einladungslink konnte nicht geprüft werden.';
+  } finally {
+    inviteChecking.value = false;
+  }
+});
 
 const form = ref({
   tenantName:    '',
@@ -164,6 +206,7 @@ async function submit() {
       tenantSlug:    form.value.tenantSlug,
       adminUsername: form.value.adminUsername,
       adminPassword: form.value.adminPassword,
+      inviteToken:   inviteToken.value || undefined,
     });
     step.value = 3;
   } catch (err) {

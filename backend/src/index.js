@@ -30,6 +30,7 @@ import setupRoutes            from './routes/setup.js';
 import passkeyRoutes          from './routes/passkey.js';
 import passwordResetRoutes    from './routes/password-reset.js';
 import dataManagementRoutes   from './routes/data-management.js';
+import inviteRoutes            from './routes/invites.js';
 
 const app    = express();
 const PORT   = process.env.PORT || 3000;
@@ -61,6 +62,7 @@ app.use('/api/auth',           authRoutes);
 app.use('/api/register',       registerRoutes);
 app.use('/api/passkey',        passkeyRoutes);        // login-options + login-verify sind öffentlich
 app.use('/api/password-reset', passwordResetRoutes);  // apply ist öffentlich
+app.use('/api/invites/validate', inviteRoutes);        // validate/:token ist öffentlich
 
 // Alle weiteren Routen benötigen einen gültigen JWT + Mandanten-DB (req.db)
 app.use(requireAuth);
@@ -80,6 +82,7 @@ app.use('/api/commands',           commandRoutes);
 app.use('/api/charging-locations', chargingLocationRoutes);
 app.use('/api/billing',            billingRoutes);
 app.use('/api/data',               dataManagementRoutes);
+app.use('/api/invites',            inviteRoutes);
 
 server.listen(PORT, async () => {
   console.log(`Tesla Carview Backend läuft auf Port ${PORT}`);
