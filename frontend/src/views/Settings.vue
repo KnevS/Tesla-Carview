@@ -241,6 +241,63 @@
       </div>
     </div>
 
+    <!-- Farbschema -->
+    <div class="card space-y-3">
+      <h2 class="font-semibold"
+        v-tooltip="'Akzentfarbe der Benutzeroberfläche – Schaltflächen, aktive Navigationspunkte und Fokus-Rahmen.'">
+        🎨 Farbschema
+      </h2>
+      <p class="text-xs text-gray-500">Akzentfarbe für Schaltflächen und Navigation. Wird lokal gespeichert.</p>
+      <div class="flex flex-wrap gap-3">
+        <button v-for="t in THEMES" :key="t.key"
+          @click="themeStore.apply(t.key)"
+          class="flex items-center gap-2 px-3 py-2 rounded-xl border-2 text-sm transition"
+          :class="themeStore.activeKey === t.key
+            ? 'border-white text-white'
+            : 'border-gray-700 text-gray-400 hover:border-gray-500'"
+          :style="themeStore.activeKey === t.key ? { backgroundColor: t.accent } : {}">
+          <span class="w-4 h-4 rounded-full flex-shrink-0" :style="{ backgroundColor: t.accent }"></span>
+          {{ t.label }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Navigation anpassen -->
+    <div class="card space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="font-semibold"
+          v-tooltip="'Reihenfolge und Sichtbarkeit der Navigationspunkte individuell anpassen. Änderungen werden lokal gespeichert.'">
+          🧭 Navigationsleiste anpassen
+        </h2>
+        <button @click="navStore.reset()" class="text-xs text-gray-500 hover:text-gray-300 transition"
+          v-tooltip="'Reihenfolge und Sichtbarkeit auf Standardwerte zurücksetzen'">
+          Zurücksetzen
+        </button>
+      </div>
+      <p class="text-xs text-gray-500">Reihenfolge mit ↑↓ ändern · Auge zum Ein-/Ausblenden</p>
+      <div class="space-y-1">
+        <div v-for="(link, idx) in navStore.allLinks" :key="link.key"
+          class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-gray-800 transition">
+          <div class="flex flex-col gap-0.5">
+            <button @click="navStore.moveUp(link.key)" :disabled="idx === 0"
+              class="text-gray-500 hover:text-white disabled:opacity-20 leading-none text-xs transition">▲</button>
+            <button @click="navStore.moveDown(link.key)" :disabled="idx === navStore.allLinks.length - 1"
+              class="text-gray-500 hover:text-white disabled:opacity-20 leading-none text-xs transition">▼</button>
+          </div>
+          <span class="text-base w-6 text-center">{{ link.icon }}</span>
+          <span class="flex-1 text-sm" :class="link.visible ? 'text-white' : 'text-gray-600 line-through'">
+            {{ link.label }}
+          </span>
+          <button @click="navStore.toggleVisible(link.key)"
+            v-tooltip="link.visible ? 'Ausblenden' : 'Einblenden'"
+            class="text-lg leading-none transition"
+            :class="link.visible ? 'text-gray-400 hover:text-white' : 'text-gray-700 hover:text-gray-400'">
+            {{ link.visible ? '👁' : '🚫' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="card">
       <button @click="logout" class="text-red-400 hover:text-red-300 text-sm transition"
         v-tooltip="'Aktuelle Session beenden – du wirst zur Login-Seite weitergeleitet'">Abmelden</button>
@@ -253,11 +310,15 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '../api.js';
 import { useAuthStore } from '../store/auth.js';
-import { useAppStore } from '../store/index.js';
+import { useAppStore }  from '../store/index.js';
+import { useNavStore }   from '../store/nav.js';
+import { useThemeStore, THEMES } from '../store/theme.js';
 
 const auth     = useAuthStore();
 const appStore = useAppStore();
-const router   = useRouter();
+const navStore   = useNavStore();
+const themeStore = useThemeStore();
+const router     = useRouter();
 
 const teslaConnected  = ref(false);
 const teslaLoginUrl   = ref('/api/auth/tesla/login');

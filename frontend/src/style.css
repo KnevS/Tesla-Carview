@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --accent:       #E31937;
+  --accent-hover: #c4162e;
+}
+
 body {
   @apply bg-tesla-dark text-white font-sans;
 }
@@ -11,7 +16,11 @@ body {
 }
 
 .btn-primary {
-  @apply bg-tesla-red hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-xl transition;
+  background-color: var(--accent);
+  @apply text-white font-semibold py-2 px-4 rounded-xl transition;
+}
+.btn-primary:hover {
+  background-color: var(--accent-hover);
 }
 
 .btn-secondary {
@@ -20,7 +29,12 @@ body {
 
 .input {
   @apply w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white
-         placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-tesla-red focus:border-transparent;
+         placeholder-gray-500 focus:outline-none focus:border-transparent;
+  box-shadow: none;
+}
+.input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent);
 }
 
 .label {

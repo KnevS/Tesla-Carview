@@ -23,6 +23,7 @@ import PasswordReset from '../views/PasswordReset.vue';
 import Handbook      from '../views/Handbook.vue';
 import UserManagement from '../views/UserManagement.vue';
 import DataManagement from '../views/DataManagement.vue';
+import Support        from '../views/Support.vue';
 
 const routes = [
   // Setup-Wizard (erster Start)
@@ -33,6 +34,7 @@ const routes = [
   { path: '/register',      component: Register,      meta: { public: true,  title: 'Registrieren' } },
   { path: '/reset-password',component: PasswordReset, meta: { public: true,  title: 'Passwort zurücksetzen' } },
   { path: '/handbook',      component: Handbook,      meta: { public: true,  title: 'Benutzerhandbuch' } },
+  { path: '/support',       component: Support,       meta: { public: true,  title: 'Unterstützen' } },
   // Geschuetzt
   { path: '/',              component: Dashboard,     meta: { title: 'Dashboard' } },
   { path: '/trips',         component: Trips,         meta: { title: 'Fahrten' } },

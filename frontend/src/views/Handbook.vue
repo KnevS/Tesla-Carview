@@ -23,6 +23,8 @@
       <p class="text-gray-300 leading-relaxed">
         Tesla Carview ist eine <strong>selbst gehostete</strong> Datenlogger-App für Tesla-Fahrzeuge.
         Alle Daten bleiben ausschließlich auf deinem eigenen Server – keine Cloud, keine Datenweitergabe.
+        Die App ist vollständig <strong>responsive</strong> und läuft auf <strong>iPhone/iPad (Safari)</strong>,
+        Android-Smartphones sowie Desktop-Browsern.
       </p>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
         <div v-for="f in features" :key="f.icon" class="bg-gray-800 rounded-lg p-3">
@@ -276,6 +278,121 @@
       </div>
     </section>
 
+    <section id="tesla-api" class="space-y-4">
+      <h2 class="text-xl font-bold border-b border-gray-700 pb-2">⚡ Tesla Developer API einrichten</h2>
+      <p class="text-sm text-gray-400">
+        Tesla Carview kommuniziert über die offizielle <strong>Tesla Fleet API</strong>.
+        Dazu brauchst du einen kostenlosen Tesla Developer Account und eine registrierte App.
+      </p>
+      <div class="space-y-3 text-sm">
+        <div class="bg-gray-800 rounded-lg p-4 space-y-3">
+          <p class="font-semibold text-white">Schritt 1 – Developer Account anlegen</p>
+          <ol class="text-gray-400 space-y-1.5 list-decimal list-inside">
+            <li>Rufe <code class="text-gray-300">developer.tesla.com</code> auf und melde dich mit deinem Tesla-Account an.</li>
+            <li>Akzeptiere die Developer Terms of Service.</li>
+            <li>Klicke auf <strong>Create Application</strong>.</li>
+          </ol>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-4 space-y-3">
+          <p class="font-semibold text-white">Schritt 2 – App konfigurieren</p>
+          <ol class="text-gray-400 space-y-2 list-decimal list-inside">
+            <li><strong>Application Name:</strong> beliebiger Name, z.&nbsp;B. <em>Tesla Carview</em></li>
+            <li><strong>Description:</strong> kurze Beschreibung (Pflichtfeld)</li>
+            <li>
+              <strong>Allowed Origin:</strong> deine öffentliche App-URL, z.&nbsp;B.<br>
+              <code class="text-gray-300 text-xs block mt-1 bg-gray-900 p-1.5 rounded">https://carview.example.com</code>
+            </li>
+            <li>
+              <strong>Redirect URI:</strong> Callback-URL der App:<br>
+              <code class="text-gray-300 text-xs block mt-1 bg-gray-900 p-1.5 rounded">https://carview.example.com/api/auth/callback</code>
+            </li>
+            <li><strong>Scopes (erforderlich):</strong> <code class="text-gray-300">vehicle_device_data</code>, <code class="text-gray-300">vehicle_cmds</code>, <code class="text-gray-300">vehicle_charging_cmds</code>, <code class="text-gray-300">openid</code>, <code class="text-gray-300">offline_access</code></li>
+          </ol>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-4 space-y-3">
+          <p class="font-semibold text-white">Schritt 3 – Zugangsdaten notieren</p>
+          <p class="text-gray-400">Nach dem Erstellen erhältst du:</p>
+          <ul class="text-gray-400 space-y-1 list-disc list-inside">
+            <li><strong>Client ID</strong> – eine UUID-artige Zeichenkette</li>
+            <li><strong>Client Secret</strong> – einmalig sichtbar, sofort kopieren und sicher speichern</li>
+          </ul>
+          <div class="bg-gray-900 rounded-lg p-3 text-xs text-gray-300 font-mono space-y-1">
+            <p>TESLA_CLIENT_ID=abc123def456...</p>
+            <p>TESLA_CLIENT_SECRET=tsl_secret_...</p>
+          </div>
+          <p class="text-xs text-gray-500">Diese Werte trägst du in die <code>.env</code>-Datei ein oder gibst sie beim interaktiven Setup-Wizard an.</p>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-4 space-y-3">
+          <p class="font-semibold text-white">Schritt 4 – Fleet API Access beantragen (für Befehle)</p>
+          <p class="text-gray-400">
+            Damit Fahrzeugbefehle (Klima, Türen, Laden) funktionieren, muss deine App als <em>Partner</em>
+            bei Tesla registriert sein. Das geht einmalig über:<br>
+            <code class="text-gray-300 text-xs block mt-2 bg-gray-900 p-1.5 rounded">POST https://fleet-api.prd.na.vn.cloud.tesla.com/api/1/partner_accounts</code>
+          </p>
+          <p class="text-gray-400">Das Setup-Script führt diesen Schritt automatisch aus, wenn <code>FRONTEND_URL</code> gesetzt ist. Sonst manuell via Postman oder curl. Dauert 1–3 Werktage bis zur Aktivierung.</p>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-4 space-y-2">
+          <p class="font-semibold text-white">Schritt 5 – In Tesla Carview verbinden</p>
+          <ol class="text-gray-400 space-y-1.5 list-decimal list-inside">
+            <li>Nach dem Login: <strong>Einstellungen → Tesla-Verbindung → Tesla neu verbinden</strong></li>
+            <li>Du wirst zu Tesla weitergeleitet und musst dich dort anmelden und der App Zugriff erlauben.</li>
+            <li>Nach der Weiterleitung: <strong>Einstellungen → 🔄 Fahrzeuge synchronisieren</strong></li>
+            <li>Alle Fahrzeuge des Tesla-Accounts erscheinen in der App.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <section id="monta" class="space-y-4">
+      <h2 class="text-xl font-bold border-b border-gray-700 pb-2">🔌 Monta-Integration (Heimlade-Abrechnung)</h2>
+      <p class="text-sm text-gray-400">
+        Für Dienstwagen-Fahrer: Tesla Carview kann Ladedaten direkt aus deiner <strong>Monta-Wallbox</strong>
+        abrufen und daraus eine monatliche Kostenabrechnung für deinen Arbeitgeber erstellen.
+      </p>
+      <div class="bg-amber-900/30 border border-amber-700/50 rounded-lg p-3 text-sm text-amber-200">
+        ⚠️ Monta-Integration ist nur für Fahrzeuge der Kategorie <strong>Dienstwagen</strong> verfügbar
+        (Einstellungen → Fahrzeugprofil → Kategorie).
+      </div>
+      <div class="space-y-3 text-sm">
+        <div class="bg-gray-800 rounded-lg p-4 space-y-3">
+          <p class="font-semibold text-white">Schritt 1 – Monta API-Key erstellen</p>
+          <ol class="text-gray-400 space-y-2 list-decimal list-inside">
+            <li>Melde dich bei <strong>Monta</strong> an (App oder Web: <code class="text-gray-300">portal.monta.com</code>).</li>
+            <li>Gehe zu <strong>Einstellungen → API</strong>.</li>
+            <li>Klicke auf <strong>API Key erstellen</strong> und kopiere den Schlüssel (er beginnt mit <code class="text-gray-300">monta_</code>).</li>
+          </ol>
+          <p class="text-xs text-gray-500">Der Key ist nur einmal sichtbar – sofort in Tesla Carview eintragen.</p>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-4 space-y-3">
+          <p class="font-semibold text-white">Schritt 2 – Charge-Point-ID herausfinden</p>
+          <ol class="text-gray-400 space-y-2 list-decimal list-inside">
+            <li>Im Monta-Portal: <strong>Ladepunkte → Meine Geräte</strong> auswählen.</li>
+            <li>Die <strong>Charge-Point-ID</strong> steht in der Detailansicht (Format: <code class="text-gray-300">cp_12345</code>).</li>
+            <li>Alternativ: API-Aufruf <code class="text-gray-300">GET /api/v1/charge-points</code> liefert alle Ladepunkte mit IDs.</li>
+          </ol>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-4 space-y-3">
+          <p class="font-semibold text-white">Schritt 3 – In Tesla Carview eintragen</p>
+          <ol class="text-gray-400 space-y-2 list-decimal list-inside">
+            <li>Gehe zu <strong>Einstellungen → Fahrzeugprofil</strong>.</li>
+            <li>Wähle Kategorie <strong>💼 Dienstwagen</strong>.</li>
+            <li>Trage <strong>Strompreis Wallbox (€/kWh)</strong> ein – z.&nbsp;B. <code class="text-gray-300">0.34</code>.</li>
+            <li>Füge <strong>Monta Charge-Point-ID</strong> und <strong>Monta API-Key</strong> ein.</li>
+            <li>Klicke <strong>Speichern</strong>.</li>
+          </ol>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-4 space-y-3">
+          <p class="font-semibold text-white">Abrechnung nutzen</p>
+          <ul class="text-gray-400 space-y-1.5 list-disc list-inside">
+            <li>Gehe zu <strong>Abrechnung</strong> in der Navigation.</li>
+            <li>Wähle den gewünschten Monat – alle Heim-Ladevorgänge werden aufgelistet.</li>
+            <li>Ladungen, die kostenlos waren (z.&nbsp;B. beim Arbeitgeber), kannst du in der Ladehistorie mit <strong>✕ kostenlos</strong> markieren – sie werden dann aus der Abrechnung ausgeschlossen.</li>
+            <li>Mit <strong>PDF exportieren</strong> erhältst du ein unterschriftsreifes Abrechnungsblatt.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <section id="troubleshooting" class="space-y-3">
       <h2 class="text-xl font-bold border-b border-gray-700 pb-2">🔧 Fehlerbehebung</h2>
       <div class="space-y-3">
@@ -308,6 +425,8 @@ const sections = [
   { id: 'security',           icon: '🔐', title: 'Sicherheit' },
   { id: 'multitenancy',       icon: '🏢', title: 'Multi-Mandanten' },
   { id: 'backup',             icon: '💾', title: 'Datensicherung' },
+  { id: 'tesla-api',          icon: '⚡', title: 'Tesla Developer API einrichten' },
+  { id: 'monta',              icon: '🔌', title: 'Monta-Integration (Abrechnung)' },
   { id: 'troubleshooting',    icon: '🔧', title: 'Fehlerbehebung' },
 ];
 
@@ -320,6 +439,7 @@ const features = [
   { icon: '📝', title: 'Betriebsbuch', desc: 'Wartungen, Reparaturen, Kosten mit Datum' },
   { icon: '📤', title: 'Export', desc: 'CSV/JSON für alle Daten, Vollbackup als ZIP' },
   { icon: '🔔', title: 'Push-Nachrichten', desc: 'Browser-Benachrichtigung bei Ladeende' },
+  { icon: '📱', title: 'Mobile-optimiert', desc: 'Vollständig nutzbar auf iPhone/iPad (Safari), Android und Desktop' },
 ];
 
 const securityFeatures = [

@@ -22,6 +22,9 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 | **Export** | CSV/JSON-Export für Fahrten & Laden, Vollbackup |
 | **Benachrichtigungen** | Web Push bei Ladeende |
 | **Benutzerhandbuch** | Vollständige Anleitung direkt in der App lesbar |
+| **Farbschema** | Anpassbares Farbprofil (6 Akzentfarben, lokal gespeichert) |
+| **Navigation** | Individuell sortierbare und ein-/ausblendbare Navigationspunkte |
+| **Mobile** | Vollständig nutzbar auf iPhone/iPad (Safari), Android und Desktop |
 
 ## Multi-Mandanten-Architektur (v2.0)
 
@@ -174,3 +177,21 @@ bash deploy/update.sh
 ## Lizenz
 
 MIT – freie Nutzung, Modifikation und Weitergabe erlaubt.
+
+---
+
+## Unterstützen
+
+# Aufgabe: 'Unterstützen'-Dialog in TeslaView/CarView ergänzen
+
+Tesla Carview ist kostenlos und werbefrei. Wenn dir das Programm etwas wert ist, freuen sich folgende gemeinnützige Organisationen über deine direkte Unterstützung:
+
+| Organisation | Beschreibung |
+|---|---|
+| **Aktion Deutschland Hilft** | Bündnis von Hilfsorganisationen für schnelle und wirkungsvolle Katastrophenhilfe weltweit |
+| **Lebenshilfe Rems-Murr** | Unterstützung, Begleitung und Teilhabe für Menschen mit Behinderung im Rems-Murr-Kreis |
+| **Radio 7 Drachenkinder** | Hilfe für schwer kranke Kinder in der Region – finanziert Therapien und Wünsche |
+
+> **100 % deiner Spende geht direkt an die Einrichtung. Wir sehen weder den Betrag noch deine Daten.**
+
+In der App erreichbar über das ❤️-Symbol in der Navigationsleiste (oben rechts).

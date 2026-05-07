@@ -7,10 +7,11 @@
       </RouterLink>
 
       <div class="hidden md:flex items-center gap-1">
-        <RouterLink v-for="link in links" :key="link.to" :to="link.to"
+        <RouterLink v-for="link in navStore.visibleLinks" :key="link.to" :to="link.to"
           v-tooltip="link.tooltip"
           class="px-4 py-2 rounded-lg text-sm font-medium transition"
-          :class="$route.path === link.to ? 'bg-tesla-red text-white' : 'text-gray-300 hover:bg-gray-700'"
+          :class="$route.path === link.to ? 'text-white' : 'text-gray-300 hover:bg-gray-700'"
+          :style="$route.path === link.to ? { backgroundColor: 'var(--accent)' } : {}"
         >
           {{ link.icon }} {{ link.label }}
         </RouterLink>
@@ -36,6 +37,11 @@
           v-tooltip="'Datenverwaltung – Daten löschen und Datenbestand einsehen'">
           🗑️
         </RouterLink>
+        <RouterLink to="/support"
+          class="text-gray-400 hover:text-red-400 transition"
+          v-tooltip="'Unterstützen – gemeinnützige Organisationen'">
+          ❤️
+        </RouterLink>
         <RouterLink to="/handbook"
           class="text-gray-400 hover:text-white transition"
           v-tooltip="'Benutzerhandbuch – Anleitungen, FAQ und Tipps zur App'">
@@ -49,10 +55,11 @@
     </div>
 
     <div class="md:hidden flex overflow-x-auto gap-1 px-4 pb-2">
-      <RouterLink v-for="link in links" :key="link.to" :to="link.to"
+      <RouterLink v-for="link in navStore.visibleLinks" :key="link.to" :to="link.to"
         v-tooltip="link.tooltip"
         class="flex-shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition"
-        :class="$route.path === link.to ? 'bg-tesla-red text-white' : 'text-gray-300 hover:bg-gray-700'"
+        :class="$route.path === link.to ? 'text-white' : 'text-gray-300 hover:bg-gray-700'"
+        :style="$route.path === link.to ? { backgroundColor: 'var(--accent)' } : {}"
       >
         {{ link.icon }} {{ link.label }}
       </RouterLink>
@@ -61,21 +68,10 @@
 </template>
 
 <script setup>
-import { useAppStore } from '../store/index.js';
+import { useAppStore }  from '../store/index.js';
 import { useAuthStore } from '../store/auth.js';
+import { useNavStore }  from '../store/nav.js';
 const appStore  = useAppStore();
 const authStore = useAuthStore();
-const links = [
-  { to: '/',          icon: '🏠', label: 'Dashboard',    tooltip: 'Übersicht mit Kennzahlen, letzter Fahrt und Monatsstatistik' },
-  { to: '/trips',        icon: '🗺️', label: 'Fahrten',      tooltip: 'Liste aller aufgezeichneten Fahrten mit GPS-Track auf einer Karte' },
-  { to: '/fahrtenbuch',      icon: '📋', label: 'Fahrtenbuch',  tooltip: 'Fahrten klassifizieren und Auswertung nach Privat/Dienst/Arbeitsweg' },
-  { to: '/kostenabrechnung', icon: '💶', label: 'Abrechnung',   tooltip: 'Kostenabrechnung Heimladen für Dienstwagen' },
-  { to: '/charging',  icon: '🔋', label: 'Laden',        tooltip: 'Alle Ladevorgänge mit Ladekurven, Kosten und Aufschlüsselung nach Ladertyp' },
-  { to: '/battery',   icon: '📊', label: 'Batterie',     tooltip: 'Reichweiten-Verlauf und Degradations-Analyse über Zeit' },
-  { to: '/logbook',   icon: '📓', label: 'Betriebsbuch', tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },
-  { to: '/telemetry', icon: '🏎', label: 'Technik',      tooltip: 'Live-Fahrzeugdaten: Reifendruck, Klima, Leistung, SOC – wie der Track-Mode' },
-  { to: '/control',   icon: '🎮', label: 'Steuerung',   tooltip: 'Fahrzeug steuern: Klima, Türen, Laden, Navigation' },
-  { to: '/export',    icon: '💾', label: 'Export',       tooltip: 'Daten als CSV/JSON exportieren, Vollbackup erstellen, Push-Benachrichtigungen' },
-  { to: '/system',    icon: '📈', label: 'System',       tooltip: 'Versionsinformationen, CPU-/RAM-Auslastung und Datenbankstatistiken' },
-];
+const navStore  = useNavStore();
 </script>
