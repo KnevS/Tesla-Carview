@@ -11,15 +11,38 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 |---|---|
 | **Dashboard** | Gesamtstatistiken, letzte Fahrt, monatliches Kilometerdiagramm |
 | **Fahrten** | GPS-Track auf Karte, Verbrauch, Geschwindigkeit, SoC-Verlauf |
-| **Laden** | Ladesessions, Ladekurven, Kosten, Aufschlüsselung nach Ladertyp |
+| **Laden** | Ladesessions mit Kosten, GPS-basierter Ladeort-Zuordnung, Ladekurven |
+| **Ladeorte** | Definierbare Standorte mit GPS-Radius, Preis/kWh, Auto-Erkennung |
 | **Batterie** | Degradations-Tracking, Reichweiten-Verlauf über Zeit |
 | **Technik** | Live-Telemetrie: TPMS, Leistungsfluss, Klimaanlage, Ladestatus |
-| **System** | Server-Monitor: CPU, RAM, DB-Größe, Prozess-Uptime |
-| **Betriebsbuch** | Notizen, Wartungen, Reparaturen, Reifen, Inspektionen mit Kosten |
+| **Steuerung** | Fahrzeugbefehle: Klima, Türen, Laden, Navigation (Virtual Key) |
+| **Fahrtenbuch** | Dienstwagen-Fahrtenbuch, Klassifikation Privat/Dienst/Arbeitsweg |
+| **Abrechnung** | Heimladen-Kostenabrechnung für Dienstwagen (Monta-Integration) |
+| **Betriebsbuch** | Wartungen, Reparaturen, Reifen, Inspektionen mit Kosten |
 | **Export** | CSV/JSON-Export für Fahrten & Laden, Vollbackup |
 | **Benachrichtigungen** | Web Push bei Ladeende |
+| **Benutzerhandbuch** | Vollständige Anleitung direkt in der App lesbar |
+
+## Multi-Mandanten-Architektur (v2.0)
+
+Seit v2.0 unterstützt Tesla Carview **mehrere Mandanten** mit vollständiger Datenisolierung:
+
+- Jeder Mandant hat seine eigene SQLite-Datenbank
+- Mandanten-Selbstregistrierung über `/register`
+- **Benutzerverwaltung** pro Mandant (Rollen, Fahrzeugzuweisung, Sperren)
+- **Passkey-Authentifizierung** (Touch ID, Face ID, Windows Hello, FIDO2)
+- **Passwort-Reset** via Admin-generiertem Link
 
 ## Schnellstart
+
+### Raspberry Pi / Linux-Server (empfohlen)
+
+```bash
+# Als root auf dem Zielgerät:
+curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/setup.sh | bash
+```
+
+Das Script erkennt automatisch die Architektur (x86_64, ARM64, ARMv7) und installiert alles.
 
 ### Lokale Entwicklung
 
@@ -40,15 +63,6 @@ cd frontend && npm install && npm run dev
 → Browser öffnen: **http://localhost:5173**
 → Beim ersten Start automatisch zum Setup-Wizard weitergeleitet
 
-### Raspberry Pi / Linux-Server
-
-```bash
-# Als root auf dem Zielgerät:
-curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/setup.sh | bash
-```
-
-Das Script erkennt automatisch die Architektur (x86_64, ARM64, ARMv7) und installiert alles.
-
 ### Nur Konfiguration einrichten
 
 ```bash
@@ -60,14 +74,21 @@ Interaktiver Assistent für: Domain, Tesla-API-Zugangsdaten, E-Mail, Web-Push.
 ## Erstkonfiguration (Web-Wizard)
 
 Beim ersten Start wird automatisch auf **/setup** weitergeleitet.
-Dort kannst du im Browser deinen Administrator-Account anlegen.
+Dort kannst du im Browser Mandantenname und Administrator-Account anlegen.
 
-Alternativ über den Terminal-Wizard: `bash deploy/setup-wizard.sh`
+Empfohlene Schritte nach dem Login:
+1. Tesla-Fahrzeug verbinden (Einstellungen → Tesla)
+2. Virtual Key am Fahrzeug registrieren (Einstellungen → Virtual Key)
+3. MFA aktivieren (Einstellungen → Zwei-Faktor-Authentifizierung)
+4. Ladeorte konfigurieren
+
+Das **Benutzerhandbuch** ist direkt in der App unter `/handbook` verfügbar.
 
 ## Sicherheit
 
 - JWT (Access-Token 15 min, Refresh-Token 7 Tage als httpOnly-Cookie)
 - **TOTP-MFA** (Google Authenticator, Authy, 1Password etc.)
+- **Passkeys** (WebAuthn, passwortloser Login)
 - **10 Backup-Codes** (bcrypt-gehasht, einmalig verwendbar)
 - **Account-Lockout** nach 5 Fehlversuchen (15 min)
 - **fail2ban** IP-Sperre nach 3 fehlgeschlagenen Logins (10 min)
@@ -75,6 +96,7 @@ Alternativ über den Terminal-Wizard: `bash deploy/setup-wizard.sh`
 - **CSP, X-Frame-Options, Permissions-Policy** Header
 - **Rate-Limiting** auf Login- und API-Endpunkten
 - **Audit-Log** aller sicherheitsrelevanten Aktionen
+- **Datenlöschung** mit Backup-Warnung und Bestätigungstext
 
 ## Tech Stack
 
@@ -82,8 +104,9 @@ Alternativ über den Terminal-Wizard: `bash deploy/setup-wizard.sh`
 |---|---|
 | Frontend | Vue 3 + Vite + Pinia + Tailwind CSS + Chart.js + Leaflet |
 | Backend | Node.js 20 + Express + SQLite (better-sqlite3) |
-| Auth | JWT + bcrypt + TOTP (otpauth) |
-| Tesla-Daten | Tesla Fleet API (OAuth2) |
+| Auth | JWT + bcrypt + TOTP (otpauth) + WebAuthn (@simplewebauthn) |
+| Tesla-Daten | Tesla Fleet API (OAuth2) + Fleet Telemetry (WebSocket) |
+| Multi-Tenancy | Separate SQLite-Datenbanken pro Mandant, Master-DB für globale Daten |
 | Deployment | Docker Compose + Nginx + Let's Encrypt |
 | Plattformen | linux/amd64 · linux/arm64 · linux/arm/v7 |
 
@@ -93,17 +116,20 @@ Alternativ über den Terminal-Wizard: `bash deploy/setup-wizard.sh`
 tesla-carview/
 ├── backend/
 │   ├── src/
-│   │   ├── db/            # Schema + DB-Initialisierung
-│   │   ├── middleware/    # auth.js, security.js, validate.js
-│   │   ├── routes/        # auth, setup, mfa, users, vehicles, trips, …
-│   │   └── services/      # teslaApi, poller, dataSync, userService, …
+│   │   ├── db/            # Schema + DB-Initialisierung (master-schema.sql)
+│   │   ├── middleware/    # auth.js (multi-tenant JWT), security.js, validate.js
+│   │   ├── routes/        # auth, setup, register, passkey, password-reset,
+│   │   │                  # users, vehicles, trips, charging, data-management, …
+│   │   └── services/      # teslaApi, poller (multi-tenant), dataSync (GPS), …
 │   └── .env.example       # Konfigurationsvorlage
 ├── frontend/
 │   └── src/
-│       ├── views/         # Setup, Login, Dashboard, Trips, Telemetry, …
-│       ├── components/    # NavBar, StatCard
-│       ├── store/         # auth.js, index.js
-│       └── router/
+│       ├── views/         # Login, Register, Setup, Dashboard, Trips,
+│       │                  # Settings (Passkey), UserManagement, DataManagement,
+│       │                  # Handbook, PasswordReset, …
+│       ├── components/    # NavBar (Admin-Links, Handbuch), StatCard
+│       ├── store/         # auth.js (Passkey, Mandant), index.js
+│       └── router/        # Routen mit Admin-Guard
 ├── deploy/
 │   ├── setup.sh                  # Vollautomatisches Server-Setup
 │   ├── setup-wizard.sh           # Interaktiver Konfigurations-Assistent
@@ -114,16 +140,28 @@ tesla-carview/
 └── docker-compose.prod.yml     # Produktion
 ```
 
+## Wichtige Umgebungsvariablen (.env)
+
+| Variable | Beschreibung | Beispiel |
+|---|---|---|
+| `JWT_SECRET` | Geheimer Schlüssel für JWT (mind. 32 Zeichen, zufällig) | `openssl rand -hex 32` |
+| `TESLA_CLIENT_ID` | Tesla Developer App Client-ID | `abc123…` |
+| `TESLA_CLIENT_SECRET` | Tesla Developer App Secret | `secret…` |
+| `FRONTEND_URL` | Öffentliche URL der App (für OAuth-Callback + Passkeys) | `https://carview.example.com` |
+| `RP_NAME` | Anzeigename für Passkey-Dialoge | `Tesla Carview` |
+| `RP_ID` | Domain für WebAuthn (ohne Protokoll) | `carview.example.com` |
+
 ## Dokumentation
 
 | Dokument | Inhalt |
 |---|---|
 | [Quickstart](docs/01-quickstart.md) | Lokale Entwicklungsumgebung |
 | [Deployment](docs/02-deployment.md) | Server-Deployment + Raspberry Pi |
-| [Authentifizierung & MFA](docs/03-authentication.md) | Login-System, MFA |
+| [Authentifizierung & MFA](docs/03-authentication.md) | Login-System, MFA, Passkeys |
 | [Tesla Fleet API](docs/04-tesla-api.md) | Tesla Developer Account einrichten |
 | [Sicherheitsarchitektur](docs/05-security-architecture.md) | Threat-Model, alle Maßnahmen |
 | [fail2ban](docs/06-fail2ban.md) | Brute-Force-Schutz konfigurieren |
+| In-App Handbuch | `/handbook` in der laufenden App |
 
 ## Updates
 
