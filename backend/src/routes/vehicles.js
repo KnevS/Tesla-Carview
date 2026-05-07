@@ -6,22 +6,27 @@ import { registerVin } from '../db/database.js';
 
 const router = Router();
 
-router.get('/', async (req, res) => {
-  try {
-    const db    = req.db;
-    const local = db.prepare('SELECT * FROM vehicles').all();
-    if (local.length > 0) return res.json(local);
+router.get('/', (req, res) => {
+  res.json(req.db.prepare('SELECT * FROM vehicles').all());
+});
 
-    const data     = await getVehicles(db);
-    const vehicles = data.response || [];
-    const insert   = db.prepare(
+// POST /api/vehicles/sync — Fahrzeuge vom Tesla-Account synchronisieren
+router.post('/sync', async (req, res) => {
+  try {
+    const db   = req.db;
+    const data = await getVehicles(db);
+    const list = data.response || [];
+    if (!list.length) return res.json({ synced: 0, vehicles: db.prepare('SELECT * FROM vehicles').all() });
+
+    const insert = db.prepare(
       'INSERT OR REPLACE INTO vehicles (tesla_id, vin, display_name, model) VALUES (?, ?, ?, ?)'
     );
-    for (const v of vehicles) {
+    for (const v of list) {
       insert.run(String(v.id), v.vin, v.display_name, v.model_name);
       if (v.vin) registerVin(v.vin, req.tenantId);
     }
-    res.json(db.prepare('SELECT * FROM vehicles').all());
+    const vehicles = db.prepare('SELECT * FROM vehicles').all();
+    res.json({ synced: list.length, vehicles });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

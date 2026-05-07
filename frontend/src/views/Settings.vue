@@ -173,7 +173,7 @@
     <div class="card space-y-4">
       <h2 class="font-semibold">⚡ Tesla-Verbindung</h2>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 flex-wrap">
         <span class="text-sm" :class="teslaConnected ? 'text-green-400' : 'text-red-400'">
           {{ teslaConnected ? '● Verbunden' : '● Nicht verbunden' }}
         </span>
@@ -181,7 +181,12 @@
           v-tooltip="'Tesla-Account neu verbinden – holt einen neuen Token mit allen benötigten Scopes'">
           Tesla neu verbinden
         </a>
+        <button @click="syncVehicles" :disabled="syncingVehicles" class="btn-secondary text-sm"
+          v-tooltip="'Alle Fahrzeuge des Tesla-Accounts abrufen und in die App übernehmen. Nützlich wenn ein neues Fahrzeug zum Account hinzugefügt wurde.'">
+          {{ syncingVehicles ? 'Synchronisiere…' : '🔄 Fahrzeuge synchronisieren' }}
+        </button>
       </div>
+      <div v-if="syncMsg" class="text-sm" :class="syncOk ? 'text-green-400' : 'text-red-400'">{{ syncMsg }}</div>
 
       <!-- Virtual Key -->
       <div class="border-t border-gray-700 pt-4 space-y-3">
@@ -257,6 +262,29 @@ const router   = useRouter();
 const teslaConnected  = ref(false);
 const teslaLoginUrl   = ref('/api/auth/tesla/login');
 const virtualKeyHost  = window.location.hostname;
+const syncingVehicles = ref(false);
+const syncMsg         = ref('');
+const syncOk          = ref(false);
+
+async function syncVehicles() {
+  syncingVehicles.value = true;
+  syncMsg.value = '';
+  try {
+    const { data } = await api.post('/vehicles/sync');
+    syncOk.value  = true;
+    syncMsg.value = `${data.synced} Fahrzeug(e) synchronisiert`;
+    // App-Store aktualisieren
+    appStore.vehicles = data.vehicles;
+    if (!appStore.selectedVehicleId && data.vehicles.length) {
+      appStore.selectedVehicleId = data.vehicles[0].id;
+    }
+  } catch (err) {
+    syncOk.value  = false;
+    syncMsg.value = err.response?.data?.error ?? 'Synchronisierung fehlgeschlagen';
+  } finally {
+    syncingVehicles.value = false;
+  }
+}
 
 // Vehicle profile
 const vProfile = ref({ license_plate: '', model: 'm3', image_color: 'PPSW', category: 'private', company_name: '', electricity_rate_kwh: 0.30, monta_api_key: '', monta_charge_point_id: '' });

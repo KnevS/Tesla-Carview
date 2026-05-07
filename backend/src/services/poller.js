@@ -1,5 +1,5 @@
-import { getVehicleData } from './teslaApi.js';
-import { getAllTenants, getDb } from '../db/database.js';
+import { getVehicleData, getVehicles } from './teslaApi.js';
+import { getAllTenants, getDb, registerVin } from '../db/database.js';
 import { syncVehicleState } from './dataSync.js';
 
 const POLL_INTERVAL_ACTIVE = 30_000;
@@ -18,6 +18,19 @@ async function poll() {
     for (const tenant of tenants) {
       try {
         const db       = getDb(tenant.id);
+        // Beim ersten Lauf (noch keine Fahrzeuge) automatisch vom Tesla-Account synchronisieren
+        if (!db.prepare('SELECT 1 FROM vehicles LIMIT 1').get()) {
+          try {
+            const data = await getVehicles(db);
+            const list = data.response || [];
+            const insert = db.prepare('INSERT OR REPLACE INTO vehicles (tesla_id, vin, display_name, model) VALUES (?,?,?,?)');
+            for (const v of list) {
+              insert.run(String(v.id), v.vin, v.display_name, v.model_name);
+              if (v.vin) registerVin(v.vin, tenant.id);
+            }
+            if (list.length) console.log(`[Poller] ${list.length} Fahrzeug(e) für Mandant "${tenant.slug}" synchronisiert`);
+          } catch { /* kein Token oder API nicht erreichbar */ }
+        }
         const vehicles = db.prepare('SELECT * FROM vehicles').all();
         for (const vehicle of vehicles) {
           try {
