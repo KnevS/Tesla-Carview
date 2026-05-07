@@ -177,10 +177,10 @@
         <span class="text-sm" :class="teslaConnected ? 'text-green-400' : 'text-red-400'">
           {{ teslaConnected ? '● Verbunden' : '● Nicht verbunden' }}
         </span>
-        <a :href="teslaLoginUrl" class="btn-primary text-sm"
+        <button @click="teslaReconnect" :disabled="!teslaAuthUrl" class="btn-primary text-sm"
           v-tooltip="'Tesla-Account neu verbinden – holt einen neuen Token mit allen benötigten Scopes'">
           Tesla neu verbinden
-        </a>
+        </button>
         <button @click="syncVehicles" :disabled="syncingVehicles" class="btn-secondary text-sm"
           v-tooltip="'Alle Fahrzeuge des Tesla-Accounts abrufen und in die App übernehmen. Nützlich wenn ein neues Fahrzeug zum Account hinzugefügt wurde.'">
           {{ syncingVehicles ? 'Synchronisiere…' : '🔄 Fahrzeuge synchronisieren' }}
@@ -204,6 +204,38 @@
             tesla.com/_ak/{{ virtualKeyHost }}
           </a>
           <p class="text-xs text-gray-500">Tesla-App zeigt "Drittanbieter-Schlüssel hinzufügen" → Allow tippen. Danach funktionieren alle Steuerbefehle.</p>
+        </div>
+      </div>
+
+      <!-- Fleet Telemetrie -->
+      <div class="border-t border-gray-700 pt-4 space-y-3">
+        <div>
+          <p class="font-medium text-sm">📡 Fleet Telemetrie (GPS &amp; Echtzeit-Daten)</p>
+          <p class="text-xs text-gray-400 mt-0.5">Sendet GPS-Track, Geschwindigkeit und Batterie live an diese App</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button @click="registerPartner" :disabled="partnerBusy"
+            class="btn-secondary text-sm"
+            v-tooltip="'Einmalig: Registriert diese App als Tesla-Partner. Muss vor der Telemetrie-Aktivierung gemacht werden.'">
+            {{ partnerBusy ? 'Registriere…' : '🔑 App bei Tesla registrieren' }}
+          </button>
+          <button @click="configureTelemetry" :disabled="telemetryBusy"
+            class="btn-primary text-sm"
+            v-tooltip="'Registriert diese App bei Tesla als Telemetrie-Empfänger. Einmalig nötig – danach werden GPS und Fahrdaten automatisch übertragen.'">
+            {{ telemetryBusy ? 'Wird aktiviert…' : '📡 Telemetrie aktivieren' }}
+          </button>
+        </div>
+        <div v-if="partnerResult" class="rounded-lg px-3 py-2 text-sm"
+          :class="partnerResult.ok ? 'bg-green-900/30 text-green-300' : 'bg-red-900/30 text-red-300'">
+          {{ partnerResult.ok ? '✓ App erfolgreich registriert – jetzt Telemetrie aktivieren' : '✗ ' + partnerResult.error }}
+        </div>
+        <div v-if="telemetryResults.length" class="space-y-2">
+          <div v-for="r in telemetryResults" :key="r.vin"
+            class="rounded-lg px-3 py-2 text-sm"
+            :class="r.ok ? 'bg-green-900/30 text-green-300' : 'bg-red-900/30 text-red-300'">
+            <span class="font-mono text-xs">{{ r.vin }}</span>
+            <span class="ml-2">{{ r.ok ? '✓ Aktiviert' : '✗ ' + (r.error?.error || r.error || 'Fehler') }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -321,11 +353,77 @@ const themeStore = useThemeStore();
 const router     = useRouter();
 
 const teslaConnected  = ref(false);
-const teslaLoginUrl   = ref('/api/auth/tesla/login');
 const virtualKeyHost  = window.location.hostname;
-const syncingVehicles = ref(false);
-const syncMsg         = ref('');
-const syncOk          = ref(false);
+const syncingVehicles  = ref(false);
+const syncMsg          = ref('');
+const syncOk           = ref(false);
+const telemetryBusy    = ref(false);
+const telemetryResults = ref([]);
+const partnerBusy      = ref(false);
+const partnerResult    = ref(null);
+
+async function registerPartner() {
+  partnerBusy.value = true;
+  partnerResult.value = null;
+  try {
+    const { data } = await api.post('/fleet/partner/register');
+    partnerResult.value = { ok: true };
+  } catch (err) {
+    partnerResult.value = { ok: false, error: err.response?.data?.error ?? err.message };
+  } finally {
+    partnerBusy.value = false;
+  }
+}
+
+async function configureTelemetry() {
+  telemetryBusy.value = true;
+  telemetryResults.value = [];
+  try {
+    const { data } = await api.post('/fleet/telemetry/configure', {}, { timeout: 100000 });
+    telemetryResults.value = data.results;
+  } catch (err) {
+    telemetryResults.value = [{ vin: '–', ok: false, error: err.response?.data?.error ?? err.message }];
+  } finally {
+    telemetryBusy.value = false;
+  }
+}
+
+const teslaAuthUrl = ref('');
+
+async function prefetchTeslaAuthUrl() {
+  try {
+    const { data } = await api.get('/auth/tesla/auth-url');
+    teslaAuthUrl.value = data.url;
+  } catch { /* ignorieren */ }
+}
+
+function teslaReconnect() {
+  if (!teslaAuthUrl.value) return;
+
+  // Synchron öffnen – kein await, Browser blockt das nicht
+  const popup = window.open(teslaAuthUrl.value, 'tesla_oauth', 'width=600,height=700,scrollbars=yes');
+  teslaAuthUrl.value = ''; // einmalig verbrauchen, danach neu laden
+
+  const onMessage = (event) => {
+    if (event.data?.type !== 'tesla_connected') return;
+    window.removeEventListener('message', onMessage);
+    clearInterval(timer);
+    try { popup?.close(); } catch { /* ignorieren */ }
+    teslaConnected.value = true;
+    syncMsg.value = 'Tesla erfolgreich verbunden ✓';
+    syncOk.value = true;
+    prefetchTeslaAuthUrl(); // für nächstes Mal neu laden
+  };
+  window.addEventListener('message', onMessage);
+
+  const timer = setInterval(() => {
+    if (popup?.closed) {
+      clearInterval(timer);
+      window.removeEventListener('message', onMessage);
+      prefetchTeslaAuthUrl();
+    }
+  }, 500);
+}
 
 async function syncVehicles() {
   syncingVehicles.value = true;
@@ -447,6 +545,7 @@ onMounted(async () => {
     api.get('/users/me/audit'),
     api.get('/auth/tesla/status').catch(() => ({ data: { connected: false } })),
   ]);
+  prefetchTeslaAuthUrl();
   loadPasskeys();
   mfaStatus.value      = mfa.data;
   auditLog.value       = audit.data;

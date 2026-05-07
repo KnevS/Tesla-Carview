@@ -95,11 +95,12 @@ export async function apiPost(db, path, body) {
   return res.data;
 }
 
-export async function apiProxyPost(db, path, body) {
+export async function apiProxyPost(db, path, body, timeoutMs = 30000) {
   const token = await getAccessToken(db);
   const res   = await axios.post(`${PROXY_BASE}${path}`, body, {
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     httpsAgent: proxyAgent,
+    timeout: timeoutMs,
   });
   return res.data;
 }

@@ -306,7 +306,8 @@
               <strong>Redirect URI:</strong> Callback-URL der App:<br>
               <code class="text-gray-300 text-xs block mt-1 bg-gray-900 p-1.5 rounded">https://carview.example.com/api/auth/callback</code>
             </li>
-            <li><strong>Scopes (erforderlich):</strong> <code class="text-gray-300">vehicle_device_data</code>, <code class="text-gray-300">vehicle_cmds</code>, <code class="text-gray-300">vehicle_charging_cmds</code>, <code class="text-gray-300">openid</code>, <code class="text-gray-300">offline_access</code></li>
+            <li><strong>Scopes (erforderlich):</strong> <code class="text-gray-300">vehicle_device_data</code>, <code class="text-gray-300">vehicle_cmds</code>, <code class="text-gray-300">vehicle_charging_cmds</code>, <code class="text-gray-300">vehicle_location</code>, <code class="text-gray-300">openid</code>, <code class="text-gray-300">offline_access</code></li>
+            <li class="text-yellow-300">⚠ <code class="text-gray-300">vehicle_location</code> ist für GPS-Tracking (Fleet Telemetry) zwingend erforderlich</li>
           </ol>
         </div>
         <div class="bg-gray-800 rounded-lg p-4 space-y-3">
@@ -339,6 +340,64 @@
             <li>Nach der Weiterleitung: <strong>Einstellungen → 🔄 Fahrzeuge synchronisieren</strong></li>
             <li>Alle Fahrzeuge des Tesla-Accounts erscheinen in der App.</li>
           </ol>
+        </div>
+        <div class="bg-gray-800 rounded-lg p-4 space-y-3">
+          <p class="font-semibold text-white">Schritt 6 – Fleet Telemetrie aktivieren (GPS-Tracking)</p>
+          <p class="text-gray-400">
+            GPS-Daten kommen bei neueren Fahrzeugen (z.&nbsp;B. Model Y ab 2024, XP7-VIN) ausschließlich über
+            <strong>Fleet Telemetry</strong> — nicht über die REST-API. Dafür sind zwei Einmal-Schritte nötig:
+          </p>
+          <ol class="text-gray-400 space-y-3 list-decimal list-inside">
+            <li>
+              <strong>App bei Tesla registrieren</strong><br>
+              <span class="text-gray-500 ml-4 block mt-1">Einstellungen → Fleet Telemetrie → <em>„🔑 App bei Tesla registrieren"</em> klicken. Einmalig nötig.</span>
+            </li>
+            <li>
+              <strong>Fleet Telemetry Access beantragen</strong><br>
+              <span class="text-gray-500 ml-4 block mt-1">
+                Wenn der nächste Schritt mit „HTTP 404" scheitert, hat Tesla den Endpoint noch nicht freigeschaltet.
+                Dann den Tesla Developer Support kontaktieren (siehe unten).
+              </span>
+            </li>
+            <li>
+              <strong>Telemetrie aktivieren</strong><br>
+              <span class="text-gray-500 ml-4 block mt-1">Einstellungen → Fleet Telemetrie → <em>„📡 Telemetrie aktivieren"</em> klicken. Konfiguriert das Fahrzeug so, dass es GPS, Geschwindigkeit und Batterie-Daten streamt.</span>
+            </li>
+          </ol>
+
+          <div class="bg-gray-900 rounded-lg p-3 space-y-2 text-xs text-gray-400 mt-2">
+            <p class="text-white font-medium text-sm">Fleet Telemetry Access beim Tesla Support beantragen</p>
+            <p>Falls Schritt 2 mit 404 scheitert, schicke folgende Anfrage ans Tesla Developer Support-Formular
+              (<code class="text-gray-300">developer.tesla.com/dashboard → Support Inquiry</code>):</p>
+            <pre class="bg-gray-800 rounded p-3 text-gray-300 whitespace-pre-wrap leading-relaxed">Subject: Fleet Telemetry Access Request – Self-Hosted App for Personal Use
+
+Hello Tesla Developer Support,
+
+I am requesting approval for fleet_telemetry_config access for a
+self-hosted application used exclusively for personal purposes
+(own vehicle, single user).
+
+Context:
+- App name: MyCarviewApp
+- Client ID: a1b2c3d4-0000-0000-0000-e5f6a7b8c9d0
+- Hosting: self-hosted on private infrastructure
+- User scope: single user (vehicle owner)
+- Vehicle VIN: 5YJ3E1EA1NF000000
+
+Current status:
+- OAuth, polling, charging control, and vehicle commands work.
+- fleet_telemetry_config returns HTTP 404.
+
+Use case:
+Personal monitoring of my own vehicle (location, charging state,
+drive state) via my self-hosted backend. No third-party access,
+no commercial use, no data sharing.
+
+Could you please review and enable fleet_telemetry_config?
+
+Thank you</pre>
+            <p class="text-yellow-300">⚠ Client ID und VIN durch eigene Werte ersetzen. Tesla antwortet erfahrungsgemäß innerhalb weniger Tage.</p>
+          </div>
         </div>
       </div>
     </section>
@@ -473,8 +532,8 @@ const troubleshooting = reactive([
     open: false,
   },
   {
-    q: 'Keine Telemetrie-Daten',
-    a: 'Fleet Telemetry benötigt eine Genehmigung bei Tesla (partner.tesla.com). Nach Genehmigung: Einstellungen → Fleet Telemetry konfigurieren. Prüfe auch, ob Port 443 von außen erreichbar ist.',
+    q: 'Keine Telemetrie-Daten / GPS fehlt',
+    a: 'Fleet Telemetry erfordert zwei Schritte: (1) App bei Tesla registrieren (Einstellungen → „🔑 App registrieren"), (2) Telemetrie aktivieren (Einstellungen → „📡 Telemetrie aktivieren"). Falls Schritt 2 mit HTTP 404 scheitert, muss der fleet_telemetry_config-Zugang beim Tesla Developer Support beantragt werden – Vorlage steht im Handbuch unter „Schritt 6". Außerdem muss vehicle_location in den App-Scopes auf developer.tesla.com aktiviert sein.',
     open: false,
   },
   {

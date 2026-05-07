@@ -86,7 +86,7 @@ async function download(path, filename, mimeType) {
   downloading[path] = true;
   try {
     const vid = appStore.selectedVehicle?.id;
-    const url = `/api/export/${path}${vid ? '?vehicle_id=' + vid : ''}`;
+    const url = `/export/${path}${vid ? '?vehicle_id=' + vid : ''}`;
     const { data } = await api.get(url, { responseType: 'blob' });
     const blobUrl = URL.createObjectURL(new Blob([data], { type: mimeType }));
     const a = document.createElement('a');

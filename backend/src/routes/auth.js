@@ -41,7 +41,7 @@ function issueRefreshToken(userId, tenantId, req) {
 
 function setRefreshCookie(res, token) {
   res.cookie('refresh_token', token, {
-    httpOnly: true, secure: true, sameSite: 'Strict',
+    httpOnly: true, secure: true, sameSite: 'Lax',
     maxAge: REFRESH_TTL * 1000, path: '/api/auth',
   });
 }
@@ -214,7 +214,21 @@ router.get('/callback', async (req, res) => {
     if (!pkce) return res.redirect(`${process.env.FRONTEND_URL}/?auth_error=invalid_state`);
     const db = getDb(pkce.tenant_id);
     await exchangeCode(db, code, state);
-    res.redirect(`${process.env.FRONTEND_URL}/?tesla_connected=1`);
+    res.send(`<!DOCTYPE html><html><head><title>Verbunden</title></head><body>
+<script>
+  try {
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage({ type: 'tesla_connected' }, window.opener.location.origin);
+      setTimeout(() => window.close(), 300);
+    } else {
+      window.location.replace('${process.env.FRONTEND_URL}/?tesla_connected=1');
+    }
+  } catch(e) {
+    window.location.replace('${process.env.FRONTEND_URL}/?tesla_connected=1');
+  }
+<\/script>
+<p style="font-family:sans-serif;text-align:center;margin-top:80px">Tesla verbunden ✓<br><small>Dieses Fenster schließt sich automatisch.</small></p>
+</body></html>`);
   } catch (e) {
     console.error('[Auth] Token-Exchange fehlgeschlagen:', e.response?.data || e.message);
     res.redirect(`${process.env.FRONTEND_URL}/?auth_error=exchange_failed`);

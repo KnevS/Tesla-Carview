@@ -1,6 +1,7 @@
 import { Router } from 'express';
+import axios from 'axios';
 import { getPublicKeyPem } from '../services/virtualKey.js';
-import { apiPost } from '../services/teslaApi.js';
+import { apiProxyPost } from '../services/teslaApi.js';
 import { getAllTenants, getDb } from '../db/database.js';
 
 const router = Router();
@@ -31,6 +32,48 @@ router.get('/telemetry/status', async (req, res) => {
   });
 });
 
+// Einmalige Partner-Registrierung bei Tesla (benötigt für fleet_telemetry_config)
+router.post('/partner/register', async (req, res) => {
+  const clientId     = process.env.TESLA_CLIENT_ID;
+  const clientSecret = process.env.TESLA_CLIENT_SECRET;
+  const audience     = process.env.TESLA_AUDIENCE;
+  const authBase     = process.env.TESLA_AUTH_BASE;
+  const domain       = process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || '';
+
+  if (!clientId || !clientSecret) {
+    return res.status(500).json({ error: 'TESLA_CLIENT_ID / TESLA_CLIENT_SECRET nicht konfiguriert' });
+  }
+
+  try {
+    // 1. Partner-Token holen (client_credentials)
+    const tokenRes = await axios.post(`${authBase}/token`, new URLSearchParams({
+      grant_type:    'client_credentials',
+      client_id:     clientId,
+      client_secret: clientSecret,
+      scope:         'openid vehicle_device_data vehicle_cmds vehicle_charging_cmds',
+      audience,
+    }), { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
+
+    const partnerToken = tokenRes.data.access_token;
+
+    // 2. App bei Tesla registrieren
+    const regRes = await axios.post(`${audience}/api/1/partner_accounts`, {
+      domain,
+    }, {
+      headers: { Authorization: `Bearer ${partnerToken}`, 'Content-Type': 'application/json' },
+    });
+
+    res.json({ ok: true, response: regRes.data });
+  } catch (err) {
+    const status  = err.response?.status;
+    const errData = err.response?.data;
+    const msg = typeof errData === 'object' && errData !== null
+      ? (errData.error || errData.message || JSON.stringify(errData))
+      : status ? `HTTP ${status}` : err.message;
+    res.status(500).json({ ok: false, error: msg });
+  }
+});
+
 router.post('/telemetry/configure', async (req, res) => {
   const db       = req.db;
   const vehicles = db.prepare('SELECT * FROM vehicles').all();
@@ -55,11 +98,19 @@ router.post('/telemetry/configure', async (req, res) => {
           exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
         },
       };
-      const data = await apiPost(db, `/api/1/vehicles/${v.vin}/fleet_telemetry_config`, payload);
+      const data = await apiProxyPost(db, `/api/1/vehicles/${v.vin}/fleet_telemetry_config`, payload, 90000);
       results.push({ vin: v.vin, ok: true, response: data });
     } catch (err) {
+      const status  = err.response?.status;
       const errData = err.response?.data;
-      results.push({ vin: v.vin, ok: false, error: errData || err.message });
+      const msg = typeof errData === 'object' && errData !== null
+        ? (errData.error || errData.message || JSON.stringify(errData))
+        : status === 404
+          ? `HTTP 404 – Fleet Telemetry nicht freigeschaltet (Partner-Zugang bei Tesla beantragen)`
+          : status
+            ? `HTTP ${status}`
+            : err.message;
+      results.push({ vin: v.vin, ok: false, error: msg });
     }
   }
   res.json({ results });
