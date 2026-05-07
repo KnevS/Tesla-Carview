@@ -83,6 +83,7 @@ const navStore  = useNavStore();
 const router    = useRouter();
 
 async function logout() {
+  if (!confirm('Wirklich abmelden?')) return;
   await authStore.logout().catch(() => {});
   router.push('/login');
 }
