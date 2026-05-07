@@ -7,10 +7,16 @@
         <h2 class="text-lg font-semibold">🗺️ Fahrten</h2>
         <p class="text-gray-400 text-sm">Alle Fahrtdaten mit Strecke, Verbrauch und SoC.</p>
         <div class="flex gap-3">
-          <a :href="exportUrl('trips.csv')" class="btn-primary flex-1 text-center" download
-            v-tooltip="'CSV-Format mit BOM – öffnet sich direkt in Excel und LibreOffice Calc. Trennzeichen ist Semikolon.'">CSV</a>
-          <a :href="exportUrl('trips.json')" class="btn-secondary flex-1 text-center" download
-            v-tooltip="'JSON-Format inklusive aller GPS-Punkte je Fahrt. Ideal für eigene Auswertungen, Skripte oder Datenmigration.'">JSON</a>
+          <button @click="download('trips.csv', 'fahrten.csv', 'text/csv')" :disabled="downloading['trips.csv']"
+            class="btn-primary flex-1"
+            v-tooltip="'CSV-Format mit BOM – öffnet sich direkt in Excel und LibreOffice Calc. Trennzeichen ist Semikolon.'">
+            {{ downloading['trips.csv'] ? 'Lädt…' : 'CSV' }}
+          </button>
+          <button @click="download('trips.json', 'fahrten.json', 'application/json')" :disabled="downloading['trips.json']"
+            class="btn-secondary flex-1"
+            v-tooltip="'JSON-Format inklusive aller GPS-Punkte je Fahrt. Ideal für eigene Auswertungen, Skripte oder Datenmigration.'">
+            {{ downloading['trips.json'] ? 'Lädt…' : 'JSON' }}
+          </button>
         </div>
       </div>
 
@@ -18,8 +24,11 @@
         <h2 class="text-lg font-semibold">🔋 Ladevorgänge</h2>
         <p class="text-gray-400 text-sm">Alle Ladesessions mit Energie, Kosten und Ladertyp.</p>
         <div class="flex gap-3">
-          <a :href="exportUrl('charging.csv')" class="btn-primary flex-1 text-center" download
-            v-tooltip="'CSV-Datei mit allen Ladesessions – Energie, Kosten, Ladertyp, SoC-Bereich. Excel-kompatibel.'">CSV</a>
+          <button @click="download('charging.csv', 'ladevorgaenge.csv', 'text/csv')" :disabled="downloading['charging.csv']"
+            class="btn-primary flex-1"
+            v-tooltip="'CSV-Datei mit allen Ladesessions – Energie, Kosten, Ladertyp, SoC-Bereich. Excel-kompatibel.'">
+            {{ downloading['charging.csv'] ? 'Lädt…' : 'CSV' }}
+          </button>
         </div>
       </div>
 
@@ -29,10 +38,12 @@
           Alle Daten (Fahrten, Laden, Batterie, Betriebsbuch) als eine JSON-Datei.
           Kann für Backups oder den Umzug auf einen anderen Server genutzt werden.
         </p>
-        <a :href="exportUrl('backup.json')" class="btn-primary inline-block" download
+        <button @click="download('backup.json', `tesla-carview-backup-${today}.json`, 'application/json')"
+          :disabled="downloading['backup.json']"
+          class="btn-primary inline-block"
           v-tooltip="'Komplette Datenbank-Sicherung im JSON-Format.\nEnthält: Fahrzeuge, Fahrten + GPS-Punkte, Ladevorgänge + Ladekurven, Batterie-Snapshots, Betriebsbuch.\nKeine Passwörter oder Tokens enthalten.'">
-          💾 Backup herunterladen
-        </a>
+          {{ downloading['backup.json'] ? '⏳ Wird erstellt…' : '💾 Backup herunterladen' }}
+        </button>
       </div>
     </div>
 
@@ -58,7 +69,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
 
@@ -66,11 +77,29 @@ const appStore = useAppStore();
 const subscribed = ref(false);
 const vapidKey = ref(null);
 const notifSupported = 'serviceWorker' in navigator && 'PushManager' in window;
+const downloading = reactive({});
 
-const exportUrl = path => {
-  const vid = appStore.selectedVehicle?.id;
-  return `/api/export/${path}${vid ? '?vehicle_id=' + vid : ''}`;
-};
+const today = new Date().toISOString().slice(0, 10);
+
+async function download(path, filename, mimeType) {
+  if (downloading[path]) return;
+  downloading[path] = true;
+  try {
+    const vid = appStore.selectedVehicle?.id;
+    const url = `/api/export/${path}${vid ? '?vehicle_id=' + vid : ''}`;
+    const { data } = await api.get(url, { responseType: 'blob' });
+    const blobUrl = URL.createObjectURL(new Blob([data], { type: mimeType }));
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(blobUrl);
+  } catch (err) {
+    alert('Download fehlgeschlagen: ' + (err.response?.data?.error ?? err.message));
+  } finally {
+    downloading[path] = false;
+  }
+}
 
 async function subscribe() {
   if (!vapidKey.value) return alert('Kein VAPID-Key konfiguriert (backend .env)');
