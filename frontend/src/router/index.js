@@ -18,28 +18,39 @@ import Fahrtenbuch      from '../views/Fahrtenbuch.vue';
 import Kostenabrechnung from '../views/Kostenabrechnung.vue';
 import System      from '../views/System.vue';
 import Setup       from '../views/Setup.vue';
+import Register      from '../views/Register.vue';
+import PasswordReset from '../views/PasswordReset.vue';
+import Handbook      from '../views/Handbook.vue';
+import UserManagement from '../views/UserManagement.vue';
+import DataManagement from '../views/DataManagement.vue';
 
 const routes = [
   // Setup-Wizard (erster Start)
-  { path: '/setup',      component: Setup,     meta: { public: true, title: 'Erstkonfiguration' } },
+  { path: '/setup',         component: Setup,         meta: { public: true,  title: 'Erstkonfiguration' } },
   // Oeffentlich
-  { path: '/login',      component: Login,     meta: { public: true, title: 'Anmelden' } },
-  { path: '/login/mfa',  component: MfaVerify, meta: { public: true, title: 'MFA-Verifikation' } },
+  { path: '/login',         component: Login,         meta: { public: true,  title: 'Anmelden' } },
+  { path: '/login/mfa',     component: MfaVerify,     meta: { public: true,  title: 'MFA-Verifikation' } },
+  { path: '/register',      component: Register,      meta: { public: true,  title: 'Registrieren' } },
+  { path: '/reset-password',component: PasswordReset, meta: { public: true,  title: 'Passwort zurücksetzen' } },
+  { path: '/handbook',      component: Handbook,      meta: { public: true,  title: 'Benutzerhandbuch' } },
   // Geschuetzt
-  { path: '/',           component: Dashboard,  meta: { title: 'Dashboard' } },
-  { path: '/trips',      component: Trips,      meta: { title: 'Fahrten' } },
-  { path: '/trips/:id',      component: TripDetail,   meta: { title: 'Fahrtdetail' } },
+  { path: '/',              component: Dashboard,     meta: { title: 'Dashboard' } },
+  { path: '/trips',         component: Trips,         meta: { title: 'Fahrten' } },
+  { path: '/trips/:id',     component: TripDetail,    meta: { title: 'Fahrtdetail' } },
   { path: '/fahrtenbuch',      component: Fahrtenbuch,      meta: { title: 'Fahrtenbuch' } },
   { path: '/kostenabrechnung', component: Kostenabrechnung, meta: { title: 'Kostenabrechnung' } },
-  { path: '/charging',   component: Charging,   meta: { title: 'Laden' } },
-  { path: '/battery',    component: Battery,    meta: { title: 'Batterie' } },
-  { path: '/logbook',    component: Logbook,    meta: { title: 'Betriebsbuch' } },
-  { path: '/export',     component: Export,     meta: { title: 'Export' } },
-  { path: '/mfa/setup',  component: MfaSetup,   meta: { title: 'MFA einrichten' } },
-  { path: '/settings',   component: Settings,   meta: { title: 'Einstellungen' } },
-  { path: '/telemetry',  component: Telemetry,  meta: { title: 'Fahrzeugtechnik' } },
-  { path: '/control',   component: Control,    meta: { title: 'Steuerung' } },
-  { path: '/system',     component: System,     meta: { title: 'System' } },
+  { path: '/charging',      component: Charging,      meta: { title: 'Laden' } },
+  { path: '/battery',       component: Battery,       meta: { title: 'Batterie' } },
+  { path: '/logbook',       component: Logbook,       meta: { title: 'Betriebsbuch' } },
+  { path: '/export',        component: Export,        meta: { title: 'Export' } },
+  { path: '/mfa/setup',     component: MfaSetup,      meta: { title: 'MFA einrichten' } },
+  { path: '/settings',      component: Settings,      meta: { title: 'Einstellungen' } },
+  { path: '/telemetry',     component: Telemetry,     meta: { title: 'Fahrzeugtechnik' } },
+  { path: '/control',       component: Control,       meta: { title: 'Steuerung' } },
+  { path: '/system',        component: System,        meta: { title: 'System' } },
+  // Admin
+  { path: '/admin/users',   component: UserManagement, meta: { title: 'Benutzerverwaltung', admin: true } },
+  { path: '/admin/data',    component: DataManagement, meta: { title: 'Datenverwaltung',    admin: true } },
 ];
 
 const router = createRouter({ history: createWebHistory(), routes });
@@ -58,7 +69,7 @@ router.beforeEach(async to => {
   }
 
   // Zur Setup-Seite weiterleiten wenn noch kein Admin existiert
-  if (needsSetup && to.path !== '/setup') {
+  if (needsSetup && to.path !== '/setup' && to.path !== '/register') {
     return '/setup';
   }
   // Setup-Seite sperren wenn schon eingerichtet
@@ -73,6 +84,9 @@ router.beforeEach(async to => {
   }
   if (!auth.isAuthenticated) {
     return { path: '/login', query: { redirect: to.fullPath } };
+  }
+  if (to.meta.admin && !auth.isAdmin) {
+    return '/';
   }
   return true;
 });

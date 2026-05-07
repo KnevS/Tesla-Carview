@@ -1,10 +1,9 @@
 import { Router } from 'express';
-import { getDb } from '../db/database.js';
 
 const router = Router();
 
 router.post('/subscribe', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id, subscription } = req.body;
   if (!vehicle_id || !subscription) {
     return res.status(400).json({ error: 'vehicle_id und subscription erforderlich' });
@@ -20,7 +19,7 @@ router.post('/subscribe', (req, res) => {
 });
 
 router.delete('/unsubscribe', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id } = req.body;
   db.prepare('DELETE FROM push_subscriptions WHERE vehicle_id=?').run(vehicle_id);
   res.json({ success: true });

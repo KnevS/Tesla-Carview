@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@simplewebauthn/browser": "^10.0.0",
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",
     "leaflet": "^1.9.4",

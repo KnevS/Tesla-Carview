@@ -11,6 +11,8 @@ services:
       - ./backend/.env
     volumes:
       - ./data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   frontend:
     build: ./frontend

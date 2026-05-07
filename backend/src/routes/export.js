@@ -1,11 +1,10 @@
 import { Router } from 'express';
-import { getDb } from '../db/database.js';
 
 const router = Router();
 
 // CSV-Export Fahrten
 router.get('/trips.csv', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id } = req.query;
   const where = vehicle_id ? 'WHERE vehicle_id = ?' : '';
   const rows = db.prepare(
@@ -29,7 +28,7 @@ router.get('/trips.csv', (req, res) => {
 
 // JSON-Export Fahrten
 router.get('/trips.json', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id } = req.query;
   const where = vehicle_id ? 'WHERE t.vehicle_id = ?' : '';
   const trips = db.prepare(
@@ -45,7 +44,7 @@ router.get('/trips.json', (req, res) => {
 
 // CSV-Export Ladevorgänge
 router.get('/charging.csv', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id } = req.query;
   const where = vehicle_id ? 'WHERE vehicle_id = ?' : '';
   const rows = db.prepare(
@@ -66,7 +65,7 @@ router.get('/charging.csv', (req, res) => {
 
 // Vollständiges Backup als JSON
 router.get('/backup.json', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id } = req.query;
   const where = vehicle_id ? 'WHERE id = ?' : '';
   const vehicles = db.prepare(`SELECT * FROM vehicles ${where}`).all(...(vehicle_id ? [vehicle_id] : []));

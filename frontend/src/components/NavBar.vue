@@ -26,6 +26,21 @@
           v-tooltip="'Aktuell aktives Fahrzeug'">
           {{ appStore.selectedVehicle.display_name }}
         </span>
+        <RouterLink v-if="authStore.isAdmin" to="/admin/users"
+          class="text-gray-400 hover:text-white transition"
+          v-tooltip="'Benutzerverwaltung – Konten anlegen, Fahrzeuge zuweisen, Reset-Links generieren'">
+          👥
+        </RouterLink>
+        <RouterLink v-if="authStore.isAdmin" to="/admin/data"
+          class="text-gray-400 hover:text-white transition"
+          v-tooltip="'Datenverwaltung – Daten löschen und Datenbestand einsehen'">
+          🗑️
+        </RouterLink>
+        <RouterLink to="/handbook"
+          class="text-gray-400 hover:text-white transition"
+          v-tooltip="'Benutzerhandbuch – Anleitungen, FAQ und Tipps zur App'">
+          📖
+        </RouterLink>
         <RouterLink to="/settings" class="text-gray-400 hover:text-white transition"
           v-tooltip="'Einstellungen, Passwort und Zwei-Faktor-Authentifizierung verwalten'">
           ⚙️
@@ -47,7 +62,9 @@
 
 <script setup>
 import { useAppStore } from '../store/index.js';
-const appStore = useAppStore();
+import { useAuthStore } from '../store/auth.js';
+const appStore  = useAppStore();
+const authStore = useAuthStore();
 const links = [
   { to: '/',          icon: '🏠', label: 'Dashboard',    tooltip: 'Übersicht mit Kennzahlen, letzter Fahrt und Monatsstatistik' },
   { to: '/trips',        icon: '🗺️', label: 'Fahrten',      tooltip: 'Liste aller aufgezeichneten Fahrten mit GPS-Track auf einer Karte' },

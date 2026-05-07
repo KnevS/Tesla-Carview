@@ -1,12 +1,10 @@
-import { getDb } from '../db/database.js';
 import { sendChargingCompleteNotification } from './notifications.js';
 
 const BATTERY_SNAPSHOT_INTERVAL = 15 * 60;
 const MODEL_Y_USABLE_KWH = 75;
 const milesToKm = m => m * 1.60934;
 
-export async function syncVehicleState(vehicle, state) {
-  const db = getDb();
+export async function syncVehicleState(db, vehicle, state) {
   const now = Math.floor(Date.now() / 1000);
 
   const drive  = state.drive_state;
@@ -16,7 +14,7 @@ export async function syncVehicleState(vehicle, state) {
   db.prepare('UPDATE vehicles SET display_name=? WHERE id=?')
     .run(state.display_name || vehicle.display_name, vehicle.id);
 
-  // -- Batterie-Snapshot (alle 15 Min)
+  // Batterie-Snapshot (alle 15 Min)
   const lastSnap = db.prepare(
     'SELECT timestamp FROM battery_snapshots WHERE vehicle_id=? ORDER BY timestamp DESC LIMIT 1'
   ).get(vehicle.id);
@@ -28,34 +26,30 @@ export async function syncVehicleState(vehicle, state) {
     ).run(
       vehicle.id, now,
       charge?.battery_level,
-      charge?.battery_range        ? milesToKm(charge.battery_range)       : null,
+      charge?.battery_range        ? milesToKm(charge.battery_range)      : null,
       charge?.ideal_battery_range  ? milesToKm(charge.ideal_battery_range) : null,
       charge?.battery_level,
       charge?.usable_battery_level,
     );
   }
 
-  // -- GPS-basiertes Tracking (aeltere Fahrzeuge mit drive_state)
+  // GPS-basiertes Tracking (ältere Fahrzeuge mit drive_state)
   if (drive?.shift_state && drive.shift_state !== 'P') {
     handleDriving(db, vehicle, drive, charge, now);
   } else if (drive) {
     finishGpsTrip(db, vehicle, drive, charge, now);
   }
 
-  // -- Odometer-basiertes Tracking (neue Fahrzeuge ohne drive_state)
+  // Odometer-basiertes Tracking (neue Fahrzeuge ohne drive_state)
   if (!drive && vs) {
-    const odomKm = vs.odometer ? milesToKm(vs.odometer) : null;
+    const odomKm     = vs.odometer ? milesToKm(vs.odometer) : null;
     const nowPresent = vs.is_user_present ? 1 : 0;
-    const cache = getOrCreateCache(db, vehicle.id);
+    const cache      = getOrCreateCache(db, vehicle.id);
     const wasPresent = cache.is_user_present;
 
-    if (!wasPresent && nowPresent) {
-      startOdometerTrip(db, vehicle, charge, odomKm, now);
-    } else if (wasPresent && !nowPresent) {
-      finishOdometerTrip(db, vehicle, charge, odomKm, now);
-    } else if (nowPresent && odomKm) {
-      keepOdometerTripAlive(db, vehicle, charge, odomKm, now);
-    }
+    if (!wasPresent && nowPresent)       startOdometerTrip(db, vehicle, charge, odomKm, now);
+    else if (wasPresent && !nowPresent)  finishOdometerTrip(db, vehicle, charge, odomKm, now);
+    else if (nowPresent && odomKm)       keepOdometerTripAlive(db, vehicle, odomKm);
 
     db.prepare(`
       INSERT INTO vehicle_state_cache (vehicle_id, is_user_present, odometer_km, battery_level, updated_at)
@@ -68,9 +62,9 @@ export async function syncVehicleState(vehicle, state) {
     `).run(vehicle.id, nowPresent, odomKm, charge?.battery_level, now);
   }
 
-  // -- Lade-Tracking
+  // Lade-Tracking
   if (charge?.charging_state === 'Charging') {
-    handleCharging(db, vehicle, charge, now);
+    handleCharging(db, vehicle, charge, drive, now);
   } else {
     finishActiveCharging(db, vehicle, charge, now);
   }
@@ -96,7 +90,6 @@ function startOdometerTrip(db, vehicle, charge, odomKm, now) {
     `INSERT INTO trips (vehicle_id, start_time, start_soc, start_odometer_km, source)
      VALUES (?, ?, ?, ?, 'odometer')`
   ).run(vehicle.id, now, charge?.battery_level, odomKm);
-  console.log(`[Sync] Fahrt gestartet (Odometer): ${odomKm?.toFixed(1)} km, SoC ${charge?.battery_level}%`);
 }
 
 function finishOdometerTrip(db, vehicle, charge, odomKm, now) {
@@ -105,9 +98,7 @@ function finishOdometerTrip(db, vehicle, charge, odomKm, now) {
   ).get(vehicle.id);
   if (!active) return;
 
-  const distKm = odomKm && active.start_odometer_km != null
-    ? odomKm - active.start_odometer_km
-    : null;
+  const distKm   = odomKm && active.start_odometer_km != null ? odomKm - active.start_odometer_km : null;
   const startSoc = active.start_soc;
   const endSoc   = charge?.battery_level ?? null;
   const energyKwh = startSoc != null && endSoc != null && startSoc > endSoc
@@ -118,10 +109,9 @@ function finishOdometerTrip(db, vehicle, charge, odomKm, now) {
     `UPDATE trips SET end_time=?, end_soc=?, end_odometer_km=?, distance_km=?, energy_used_kwh=?
      WHERE id=?`
   ).run(now, endSoc, odomKm, distKm, energyKwh, active.id);
-  console.log(`[Sync] Fahrt beendet: ${distKm?.toFixed(1)} km, ${energyKwh?.toFixed(1)} kWh`);
 }
 
-function keepOdometerTripAlive(db, vehicle, charge, odomKm, now) {
+function keepOdometerTripAlive(db, vehicle, odomKm) {
   const active = db.prepare(
     'SELECT * FROM trips WHERE vehicle_id=? AND end_time IS NULL LIMIT 1'
   ).get(vehicle.id);
@@ -131,7 +121,7 @@ function keepOdometerTripAlive(db, vehicle, charge, odomKm, now) {
     .run(odomKm, distKm, active.id);
 }
 
-// ---- GPS Trip Helpers (drive_state – aeltere Fahrzeuge) -------------------
+// ---- GPS Trip Helpers (drive_state) ----------------------------------------
 
 function handleDriving(db, vehicle, drive, charge, now) {
   const active = db.prepare(
@@ -142,7 +132,6 @@ function handleDriving(db, vehicle, drive, charge, now) {
       `INSERT INTO trips (vehicle_id, start_time, start_lat, start_lon, start_soc, source)
        VALUES (?, ?, ?, ?, ?, 'gps')`
     ).run(vehicle.id, now, drive.latitude, drive.longitude, charge?.battery_level);
-    console.log(`[Sync] Fahrt gestartet (GPS): Fahrzeug ${vehicle.display_name}`);
   } else {
     db.prepare(
       `INSERT INTO trip_points (trip_id, timestamp, lat, lon, speed_kmh, power_kw, soc)
@@ -163,10 +152,8 @@ function finishGpsTrip(db, vehicle, drive, charge, now) {
   ).get(vehicle.id);
   if (!active) return;
 
-  const points = db.prepare(
-    'SELECT * FROM trip_points WHERE trip_id=? ORDER BY timestamp ASC'
-  ).all(active.id);
-  const distKm = calcDistanceKm(points);
+  const points  = db.prepare('SELECT * FROM trip_points WHERE trip_id=? ORDER BY timestamp ASC').all(active.id);
+  const distKm  = calcDistanceKm(points);
   const avgSpeed = points.length ? points.reduce((s, p) => s + (p.speed_kmh || 0), 0) / points.length : 0;
   const maxSpeed = points.length ? Math.max(...points.map(p => p.speed_kmh || 0)) : 0;
 
@@ -175,33 +162,43 @@ function finishGpsTrip(db, vehicle, drive, charge, now) {
      distance_km=?, avg_speed_kmh=?, max_speed_kmh=? WHERE id=?`
   ).run(
     now,
-    drive?.latitude ?? active.start_lat,
+    drive?.latitude  ?? active.start_lat,
     drive?.longitude ?? active.start_lon,
     charge?.battery_level,
     distKm, avgSpeed, maxSpeed,
     active.id,
   );
-  console.log(`[Sync] Fahrt beendet (GPS): ${distKm.toFixed(1)} km`);
 }
 
-// ---- Lade-Tracking --------------------------------------------------------
+// ---- Lade-Tracking ---------------------------------------------------------
 
-function handleCharging(db, vehicle, charge, now) {
+function handleCharging(db, vehicle, charge, drive, now) {
   const active = db.prepare(
     'SELECT * FROM charging_sessions WHERE vehicle_id=? AND end_time IS NULL ORDER BY id DESC LIMIT 1'
   ).get(vehicle.id);
+
   if (!active) {
+    // Ladeort per GPS ermitteln (drive_state oder letzter bekannter Telemetriepunkt)
+    const lat = drive?.latitude  ?? getLastKnownLat(db, vehicle.id);
+    const lon = drive?.longitude ?? getLastKnownLon(db, vehicle.id);
+    const loc = lat != null ? matchChargingLocation(db, vehicle.id, lat, lon) : null;
+
     db.prepare(
       `INSERT INTO charging_sessions
-       (vehicle_id, start_time, charger_type, start_soc, max_power_kw)
-       VALUES (?, ?, ?, ?, ?)`
+       (vehicle_id, start_time, charger_type, start_soc, max_power_kw, lat, lon, location_id, location_name, billing_rate_kwh)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       vehicle.id, now,
       charge.fast_charger_type || (charge.fast_charger_present ? 'DC' : 'AC'),
       charge.battery_level,
       charge.charger_power || 0,
+      lat ?? null,
+      lon ?? null,
+      loc?.id ?? null,
+      loc?.name ?? null,
+      loc?.rate_kwh ?? null,
     );
-    console.log(`[Sync] Laden gestartet: Fahrzeug ${vehicle.display_name}`);
+    console.log(`[Sync] Laden gestartet: ${vehicle.display_name}${loc ? ` @ ${loc.name}` : ''}`);
   } else {
     db.prepare(
       `INSERT INTO charging_points (session_id, timestamp, soc, power_kw, voltage, current, energy_added_kwh)
@@ -226,30 +223,65 @@ function finishActiveCharging(db, vehicle, charge, now) {
     'SELECT * FROM charging_sessions WHERE vehicle_id=? AND end_time IS NULL ORDER BY id DESC LIMIT 1'
   ).get(vehicle.id);
   if (!active) return;
+
+  const energyKwh = charge?.charge_energy_added || 0;
+  const rateKwh   = active.billing_rate_kwh;
+  const cost      = rateKwh != null ? energyKwh * rateKwh : null;
+
   db.prepare(
-    `UPDATE charging_sessions SET end_time=?, end_soc=?, energy_added_kwh=? WHERE id=?`
-  ).run(now, charge?.battery_level, charge?.charge_energy_added || 0, active.id);
-  console.log(`[Sync] Laden beendet: +${(charge?.charge_energy_added || 0).toFixed(1)} kWh`);
-  sendChargingCompleteNotification(vehicle, charge).catch(() => {});
+    `UPDATE charging_sessions SET end_time=?, end_soc=?, energy_added_kwh=?, cost=?,
+     billing_status=CASE WHEN ? IS NOT NULL THEN 'calculated' ELSE 'pending' END WHERE id=?`
+  ).run(now, charge?.battery_level, energyKwh, cost, cost, active.id);
+
+  console.log(`[Sync] Laden beendet: +${energyKwh.toFixed(1)} kWh${cost != null ? `, ${cost.toFixed(2)} EUR` : ''}`);
+  sendChargingCompleteNotification(vehicle, charge, db).catch(() => {});
 }
 
-// ---- Geo-Helpers ----------------------------------------------------------
+// ---- GPS Helpers -----------------------------------------------------------
+
+function getLastKnownLat(db, vehicleId) {
+  return db.prepare(
+    'SELECT lat FROM telemetry_points WHERE vehicle_id=? AND lat IS NOT NULL ORDER BY timestamp DESC LIMIT 1'
+  ).get(vehicleId)?.lat ?? null;
+}
+
+function getLastKnownLon(db, vehicleId) {
+  return db.prepare(
+    'SELECT lon FROM telemetry_points WHERE vehicle_id=? AND lon IS NOT NULL ORDER BY timestamp DESC LIMIT 1'
+  ).get(vehicleId)?.lon ?? null;
+}
+
+export function matchChargingLocation(db, vehicleId, lat, lon) {
+  const locations = db.prepare(
+    'SELECT * FROM charging_locations WHERE (vehicle_id=? OR vehicle_id IS NULL) AND lat IS NOT NULL AND lon IS NOT NULL'
+  ).all(vehicleId);
+
+  let best = null;
+  let bestDist = Infinity;
+  for (const loc of locations) {
+    const dist = haversineM(lat, lon, loc.lat, loc.lon);
+    const radius = loc.radius_m ?? 200;
+    if (dist <= radius && dist < bestDist) {
+      bestDist = dist;
+      best = loc;
+    }
+  }
+  return best;
+}
 
 function calcDistanceKm(points) {
   if (points.length < 2) return 0;
   let total = 0;
   for (let i = 1; i < points.length; i++) {
-    total += haversine(points[i-1].lat, points[i-1].lon, points[i].lat, points[i].lon);
+    total += haversineM(points[i-1].lat, points[i-1].lon, points[i].lat, points[i].lon) / 1000;
   }
   return total;
 }
 
-function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371;
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a = Math.sin(dLat/2)**2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon/2)**2;
+function haversineM(lat1, lon1, lat2, lon2) {
+  const R    = 6371000;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a    = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
-
-const toRad = d => d * Math.PI / 180;

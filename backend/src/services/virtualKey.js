@@ -1,8 +1,6 @@
 import { generateKeyPairSync } from 'crypto';
-import { getDb } from '../db/database.js';
 
-export function getOrCreateVirtualKey() {
-  const db = getDb();
+export function getOrCreateVirtualKey(db) {
   const existing = db.prepare('SELECT * FROM virtual_key ORDER BY id DESC LIMIT 1').get();
   if (existing) return existing;
 
@@ -20,10 +18,5 @@ export function getOrCreateVirtualKey() {
   return db.prepare('SELECT * FROM virtual_key ORDER BY id DESC LIMIT 1').get();
 }
 
-export function getPublicKeyPem() {
-  return getOrCreateVirtualKey().public_key_pem;
-}
-
-export function getPrivateKeyPem() {
-  return getOrCreateVirtualKey().private_key_pem;
-}
+export function getPublicKeyPem(db)  { return getOrCreateVirtualKey(db).public_key_pem;  }
+export function getPrivateKeyPem(db) { return getOrCreateVirtualKey(db).private_key_pem; }

@@ -1,9 +1,6 @@
 import jwt from 'jsonwebtoken';
+import { getDb, getTenantById } from '../db/database.js';
 
-/**
- * Prueft den JWT Bearer-Token im Authorization-Header.
- * Haengt das dekodierte Payload als req.user an.
- */
 export function requireAuth(req, res, next) {
   const header = req.headers.authorization;
   if (!header?.startsWith('Bearer ')) {
@@ -11,16 +8,23 @@ export function requireAuth(req, res, next) {
   }
   try {
     req.user = jwt.verify(header.slice(7), process.env.JWT_SECRET);
-    next();
   } catch {
-    res.status(401).json({ error: 'Token ungueltig oder abgelaufen' });
+    return res.status(401).json({ error: 'Token ungueltig oder abgelaufen' });
   }
+
+  const tenantId = req.user.tenantId;
+  if (!tenantId) return res.status(401).json({ error: 'Token ohne Mandant' });
+
+  try {
+    req.db       = getDb(tenantId);
+    req.tenantId = tenantId;
+  } catch {
+    return res.status(401).json({ error: 'Mandant nicht gefunden' });
+  }
+
+  next();
 }
 
-/**
- * Prueft ob der Benutzer die Rolle 'admin' hat.
- * Muss nach requireAuth verwendet werden.
- */
 export function requireAdmin(req, res, next) {
   if (req.user?.role !== 'admin') {
     return res.status(403).json({ error: 'Keine Berechtigung' });

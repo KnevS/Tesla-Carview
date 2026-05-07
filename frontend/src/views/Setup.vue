@@ -41,6 +41,29 @@
         <p class="text-sm text-gray-400">
           Dieses Konto hat vollen Zugriff auf die Anwendung.
         </p>
+
+        <!-- Mandant (optional, für Mehr-Mandanten-Betrieb) -->
+        <details class="bg-gray-800 rounded-lg p-3 text-sm">
+          <summary class="cursor-pointer text-gray-300 font-medium select-none">
+            ▸ Mandantenname (optional)
+          </summary>
+          <div class="mt-3 space-y-3">
+            <p class="text-xs text-gray-400">
+              Nur relevant wenn du mehrere Mandanten betreiben möchtest. Standard: „Default".
+            </p>
+            <div>
+              <label class="label">Mandantenname</label>
+              <input v-model="form.tenantName" type="text" class="input" placeholder="z.B. Familie Muster" />
+            </div>
+            <div>
+              <label class="label">Mandanten-Kürzel (Slug)</label>
+              <input v-model="form.tenantSlug" type="text" class="input" placeholder="z.B. muster"
+                @input="form.tenantSlug = form.tenantSlug.toLowerCase().replace(/[^a-z0-9-]/g,'')" />
+              <p class="text-xs text-gray-500 mt-1">Nur Kleinbuchstaben, Zahlen und -</p>
+            </div>
+          </div>
+        </details>
+
         <div>
           <label class="label">Benutzername</label>
           <input v-model="form.username" type="text" class="input" placeholder="admin"
@@ -113,7 +136,7 @@ import api from '../api.js';
 const step = ref(1);
 const loading = ref(false);
 const error = ref('');
-const form = ref({ username: 'admin', password: '', confirm: '' });
+const form = ref({ username: 'admin', password: '', confirm: '', tenantName: '', tenantSlug: '' });
 
 const passwordStrength = computed(() => {
   const p = form.value.password;
@@ -156,8 +179,10 @@ async function submit() {
   loading.value = true;
   try {
     await api.post('/setup/init', {
-      username: form.value.username,
-      password: form.value.password,
+      username:   form.value.username,
+      password:   form.value.password,
+      tenantName: form.value.tenantName || undefined,
+      tenantSlug: form.value.tenantSlug || undefined,
     });
     step.value = 3;
   } catch (err) {

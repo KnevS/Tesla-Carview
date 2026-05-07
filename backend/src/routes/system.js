@@ -5,7 +5,6 @@ import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { requireAuth } from '../middleware/auth.js';
-import { getDb } from '../db/database.js';
 
 const router = Router();
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -52,7 +51,7 @@ router.get('/stats', requireAuth, (req, res) => {
   let dbSize = null;
   let dbStats = {};
   try {
-    const db = getDb();
+    const db = req.db;
     const row = db.prepare("SELECT page_count * page_size AS size FROM pragma_page_count(), pragma_page_size()").get();
     dbSize = row?.size ?? null;
     dbStats = {

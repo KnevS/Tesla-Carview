@@ -1,11 +1,9 @@
-import { getVehicles, getVehicleData } from './teslaApi.js';
-import { getDb } from '../db/database.js';
+import { getVehicleData } from './teslaApi.js';
+import { getAllTenants, getDb } from '../db/database.js';
 import { syncVehicleState } from './dataSync.js';
 
-const POLL_INTERVAL_ACTIVE = 30_000;   // 30s wenn Fahrzeug aktiv
-const POLL_INTERVAL_IDLE   = 300_000;  // 5min wenn Fahrzeug schläft
-
-const vehicleStates = new Map();
+const POLL_INTERVAL_ACTIVE = 30_000;
+const POLL_INTERVAL_IDLE   = 300_000;
 
 export async function startPoller() {
   console.log('[Poller] Starte Tesla Polling-Service...');
@@ -13,40 +11,34 @@ export async function startPoller() {
 }
 
 async function poll() {
+  let anyActive = false;
+
   try {
-    const db = getDb();
-    const vehicles = db.prepare('SELECT * FROM vehicles').all();
-
-    if (vehicles.length === 0) {
-      setTimeout(poll, POLL_INTERVAL_IDLE);
-      return;
-    }
-
-    let anyActive = false;
-
-    for (const vehicle of vehicles) {
+    const tenants = getAllTenants();
+    for (const tenant of tenants) {
       try {
-        const data = await getVehicleData(vehicle.tesla_id);
-        const state = data?.response;
-        if (!state) continue;
-
-        const isAwake = state.state === 'online';
-        if (isAwake) anyActive = true;
-
-        await syncVehicleState(vehicle, state);
-      } catch (err) {
-        if (err.response?.status === 408) {
-          // Fahrzeug schläft – kein Fehler
-        } else {
-          console.error(`[Poller] Fehler bei Fahrzeug ${vehicle.display_name}:`, err.message);
+        const db       = getDb(tenant.id);
+        const vehicles = db.prepare('SELECT * FROM vehicles').all();
+        for (const vehicle of vehicles) {
+          try {
+            const data = await getVehicleData(db, vehicle.tesla_id);
+            const state = data?.response;
+            if (!state) continue;
+            if (state.state === 'online') anyActive = true;
+            await syncVehicleState(db, vehicle, state);
+          } catch (err) {
+            if (err.response?.status !== 408) {
+              console.error(`[Poller] Fahrzeug ${vehicle.display_name} (${tenant.slug}):`, err.message);
+            }
+          }
         }
+      } catch (err) {
+        console.error(`[Poller] Mandant ${tenant.slug}:`, err.message);
       }
     }
-
-    const interval = anyActive ? POLL_INTERVAL_ACTIVE : POLL_INTERVAL_IDLE;
-    setTimeout(poll, interval);
   } catch (err) {
     console.error('[Poller] Allgemeiner Fehler:', err.message);
-    setTimeout(poll, POLL_INTERVAL_IDLE);
   }
+
+  setTimeout(poll, anyActive ? POLL_INTERVAL_ACTIVE : POLL_INTERVAL_IDLE);
 }

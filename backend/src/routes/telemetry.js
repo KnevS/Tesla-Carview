@@ -1,11 +1,10 @@
 import { Router } from 'express';
 import { getVehicleData } from '../services/teslaApi.js';
-import { getDb } from '../db/database.js';
 
 const router = Router();
 
 router.get('/:vehicleId/live', async (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const vehicle = db.prepare('SELECT * FROM vehicles WHERE id = ?').get(req.params.vehicleId);
   if (!vehicle) return res.status(404).json({ error: 'Fahrzeug nicht gefunden' });
 

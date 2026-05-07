@@ -1,12 +1,11 @@
 import { Router } from 'express';
-import { getDb } from '../db/database.js';
 import axios from 'axios';
 
 const router = Router();
 
 // Heimlade-Sessions für Abrechnung (nur Ladeort-Typ 'home')
 router.get('/:vehicleId/sessions', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { from, to, status } = req.query;
   const conds = ['cs.vehicle_id = ?'];
   const params = [req.params.vehicleId];
@@ -36,7 +35,7 @@ router.get('/:vehicleId/sessions', (req, res) => {
 
 // Monatsauswertung für Abrechnung
 router.get('/:vehicleId/summary', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const vehicle = db.prepare('SELECT * FROM vehicles WHERE id=?').get(req.params.vehicleId);
   if (!vehicle) return res.status(404).json({ error: 'Fahrzeug nicht gefunden' });
 
@@ -64,7 +63,7 @@ router.get('/:vehicleId/summary', (req, res) => {
 
 // Einzel-Session: Ladeort zuweisen + Tarif setzen
 router.patch('/sessions/:sessionId', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { location_id, billing_rate_kwh, energy_kwh_mid, billing_status } = req.body;
   db.prepare(`
     UPDATE charging_sessions SET
@@ -80,7 +79,7 @@ router.patch('/sessions/:sessionId', (req, res) => {
 
 // Monta-Sync: Ladesessions von Monta API holen und mit lokalen Sessions abgleichen
 router.post('/:vehicleId/monta-sync', async (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const vehicle = db.prepare('SELECT * FROM vehicles WHERE id=?').get(req.params.vehicleId);
   if (!vehicle?.monta_api_key) {
     return res.status(400).json({ error: 'Kein Monta API-Key konfiguriert' });

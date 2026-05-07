@@ -1,10 +1,9 @@
 import { Router } from 'express';
-import { getDb } from '../db/database.js';
 
 const router = Router();
 
 router.get('/snapshots', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id, days = 90 } = req.query;
   try {
     const since = Math.floor(Date.now() / 1000) - +days * 86400;
@@ -22,7 +21,7 @@ router.get('/snapshots', (req, res) => {
 });
 
 router.get('/degradation', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id } = req.query;
   try {
     const where = vehicle_id ? 'WHERE vehicle_id = ?' : '';
@@ -43,7 +42,7 @@ router.get('/degradation', (req, res) => {
 });
 
 router.post('/snapshot', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id, soc, rated_range_km, ideal_range_km, battery_level, usable_battery_level } = req.body;
   try {
     const result = db.prepare(

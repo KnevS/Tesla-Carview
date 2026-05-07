@@ -1,10 +1,9 @@
 import { Router } from 'express';
-import { getDb } from '../db/database.js';
 
 const router = Router();
 
 router.get('/', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id, limit = 50, offset = 0 } = req.query;
   try {
     const where = vehicle_id ? 'WHERE vehicle_id = ?' : '';
@@ -21,7 +20,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/stats', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id } = req.query;
   try {
     const where = vehicle_id ? 'WHERE vehicle_id = ?' : '';
@@ -47,7 +46,7 @@ router.get('/stats', (req, res) => {
 
 // Fahrtenbuch: Fahrten mit Klassifikations-Filter + Monatsgruppen
 router.get('/logbook', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id, year, month, trip_type } = req.query;
   try {
     const conds = [];
@@ -71,7 +70,7 @@ router.get('/logbook', (req, res) => {
 
 // Monatsübersicht für Fahrtenbuch-Auswertung
 router.get('/logbook/months', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id } = req.query;
   try {
     const where = vehicle_id ? 'WHERE vehicle_id = ?' : '';
@@ -94,7 +93,7 @@ router.get('/logbook/months', (req, res) => {
 });
 
 router.get('/:id', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   try {
     const trip = db.prepare('SELECT * FROM trips WHERE id = ?').get(req.params.id);
     if (!trip) return res.status(404).json({ error: 'Fahrt nicht gefunden' });
@@ -116,7 +115,7 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const {
     vehicle_id, start_time, end_time, start_lat, start_lon, end_lat, end_lon,
     start_address, end_address, distance_km, energy_used_kwh, avg_speed_kmh,
@@ -139,7 +138,7 @@ router.post('/', (req, res) => {
 
 // Fahrt klassifizieren
 router.patch('/:id/classify', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { trip_type, purpose } = req.body;
   const allowed = ['private', 'business', 'commute'];
   if (!allowed.includes(trip_type)) {
@@ -155,7 +154,7 @@ router.patch('/:id/classify', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   try {
     db.prepare('DELETE FROM trips WHERE id = ?').run(req.params.id);
     res.json({ success: true });

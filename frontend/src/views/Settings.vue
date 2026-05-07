@@ -139,6 +139,36 @@
       </div>
     </div>
 
+    <!-- Passkey -->
+    <div class="card space-y-3">
+      <h2 class="font-semibold"
+        v-tooltip="'Passkeys ermöglichen passwortlosen Login per Touch ID, Face ID oder Sicherheitsschlüssel.'">
+        🗝️ Passkey (Passwortlos anmelden)
+      </h2>
+      <p class="text-sm text-gray-400">
+        Registriere einen Passkey für dieses Gerät, um dich künftig ohne Passwort anzumelden (Touch ID, Face ID, Windows Hello oder USB-Schlüssel).
+      </p>
+      <div v-if="passkeys.length" class="space-y-2">
+        <div v-for="pk in passkeys" :key="pk.id"
+          class="flex items-center justify-between bg-gray-800 rounded-lg px-3 py-2">
+          <div>
+            <p class="text-sm font-medium text-white">{{ pk.device_type || 'Gerät' }}</p>
+            <p class="text-xs text-gray-500">Hinzugefügt: {{ fmtDate(pk.created_at) }}</p>
+          </div>
+          <button @click="removePasskey(pk.id)"
+            class="text-xs text-gray-500 hover:text-red-400 transition">Entfernen</button>
+        </div>
+      </div>
+      <p v-else class="text-sm text-gray-500">Noch kein Passkey registriert.</p>
+      <div v-if="passkeyError"   class="text-red-400 text-sm">{{ passkeyError }}</div>
+      <div v-if="passkeySuccess" class="text-green-400 text-sm">{{ passkeySuccess }}</div>
+      <button @click="addPasskey" :disabled="passkeyRegistering"
+        class="btn-secondary text-sm"
+        v-tooltip="'Browser-Dialog öffnet sich – Fingerabdruck, Gesichtserkennung oder Sicherheitsschlüssel bestätigen'">
+        {{ passkeyRegistering ? 'Bitte warten…' : '+ Passkey hinzufügen' }}
+      </button>
+    </div>
+
     <!-- Tesla Verbindung -->
     <div class="card space-y-4">
       <h2 class="font-semibold">⚡ Tesla-Verbindung</h2>
@@ -164,9 +194,9 @@
             <li class="flex gap-2"><span class="text-tesla-red font-bold">1.</span> iPhone nahe am Auto, Bluetooth ein, Tesla-App offen</li>
             <li class="flex gap-2"><span class="text-tesla-red font-bold">2.</span> Diesen Link im iPhone-Browser öffnen:</li>
           </ol>
-          <a href="https://tesla.com/_ak/your-domain.example.com" target="_blank"
+          <a :href="`https://tesla.com/_ak/${virtualKeyHost}`" target="_blank"
             class="block w-full text-center py-2 rounded-lg bg-tesla-red hover:bg-red-700 text-white font-medium transition">
-            tesla.com/_ak/your-domain.example.com
+            tesla.com/_ak/{{ virtualKeyHost }}
           </a>
           <p class="text-xs text-gray-500">Tesla-App zeigt "Drittanbieter-Schlüssel hinzufügen" → Allow tippen. Danach funktionieren alle Steuerbefehle.</p>
         </div>
@@ -224,8 +254,9 @@ const auth     = useAuthStore();
 const appStore = useAppStore();
 const router   = useRouter();
 
-const teslaConnected = ref(false);
-const teslaLoginUrl  = ref('/api/auth/tesla/login');
+const teslaConnected  = ref(false);
+const teslaLoginUrl   = ref('/api/auth/tesla/login');
+const virtualKeyHost  = window.location.hostname;
 
 // Vehicle profile
 const vProfile = ref({ license_plate: '', model: 'm3', image_color: 'PPSW', category: 'private', company_name: '', electricity_rate_kwh: 0.30, monta_api_key: '', monta_charge_point_id: '' });
@@ -261,6 +292,51 @@ const pwError         = ref('');
 const pwSuccess       = ref('');
 const auditLog        = ref([]);
 
+const passkeys          = ref([]);
+const passkeyRegistering = ref(false);
+const passkeyError      = ref('');
+const passkeySuccess    = ref('');
+
+async function loadPasskeys() {
+  try {
+    const { data } = await api.get('/passkey/credentials');
+    passkeys.value = data;
+  } catch { passkeys.value = []; }
+}
+
+async function addPasskey() {
+  passkeyError.value = passkeySuccess.value = '';
+  passkeyRegistering.value = true;
+  try {
+    const { startRegistration } = await import('@simplewebauthn/browser');
+    const { data: opts } = await api.post('/passkey/register-options');
+    const response   = await startRegistration(opts);
+    const ua         = navigator.userAgent;
+    const deviceName = /iPhone|iPad/.test(ua) ? 'iPhone/iPad'
+                     : /Mac/.test(ua)          ? 'Mac'
+                     : /Android/.test(ua)      ? 'Android'
+                     : /Windows/.test(ua)      ? 'Windows'
+                     : 'Gerät';
+    await api.post('/passkey/register-verify', { challengeId: opts.challengeId, response, deviceName });
+    passkeySuccess.value = 'Passkey erfolgreich registriert';
+    await loadPasskeys();
+  } catch (err) {
+    passkeyError.value = err.message ?? 'Fehler beim Registrieren';
+  } finally {
+    passkeyRegistering.value = false;
+  }
+}
+
+async function removePasskey(id) {
+  if (!confirm('Diesen Passkey wirklich entfernen?')) return;
+  try {
+    await api.delete(`/passkey/credentials/${id}`);
+    passkeys.value = passkeys.value.filter(p => p.id !== id);
+  } catch (err) {
+    passkeyError.value = err.response?.data?.error ?? 'Fehler beim Entfernen';
+  }
+}
+
 const fmtDate = ts => new Date(ts * 1000).toLocaleString('de-DE');
 
 const actionTooltips = {
@@ -282,6 +358,7 @@ onMounted(async () => {
     api.get('/users/me/audit'),
     api.get('/auth/tesla/status').catch(() => ({ data: { connected: false } })),
   ]);
+  loadPasskeys();
   mfaStatus.value      = mfa.data;
   auditLog.value       = audit.data;
   teslaConnected.value = teslaStatus.data.connected;

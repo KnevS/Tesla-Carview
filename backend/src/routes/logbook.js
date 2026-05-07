@@ -1,12 +1,11 @@
 import { Router } from 'express';
-import { getDb } from '../db/database.js';
 
 const router = Router();
 
 const CATEGORIES = ['note', 'maintenance', 'repair', 'tire', 'inspection', 'accident', 'other'];
 
 router.get('/', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id, category, limit = 50, offset = 0 } = req.query;
   try {
     const conditions = [];
@@ -24,7 +23,7 @@ router.get('/', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { vehicle_id, entry_date, category = 'note', title, description, mileage_km, cost, currency } = req.body;
   if (!vehicle_id || !title) return res.status(400).json({ error: 'vehicle_id und title sind Pflichtfelder' });
   if (!CATEGORIES.includes(category)) return res.status(400).json({ error: 'Ungültige Kategorie' });
@@ -40,7 +39,7 @@ router.post('/', (req, res) => {
 });
 
 router.put('/:id', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   const { title, description, category, mileage_km, cost, entry_date } = req.body;
   try {
     db.prepare(
@@ -54,7 +53,7 @@ router.put('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  const db = getDb();
+  const db = req.db;
   try {
     db.prepare('DELETE FROM logbook_entries WHERE id = ?').run(req.params.id);
     res.json({ success: true });

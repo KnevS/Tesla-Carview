@@ -1,8 +1,7 @@
 import { WebSocketServer } from 'ws';
 import protobuf from 'protobufjs';
-import { getDb } from '../db/database.js';
+import { getDb, getTenantByVin } from '../db/database.js';
 
-// Tesla Fleet Telemetry Protobuf-Schema (inline)
 const PROTO = `
 syntax = "proto3";
 package telemetry.vehicle_data;
@@ -51,7 +50,6 @@ message Payload {
 }
 `;
 
-// Telemetry Field-Nummern (aus Tesla vehicle_data.proto)
 const FIELD = {
   VehicleSpeed: 4,
   Odometer:     5,
@@ -93,83 +91,61 @@ export async function startFleetTelemetryServer(server) {
       try {
         const payload = Payload.decode(raw);
         const vin = payload.vin;
-        const ts = payload.created_at
+        const ts  = payload.created_at
           ? Number(payload.created_at) / 1000
           : Math.floor(Date.now() / 1000);
 
         const point = extractPoint(payload.data);
-        if (point && vin) {
-          storePoint(vin, ts, point);
-        }
+        if (point && vin) storePoint(vin, ts, point);
 
-        // Acknowledgment senden
-        if (payload.txid) {
-          ws.send(JSON.stringify({ txid: payload.txid, status: 200 }));
-        }
+        if (payload.txid) ws.send(JSON.stringify({ txid: payload.txid, status: 200 }));
       } catch (err) {
         console.error('[FleetTelemetry] Parse-Fehler:', err.message);
       }
     });
 
-    ws.on('error', (err) => {
-      console.error('[FleetTelemetry] WS-Fehler:', err.message);
-    });
-
-    ws.on('close', () => {
-      console.log(`[FleetTelemetry] Verbindung getrennt: ${ip}`);
-    });
+    ws.on('error', (err) => console.error('[FleetTelemetry] WS-Fehler:', err.message));
+    ws.on('close', () => console.log(`[FleetTelemetry] Verbindung getrennt: ${ip}`));
   });
 }
 
 function extractPoint(data) {
-  if (!data || data.length === 0) return null;
+  if (!data?.length) return null;
   const point = {};
   for (const datum of data) {
     const v = datum.value;
     switch (datum.key) {
       case FIELD.Location:
-        if (v?.location_value) {
-          point.lat = v.location_value.latitude;
-          point.lon = v.location_value.longitude;
-        }
+        if (v?.location_value) { point.lat = v.location_value.latitude; point.lon = v.location_value.longitude; }
         break;
-      case FIELD.VehicleSpeed:
-        point.speed_kmh = (v?.float_value ?? v?.double_value ?? null);
-        break;
-      case FIELD.Gear:
-        point.gear = GEAR_MAP[v?.shift_state_value] ?? null;
-        break;
-      case FIELD.PackVoltage:
-        point.voltage = v?.float_value ?? v?.double_value ?? null;
-        break;
-      case FIELD.PackCurrent:
-        point.current = v?.float_value ?? v?.double_value ?? null;
-        break;
-      case FIELD.Soc:
-        point.soc = v?.float_value ?? v?.double_value ?? null;
-        break;
+      case FIELD.VehicleSpeed: point.speed_kmh   = v?.float_value ?? v?.double_value ?? null; break;
+      case FIELD.Gear:         point.gear         = GEAR_MAP[v?.shift_state_value] ?? null;   break;
+      case FIELD.PackVoltage:  point.voltage      = v?.float_value ?? v?.double_value ?? null; break;
+      case FIELD.PackCurrent:  point.current      = v?.float_value ?? v?.double_value ?? null; break;
+      case FIELD.Soc:          point.soc          = v?.float_value ?? v?.double_value ?? null; break;
       case FIELD.Odometer:
-        point.odometer_km = v?.float_value != null ? v.float_value * 1.60934 : null;
-        break;
+        point.odometer_km = v?.float_value != null ? v.float_value * 1.60934 : null; break;
     }
   }
   return Object.keys(point).length > 0 ? point : null;
 }
 
 function storePoint(vin, ts, point) {
-  const db = getDb();
+  const tenant = getTenantByVin(vin);
+  if (!tenant) return;
+
+  const db      = getDb(tenant.id);
   const vehicle = db.prepare('SELECT * FROM vehicles WHERE vin=?').get(vin);
   if (!vehicle) return;
 
-  // Aktive Fahrt finden
   const activeTrip = db.prepare(
     'SELECT id FROM trips WHERE vehicle_id=? AND end_time IS NULL ORDER BY id DESC LIMIT 1'
   ).get(vehicle.id);
 
-  // Trip starten wenn Fahrzeug faehrt
   let tripId = activeTrip?.id ?? null;
+
   if (point.gear && point.gear !== 'P' && !activeTrip) {
-    const soc = point.soc ? Math.round(point.soc) : null;
+    const soc    = point.soc ? Math.round(point.soc) : null;
     const result = db.prepare(
       `INSERT INTO trips (vehicle_id, start_time, start_lat, start_lon, start_soc, start_odometer_km, source)
        VALUES (?, ?, ?, ?, ?, ?, 'telemetry')`
@@ -178,33 +154,25 @@ function storePoint(vin, ts, point) {
     console.log(`[FleetTelemetry] Fahrt gestartet: ${vin}`);
   }
 
-  // Trip beenden wenn parkiert
   if (activeTrip && (point.gear === 'P' || point.gear === null)) {
     const soc = point.soc ? Math.round(point.soc) : null;
     db.prepare(
-      `UPDATE trips SET end_time=?, end_lat=?, end_lon=?, end_soc=?, end_odometer_km=?
-       WHERE id=?`
+      `UPDATE trips SET end_time=?, end_lat=?, end_lon=?, end_soc=?, end_odometer_km=? WHERE id=?`
     ).run(ts, point.lat ?? null, point.lon ?? null, soc, point.odometer_km ?? null, activeTrip.id);
 
-    // Distanz berechnen aus Telemetrie-Punkten
     const pts = db.prepare(
       'SELECT lat, lon FROM telemetry_points WHERE trip_id=? AND lat IS NOT NULL ORDER BY timestamp'
     ).all(activeTrip.id);
     if (pts.length > 1) {
       let dist = 0;
-      for (let i = 1; i < pts.length; i++) {
-        dist += haversine(pts[i-1].lat, pts[i-1].lon, pts[i].lat, pts[i].lon);
-      }
+      for (let i = 1; i < pts.length; i++) dist += haversine(pts[i-1].lat, pts[i-1].lon, pts[i].lat, pts[i].lon);
       db.prepare('UPDATE trips SET distance_km=? WHERE id=?').run(dist, activeTrip.id);
     }
     console.log(`[FleetTelemetry] Fahrt beendet: ${vin}`);
     tripId = null;
   }
 
-  // Telemetrie-Punkt speichern
-  const powerKw = point.voltage && point.current
-    ? (point.voltage * point.current) / 1000
-    : null;
+  const powerKw = point.voltage && point.current ? (point.voltage * point.current) / 1000 : null;
 
   db.prepare(
     `INSERT INTO telemetry_points
@@ -212,20 +180,16 @@ function storePoint(vin, ts, point) {
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).run(
     vehicle.id, tripId, ts,
-    point.lat ?? null,
-    point.lon ?? null,
-    point.speed_kmh ?? null,
-    point.gear ?? null,
-    powerKw,
-    point.soc ? Math.round(point.soc) : null,
-    point.odometer_km ?? null,
+    point.lat ?? null, point.lon ?? null,
+    point.speed_kmh ?? null, point.gear ?? null, powerKw,
+    point.soc ? Math.round(point.soc) : null, point.odometer_km ?? null,
   );
 }
 
 function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371;
+  const R    = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+  const a    = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
 }
