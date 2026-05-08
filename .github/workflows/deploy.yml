@@ -15,10 +15,28 @@ env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
+  check-secrets:
+    name: Secrets vorhanden?
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          KEY:  ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          if [ -n "$HOST" ] && [ -n "$KEY" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
   deploy:
     name: Deploy via SSH
+    needs: check-secrets
+    if: needs.check-secrets.outputs.ready == 'true'
     runs-on: ubuntu-latest
-    if: ${{ secrets.DEPLOY_HOST != '' && secrets.DEPLOY_SSH_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -32,7 +50,8 @@ jobs:
             APP_DIR="${{ secrets.DEPLOY_APP_DIR }}"
             APP_DIR="${APP_DIR:-/opt/tesla-carview}"
             cd "$APP_DIR"
-            sudo git pull origin main
+            sudo git fetch origin main
+            sudo git reset --hard origin/main
             GIT_HASH=$(sudo git rev-parse --short HEAD)
             GIT_BRANCH=$(sudo git rev-parse --abbrev-ref HEAD)
             BUILD_DATE=$(sudo git log -1 --format=%ci)

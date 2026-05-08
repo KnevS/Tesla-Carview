@@ -15,9 +15,9 @@ export function generateMfaSecret(username) {
 }
 
 export async function generateQrCode(uri) {
-  return QRCode.toDataURL(uri, {
-    width: 320,
-    margin: 3,
+  return QRCode.toString(uri, {
+    type: 'svg',
+    margin: 4,
     color: { dark: '#000000', light: '#ffffff' },
     errorCorrectionLevel: 'M',
   });

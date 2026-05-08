@@ -9,10 +9,10 @@
         den integrierten Passwort-Manager) und scanne diesen QR-Code:
       </p>
       <div class="flex justify-center">
-        <div v-if="qrCode" class="bg-white rounded-xl p-3 inline-flex items-center justify-center">
-          <img :src="qrCode" alt="MFA QR-Code" class="w-56 h-56 cursor-help block"
-            v-tooltip="'Scanne diesen QR-Code einmalig mit deiner Authenticator-App. Die App speichert daraufhin ein Geheimnis und generiert daraus alle 30 Sekunden einen neuen 6-stelligen Code.'" />
-        </div>
+        <div v-if="qrCode"
+             class="rounded-xl bg-white p-4 cursor-help qr-container"
+             v-html="qrCode"
+             v-tooltip="'Scanne diesen QR-Code einmalig mit deiner Authenticator-App. Die App speichert daraufhin ein Geheimnis und generiert daraus alle 30 Sekunden einen neuen 6-stelligen Code.'" />
         <div v-else-if="qrError" class="w-64 h-64 bg-gray-700 rounded-xl flex items-center justify-center text-red-400 text-sm text-center px-4">
           QR-Code konnte nicht geladen werden. Bitte Seite neu laden.
         </div>
@@ -109,3 +109,8 @@ async function confirm() {
   }
 }
 </script>
+
+<style scoped>
+.qr-container { width: 264px; height: 264px; }
+.qr-container :deep(svg) { width: 100%; height: 100%; display: block; }
+</style>
