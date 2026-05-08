@@ -86,6 +86,12 @@ app.use('/api/data',               dataManagementRoutes);
 app.use('/api/invites',            inviteRoutes);
 app.use('/api/drivers',            driverRoutes);
 
+// Globaler Error-Handler — fängt alle ungehandelten Throws/Rejects der Routes
+app.use((err, _req, res, _next) => {
+  console.error('[Unhandled]', err);
+  res.status(500).json({ error: 'Interner Serverfehler', detail: err.message });
+});
+
 server.listen(PORT, async () => {
   console.log(`Tesla Carview Backend läuft auf Port ${PORT}`);
 

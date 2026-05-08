@@ -11,7 +11,11 @@ import { auditLog } from '../services/auditService.js';
 const router = Router();
 router.use(requireAuth);
 
+<<<<<<< Updated upstream
 router.get('/setup', async (req, res, next) => {
+=======
+router.get('/setup', async (req, res) => {
+>>>>>>> Stashed changes
   try {
     const user = findUserById(req.db, req.user.sub);
     if (!user) return res.status(404).json({ error: 'Benutzer nicht gefunden' });
@@ -24,7 +28,12 @@ router.get('/setup', async (req, res, next) => {
     );
     res.json({ qrCode, setupToken });
   } catch (err) {
+<<<<<<< Updated upstream
     next(err);
+=======
+    console.error('[MFA setup] Fehler:', err);
+    res.status(500).json({ error: 'MFA-Setup fehlgeschlagen', detail: err.message });
+>>>>>>> Stashed changes
   }
 });
 

@@ -9,7 +9,7 @@ export function generateMfaSecret(username) {
   const totp = new OTPAuth.TOTP({
     issuer: ISSUER, label: username,
     algorithm: 'SHA1', digits: 6, period: 30,
-    secret: OTPAuth.Secret.generate(20),
+    secret: new OTPAuth.Secret({ size: 20 }),
   });
   return { secret: totp.secret.base32, uri: totp.toString() };
 }
