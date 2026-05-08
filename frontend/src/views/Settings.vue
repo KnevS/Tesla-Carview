@@ -84,10 +84,15 @@
               <label class="label">Monta Charge-Point-ID</label>
               <input v-model="vProfile.monta_charge_point_id" type="text" class="input" placeholder="cp_12345" />
             </div>
-            <div class="col-span-2">
-              <label class="label">Monta API-Key</label>
-              <input v-model="vProfile.monta_api_key" type="password" class="input" placeholder="monta_…" />
-              <p class="text-xs text-gray-500 mt-1">Monta → Einstellungen → API → Key erstellen. Wird verschlüsselt gespeichert.</p>
+            <div>
+              <label class="label">Monta Client ID</label>
+              <input v-model="vProfile.monta_client_id" type="text" class="input" placeholder="90026e8a-…" />
+              <p class="text-xs text-gray-500 mt-1">Partner API: Hub → Anwendung → Client ID</p>
+            </div>
+            <div>
+              <label class="label">Monta Client Secret</label>
+              <input v-model="vProfile.monta_api_key" type="password" class="input" placeholder="2cde9e96-…" />
+              <p class="text-xs text-gray-500 mt-1">Partner API: Hub → Anwendung → Client Secret</p>
             </div>
           </div>
         </div>
@@ -558,7 +563,7 @@ async function syncVehicles() {
 }
 
 // Vehicle profile
-const vProfile = ref({ license_plate: '', model: 'm3', image_color: 'PPSW', category: 'private', company_name: '', electricity_rate_kwh: 0.30, monta_api_key: '', monta_charge_point_id: '' });
+const vProfile = ref({ license_plate: '', model: 'm3', image_color: 'PPSW', category: 'private', company_name: '', electricity_rate_kwh: 0.30, monta_client_id: '', monta_api_key: '', monta_charge_point_id: '' });
 const vMsg = ref('');
 const vOk  = ref(false);
 
@@ -673,6 +678,7 @@ onMounted(async () => {
       category:              v.category              ?? 'private',
       company_name:          v.company_name          ?? '',
       electricity_rate_kwh:  v.electricity_rate_kwh  ?? 0.30,
+      monta_client_id:       v.monta_client_id       ?? '',
       monta_api_key:         v.monta_api_key         ?? '',
       monta_charge_point_id: v.monta_charge_point_id ?? '',
     };

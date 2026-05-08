@@ -190,6 +190,9 @@ function runTenantMigrations(db) {
     db.exec('ALTER TABLE vehicles ADD COLUMN monta_api_key TEXT');
     db.exec('ALTER TABLE vehicles ADD COLUMN monta_charge_point_id TEXT');
   }
+  if (!vCols.includes('monta_client_id')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN monta_client_id TEXT');
+  }
 
   // charging_sessions
   const csCols = col('charging_sessions');

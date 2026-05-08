@@ -141,7 +141,8 @@
     "companyName": "Firmenname (Arbeitgeber)",
     "licensePlate": "Kennzeichen", "model": "Modell", "color": "Farbe",
     "electricity": "Strompreis Wallbox (€/kWh)", "montaChargePoint": "Monta Charge-Point-ID",
-    "montaKey": "Monta API-Key", "montaKeyHint": "Monta → Einstellungen → API → Key erstellen.",
+    "montaClientId": "Monta Client ID", "montaClientIdHint": "Partner API: Hub → Anwendung → Client ID",
+    "montaKey": "Monta Client Secret", "montaKeyHint": "Partner API: Hub → Anwendung → Client Secret",
     "homeCharging": "Heimladen / Monta-Konfiguration",
     "drivers": "👤 Fahrer & Profile",
     "driversHint": "Fahrer anlegen und benennen – werden bei Fahrten zugewiesen und in der Auswertung angezeigt.",
@@ -457,13 +458,13 @@
       "title": "🔌 Monta-Integration (Heimlade-Abrechnung)",
       "desc": "Für Dienstwagen-Fahrer: Tesla Carview kann Ladedaten direkt aus deiner Monta-Wallbox abrufen und daraus eine monatliche Kostenabrechnung für deinen Arbeitgeber erstellen.",
       "warning": "⚠️ Monta-Integration ist nur für Fahrzeuge der Kategorie Dienstwagen verfügbar (Einstellungen → Fahrzeugprofil → Kategorie).",
-      "step1Title": "Schritt 1 – Monta API-Key erstellen",
+      "step1Title": "Schritt 1 – Monta Partner API Zugangsdaten erstellen",
       "step1Items": [
-        "Melde dich bei Monta an (App oder Web: portal.monta.com).",
-        "Gehe zu Einstellungen → API.",
-        "Klicke auf API Key erstellen und kopiere den Schlüssel (er beginnt mit monta_)."
+        "Melde dich im Monta Operator Hub an (hub.monta.com).",
+        "Gehe zu Einstellungen → Anwendungen → Neue Anwendung erstellen.",
+        "Kopiere Client ID und Client Secret – beide werden in Tesla Carview benötigt."
       ],
-      "step1Hint": "Der Key ist nur einmal sichtbar – sofort in Tesla Carview eintragen.",
+      "step1Hint": "Das Client Secret ist nur einmal sichtbar – sofort in Tesla Carview eintragen.",
       "step2Title": "Schritt 2 – Charge-Point-ID herausfinden",
       "step2Items": [
         "Im Monta-Portal: Ladepunkte → Meine Geräte auswählen.",

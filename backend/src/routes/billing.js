@@ -84,7 +84,7 @@ router.post('/:vehicleId/monta-sync', async (req, res) => {
   const db = req.db;
   const vehicle = db.prepare('SELECT * FROM vehicles WHERE id=?').get(req.params.vehicleId);
   if (!vehicle?.monta_api_key) {
-    return res.status(400).json({ error: 'Kein Monta API-Key konfiguriert' });
+    return res.status(400).json({ error: 'Kein Monta API-Key / Client Secret konfiguriert' });
   }
 
   try {
@@ -94,8 +94,19 @@ router.post('/:vehicleId/monta-sync', async (req, res) => {
     if (to)   params.to   = new Date(to   * 1000).toISOString();
     if (vehicle.monta_charge_point_id) params.chargePointId = vehicle.monta_charge_point_id;
 
+    // Auth: Partner API (Client ID + Secret) hat Vorrang vor Public API Bearer Token
+    let authHeaders;
+    if (vehicle.monta_client_id) {
+      authHeaders = {
+        'X-Monta-Client-Id':     vehicle.monta_client_id,
+        'X-Monta-Client-Secret': vehicle.monta_api_key,
+      };
+    } else {
+      authHeaders = { Authorization: `Bearer ${vehicle.monta_api_key}` };
+    }
+
     const resp = await axios.get('https://api.monta.app/v2/charge-sessions', {
-      headers: { Authorization: `Bearer ${vehicle.monta_api_key}` },
+      headers: authHeaders,
       params,
     });
 
