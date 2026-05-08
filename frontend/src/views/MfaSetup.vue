@@ -9,8 +9,13 @@
         den integrierten Passwort-Manager) und scanne diesen QR-Code:
       </p>
       <div class="flex justify-center">
-        <img v-if="qrCode" :src="qrCode" alt="MFA QR-Code" class="rounded-xl w-64 h-64 bg-white p-3 cursor-help"
-          v-tooltip="'Scanne diesen QR-Code einmalig mit deiner Authenticator-App. Die App speichert daraufhin ein Geheimnis und generiert daraus alle 30 Sekunden einen neuen 6-stelligen Code.'" />
+        <div v-if="qrCode" class="bg-white rounded-xl p-3 inline-flex items-center justify-center">
+          <img :src="qrCode" alt="MFA QR-Code" class="w-56 h-56 cursor-help block"
+            v-tooltip="'Scanne diesen QR-Code einmalig mit deiner Authenticator-App. Die App speichert daraufhin ein Geheimnis und generiert daraus alle 30 Sekunden einen neuen 6-stelligen Code.'" />
+        </div>
+        <div v-else-if="qrError" class="w-64 h-64 bg-gray-700 rounded-xl flex items-center justify-center text-red-400 text-sm text-center px-4">
+          QR-Code konnte nicht geladen werden. Bitte Seite neu laden.
+        </div>
         <div v-else class="w-64 h-64 bg-gray-700 rounded-xl animate-pulse" />
       </div>
       <button @click="step = 2" class="btn-primary w-full"
@@ -75,11 +80,16 @@ const confirmCode = ref('');
 const backupCodes = ref([]);
 const loading     = ref(false);
 const error       = ref('');
+const qrError     = ref(false);
 
 onMounted(async () => {
-  const { data } = await api.get('/mfa/setup');
-  qrCode.value     = data.qrCode;
-  setupToken.value = data.setupToken;
+  try {
+    const { data } = await api.get('/mfa/setup');
+    qrCode.value     = data.qrCode;
+    setupToken.value = data.setupToken;
+  } catch {
+    qrError.value = true;
+  }
 });
 
 async function confirm() {
