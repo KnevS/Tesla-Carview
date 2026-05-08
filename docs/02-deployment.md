@@ -113,6 +113,17 @@ bash /opt/tesla-carview/deploy/update.sh
 
 ---
 
+## Automatisches Deployment
+
+Es gibt zwei Wege für automatisches Deployment bei jedem Push auf `main`:
+
+| Methode | Geeignet für | Anleitung |
+|---|---|---|
+| **GitHub Actions + SSH** | Einzelne App, vorhandener Server, volle Kontrolle | Siehe unten |
+| **Dokploy** | Mehrere Apps, Web-UI gewünscht, einfacheres SSL | [08-dokploy.md](./08-dokploy.md) |
+
+---
+
 ## GitHub Actions Auto-Deploy
 
 Für automatisches Deployment bei jedem Push auf `main`.

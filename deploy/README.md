@@ -15,7 +15,18 @@ Das Script führt den Konfigurations-Wizard automatisch aus.
 bash /opt/tesla-carview/deploy/update.sh
 ```
 
-## GitHub Actions Auto-Deploy
+## Automatisches Deployment
+
+Zwei Optionen – wähle was zu deiner Infrastruktur passt:
+
+| Methode | Beschreibung | Doku |
+|---|---|---|
+| **GitHub Actions + SSH** | Klassisch, volle Kontrolle | Siehe unten |
+| **Dokploy** | Web-UI, SSL automatisch, mehrere Apps | [docs/08-dokploy.md](../docs/08-dokploy.md) |
+
+---
+
+## GitHub Actions + SSH
 
 Für automatisches Deployment bei jedem Push auf `main`, folgende Secrets im GitHub-Repository setzen:
 
