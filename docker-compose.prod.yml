@@ -5,6 +5,10 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      args:
+        GIT_HASH: ${GIT_HASH:-unknown}
+        GIT_BRANCH: ${GIT_BRANCH:-unknown}
+        BUILD_DATE: ${BUILD_DATE:-}
     container_name: tesla-carview-backend
     restart: unless-stopped
     env_file:

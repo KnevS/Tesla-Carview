@@ -80,7 +80,8 @@ router.patch('/sessions/:sessionId', (req, res) => {
 });
 
 async function getMontaToken(clientId, clientSecret) {
-  const resp = await axios.post('https://api.monta.app/v1/auth/operators/token', {
+  const resp = await axios.post('https://partner-api.monta.com/api/v1/auth/token', {
+    grantType: 'client_credentials',
     clientId,
     clientSecret,
   });
@@ -97,9 +98,9 @@ router.post('/:vehicleId/monta-sync', async (req, res) => {
 
   try {
     const { from, to } = req.body;
-    const params = { page: 1, perPage: 100 };
-    if (from) params.from = new Date(from * 1000).toISOString();
-    if (to)   params.to   = new Date(to   * 1000).toISOString();
+    const params = { page: 0, perPage: 100 };
+    if (from) params.fromDate = new Date(from * 1000).toISOString();
+    if (to)   params.toDate   = new Date(to   * 1000).toISOString();
     if (vehicle.monta_charge_point_id) params.chargePointId = vehicle.monta_charge_point_id;
 
     // Auth: Partner API OAuth2-Token-Exchange, Fallback auf direkten Bearer Token
@@ -112,7 +113,7 @@ router.post('/:vehicleId/monta-sync', async (req, res) => {
       bearerToken = vehicle.monta_api_key;
     }
 
-    const montaUrl = 'https://api.monta.app/v1/charge-sessions';
+    const montaUrl = 'https://partner-api.monta.com/api/v1/charges';
     console.log('[Monta] Request:', montaUrl, JSON.stringify(params));
     const resp = await axios.get(montaUrl, {
       headers: { Authorization: `Bearer ${bearerToken}` },

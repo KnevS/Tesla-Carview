@@ -18,6 +18,13 @@ function getVersion() {
 }
 
 function getGitInfo() {
+  if (process.env.GIT_HASH && process.env.GIT_HASH !== 'unknown') {
+    return {
+      hash:   process.env.GIT_HASH,
+      branch: process.env.GIT_BRANCH ?? 'unknown',
+      date:   process.env.BUILD_DATE ?? null,
+    };
+  }
   try {
     const hash   = execSync('git rev-parse --short HEAD 2>/dev/null', { encoding: 'utf8' }).trim();
     const branch = execSync('git rev-parse --abbrev-ref HEAD 2>/dev/null', { encoding: 'utf8' }).trim();
