@@ -9,12 +9,16 @@ on:
 #   DEPLOY_HOST      – IP oder Hostname des Zielservers
 #   DEPLOY_USER      – SSH-Benutzer (z.B. root oder deploy)
 #   DEPLOY_SSH_KEY   – privater SSH-Key (ed25519 empfohlen)
-#   DEPLOY_APP_DIR   – Pfad auf dem Server (z.B. /opt/tesla-carview)
+#   DEPLOY_APP_DIR   – Pfad auf dem Server (Standard: /opt/tesla-carview)
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   deploy:
     name: Deploy via SSH
     runs-on: ubuntu-latest
+    if: ${{ secrets.DEPLOY_HOST != '' && secrets.DEPLOY_SSH_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -25,9 +29,13 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           script: |
-            APP_DIR="${{ secrets.DEPLOY_APP_DIR || '/opt/tesla-carview' }}"
+            APP_DIR="${{ secrets.DEPLOY_APP_DIR }}"
+            APP_DIR="${APP_DIR:-/opt/tesla-carview}"
             cd "$APP_DIR"
             git pull origin main
-            docker compose -f docker-compose.prod.yml up -d --build
+            GIT_HASH=$(git rev-parse --short HEAD) \
+            GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD) \
+            BUILD_DATE=$(git log -1 --format=%ci) \
+            docker compose -f docker-compose.prod.yml up -d --build backend frontend
             docker system prune -f
-            echo "Deployment erfolgreich: $(date)"
+            echo "Deployment erfolgreich: $(date) | $(git rev-parse --short HEAD)"
