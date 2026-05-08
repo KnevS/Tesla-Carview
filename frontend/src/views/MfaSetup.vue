@@ -9,9 +9,9 @@
         den integrierten Passwort-Manager) und scanne diesen QR-Code:
       </p>
       <div class="flex justify-center">
-        <img v-if="qrCode" :src="qrCode" alt="MFA QR-Code" class="rounded-xl w-48 h-48 bg-white p-2 cursor-help"
+        <img v-if="qrCode" :src="qrCode" alt="MFA QR-Code" class="rounded-xl w-64 h-64 bg-white p-3 cursor-help"
           v-tooltip="'Scanne diesen QR-Code einmalig mit deiner Authenticator-App. Die App speichert daraufhin ein Geheimnis und generiert daraus alle 30 Sekunden einen neuen 6-stelligen Code.'" />
-        <div v-else class="w-48 h-48 bg-gray-700 rounded-xl animate-pulse" />
+        <div v-else class="w-64 h-64 bg-gray-700 rounded-xl animate-pulse" />
       </div>
       <button @click="step = 2" class="btn-primary w-full"
         v-tooltip="'Erst weiterklicken nachdem du den QR-Code in deiner App gespeichert hast'">Weiter</button>

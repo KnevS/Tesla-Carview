@@ -15,7 +15,12 @@ export function generateMfaSecret(username) {
 }
 
 export async function generateQrCode(uri) {
-  return QRCode.toDataURL(uri);
+  return QRCode.toDataURL(uri, {
+    width: 320,
+    margin: 3,
+    color: { dark: '#000000', light: '#ffffff' },
+    errorCorrectionLevel: 'M',
+  });
 }
 
 export function verifyTotp(secret, token) {
