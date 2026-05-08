@@ -79,12 +79,20 @@ router.patch('/sessions/:sessionId', (req, res) => {
   res.json({ ok: true });
 });
 
+async function getMontaToken(clientId, clientSecret) {
+  const resp = await axios.post('https://api.monta.app/v1/auth/operators/token', {
+    clientId,
+    clientSecret,
+  });
+  return resp.data?.accessToken ?? resp.data?.access_token;
+}
+
 // Monta-Sync: Ladesessions von Monta API holen und mit lokalen Sessions abgleichen
 router.post('/:vehicleId/monta-sync', async (req, res) => {
   const db = req.db;
   const vehicle = db.prepare('SELECT * FROM vehicles WHERE id=?').get(req.params.vehicleId);
   if (!vehicle?.monta_api_key) {
-    return res.status(400).json({ error: 'Kein Monta API-Key / Client Secret konfiguriert' });
+    return res.status(400).json({ error: 'Kein Monta Client Secret konfiguriert' });
   }
 
   try {
@@ -94,21 +102,20 @@ router.post('/:vehicleId/monta-sync', async (req, res) => {
     if (to)   params.to   = new Date(to   * 1000).toISOString();
     if (vehicle.monta_charge_point_id) params.chargePointId = vehicle.monta_charge_point_id;
 
-    // Auth: Partner API (Client ID + Secret) hat Vorrang vor Public API Bearer Token
-    let authHeaders;
+    // Auth: Partner API OAuth2-Token-Exchange, Fallback auf direkten Bearer Token
+    let bearerToken;
     if (vehicle.monta_client_id) {
-      authHeaders = {
-        'X-Monta-Client-Id':     vehicle.monta_client_id,
-        'X-Monta-Client-Secret': vehicle.monta_api_key,
-      };
+      console.log('[Monta] Token-Exchange für Client ID:', vehicle.monta_client_id);
+      bearerToken = await getMontaToken(vehicle.monta_client_id, vehicle.monta_api_key);
+      if (!bearerToken) throw new Error('Kein Access Token von Monta erhalten');
     } else {
-      authHeaders = { Authorization: `Bearer ${vehicle.monta_api_key}` };
+      bearerToken = vehicle.monta_api_key;
     }
 
     const montaUrl = 'https://api.monta.app/v1/charge-sessions';
     console.log('[Monta] Request:', montaUrl, JSON.stringify(params));
     const resp = await axios.get(montaUrl, {
-      headers: authHeaders,
+      headers: { Authorization: `Bearer ${bearerToken}` },
       params,
     });
 
