@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚡ Tesla Carview</title>
+  <style>
+    :root {
+      --bg:       #0d0d0d;
+      --surface:  #1a1a1a;
+      --border:   #2a2a2a;
+      --accent:   #e31937;
+      --accent2:  #ff4d63;
+      --text:     #e8e8e8;
+      --muted:    #888;
+      --code-bg:  #111;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      padding: 2rem 1rem;
+    }
+
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .hero {
+      text-align: center;
+      padding: 3.5rem 2rem 3rem;
+      background: linear-gradient(135deg, #1a1a1a 0%, #111 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(227,25,55,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 0.75rem;
+    }
+    .hero h1 span { color: var(--accent); }
+    .hero p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 520px;
+      margin: 0 auto 1.2rem;
+    }
+    .badge {
+      display: inline-block;
+      background: rgba(227,25,55,0.15);
+      color: var(--accent2);
+      border: 1px solid rgba(227,25,55,0.3);
+      border-radius: 20px;
+      padding: 0.25rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin: 0.2rem;
+    }
+
+    /* Sections */
+    h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    h2::before {
+      content: '';
+      display: inline-block;
+      width: 3px;
+      height: 1.2em;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 1.5rem 0 0.6rem;
+    }
+
+    p { margin: 0.6rem 0; color: var(--text); }
+
+    /* Tables */
+    .table-wrap { overflow-x: auto; margin: 1rem 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    thead th {
+      background: #1f1f1f;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.6px;
+      padding: 0.65rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr { border-bottom: 1px solid var(--border); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.02); }
+    td {
+      padding: 0.65rem 1rem;
+      vertical-align: top;
+    }
+    td:first-child { font-weight: 600; white-space: nowrap; }
+    td strong { color: var(--text); }
+
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    /* Code */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.2rem 1.4rem;
+      overflow-x: auto;
+      margin: 1rem 0;
+      font-size: 0.85rem;
+    }
+    code {
+      font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+      color: #cdd6f4;
+      line-height: 1.6;
+    }
+    p code, li code {
+      background: #1e1e2e;
+      border: 1px solid #313244;
+      border-radius: 4px;
+      padding: 0.1em 0.4em;
+      font-size: 0.85em;
+      color: #89b4fa;
+    }
+
+    /* Steps */
+    .steps { counter-reset: step; list-style: none; margin: 1rem 0; }
+    .steps li {
+      counter-increment: step;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.6rem;
+      color: var(--text);
+    }
+    .steps li::before {
+      content: counter(step);
+      flex-shrink: 0;
+      width: 1.6rem;
+      height: 1.6rem;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.78rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.15rem;
+    }
+
+    /* Cards */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.1rem 1.2rem;
+      transition: border-color 0.2s;
+    }
+    .card:hover { border-color: rgba(227,25,55,0.4); }
+    .card-icon { font-size: 1.3rem; margin-bottom: 0.4rem; }
+    .card-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.3rem; }
+    .card-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.5; }
+
+    /* Security list */
+    .sec-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+    .sec-list li {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.9rem;
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .sec-list li::before { content: '✓'; color: #a6e3a1; font-weight: 700; }
+
+    /* Blockquote */
+    blockquote {
+      border-left: 3px solid var(--accent);
+      background: rgba(227,25,55,0.06);
+      border-radius: 0 8px 8px 0;
+      padding: 0.8rem 1.2rem;
+      margin: 1rem 0;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+    blockquote strong { color: var(--text); }
+
+    /* Footer */
+    .footer {
+      margin-top: 3rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    .footer a { color: var(--accent2); text-decoration: none; }
+
+    /* Donate section */
+    .donate-card {
+      background: linear-gradient(135deg, #1a1a1a, #141414);
+      border: 1px solid rgba(227,25,55,0.3);
+      border-radius: 12px;
+      padding: 1.5rem 1.8rem;
+      margin-top: 1rem;
+    }
+    .donate-card p { color: var(--muted); margin-bottom: 1rem; font-size: 0.95rem; }
+
+    a { color: var(--accent2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    ul { padding-left: 1.4rem; }
+    ul li { margin-bottom: 0.3rem; }
+
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 2rem; }
+      h2 { font-size: 1.2rem; }
+      pre { font-size: 0.78rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- Hero -->
+  <div class="hero">
+    <h1>⚡ Tesla <span>Carview</span></h1>
+    <p>Eine <strong>selbst gehostete</strong> Tesla-Datenlogger-Applikation.<br>
+    Keine Cloud, keine Datenweitergabe – alle Fahrzeugdaten bleiben auf deinem eigenen Server.</p>
+    <div>
+      <span class="badge">linux/amd64</span>
+      <span class="badge">linux/arm64</span>
+      <span class="badge">linux/arm/v7</span>
+      <span class="badge">MIT Lizenz</span>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <h2>Features</h2>
+  <div class="card-grid">
+    <div class="card"><div class="card-icon">📊</div><div class="card-title">Dashboard</div><div class="card-desc">Gesamtstatistiken, letzte Fahrt, monatliches Kilometerdiagramm</div></div>
+    <div class="card"><div class="card-icon">🗺️</div><div class="card-title">Fahrten</div><div class="card-desc">GPS-Track auf Karte, Verbrauch, Geschwindigkeit, SoC-Verlauf</div></div>
+    <div class="card"><div class="card-icon">⚡</div><div class="card-title">Laden</div><div class="card-desc">Ladesessions mit Kosten, GPS-basierter Ladeort-Zuordnung, kostenlose Ladungen markierbar</div></div>
+    <div class="card"><div class="card-icon">📍</div><div class="card-title">Ladeorte</div><div class="card-desc">Definierbare Standorte mit GPS-Radius, Preis/kWh, Auto-Erkennung</div></div>
+    <div class="card"><div class="card-icon">🔋</div><div class="card-title">Batterie</div><div class="card-desc">Degradations-Tracking, Reichweiten-Verlauf über Zeit</div></div>
+    <div class="card"><div class="card-icon">📡</div><div class="card-title">Technik</div><div class="card-desc">Live-Telemetrie: TPMS, Leistungsfluss, Klimaanlage, Ladestatus</div></div>
+    <div class="card"><div class="card-icon">🎮</div><div class="card-title">Steuerung</div><div class="card-desc">Fahrzeugbefehle: Klima, Türen, Laden, Navigation (Virtual Key)</div></div>
+    <div class="card"><div class="card-icon">📓</div><div class="card-title">Fahrtenbuch</div><div class="card-desc">Dienstwagen-Fahrtenbuch, Klassifikation Privat/Dienst/Arbeitsweg</div></div>
+    <div class="card"><div class="card-icon">💶</div><div class="card-title">Abrechnung</div><div class="card-desc">Heimladen-Kostenabrechnung für Dienstwagen (Monta-Integration)</div></div>
+    <div class="card"><div class="card-icon">🔧</div><div class="card-title">Betriebsbuch</div><div class="card-desc">Wartungen, Reparaturen, Reifen, Inspektionen mit Kosten</div></div>
+    <div class="card"><div class="card-icon">📤</div><div class="card-title">Export</div><div class="card-desc">CSV/JSON-Export für Fahrten &amp; Laden, Vollbackup</div></div>
+    <div class="card"><div class="card-icon">🔔</div><div class="card-title">Push</div><div class="card-desc">Web Push-Benachrichtigungen bei Ladeende</div></div>
+    <div class="card"><div class="card-icon">📖</div><div class="card-title">Handbuch</div><div class="card-desc">Vollständige Anleitung direkt in der App unter /handbook</div></div>
+    <div class="card"><div class="card-icon">🎨</div><div class="card-title">Design</div><div class="card-desc">6 Akzentfarben, sortierbare Navigation, vollständig mobilfähig</div></div>
+  </div>
+
+  <!-- Multi-Tenant -->
+  <h2>Multi-Mandanten-Architektur (v2.0)</h2>
+  <p>Seit v2.0 unterstützt Tesla Carview <strong>mehrere Mandanten</strong> mit vollständiger Datenisolierung:</p>
+  <ul style="margin: 0.8rem 0 0.8rem 1.4rem;">
+    <li>Jeder Mandant hat seine eigene SQLite-Datenbank</li>
+    <li>Neue Mandanten nur per <strong>Einladungslink</strong> (Admin → Benutzer → Einladungslink erstellen, 7 Tage, einmalig)</li>
+    <li><strong>Mehrere Fahrzeuge</strong> pro Mandant: Sync über Einstellungen → 🔄 Fahrzeuge synchronisieren</li>
+    <li><strong>Benutzerverwaltung</strong> pro Mandant (Rollen, Fahrzeugzuweisung, Sperren)</li>
+    <li><strong>Passkey-Authentifizierung</strong> (Touch ID, Face ID, Windows Hello, FIDO2)</li>
+    <li><strong>Passwort-Reset</strong> via Admin-generiertem Link</li>
+    <li><strong>Kostenlose Ladungen</strong>: markierbar, werden aus der Abrechnung ausgeschlossen</li>
+  </ul>
+
+  <!-- Quickstart -->
+  <h2>Schnellstart</h2>
+
+  <h3>Raspberry Pi / Linux-Server (empfohlen)</h3>
+  <pre><code># Als root auf dem Zielgerät:
+curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/setup.sh | bash</code></pre>
+  <p style="color:var(--muted); font-size:0.9rem;">Das Script erkennt automatisch die Architektur (x86_64, ARM64, ARMv7) und installiert alles.</p>
+
+  <h3>Lokale Entwicklung</h3>
+  <pre><code>git clone https://github.com/KnevS/Tesla-Carview.git
+cd Tesla-Carview
+
+# Backend
+cd backend
+cp .env.example .env
+# .env anpassen (JWT_SECRET ist Pflicht!)
+npm install && npm run dev
+
+# Frontend (zweites Terminal)
+cd frontend && npm install && npm run dev</code></pre>
+  <p>→ Browser öffnen: <code>http://localhost:5173</code><br>
+  → Beim ersten Start automatisch zum Setup-Wizard weitergeleitet</p>
+
+  <h3>Nur Konfiguration einrichten</h3>
+  <pre><code>bash deploy/setup-wizard.sh</code></pre>
+  <p style="color:var(--muted); font-size:0.9rem;">Interaktiver Assistent für: Domain, Tesla-API-Zugangsdaten, E-Mail, Web-Push.</p>
+
+  <!-- Erstkonfiguration -->
+  <h2>Erstkonfiguration (Web-Wizard)</h2>
+  <p>Beim ersten Start wird automatisch auf <code>/setup</code> weitergeleitet. Dort kannst du im Browser Mandantenname und Administrator-Account anlegen.</p>
+  <p>Empfohlene Schritte nach dem Login:</p>
+  <ol class="steps">
+    <li>Tesla-Fahrzeug verbinden (Einstellungen → Tesla)</li>
+    <li>Virtual Key am Fahrzeug registrieren (Einstellungen → Virtual Key)</li>
+    <li>MFA aktivieren (Einstellungen → Zwei-Faktor-Authentifizierung)</li>
+    <li>Ladeorte konfigurieren</li>
+  </ol>
+  <p>Das <strong>Benutzerhandbuch</strong> ist direkt in der App unter <code>/handbook</code> verfügbar.</p>
+
+  <!-- Sicherheit -->
+  <h2>Sicherheit</h2>
+  <ul class="sec-list">
+    <li>JWT (Access 15 min, Refresh 7 Tage httpOnly-Cookie)</li>
+    <li>TOTP-MFA (Google Authenticator, Authy, 1Password …)</li>
+    <li>Passkeys (WebAuthn, passwortloser Login)</li>
+    <li>10 Backup-Codes (bcrypt-gehasht, einmalig)</li>
+    <li>Account-Lockout nach 5 Fehlversuchen (15 min)</li>
+    <li>fail2ban IP-Sperre nach 3 fehlgeschlagenen Logins</li>
+    <li>HTTPS mit TLS 1.2/1.3, HSTS, OCSP-Stapling</li>
+    <li>CSP, X-Frame-Options, Permissions-Policy Header</li>
+    <li>Rate-Limiting auf Login- und API-Endpunkten</li>
+    <li>Audit-Log aller sicherheitsrelevanten Aktionen</li>
+    <li>Datenlöschung mit Backup-Warnung und Bestätigung</li>
+  </ul>
+
+  <!-- Tech Stack -->
+  <h2>Tech Stack</h2>
+  <div class="table-card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Schicht</th><th>Technologie</th></tr></thead>
+        <tbody>
+          <tr><td>Frontend</td><td>Vue 3 + Vite + Pinia + Tailwind CSS + Chart.js + Leaflet</td></tr>
+          <tr><td>Backend</td><td>Node.js 20 + Express + SQLite (better-sqlite3)</td></tr>
+          <tr><td>Auth</td><td>JWT + bcrypt + TOTP (otpauth) + WebAuthn (@simplewebauthn)</td></tr>
+          <tr><td>Tesla-Daten</td><td>Tesla Fleet API (OAuth2) + Fleet Telemetry (WebSocket)</td></tr>
+          <tr><td>Multi-Tenancy</td><td>Separate SQLite-Datenbanken pro Mandant, Master-DB für globale Daten</td></tr>
+          <tr><td>Deployment</td><td>Docker Compose + Nginx + Let's Encrypt</td></tr>
+          <tr><td>Plattformen</td><td>linux/amd64 · linux/arm64 · linux/arm/v7</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Projektstruktur -->
+  <h2>Projektstruktur</h2>
+  <pre><code>tesla-carview/
+├── backend/
+│   ├── src/
+│   │   ├── db/            # Schema + DB-Initialisierung
+│   │   ├── middleware/    # auth.js (multi-tenant JWT), security.js, validate.js
+│   │   ├── routes/        # auth, setup, register, passkey, password-reset,
+│   │   │                  # users, vehicles, trips, charging, data-management …
+│   │   └── services/      # teslaApi, poller (multi-tenant), dataSync (GPS) …
+│   └── .env.example       # Konfigurationsvorlage
+├── frontend/
+│   └── src/
+│       ├── views/         # Login, Register, Setup, Dashboard, Trips, Settings …
+│       ├── components/    # NavBar, StatCard
+│       ├── store/         # auth.js, index.js
+│       └── router/        # Routen mit Admin-Guard
+├── deploy/
+│   ├── setup.sh                  # Vollautomatisches Server-Setup
+│   ├── setup-wizard.sh           # Interaktiver Konfigurations-Assistent
+│   ├── nginx-host.conf.template  # Nginx-Config (HTTPS, TLS-Hardening)
+│   └── update.sh                 # Zero-Downtime-Update
+├── docs/                  # Detaillierte Anleitungen
+├── docker-compose.yml          # Entwicklung
+└── docker-compose.prod.yml     # Produktion</code></pre>
+
+  <!-- Umgebungsvariablen -->
+  <h2>Wichtige Umgebungsvariablen (.env)</h2>
+  <div class="table-card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Variable</th><th>Beschreibung</th><th>Beispiel</th></tr></thead>
+        <tbody>
+          <tr><td><code>JWT_SECRET</code></td><td>Geheimer Schlüssel für JWT (mind. 32 Zeichen, zufällig)</td><td><code>openssl rand -hex 32</code></td></tr>
+          <tr><td><code>TESLA_CLIENT_ID</code></td><td>Tesla Developer App Client-ID</td><td><code>abc123…</code></td></tr>
+          <tr><td><code>TESLA_CLIENT_SECRET</code></td><td>Tesla Developer App Secret</td><td><code>secret…</code></td></tr>
+          <tr><td><code>FRONTEND_URL</code></td><td>Öffentliche URL der App (OAuth-Callback + Passkeys)</td><td><code>https://carview.example.com</code></td></tr>
+          <tr><td><code>RP_NAME</code></td><td>Anzeigename für Passkey-Dialoge</td><td><code>Tesla Carview</code></td></tr>
+          <tr><td><code>RP_ID</code></td><td>Domain für WebAuthn (ohne Protokoll)</td><td><code>carview.example.com</code></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Dokumentation -->
+  <h2>Dokumentation</h2>
+  <div class="table-card">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Dokument</th><th>Inhalt</th></tr></thead>
+        <tbody>
+          <tr><td><a href="docs/01-quickstart.md">Quickstart</a></td><td>Lokale Entwicklungsumgebung</td></tr>
+          <tr><td><a href="docs/02-deployment.md">Deployment</a></td><td>Server-Deployment + Raspberry Pi</td></tr>
+          <tr><td><a href="docs/03-authentication.md">Authentifizierung &amp; MFA</a></td><td>Login-System, MFA, Passkeys</td></tr>
+          <tr><td><a href="docs/04-tesla-api.md">Tesla Fleet API</a></td><td>Tesla Developer Account einrichten</td></tr>
+          <tr><td><a href="docs/05-security-architecture.md">Sicherheitsarchitektur</a></td><td>Threat-Model, alle Maßnahmen</td></tr>
+          <tr><td><a href="docs/06-fail2ban.md">fail2ban</a></td><td>Brute-Force-Schutz konfigurieren</td></tr>
+          <tr><td><code>/handbook</code></td><td>In-App Benutzerhandbuch</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Updates -->
+  <h2>Updates</h2>
+  <pre><code>bash deploy/update.sh</code></pre>
+
+  <!-- Unterstützen -->
+  <h2>❤️ Unterstützen</h2>
+  <div class="donate-card">
+    <p>Tesla Carview ist kostenlos und werbefrei. Wenn dir das Programm etwas wert ist, freuen sich folgende gemeinnützige Organisationen über deine direkte Unterstützung:</p>
+    <div class="table-card" style="background:transparent; border-color: rgba(255,255,255,0.08);">
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Organisation</th><th>Beschreibung</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Aktion Deutschland Hilft</strong></td><td>Bündnis von Hilfsorganisationen für schnelle und wirkungsvolle Katastrophenhilfe weltweit</td></tr>
+            <tr><td><strong>Lebenshilfe Rems-Murr</strong></td><td>Unterstützung, Begleitung und Teilhabe für Menschen mit Behinderung im Rems-Murr-Kreis</td></tr>
+            <tr><td><strong>Radio 7 Drachenkinder</strong></td><td>Hilfe für schwer kranke Kinder in der Region – finanziert Therapien und Wünsche</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <blockquote style="margin-top: 1rem;">
+      <strong>100 % deiner Spende geht direkt an die Einrichtung.</strong> Wir sehen weder den Betrag noch deine Daten.
+    </blockquote>
+    <p style="margin-top: 0.8rem; font-size: 0.88rem;">Erreichbar über das ❤️-Symbol in der Navigationsleiste (oben rechts).</p>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>MIT Lizenz · freie Nutzung, Modifikation und Weitergabe erlaubt</p>
+    <p style="margin-top: 0.4rem;"><a href="https://github.com/KnevS/Tesla-Carview">github.com/KnevS/Tesla-Carview</a></p>
+  </div>
+
+</div>
+</body>
+</html>
