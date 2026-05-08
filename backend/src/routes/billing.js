@@ -105,7 +105,9 @@ router.post('/:vehicleId/monta-sync', async (req, res) => {
       authHeaders = { Authorization: `Bearer ${vehicle.monta_api_key}` };
     }
 
-    const resp = await axios.get('https://api.monta.app/v2/charge-sessions', {
+    const montaUrl = 'https://api.monta.app/v1/charge-sessions';
+    console.log('[Monta] Request:', montaUrl, JSON.stringify(params));
+    const resp = await axios.get(montaUrl, {
       headers: authHeaders,
       params,
     });
@@ -138,8 +140,10 @@ router.post('/:vehicleId/monta-sync', async (req, res) => {
   } catch (e) {
     const status = e.response?.status;
     const err    = e.response?.data;
-    console.error('[Monta] Sync-Fehler:', err || e.message);
-    res.status(status || 502).json({ error: err?.message || err || e.message });
+    console.error('[Monta] Sync-Fehler Status:', status);
+    console.error('[Monta] Sync-Fehler Body:', JSON.stringify(err));
+    const msg = typeof err === 'string' ? err : (err?.message || err?.error || JSON.stringify(err) || e.message);
+    res.status(status || 502).json({ error: `Monta API ${status ?? ''}: ${msg}` });
   }
 });
 
