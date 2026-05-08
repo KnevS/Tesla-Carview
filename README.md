@@ -5,6 +5,10 @@ Keine Cloud, keine Datenweitergabe an Dritte – alle Fahrzeugdaten bleiben auf 
 
 Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lokale Entwicklung.
 
+> **🏠 Live-Instanz**: Eine produktive Instanz dieser App läuft unter [teslaview.krische.com](https://teslaview.krische.com) – geschlossen, nur für den Betreiber. Die Instanz bildet die Referenz für alle Features in dieser Dokumentation.
+
+---
+
 ## Features
 
 | Bereich | Beschreibung |
@@ -15,9 +19,9 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 | **Ladeorte** | Definierbare Standorte mit GPS-Radius, Preis/kWh, Auto-Erkennung |
 | **Batterie** | Degradations-Tracking, Reichweiten-Verlauf über Zeit |
 | **Technik** | Live-Telemetrie: TPMS, Leistungsfluss, Klimaanlage, Ladestatus |
-| **Steuerung** | Fahrzeugbefehle: Klima, Türen, Laden, Navigation (Virtual Key) |
+| **Steuerung** | Fahrzeugbefehle: Klima, Türen, Laden, Navigation (Virtual Key erforderlich) |
 | **Fahrtenbuch** | Dienstwagen-Fahrtenbuch, Klassifikation Privat/Dienst/Arbeitsweg |
-| **Abrechnung** | Heimladen-Kostenabrechnung für Dienstwagen (Monta-Integration) |
+| **Abrechnung** | Heimladen-Kostenabrechnung für Dienstwagen (Monta-Integration optional) |
 | **Betriebsbuch** | Wartungen, Reparaturen, Reifen, Inspektionen mit Kosten |
 | **Export** | CSV/JSON-Export für Fahrten & Laden, Vollbackup |
 | **Benachrichtigungen** | Web Push bei Ladeende |
@@ -25,6 +29,8 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 | **Farbschema** | Anpassbares Farbprofil (6 Akzentfarben, lokal gespeichert) |
 | **Navigation** | Individuell sortierbare und ein-/ausblendbare Navigationspunkte |
 | **Mobile** | Vollständig nutzbar auf iPhone/iPad (Safari), Android und Desktop |
+
+---
 
 ## Multi-Mandanten-Architektur (v2.0)
 
@@ -37,6 +43,8 @@ Seit v2.0 unterstützt Tesla Carview **mehrere Mandanten** mit vollständiger Da
 - **Passkey-Authentifizierung** (Touch ID, Face ID, Windows Hello, FIDO2)
 - **Passwort-Reset** via Admin-generiertem Link
 - **Kostenlose Ladungen**: in der Ladehistorie markierbar, werden aus der Abrechnung ausgeschlossen
+
+---
 
 ## Schnellstart
 
@@ -76,6 +84,8 @@ bash deploy/setup-wizard.sh
 
 Interaktiver Assistent für: Domain, Tesla-API-Zugangsdaten, E-Mail, Web-Push.
 
+---
+
 ## Erstkonfiguration (Web-Wizard)
 
 Beim ersten Start wird automatisch auf **/setup** weitergeleitet.
@@ -88,6 +98,46 @@ Empfohlene Schritte nach dem Login:
 4. Ladeorte konfigurieren
 
 Das **Benutzerhandbuch** ist direkt in der App unter `/handbook` verfügbar.
+
+---
+
+## Fahrzeugbefehle & Virtual Key
+
+Für Fahrzeugbefehle (Klimaanlage, Türen, Hupen etc.) ist ein **Virtual Key** notwendig.
+Der Virtual Key erlaubt der App, signierte Befehle direkt ans Fahrzeug zu senden.
+
+**Voraussetzung**: Ein laufender [`tesla-http-proxy`](https://github.com/teslamotors/vehicle-command) auf dem Server.
+
+```bash
+# Proxy starten (Beispiel – Pfade anpassen):
+tesla-http-proxy -port 4443 -host 0.0.0.0 \
+  -tls-key /etc/tesla-proxy/server.key \
+  -cert /etc/tesla-proxy/server.crt \
+  -key-file /etc/tesla-proxy/tesla_priv.pem
+```
+
+Der öffentliche Schlüssel muss unter `/.well-known/appspecific/com.tesla.3p.public-key.pem`
+der App-Domain erreichbar sein, damit das Fahrzeug den Key verifizieren kann.
+
+> **🏠 Meine Installation**: Virtual Key ist eingerichtet und Fahrzeugbefehle sind aktiv.
+> Der Proxy läuft als systemd-Dienst auf Port 4443.
+
+---
+
+## Monta-Integration (optional)
+
+Die Abrechnung unterstützt optionale Synchronisation mit [Monta](https://monta.com) –
+einem EV-Lademanagement-Dienst.
+
+Konfiguration pro Fahrzeug in den Einstellungen:
+- **Monta Client ID** + **Client Secret** (OAuth2, Partner API)
+- **Charge Point ID** (optional, filtert Sessions auf einen bestimmten Ladepunkt)
+
+Die Synchronisation läuft manuell über **Abrechnung → Monta Sync**.
+
+> **🏠 Meine Installation**: Monta ist konfiguriert und wird für die Heimladen-Abrechnung genutzt.
+
+---
 
 ## Sicherheit
 
@@ -103,6 +153,8 @@ Das **Benutzerhandbuch** ist direkt in der App unter `/handbook` verfügbar.
 - **Audit-Log** aller sicherheitsrelevanten Aktionen
 - **Datenlöschung** mit Backup-Warnung und Bestätigungstext
 
+---
+
 ## Tech Stack
 
 | Schicht | Technologie |
@@ -114,6 +166,8 @@ Das **Benutzerhandbuch** ist direkt in der App unter `/handbook` verfügbar.
 | Multi-Tenancy | Separate SQLite-Datenbanken pro Mandant, Master-DB für globale Daten |
 | Deployment | Docker Compose + Nginx + Let's Encrypt |
 | Plattformen | linux/amd64 · linux/arm64 · linux/arm/v7 |
+
+---
 
 ## Projektstruktur
 
@@ -145,6 +199,8 @@ tesla-carview/
 └── docker-compose.prod.yml     # Produktion
 ```
 
+---
+
 ## Wichtige Umgebungsvariablen (.env)
 
 | Variable | Beschreibung | Beispiel |
@@ -155,6 +211,8 @@ tesla-carview/
 | `FRONTEND_URL` | Öffentliche URL der App (für OAuth-Callback + Passkeys) | `https://carview.example.com` |
 | `RP_NAME` | Anzeigename für Passkey-Dialoge | `Tesla Carview` |
 | `RP_ID` | Domain für WebAuthn (ohne Protokoll) | `carview.example.com` |
+
+---
 
 ## Dokumentation
 
@@ -168,11 +226,15 @@ tesla-carview/
 | [fail2ban](docs/06-fail2ban.md) | Brute-Force-Schutz konfigurieren |
 | In-App Handbuch | `/handbook` in der laufenden App |
 
+---
+
 ## Updates
 
 ```bash
 bash deploy/update.sh
 ```
+
+---
 
 ## Lizenz
 
@@ -180,11 +242,10 @@ MIT – freie Nutzung, Modifikation und Weitergabe erlaubt.
 
 ---
 
-## Unterstützen
+## ❤️ Unterstützen
 
-# Aufgabe: 'Unterstützen'-Dialog in TeslaView/CarView ergänzen
-
-Tesla Carview ist kostenlos und werbefrei. Wenn dir das Programm etwas wert ist, freuen sich folgende gemeinnützige Organisationen über deine direkte Unterstützung:
+Tesla Carview ist kostenlos und werbefrei. Wenn dir das Programm etwas wert ist,
+freuen sich folgende gemeinnützige Organisationen über deine direkte Unterstützung:
 
 | Organisation | Beschreibung |
 |---|---|

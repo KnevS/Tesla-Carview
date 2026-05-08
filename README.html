@@ -14,6 +14,9 @@
       --text:     #e8e8e8;
       --muted:    #888;
       --code-bg:  #111;
+      --my-bg:    rgba(99,179,237,0.07);
+      --my-border:rgba(99,179,237,0.3);
+      --my-text:  #90cdf4;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,12 +29,9 @@
       padding: 2rem 1rem;
     }
 
-    .page {
-      max-width: 860px;
-      margin: 0 auto;
-    }
+    .page { max-width: 860px; margin: 0 auto; }
 
-    /* Header */
+    /* Hero */
     .hero {
       text-align: center;
       padding: 3.5rem 2rem 3rem;
@@ -49,19 +49,9 @@
       background: radial-gradient(ellipse at 50% 0%, rgba(227,25,55,0.15) 0%, transparent 70%);
       pointer-events: none;
     }
-    .hero h1 {
-      font-size: 2.8rem;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-      margin-bottom: 0.75rem;
-    }
+    .hero h1 { font-size: 2.8rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 0.75rem; }
     .hero h1 span { color: var(--accent); }
-    .hero p {
-      color: var(--muted);
-      font-size: 1.05rem;
-      max-width: 520px;
-      margin: 0 auto 1.2rem;
-    }
+    .hero p { color: var(--muted); font-size: 1.05rem; max-width: 520px; margin: 0 auto 1.2rem; }
     .badge {
       display: inline-block;
       background: rgba(227,25,55,0.15);
@@ -75,7 +65,21 @@
       margin: 0.2rem;
     }
 
-    /* Sections */
+    /* Live-Instanz callout */
+    .callout-my {
+      background: var(--my-bg);
+      border: 1px solid var(--my-border);
+      border-left: 3px solid var(--my-text);
+      border-radius: 8px;
+      padding: 0.75rem 1.1rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+    .callout-my strong { color: var(--my-text); }
+    .callout-my a { color: var(--my-text); }
+
+    /* Section headings */
     h2 {
       font-size: 1.4rem;
       font-weight: 700;
@@ -95,23 +99,13 @@
       background: var(--accent);
       border-radius: 2px;
     }
-
-    h3 {
-      font-size: 1.05rem;
-      font-weight: 600;
-      color: var(--text);
-      margin: 1.5rem 0 0.6rem;
-    }
+    h3 { font-size: 1.05rem; font-weight: 600; color: var(--text); margin: 1.5rem 0 0.6rem; }
 
     p { margin: 0.6rem 0; color: var(--text); }
 
     /* Tables */
     .table-wrap { overflow-x: auto; margin: 1rem 0; }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.92rem;
-    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
     thead th {
       background: #1f1f1f;
       color: var(--muted);
@@ -126,19 +120,9 @@
     tbody tr { border-bottom: 1px solid var(--border); }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: rgba(255,255,255,0.02); }
-    td {
-      padding: 0.65rem 1rem;
-      vertical-align: top;
-    }
+    td { padding: 0.65rem 1rem; vertical-align: top; }
     td:first-child { font-weight: 600; white-space: nowrap; }
-    td strong { color: var(--text); }
-
-    .table-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      overflow: hidden;
-    }
+    .table-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
 
     /* Code */
     pre {
@@ -150,12 +134,8 @@
       margin: 1rem 0;
       font-size: 0.85rem;
     }
-    code {
-      font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
-      color: #cdd6f4;
-      line-height: 1.6;
-    }
-    p code, li code {
+    code { font-family: 'SF Mono', 'Fira Code', Consolas, monospace; color: #cdd6f4; line-height: 1.6; }
+    p code, li code, td code {
       background: #1e1e2e;
       border: 1px solid #313244;
       border-radius: 4px;
@@ -172,7 +152,6 @@
       align-items: flex-start;
       gap: 0.75rem;
       margin-bottom: 0.6rem;
-      color: var(--text);
     }
     .steps li::before {
       content: counter(step);
@@ -190,13 +169,8 @@
       margin-top: 0.15rem;
     }
 
-    /* Cards */
-    .card-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 1rem;
-      margin: 1rem 0;
-    }
+    /* Feature cards */
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin: 1rem 0; }
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -210,13 +184,7 @@
     .card-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.5; }
 
     /* Security list */
-    .sec-list {
-      list-style: none;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 0.5rem;
-      margin: 1rem 0;
-    }
+    .sec-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0.5rem; margin: 1rem 0; }
     .sec-list li {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -229,7 +197,6 @@
     }
     .sec-list li::before { content: '✓'; color: #a6e3a1; font-weight: 700; }
 
-    /* Blockquote */
     blockquote {
       border-left: 3px solid var(--accent);
       background: rgba(227,25,55,0.06);
@@ -241,18 +208,6 @@
     }
     blockquote strong { color: var(--text); }
 
-    /* Footer */
-    .footer {
-      margin-top: 3rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--border);
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.85rem;
-    }
-    .footer a { color: var(--accent2); text-decoration: none; }
-
-    /* Donate section */
     .donate-card {
       background: linear-gradient(135deg, #1a1a1a, #141414);
       border: 1px solid rgba(227,25,55,0.3);
@@ -260,13 +215,13 @@
       padding: 1.5rem 1.8rem;
       margin-top: 1rem;
     }
-    .donate-card p { color: var(--muted); margin-bottom: 1rem; font-size: 0.95rem; }
 
+    .footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); text-align: center; color: var(--muted); font-size: 0.85rem; }
     a { color: var(--accent2); text-decoration: none; }
     a:hover { text-decoration: underline; }
-
     ul { padding-left: 1.4rem; }
     ul li { margin-bottom: 0.3rem; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
 
     @media (max-width: 600px) {
       .hero h1 { font-size: 2rem; }
@@ -291,6 +246,13 @@
     </div>
   </div>
 
+  <!-- Live-Instanz -->
+  <div class="callout-my">
+    <strong>🏠 Live-Instanz:</strong> Eine produktive Instanz dieser App läuft unter
+    <a href="https://teslaview.krische.com">teslaview.krische.com</a> — geschlossen, nur für den Betreiber.
+    Die Instanz bildet die Referenz für alle Features in dieser Dokumentation.
+  </div>
+
   <!-- Features -->
   <h2>Features</h2>
   <div class="card-grid">
@@ -300,9 +262,9 @@
     <div class="card"><div class="card-icon">📍</div><div class="card-title">Ladeorte</div><div class="card-desc">Definierbare Standorte mit GPS-Radius, Preis/kWh, Auto-Erkennung</div></div>
     <div class="card"><div class="card-icon">🔋</div><div class="card-title">Batterie</div><div class="card-desc">Degradations-Tracking, Reichweiten-Verlauf über Zeit</div></div>
     <div class="card"><div class="card-icon">📡</div><div class="card-title">Technik</div><div class="card-desc">Live-Telemetrie: TPMS, Leistungsfluss, Klimaanlage, Ladestatus</div></div>
-    <div class="card"><div class="card-icon">🎮</div><div class="card-title">Steuerung</div><div class="card-desc">Fahrzeugbefehle: Klima, Türen, Laden, Navigation (Virtual Key)</div></div>
+    <div class="card"><div class="card-icon">🎮</div><div class="card-title">Steuerung</div><div class="card-desc">Fahrzeugbefehle: Klima, Türen, Laden, Navigation (Virtual Key erforderlich)</div></div>
     <div class="card"><div class="card-icon">📓</div><div class="card-title">Fahrtenbuch</div><div class="card-desc">Dienstwagen-Fahrtenbuch, Klassifikation Privat/Dienst/Arbeitsweg</div></div>
-    <div class="card"><div class="card-icon">💶</div><div class="card-title">Abrechnung</div><div class="card-desc">Heimladen-Kostenabrechnung für Dienstwagen (Monta-Integration)</div></div>
+    <div class="card"><div class="card-icon">💶</div><div class="card-title">Abrechnung</div><div class="card-desc">Heimladen-Kostenabrechnung für Dienstwagen (Monta-Integration optional)</div></div>
     <div class="card"><div class="card-icon">🔧</div><div class="card-title">Betriebsbuch</div><div class="card-desc">Wartungen, Reparaturen, Reifen, Inspektionen mit Kosten</div></div>
     <div class="card"><div class="card-icon">📤</div><div class="card-title">Export</div><div class="card-desc">CSV/JSON-Export für Fahrten &amp; Laden, Vollbackup</div></div>
     <div class="card"><div class="card-icon">🔔</div><div class="card-title">Push</div><div class="card-desc">Web Push-Benachrichtigungen bei Ladeende</div></div>
@@ -315,52 +277,58 @@
   <p>Seit v2.0 unterstützt Tesla Carview <strong>mehrere Mandanten</strong> mit vollständiger Datenisolierung:</p>
   <ul style="margin: 0.8rem 0 0.8rem 1.4rem;">
     <li>Jeder Mandant hat seine eigene SQLite-Datenbank</li>
-    <li>Neue Mandanten nur per <strong>Einladungslink</strong> (Admin → Benutzer → Einladungslink erstellen, 7 Tage, einmalig)</li>
-    <li><strong>Mehrere Fahrzeuge</strong> pro Mandant: Sync über Einstellungen → 🔄 Fahrzeuge synchronisieren</li>
+    <li>Neue Mandanten nur per <strong>Einladungslink</strong> (7 Tage, einmalig verwendbar)</li>
+    <li><strong>Mehrere Fahrzeuge</strong> pro Mandant</li>
     <li><strong>Benutzerverwaltung</strong> pro Mandant (Rollen, Fahrzeugzuweisung, Sperren)</li>
     <li><strong>Passkey-Authentifizierung</strong> (Touch ID, Face ID, Windows Hello, FIDO2)</li>
     <li><strong>Passwort-Reset</strong> via Admin-generiertem Link</li>
     <li><strong>Kostenlose Ladungen</strong>: markierbar, werden aus der Abrechnung ausgeschlossen</li>
   </ul>
 
-  <!-- Quickstart -->
+  <!-- Schnellstart -->
   <h2>Schnellstart</h2>
-
-  <h3>Raspberry Pi / Linux-Server (empfohlen)</h3>
+  <h3>📦 Raspberry Pi / Linux-Server (für alle)</h3>
   <pre><code># Als root auf dem Zielgerät:
 curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/setup.sh | bash</code></pre>
-  <p style="color:var(--muted); font-size:0.9rem;">Das Script erkennt automatisch die Architektur (x86_64, ARM64, ARMv7) und installiert alles.</p>
 
   <h3>Lokale Entwicklung</h3>
   <pre><code>git clone https://github.com/KnevS/Tesla-Carview.git
 cd Tesla-Carview
 
 # Backend
-cd backend
-cp .env.example .env
-# .env anpassen (JWT_SECRET ist Pflicht!)
+cd backend && cp .env.example .env
 npm install && npm run dev
 
 # Frontend (zweites Terminal)
 cd frontend && npm install && npm run dev</code></pre>
-  <p>→ Browser öffnen: <code>http://localhost:5173</code><br>
-  → Beim ersten Start automatisch zum Setup-Wizard weitergeleitet</p>
-
-  <h3>Nur Konfiguration einrichten</h3>
-  <pre><code>bash deploy/setup-wizard.sh</code></pre>
-  <p style="color:var(--muted); font-size:0.9rem;">Interaktiver Assistent für: Domain, Tesla-API-Zugangsdaten, E-Mail, Web-Push.</p>
+  <p>→ Browser öffnen: <code>http://localhost:5173</code></p>
 
   <!-- Erstkonfiguration -->
   <h2>Erstkonfiguration (Web-Wizard)</h2>
-  <p>Beim ersten Start wird automatisch auf <code>/setup</code> weitergeleitet. Dort kannst du im Browser Mandantenname und Administrator-Account anlegen.</p>
-  <p>Empfohlene Schritte nach dem Login:</p>
+  <p>Beim ersten Start wird automatisch auf <code>/setup</code> weitergeleitet.</p>
   <ol class="steps">
     <li>Tesla-Fahrzeug verbinden (Einstellungen → Tesla)</li>
     <li>Virtual Key am Fahrzeug registrieren (Einstellungen → Virtual Key)</li>
     <li>MFA aktivieren (Einstellungen → Zwei-Faktor-Authentifizierung)</li>
     <li>Ladeorte konfigurieren</li>
   </ol>
-  <p>Das <strong>Benutzerhandbuch</strong> ist direkt in der App unter <code>/handbook</code> verfügbar.</p>
+
+  <!-- Virtual Key -->
+  <h2>Fahrzeugbefehle &amp; Virtual Key</h2>
+  <p>Für Fahrzeugbefehle (Klimaanlage, Türen, Hupen etc.) ist ein <strong>Virtual Key</strong> und ein laufender
+  <code>tesla-http-proxy</code> erforderlich.</p>
+  <div class="callout-my">
+    <strong>🏠 Meine Installation:</strong> Virtual Key ist eingerichtet und aktiv.
+    Der <code>tesla-http-proxy</code> läuft als systemd-Dienst auf Port 4443.
+  </div>
+
+  <!-- Monta -->
+  <h2>Monta-Integration (optional)</h2>
+  <p>Die Abrechnung unterstützt optionale Synchronisation mit <a href="https://monta.com">Monta</a> (EV-Lademanagement).
+  Konfiguration pro Fahrzeug: Monta Client ID + Client Secret (OAuth2) und optionale Charge Point ID.</p>
+  <div class="callout-my">
+    <strong>🏠 Meine Installation:</strong> Monta ist konfiguriert und wird für die Heimladen-Abrechnung genutzt.
+  </div>
 
   <!-- Sicherheit -->
   <h2>Sicherheit</h2>
@@ -397,32 +365,6 @@ cd frontend && npm install && npm run dev</code></pre>
     </div>
   </div>
 
-  <!-- Projektstruktur -->
-  <h2>Projektstruktur</h2>
-  <pre><code>tesla-carview/
-├── backend/
-│   ├── src/
-│   │   ├── db/            # Schema + DB-Initialisierung
-│   │   ├── middleware/    # auth.js (multi-tenant JWT), security.js, validate.js
-│   │   ├── routes/        # auth, setup, register, passkey, password-reset,
-│   │   │                  # users, vehicles, trips, charging, data-management …
-│   │   └── services/      # teslaApi, poller (multi-tenant), dataSync (GPS) …
-│   └── .env.example       # Konfigurationsvorlage
-├── frontend/
-│   └── src/
-│       ├── views/         # Login, Register, Setup, Dashboard, Trips, Settings …
-│       ├── components/    # NavBar, StatCard
-│       ├── store/         # auth.js, index.js
-│       └── router/        # Routen mit Admin-Guard
-├── deploy/
-│   ├── setup.sh                  # Vollautomatisches Server-Setup
-│   ├── setup-wizard.sh           # Interaktiver Konfigurations-Assistent
-│   ├── nginx-host.conf.template  # Nginx-Config (HTTPS, TLS-Hardening)
-│   └── update.sh                 # Zero-Downtime-Update
-├── docs/                  # Detaillierte Anleitungen
-├── docker-compose.yml          # Entwicklung
-└── docker-compose.prod.yml     # Produktion</code></pre>
-
   <!-- Umgebungsvariablen -->
   <h2>Wichtige Umgebungsvariablen (.env)</h2>
   <div class="table-card">
@@ -430,7 +372,7 @@ cd frontend && npm install && npm run dev</code></pre>
       <table>
         <thead><tr><th>Variable</th><th>Beschreibung</th><th>Beispiel</th></tr></thead>
         <tbody>
-          <tr><td><code>JWT_SECRET</code></td><td>Geheimer Schlüssel für JWT (mind. 32 Zeichen, zufällig)</td><td><code>openssl rand -hex 32</code></td></tr>
+          <tr><td><code>JWT_SECRET</code></td><td>Geheimer Schlüssel für JWT (mind. 32 Zeichen)</td><td><code>openssl rand -hex 32</code></td></tr>
           <tr><td><code>TESLA_CLIENT_ID</code></td><td>Tesla Developer App Client-ID</td><td><code>abc123…</code></td></tr>
           <tr><td><code>TESLA_CLIENT_SECRET</code></td><td>Tesla Developer App Secret</td><td><code>secret…</code></td></tr>
           <tr><td><code>FRONTEND_URL</code></td><td>Öffentliche URL der App (OAuth-Callback + Passkeys)</td><td><code>https://carview.example.com</code></td></tr>
@@ -449,9 +391,9 @@ cd frontend && npm install && npm run dev</code></pre>
         <thead><tr><th>Dokument</th><th>Inhalt</th></tr></thead>
         <tbody>
           <tr><td><a href="docs/01-quickstart.md">Quickstart</a></td><td>Lokale Entwicklungsumgebung</td></tr>
-          <tr><td><a href="docs/02-deployment.md">Deployment</a></td><td>Server-Deployment + Raspberry Pi</td></tr>
+          <tr><td><a href="docs/02-deployment.md">Deployment</a></td><td>Server-Deployment + Raspberry Pi + Auto-Deploy</td></tr>
           <tr><td><a href="docs/03-authentication.md">Authentifizierung &amp; MFA</a></td><td>Login-System, MFA, Passkeys</td></tr>
-          <tr><td><a href="docs/04-tesla-api.md">Tesla Fleet API</a></td><td>Tesla Developer Account einrichten</td></tr>
+          <tr><td><a href="docs/04-tesla-api.md">Tesla Fleet API</a></td><td>Developer Account, Virtual Key, XP7-Besonderheiten</td></tr>
           <tr><td><a href="docs/05-security-architecture.md">Sicherheitsarchitektur</a></td><td>Threat-Model, alle Maßnahmen</td></tr>
           <tr><td><a href="docs/06-fail2ban.md">fail2ban</a></td><td>Brute-Force-Schutz konfigurieren</td></tr>
           <tr><td><code>/handbook</code></td><td>In-App Benutzerhandbuch</td></tr>
@@ -467,8 +409,8 @@ cd frontend && npm install && npm run dev</code></pre>
   <!-- Unterstützen -->
   <h2>❤️ Unterstützen</h2>
   <div class="donate-card">
-    <p>Tesla Carview ist kostenlos und werbefrei. Wenn dir das Programm etwas wert ist, freuen sich folgende gemeinnützige Organisationen über deine direkte Unterstützung:</p>
-    <div class="table-card" style="background:transparent; border-color: rgba(255,255,255,0.08);">
+    <p style="color:var(--muted); margin-bottom:1rem;">Tesla Carview ist kostenlos und werbefrei. Wenn dir das Programm etwas wert ist, freuen sich folgende gemeinnützige Organisationen über deine direkte Unterstützung:</p>
+    <div class="table-card" style="background:transparent; border-color:rgba(255,255,255,0.08);">
       <div class="table-wrap">
         <table>
           <thead><tr><th>Organisation</th><th>Beschreibung</th></tr></thead>
@@ -480,16 +422,16 @@ cd frontend && npm install && npm run dev</code></pre>
         </table>
       </div>
     </div>
-    <blockquote style="margin-top: 1rem;">
+    <blockquote style="margin-top:1rem;">
       <strong>100 % deiner Spende geht direkt an die Einrichtung.</strong> Wir sehen weder den Betrag noch deine Daten.
     </blockquote>
-    <p style="margin-top: 0.8rem; font-size: 0.88rem;">Erreichbar über das ❤️-Symbol in der Navigationsleiste (oben rechts).</p>
+    <p style="margin-top:0.8rem; font-size:0.88rem; color:var(--muted);">Erreichbar über das ❤️-Symbol in der Navigationsleiste (oben rechts).</p>
   </div>
 
   <!-- Footer -->
   <div class="footer">
     <p>MIT Lizenz · freie Nutzung, Modifikation und Weitergabe erlaubt</p>
-    <p style="margin-top: 0.4rem;"><a href="https://github.com/KnevS/Tesla-Carview">github.com/KnevS/Tesla-Carview</a></p>
+    <p style="margin-top:0.4rem;"><a href="https://github.com/KnevS/Tesla-Carview">github.com/KnevS/Tesla-Carview</a></p>
   </div>
 
 </div>
