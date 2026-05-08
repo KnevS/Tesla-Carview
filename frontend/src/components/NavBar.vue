@@ -37,11 +37,6 @@
           v-tooltip="'Datenverwaltung – Daten löschen und Datenbestand einsehen'">
           🗑️
         </RouterLink>
-        <RouterLink to="/support"
-          class="text-gray-400 hover:text-red-400 transition"
-          v-tooltip="'Unterstützen – gemeinnützige Organisationen'">
-          ❤️
-        </RouterLink>
         <RouterLink to="/handbook"
           class="text-gray-400 hover:text-white transition"
           v-tooltip="'Benutzerhandbuch – Anleitungen, FAQ und Tipps zur App'">

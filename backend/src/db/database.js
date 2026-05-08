@@ -147,11 +147,14 @@ function migrateLegacyTokens(master, tdb, tenantId) {
 function runTenantMigrations(db) {
   const col = (tbl) => db.prepare(`PRAGMA table_info(${tbl})`).all().map(c => c.name);
 
-  // users: email
+  // users: email, lang
   const uCols = col('users');
   if (!uCols.includes('email')) {
     db.exec('ALTER TABLE users ADD COLUMN email TEXT');
     db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email) WHERE email IS NOT NULL');
+  }
+  if (!uCols.includes('lang')) {
+    db.exec("ALTER TABLE users ADD COLUMN lang TEXT DEFAULT 'de'");
   }
 
   // trips
@@ -165,6 +168,18 @@ function runTenantMigrations(db) {
     db.exec("ALTER TABLE trips ADD COLUMN trip_type TEXT NOT NULL DEFAULT 'private'");
     db.exec('ALTER TABLE trips ADD COLUMN purpose TEXT');
   }
+  if (!tCols.includes('driver_id')) {
+    db.exec('ALTER TABLE trips ADD COLUMN driver_id INTEGER');
+  }
+
+  // drivers
+  db.exec(`CREATE TABLE IF NOT EXISTS drivers (
+    id         INTEGER PRIMARY KEY,
+    name       TEXT NOT NULL,
+    color      TEXT DEFAULT '#6b7280',
+    is_default INTEGER DEFAULT 0,
+    created_at INTEGER DEFAULT (unixepoch())
+  )`);
 
   // vehicles
   const vCols = col('vehicles');

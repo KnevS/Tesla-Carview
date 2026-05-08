@@ -100,6 +100,66 @@
       <p v-else class="text-gray-400 text-sm">Kein Fahrzeug verbunden.</p>
     </div>
 
+    <!-- Fahrerverwaltung -->
+    <div class="card space-y-4">
+      <h2 class="font-semibold" v-tooltip="'Fahrer anlegen und benennen – werden bei Fahrten zugewiesen und in der Auswertung angezeigt.'">
+        👤 Fahrer &amp; Profile
+      </h2>
+
+      <div class="space-y-2">
+        <div v-for="d in drivers" :key="d.id"
+          class="flex items-center gap-3 bg-gray-800 rounded-xl px-3 py-2">
+          <!-- Farbpunkt wählbar -->
+          <div class="relative flex-shrink-0">
+            <button @click="editingColor = editingColor === d.id ? null : d.id"
+              class="w-5 h-5 rounded-full border-2 border-gray-600 hover:border-white transition flex-shrink-0"
+              :style="{ background: d.color }"
+              v-tooltip="'Farbe ändern'"></button>
+            <div v-if="editingColor === d.id"
+              class="absolute left-0 top-full mt-1 z-20 bg-gray-900 border border-gray-600 rounded-xl p-2 flex flex-wrap gap-1.5 shadow-xl"
+              style="width: 144px" @click.stop>
+              <button v-for="c in DRIVER_COLORS" :key="c"
+                class="w-7 h-7 rounded-full border-2 transition hover:scale-110"
+                :class="d.color === c ? 'border-white' : 'border-transparent'"
+                :style="{ background: c }"
+                @click="saveDriverColor(d, c)"></button>
+            </div>
+          </div>
+
+          <!-- Name -->
+          <input :value="d.name"
+            @change="e => saveDriverName(d, e.target.value)"
+            class="flex-1 bg-transparent text-white text-sm focus:outline-none border-b border-transparent focus:border-gray-500 py-0.5 min-w-0"
+            :placeholder="'Name'" />
+
+          <!-- Default-Badge -->
+          <button @click="setDefaultDriver(d)"
+            class="text-xs px-2 py-0.5 rounded-full transition flex-shrink-0"
+            :class="d.is_default ? 'bg-tesla-red text-white' : 'bg-gray-700 text-gray-400 hover:text-white'"
+            v-tooltip="d.is_default ? 'Standard-Fahrer – wird bei neuen Fahrten auto-zugewiesen' : 'Als Standard-Fahrer setzen'">
+            {{ d.is_default ? '★ Standard' : '☆ Standard' }}
+          </button>
+
+          <!-- Löschen -->
+          <button @click="deleteDriver(d)"
+            class="text-gray-600 hover:text-red-400 transition text-sm flex-shrink-0"
+            v-tooltip="'Fahrer löschen – bestehende Fahrten werden auf Kein Fahrer gesetzt'">✕</button>
+        </div>
+        <p v-if="!drivers.length" class="text-gray-500 text-sm">Noch keine Fahrer angelegt.</p>
+      </div>
+
+      <!-- Neuen Fahrer -->
+      <div class="flex gap-2">
+        <input v-model="newDriverName" type="text" placeholder="Name (z.B. Sven)"
+          class="flex-1 bg-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-tesla-red"
+          @keyup.enter="addDriver" />
+        <button @click="addDriver" :disabled="!newDriverName.trim()" class="btn-primary text-sm">
+          + Hinzufügen
+        </button>
+      </div>
+      <p v-if="driverMsg" class="text-sm" :class="driverOk ? 'text-green-400' : 'text-red-400'">{{ driverMsg }}</p>
+    </div>
+
     <div class="card space-y-3">
       <h2 class="font-semibold"
         v-tooltip="'Zwei-Faktor-Authentifizierung schützt dein Konto: auch wenn dein Passwort gestohlen wird, kann sich niemand ohne deinen zweiten Faktor anmelden.'">
@@ -352,6 +412,58 @@ const navStore   = useNavStore();
 const themeStore = useThemeStore();
 const router     = useRouter();
 
+// Fahrerverwaltung
+const DRIVER_COLORS = [
+  '#6b7280','#ef4444','#f97316','#eab308',
+  '#22c55e','#3b82f6','#a855f7','#ec4899',
+];
+const drivers      = ref([]);
+const newDriverName = ref('');
+const driverMsg    = ref('');
+const driverOk     = ref(false);
+const editingColor = ref(null);
+
+async function loadDrivers() {
+  const { data } = await api.get('/drivers');
+  drivers.value = data;
+}
+
+async function addDriver() {
+  const name = newDriverName.value.trim();
+  if (!name) return;
+  try {
+    await api.post('/drivers', { name, color: '#6b7280' });
+    newDriverName.value = '';
+    driverMsg.value = 'Fahrer gespeichert.'; driverOk.value = true;
+    await loadDrivers();
+  } catch { driverMsg.value = 'Fehler beim Speichern.'; driverOk.value = false; }
+  setTimeout(() => { driverMsg.value = ''; }, 2500);
+}
+
+async function saveDriverName(driver, name) {
+  if (!name.trim()) return;
+  await api.patch(`/drivers/${driver.id}`, { name: name.trim() });
+  driver.name = name.trim();
+}
+
+async function saveDriverColor(driver, color) {
+  editingColor.value = null;
+  await api.patch(`/drivers/${driver.id}`, { color });
+  driver.color = color;
+}
+
+async function setDefaultDriver(driver) {
+  const newDefault = driver.is_default ? 0 : 1;
+  await api.patch(`/drivers/${driver.id}`, { is_default: newDefault });
+  await loadDrivers();
+}
+
+async function deleteDriver(driver) {
+  if (!confirm(`Fahrer "${driver.name}" löschen? Bestehende Fahrten werden auf "kein Fahrer" gesetzt.`)) return;
+  await api.delete(`/drivers/${driver.id}`);
+  await loadDrivers();
+}
+
 const teslaConnected  = ref(false);
 const virtualKeyHost  = window.location.hostname;
 const syncingVehicles  = ref(false);
@@ -540,6 +652,7 @@ const actionTooltips = {
 const actionTooltip = a => actionTooltips[a] || a;
 
 onMounted(async () => {
+  loadDrivers();
   const [mfa, audit, teslaStatus] = await Promise.all([
     api.get('/mfa/status'),
     api.get('/users/me/audit'),

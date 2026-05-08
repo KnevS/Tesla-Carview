@@ -74,6 +74,34 @@
             <p class="text-gray-400 mt-1">{{ fmtDateTime(trip.end_time) }}</p>
           </div>
         </div>
+
+        <!-- Fahrer -->
+        <div class="mt-4 pt-4 border-t border-gray-700 flex items-center gap-3">
+          <p class="text-gray-400 text-sm w-16 flex-shrink-0">Fahrer</p>
+          <div class="relative">
+            <button @click="showDriverMenu = !showDriverMenu"
+              class="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border transition"
+              :style="trip.driver_color
+                ? `border-color:${trip.driver_color}55; color:${trip.driver_color}; background:${trip.driver_color}18`
+                : 'border-color:#4b5563; color:#9ca3af'"">
+              <span v-if="trip.driver_color" class="w-2.5 h-2.5 rounded-full" :style="{ background: trip.driver_color }"></span>
+              {{ trip.driver_name || '– kein Fahrer' }}
+              <span class="text-xs opacity-60">▾</span>
+            </button>
+            <div v-if="showDriverMenu"
+              class="absolute left-0 top-full mt-1 z-20 bg-gray-800 border border-gray-600 rounded-xl shadow-xl min-w-max py-1">
+              <button class="block w-full text-left px-4 py-1.5 text-sm hover:bg-gray-700 text-gray-400"
+                @click="assignDriver(null)">– Kein Fahrer</button>
+              <button v-for="d in drivers" :key="d.id"
+                class="flex items-center gap-2 w-full text-left px-4 py-1.5 text-sm hover:bg-gray-700"
+                :class="trip.driver_id === d.id ? 'text-white font-semibold' : 'text-gray-300'"
+                @click="assignDriver(d)">
+                <span class="w-2.5 h-2.5 rounded-full" :style="{ background: d.color }"></span>
+                {{ d.name }}
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Geschwindigkeitskurve -->
@@ -121,6 +149,8 @@ const route   = useRoute();
 const trip    = ref(null);
 const loading = ref(true);
 const sliderIdx = ref(0);
+const drivers = ref([]);
+const showDriverMenu = ref(false);
 let leafletMap  = null;
 let sliderMarker = null;
 
@@ -218,12 +248,24 @@ async function initMap(points) {
   leafletMap.fitBounds(L.latLngBounds(latlngs), { padding: [20, 20] });
 }
 
+async function assignDriver(driver) {
+  showDriverMenu.value = false;
+  trip.value.driver_id    = driver?.id    ?? null;
+  trip.value.driver_name  = driver?.name  ?? null;
+  trip.value.driver_color = driver?.color ?? null;
+  await api.patch(`/trips/${route.params.id}/driver`, { driver_id: driver?.id ?? null });
+}
+
 onMounted(async () => {
-  const { data } = await api.get(`/trips/${route.params.id}`);
-  trip.value    = data;
+  const [tripRes, driversRes] = await Promise.all([
+    api.get(`/trips/${route.params.id}`),
+    api.get('/drivers'),
+  ]);
+  trip.value    = tripRes.data;
+  drivers.value = driversRes.data;
   loading.value = false;
-  if (data.points?.length >= 2) {
-    await initMap(data.points);
+  if (tripRes.data.points?.length >= 2) {
+    await initMap(tripRes.data.points);
   }
 });
 

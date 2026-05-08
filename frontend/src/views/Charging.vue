@@ -57,7 +57,25 @@
               +{{ fmt(s.energy_added_kwh, 1) }} kWh
             </p>
             <p class="text-sm text-gray-400">{{ fmt(s.max_power_kw, 0) }} kW max</p>
-            <p v-if="s.cost != null && !s.is_free" class="text-sm text-gray-400">{{ fmt(s.cost, 2) }} {{ s.currency }}</p>
+            <!-- Kosten & Tarif -->
+            <div v-if="!s.is_free">
+              <p v-if="s.cost != null" class="text-sm text-gray-300 font-medium">{{ fmt(s.cost, 2) }} {{ s.currency || 'EUR' }}</p>
+              <!-- Inline-Tarifeditor -->
+              <div v-if="editingRateId === s.id" class="flex items-center gap-1 mt-1 justify-end">
+                <input v-model="rateInput" type="number" step="0.01" min="0"
+                  class="w-20 text-xs bg-gray-700 border border-gray-500 rounded px-1 py-0.5 text-right"
+                  placeholder="€/kWh"
+                  @keyup.enter="saveRate(s)"
+                  @keyup.escape="editingRateId = null" />
+                <button @click="saveRate(s)" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-2 py-0.5 rounded">✓</button>
+                <button @click="editingRateId = null" class="text-xs text-gray-400 hover:text-white px-1">✕</button>
+              </div>
+              <button v-else @click="startEditRate(s)"
+                class="text-xs text-gray-500 hover:text-gray-300 transition mt-0.5"
+                v-tooltip="'Ladepreis für diese Session individuell anpassen (überschreibt den Standardtarif)'">
+                {{ s.billing_rate_kwh != null ? fmt(s.billing_rate_kwh, 3) + ' €/kWh' : '✎ Tarif' }}
+              </button>
+            </div>
             <button @click="toggleFree(s)"
               class="text-xs px-2 py-0.5 rounded transition"
               :class="s.is_free
@@ -83,6 +101,8 @@ const appStore = useAppStore();
 const sessions = ref([]);
 const stats = ref({ byType: [] });
 const loading = ref(true);
+const editingRateId = ref(null);
+const rateInput = ref('');
 
 const fmt = (v, d = 0) => (+(v || 0)).toFixed(d);
 const fmtDate = ts => new Date(ts * 1000).toLocaleString('de-DE');
@@ -111,6 +131,19 @@ async function toggleFree(session) {
   const newVal = !session.is_free;
   await api.patch(`/charging/${session.id}`, { is_free: newVal });
   session.is_free = newVal;
+}
+
+function startEditRate(session) {
+  editingRateId.value = session.id;
+  rateInput.value = session.billing_rate_kwh != null ? String(session.billing_rate_kwh) : '';
+}
+
+async function saveRate(session) {
+  const rate = parseFloat(rateInput.value);
+  if (isNaN(rate) || rate < 0) { editingRateId.value = null; return; }
+  const { data } = await api.patch(`/charging/${session.id}`, { billing_rate_kwh: rate });
+  Object.assign(session, data);
+  editingRateId.value = null;
 }
 
 onMounted(load);

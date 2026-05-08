@@ -31,6 +31,7 @@ import passkeyRoutes          from './routes/passkey.js';
 import passwordResetRoutes    from './routes/password-reset.js';
 import dataManagementRoutes   from './routes/data-management.js';
 import inviteRoutes            from './routes/invites.js';
+import driverRoutes            from './routes/drivers.js';
 
 const app    = express();
 const PORT   = process.env.PORT || 3000;
@@ -83,6 +84,7 @@ app.use('/api/charging-locations', chargingLocationRoutes);
 app.use('/api/billing',            billingRoutes);
 app.use('/api/data',               dataManagementRoutes);
 app.use('/api/invites',            inviteRoutes);
+app.use('/api/drivers',            driverRoutes);
 
 server.listen(PORT, async () => {
   console.log(`Tesla Carview Backend läuft auf Port ${PORT}`);

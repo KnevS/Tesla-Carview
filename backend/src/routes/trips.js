@@ -4,13 +4,20 @@ const router = Router();
 
 router.get('/', (req, res) => {
   const db = req.db;
-  const { vehicle_id, limit = 50, offset = 0 } = req.query;
+  const { vehicle_id, limit = 50, offset = 0, driver_id } = req.query;
   try {
-    const where = vehicle_id ? 'WHERE vehicle_id = ?' : '';
-    const params = vehicle_id ? [vehicle_id, +limit, +offset] : [+limit, +offset];
+    const conds = [];
+    const params = [];
+    if (vehicle_id) { conds.push('t.vehicle_id = ?'); params.push(vehicle_id); }
+    if (driver_id === 'null') { conds.push('t.driver_id IS NULL'); }
+    else if (driver_id) { conds.push('t.driver_id = ?'); params.push(driver_id); }
+    const where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
+    params.push(+limit, +offset);
     const trips = db.prepare(
-      `SELECT t.*, v.display_name as vehicle_name FROM trips t
+      `SELECT t.*, v.display_name as vehicle_name, d.name as driver_name, d.color as driver_color
+       FROM trips t
        JOIN vehicles v ON v.id = t.vehicle_id
+       LEFT JOIN drivers d ON d.id = t.driver_id
        ${where} ORDER BY t.start_time DESC LIMIT ? OFFSET ?`
     ).all(...params);
     res.json(trips);
@@ -57,10 +64,12 @@ router.get('/logbook', (req, res) => {
     if (month) { conds.push("strftime('%m', datetime(start_time,'unixepoch')) = ?"); params.push(month.padStart(2,'0')); }
     const where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
     const trips = db.prepare(
-      `SELECT id, start_time, end_time, start_lat, start_lon, end_lat, end_lon,
-              start_address, end_address, distance_km, energy_used_kwh,
-              start_soc, end_soc, trip_type, purpose
-       FROM trips ${where} ORDER BY start_time DESC`
+      `SELECT t.id, t.start_time, t.end_time, t.start_lat, t.start_lon, t.end_lat, t.end_lon,
+              t.start_address, t.end_address, t.distance_km, t.energy_used_kwh,
+              t.start_soc, t.end_soc, t.trip_type, t.purpose, t.driver_id,
+              d.name as driver_name, d.color as driver_color
+       FROM trips t LEFT JOIN drivers d ON d.id = t.driver_id
+       ${where} ORDER BY t.start_time DESC`
     ).all(...params);
     res.json(trips);
   } catch (err) {
@@ -92,11 +101,27 @@ router.get('/logbook/months', (req, res) => {
   }
 });
 
+router.patch('/:id/driver', (req, res) => {
+  const db = req.db;
+  const { driver_id } = req.body;
+  try {
+    db.prepare('UPDATE trips SET driver_id=? WHERE id=?').run(driver_id ?? null, req.params.id);
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/:id', (req, res) => {
   const db = req.db;
   try {
-    const trip = db.prepare('SELECT * FROM trips WHERE id = ?').get(req.params.id);
+    const trip = db.prepare(
+      `SELECT t.*, d.name as driver_name, d.color as driver_color
+       FROM trips t LEFT JOIN drivers d ON d.id = t.driver_id
+       WHERE t.id = ?`
+    ).get(req.params.id);
     if (!trip) return res.status(404).json({ error: 'Fahrt nicht gefunden' });
+
 
     const points = trip.source === 'telemetry'
       ? db.prepare(

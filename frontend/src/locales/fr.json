@@ -1,0 +1,471 @@
+{
+  "common": {
+    "save": "Enregistrer", "cancel": "Annuler", "delete": "Supprimer", "loading": "Chargement...",
+    "yes": "Oui", "no": "Non", "back": "Retour", "close": "Fermer",
+    "confirm": "Confirmer", "create": "Créer", "add": "Ajouter", "remove": "Retirer",
+    "edit": "Modifier", "next": "Suivant →", "prev": "← Précédent", "error": "Erreur",
+    "success": "Succès", "logout": "Se déconnecter", "noData": "Aucune donnée disponible",
+    "noVehicle": "Aucun véhicule connecté", "all": "Tous", "from": "De", "to": "À",
+    "private": "Privé", "business": "Professionnel", "commute": "Trajet domicile-travail",
+    "km": "km", "kwh": "kWh", "donate": "Faire un don"
+  },
+  "lang": {
+    "title": "Langue / Language",
+    "label": "Langue d'affichage",
+    "de": "Deutsch", "en": "English", "fr": "Français",
+    "es": "Español", "tr": "Türkçe", "el": "Ελληνικά"
+  },
+  "nav": {
+    "dashboard":   { "label": "Tableau de bord", "tooltip": "Vue d'ensemble avec indicateurs clés, dernier trajet et statistiques mensuelles" },
+    "trips":       { "label": "Trajets",          "tooltip": "Liste de tous les trajets enregistrés avec trace GPS sur une carte" },
+    "fahrtenbuch": { "label": "Carnet de route",  "tooltip": "Classer les trajets et voir la répartition privé/professionnel/domicile-travail" },
+    "abrechnung":  { "label": "Facturation",      "tooltip": "Remboursement des frais de recharge à domicile pour véhicules de société" },
+    "charging":    { "label": "Recharge",         "tooltip": "Toutes les sessions de recharge avec courbes, coûts et répartition par type" },
+    "battery":     { "label": "Batterie",         "tooltip": "Historique d'autonomie et analyse de dégradation dans le temps" },
+    "logbook":     { "label": "Carnet",           "tooltip": "Entretiens, réparations, pneus, contrôles et notes sur le véhicule" },
+    "telemetry":   { "label": "Technique",        "tooltip": "Données live du véhicule : pression pneus, climatisation, puissance, SOC" },
+    "control":     { "label": "Contrôle",         "tooltip": "Contrôler le véhicule : climatisation, portes, recharge, navigation" },
+    "export":      { "label": "Export",           "tooltip": "Exporter les données en CSV/JSON, créer une sauvegarde complète, notifications push" },
+    "system":      { "label": "Système",          "tooltip": "Informations de version, utilisation CPU/RAM et statistiques de base de données" }
+  },
+  "dashboard": {
+    "title": "Tableau de bord", "loading": "Chargement des données...",
+    "connectHint": "Connectez votre véhicule pour voir les données de trajet",
+    "connectBtn": "Connecter →",
+    "totalKm": "Distance totale", "trips": "Trajets", "charged": "Rechargé",
+    "chargingCost": "Coût de recharge", "lastTrip": "Dernier trajet",
+    "allTrips": "Voir tous les trajets →", "monthlyKm": "Aperçu mensuel – Distance (km)",
+    "distance": "Distance", "consumption": "Consommation", "noTrips": "Aucun trajet enregistré."
+  },
+  "trips": {
+    "title": "Trajets", "loading": "Chargement des trajets...", "loadMore": "Charger plus",
+    "allTypes": "Tous les types", "allDrivers": "Tous les conducteurs", "noDriver": "Sans conducteur",
+    "filterPrivate": "Trajets privés", "filterBusiness": "Trajets professionnels", "filterCommute": "Domicile-travail",
+    "start": "Départ", "dest": "Destination", "distance": "Distance", "consumption": "Consommation",
+    "soc": "SoC", "purpose": "Saisir le motif du trajet (ex. visite client, déplacement pro)…",
+    "assignDriver": "Attribuer un conducteur", "noDriverLabel": "– Conducteur"
+  },
+  "tripDetail": {
+    "back": "← Trajets", "title": "Détail du trajet", "loading": "Chargement...",
+    "distance": "Distance", "duration": "Durée", "avgSpeed": "Vit. moy.", "consumption": "Consommation",
+    "gpsTrack": "Trace GPS", "noGps": "Aucune donnée GPS disponible pour ce trajet.",
+    "route": "Itinéraire", "speedChart": "Vitesse & Puissance",
+    "battery": "Batterie", "startSoc": "SoC départ", "endSoc": "SoC arrivée", "totalEnergy": "Énergie totale",
+    "driver": "Conducteur", "noDriverAssigned": "– aucun conducteur"
+  },
+  "logbook": {
+    "title": "Carnet de route", "allMonths": "Tous les mois",
+    "totalKm": "Total km", "private": "Trajets privés", "business": "Trajets professionnels", "commute": "Domicile-travail",
+    "kmSplit": "Répartition kilométrique"
+  },
+  "charging": {
+    "title": "Recharge", "sessions": "Sessions", "totalCharged": "Total rechargé",
+    "totalCost": "Coût de recharge", "maxPower": "Puissance max.", "byType": "Par type de chargeur",
+    "loading": "Chargement des sessions...", "unknownLocation": "Lieu inconnu", "free": "gratuit",
+    "markFree": "✕ marquer gratuit", "unmarkFree": "↩ marquer payant",
+    "editRate": "✎ Tarif", "rateTooltip": "Ajuster individuellement le tarif de cette session (remplace le tarif par défaut)", "rateSet": "Définir"
+  },
+  "battery": {
+    "title": "Batterie & Dégradation", "rangeHistory": "Historique d'autonomie",
+    "degradationOverview": "Aperçu dégradation", "firstMeasurement": "Première mesure",
+    "lastMeasurement": "Dernière mesure", "degradation": "Dégradation",
+    "noData": "Pas encore assez de données pour l'analyse de dégradation"
+  },
+  "control": {
+    "title": "Contrôle du véhicule", "online": "En ligne", "sleeping": "En veille", "offline": "Hors ligne",
+    "wake": "☀️ Réveiller", "sleepHint": "Le véhicule est en veille ou hors ligne",
+    "climate": "🌡 Climatisation", "on": "Marche", "off": "Arrêt",
+    "temp": "Température", "setTemp": "Régler la température",
+    "preCondition": "❄️ Préconditionnement / Max-Defrost",
+    "vehicle": "🚗 Véhicule", "doors": "Portes", "unlock": "🔓 Déverrouiller", "lock": "🔒 Verrouiller",
+    "sentryMode": "Mode Sentry", "lights": "💡 Feux", "horn": "📯 Klaxon",
+    "charging": "⚡ Recharge", "chargeStart": "Démarrer", "chargeStop": "Arrêter",
+    "chargeLimit": "Limite de charge", "setChargeLimit": "Régler la limite de charge",
+    "navigation": "🗺️ Navigation", "navPlaceholder": "Saisir une adresse ou un lieu…",
+    "sendNav": "Envoyer la destination", "recentNav": "Récemment utilisé"
+  },
+  "exportPage": {
+    "title": "Exporter les données",
+    "tripsLabel": "🗺️ Trajets", "tripsDesc": "Toutes les données de trajet avec distance, consommation et SoC",
+    "chargingLabel": "🔋 Sessions de recharge",
+    "backupLabel": "💾 Sauvegarde complète", "backupDesc": "Toutes les données (trajets, recharge, batterie, carnet) en un seul fichier JSON",
+    "notifications": "🔔 Notifications",
+    "notificationsDesc": "Recevoir une notification navigateur quand la recharge est terminée",
+    "enableNotifications": "Activer les notifications",
+    "notificationsActive": "✓ Notifications actives", "disableNotifications": "Désactiver",
+    "downloadFailed": "Échec du téléchargement"
+  },
+  "maintenanceLog": {
+    "title": "Carnet de bord", "add": "+ Entrée", "loading": "Chargement des entrées...",
+    "empty": "Aucune entrée", "newEntry": "Nouvelle entrée", "entryTitle": "Titre *",
+    "category": "Catégorie", "description": "Description", "odometer": "Kilométrage",
+    "cost": "Coût (€)", "confirmDelete": "Supprimer cette entrée ?",
+    "cat_note": "Note", "cat_maintenance": "Entretien", "cat_repair": "Réparation",
+    "cat_tires": "Pneus", "cat_inspection": "Contrôle technique", "cat_accident": "Accident", "cat_other": "Autre"
+  },
+  "billing": {
+    "title": "Remboursement recharge domicile", "companyCar": "Véhicule de société", "montaSync": "Synchro Monta",
+    "csvExport": "Export CSV",
+    "notCompany": "Ce véhicule est configuré comme véhicule privé",
+    "toSettings": "Aller aux paramètres",
+    "chargedKwh": "kWh rechargés", "avgRate": "Tarif moy.", "reimbursement": "Montant remboursé",
+    "inclVat": "TVA incluse", "monthlyOverview": "Aperçu mensuel",
+    "month": "Mois", "sessions": "Sessions", "kwhTesla": "kWh (véhicule)", "kwhMid": "kWh (compteur)",
+    "rate": "Tarif €/kWh", "amount": "Montant €", "settled": "Réglé",
+    "yes": "Oui", "pending": "En attente", "total": "Total",
+    "chargingSessions": "Sessions de recharge", "date": "Date", "location": "Lieu",
+    "status": "Statut", "template": "Modèle de facturation",
+    "templateTitle": "Demande de remboursement recharge domicile"
+  },
+  "telemetry": {
+    "title": "Technique véhicule", "live": "En direct", "offline": "Hors ligne", "refresh": "Actualiser",
+    "sleepHint": "Le véhicule est en veille ou hors ligne", "autoLoad": "Les données se chargent automatiquement",
+    "soc": "SOC", "speed": "Vitesse", "power": "Puissance", "odometer": "Kilométrage",
+    "livePos": "📍 Position live", "regen": "← Récupération", "drive": "Propulsion →",
+    "tpms": "🏎 Pression pneus (TPMS)", "fl": "AG", "fr": "AD", "rl": "RG", "rr": "RD",
+    "climate": "🌡 Climatisation", "insideTemp": "Température intérieure", "outsideTemp": "Température extérieure",
+    "targetTemp": "Température cible", "climateOn": "Climatisation", "frontDefroster": "Dégivrage avant",
+    "rearDefroster": "Dégivrage arrière",
+    "charging": "⚡ Recharge", "chargeStatus": "Statut", "chargePower": "Puissance de recharge",
+    "chargeRate": "Vitesse de recharge", "chargeLimit": "Limite de charge", "timeToFull": "Temps avant plein",
+    "vehicle": "🚗 Véhicule", "state": "État", "locked": "Verrouillé",
+    "sentry": "Sentry", "software": "Logiciel", "heading": "Cap"
+  },
+  "settings": {
+    "title": "Paramètres",
+    "vehicleProfile": "🚗 Profil du véhicule",
+    "noVehicle": "Aucun véhicule connecté.",
+    "category": "Catégorie du véhicule",
+    "private": "🏠 Véhicule privé", "privateDesc": "Trajets privés uniquement, pas de carnet requis",
+    "company": "💼 Véhicule de société", "companyDesc": "Carnet de route + facturation active",
+    "companyName": "Nom de l'entreprise (employeur)",
+    "licensePlate": "Immatriculation", "model": "Modèle", "color": "Couleur",
+    "electricity": "Tarif recharge domicile (€/kWh)", "montaChargePoint": "ID point de charge Monta",
+    "montaKey": "Clé API Monta", "montaKeyHint": "Monta → Paramètres → API → Créer une clé.",
+    "homeCharging": "Recharge domicile / Configuration Monta",
+    "drivers": "👤 Conducteurs & Profils",
+    "driversHint": "Créer et nommer des conducteurs – attribués aux trajets et affichés dans les rapports.",
+    "noDrivers": "Aucun conducteur créé.",
+    "driverName": "Nom (ex. Jean)",
+    "addDriver": "+ Ajouter", "setDefault": "★ Par défaut", "unsetDefault": "☆ Par défaut",
+    "defaultTooltip": "Conducteur par défaut – attribué automatiquement aux nouveaux trajets",
+    "setDefaultTooltip": "Définir comme conducteur par défaut",
+    "deleteDriverConfirm": "Supprimer le conducteur \"{name}\" ? Les trajets existants seront mis à \"aucun conducteur\".",
+    "driverSaved": "Conducteur enregistré.", "driverError": "Erreur lors de l'enregistrement.",
+    "mfa": "🔐 Authentification à deux facteurs",
+    "mfaEnabled": "✓ MFA activé", "mfaBackupCodes": "Codes de secours restants :",
+    "mfaDisable": "Désactiver MFA", "mfaDisableConfirm": "Saisir le mot de passe pour confirmer :",
+    "mfaConfirmBtn": "Confirmer", "mfaNotEnabled": "MFA non activé. Activez-le pour plus de sécurité.",
+    "mfaActivate": "Activer MFA",
+    "passkey": "🗝️ Passkey (connexion sans mot de passe)",
+    "passkeyDesc": "Enregistrez un passkey pour cet appareil afin de vous connecter sans mot de passe.",
+    "passkeyAdded": "Ajouté :", "passkeyRemove": "Supprimer",
+    "passkeyNone": "Aucun passkey enregistré.",
+    "passkeyAdd": "+ Ajouter un passkey", "passkeyAdding": "Veuillez patienter…",
+    "teslaConnection": "⚡ Connexion véhicule", "teslaConnected": "● Connecté", "teslaDisconnected": "● Non connecté",
+    "teslaReconnect": "Reconnecter le véhicule", "teslaSync": "🔄 Synchroniser les véhicules",
+    "teslaSyncing": "Synchronisation…",
+    "virtualKey": "Clé virtuelle (commandes véhicule)",
+    "virtualKeyDesc": "À enregistrer une fois sur le véhicule pour que la climatisation, les portes et la recharge fonctionnent",
+    "telemetrySection": "📡 Fleet Telemetry (GPS & données temps réel)",
+    "telemetryDesc": "Envoie la trace GPS, la vitesse et la batterie en direct à cette application",
+    "registerPartner": "🔑 Enregistrer l'application", "registering": "Enregistrement…",
+    "activateTelemetry": "📡 Activer la télémétrie", "activating": "Activation…",
+    "password": "🔑 Changer le mot de passe",
+    "currentPw": "Mot de passe actuel", "newPw": "Nouveau mot de passe (min. 12 caractères)", "confirmPw": "Confirmer le nouveau mot de passe",
+    "changePw": "Changer le mot de passe",
+    "auditLog": "📝 Activité récente", "noAudit": "Aucune entrée",
+    "theme": "🎨 Thème de couleur", "themeDesc": "Couleur d'accentuation pour les boutons et la navigation. Sauvegardé localement.",
+    "nav": "🧭 Personnaliser la navigation", "navReset": "Réinitialiser", "navHint": "Changer l'ordre avec ↑↓ · Œil pour afficher/masquer",
+    "navHide": "Masquer", "navShow": "Afficher"
+  },
+  "auth": {
+    "loginTitle": "Veuillez vous connecter", "tenant": "Locataire", "tenantPlaceholder": "— Veuillez sélectionner —",
+    "username": "Nom d'utilisateur", "password": "Mot de passe", "loginBtn": "Se connecter",
+    "passkeyBtn": "Se connecter avec passkey", "registerLink": "Créer un nouveau locataire",
+    "forgotPw": "Mot de passe oublié ?", "handbook": "Manuel & aide",
+    "loginError": "Échec de la connexion"
+  },
+  "register": {
+    "title": "Créer un nouveau locataire",
+    "checkingInvite": "Vérification du lien d'invitation…",
+    "noInvite": "Veuillez contacter un administrateur pour obtenir un lien d'invitation",
+    "backToLogin": "← Retour à la connexion",
+    "tenantName": "Nom du locataire", "tenantSlug": "Identifiant locataire (slug)",
+    "adminAccount": "Compte administrateur",
+    "passwordStrengths": ["Faible", "Moyen", "Bon", "Fort"],
+    "created": "Locataire créé !", "credentials": "Vos identifiants :",
+    "slugLabel": "Identifiant locataire :",
+    "slugWarning": "⚠ Notez votre identifiant locataire",
+    "nextSteps": "Prochaines étapes recommandées :",
+    "step1": "① Connecter le véhicule", "step2": "② Configurer MFA", "step3": "③ Configurer les lieux de recharge"
+  },
+  "mfa": {
+    "setupTitle": "🔐 Configurer l'authentification à deux facteurs",
+    "step1Title": "Étape 1 : Connecter l'application", "step1Hint": "Ouvrez votre application d'authentification",
+    "step2Title": "Étape 2 : Confirmer le code", "step2Hint": "Entrez le code à 6 chiffres de votre application",
+    "step3Title": "Étape 3 : MFA activé !",
+    "activated": "✓ MFA activé !", "backupWarning": "⚠️ Codes de secours – sauvegardez-les maintenant !",
+    "backupOnce": "Ces codes ne sont affichés qu'une seule fois",
+    "done": "Terminé", "verify": "Confirmer", "checking": "Vérification...",
+    "verifyTitle": "🔐 Authentification à deux facteurs",
+    "enterCode": "Saisir le code de l'application d'authentification",
+    "enterBackup": "Saisir un code de secours",
+    "useApp": "Utiliser l'application d'authentification", "useBackup": "Utiliser un code de secours",
+    "backToLogin": "Retour à la connexion"
+  },
+  "setup": {
+    "title": "Configuration initiale – créer un compte admin", "welcome": "Bienvenue",
+    "notConfigured": "CarView-eXcellenT n'a pas encore été configuré",
+    "wizardDesc": "Cet assistant crée votre premier compte administrateur",
+    "featureLocal": "✓ Toutes les données restent sur votre serveur",
+    "featureNoCloud": "✓ Pas de cloud, pas de partage de données",
+    "featureControl": "✓ Contrôle total sur vos données",
+    "startBtn": "Démarrer la configuration →",
+    "adminAccount": "Compte administrateur", "adminDesc": "Ce compte a un accès complet à l'application",
+    "tenantOptional": "▸ Nom du locataire (optionnel)", "tenantHint": "Pertinent uniquement si vous gérez plusieurs locataires",
+    "done": "Configuration terminée !", "doneDesc": "Votre compte administrateur a été créé avec succès",
+    "nextSteps": "Prochaines étapes recommandées :",
+    "ns1": "① Activer MFA dans les paramètres", "ns2": "② Connecter un véhicule", "ns3": "③ Changer le mot de passe après la première connexion"
+  },
+  "users": {
+    "title": "Gestion des utilisateurs", "add": "+ Créer un utilisateur", "loading": "Chargement des utilisateurs…",
+    "locked": "verrouillé", "assignVehicle": "Attribuer un véhicule", "resetLink": "Lien de réinitialisation",
+    "deactivate": "Désactiver", "activate": "Activer",
+    "resetGenerated": "Lien de réinitialisation généré", "linkValid": "Lien valide 60 minutes",
+    "copy": "Copier", "inviteNew": "🔗 Inviter un nouveau locataire",
+    "createInvite": "+ Créer un lien d'invitation",
+    "inviteDesc": "Seul celui qui possède ce lien peut enregistrer un nouveau locataire",
+    "inviteExpiry": "Lien (valide 7 jours, usage unique) :",
+    "openInvites": "Invitations en attente", "open": "Ouvert", "expires": "Expire le :",
+    "revoke": "Révoquer", "used": "✓ utilisé",
+    "assignTo": "Attribuer un véhicule à :", "newUser": "Créer un nouvel utilisateur",
+    "role": "Rôle", "email": "E-mail (optionnel)", "allRequired": "Remplir tous les champs obligatoires",
+    "pwTooShort": "Le mot de passe doit comporter au moins 12 caractères",
+    "creating": "Création…"
+  },
+  "data": {
+    "title": "Gestion des données", "warning": "⚠ Attention – la suppression est irréversible",
+    "currentData": "Données actuelles", "deleteAll": "Supprimer toutes les données du locataire",
+    "deleteAllDesc": "Tous les trajets, sessions de recharge, télémétrie, carnet et journaux d'audit",
+    "deleteVehicle": "Supprimer les données du véhicule", "deleteVehicleDesc": "Supprime toutes les données d'un seul véhicule",
+    "deleteBtn": "Supprimer les données",
+    "confirmType": "Saisir pour confirmer :", "confirmText": "SUPPRIMER LES DONNÉES",
+    "deleteSuccess": "Toutes les données supprimées. Sauvegarde créée"
+  },
+  "system": {
+    "title": "📊 Système & Version", "appTitle": "⚡ CarView-eXcellenT",
+    "version": "Version", "gitHash": "Hash Git", "branch": "Branche", "buildDate": "Date de build",
+    "nodeVersion": "Node.js", "uptime": "Uptime serveur",
+    "updates": "🔄 Mise à jour logicielle", "checkNow": "Vérifier maintenant", "checking": "Vérification…",
+    "updateAvailable": "Mise à jour disponible !", "newCommit": "Nouveau commit :", "runOnServer": "Exécuter sur le serveur :",
+    "noUpdate": "À jour – vous exécutez la dernière version",
+    "dataStays": "✅ Toutes les données sont conservées",
+    "autoUpdate": "⏰ Configurer les mises à jour automatiques",
+    "cpu": "🖥 CPU", "load": "Charge", "cores": "Cœurs", "model": "Modèle",
+    "ram": "💾 Mémoire", "used": "Utilisé", "free": "Libre", "total": "Total",
+    "nodeProcess": "⚙️ Processus Node.js", "pid": "PID", "heapUsed": "Tas utilisé",
+    "heapTotal": "Tas total", "rss": "RSS", "processUptime": "Uptime processus",
+    "database": "🗄 Base de données", "dbSize": "Taille du fichier", "batterySnapshots": "Snapshots batterie",
+    "logbookEntries": "Entrées carnet", "auditEntries": "Entrées audit",
+    "server": "🖥 Serveur", "hostname": "Nom d'hôte", "platform": "Plateforme",
+    "arch": "Architecture", "osUptime": "Uptime OS"
+  },
+  "drivers": { "noDriver": "– Aucun conducteur" },
+  "handbook": {
+    "title": "Manuel CarView-eXcellenT",
+    "version": "Version 2.0 · Auto-hébergé · Multi-locataire",
+    "toc": "Table des matières",
+    "sections": [
+      { "id": "overview",           "icon": "🌟", "title": "Vue d'ensemble" },
+      { "id": "requirements",       "icon": "📋", "title": "Prérequis" },
+      { "id": "installation",       "icon": "🚀", "title": "Installation" },
+      { "id": "first-setup",        "icon": "⚙️",  "title": "Configuration initiale dans le navigateur" },
+      { "id": "virtual-key",        "icon": "🔑", "title": "Configurer la clé virtuelle" },
+      { "id": "charging-locations", "icon": "⚡", "title": "Lieux de recharge & coûts" },
+      { "id": "security",           "icon": "🔐", "title": "Sécurité" },
+      { "id": "multitenancy",       "icon": "🏢", "title": "Multi-locataire" },
+      { "id": "backup",             "icon": "💾", "title": "Sauvegarde des données" },
+      { "id": "tesla-api",          "icon": "⚡", "title": "Configuration API Tesla Developer" },
+      { "id": "monta",              "icon": "🔌", "title": "Intégration Monta (facturation)" },
+      { "id": "troubleshooting",    "icon": "🔧", "title": "Dépannage" }
+    ],
+    "overview": {
+      "title": "🌟 Vue d'ensemble",
+      "body": "CarView-eXcellenT est une application de journalisation auto-hébergée pour véhicules électriques. Toutes les données restent exclusivement sur votre propre serveur – pas de cloud, pas de partage de données. L'application est entièrement responsive et fonctionne sur iPhone/iPad (Safari), smartphones Android et navigateurs de bureau.",
+      "features": [
+        { "icon": "🚗", "title": "Carnet de route",    "desc": "Traces GPS, consommation, classification du type de trajet" },
+        { "icon": "⚡", "title": "Recharge",            "desc": "Sessions de recharge avec coûts, détection GPS du lieu" },
+        { "icon": "🔋", "title": "Batterie",            "desc": "Suivi de dégradation, historique d'autonomie" },
+        { "icon": "📊", "title": "Tableau de bord",     "desc": "Statistiques, aperçu mensuel, activité récente" },
+        { "icon": "🎮", "title": "Contrôle",            "desc": "Climatisation, portes, feux – directement depuis l'application" },
+        { "icon": "📝", "title": "Carnet",              "desc": "Entretiens, réparations, coûts avec dates" },
+        { "icon": "📤", "title": "Export",              "desc": "CSV/JSON pour toutes les données, sauvegarde complète en ZIP" },
+        { "icon": "🔔", "title": "Notifications push",  "desc": "Notification navigateur à la fin de la recharge" },
+        { "icon": "📱", "title": "Optimisé mobile",     "desc": "Entièrement utilisable sur iPhone/iPad (Safari), Android et bureau" }
+      ]
+    },
+    "requirements": {
+      "title": "📋 Prérequis",
+      "serverTitle": "Serveur",
+      "serverItems": [
+        "Serveur Linux (x86_64, ARM64 ou ARMv7) avec min. 1 Go de RAM",
+        "Docker + Docker Compose (installé par le script de configuration)",
+        "Domaine accessible publiquement + certificat TLS (requis pour l'API)",
+        "Le port 443 (HTTPS) doit être accessible de l'extérieur"
+      ],
+      "teslaTitle": "Compte Tesla Developer",
+      "teslaItems": [
+        "S'inscrire sur developer.tesla.com",
+        "Créer une application → noter le Client ID et le Client Secret",
+        "URL de rappel : https://<votre-domaine>/api/auth/callback",
+        "Pour les commandes véhicule : demander l'accès Fleet API (gratuit, 1–3 jours ouvrés)"
+      ]
+    },
+    "installation": {
+      "title": "🚀 Installation",
+      "desc": "Le script de configuration installe tout automatiquement : Docker, nginx, TLS, tesla-http-proxy.",
+      "asRoot": "# En tant que root sur le serveur cible :",
+      "scriptAsks": "# Le script pose des questions interactivement :",
+      "promptDomain": "→ Domaine (ex. carview.monserveur.fr)",
+      "promptClientId": "→ Tesla Client ID et Client Secret",
+      "promptRedirect": "→ Tesla Redirect URI",
+      "promptJwt": "→ JWT Secret (généré automatiquement)",
+      "altTitle": "Alternative : Configuration manuelle",
+      "altDesc": "Copiez .env.example → .env et adaptez toutes les valeurs. Ensuite : docker compose -f docker-compose.prod.yml up -d"
+    },
+    "firstSetup": {
+      "title": "⚙️ Configuration initiale dans le navigateur",
+      "steps": [
+        { "title": "Ouvrir le navigateur",    "desc": "Ouvrez https://<votre-domaine>/setup — vous serez redirigé automatiquement." },
+        { "title": "Créer un locataire",      "desc": "Choisissez un nom de locataire (ex. \"Famille Martin\") et un identifiant (ex. \"martin\"). L'identifiant est requis à la connexion – notez-le." },
+        { "title": "Créer un compte admin",   "desc": "Définissez nom d'utilisateur et mot de passe. Le mot de passe doit comporter au moins 12 caractères. Recommandation : une phrase de passe de 4 mots." },
+        { "title": "Connecter le véhicule",   "desc": "Après connexion : Paramètres → Connecter le compte. Vous serez redirigé pour vous authentifier." },
+        { "title": "Importer les véhicules",  "desc": "Allez dans Paramètres → Connexion véhicule → Synchroniser les véhicules. Tous les véhicules sont importés automatiquement." }
+      ]
+    },
+    "virtualKey": {
+      "title": "🔑 Configurer la clé virtuelle",
+      "desc": "Pour les commandes véhicule (déverrouiller, climatisation, etc.) une clé virtuelle doit être enregistrée sur le véhicule.",
+      "steps": [
+        "Vérifiez que tesla-http-proxy fonctionne : systemctl status tesla-http-proxy",
+        "Ouvrez dans Safari sur iPhone : https://tesla.com/_ak/<votre-domaine>",
+        "L'application Tesla demande « Autoriser l'application ? » → confirmer",
+        "Restez à portée Bluetooth du véhicule — la clé est acceptée en 30 secondes",
+        "Vérifiez dans Paramètres → Connexion véhicule → Statut clé virtuelle"
+      ]
+    },
+    "chargingLocations": {
+      "title": "⚡ Lieux de recharge & coûts",
+      "desc": "Les lieux de recharge sont détectés automatiquement via GPS et associés à un prix par kWh.",
+      "autoTitle": "Détection GPS automatique",
+      "autoDesc": "Lorsqu'un lieu de recharge avec coordonnées GPS et rayon (200m par défaut) est enregistré, le bon lieu est détecté automatiquement au début de la recharge et le prix/kWh stocké est appliqué.",
+      "createTitle": "Créer un lieu de recharge",
+      "createDesc": "Sous Recharge → Lieux : saisir le nom, le type (domicile/bureau/public), le prix/kWh, les coordonnées GPS et le rayon de détection.",
+      "adjustTitle": "Ajuster les coûts manuellement",
+      "adjustDesc": "Dans la liste de recharge : cliquer sur une session → modifier les coûts. Les coûts peuvent aussi être mis à 0 (ex. recharge gratuite).",
+      "freeTitle": "✕ Marquer une recharge comme gratuite",
+      "freeDesc": "Chaque session dispose d'un bouton « ✕ marquer gratuit ». Les sessions ainsi marquées apparaissent grisées avec le badge « gratuit » et sont automatiquement exclues de la facturation.",
+      "freeHint": "Cas d'usage typique : recharge sur le lieu de travail fournie par l'employeur. Utilisez le bouton « ↩ marquer payant » pour annuler le marquage."
+    },
+    "security": {
+      "title": "🔐 Sécurité",
+      "features": [
+        { "icon": "🔑", "title": "Passkey / WebAuthn", "desc": "Connexion sans mot de passe par empreinte digitale, Face ID ou clé matérielle" },
+        { "icon": "📱", "title": "MFA TOTP",            "desc": "Authentification à deux facteurs avec application d'authentification" },
+        { "icon": "🛡️", "title": "Verrouillage compte", "desc": "Compte verrouillé après 5 tentatives échouées pendant 15 minutes" },
+        { "icon": "🍪", "title": "Refresh token",       "desc": "Cookie httpOnly, valide 7 jours, rotation automatique" },
+        { "icon": "📋", "title": "Journal d'audit",     "desc": "Toutes les connexions, modifications et événements de sécurité consignés" },
+        { "icon": "🔒", "title": "HTTPS + HSTS",        "desc": "TLS 1.2/1.3, HSTS, agrafage OCSP, en-têtes sécurisés" }
+      ],
+      "recommendTitle": "Paramètres de sécurité recommandés",
+      "recommend": [
+        "Activer MFA (TOTP) après la première connexion",
+        "Configurer un passkey pour une connexion sans mot de passe",
+        "Créer des sauvegardes régulières (Export)",
+        "Mot de passe fort : min. 16 caractères ou phrase de 4 mots"
+      ]
+    },
+    "multitenancy": {
+      "title": "🏢 Multi-locataire",
+      "desc": "CarView-eXcellenT prend en charge plusieurs locataires entièrement isolés sur une même instance. Chaque locataire dispose de sa propre base de données – aucun locataire ne peut jamais voir les données d'un autre.",
+      "inviteTitle": "Créer des locataires (lien d'invitation)",
+      "inviteDesc": "Les nouveaux locataires ne peuvent être enregistrés que via un lien d'invitation. Un administrateur génère le lien sous Admin → Utilisateurs → Créer un lien d'invitation. Le lien est valide 7 jours et ne peut être utilisé qu'une seule fois.",
+      "multiVehicleTitle": "Plusieurs véhicules par locataire",
+      "multiVehicleDesc": "Tous les véhicules d'un compte connecté sont importés automatiquement lors de la synchronisation. Changez de véhicule en haut à droite dans la barre de navigation.",
+      "loginTitle": "Connexion avec l'identifiant locataire",
+      "loginDesc": "Avec plusieurs locataires, un champ locataire apparaît à la connexion. Avec un seul locataire, il est détecté automatiquement.",
+      "userMgmtTitle": "Gestion des utilisateurs",
+      "userMgmtDesc": "Les administrateurs peuvent créer des utilisateurs supplémentaires et attribuer des véhicules au sein de leur locataire. Sous Admin → Utilisateurs."
+    },
+    "backup": {
+      "title": "💾 Sauvegarde des données",
+      "manualTitle": "Export manuel",
+      "manualDesc": "Sous Export : CSV ou JSON pour les trajets et sessions de recharge, et sauvegarde complète en ZIP.",
+      "autoTitle": "Sauvegarde automatique (serveur)",
+      "autoDesc": "Les bases de données SQLite se trouvent dans le volume Docker tesla_data. Pour des sauvegardes automatiques sur le serveur :",
+      "cron": "# Sauvegarde quotidienne à 3h (crontab -e) :\n0 3 * * * cp /var/lib/docker/volumes/tesla_data/_data/*.db /backup/",
+      "warningTitle": "Important avant de supprimer",
+      "warningDesc": "Créez toujours un export avant de supprimer des données. Les données supprimées ne peuvent pas être récupérées."
+    },
+    "teslaApi": {
+      "title": "⚡ Configuration API Tesla Developer",
+      "desc": "CarView-eXcellenT communique via l'API Tesla Fleet officielle. Vous avez besoin d'un compte Tesla Developer gratuit et d'une application enregistrée.",
+      "step1Title": "Étape 1 – Créer un compte développeur",
+      "step1Items": ["Rendez-vous sur developer.tesla.com et connectez-vous avec votre compte Tesla.", "Acceptez les conditions d'utilisation développeur.", "Cliquez sur Créer une application."],
+      "step2Title": "Étape 2 – Configurer l'application",
+      "step2Items": ["Nom de l'application : nom au choix, ex. CarView-eXcellenT", "Description : courte description (obligatoire)", "Origine autorisée : votre URL d'application publique", "URI de redirection : https://carview.example.com/api/auth/callback", "Scopes (requis) : vehicle_device_data, vehicle_cmds, vehicle_charging_cmds, vehicle_location, openid, offline_access", "⚠ vehicle_location est requis pour le suivi GPS (Fleet Telemetry)"],
+      "step3Title": "Étape 3 – Noter les identifiants",
+      "step3Desc": "Après création vous recevez :",
+      "step3Items": ["Client ID – une chaîne de type UUID", "Client Secret – visible une seule fois, copiez et stockez en sécurité"],
+      "step3Hint": "Saisissez ces valeurs dans le fichier .env ou fournissez-les lors de l'assistant de configuration interactif.",
+      "step4Title": "Étape 4 – Demander l'accès Fleet API (pour les commandes)",
+      "step4Desc": "Pour que les commandes véhicule (climatisation, portes, recharge) fonctionnent, votre application doit être enregistrée comme partenaire Tesla.",
+      "step4Hint": "Le script de configuration effectue cette étape automatiquement si FRONTEND_URL est défini. Sinon manuellement via Postman ou curl. Prend 1–3 jours ouvrés pour être activé.",
+      "step5Title": "Étape 5 – Connecter dans CarView-eXcellenT",
+      "step5Items": ["Après connexion : Paramètres → Connexion véhicule → Reconnecter", "Vous serez redirigé pour vous connecter et autoriser l'accès.", "Après redirection : Paramètres → 🔄 Synchroniser les véhicules", "Tous les véhicules apparaissent dans l'application."],
+      "step6Title": "Étape 6 – Activer Fleet Telemetry (suivi GPS)",
+      "step6Desc": "Les données GPS sur les nouveaux véhicules (ex. Model Y depuis 2024, VIN XP7) proviennent exclusivement de Fleet Telemetry — pas de l'API REST.",
+      "step6Steps": ["Enregistrer l'application avec Tesla – Paramètres → Fleet Telemetry → '🔑 Enregistrer l'application'. Une seule fois.", "Demander l'accès Fleet Telemetry – Si l'étape suivante renvoie HTTP 404, Tesla n'a pas encore activé l'endpoint. Contactez le support développeur Tesla.", "Activer la télémétrie – Paramètres → Fleet Telemetry → '📡 Activer la télémétrie'."],
+      "supportTitle": "Demander l'accès Fleet Telemetry au support Tesla",
+      "supportDesc": "Si l'étape 2 renvoie 404, envoyez la demande suivante au formulaire de support développeur Tesla (developer.tesla.com/dashboard → Support Inquiry) :",
+      "supportNote": "⚠ Remplacez le Client ID et le VIN par vos propres valeurs. Tesla répond généralement en quelques jours."
+    },
+    "monta": {
+      "title": "🔌 Intégration Monta (facturation recharge domicile)",
+      "desc": "Pour les conducteurs de véhicules de société : CarView-eXcellenT peut récupérer les données de recharge directement depuis votre wallbox Monta et créer un relevé de coûts mensuel pour votre employeur.",
+      "warning": "⚠️ L'intégration Monta est uniquement disponible pour les véhicules de la catégorie Véhicule de société (Paramètres → Profil véhicule → Catégorie).",
+      "step1Title": "Étape 1 – Créer une clé API Monta",
+      "step1Items": ["Connectez-vous à Monta (application ou web : portal.monta.com).", "Allez dans Paramètres → API.", "Cliquez sur Créer une clé API et copiez la clé (commence par monta_)."],
+      "step1Hint": "La clé n'est visible qu'une fois – saisissez-la immédiatement dans CarView-eXcellenT.",
+      "step2Title": "Étape 2 – Trouver l'ID du point de charge",
+      "step2Items": ["Dans le portail Monta : Points de charge → Mes appareils.", "L'ID du point de charge se trouve dans la vue détaillée (format : cp_12345).", "Alternative : l'appel API GET /api/v1/charge-points renvoie tous les points de charge avec IDs."],
+      "step3Title": "Étape 3 – Saisir dans CarView-eXcellenT",
+      "step3Items": ["Allez dans Paramètres → Profil véhicule.", "Sélectionnez la catégorie 💼 Véhicule de société.", "Saisissez le tarif de recharge domicile (€/kWh) – ex. 0,34.", "Ajoutez l'ID du point de charge Monta et la clé API Monta.", "Cliquez sur Enregistrer."],
+      "useTitle": "Utiliser la facturation",
+      "useItems": ["Allez dans Facturation dans la navigation.", "Sélectionnez le mois souhaité – toutes les sessions de recharge à domicile sont listées.", "Les sessions gratuites peuvent être marquées avec ✕ marquer gratuit dans l'historique – elles sont exclues de la facturation.", "L'export PDF vous donne un relevé prêt à signer."]
+    },
+    "troubleshooting": {
+      "title": "🔧 Dépannage",
+      "items": [
+        { "q": "Le véhicule ne renvoie aucune donnée GPS", "a": "Les nouveaux modèles (VIN XP7, ex. Model Y Juniper) ne fournissent pas drive_state via l'API REST. Le suivi GPS utilise Fleet Telemetry. Assurez-vous que tesla-http-proxy fonctionne et que la clé virtuelle est enregistrée." },
+        { "q": "La connexion échoue après la mise à jour", "a": "Après la mise à jour vers v2.0 (multi-locataire), un identifiant locataire est requis à la connexion. L'identifiant pour la base de données migrée est 'default'. Saisissez-le dans le champ de connexion." },
+        { "q": "La connexion au véhicule échoue (401)", "a": "Le token OAuth a expiré. Allez dans Paramètres → Connexion véhicule et reconnectez. Vérifiez que TESLA_CLIENT_ID et TESLA_CLIENT_SECRET dans .env sont corrects." },
+        { "q": "Les commandes véhicule échouent", "a": "Vérifiez : 1) tesla-http-proxy fonctionne (systemctl status tesla-http-proxy) 2) La clé virtuelle est enregistrée 3) Le véhicule est en ligne (pas en veille)." },
+        { "q": "Pas de données de télémétrie / GPS manquant", "a": "Fleet Telemetry nécessite deux étapes : (1) enregistrer l'application avec Tesla, (2) activer la télémétrie. Si l'étape 2 renvoie HTTP 404, demandez l'accès fleet_telemetry_config au support développeur Tesla." },
+        { "q": "Le backend ne démarre pas", "a": "Vérifiez les logs : docker logs tesla-carview-backend. Causes fréquentes : variables .env manquantes (JWT_SECRET, TESLA_CLIENT_ID), erreur de migration base de données." }
+      ]
+    },
+    "donate": {
+      "title": "❤️ Si l'application vous est utile",
+      "desc": "CarView-eXcellenT est gratuit et sans publicité. Si vous souhaitez contribuer, ces organisations apprécieraient votre soutien.",
+      "footer": "100 % de votre don va directement à l'organisation. Nous ne voyons ni le montant ni vos données.",
+      "btn": "Faire un don →",
+      "orgs": [
+        { "name": "Aktion Deutschland Hilft", "desc": "Alliance d'organisations d'aide pour une aide humanitaire rapide et efficace dans le monde entier.", "url": "https://www.aktion-deutschland-hilft.de/de/spenden/" },
+        { "name": "Lebenshilfe Rems-Murr", "desc": "Soutien, accompagnement et participation pour les personnes handicapées dans le district de Rems-Murr.", "url": "https://www.lebenshilfe-rems-murr.de/" },
+        { "name": "Radio 7 Drachenkinder", "desc": "Aide aux enfants gravement malades de la région – finance thérapies, sorties et souhaits.", "url": "https://www.radio7.de/drachenkinder/" }
+      ]
+    }
+  }
+}

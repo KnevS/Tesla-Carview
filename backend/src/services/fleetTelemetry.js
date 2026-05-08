@@ -145,11 +145,12 @@ function storePoint(vin, ts, point) {
   let tripId = activeTrip?.id ?? null;
 
   if (point.gear && point.gear !== 'P' && !activeTrip) {
-    const soc    = point.soc ? Math.round(point.soc) : null;
+    const soc           = point.soc ? Math.round(point.soc) : null;
+    const defaultDriver = db.prepare('SELECT id FROM drivers WHERE is_default=1 LIMIT 1').get();
     const result = db.prepare(
-      `INSERT INTO trips (vehicle_id, start_time, start_lat, start_lon, start_soc, start_odometer_km, source)
-       VALUES (?, ?, ?, ?, ?, ?, 'telemetry')`
-    ).run(vehicle.id, ts, point.lat ?? null, point.lon ?? null, soc, point.odometer_km ?? null);
+      `INSERT INTO trips (vehicle_id, start_time, start_lat, start_lon, start_soc, start_odometer_km, source, driver_id)
+       VALUES (?, ?, ?, ?, ?, ?, 'telemetry', ?)`
+    ).run(vehicle.id, ts, point.lat ?? null, point.lon ?? null, soc, point.odometer_km ?? null, defaultDriver?.id ?? null);
     tripId = result.lastInsertRowid;
     console.log(`[FleetTelemetry] Fahrt gestartet: ${vin}`);
   }

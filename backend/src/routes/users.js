@@ -113,4 +113,12 @@ router.delete('/:id/vehicles/:vehicleId', requireAdmin, (req, res) => {
   res.json({ success: true });
 });
 
+router.patch('/me/lang', (req, res) => {
+  const allowed = ['de', 'en', 'fr', 'es', 'tr', 'el'];
+  const { lang } = req.body;
+  if (!allowed.includes(lang)) return res.status(400).json({ error: 'Invalid language' });
+  req.db.prepare('UPDATE users SET lang=? WHERE id=?').run(lang, req.user.sub);
+  res.json({ ok: true });
+});
+
 export default router;

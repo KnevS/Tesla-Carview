@@ -1,0 +1,471 @@
+{
+  "common": {
+    "save": "Save", "cancel": "Cancel", "delete": "Delete", "loading": "Loading...",
+    "yes": "Yes", "no": "No", "back": "Back", "close": "Close",
+    "confirm": "Confirm", "create": "Create", "add": "Add", "remove": "Remove",
+    "edit": "Edit", "next": "Next →", "prev": "← Back", "error": "Error",
+    "success": "Success", "logout": "Log out", "noData": "No data available",
+    "noVehicle": "No vehicle connected", "all": "All", "from": "From", "to": "To",
+    "private": "Private", "business": "Business", "commute": "Commute",
+    "km": "km", "kwh": "kWh", "donate": "Donate"
+  },
+  "lang": {
+    "title": "Language / Sprache",
+    "label": "Display language",
+    "de": "Deutsch", "en": "English", "fr": "Français",
+    "es": "Español", "tr": "Türkçe", "el": "Ελληνικά"
+  },
+  "nav": {
+    "dashboard":   { "label": "Dashboard",    "tooltip": "Overview with key figures, last trip and monthly statistics" },
+    "trips":       { "label": "Trips",        "tooltip": "List of all recorded trips with GPS track on a map" },
+    "fahrtenbuch": { "label": "Trip Log",     "tooltip": "Classify trips and view breakdown by private/business/commute" },
+    "abrechnung":  { "label": "Billing",      "tooltip": "Home charging cost settlement for company cars" },
+    "charging":    { "label": "Charging",     "tooltip": "All charging sessions with charge curves, costs and type breakdown" },
+    "battery":     { "label": "Battery",      "tooltip": "Range history and degradation analysis over time" },
+    "logbook":     { "label": "Logbook",      "tooltip": "Maintenance, repairs, tires, inspections and vehicle notes" },
+    "telemetry":   { "label": "Tech",         "tooltip": "Live vehicle data: tyre pressure, climate, power, SOC – like track mode" },
+    "control":     { "label": "Control",      "tooltip": "Control the vehicle: climate, doors, charging, navigation" },
+    "export":      { "label": "Export",       "tooltip": "Export data as CSV/JSON, create full backup, push notifications" },
+    "system":      { "label": "System",       "tooltip": "Version info, CPU/RAM usage and database statistics" }
+  },
+  "dashboard": {
+    "title": "Dashboard", "loading": "Loading data...",
+    "connectHint": "Connect your account to see trip data",
+    "connectBtn": "Connect →",
+    "totalKm": "Total distance", "trips": "Trips", "charged": "Charged",
+    "chargingCost": "Charging cost", "lastTrip": "Last trip",
+    "allTrips": "View all trips →", "monthlyKm": "Monthly overview – Distance (km)",
+    "distance": "Distance", "consumption": "Consumption", "noTrips": "No trips recorded yet."
+  },
+  "trips": {
+    "title": "Trips", "loading": "Loading trips...", "loadMore": "Load more",
+    "allTypes": "All types", "allDrivers": "All drivers", "noDriver": "No driver",
+    "filterPrivate": "Private trips", "filterBusiness": "Business trips", "filterCommute": "Commute",
+    "start": "Start", "dest": "Destination", "distance": "Distance", "consumption": "Consumption",
+    "soc": "SoC", "purpose": "Enter trip purpose (e.g. client visit, business trip)…",
+    "assignDriver": "Assign driver", "noDriverLabel": "– Driver"
+  },
+  "tripDetail": {
+    "back": "← Trips", "title": "Trip detail", "loading": "Loading...",
+    "distance": "Distance", "duration": "Duration", "avgSpeed": "Avg speed", "consumption": "Consumption",
+    "gpsTrack": "GPS Track", "noGps": "No GPS data available for this trip.",
+    "route": "Route", "speedChart": "Speed & Power",
+    "battery": "Battery", "startSoc": "Start SoC", "endSoc": "End SoC", "totalEnergy": "Total energy used",
+    "driver": "Driver", "noDriverAssigned": "– no driver"
+  },
+  "logbook": {
+    "title": "Trip Log", "allMonths": "All months",
+    "totalKm": "Total km", "private": "Private trips", "business": "Business trips", "commute": "Commute",
+    "kmSplit": "Distance breakdown"
+  },
+  "charging": {
+    "title": "Charging", "sessions": "Sessions", "totalCharged": "Total charged",
+    "totalCost": "Charging cost", "maxPower": "Max. charge power", "byType": "By charger type",
+    "loading": "Loading sessions...", "unknownLocation": "Unknown location", "free": "free",
+    "markFree": "✕ mark free", "unmarkFree": "↩ mark paid",
+    "editRate": "✎ Rate", "rateTooltip": "Adjust the charging rate for this session individually (overrides the default rate)", "rateSet": "Set"
+  },
+  "battery": {
+    "title": "Battery & Degradation", "rangeHistory": "Range history",
+    "degradationOverview": "Degradation overview", "firstMeasurement": "First measurement",
+    "lastMeasurement": "Last measurement", "degradation": "Degradation",
+    "noData": "Not enough data for degradation analysis yet"
+  },
+  "control": {
+    "title": "Vehicle control", "online": "Online", "sleeping": "Sleeping", "offline": "Offline",
+    "wake": "☀️ Wake up", "sleepHint": "Vehicle is sleeping or offline",
+    "climate": "🌡 Climate", "on": "On", "off": "Off",
+    "temp": "Temperature", "setTemp": "Set temperature",
+    "preCondition": "❄️ Pre-conditioning / Max-Defrost",
+    "vehicle": "🚗 Vehicle", "doors": "Doors", "unlock": "🔓 Unlock", "lock": "🔒 Lock",
+    "sentryMode": "Sentry mode", "lights": "💡 Lights", "horn": "📯 Horn",
+    "charging": "⚡ Charging", "chargeStart": "Start", "chargeStop": "Stop",
+    "chargeLimit": "Charge limit", "setChargeLimit": "Set charge limit",
+    "navigation": "🗺️ Navigation", "navPlaceholder": "Enter address or place…",
+    "sendNav": "Send destination", "recentNav": "Recently used"
+  },
+  "exportPage": {
+    "title": "Export data",
+    "tripsLabel": "🗺️ Trips", "tripsDesc": "All trip data with distance, consumption and SoC",
+    "chargingLabel": "🔋 Charging sessions",
+    "backupLabel": "💾 Full backup", "backupDesc": "All data (trips, charging, battery, logbook) as one JSON file",
+    "notifications": "🔔 Notifications",
+    "notificationsDesc": "Receive a browser notification when your car has finished charging",
+    "enableNotifications": "Enable notifications",
+    "notificationsActive": "✓ Notifications active", "disableNotifications": "Disable",
+    "downloadFailed": "Download failed"
+  },
+  "maintenanceLog": {
+    "title": "Logbook", "add": "+ Entry", "loading": "Loading entries...",
+    "empty": "No entries yet", "newEntry": "New entry", "entryTitle": "Title *",
+    "category": "Category", "description": "Description", "odometer": "Odometer",
+    "cost": "Cost (€)", "confirmDelete": "Really delete this entry?",
+    "cat_note": "Note", "cat_maintenance": "Maintenance", "cat_repair": "Repair",
+    "cat_tires": "Tires", "cat_inspection": "Inspection", "cat_accident": "Accident", "cat_other": "Other"
+  },
+  "billing": {
+    "title": "Home charging billing", "companyCar": "Company car", "montaSync": "Monta sync",
+    "csvExport": "CSV export",
+    "notCompany": "This vehicle is configured as a private vehicle",
+    "toSettings": "Go to settings",
+    "chargedKwh": "Charged kWh", "avgRate": "Avg. rate", "reimbursement": "Reimbursement",
+    "inclVat": "incl. VAT", "monthlyOverview": "Monthly overview",
+    "month": "Month", "sessions": "Sessions", "kwhTesla": "kWh (vehicle)", "kwhMid": "kWh (meter)",
+    "rate": "Rate €/kWh", "amount": "Amount €", "settled": "Settled",
+    "yes": "Yes", "pending": "Pending", "total": "Total",
+    "chargingSessions": "Charging sessions", "date": "Date", "location": "Location",
+    "status": "Status", "template": "Billing template",
+    "templateTitle": "Home charging reimbursement claim"
+  },
+  "telemetry": {
+    "title": "Vehicle tech", "live": "Live", "offline": "Offline", "refresh": "Refresh",
+    "sleepHint": "Vehicle is sleeping or offline", "autoLoad": "Data loads automatically",
+    "soc": "SOC", "speed": "Speed", "power": "Power", "odometer": "Odometer",
+    "livePos": "📍 Live position", "regen": "← Regen", "drive": "Drive →",
+    "tpms": "🏎 Tyre pressure (TPMS)", "fl": "FL", "fr": "FR", "rl": "RL", "rr": "RR",
+    "climate": "🌡 Climate", "insideTemp": "Interior temp", "outsideTemp": "Outside temp",
+    "targetTemp": "Target temp", "climateOn": "Climate", "frontDefroster": "Front defroster",
+    "rearDefroster": "Rear defroster",
+    "charging": "⚡ Charging", "chargeStatus": "Status", "chargePower": "Charge power",
+    "chargeRate": "Charge rate", "chargeLimit": "Charge limit", "timeToFull": "Time to full",
+    "vehicle": "🚗 Vehicle", "state": "State", "locked": "Locked",
+    "sentry": "Sentry", "software": "Software", "heading": "Heading"
+  },
+  "settings": {
+    "title": "Settings",
+    "vehicleProfile": "🚗 Vehicle profile",
+    "noVehicle": "No vehicle connected.",
+    "category": "Vehicle category",
+    "private": "🏠 Private vehicle", "privateDesc": "Private trips only, no logbook required",
+    "company": "💼 Company car", "companyDesc": "Trip log + cost billing active",
+    "companyName": "Company name (employer)",
+    "licensePlate": "Number plate", "model": "Model", "color": "Colour",
+    "electricity": "Home charging rate (€/kWh)", "montaChargePoint": "Monta charge point ID",
+    "montaKey": "Monta API key", "montaKeyHint": "Monta → Settings → API → Create key.",
+    "homeCharging": "Home charging / Monta configuration",
+    "drivers": "👤 Drivers & Profiles",
+    "driversHint": "Create and name drivers – assigned to trips and shown in reports.",
+    "noDrivers": "No drivers created yet.",
+    "driverName": "Name (e.g. John)",
+    "addDriver": "+ Add", "setDefault": "★ Default", "unsetDefault": "☆ Default",
+    "defaultTooltip": "Default driver – auto-assigned to new trips",
+    "setDefaultTooltip": "Set as default driver",
+    "deleteDriverConfirm": "Delete driver \"{name}\"? Existing trips will be set to no driver.",
+    "driverSaved": "Driver saved.", "driverError": "Error saving.",
+    "mfa": "🔐 Two-factor authentication",
+    "mfaEnabled": "✓ MFA is enabled", "mfaBackupCodes": "Remaining backup codes:",
+    "mfaDisable": "Disable MFA", "mfaDisableConfirm": "Enter password to confirm:",
+    "mfaConfirmBtn": "Confirm", "mfaNotEnabled": "MFA is not enabled. Enable it for more security.",
+    "mfaActivate": "Enable MFA",
+    "passkey": "🗝️ Passkey (passwordless login)",
+    "passkeyDesc": "Register a passkey for this device to log in without a password.",
+    "passkeyAdded": "Added:", "passkeyRemove": "Remove",
+    "passkeyNone": "No passkey registered yet.",
+    "passkeyAdd": "+ Add passkey", "passkeyAdding": "Please wait…",
+    "teslaConnection": "⚡ Vehicle connection", "teslaConnected": "● Connected", "teslaDisconnected": "● Not connected",
+    "teslaReconnect": "Reconnect vehicle", "teslaSync": "🔄 Sync vehicles",
+    "teslaSyncing": "Syncing…",
+    "virtualKey": "Virtual Key (vehicle commands)",
+    "virtualKeyDesc": "Register once on the vehicle so climate, doors and charging work",
+    "telemetrySection": "📡 Fleet Telemetry (GPS & real-time data)",
+    "telemetryDesc": "Streams GPS track, speed and battery live to this app",
+    "registerPartner": "🔑 Register app", "registering": "Registering…",
+    "activateTelemetry": "📡 Activate telemetry", "activating": "Activating…",
+    "password": "🔑 Change password",
+    "currentPw": "Current password", "newPw": "New password (min. 12 characters)", "confirmPw": "Confirm new password",
+    "changePw": "Change password",
+    "auditLog": "📝 Recent activity", "noAudit": "No entries",
+    "theme": "🎨 Colour scheme", "themeDesc": "Accent colour for buttons and navigation. Saved locally.",
+    "nav": "🧭 Customise navigation", "navReset": "Reset", "navHint": "Change order with ↑↓ · Eye to show/hide",
+    "navHide": "Hide", "navShow": "Show"
+  },
+  "auth": {
+    "loginTitle": "Please sign in", "tenant": "Tenant", "tenantPlaceholder": "— Please select —",
+    "username": "Username", "password": "Password", "loginBtn": "Sign in",
+    "passkeyBtn": "Sign in with passkey", "registerLink": "Register new tenant",
+    "forgotPw": "Forgot password?", "handbook": "Handbook & help",
+    "loginError": "Login failed"
+  },
+  "register": {
+    "title": "Register new tenant",
+    "checkingInvite": "Checking invitation link…",
+    "noInvite": "Please contact an administrator to receive an invitation link",
+    "backToLogin": "← Back to login",
+    "tenantName": "Tenant name", "tenantSlug": "Tenant slug",
+    "adminAccount": "Administrator account",
+    "passwordStrengths": ["Weak", "Fair", "Good", "Strong"],
+    "created": "Tenant created!", "credentials": "Your credentials:",
+    "slugLabel": "Tenant slug:",
+    "slugWarning": "⚠ Note down your tenant slug",
+    "nextSteps": "Recommended next steps:",
+    "step1": "① Connect vehicle", "step2": "② Set up MFA", "step3": "③ Configure charging locations"
+  },
+  "mfa": {
+    "setupTitle": "🔐 Set up two-factor authentication",
+    "step1Title": "Step 1: Connect app", "step1Hint": "Open your authenticator app",
+    "step2Title": "Step 2: Confirm code", "step2Hint": "Enter the 6-digit code from your app",
+    "step3Title": "Step 3: MFA enabled!",
+    "activated": "✓ MFA enabled!", "backupWarning": "⚠️ Backup codes – save them now!",
+    "backupOnce": "These codes are shown only once",
+    "done": "Done", "verify": "Confirm", "checking": "Checking...",
+    "verifyTitle": "🔐 Two-factor authentication",
+    "enterCode": "Enter code from authenticator app",
+    "enterBackup": "Enter backup code",
+    "useApp": "Use authenticator app", "useBackup": "Use backup code",
+    "backToLogin": "Back to login"
+  },
+  "setup": {
+    "title": "Initial setup – create admin account", "welcome": "Welcome",
+    "notConfigured": "CarView-eXcellenT has not been set up yet",
+    "wizardDesc": "This wizard creates your first administrator account",
+    "featureLocal": "✓ All vehicle data stays locally on your server",
+    "featureNoCloud": "✓ No cloud, no data sharing",
+    "featureControl": "✓ Full control over your data",
+    "startBtn": "Start setup →",
+    "adminAccount": "Administrator account", "adminDesc": "This account has full access to the application",
+    "tenantOptional": "▸ Tenant name (optional)", "tenantHint": "Only relevant if you run multiple tenants",
+    "done": "Setup complete!", "doneDesc": "Your administrator account has been created successfully",
+    "nextSteps": "Recommended next steps:",
+    "ns1": "① Enable MFA in settings", "ns2": "② Connect vehicle", "ns3": "③ Change password after first login"
+  },
+  "users": {
+    "title": "User management", "add": "+ Create user", "loading": "Loading users…",
+    "locked": "locked", "assignVehicle": "Assign vehicle", "resetLink": "Reset link",
+    "deactivate": "Deactivate", "activate": "Activate",
+    "resetGenerated": "Reset link generated", "linkValid": "Link valid for 60 minutes",
+    "copy": "Copy", "inviteNew": "🔗 Invite new tenant",
+    "createInvite": "+ Create invitation link",
+    "inviteDesc": "Only those with this link can register a new tenant",
+    "inviteExpiry": "Link (valid 7 days, single use):",
+    "openInvites": "Open invitations", "open": "Open", "expires": "Expires:",
+    "revoke": "Revoke", "used": "✓ used",
+    "assignTo": "Assign vehicle to:", "newUser": "Create new user",
+    "role": "Role", "email": "Email (optional)", "allRequired": "Fill in all required fields",
+    "pwTooShort": "Password must be at least 12 characters",
+    "creating": "Creating…"
+  },
+  "data": {
+    "title": "Data management", "warning": "⚠ Caution – data deletion is irreversible",
+    "currentData": "Current data", "deleteAll": "Delete all tenant data",
+    "deleteAllDesc": "All trips, charging sessions, telemetry, logbook and audit logs",
+    "deleteVehicle": "Delete vehicle data", "deleteVehicleDesc": "Deletes all data for a single vehicle",
+    "deleteBtn": "Delete data",
+    "confirmType": "Type to confirm:", "confirmText": "DELETE DATA",
+    "deleteSuccess": "All data deleted. Backup was created"
+  },
+  "system": {
+    "title": "📊 System & Version", "appTitle": "⚡ CarView-eXcellenT",
+    "version": "Version", "gitHash": "Git hash", "branch": "Branch", "buildDate": "Build date",
+    "nodeVersion": "Node.js", "uptime": "Server uptime",
+    "updates": "🔄 Software update", "checkNow": "Check now", "checking": "Checking…",
+    "updateAvailable": "Update available!", "newCommit": "New commit:", "runOnServer": "Run on server:",
+    "noUpdate": "Up to date – you are running the latest build",
+    "dataStays": "✅ All data is preserved",
+    "autoUpdate": "⏰ Set up automatic updates",
+    "cpu": "🖥 CPU", "load": "Load", "cores": "Cores", "model": "Model",
+    "ram": "💾 Memory", "used": "Used", "free": "Free", "total": "Total",
+    "nodeProcess": "⚙️ Node.js process", "pid": "PID", "heapUsed": "Heap used",
+    "heapTotal": "Heap total", "rss": "RSS", "processUptime": "Process uptime",
+    "database": "🗄 Database", "dbSize": "File size", "batterySnapshots": "Battery snapshots",
+    "logbookEntries": "Logbook entries", "auditEntries": "Audit entries",
+    "server": "🖥 Server", "hostname": "Hostname", "platform": "Platform",
+    "arch": "Architecture", "osUptime": "OS uptime"
+  },
+  "drivers": { "noDriver": "– No driver" },
+  "handbook": {
+    "title": "CarView-eXcellenT Manual",
+    "version": "Version 2.0 · Self-Hosted · Multi-Tenant",
+    "toc": "Table of contents",
+    "sections": [
+      { "id": "overview",           "icon": "🌟", "title": "Overview" },
+      { "id": "requirements",       "icon": "📋", "title": "Requirements" },
+      { "id": "installation",       "icon": "🚀", "title": "Installation" },
+      { "id": "first-setup",        "icon": "⚙️",  "title": "Initial setup in browser" },
+      { "id": "virtual-key",        "icon": "🔑", "title": "Setting up the Virtual Key" },
+      { "id": "charging-locations", "icon": "⚡", "title": "Charging locations & costs" },
+      { "id": "security",           "icon": "🔐", "title": "Security" },
+      { "id": "multitenancy",       "icon": "🏢", "title": "Multi-tenancy" },
+      { "id": "backup",             "icon": "💾", "title": "Data backup" },
+      { "id": "tesla-api",          "icon": "⚡", "title": "Tesla Developer API setup" },
+      { "id": "monta",              "icon": "🔌", "title": "Monta integration (billing)" },
+      { "id": "troubleshooting",    "icon": "🔧", "title": "Troubleshooting" }
+    ],
+    "overview": {
+      "title": "🌟 Overview",
+      "body": "CarView-eXcellenT is a self-hosted data logger app for electric vehicles. All data stays exclusively on your own server – no cloud, no data sharing. The app is fully responsive and runs on iPhone/iPad (Safari), Android smartphones and desktop browsers.",
+      "features": [
+        { "icon": "🚗", "title": "Trip log",          "desc": "GPS tracks, consumption, trip type classification" },
+        { "icon": "⚡", "title": "Charging",           "desc": "Charging sessions with costs, GPS location detection" },
+        { "icon": "🔋", "title": "Battery",            "desc": "Degradation tracking, range history" },
+        { "icon": "📊", "title": "Dashboard",          "desc": "Statistics, monthly overview, recent activity" },
+        { "icon": "🎮", "title": "Control",            "desc": "Climate, doors, lights – directly from the app" },
+        { "icon": "📝", "title": "Logbook",            "desc": "Maintenance, repairs, costs with dates" },
+        { "icon": "📤", "title": "Export",             "desc": "CSV/JSON for all data, full backup as ZIP" },
+        { "icon": "🔔", "title": "Push notifications", "desc": "Browser notification when charging is complete" },
+        { "icon": "📱", "title": "Mobile-optimised",   "desc": "Fully usable on iPhone/iPad (Safari), Android and desktop" }
+      ]
+    },
+    "requirements": {
+      "title": "📋 Requirements",
+      "serverTitle": "Server",
+      "serverItems": [
+        "Linux server (x86_64, ARM64 or ARMv7) with min. 1 GB RAM",
+        "Docker + Docker Compose (installed by setup script)",
+        "Publicly accessible domain + TLS certificate (required for API)",
+        "Port 443 (HTTPS) must be reachable from outside"
+      ],
+      "teslaTitle": "Tesla Developer Account",
+      "teslaItems": [
+        "Register at developer.tesla.com",
+        "Create app → note Client ID and Client Secret",
+        "Callback URL: https://<your-domain>/api/auth/callback",
+        "For vehicle commands: apply for Fleet API Access (free, 1–3 business days)"
+      ]
+    },
+    "installation": {
+      "title": "🚀 Installation",
+      "desc": "The setup script installs everything automatically: Docker, nginx, TLS, tesla-http-proxy.",
+      "asRoot": "# As root on the target server:",
+      "scriptAsks": "# The script asks interactively:",
+      "promptDomain": "→ Domain (e.g. carview.myserver.com)",
+      "promptClientId": "→ Tesla Client ID and Client Secret",
+      "promptRedirect": "→ Tesla Redirect URI",
+      "promptJwt": "→ JWT Secret (generated automatically)",
+      "altTitle": "Alternative: Manual configuration",
+      "altDesc": "Copy .env.example → .env and adjust all values. Then: docker compose -f docker-compose.prod.yml up -d"
+    },
+    "firstSetup": {
+      "title": "⚙️ Initial setup in browser",
+      "steps": [
+        { "title": "Open browser",         "desc": "Open https://<your-domain>/setup — you will be redirected automatically." },
+        { "title": "Create tenant",        "desc": "Choose a tenant name (e.g. \"Smith Family\") and a slug (e.g. \"smith\"). The slug is required at login – note it down." },
+        { "title": "Create admin account", "desc": "Set username and password. Password must be at least 12 characters. Recommendation: a passphrase of 4 words." },
+        { "title": "Connect vehicle",      "desc": "After login: Settings → Connect Tesla account. You will be redirected to Tesla to sign in." },
+        { "title": "Import vehicles",      "desc": "Go to Settings → Vehicle connection → Sync vehicles. All vehicles of the connected account are imported automatically." }
+      ]
+    },
+    "virtualKey": {
+      "title": "🔑 Setting up the Virtual Key",
+      "desc": "For vehicle commands (unlock, climate etc.) a Virtual Key must be registered on the vehicle.",
+      "steps": [
+        "Make sure tesla-http-proxy is running: systemctl status tesla-http-proxy",
+        "Open in iPhone Safari: https://tesla.com/_ak/<your-domain>",
+        "The Tesla app asks 'Allow app?' → confirm",
+        "Stay within Bluetooth range of the vehicle — the key is accepted within 30 seconds",
+        "Verify under Settings → Vehicle connection → Virtual Key status"
+      ]
+    },
+    "chargingLocations": {
+      "title": "⚡ Charging locations & costs",
+      "desc": "Charging locations are detected automatically via GPS and linked to a price per kWh.",
+      "autoTitle": "Automatic GPS detection",
+      "autoDesc": "When a charging location with GPS coordinates and radius (default 200m) is stored, the correct location is detected automatically at the start of charging and the stored price/kWh is applied.",
+      "createTitle": "Creating a charging location",
+      "createDesc": "Under Charging → Locations: enter name, type (home/office/public), price/kWh, GPS coordinates and detection radius.",
+      "adjustTitle": "Adjust costs manually",
+      "adjustDesc": "In the charging list: click a session → edit costs. Costs can also be set to 0 (e.g. free charging).",
+      "freeTitle": "✕ Mark charge as free",
+      "freeDesc": "Each session has a small '✕ mark free' button. Sessions marked this way appear greyed out with a 'free' badge and are automatically excluded from the home charging billing.",
+      "freeHint": "Typical use case: charging at the workplace provided by the employer. Use the '↩ mark paid' button to undo the marking at any time."
+    },
+    "security": {
+      "title": "🔐 Security",
+      "features": [
+        { "icon": "🔑", "title": "Passkey / WebAuthn", "desc": "Passwordless login with fingerprint, Face ID or hardware key" },
+        { "icon": "📱", "title": "TOTP MFA",            "desc": "Two-factor authentication with authenticator app" },
+        { "icon": "🛡️", "title": "Account lockout",     "desc": "Account locked after 5 failed attempts for 15 minutes" },
+        { "icon": "🍪", "title": "Refresh token",       "desc": "httpOnly cookie, valid 7 days, automatic rotation" },
+        { "icon": "📋", "title": "Audit log",           "desc": "All logins, changes and security events logged" },
+        { "icon": "🔒", "title": "HTTPS + HSTS",        "desc": "TLS 1.2/1.3, HSTS, OCSP stapling, secure headers" }
+      ],
+      "recommendTitle": "Recommended security settings",
+      "recommend": [
+        "Enable MFA (TOTP) after first login",
+        "Set up a passkey for passwordless login",
+        "Create regular data backups (Export)",
+        "Strong password: min. 16 characters or 4-word passphrase"
+      ]
+    },
+    "multitenancy": {
+      "title": "🏢 Multi-tenancy",
+      "desc": "CarView-eXcellenT supports multiple fully isolated tenants on one instance. Each tenant has its own database – no tenant can ever see another's data.",
+      "inviteTitle": "Creating tenants (invitation link)",
+      "inviteDesc": "New tenants can only be registered via an invitation link. An administrator generates the link under Admin → Users → Create invitation link. The link is valid for 7 days and can only be used once.",
+      "multiVehicleTitle": "Multiple vehicles per tenant",
+      "multiVehicleDesc": "All vehicles of a connected account are imported automatically when syncing. Switch between vehicles in the top-right navigation bar.",
+      "loginTitle": "Login with tenant slug",
+      "loginDesc": "With multiple tenants, a tenant field appears at login. With only one tenant, it is detected automatically.",
+      "userMgmtTitle": "User management",
+      "userMgmtDesc": "Administrators can create additional users and assign vehicles within their tenant. Under Admin → Users."
+    },
+    "backup": {
+      "title": "💾 Data backup",
+      "manualTitle": "Manual export",
+      "manualDesc": "Under Export: CSV or JSON for trips and charging sessions, and full backup as ZIP.",
+      "autoTitle": "Automatic backup (server)",
+      "autoDesc": "The SQLite databases are in the Docker volume tesla_data. For automatic server backups:",
+      "cron": "# Daily backup at 3am (crontab -e):\n0 3 * * * cp /var/lib/docker/volumes/tesla_data/_data/*.db /backup/",
+      "warningTitle": "Important before deleting",
+      "warningDesc": "Always create an export before deleting data. Deleted data cannot be recovered."
+    },
+    "teslaApi": {
+      "title": "⚡ Tesla Developer API setup",
+      "desc": "CarView-eXcellenT communicates via the official Tesla Fleet API. You need a free Tesla Developer account and a registered app.",
+      "step1Title": "Step 1 – Create developer account",
+      "step1Items": ["Visit developer.tesla.com and sign in with your Tesla account.", "Accept the Developer Terms of Service.", "Click Create Application."],
+      "step2Title": "Step 2 – Configure app",
+      "step2Items": ["Application Name: any name, e.g. CarView-eXcellenT", "Description: short description (required)", "Allowed Origin: your public app URL", "Redirect URI: https://carview.example.com/api/auth/callback", "Scopes (required): vehicle_device_data, vehicle_cmds, vehicle_charging_cmds, vehicle_location, openid, offline_access", "⚠ vehicle_location is required for GPS tracking (Fleet Telemetry)"],
+      "step3Title": "Step 3 – Note credentials",
+      "step3Desc": "After creation you receive:",
+      "step3Items": ["Client ID – a UUID-like string", "Client Secret – visible only once, copy and store securely"],
+      "step3Hint": "Enter these values in the .env file or provide them in the interactive setup wizard.",
+      "step4Title": "Step 4 – Apply for Fleet API Access (for commands)",
+      "step4Desc": "For vehicle commands (climate, doors, charging) your app must be registered as a partner with Tesla.",
+      "step4Hint": "The setup script runs this step automatically when FRONTEND_URL is set. Otherwise manually via Postman or curl. Takes 1–3 business days to activate.",
+      "step5Title": "Step 5 – Connect in CarView-eXcellenT",
+      "step5Items": ["After login: Settings → Vehicle connection → Reconnect", "You will be redirected to Tesla to sign in and grant the app access.", "After redirect: Settings → 🔄 Sync vehicles", "All vehicles appear in the app."],
+      "step6Title": "Step 6 – Enable Fleet Telemetry (GPS tracking)",
+      "step6Desc": "GPS data on newer vehicles (e.g. Model Y from 2024, XP7 VIN) comes exclusively via Fleet Telemetry — not the REST API.",
+      "step6Steps": ["Register app with Tesla – Settings → Fleet Telemetry → '🔑 Register app'. One-time only.", "Apply for Fleet Telemetry Access – If the next step returns HTTP 404, Tesla hasn't enabled the endpoint yet. Contact Tesla Developer Support.", "Activate telemetry – Settings → Fleet Telemetry → '📡 Activate telemetry'."],
+      "supportTitle": "Requesting Fleet Telemetry Access from Tesla Support",
+      "supportDesc": "If step 2 returns 404, send the following request to the Tesla Developer Support form (developer.tesla.com/dashboard → Support Inquiry):",
+      "supportNote": "⚠ Replace Client ID and VIN with your own values. Tesla typically responds within a few days."
+    },
+    "monta": {
+      "title": "🔌 Monta integration (home charging billing)",
+      "desc": "For company car drivers: CarView-eXcellenT can pull charging data directly from your Monta wallbox and create a monthly cost statement for your employer.",
+      "warning": "⚠️ Monta integration is only available for vehicles in the Company car category (Settings → Vehicle profile → Category).",
+      "step1Title": "Step 1 – Create Monta API key",
+      "step1Items": ["Log in to Monta (app or web: portal.monta.com).", "Go to Settings → API.", "Click Create API Key and copy the key (starts with monta_)."],
+      "step1Hint": "The key is only visible once – enter it in CarView-eXcellenT immediately.",
+      "step2Title": "Step 2 – Find charge point ID",
+      "step2Items": ["In the Monta portal: Charge points → My devices.", "The Charge Point ID is in the detail view (format: cp_12345).", "Alternative: API call GET /api/v1/charge-points returns all charge points with IDs."],
+      "step3Title": "Step 3 – Enter in CarView-eXcellenT",
+      "step3Items": ["Go to Settings → Vehicle profile.", "Select category 💼 Company car.", "Enter Home charging rate (€/kWh) – e.g. 0.34.", "Add Monta charge point ID and Monta API key.", "Click Save."],
+      "useTitle": "Using billing",
+      "useItems": ["Go to Billing in the navigation.", "Select the desired month – all home charging sessions are listed.", "Sessions that were free can be marked with ✕ mark free in the charging history – they are excluded from billing.", "PDF export gives you a ready-to-sign billing sheet."]
+    },
+    "troubleshooting": {
+      "title": "🔧 Troubleshooting",
+      "items": [
+        { "q": "Vehicle returns no GPS data", "a": "Newer models (XP7 VIN, e.g. Model Y Juniper) do not provide drive_state via REST API. GPS tracking uses Fleet Telemetry. Make sure tesla-http-proxy is running and the Virtual Key is registered." },
+        { "q": "Login fails after update", "a": "After updating to v2.0 (multi-tenant), a tenant slug is required at login. The slug for the migrated database is 'default'. Enter it in the login field or click 'Select tenant'." },
+        { "q": "Vehicle connection fails (401)", "a": "The Tesla OAuth token has expired. Go to Settings → Vehicle connection and reconnect. Make sure TESLA_CLIENT_ID and TESLA_CLIENT_SECRET in the .env are correct." },
+        { "q": "Vehicle commands fail", "a": "Check: 1) tesla-http-proxy is running (systemctl status tesla-http-proxy) 2) Virtual Key is registered on the vehicle 3) Vehicle is online (not sleeping)." },
+        { "q": "No telemetry data / GPS missing", "a": "Fleet Telemetry requires two steps: (1) register app with Tesla, (2) activate telemetry. If step 2 returns HTTP 404, fleet_telemetry_config access must be requested from Tesla Developer Support. Also ensure vehicle_location is enabled in the app scopes on developer.tesla.com." },
+        { "q": "Backend does not start", "a": "Check logs: docker logs tesla-carview-backend. Common causes: missing .env variables (JWT_SECRET, TESLA_CLIENT_ID), database migration error." }
+      ]
+    },
+    "donate": {
+      "title": "❤️ If the app is worth something to you",
+      "desc": "CarView-eXcellenT is free and ad-free. If you'd like to give something back, these organisations would appreciate your support.",
+      "footer": "100% of your donation goes directly to the organisation. We see neither the amount nor your data.",
+      "btn": "Donate →",
+      "orgs": [
+        { "name": "Aktion Deutschland Hilft", "desc": "Alliance of aid organisations for rapid and effective disaster relief worldwide.", "url": "https://www.aktion-deutschland-hilft.de/de/spenden/" },
+        { "name": "Lebenshilfe Rems-Murr", "desc": "Support, accompaniment and participation for people with disabilities in the Rems-Murr district.", "url": "https://www.lebenshilfe-rems-murr.de/" },
+        { "name": "Radio 7 Drachenkinder", "desc": "Help for seriously ill children in the region – funds therapies, outings and wishes.", "url": "https://www.radio7.de/drachenkinder/" }
+      ]
+    }
+  }
+}

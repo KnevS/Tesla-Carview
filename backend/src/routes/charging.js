@@ -77,10 +77,13 @@ router.patch('/:id', (req, res) => {
 
     const { cost, location_id, billing_rate_kwh, billing_status, location_name, is_free } = req.body;
 
-    // cost darf explizit auf 0 gesetzt werden
-    const newCost   = cost !== undefined ? cost : session.cost;
-    const newStatus = cost !== undefined
-      ? (cost === null ? 'pending' : 'calculated')
+    // cost darf explizit auf 0 gesetzt werden; bei neuem Tarif auto-berechnen
+    let newCost = cost !== undefined ? cost : session.cost;
+    if (billing_rate_kwh !== undefined && cost === undefined && session.energy_added_kwh) {
+      newCost = Math.round(billing_rate_kwh * session.energy_added_kwh * 100) / 100;
+    }
+    const newStatus = (cost !== undefined || billing_rate_kwh !== undefined)
+      ? (newCost === null ? 'pending' : 'calculated')
       : (billing_status ?? session.billing_status);
     const newIsFree = is_free !== undefined ? (is_free ? 1 : 0) : session.is_free;
 
