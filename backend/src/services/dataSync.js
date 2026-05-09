@@ -33,15 +33,22 @@ export async function syncVehicleState(db, vehicle, state) {
     );
   }
 
-  // GPS-basiertes Tracking (ältere Fahrzeuge mit drive_state)
-  if (drive?.shift_state && drive.shift_state !== 'P') {
+  // GPS-basiertes Tracking (ältere Fahrzeuge mit drive_state inkl. Koordinaten).
+  // Bei XP7-Modellen liefert Tesla manchmal shift_state, aber lat/lon = null —
+  // dann ist drive_state nicht nutzbar und wir fallen unten auf den Odometer-Pfad.
+  const driveValid = drive?.shift_state != null
+                  && drive.latitude != null
+                  && drive.longitude != null;
+
+  if (driveValid && drive.shift_state !== 'P') {
     handleDriving(db, vehicle, drive, charge, now);
-  } else if (drive) {
+  } else if (driveValid) {
     finishGpsTrip(db, vehicle, drive, charge, now);
   }
 
-  // Odometer-basiertes Tracking (neue Fahrzeuge ohne drive_state)
-  if (!drive && vs) {
+  // Odometer-basiertes Tracking — greift auch, wenn drive_state vorhanden,
+  // aber unbrauchbar ist (kein lat/lon).
+  if (!driveValid && vs) {
     const odomKm     = vs.odometer ? milesToKm(vs.odometer) : null;
     const nowPresent = vs.is_user_present ? 1 : 0;
     const cache      = getOrCreateCache(db, vehicle.id);
