@@ -274,6 +274,45 @@ function runTenantMigrations(db) {
     value TEXT
   )`);
 
+  // tesla_api_usage – Zähler je Monat × Kategorie × Endpoint
+  db.exec(`CREATE TABLE IF NOT EXISTS tesla_api_usage (
+    id              INTEGER PRIMARY KEY,
+    period          TEXT    NOT NULL,            -- "YYYY-MM"
+    category        TEXT    NOT NULL,            -- vehicle_data | wake | command | streaming_signal | other
+    endpoint        TEXT    NOT NULL,            -- z. B. "GET /api/1/vehicles/:id/vehicle_data"
+    count           INTEGER NOT NULL DEFAULT 0,
+    cost_usd        REAL    NOT NULL DEFAULT 0,
+    last_call_at    INTEGER,
+    UNIQUE (period, category, endpoint)
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_tesla_usage_period ON tesla_api_usage(period)');
+
+  // tesla_usage_events – aus Tesla-Validierungs-Mails (Webhook)
+  db.exec(`CREATE TABLE IF NOT EXISTS tesla_usage_events (
+    id           INTEGER PRIMARY KEY,
+    received_at  INTEGER NOT NULL DEFAULT (unixepoch()),
+    subject      TEXT,
+    period       TEXT,
+    spend_usd    REAL,
+    threshold    TEXT,
+    raw_body     TEXT
+  )`);
+
+  // Default-Tarife & Limit – Tesla 2024er Preisliste (USD); Admin kann anpassen
+  const seed = (k, v) => db.prepare(
+    'INSERT OR IGNORE INTO tenant_settings (key, value) VALUES (?, ?)'
+  ).run(k, v);
+  seed('tesla_usage.currency',           'USD');
+  seed('tesla_usage.monthly_limit_usd',  '50');
+  seed('tesla_usage.free_credit_usd',    '10');
+  seed('tesla_usage.hard_stop_enabled',  '0');
+  seed('tesla_usage.hard_stop_pct',      '90');
+  seed('tesla_usage.rate_vehicle_data',  '0.005');
+  seed('tesla_usage.rate_wake',          '0.005');
+  seed('tesla_usage.rate_command',       '0.005');
+  seed('tesla_usage.rate_streaming_signal','0.000005');
+  seed('tesla_usage.rate_other',         '0.005');
+
   // billing_periods
   db.exec(`CREATE TABLE IF NOT EXISTS billing_periods (
     id           INTEGER PRIMARY KEY,

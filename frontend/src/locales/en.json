@@ -506,5 +506,19 @@
         { "name": "Radio 7 Drachenkinder", "desc": "Help for seriously ill children in the region – funds therapies, outings and wishes.", "url": "https://www.radio7.de/drachenkinder/" }
       ]
     }
+  },
+  "teslaUsage": {
+    "title": "Tesla API usage",
+    "subtitle": "Projected Tesla Fleet API costs for the current month.",
+    "period": "Period",
+    "limit": "Monthly limit",
+    "freeCredit": "Free credit",
+    "hardStop": "Hard-stop at",
+    "hardStopOn": "Hard-stop active – further calls are blocked",
+    "currency": "Currency",
+    "rates": "Rates (USD per call)",
+    "save": "Save rates",
+    "reset": "Reset current month",
+    "cat": { "vehicle_data": "Vehicle data", "wake": "Wake", "command": "Commands", "streaming": "Streaming", "other": "Other" }
   }
 }

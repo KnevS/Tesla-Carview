@@ -2,6 +2,12 @@ import { randomBytes, createHash } from 'crypto';
 import https from 'https';
 import axios from 'axios';
 import { getMasterDb } from '../db/database.js';
+import {
+  assertWithinBudget,
+  recordCall,
+  categorize,
+  normalizeEndpoint,
+} from './teslaUsage.js';
 
 const proxyAgent = new https.Agent({ rejectUnauthorized: false });
 const PROXY_BASE  = 'https://host.docker.internal:4443';
@@ -79,30 +85,49 @@ export async function getAccessToken(db) {
   return row.access_token;
 }
 
+/** Wrapper: prüft Budget vor jedem Call, zählt nach Erfolg. */
+async function trackedCall(db, method, path, fn) {
+  assertWithinBudget(db);
+  const result = await fn();
+  try {
+    const cat = categorize(method, path);
+    if (cat) recordCall(db, cat, normalizeEndpoint(method, path));
+  } catch (err) {
+    console.error('[teslaUsage] recordCall failed:', err.message);
+  }
+  return result;
+}
+
 export async function apiGet(db, path) {
-  const token = await getAccessToken(db);
-  const res   = await axios.get(`${getFleetApiUrl()}${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
+  return trackedCall(db, 'GET', path, async () => {
+    const token = await getAccessToken(db);
+    const res   = await axios.get(`${getFleetApiUrl()}${path}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return res.data;
   });
-  return res.data;
 }
 
 export async function apiPost(db, path, body) {
-  const token = await getAccessToken(db);
-  const res   = await axios.post(`${getFleetApiUrl()}${path}`, body, {
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+  return trackedCall(db, 'POST', path, async () => {
+    const token = await getAccessToken(db);
+    const res   = await axios.post(`${getFleetApiUrl()}${path}`, body, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    });
+    return res.data;
   });
-  return res.data;
 }
 
 export async function apiProxyPost(db, path, body, timeoutMs = 30000) {
-  const token = await getAccessToken(db);
-  const res   = await axios.post(`${PROXY_BASE}${path}`, body, {
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    httpsAgent: proxyAgent,
-    timeout: timeoutMs,
+  return trackedCall(db, 'POST', path, async () => {
+    const token = await getAccessToken(db);
+    const res   = await axios.post(`${PROXY_BASE}${path}`, body, {
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      httpsAgent: proxyAgent,
+      timeout: timeoutMs,
+    });
+    return res.data;
   });
-  return res.data;
 }
 
 export async function getVehicles(db) {

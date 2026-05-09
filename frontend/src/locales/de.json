@@ -547,5 +547,19 @@
         { "name": "Radio 7 Drachenkinder", "desc": "Hilfe für schwer kranke Kinder in der Region – finanziert Therapien, Ausflüge und Wünsche.", "url": "https://www.radio7.de/drachenkinder/" }
       ]
     }
+  },
+  "teslaUsage": {
+    "title": "Tesla API-Nutzung",
+    "subtitle": "Voraussichtliche Tesla-Fleet-API-Kosten im laufenden Monat.",
+    "period": "Zeitraum",
+    "limit": "Monatslimit",
+    "freeCredit": "Free-Credit",
+    "hardStop": "Hard-Stop bei",
+    "hardStopOn": "Hard-Stop aktiv – weitere Calls werden blockiert",
+    "currency": "Währung",
+    "rates": "Tarife (USD pro Aufruf)",
+    "save": "Tarife speichern",
+    "reset": "Aktuellen Monat zurücksetzen",
+    "cat": { "vehicle_data": "Vehicle-Data", "wake": "Wake", "command": "Commands", "streaming": "Streaming", "other": "Sonstige" }
   }
 }

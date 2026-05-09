@@ -505,5 +505,19 @@
         { "name": "Radio 7 Drachenkinder", "desc": "Bölgedeki ağır hasta çocuklara yardım – terapileri, gezileri ve dilekleri finanse eder.", "url": "https://www.radio7.de/drachenkinder/" }
       ]
     }
+  },
+  "teslaUsage": {
+    "title": "Tesla API kullanımı",
+    "subtitle": "İçinde bulunulan ay için tahmini Tesla Fleet API maliyetleri.",
+    "period": "Dönem",
+    "limit": "Aylık limit",
+    "freeCredit": "Ücretsiz kredi",
+    "hardStop": "Sıkı durdurma",
+    "hardStopOn": "Sıkı durdurma etkin – yeni çağrılar engellenir",
+    "currency": "Para birimi",
+    "rates": "Tarifeler (çağrı başına USD)",
+    "save": "Tarifeleri kaydet",
+    "reset": "Geçerli ayı sıfırla",
+    "cat": { "vehicle_data": "Araç verisi", "wake": "Uyandırma", "command": "Komutlar", "streaming": "Akış", "other": "Diğer" }
   }
 }

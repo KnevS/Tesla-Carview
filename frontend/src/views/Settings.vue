@@ -395,6 +395,67 @@
       </div>
     </div>
 
+    <!-- Tesla API-Nutzung (admin only) -->
+    <div v-if="auth.isAdmin" class="card space-y-3">
+      <h2 class="font-semibold"
+        v-tooltip="'Tarife und Schwellwerte für die Tesla-Fleet-API-Nutzung – passt zur Tesla-Preisliste, kann jederzeit angepasst werden, sobald Tesla sie ändert.'">
+        💸 Tesla API-Nutzung
+      </h2>
+
+      <p v-if="usageMsg" :class="usageOk ? 'text-green-400' : 'text-red-400'" class="text-xs">{{ usageMsg }}</p>
+
+      <div v-if="usageCfg" class="grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <label class="label">Währung</label>
+          <select v-model="usageCfg.currency" class="input">
+            <option>USD</option><option>EUR</option><option>GBP</option>
+          </select>
+        </div>
+        <div>
+          <label class="label">Monatslimit</label>
+          <input v-model.number="usageCfg.monthly_limit_usd" type="number" min="0" step="1" class="input" />
+        </div>
+        <div>
+          <label class="label">Free-Credit pro Monat</label>
+          <input v-model.number="usageCfg.free_credit_usd" type="number" min="0" step="1" class="input" />
+        </div>
+        <div>
+          <label class="label">Hard-Stop bei (% vom Limit)</label>
+          <input v-model.number="usageCfg.hard_stop_pct" type="number" min="0" max="100" step="1" class="input" />
+        </div>
+        <div class="col-span-2 flex items-center gap-2">
+          <input id="hardstop" v-model="usageCfg.hard_stop_enabled" type="checkbox" class="accent-tesla-red" />
+          <label for="hardstop" class="text-sm" v-tooltip="'Wenn aktiv: Tesla-API-Calls werden ab der Schwelle blockiert (HTTP 429), bis zur Monatswende oder Reset.'">
+            Hard-Stop aktivieren (blockiert Tesla-Calls bei Schwelle)
+          </label>
+        </div>
+
+        <div class="col-span-2 border-t border-gray-700 pt-3">
+          <p class="text-sm font-medium text-gray-300 mb-2">Tarife (USD pro Aufruf bzw. pro Streaming-Signal)</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div><label class="label">Vehicle-Data</label>
+              <input v-model.number="usageCfg.rate_vehicle_data" type="number" min="0" step="0.0001" class="input" /></div>
+            <div><label class="label">Wake-Up</label>
+              <input v-model.number="usageCfg.rate_wake" type="number" min="0" step="0.0001" class="input" /></div>
+            <div><label class="label">Commands</label>
+              <input v-model.number="usageCfg.rate_command" type="number" min="0" step="0.0001" class="input" /></div>
+            <div><label class="label">Streaming-Signal</label>
+              <input v-model.number="usageCfg.rate_streaming_signal" type="number" min="0" step="0.000001" class="input" /></div>
+            <div><label class="label">Sonstige</label>
+              <input v-model.number="usageCfg.rate_other" type="number" min="0" step="0.0001" class="input" /></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <button @click="saveUsageConfig" class="btn-primary text-sm">Tarife speichern</button>
+        <button @click="resetUsageMonth" class="btn-secondary text-sm"
+          v-tooltip="'Setzt die Zähler des laufenden Monats zurück – nur nach Tesla-Korrekturbuchung oder zur Behebung von Doppelzählungen sinnvoll.'">
+          Aktuellen Monat zurücksetzen
+        </button>
+      </div>
+    </div>
+
     <div class="card">
       <button @click="logout" class="text-red-400 hover:text-red-300 text-sm transition"
         v-tooltip="'Aktuelle Session beenden – du wirst zur Login-Seite weitergeleitet'">Abmelden</button>
@@ -722,4 +783,42 @@ async function logout() {
   await auth.logout();
   router.push('/login');
 }
+
+// Tesla API-Nutzung (admin)
+const usageCfg = ref(null);
+const usageMsg = ref('');
+const usageOk  = ref(false);
+
+async function loadUsageConfig() {
+  if (!auth.isAdmin) return;
+  try {
+    const { data } = await api.get('/tesla-usage/config');
+    usageCfg.value = data;
+  } catch { /* ignore */ }
+}
+
+async function saveUsageConfig() {
+  usageMsg.value = '';
+  try {
+    const { data } = await api.put('/tesla-usage/config', usageCfg.value);
+    usageCfg.value = data;
+    usageMsg.value = 'Tarife gespeichert ✓'; usageOk.value = true;
+  } catch (err) {
+    usageMsg.value = err.response?.data?.error ?? 'Fehler beim Speichern'; usageOk.value = false;
+  }
+  setTimeout(() => { usageMsg.value = ''; }, 2500);
+}
+
+async function resetUsageMonth() {
+  if (!confirm('Zähler für den aktuellen Monat wirklich auf 0 setzen?')) return;
+  try {
+    const { data } = await api.post('/tesla-usage/reset');
+    usageMsg.value = `Zurückgesetzt (${data.deletedRows} Zeilen)`; usageOk.value = true;
+  } catch (err) {
+    usageMsg.value = err.response?.data?.error ?? 'Fehler beim Reset'; usageOk.value = false;
+  }
+  setTimeout(() => { usageMsg.value = ''; }, 2500);
+}
+
+loadUsageConfig();
 </script>

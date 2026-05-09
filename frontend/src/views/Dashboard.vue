@@ -69,6 +69,8 @@
           <Bar v-if="chartData" :data="chartData" :options="chartOptions" />
         </div>
       </div>
+
+      <TeslaUsageWidget />
     </template>
   </div>
 </template>
@@ -79,6 +81,7 @@ import { Bar } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js';
 import { useAppStore } from '../store/index.js';
 import StatCard from '../components/StatCard.vue';
+import TeslaUsageWidget from '../components/TeslaUsageWidget.vue';
 import api from '../api.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
