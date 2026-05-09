@@ -37,6 +37,13 @@ git log -1 --format="    Commit: %h  |  %s  |  %ci"
 # echo "==> Backup gespeichert: $BACKUP_FILE"
 
 echo ""
+echo "==> Build-Metadaten ermitteln"
+export GIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo unknown)
+export GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo unknown)
+export BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+echo "    GIT_HASH=$GIT_HASH  GIT_BRANCH=$GIT_BRANCH  BUILD_DATE=$BUILD_DATE"
+
+echo ""
 echo "==> Docker Images bauen und Container neu starten"
 docker compose -f docker-compose.prod.yml up -d --build
 

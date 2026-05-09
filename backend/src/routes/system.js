@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import { execSync } from 'child_process';
 import os from 'os';
-import { readFileSync } from 'fs';
+import { readFileSync, statSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { requireAuth } from '../middleware/auth.js';
+import { getAllTenants, getDb } from '../db/database.js';
 import https from 'https';
 
 const router = Router();
@@ -71,6 +72,35 @@ router.get('/stats', requireAuth, (req, res) => {
     };
   } catch { /* DB might not have all tables */ }
 
+  // Mandanten-Übersicht (alle Mandanten, auch fremde — nur für Admin sichtbar)
+  let tenants = { count: 0, items: [] };
+  try {
+    const list = getAllTenants();
+    tenants.count = list.length;
+    tenants.items = list.map(t => {
+      let sizeByte = null, vehicleCount = 0, userCount = 0, lastActivity = null;
+      try { sizeByte = statSync(t.db_path).size; } catch { /* db file missing */ }
+      try {
+        const tdb = getDb(t.id);
+        vehicleCount = tdb.prepare('SELECT COUNT(*) AS n FROM vehicles').get().n;
+        userCount    = tdb.prepare('SELECT COUNT(*) AS n FROM users').get().n;
+        lastActivity = tdb.prepare(
+          'SELECT MAX(ts) AS ts FROM (SELECT MAX(start_time) AS ts FROM trips UNION SELECT MAX(start_time) AS ts FROM charging_sessions)'
+        ).get()?.ts ?? null;
+      } catch { /* tenant DB might be missing tables */ }
+      return {
+        id:           t.id,
+        slug:         t.slug,
+        name:         t.name,
+        createdAt:    t.created_at,
+        sizeByte,
+        vehicleCount,
+        userCount,
+        lastActivity,
+      };
+    });
+  } catch { /* master DB unavailable — leave defaults */ }
+
   res.json({
     system: {
       platform: os.platform(),
@@ -93,6 +123,7 @@ router.get('/stats', requireAuth, (req, res) => {
       memUsage: process.memoryUsage(),
     },
     database: { sizeByte: dbSize, records: dbStats },
+    tenants,
     version: getVersion(),
     git: getGitInfo(),
   });

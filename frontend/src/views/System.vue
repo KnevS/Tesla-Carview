@@ -160,6 +160,45 @@
           <DataRow label="OS-Uptime"   :value="fmtUp(stats.system.uptime)"    tooltip="Wie lange das Betriebssystem ohne Reboot läuft" />
         </div>
       </div>
+
+      <!-- Mandanten -->
+      <div v-if="stats.tenants" class="card space-y-3">
+        <div class="flex items-center justify-between">
+          <h2 class="font-semibold"
+            v-tooltip="'Alle in der Master-Datenbank registrierten Mandanten. Jeder Mandant hat eine eigene SQLite-Datenbank.'">
+            🏢 Mandanten
+          </h2>
+          <span class="text-xs text-gray-500">{{ stats.tenants.count }} insgesamt</span>
+        </div>
+        <p v-if="!stats.tenants.items.length" class="text-sm text-gray-500">
+          Noch keine Mandanten angelegt.
+        </p>
+        <div v-else class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="text-xs text-gray-400 border-b border-gray-700">
+              <tr>
+                <th class="text-left py-1 pr-3">Name</th>
+                <th class="text-left py-1 pr-3">Slug</th>
+                <th class="text-right py-1 pr-3" v-tooltip="'Anzahl angelegter Fahrzeuge im Mandanten'">Fahrzeuge</th>
+                <th class="text-right py-1 pr-3" v-tooltip="'Anzahl Benutzer im Mandanten'">User</th>
+                <th class="text-right py-1 pr-3" v-tooltip="'Größe der Mandanten-Datenbank auf der Platte'">DB-Größe</th>
+                <th class="text-right py-1" v-tooltip="'Letzte Aktivität (jüngste Fahrt oder Ladevorgang)'">Letzte Aktivität</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="t in stats.tenants.items" :key="t.id"
+                class="border-b border-gray-800 last:border-0">
+                <td class="py-1 pr-3 font-medium text-white">{{ t.name }}</td>
+                <td class="py-1 pr-3 font-mono text-gray-400">{{ t.slug }}</td>
+                <td class="py-1 pr-3 text-right">{{ t.vehicleCount }}</td>
+                <td class="py-1 pr-3 text-right">{{ t.userCount }}</td>
+                <td class="py-1 pr-3 text-right text-gray-400">{{ t.sizeByte != null ? fmtB(t.sizeByte) : '–' }}</td>
+                <td class="py-1 text-right text-gray-400">{{ t.lastActivity ? fmtDate(t.lastActivity * 1000) : '–' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </template>
 
     <div v-else-if="isAdmin === false" class="card text-gray-400 text-sm text-center py-6">
