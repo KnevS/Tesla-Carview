@@ -68,6 +68,10 @@ router.post('/login', loginRateLimit, validate(z.object({
     await new Promise(r => setTimeout(r, 300));
     return res.status(401).json({ error: 'Mandant nicht gefunden. Bitte tenantSlug angeben.' });
   }
+  if (tenant.status === 'suspended') {
+    await new Promise(r => setTimeout(r, 300));
+    return res.status(403).json({ error: 'Mandant pausiert. Bitte Administrator kontaktieren.' });
+  }
 
   const db   = getDb(tenant.id);
   const user = findUserByUsername(db, username);

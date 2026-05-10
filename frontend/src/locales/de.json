@@ -270,7 +270,45 @@
     "database": "🗄 Datenbank", "dbSize": "Dateigröße", "batterySnapshots": "Akku-Snapshots",
     "logbookEntries": "Betriebsbuch", "auditEntries": "Audit-Einträge",
     "server": "🖥 Server", "hostname": "Hostname", "platform": "Plattform",
-    "arch": "Architektur", "osUptime": "OS-Uptime"
+    "arch": "Architektur", "osUptime": "OS-Uptime",
+    "tenants": {
+      "heading": "🏢 Mandanten", "total": "insgesamt",
+      "empty": "Noch keine Mandanten angelegt.",
+      "you": "(du)",
+      "status": { "active": "Aktiv", "suspended": "Pausiert" },
+      "cols": {
+        "status": "Status", "name": "Name", "slug": "Slug",
+        "vehicles": "Fahrzeuge", "users": "User",
+        "size": "DB-Größe", "lastActivity": "Letzte Aktivität", "actions": "Aktionen"
+      },
+      "actions": {
+        "rename": "Umbenennen", "save": "Speichern", "cancel": "Abbrechen",
+        "suspend": "Pausieren", "unsuspend": "Reaktivieren", "delete": "Löschen"
+      },
+      "detail": {
+        "loading": "Lade Details…", "vehicles": "Fahrzeuge", "users": "Benutzer",
+        "counts": "Datensätze", "dbPath": "DB-Pfad", "createdAt": "Erstellt am",
+        "noVehicles": "Keine Fahrzeuge angelegt", "noUsers": "Keine Benutzer",
+        "trips": "Fahrten", "charging": "Ladevorgänge", "battery": "Akku-Snapshots",
+        "telemetry": "Telemetrie-Punkte", "logbook": "Betriebsbuch", "audit": "Audit-Logs",
+        "role": "Rolle", "lastLogin": "Letzter Login", "neverLoggedIn": "Noch nie angemeldet"
+      },
+      "delete": {
+        "title": "Mandant endgültig löschen?",
+        "warning": "Alle Daten dieses Mandanten werden gelöscht — Fahrzeuge, Fahrten, Ladevorgänge, Benutzer.",
+        "backupNote": "Vor dem Löschen wird automatisch eine Backup-Kopie der DB-Datei erstellt.",
+        "typeSlug": "Zur Bestätigung den Mandanten-Slug eingeben:",
+        "confirm": "Endgültig löschen",
+        "cancel": "Abbrechen"
+      },
+      "errors": {
+        "suspendFailed": "Pausieren fehlgeschlagen",
+        "unsuspendFailed": "Reaktivieren fehlgeschlagen",
+        "renameFailed": "Umbenennen fehlgeschlagen",
+        "deleteFailed": "Löschen fehlgeschlagen",
+        "loadDetailFailed": "Details konnten nicht geladen werden"
+      }
+    }
   },
   "drivers": {
     "noDriver": "– Kein Fahrer"

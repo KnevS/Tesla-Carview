@@ -16,6 +16,7 @@ async function poll() {
   try {
     const tenants = getAllTenants();
     for (const tenant of tenants) {
+      if (tenant.status === 'suspended') continue;
       try {
         const db       = getDb(tenant.id);
         // Beim ersten Lauf (noch keine Fahrzeuge) automatisch vom Tesla-Account synchronisieren

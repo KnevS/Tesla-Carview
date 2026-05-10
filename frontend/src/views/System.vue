@@ -166,40 +166,183 @@
         <div class="flex items-center justify-between">
           <h2 class="font-semibold"
             v-tooltip="'Alle in der Master-Datenbank registrierten Mandanten. Jeder Mandant hat eine eigene SQLite-Datenbank.'">
-            🏢 Mandanten
+            {{ tt('heading') }}
           </h2>
-          <span class="text-xs text-gray-500">{{ stats.tenants.count }} insgesamt</span>
+          <span class="text-xs text-gray-500">{{ stats.tenants.count }} {{ tt('total') }}</span>
         </div>
         <p v-if="!stats.tenants.items.length" class="text-sm text-gray-500">
-          Noch keine Mandanten angelegt.
+          {{ tt('empty') }}
         </p>
         <div v-else class="overflow-x-auto">
           <table class="w-full text-sm">
             <thead class="text-xs text-gray-400 border-b border-gray-700">
               <tr>
-                <th class="text-left py-1 pr-3">Name</th>
-                <th class="text-left py-1 pr-3">Slug</th>
-                <th class="text-right py-1 pr-3" v-tooltip="'Anzahl angelegter Fahrzeuge im Mandanten'">Fahrzeuge</th>
-                <th class="text-right py-1 pr-3" v-tooltip="'Anzahl Benutzer im Mandanten'">User</th>
-                <th class="text-right py-1 pr-3" v-tooltip="'Größe der Mandanten-Datenbank auf der Platte'">DB-Größe</th>
-                <th class="text-right py-1" v-tooltip="'Letzte Aktivität (jüngste Fahrt oder Ladevorgang)'">Letzte Aktivität</th>
+                <th class="w-6 py-1"></th>
+                <th class="text-left py-1 pr-3">{{ tt('cols.status') }}</th>
+                <th class="text-left py-1 pr-3">{{ tt('cols.name') }}</th>
+                <th class="text-left py-1 pr-3">{{ tt('cols.slug') }}</th>
+                <th class="text-right py-1 pr-3">{{ tt('cols.vehicles') }}</th>
+                <th class="text-right py-1 pr-3">{{ tt('cols.users') }}</th>
+                <th class="text-right py-1 pr-3">{{ tt('cols.size') }}</th>
+                <th class="text-right py-1 pr-3">{{ tt('cols.lastActivity') }}</th>
+                <th class="text-right py-1">{{ tt('cols.actions') }}</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="t in stats.tenants.items" :key="t.id"
-                class="border-b border-gray-800 last:border-0">
-                <td class="py-1 pr-3 font-medium text-white">{{ t.name }}</td>
-                <td class="py-1 pr-3 font-mono text-gray-400">{{ t.slug }}</td>
-                <td class="py-1 pr-3 text-right">{{ t.vehicleCount }}</td>
-                <td class="py-1 pr-3 text-right">{{ t.userCount }}</td>
-                <td class="py-1 pr-3 text-right text-gray-400">{{ t.sizeByte != null ? fmtB(t.sizeByte) : '–' }}</td>
-                <td class="py-1 text-right text-gray-400">{{ t.lastActivity ? fmtDate(t.lastActivity * 1000) : '–' }}</td>
-              </tr>
+              <template v-for="tn in stats.tenants.items" :key="tn.id">
+                <tr class="border-b border-gray-800 last:border-0 hover:bg-gray-800/40 cursor-pointer"
+                    @click="toggleExpanded(tn.id)">
+                  <td class="py-1 text-gray-500 select-none">{{ expandedId === tn.id ? '▾' : '▸' }}</td>
+                  <td class="py-1 pr-3">
+                    <span :class="tn.status === 'suspended'
+                      ? 'inline-block px-1.5 py-0.5 rounded text-xs bg-yellow-900/40 text-yellow-300 border border-yellow-700/40'
+                      : 'inline-block px-1.5 py-0.5 rounded text-xs bg-green-900/40 text-green-300 border border-green-700/40'">
+                      {{ tn.status === 'suspended' ? tt('status.suspended') : tt('status.active') }}
+                    </span>
+                  </td>
+                  <td class="py-1 pr-3 font-medium text-white">
+                    <input v-if="editingId === tn.id"
+                      v-model="editName"
+                      @click.stop
+                      @keyup.enter.stop="saveRename(tn)"
+                      @keyup.esc.stop="cancelRename"
+                      class="bg-gray-900 border border-gray-700 rounded px-1.5 py-0.5 text-sm w-40" />
+                    <template v-else>
+                      {{ tn.name }}
+                      <span v-if="tn.isSelf" class="text-xs text-gray-500 ml-1">{{ tt('you') }}</span>
+                    </template>
+                  </td>
+                  <td class="py-1 pr-3 font-mono text-gray-400">{{ tn.slug }}</td>
+                  <td class="py-1 pr-3 text-right">{{ tn.vehicleCount }}</td>
+                  <td class="py-1 pr-3 text-right">{{ tn.userCount }}</td>
+                  <td class="py-1 pr-3 text-right text-gray-400">{{ tn.sizeByte != null ? fmtB(tn.sizeByte) : '–' }}</td>
+                  <td class="py-1 pr-3 text-right text-gray-400">{{ tn.lastActivity ? fmtDate(tn.lastActivity * 1000) : '–' }}</td>
+                  <td class="py-1 text-right whitespace-nowrap" @click.stop>
+                    <template v-if="editingId === tn.id">
+                      <button @click="saveRename(tn)" v-tooltip="tt('actions.save')"
+                        class="px-1.5 hover:text-green-400">✓</button>
+                      <button @click="cancelRename" v-tooltip="tt('actions.cancel')"
+                        class="px-1.5 hover:text-gray-300">✗</button>
+                    </template>
+                    <template v-else>
+                      <button @click="startRename(tn)" v-tooltip="tt('actions.rename')"
+                        class="px-1.5 hover:text-blue-400">✏️</button>
+                      <button v-if="!tn.isSelf && tn.status === 'active'"
+                        @click="doSuspend(tn)" v-tooltip="tt('actions.suspend')"
+                        class="px-1.5 hover:text-yellow-400">⏸</button>
+                      <button v-if="!tn.isSelf && tn.status === 'suspended'"
+                        @click="doUnsuspend(tn)" v-tooltip="tt('actions.unsuspend')"
+                        class="px-1.5 hover:text-green-400">▶</button>
+                      <button v-if="!tn.isSelf"
+                        @click="askDelete(tn)" v-tooltip="tt('actions.delete')"
+                        class="px-1.5 hover:text-red-400">🗑</button>
+                    </template>
+                  </td>
+                </tr>
+                <tr v-if="expandedId === tn.id" class="border-b border-gray-800 bg-gray-900/40">
+                  <td colspan="9" class="p-4">
+                    <div v-if="!tenantDetails[tn.id]" class="text-sm text-gray-500">
+                      {{ tt('detail.loading') }}
+                    </div>
+                    <div v-else-if="tenantDetails[tn.id].error" class="text-sm text-red-400">
+                      {{ tt('errors.loadDetailFailed') }}
+                    </div>
+                    <div v-else class="grid md:grid-cols-3 gap-6 text-sm">
+                      <!-- Vehicles -->
+                      <div>
+                        <div class="font-semibold text-gray-300 mb-2">
+                          {{ tt('detail.vehicles') }} ({{ tenantDetails[tn.id].vehicles.length }})
+                        </div>
+                        <p v-if="!tenantDetails[tn.id].vehicles.length" class="text-gray-500">
+                          {{ tt('detail.noVehicles') }}
+                        </p>
+                        <ul v-else class="space-y-1">
+                          <li v-for="v in tenantDetails[tn.id].vehicles" :key="v.id"
+                            class="text-gray-300">
+                            <span class="text-white">{{ v.display_name || v.vin || v.id }}</span>
+                            <span v-if="v.model" class="text-gray-500 text-xs ml-2">{{ v.model }}</span>
+                            <div v-if="v.vin" class="text-gray-500 text-xs font-mono">{{ v.vin }}</div>
+                          </li>
+                        </ul>
+                      </div>
+                      <!-- Users -->
+                      <div>
+                        <div class="font-semibold text-gray-300 mb-2">
+                          {{ tt('detail.users') }} ({{ tenantDetails[tn.id].users.length }})
+                        </div>
+                        <p v-if="!tenantDetails[tn.id].users.length" class="text-gray-500">
+                          {{ tt('detail.noUsers') }}
+                        </p>
+                        <ul v-else class="space-y-1">
+                          <li v-for="u in tenantDetails[tn.id].users" :key="u.id">
+                            <span class="text-white">{{ u.username }}</span>
+                            <span class="text-gray-500 text-xs ml-2">· {{ u.role }}</span>
+                            <span v-if="u.is_active === 0" class="text-red-400 text-xs ml-2">⚠ inaktiv</span>
+                            <div class="text-gray-500 text-xs">
+                              {{ tt('detail.lastLogin') }}:
+                              {{ u.last_login ? fmtDate(u.last_login * 1000) : tt('detail.neverLoggedIn') }}
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                      <!-- Counts + meta -->
+                      <div>
+                        <div class="font-semibold text-gray-300 mb-2">{{ tt('detail.counts') }}</div>
+                        <div class="space-y-0.5 text-gray-300">
+                          <div class="flex justify-between"><span class="text-gray-500">{{ tt('detail.trips') }}</span><span>{{ tenantDetails[tn.id].counts.trips }}</span></div>
+                          <div class="flex justify-between"><span class="text-gray-500">{{ tt('detail.charging') }}</span><span>{{ tenantDetails[tn.id].counts.charging_sessions }}</span></div>
+                          <div class="flex justify-between"><span class="text-gray-500">{{ tt('detail.battery') }}</span><span>{{ tenantDetails[tn.id].counts.battery_snapshots }}</span></div>
+                          <div class="flex justify-between"><span class="text-gray-500">{{ tt('detail.telemetry') }}</span><span>{{ tenantDetails[tn.id].counts.telemetry_points }}</span></div>
+                          <div class="flex justify-between"><span class="text-gray-500">{{ tt('detail.logbook') }}</span><span>{{ tenantDetails[tn.id].counts.logbook_entries }}</span></div>
+                          <div class="flex justify-between"><span class="text-gray-500">{{ tt('detail.audit') }}</span><span>{{ tenantDetails[tn.id].counts.audit_logs }}</span></div>
+                        </div>
+                        <div class="mt-3 pt-3 border-t border-gray-800 text-xs text-gray-500 space-y-0.5">
+                          <div>{{ tt('detail.createdAt') }}: {{ fmtDate(tenantDetails[tn.id].createdAt * 1000) }}</div>
+                          <div class="font-mono break-all">{{ tt('detail.dbPath') }}: {{ tenantDetails[tn.id].dbPath }}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </template>
             </tbody>
           </table>
         </div>
       </div>
     </template>
+
+    <!-- Lösch-Bestätigungsmodal -->
+    <div v-if="deleteTarget"
+      class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
+      @click.self="deleteTarget = null">
+      <div class="card max-w-md w-full space-y-4">
+        <h3 class="text-lg font-semibold text-red-300">⚠️ {{ tt('delete.title') }}</h3>
+        <p class="text-sm text-gray-300">
+          „<span class="font-semibold text-white">{{ deleteTarget.name }}</span>"
+          (<code class="text-gray-400">{{ deleteTarget.slug }}</code>)
+        </p>
+        <p class="text-sm text-yellow-300">{{ tt('delete.warning') }}</p>
+        <p class="text-xs text-gray-500">{{ tt('delete.backupNote') }}</p>
+        <div class="space-y-2">
+          <label class="text-sm text-gray-400">
+            {{ tt('delete.typeSlug') }} <code class="text-yellow-300">{{ deleteTarget.slug }}</code>
+          </label>
+          <input v-model="deleteSlugInput" type="text"
+            class="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1.5 text-sm font-mono" />
+        </div>
+        <p v-if="deleteError" class="text-sm text-red-400">{{ deleteError }}</p>
+        <div class="flex justify-end gap-2 pt-2">
+          <button @click="deleteTarget = null; deleteSlugInput = ''; deleteError = ''"
+            class="btn-secondary text-sm">{{ tt('delete.cancel') }}</button>
+          <button @click="confirmDelete"
+            :disabled="deleteSlugInput !== deleteTarget.slug || deleting"
+            class="px-3 py-1.5 rounded bg-red-600 text-white text-sm font-medium
+                   hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed">
+            {{ deleting ? '…' : tt('delete.confirm') }}
+          </button>
+        </div>
+      </div>
+    </div>
 
     <div v-else-if="isAdmin === false" class="card text-gray-400 text-sm text-center py-6">
       Systemdetails sind nur für Administratoren sichtbar.
@@ -208,12 +351,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, h, resolveDirective, withDirectives } from 'vue';
+import { ref, computed, onMounted, h, resolveDirective, withDirectives, reactive } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../store/auth.js';
 import api from '../api.js';
 
 const auth    = useAuthStore();
 const isAdmin = computed(() => auth.user?.role === 'admin');
+const { t }   = useI18n();
+const tt = (key) => t('system.tenants.' + key);
 
 const ver   = ref({});
 const stats = ref(null);
@@ -221,6 +367,108 @@ const stats = ref(null);
 const updateInfo     = ref(null);
 const updateChecking = ref(false);
 const updateError    = ref('');
+
+// ─── Mandanten-Verwaltung ─────────────────────────────────────────
+const expandedId    = ref(null);
+const tenantDetails = reactive({});       // id → detail | { error: true }
+const editingId     = ref(null);
+const editName      = ref('');
+const deleteTarget  = ref(null);
+const deleteSlugInput = ref('');
+const deleteError   = ref('');
+const deleting      = ref(false);
+
+async function reloadStats() {
+  try {
+    const { data } = await api.get('/system/stats');
+    stats.value = data;
+  } catch { /* ignore */ }
+}
+
+async function loadTenantDetail(id) {
+  try {
+    const { data } = await api.get('/system/tenants/' + id);
+    tenantDetails[id] = data;
+  } catch {
+    tenantDetails[id] = { error: true };
+  }
+}
+
+function toggleExpanded(id) {
+  if (editingId.value === id) return;        // im Edit-Modus nicht zuklappen
+  if (expandedId.value === id) {
+    expandedId.value = null;
+  } else {
+    expandedId.value = id;
+    if (!tenantDetails[id]) loadTenantDetail(id);
+  }
+}
+
+function startRename(tn) {
+  editingId.value = tn.id;
+  editName.value  = tn.name;
+}
+function cancelRename() {
+  editingId.value = null;
+  editName.value  = '';
+}
+async function saveRename(tn) {
+  const name = editName.value.trim();
+  if (!name || name === tn.name) { cancelRename(); return; }
+  try {
+    await api.patch('/system/tenants/' + tn.id, { name });
+    cancelRename();
+    await reloadStats();
+  } catch (e) {
+    alert(tt('errors.renameFailed') + ': ' + (e.response?.data?.error ?? e.message));
+  }
+}
+
+async function doSuspend(tn) {
+  try {
+    await api.post('/system/tenants/' + tn.id + '/suspend');
+    await reloadStats();
+    if (tenantDetails[tn.id]) await loadTenantDetail(tn.id);
+  } catch (e) {
+    alert(tt('errors.suspendFailed') + ': ' + (e.response?.data?.error ?? e.message));
+  }
+}
+async function doUnsuspend(tn) {
+  try {
+    await api.post('/system/tenants/' + tn.id + '/unsuspend');
+    await reloadStats();
+    if (tenantDetails[tn.id]) await loadTenantDetail(tn.id);
+  } catch (e) {
+    alert(tt('errors.unsuspendFailed') + ': ' + (e.response?.data?.error ?? e.message));
+  }
+}
+
+function askDelete(tn) {
+  deleteTarget.value    = tn;
+  deleteSlugInput.value = '';
+  deleteError.value     = '';
+}
+async function confirmDelete() {
+  if (!deleteTarget.value) return;
+  if (deleteSlugInput.value !== deleteTarget.value.slug) return;
+  deleting.value = true;
+  deleteError.value = '';
+  try {
+    await api.delete('/system/tenants/' + deleteTarget.value.id, {
+      data: { confirm: true, confirmationText: deleteTarget.value.slug },
+    });
+    const removedId = deleteTarget.value.id;
+    deleteTarget.value = null;
+    deleteSlugInput.value = '';
+    if (expandedId.value === removedId) expandedId.value = null;
+    delete tenantDetails[removedId];
+    await reloadStats();
+  } catch (e) {
+    deleteError.value = e.response?.data?.error ?? tt('errors.deleteFailed');
+  } finally {
+    deleting.value = false;
+  }
+}
 
 async function checkUpdate() {
   updateChecking.value = true;
@@ -270,11 +518,6 @@ onMounted(async () => {
     ver.value = data;
   } catch { /* ignore */ }
 
-  if (isAdmin.value) {
-    try {
-      const { data } = await api.get('/system/stats');
-      stats.value = data;
-    } catch { /* ignore */ }
-  }
+  if (isAdmin.value) await reloadStats();
 });
 </script>

@@ -269,7 +269,45 @@
     "database": "🗄 Base de données", "dbSize": "Taille du fichier", "batterySnapshots": "Snapshots batterie",
     "logbookEntries": "Entrées carnet", "auditEntries": "Entrées audit",
     "server": "🖥 Serveur", "hostname": "Nom d'hôte", "platform": "Plateforme",
-    "arch": "Architecture", "osUptime": "Uptime OS"
+    "arch": "Architecture", "osUptime": "Uptime OS",
+    "tenants": {
+      "heading": "🏢 Locataires", "total": "au total",
+      "empty": "Aucun locataire enregistré.",
+      "you": "(vous)",
+      "status": { "active": "Actif", "suspended": "Suspendu" },
+      "cols": {
+        "status": "Statut", "name": "Nom", "slug": "Slug",
+        "vehicles": "Véhicules", "users": "Utilisateurs",
+        "size": "Taille BDD", "lastActivity": "Dernière activité", "actions": "Actions"
+      },
+      "actions": {
+        "rename": "Renommer", "save": "Enregistrer", "cancel": "Annuler",
+        "suspend": "Suspendre", "unsuspend": "Réactiver", "delete": "Supprimer"
+      },
+      "detail": {
+        "loading": "Chargement des détails…", "vehicles": "Véhicules", "users": "Utilisateurs",
+        "counts": "Enregistrements", "dbPath": "Chemin BDD", "createdAt": "Créé le",
+        "noVehicles": "Aucun véhicule", "noUsers": "Aucun utilisateur",
+        "trips": "Trajets", "charging": "Sessions de charge", "battery": "Instantanés batterie",
+        "telemetry": "Points télémétrie", "logbook": "Carnet", "audit": "Journaux d'audit",
+        "role": "Rôle", "lastLogin": "Dernière connexion", "neverLoggedIn": "Jamais connecté"
+      },
+      "delete": {
+        "title": "Supprimer définitivement le locataire ?",
+        "warning": "Toutes les données de ce locataire seront supprimées — véhicules, trajets, charges, utilisateurs.",
+        "backupNote": "Une copie de sauvegarde de la base est créée automatiquement avant la suppression.",
+        "typeSlug": "Saisissez le slug pour confirmer :",
+        "confirm": "Supprimer définitivement",
+        "cancel": "Annuler"
+      },
+      "errors": {
+        "suspendFailed": "Échec de la suspension",
+        "unsuspendFailed": "Échec de la réactivation",
+        "renameFailed": "Échec du renommage",
+        "deleteFailed": "Échec de la suppression",
+        "loadDetailFailed": "Impossible de charger les détails"
+      }
+    }
   },
   "drivers": { "noDriver": "– Aucun conducteur" },
   "handbook": {

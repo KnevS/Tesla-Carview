@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS tenants (
   slug TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
   db_path TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active',
+  suspended_at INTEGER,
   created_at INTEGER DEFAULT (unixepoch())
 );
 

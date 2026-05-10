@@ -269,7 +269,45 @@
     "database": "🗄 Veritabanı", "dbSize": "Dosya boyutu", "batterySnapshots": "Batarya anlık görüntüleri",
     "logbookEntries": "Bakım defteri girişleri", "auditEntries": "Denetim girişleri",
     "server": "🖥 Sunucu", "hostname": "Ana bilgisayar adı", "platform": "Platform",
-    "arch": "Mimari", "osUptime": "İşletim sistemi çalışma süresi"
+    "arch": "Mimari", "osUptime": "İşletim sistemi çalışma süresi",
+    "tenants": {
+      "heading": "🏢 Kiracılar", "total": "toplam",
+      "empty": "Henüz kiracı oluşturulmadı.",
+      "you": "(siz)",
+      "status": { "active": "Aktif", "suspended": "Duraklatıldı" },
+      "cols": {
+        "status": "Durum", "name": "Ad", "slug": "Slug",
+        "vehicles": "Araçlar", "users": "Kullanıcılar",
+        "size": "DB boyutu", "lastActivity": "Son etkinlik", "actions": "İşlemler"
+      },
+      "actions": {
+        "rename": "Yeniden adlandır", "save": "Kaydet", "cancel": "İptal",
+        "suspend": "Duraklat", "unsuspend": "Yeniden etkinleştir", "delete": "Sil"
+      },
+      "detail": {
+        "loading": "Ayrıntılar yükleniyor…", "vehicles": "Araçlar", "users": "Kullanıcılar",
+        "counts": "Kayıtlar", "dbPath": "DB yolu", "createdAt": "Oluşturulma tarihi",
+        "noVehicles": "Araç yok", "noUsers": "Kullanıcı yok",
+        "trips": "Seyahatler", "charging": "Şarj oturumları", "battery": "Akü anlık görüntüleri",
+        "telemetry": "Telemetri noktaları", "logbook": "Bakım defteri", "audit": "Denetim kayıtları",
+        "role": "Rol", "lastLogin": "Son giriş", "neverLoggedIn": "Hiç giriş yapılmadı"
+      },
+      "delete": {
+        "title": "Kiracıyı kalıcı olarak silmek istiyor musunuz?",
+        "warning": "Bu kiracının tüm verileri silinecek — araçlar, seyahatler, şarj oturumları, kullanıcılar.",
+        "backupNote": "Silmeden önce otomatik olarak veritabanı dosyasının yedek kopyası oluşturulur.",
+        "typeSlug": "Onaylamak için kiracı slug'ını yazın:",
+        "confirm": "Kalıcı olarak sil",
+        "cancel": "İptal"
+      },
+      "errors": {
+        "suspendFailed": "Duraklatma başarısız",
+        "unsuspendFailed": "Yeniden etkinleştirme başarısız",
+        "renameFailed": "Yeniden adlandırma başarısız",
+        "deleteFailed": "Silme başarısız",
+        "loadDetailFailed": "Ayrıntılar yüklenemedi"
+      }
+    }
   },
   "drivers": { "noDriver": "– Sürücü yok" },
   "handbook": {
