@@ -186,9 +186,13 @@ router.post('/logout', requireAuth, (req, res) => {
 // GET /api/auth/me
 router.get('/me', requireAuth, (req, res) => {
   const user = req.db.prepare(
-    'SELECT id, username, role, email, mfa_enabled, last_login, created_at FROM users WHERE id=?'
+    'SELECT id, username, role, email, lang, mfa_enabled, last_login, created_at FROM users WHERE id=?'
   ).get(req.user.sub);
-  res.json({ ...user, tenantId: req.tenantId });
+  // Mandanten-Standard-Sprache mitliefern, damit Frontend ohne Flash umschalten kann
+  const tenantDefaultLocale = req.db.prepare(
+    "SELECT value FROM tenant_settings WHERE key='i18n.default_locale'"
+  ).get()?.value || 'de';
+  res.json({ ...user, tenantId: req.tenantId, tenantDefaultLocale });
 });
 
 // GET /api/auth/tenants — öffentlich, gibt verfügbare Slugs zurück (ohne sensitive Infos)

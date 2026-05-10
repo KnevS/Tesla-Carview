@@ -1,64 +1,49 @@
 <template>
-  <nav class="bg-tesla-gray border-b border-gray-700 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
-      <RouterLink to="/" class="flex items-center gap-2 font-bold text-xl"
-        v-tooltip="'Zurück zur Startseite'">
-        <span class="text-tesla-red">⚡</span> Tesla Carview
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <!-- Logo -->
+      <RouterLink to="/" class="brand" v-tooltip="$t('auth.handbook')">
+        <span class="brand-icon">⚡</span>
+        <span class="brand-name">Tesla Carview</span>
       </RouterLink>
 
+      <!-- Desktop: gruppierte Dropdowns -->
       <div class="hidden md:flex items-center gap-1">
-        <RouterLink v-for="link in navStore.visibleLinks" :key="link.to" :to="link.to"
-          v-tooltip="link.tooltip"
-          class="px-4 py-2 rounded-lg text-sm font-medium transition"
-          :class="$route.path === link.to ? 'text-white' : 'text-gray-300 hover:bg-gray-700'"
-          :style="$route.path === link.to ? { backgroundColor: 'var(--accent)' } : {}"
-        >
-          {{ link.icon }} {{ link.label }}
-        </RouterLink>
+        <NavGroup
+          v-for="g in visibleGroups"
+          :key="g.id"
+          :title="$t(`nav.group_${g.id}`)"
+          :items="g.items"
+          :active="activeGroupId === g.id"
+        />
       </div>
 
-      <div class="flex items-center gap-3">
+      <!-- Rechts: Fahrzeug, Sprache, Handbuch, Einstellungen, Logout -->
+      <div class="flex items-center gap-2">
         <select v-if="appStore.vehicles.length > 1" v-model="appStore.selectedVehicleId"
-          v-tooltip="'Aktives Fahrzeug auswählen – alle Statistiken werden für dieses Fahrzeug angezeigt'"
+          v-tooltip="'Aktives Fahrzeug auswählen'"
           class="bg-gray-700 text-white text-sm rounded-lg px-3 py-1.5 border border-gray-600">
           <option v-for="v in appStore.vehicles" :key="v.id" :value="v.id">{{ v.display_name }}</option>
         </select>
-        <span v-else-if="appStore.selectedVehicle" class="text-sm text-gray-300"
-          v-tooltip="'Aktuell aktives Fahrzeug'">
-          {{ appStore.selectedVehicle.display_name }}
+        <span v-else-if="appStore.selectedVehicle" class="text-sm text-gray-300 truncate max-w-[8rem]"
+          v-tooltip="appStore.selectedVehicle.display_name">
+          🚗 {{ appStore.selectedVehicle.display_name }}
         </span>
-        <RouterLink v-if="authStore.isAdmin" to="/admin/users"
-          class="text-gray-400 hover:text-white transition"
-          v-tooltip="'Benutzerverwaltung – Konten anlegen, Fahrzeuge zuweisen, Reset-Links generieren'">
-          👥
-        </RouterLink>
-        <RouterLink v-if="authStore.isAdmin" to="/admin/data"
-          class="text-gray-400 hover:text-white transition"
-          v-tooltip="'Datenverwaltung – Daten löschen und Datenbestand einsehen'">
-          🗑️
-        </RouterLink>
-        <RouterLink to="/handbook"
-          class="text-gray-400 hover:text-white transition"
-          v-tooltip="'Benutzerhandbuch – Anleitungen, FAQ und Tipps zur App'">
-          📖
-        </RouterLink>
-        <RouterLink to="/settings" class="text-gray-400 hover:text-white transition"
-          v-tooltip="'Einstellungen, Passwort und Zwei-Faktor-Authentifizierung verwalten'">
-          ⚙️
-        </RouterLink>
-        <button @click="logout"
-          class="text-gray-400 hover:text-red-400 transition text-lg leading-none"
-          v-tooltip="'Abmelden'">
-          ⏻
-        </button>
+
+        <LangSwitcher compact />
+
+        <RouterLink to="/handbook" class="icon-btn" v-tooltip="$t('auth.handbook')">📖</RouterLink>
+        <RouterLink to="/settings" class="icon-btn" v-tooltip="$t('settings.title')">⚙️</RouterLink>
+        <button @click="logout" class="icon-btn icon-btn-danger" v-tooltip="$t('common.logout')">⏻</button>
       </div>
     </div>
 
+    <!-- Mobile: horizontale Scroll-Leiste mit allen sichtbaren Items (flach) -->
     <div class="md:hidden flex overflow-x-auto gap-1 px-4 pb-2">
-      <RouterLink v-for="link in navStore.visibleLinks" :key="link.to" :to="link.to"
+      <RouterLink v-for="link in mobileLinks" :key="link.to" :to="link.to"
         v-tooltip="link.tooltip"
         class="flex-shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition"
-        :class="$route.path === link.to ? 'text-white' : 'text-gray-300 hover:bg-gray-700'"
+        :class="$route.path === link.to ? 'active-mobile' : 'text-gray-300 hover:bg-gray-700'"
         :style="$route.path === link.to ? { backgroundColor: 'var(--accent)' } : {}"
       >
         {{ link.icon }} {{ link.label }}
@@ -68,18 +53,149 @@
 </template>
 
 <script setup>
-import { useRouter }    from 'vue-router';
+import { computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAppStore }  from '../store/index.js';
 import { useAuthStore } from '../store/auth.js';
-import { useNavStore }  from '../store/nav.js';
+import NavGroup     from './NavGroup.vue';
+import LangSwitcher from './LangSwitcher.vue';
+
 const appStore  = useAppStore();
 const authStore = useAuthStore();
-const navStore  = useNavStore();
 const router    = useRouter();
+const route     = useRoute();
+const { t }     = useI18n();
+
+/* Gruppen-Struktur — Single Source of Truth.
+ * Falls eine Route hier fehlt, taucht sie in der NavBar nicht auf.
+ * Admin-Items werden serverseitig durch authStore.isAdmin gefiltert. */
+const NAV_GROUPS = [
+  {
+    id: 'overview', adminOnly: false,
+    items: [
+      { key: 'dashboard', to: '/',          icon: '🏠' },
+      { key: 'telemetry', to: '/telemetry', icon: '🏎' },
+      { key: 'control',   to: '/control',   icon: '🎮' },
+      { key: 'battery',   to: '/battery',   icon: '📊' },
+    ],
+  },
+  {
+    id: 'analytics', adminOnly: false,
+    items: [
+      { key: 'trips',       to: '/trips',            icon: '🗺️' },
+      { key: 'fahrtenbuch', to: '/fahrtenbuch',      icon: '📋' },
+      { key: 'charging',    to: '/charging',         icon: '🔋' },
+      { key: 'logbook',     to: '/logbook',          icon: '📓' },
+      { key: 'abrechnung',  to: '/kostenabrechnung', icon: '💶' },
+      { key: 'export',      to: '/export',           icon: '💾' },
+    ],
+  },
+  {
+    id: 'admin', adminOnly: true,
+    items: [
+      // Admin-Items — Routes existieren bereits in der App
+      { key: 'users',  to: '/admin/users', icon: '👥', label: 'Benutzer',         tooltip: 'Benutzerverwaltung – Konten anlegen, Fahrzeuge zuweisen, Reset-Links generieren' },
+      { key: 'data',   to: '/admin/data',  icon: '🗑️', label: 'Daten',            tooltip: 'Datenverwaltung – Daten löschen und Datenbestand einsehen' },
+      { key: 'system', to: '/system',      icon: '📈', label: 'System',           tooltip: 'Versionsinformationen, CPU-/RAM-Auslastung und Datenbankstatistiken' },
+    ],
+  },
+];
+
+/** Items mit übersetzten Labels/Tooltips anreichern. Fallback: Hardcoded label/tooltip oder die i18n-Keys aus nav.{key} */
+function localize(items) {
+  return items.map(it => ({
+    ...it,
+    label:   it.label   ?? t(`nav.${it.key}.label`),
+    tooltip: it.tooltip ?? (() => { const k = `nav.${it.key}.tooltip`; const v = t(k); return v === k ? '' : v; })(),
+  }));
+}
+
+const visibleGroups = computed(() =>
+  NAV_GROUPS
+    .filter(g => !g.adminOnly || authStore.isAdmin)
+    .map(g => ({ ...g, items: localize(g.items) }))
+);
+
+/** Aktive Gruppe = jene mit dem aktuellen Route-Pfad — für Highlighting */
+const activeGroupId = computed(() => {
+  const p = route.path;
+  for (const g of NAV_GROUPS) {
+    if (g.items.some(it => it.to === p)) return g.id;
+  }
+  return null;
+});
+
+/** Mobile: flache Liste aller (sichtbaren) Items */
+const mobileLinks = computed(() =>
+  visibleGroups.value.flatMap(g => g.items)
+);
 
 async function logout() {
-  if (!confirm('Wirklich abmelden?')) return;
+  if (!confirm(t('common.logout') + '?')) return;
   await authStore.logout().catch(() => {});
   router.push('/login');
 }
 </script>
+
+<style scoped>
+.navbar {
+  background: var(--card-bg, #1f2937);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: saturate(150%) blur(8px);
+}
+.navbar-inner {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 4rem;
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-decoration: none;
+  color: inherit;
+  letter-spacing: -0.01em;
+}
+.brand-icon { color: var(--accent, #ef4444); font-size: 1.3rem; }
+.brand-name { white-space: nowrap; }
+
+.icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2rem;
+  min-width: 2rem;
+  padding: 0 0.5rem;
+  border-radius: 0.5rem;
+  color: rgba(229,231,235,0.75);
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  text-decoration: none;
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.icon-btn:hover { background: rgba(255,255,255,0.07); color: white; }
+.icon-btn:active { transform: scale(0.96); }
+.icon-btn-danger:hover { color: #fca5a5; }
+
+.active-mobile {
+  color: white;
+  font-weight: 600;
+}
+
+@media (prefers-color-scheme: light) {
+  .icon-btn { color: rgba(31,41,55,0.7); }
+  .icon-btn:hover { background: rgba(0,0,0,0.06); color: black; }
+}
+</style>

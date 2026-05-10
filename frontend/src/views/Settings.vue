@@ -1,6 +1,45 @@
 <template>
   <div class="max-w-2xl space-y-6">
-    <h1 class="text-2xl font-bold">Einstellungen</h1>
+    <h1 class="text-2xl font-bold">{{ $t('settings.title') }}</h1>
+
+    <!-- Sprache (User-Preference) -->
+    <div class="card space-y-3">
+      <h2 class="font-semibold">🌐 {{ $t('settings.languageTitle') }}</h2>
+      <p class="text-sm text-gray-400">{{ $t('settings.languageHint') }}</p>
+      <div class="flex flex-wrap gap-2">
+        <button
+          v-for="l in LANGS" :key="l.code"
+          type="button"
+          class="lang-pick"
+          :class="{ active: langStore.current === l.code }"
+          @click="onPickLang(l.code)"
+        >
+          <span class="text-lg leading-none">{{ l.flag }}</span>
+          <span>{{ l.label }}</span>
+        </button>
+      </div>
+      <p v-if="langSaved" class="text-xs text-green-400">✓ {{ $t('settings.saved') }}</p>
+    </div>
+
+    <!-- Mandanten-Standardsprache (nur Admin) -->
+    <div v-if="auth.isAdmin" class="card space-y-3">
+      <h2 class="font-semibold">🏢 {{ $t('settings.tenantDefaultLocaleTitle') }}</h2>
+      <p class="text-sm text-gray-400">{{ $t('settings.tenantDefaultLocaleHint') }}</p>
+      <div class="flex flex-wrap gap-2">
+        <button
+          v-for="l in LANGS" :key="l.code"
+          type="button"
+          class="lang-pick"
+          :class="{ active: tenantDefaultLocale === l.code }"
+          :disabled="tenantSaving"
+          @click="saveTenantDefault(l.code)"
+        >
+          <span class="text-lg leading-none">{{ l.flag }}</span>
+          <span>{{ l.label }}</span>
+        </button>
+      </div>
+      <p v-if="tenantSaved" class="text-xs text-green-400">✓ {{ $t('settings.saved') }}</p>
+    </div>
 
     <!-- Vehicle profile -->
     <div class="card space-y-4">
@@ -471,12 +510,45 @@ import { useAuthStore } from '../store/auth.js';
 import { useAppStore }  from '../store/index.js';
 import { useNavStore }   from '../store/nav.js';
 import { useThemeStore, THEMES } from '../store/theme.js';
+import { useLangStore, LANGS } from '../store/lang.js';
 
 const auth     = useAuthStore();
 const appStore = useAppStore();
 const navStore   = useNavStore();
 const themeStore = useThemeStore();
+const langStore  = useLangStore();
 const router     = useRouter();
+
+// ── Sprache (User) ──
+const langSaved = ref(false);
+async function onPickLang(code) {
+  await langStore.setLang(code);
+  langSaved.value = true;
+  setTimeout(() => { langSaved.value = false; }, 1500);
+}
+
+// ── Mandanten-Standardsprache (Admin) ──
+const tenantDefaultLocale = ref('de');
+const tenantSaved         = ref(false);
+const tenantSaving        = ref(false);
+async function loadTenantDefaultLocale() {
+  if (!auth.isAdmin) return;
+  try {
+    const { data } = await api.get('/system/tenant-settings/default-locale');
+    tenantDefaultLocale.value = data.defaultLocale || 'de';
+  } catch { /* leave default */ }
+}
+async function saveTenantDefault(code) {
+  if (tenantSaving.value) return;
+  tenantSaving.value = true;
+  try {
+    await api.put('/system/tenant-settings/default-locale', { defaultLocale: code });
+    tenantDefaultLocale.value = code;
+    tenantSaved.value = true;
+    setTimeout(() => { tenantSaved.value = false; }, 1500);
+  } catch { /* ignore – server validates */ }
+  finally { tenantSaving.value = false; }
+}
 
 // Fahrerverwaltung
 const DRIVER_COLORS = [
@@ -719,6 +791,7 @@ const actionTooltip = a => actionTooltips[a] || a;
 
 onMounted(async () => {
   loadDrivers();
+  loadTenantDefaultLocale();
   const [mfa, audit, teslaStatus] = await Promise.all([
     api.get('/mfa/status'),
     api.get('/users/me/audit'),
@@ -822,3 +895,33 @@ async function resetUsageMonth() {
 
 loadUsageConfig();
 </script>
+
+<style scoped>
+.lang-pick {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.55rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease, transform 0.1s ease;
+}
+.lang-pick:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
+.lang-pick:active { transform: scale(0.97); }
+.lang-pick:disabled { opacity: 0.55; cursor: progress; }
+.lang-pick.active {
+  background: var(--accent, #ef4444);
+  border-color: transparent;
+  color: white;
+  box-shadow: 0 6px 16px rgba(239,68,68,0.18);
+}
+
+@media (prefers-color-scheme: light) {
+  .lang-pick { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); }
+  .lang-pick:hover { background: rgba(0,0,0,0.07); }
+}
+</style>

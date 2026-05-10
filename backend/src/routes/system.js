@@ -257,6 +257,31 @@ router.delete('/tenants/:id', requireAuth, requireAdmin,
     res.json({ ok: true, id: t.id, backupPath });
   });
 
+// ───────────────────────── Mandanten-Standard-Sprache ─────────────────────────
+// Whitelist analog zu users.lang (siehe users.js). Single-Source-of-Truth wäre eine
+// gemeinsame Konstante; vorerst hier als kleines Array, da dies der einzige
+// zweite Konsument ist.
+const LOCALE_WHITELIST = ['de', 'en', 'fr', 'es', 'tr', 'el'];
+
+router.get('/tenant-settings/default-locale', requireAuth, (req, res) => {
+  const row = req.db.prepare(
+    "SELECT value FROM tenant_settings WHERE key='i18n.default_locale'"
+  ).get();
+  res.json({ defaultLocale: row?.value || 'de' });
+});
+
+router.put('/tenant-settings/default-locale', requireAuth, requireAdmin,
+  validate(z.object({ defaultLocale: z.enum(LOCALE_WHITELIST) })),
+  (req, res) => {
+    req.db.prepare(
+      `INSERT INTO tenant_settings (key, value) VALUES ('i18n.default_locale', ?)
+         ON CONFLICT(key) DO UPDATE SET value = excluded.value`
+    ).run(req.body.defaultLocale);
+    auditLog(req.db, req.user.sub, 'tenant_default_locale_set', req,
+      { defaultLocale: req.body.defaultLocale });
+    res.json({ ok: true, defaultLocale: req.body.defaultLocale });
+  });
+
 function fetchJson(url) {
   return new Promise((resolve, reject) => {
     const req = https.get(url, { headers: { 'User-Agent': 'tesla-carview' } }, res => {
