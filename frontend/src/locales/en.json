@@ -270,7 +270,45 @@
     "database": "🗄 Database", "dbSize": "File size", "batterySnapshots": "Battery snapshots",
     "logbookEntries": "Logbook entries", "auditEntries": "Audit entries",
     "server": "🖥 Server", "hostname": "Hostname", "platform": "Platform",
-    "arch": "Architecture", "osUptime": "OS uptime"
+    "arch": "Architecture", "osUptime": "OS uptime",
+    "tenants": {
+      "heading": "🏢 Tenants", "total": "total",
+      "empty": "No tenants registered yet.",
+      "you": "(you)",
+      "status": { "active": "Active", "suspended": "Suspended" },
+      "cols": {
+        "status": "Status", "name": "Name", "slug": "Slug",
+        "vehicles": "Vehicles", "users": "Users",
+        "size": "DB size", "lastActivity": "Last activity", "actions": "Actions"
+      },
+      "actions": {
+        "rename": "Rename", "save": "Save", "cancel": "Cancel",
+        "suspend": "Suspend", "unsuspend": "Reactivate", "delete": "Delete"
+      },
+      "detail": {
+        "loading": "Loading details…", "vehicles": "Vehicles", "users": "Users",
+        "counts": "Records", "dbPath": "DB path", "createdAt": "Created at",
+        "noVehicles": "No vehicles", "noUsers": "No users",
+        "trips": "Trips", "charging": "Charging sessions", "battery": "Battery snapshots",
+        "telemetry": "Telemetry points", "logbook": "Logbook", "audit": "Audit logs",
+        "role": "Role", "lastLogin": "Last login", "neverLoggedIn": "Never logged in"
+      },
+      "delete": {
+        "title": "Delete tenant permanently?",
+        "warning": "All data of this tenant will be removed — vehicles, trips, charging sessions, users.",
+        "backupNote": "A backup copy of the database file is created automatically before deletion.",
+        "typeSlug": "Type the tenant slug to confirm:",
+        "confirm": "Delete permanently",
+        "cancel": "Cancel"
+      },
+      "errors": {
+        "suspendFailed": "Suspend failed",
+        "unsuspendFailed": "Reactivation failed",
+        "renameFailed": "Rename failed",
+        "deleteFailed": "Delete failed",
+        "loadDetailFailed": "Could not load tenant details"
+      }
+    }
   },
   "drivers": { "noDriver": "– No driver" },
   "handbook": {

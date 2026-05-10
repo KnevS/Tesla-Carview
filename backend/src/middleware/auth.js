@@ -15,6 +15,12 @@ export function requireAuth(req, res, next) {
   const tenantId = req.user.tenantId;
   if (!tenantId) return res.status(401).json({ error: 'Token ohne Mandant' });
 
+  const tenant = getTenantById(tenantId);
+  if (!tenant) return res.status(401).json({ error: 'Mandant nicht gefunden' });
+  if (tenant.status === 'suspended') {
+    return res.status(403).json({ error: 'Mandant pausiert' });
+  }
+
   try {
     req.db       = getDb(tenantId);
     req.tenantId = tenantId;

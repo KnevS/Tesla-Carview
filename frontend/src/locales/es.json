@@ -269,7 +269,45 @@
     "database": "🗄 Base de datos", "dbSize": "Tamaño del archivo", "batterySnapshots": "Snapshots de batería",
     "logbookEntries": "Entradas del cuaderno", "auditEntries": "Entradas de auditoría",
     "server": "🖥 Servidor", "hostname": "Nombre del host", "platform": "Plataforma",
-    "arch": "Arquitectura", "osUptime": "Tiempo activo del SO"
+    "arch": "Arquitectura", "osUptime": "Tiempo activo del SO",
+    "tenants": {
+      "heading": "🏢 Inquilinos", "total": "en total",
+      "empty": "Aún no hay inquilinos registrados.",
+      "you": "(tú)",
+      "status": { "active": "Activo", "suspended": "Suspendido" },
+      "cols": {
+        "status": "Estado", "name": "Nombre", "slug": "Slug",
+        "vehicles": "Vehículos", "users": "Usuarios",
+        "size": "Tamaño BD", "lastActivity": "Última actividad", "actions": "Acciones"
+      },
+      "actions": {
+        "rename": "Renombrar", "save": "Guardar", "cancel": "Cancelar",
+        "suspend": "Suspender", "unsuspend": "Reactivar", "delete": "Eliminar"
+      },
+      "detail": {
+        "loading": "Cargando detalles…", "vehicles": "Vehículos", "users": "Usuarios",
+        "counts": "Registros", "dbPath": "Ruta BD", "createdAt": "Creado el",
+        "noVehicles": "Sin vehículos", "noUsers": "Sin usuarios",
+        "trips": "Viajes", "charging": "Sesiones de carga", "battery": "Snapshots batería",
+        "telemetry": "Puntos telemetría", "logbook": "Cuaderno", "audit": "Registros de auditoría",
+        "role": "Rol", "lastLogin": "Último inicio de sesión", "neverLoggedIn": "Nunca ha iniciado sesión"
+      },
+      "delete": {
+        "title": "¿Eliminar inquilino permanentemente?",
+        "warning": "Se eliminarán todos los datos de este inquilino — vehículos, viajes, cargas, usuarios.",
+        "backupNote": "Antes de eliminar se crea automáticamente una copia de seguridad de la base de datos.",
+        "typeSlug": "Escribe el slug del inquilino para confirmar:",
+        "confirm": "Eliminar permanentemente",
+        "cancel": "Cancelar"
+      },
+      "errors": {
+        "suspendFailed": "Error al suspender",
+        "unsuspendFailed": "Error al reactivar",
+        "renameFailed": "Error al renombrar",
+        "deleteFailed": "Error al eliminar",
+        "loadDetailFailed": "No se pudieron cargar los detalles"
+      }
+    }
   },
   "drivers": { "noDriver": "– Sin conductor" },
   "handbook": {

@@ -1,11 +1,17 @@
 import { Router } from 'express';
 import { execSync } from 'child_process';
 import os from 'os';
-import { readFileSync, statSync } from 'fs';
+import { readFileSync, statSync, copyFileSync, unlinkSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
-import { requireAuth } from '../middleware/auth.js';
-import { getAllTenants, getDb } from '../db/database.js';
+import { z } from 'zod';
+import { requireAuth, requireAdmin } from '../middleware/auth.js';
+import { validate } from '../middleware/validate.js';
+import { auditLog } from '../services/auditService.js';
+import {
+  getAllTenants, getDb, getTenantById,
+  setTenantStatus, renameTenant, dropTenant,
+} from '../db/database.js';
 import https from 'https';
 
 const router = Router();
@@ -92,11 +98,14 @@ router.get('/stats', requireAuth, (req, res) => {
         id:           t.id,
         slug:         t.slug,
         name:         t.name,
+        status:       t.status ?? 'active',
+        suspendedAt:  t.suspended_at ?? null,
         createdAt:    t.created_at,
         sizeByte,
         vehicleCount,
         userCount,
         lastActivity,
+        isSelf:       t.id === req.tenantId,
       };
     });
   } catch { /* master DB unavailable — leave defaults */ }
@@ -128,6 +137,125 @@ router.get('/stats', requireAuth, (req, res) => {
     git: getGitInfo(),
   });
 });
+
+// ───────────────────────── Mandanten-Verwaltung (admin) ─────────────────────────
+// Detail-Ansicht eines einzelnen Mandanten
+router.get('/tenants/:id', requireAuth, requireAdmin, (req, res) => {
+  const t = getTenantById(req.params.id);
+  if (!t) return res.status(404).json({ error: 'Mandant nicht gefunden' });
+
+  let sizeByte = null;
+  try { sizeByte = statSync(t.db_path).size; } catch { /* missing */ }
+
+  let vehicles = [], users = [], counts = {}, lastActivity = null;
+  try {
+    const tdb = getDb(t.id);
+    vehicles = tdb.prepare(
+      'SELECT id, vin, display_name, model, category, created_at FROM vehicles ORDER BY created_at'
+    ).all();
+    users = tdb.prepare(
+      `SELECT id, username, email, role, lang, is_active, last_login, created_at
+         FROM users ORDER BY created_at`
+    ).all();
+    counts = {
+      trips:             tdb.prepare('SELECT COUNT(*) AS n FROM trips').get().n,
+      charging_sessions: tdb.prepare('SELECT COUNT(*) AS n FROM charging_sessions').get().n,
+      battery_snapshots: tdb.prepare('SELECT COUNT(*) AS n FROM battery_snapshots').get().n,
+      telemetry_points:  tdb.prepare('SELECT COUNT(*) AS n FROM telemetry_points').get().n,
+      logbook_entries:   tdb.prepare('SELECT COUNT(*) AS n FROM logbook_entries').get().n,
+      audit_logs:        tdb.prepare('SELECT COUNT(*) AS n FROM audit_logs').get().n,
+    };
+    lastActivity = tdb.prepare(
+      'SELECT MAX(ts) AS ts FROM (SELECT MAX(start_time) AS ts FROM trips UNION SELECT MAX(start_time) AS ts FROM charging_sessions)'
+    ).get()?.ts ?? null;
+  } catch { /* tenant DB unavailable */ }
+
+  res.json({
+    id:           t.id,
+    slug:         t.slug,
+    name:         t.name,
+    status:       t.status ?? 'active',
+    suspendedAt:  t.suspended_at ?? null,
+    createdAt:    t.created_at,
+    dbPath:       t.db_path,
+    sizeByte,
+    isSelf:       t.id === req.tenantId,
+    vehicles, users, counts, lastActivity,
+  });
+});
+
+// Mandant umbenennen (Name, nicht Slug)
+router.patch('/tenants/:id', requireAuth, requireAdmin,
+  validate(z.object({ name: z.string().trim().min(1).max(100) })),
+  (req, res) => {
+    const t = getTenantById(req.params.id);
+    if (!t) return res.status(404).json({ error: 'Mandant nicht gefunden' });
+    renameTenant(t.id, req.body.name);
+    auditLog(req.db, req.user.sub, 'tenant_renamed', req,
+      { tenantId: t.id, oldName: t.name, newName: req.body.name });
+    res.json({ ok: true, id: t.id, name: req.body.name });
+  });
+
+// Mandant pausieren — Login + Sync gestoppt
+router.post('/tenants/:id/suspend', requireAuth, requireAdmin, (req, res) => {
+  const t = getTenantById(req.params.id);
+  if (!t) return res.status(404).json({ error: 'Mandant nicht gefunden' });
+  if (t.id === req.tenantId) {
+    return res.status(400).json({ error: 'Eigenen Mandanten kann man nicht pausieren' });
+  }
+  setTenantStatus(t.id, 'suspended');
+  auditLog(req.db, req.user.sub, 'tenant_suspended', req, { tenantId: t.id, slug: t.slug });
+  res.json({ ok: true, id: t.id, status: 'suspended' });
+});
+
+// Mandant reaktivieren
+router.post('/tenants/:id/unsuspend', requireAuth, requireAdmin, (req, res) => {
+  const t = getTenantById(req.params.id);
+  if (!t) return res.status(404).json({ error: 'Mandant nicht gefunden' });
+  setTenantStatus(t.id, 'active');
+  auditLog(req.db, req.user.sub, 'tenant_unsuspended', req, { tenantId: t.id, slug: t.slug });
+  res.json({ ok: true, id: t.id, status: 'active' });
+});
+
+// Mandant löschen — mit Backup, dreifache Bestätigung
+router.delete('/tenants/:id', requireAuth, requireAdmin,
+  validate(z.object({
+    confirm:          z.literal(true),
+    confirmationText: z.string(),
+  })),
+  (req, res) => {
+    const t = getTenantById(req.params.id);
+    if (!t) return res.status(404).json({ error: 'Mandant nicht gefunden' });
+    if (t.id === req.tenantId) {
+      return res.status(400).json({ error: 'Eigenen Mandanten kann man nicht löschen' });
+    }
+    if (req.body.confirmationText !== t.slug) {
+      return res.status(400).json({ error: `Bitte exakt den Slug "${t.slug}" zur Bestätigung eingeben` });
+    }
+
+    // Backup vor dem Löschen
+    let backupPath = null;
+    try {
+      if (existsSync(t.db_path)) {
+        backupPath = t.db_path.replace(/\.db$/, `_deleted_${Date.now()}.db`);
+        copyFileSync(t.db_path, backupPath);
+      }
+    } catch (e) {
+      return res.status(500).json({ error: 'Backup fehlgeschlagen — Löschung abgebrochen', detail: e.message });
+    }
+
+    // Master-Einträge entfernen (Connection schließen, Master-Reihen weg)
+    dropTenant(t.id);
+
+    // DB-Datei + WAL/SHM löschen
+    for (const suffix of ['', '-wal', '-shm']) {
+      try { unlinkSync(t.db_path + suffix); } catch { /* darf fehlen */ }
+    }
+
+    auditLog(req.db, req.user.sub, 'tenant_deleted', req,
+      { tenantId: t.id, slug: t.slug, name: t.name, backupPath });
+    res.json({ ok: true, id: t.id, backupPath });
+  });
 
 function fetchJson(url) {
   return new Promise((resolve, reject) => {

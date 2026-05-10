@@ -64,6 +64,30 @@ export function registerVin(vin, tenantId) {
   ).run(vin, tenantId);
 }
 
+export function setTenantStatus(id, status) {
+  const suspendedAt = status === 'suspended' ? Math.floor(Date.now() / 1000) : null;
+  getMasterDb().prepare(
+    'UPDATE tenants SET status=?, suspended_at=? WHERE id=?'
+  ).run(status, suspendedAt, id);
+}
+
+export function renameTenant(id, name) {
+  getMasterDb().prepare('UPDATE tenants SET name=? WHERE id=?').run(name, id);
+}
+
+export function closeTenantConnection(id) {
+  const db = tenantConnections.get(id);
+  if (db) { try { db.close(); } catch { /* ignore */ } }
+  tenantConnections.delete(id);
+}
+
+export function dropTenant(id) {
+  const master = getMasterDb();
+  closeTenantConnection(id);
+  // ON DELETE CASCADE räumt vin_registry + refresh_tokens auf
+  master.prepare('DELETE FROM tenants WHERE id=?').run(id);
+}
+
 export function createTenant(slug, name) {
   ensureDirs();
   const id     = randomUUID();
@@ -85,10 +109,21 @@ export function createTenant(slug, name) {
   return id;
 }
 
+function runMasterMigrations(master) {
+  const cols = master.prepare('PRAGMA table_info(tenants)').all().map(c => c.name);
+  if (!cols.includes('status')) {
+    master.exec("ALTER TABLE tenants ADD COLUMN status TEXT NOT NULL DEFAULT 'active'");
+  }
+  if (!cols.includes('suspended_at')) {
+    master.exec('ALTER TABLE tenants ADD COLUMN suspended_at INTEGER');
+  }
+}
+
 export function initMasterDb() {
   ensureDirs();
   const master = getMasterDb();
   master.exec(readFileSync(join(__dirname, 'master-schema.sql'), 'utf8'));
+  runMasterMigrations(master);
 
   const tenantCount = master.prepare('SELECT COUNT(*) as n FROM tenants').get().n;
   const legacyPath  = process.env.DB_PATH || join(DATA_DIR, 'tesla-carview.db');
