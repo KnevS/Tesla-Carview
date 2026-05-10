@@ -313,6 +313,9 @@ function runTenantMigrations(db) {
   seed('tesla_usage.rate_streaming_signal','0.000005');
   seed('tesla_usage.rate_other',         '0.005');
 
+  // i18n – Mandanten-Standard-Sprache (User-Profil-Auswahl überschreibt sie)
+  seed('i18n.default_locale',            'de');
+
   // billing_periods
   db.exec(`CREATE TABLE IF NOT EXISTS billing_periods (
     id           INTEGER PRIMARY KEY,

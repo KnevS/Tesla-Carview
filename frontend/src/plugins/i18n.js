@@ -6,9 +6,32 @@ import es from '../locales/es.json';
 import tr from '../locales/tr.json';
 import el from '../locales/el.json';
 
+export const SUPPORTED_LOCALES = ['de', 'en', 'fr', 'es', 'tr', 'el'];
+
+/**
+ * Auflösung der initialen Sprache (höchste Priorität zuerst):
+ *  1. localStorage['locale']  – Auswahl auf Startseite, persistent im Browser
+ *  2. navigator.language       – Browser-Default
+ *  3. 'de'                     – Hard-Fallback
+ *
+ * User-Profil und Mandanten-Default werden NACH dem Login angewendet
+ * (siehe store/lang.js → applyFromUser bzw. applyTenantDefault).
+ */
+export function resolveInitialLocale() {
+  try {
+    const saved = localStorage.getItem('locale');
+    if (saved && SUPPORTED_LOCALES.includes(saved)) return saved;
+  } catch { /* localStorage gesperrt – egal */ }
+
+  const nav = (navigator.language || '').slice(0, 2).toLowerCase();
+  if (SUPPORTED_LOCALES.includes(nav)) return nav;
+
+  return 'de';
+}
+
 export const i18n = createI18n({
   legacy: false,
-  locale: 'de',
+  locale: resolveInitialLocale(),
   fallbackLocale: 'de',
   messages: { de, en, fr, es, tr, el },
 });
