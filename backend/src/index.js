@@ -32,6 +32,7 @@ import passwordResetRoutes    from './routes/password-reset.js';
 import dataManagementRoutes   from './routes/data-management.js';
 import inviteRoutes            from './routes/invites.js';
 import driverRoutes            from './routes/drivers.js';
+import teslaUsageRoutes, { webhookRouter as teslaUsageWebhookRouter } from './routes/teslaUsage.js';
 
 const app    = express();
 const PORT   = process.env.PORT || 3000;
@@ -64,6 +65,7 @@ app.use('/api/register',       registerRoutes);
 app.use('/api/passkey',        passkeyRoutes);        // login-options + login-verify sind öffentlich
 app.use('/api/password-reset', passwordResetRoutes);  // apply ist öffentlich
 app.use('/api/invites/validate', inviteRoutes);        // validate/:token ist öffentlich
+app.use('/api/tesla-usage', teslaUsageWebhookRouter);   // /webhook/email — header-secret
 
 // Alle weiteren Routen benötigen einen gültigen JWT + Mandanten-DB (req.db)
 app.use(requireAuth);
@@ -85,9 +87,19 @@ app.use('/api/billing',            billingRoutes);
 app.use('/api/data',               dataManagementRoutes);
 app.use('/api/invites',            inviteRoutes);
 app.use('/api/drivers',            driverRoutes);
+app.use('/api/tesla-usage',        teslaUsageRoutes);
 
 // Globaler Error-Handler — fängt alle ungehandelten Throws/Rejects der Routes
 app.use((err, _req, res, _next) => {
+  // Errors mit eigenem statusCode (z. B. TeslaBudgetExceededError) sauber durchreichen
+  if (err && err.statusCode) {
+    console.warn(`[${err.name || 'AppError'}]`, err.message);
+    return res.status(err.statusCode).json({
+      error:  err.message,
+      code:   err.name,
+      detail: err.detail,
+    });
+  }
   console.error('[Unhandled]', err);
   res.status(500).json({ error: 'Interner Serverfehler', detail: err.message });
 });

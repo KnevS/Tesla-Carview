@@ -505,5 +505,19 @@
         { "name": "Radio 7 Drachenkinder", "desc": "Βοήθεια για σοβαρά άρρωστα παιδιά στην περιοχή – χρηματοδοτεί θεραπείες, εκδρομές και ευχές.", "url": "https://www.radio7.de/drachenkinder/" }
       ]
     }
+  },
+  "teslaUsage": {
+    "title": "Χρήση Tesla API",
+    "subtitle": "Προβλεπόμενα κόστη Tesla Fleet API για τον τρέχοντα μήνα.",
+    "period": "Περίοδος",
+    "limit": "Μηνιαίο όριο",
+    "freeCredit": "Δωρεάν πίστωση",
+    "hardStop": "Σκληρή διακοπή στο",
+    "hardStopOn": "Σκληρή διακοπή ενεργή – νέες κλήσεις μπλοκάρονται",
+    "currency": "Νόμισμα",
+    "rates": "Τιμές (USD ανά κλήση)",
+    "save": "Αποθήκευση τιμών",
+    "reset": "Επαναφορά τρέχοντος μήνα",
+    "cat": { "vehicle_data": "Δεδομένα οχήματος", "wake": "Ξύπνημα", "command": "Εντολές", "streaming": "Streaming", "other": "Άλλα" }
   }
 }

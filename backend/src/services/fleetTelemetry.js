@@ -1,6 +1,7 @@
 import { WebSocketServer } from 'ws';
 import protobuf from 'protobufjs';
 import { getDb, getTenantByVin } from '../db/database.js';
+import { recordCall } from './teslaUsage.js';
 
 const PROTO = `
 syntax = "proto3";
@@ -97,6 +98,16 @@ export async function startFleetTelemetryServer(server) {
 
         const point = extractPoint(payload.data);
         if (point && vin) storePoint(vin, ts, point);
+
+        // Streaming-Signale zählen (1 Datum = 1 abrechenbarer Wert).
+        if (vin && payload.data?.length) {
+          const tenant = getTenantByVin(vin);
+          if (tenant) {
+            try {
+              recordCall(getDb(tenant.id), 'streaming_signal', 'fleet_telemetry', payload.data.length);
+            } catch { /* Counter-Fehler dürfen den Stream nicht abreißen */ }
+          }
+        }
 
         if (payload.txid) ws.send(JSON.stringify({ txid: payload.txid, status: 200 }));
       } catch (err) {
