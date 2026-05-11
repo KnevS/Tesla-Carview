@@ -21,36 +21,40 @@ import { useAuthStore } from './auth.js';
 
 /** Statische Gruppen-Definition. Items unverhandelbar — Routen muessen
  *  in router/index.js existieren; admin-Items werden zusaetzlich vom
- *  Router-Guard auf authStore.isAdmin geprueft. */
+ *  Router-Guard auf authStore.isAdmin geprueft.
+ *
+ *  `icon` ist ein AppIcon-Name (siehe components/AppIcon.vue), das
+ *  alte Emoji bleibt als `emojiFallback` erhalten — wird angezeigt,
+ *  falls AppIcon den Namen nicht kennt. */
 export const NAV_GROUPS = [
   {
     id: 'overview', adminOnly: false,
     items: [
-      { key: 'dashboard', to: '/',          icon: '🏠', label: 'Dashboard',    tooltip: 'Übersicht mit Kennzahlen, letzter Fahrt und Monatsstatistik' },
-      { key: 'telemetry', to: '/telemetry', icon: '🏎',  label: 'Technik',      tooltip: 'Live-Fahrzeugdaten: Reifendruck, Klima, Leistung, SOC – wie der Track-Mode' },
-      { key: 'control',   to: '/control',   icon: '🎮', label: 'Steuerung',    tooltip: 'Fahrzeug steuern: Klima, Türen, Laden, Navigation' },
-      { key: 'battery',   to: '/battery',   icon: '📊', label: 'Batterie',     tooltip: 'Reichweiten-Verlauf und Degradations-Analyse über Zeit' },
+      { key: 'dashboard', to: '/',          icon: 'home',     emojiFallback: '🏠', label: 'Dashboard',    tooltip: 'Übersicht mit Kennzahlen, letzter Fahrt und Monatsstatistik' },
+      { key: 'telemetry', to: '/telemetry', icon: 'gauge',    emojiFallback: '🏎',  label: 'Technik',      tooltip: 'Live-Fahrzeugdaten: Reifendruck, Klima, Leistung, SOC – wie der Track-Mode' },
+      { key: 'control',   to: '/control',   icon: 'steering', emojiFallback: '🎮', label: 'Steuerung',    tooltip: 'Fahrzeug steuern: Klima, Türen, Laden, Navigation' },
+      { key: 'battery',   to: '/battery',   icon: 'battery',  emojiFallback: '📊', label: 'Batterie',     tooltip: 'Reichweiten-Verlauf und Degradations-Analyse über Zeit' },
     ],
   },
   {
     id: 'analytics', adminOnly: false,
     items: [
-      { key: 'trips',       to: '/trips',            icon: '🗺️', label: 'Fahrten',      tooltip: 'Liste aller aufgezeichneten Fahrten mit GPS-Track auf einer Karte' },
-      { key: 'fahrtenbuch', to: '/fahrtenbuch',      icon: '📋', label: 'Fahrtenbuch',  tooltip: 'Fahrten klassifizieren und Auswertung nach Privat/Dienst/Arbeitsweg' },
-      { key: 'charging',    to: '/charging',         icon: '🔋', label: 'Laden',        tooltip: 'Alle Ladevorgänge mit Ladekurven, Kosten und Aufschlüsselung nach Ladertyp' },
-      { key: 'logbook',     to: '/logbook',          icon: '📓', label: 'Betriebsbuch', tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },
-      { key: 'abrechnung',  to: '/kostenabrechnung', icon: '💶', label: 'Abrechnung',   tooltip: 'Kostenabrechnung Heimladen für Dienstwagen' },
-      { key: 'export',      to: '/export',           icon: '💾', label: 'Export',       tooltip: 'Daten als CSV/JSON exportieren, Vollbackup erstellen, Push-Benachrichtigungen' },
+      { key: 'trips',       to: '/trips',            icon: 'map',     emojiFallback: '🗺️', label: 'Fahrten',      tooltip: 'Liste aller aufgezeichneten Fahrten mit GPS-Track auf einer Karte' },
+      { key: 'fahrtenbuch', to: '/fahrtenbuch',      icon: 'logbook', emojiFallback: '📋', label: 'Fahrtenbuch',  tooltip: 'Fahrten klassifizieren und Auswertung nach Privat/Dienst/Arbeitsweg' },
+      { key: 'charging',    to: '/charging',         icon: 'bolt',    emojiFallback: '🔋', label: 'Laden',        tooltip: 'Alle Ladevorgänge mit Ladekurven, Kosten und Aufschlüsselung nach Ladertyp' },
+      { key: 'logbook',     to: '/logbook',          icon: 'tool',    emojiFallback: '📓', label: 'Betriebsbuch', tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },
+      { key: 'abrechnung',  to: '/kostenabrechnung', icon: 'cash',    emojiFallback: '💶', label: 'Abrechnung',   tooltip: 'Kostenabrechnung Heimladen für Dienstwagen' },
+      { key: 'export',      to: '/export',           icon: 'export',  emojiFallback: '💾', label: 'Export',       tooltip: 'Daten als CSV/JSON exportieren, Vollbackup erstellen, Push-Benachrichtigungen' },
     ],
   },
   {
     id: 'admin', adminOnly: true,
     items: [
-      { key: 'users',  to: '/admin/users', icon: '👥', label: 'Benutzer',    tooltip: 'Benutzerverwaltung – Konten anlegen, Fahrzeuge zuweisen, Reset-Links generieren' },
-      { key: 'data',   to: '/admin/data',  icon: '🗑️', label: 'Daten',       tooltip: 'Datenverwaltung – Daten löschen und Datenbestand einsehen' },
-      { key: 'legal',  to: '/admin/legal', icon: '⚖️',  label: 'Rechtliches', tooltip: 'Impressum, Datenschutz und Nutzungsbedingungen pro Sprache pflegen' },
-      { key: 'audit',  to: '/admin/audit', icon: '📋', label: 'Audit-Log',   tooltip: 'Sicherheitsrelevante Ereignisse einsehen — Logins, Berechtigungs-Änderungen, Tesla-Befehle, Akzeptanzen' },
-      { key: 'system', to: '/system',      icon: '📈', label: 'System',      tooltip: 'Versionsinformationen, CPU-/RAM-Auslastung und Datenbankstatistiken' },
+      { key: 'users',  to: '/admin/users', icon: 'users',    emojiFallback: '👥', label: 'Benutzer',    tooltip: 'Benutzerverwaltung – Konten anlegen, Fahrzeuge zuweisen, Reset-Links generieren' },
+      { key: 'data',   to: '/admin/data',  icon: 'database', emojiFallback: '🗑️', label: 'Daten',       tooltip: 'Datenverwaltung – Daten löschen und Datenbestand einsehen' },
+      { key: 'legal',  to: '/admin/legal', icon: 'legal',    emojiFallback: '⚖️',  label: 'Rechtliches', tooltip: 'Impressum, Datenschutz und Nutzungsbedingungen pro Sprache pflegen' },
+      { key: 'audit',  to: '/admin/audit', icon: 'audit',    emojiFallback: '📋', label: 'Audit-Log',   tooltip: 'Sicherheitsrelevante Ereignisse einsehen — Logins, Berechtigungs-Änderungen, Tesla-Befehle, Akzeptanzen' },
+      { key: 'system', to: '/system',      icon: 'system',   emojiFallback: '📈', label: 'System',      tooltip: 'Versionsinformationen, CPU-/RAM-Auslastung und Datenbankstatistiken' },
     ],
   },
 ];
