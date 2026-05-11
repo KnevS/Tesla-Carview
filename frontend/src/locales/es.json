@@ -136,7 +136,22 @@
     "heatmapSummary": "{trips} viaje(s) · {km} km en total",
     "locationHeatmapTitle": "📍 Mapa de ubicaciones",
     "annualReportTitle": "📄 Informe anual",
-    "annualReportGenerate": "Generar informe"
+    "annualReportGenerate": "Generar informe",
+    "countLabel": "{count} viajes",
+    "totalKm": "Km totales",
+    "totalKmTooltip": "Suma de todos los kilómetros registrados",
+    "avgConsumption": "Consumo med.",
+    "avgConsumptionTooltip": "Consumo medio de energía por 100 km",
+    "privateKm": "Viajes privados",
+    "privateKmTooltip": "Kilometraje clasificado como viajes privados",
+    "businessKm": "Viajes laborales",
+    "businessKmTooltip": "Viajes laborales + desplazamientos",
+    "typeCycleTooltip": "Hacer clic para cambiar el tipo de viaje",
+    "wltpTooltip": "Desviación del valor WLTP de tu modelo. + = más consumido, − = menos.",
+    "wltpDelta": "({sign}{value} % vs. WLTP)",
+    "typePrivate": "Privado",
+    "typeBusiness": "Laboral",
+    "typeCommute": "Desplazamiento"
   },
   "locationHeatmap": {
     "intro": "¿Dónde conduces a menudo? Áreas brillantes = visitadas frecuentemente.",

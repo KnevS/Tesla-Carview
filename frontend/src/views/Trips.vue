@@ -1,32 +1,32 @@
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between flex-wrap gap-2">
-      <h1 class="text-2xl font-bold">Fahrten</h1>
+      <h1 class="text-2xl font-bold">{{ $t('trips.title') }}</h1>
       <div class="flex items-center gap-2 flex-wrap">
         <select v-model="filterType" @change="load" class="bg-gray-700 text-white text-sm rounded-lg px-3 py-1.5 border border-gray-600">
-          <option value="">Alle Typen</option>
-          <option value="private">Privatfahrten</option>
-          <option value="business">Dienstfahrten</option>
-          <option value="commute">Arbeitswege</option>
+          <option value="">{{ $t('trips.allTypes') }}</option>
+          <option value="private">{{ $t('trips.filterPrivate') }}</option>
+          <option value="business">{{ $t('trips.filterBusiness') }}</option>
+          <option value="commute">{{ $t('trips.filterCommute') }}</option>
         </select>
         <select v-model="filterDriver" @change="load" class="bg-gray-700 text-white text-sm rounded-lg px-3 py-1.5 border border-gray-600">
-          <option value="">Alle Fahrer</option>
+          <option value="">{{ $t('trips.allDrivers') }}</option>
           <option v-for="d in drivers" :key="d.id" :value="d.id">{{ d.name }}</option>
-          <option value="null">Kein Fahrer</option>
+          <option value="null">{{ $t('trips.noDriver') }}</option>
         </select>
-        <div class="text-sm text-gray-400">{{ trips.length }} Fahrten</div>
+        <div class="text-sm text-gray-400">{{ $t('trips.countLabel', { count: trips.length }) }}</div>
       </div>
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <StatCard label="Gesamt km"      :value="fmt(stats.total_km, 0) + ' km'"          icon="🛣️" tooltip="Summe aller aufgezeichneten Fahrtkilometer" />
-      <StatCard label="Ø Verbrauch"    :value="fmt(stats.avg_consumption, 1) + ' kWh/100km'" icon="⚡" tooltip="Durchschnittlicher Energieverbrauch pro 100 km" />
-      <StatCard label="Privatfahrten"  :value="fmt(stats.private_km, 0) + ' km'"         icon="🏠" tooltip="Kilometerleistung als Privatfahrten klassifiziert" />
-      <StatCard label="Dienstfahrten"  :value="fmt(stats.business_km + stats.commute_km, 0) + ' km'" icon="💼" tooltip="Dienstfahrten + Arbeitswege" />
+      <StatCard :label="$t('trips.totalKm')"        :value="fmt(stats.total_km, 0) + ' km'"          icon="🛣️" :tooltip="$t('trips.totalKmTooltip')" />
+      <StatCard :label="$t('trips.avgConsumption')" :value="fmt(stats.avg_consumption, 1) + ' kWh/100km'" icon="⚡" :tooltip="$t('trips.avgConsumptionTooltip')" />
+      <StatCard :label="$t('trips.privateKm')"      :value="fmt(stats.private_km, 0) + ' km'"         icon="🏠" :tooltip="$t('trips.privateKmTooltip')" />
+      <StatCard :label="$t('trips.businessKm')"     :value="fmt(stats.business_km + stats.commute_km, 0) + ' km'" icon="💼" :tooltip="$t('trips.businessKmTooltip')" />
     </div>
 
     <div class="space-y-2">
-      <div v-if="loading" class="text-gray-400">Lade Fahrten...</div>
+      <div v-if="loading" class="text-gray-400">{{ $t('trips.loading') }}</div>
 
       <div v-for="trip in trips" :key="trip.id" class="card hover:bg-gray-600 transition">
         <div class="flex items-start gap-3">
@@ -35,7 +35,7 @@
             <button @click.stop="cycleType(trip)"
               :class="typeBadge(trip.trip_type)"
               class="w-full text-xs font-semibold px-2 py-1 rounded-full text-center transition"
-              v-tooltip="'Klicken um Fahrtentyp zu ändern'">
+              v-tooltip="$t('trips.typeCycleTooltip')">
               {{ typeLabel(trip.trip_type) }}
             </button>
 
@@ -46,8 +46,8 @@
             <button @click.stop="toggleDriverMenu(trip.id, $event)"
               class="w-full text-xs px-2 py-1 rounded-full text-center transition border"
               :style="driverBadgeStyle(trip)"
-              v-tooltip="'Fahrer zuweisen'">
-              {{ trip.driver_name || '– Fahrer' }}
+              v-tooltip="$t('trips.assignDriver')">
+              {{ trip.driver_name || $t('trips.noDriverLabel') }}
             </button>
           </div>
 
@@ -59,29 +59,29 @@
                 <span class="text-gray-400 text-sm">{{ fmtTime(trip.start_time) }}</span>
               </div>
               <p class="font-medium truncate mt-0.5">
-                {{ trip.start_address || 'Start' }} → {{ trip.end_address || 'Ziel' }}
+                {{ trip.start_address || $t('trips.start') }} → {{ trip.end_address || $t('trips.dest') }}
               </p>
               <p v-if="trip.purpose" class="text-xs text-gray-400 truncate mt-0.5 italic">{{ trip.purpose }}</p>
             </div>
             <div class="flex gap-4 text-sm text-right ml-2 flex-shrink-0">
               <div>
-                <p class="text-gray-400">Strecke</p>
+                <p class="text-gray-400">{{ $t('trips.distance') }}</p>
                 <p class="font-semibold">{{ fmt(trip.distance_km, 1) }} km</p>
               </div>
               <div class="hidden md:block">
-                <p class="text-gray-400">Verbrauch</p>
+                <p class="text-gray-400">{{ $t('trips.consumption') }}</p>
                 <p class="font-semibold">
                   {{ trip.distance_km ? fmt(trip.energy_used_kwh / trip.distance_km * 100, 1) : '–' }} kWh/100km
                   <span v-if="trip.wltp_delta_pct != null"
                         :class="trip.wltp_delta_pct > 0 ? 'text-red-300' : 'text-green-300'"
                         class="text-xs font-normal ml-1"
-                        v-tooltip="'Abweichung vom WLTP-Wert deines Modells. + = mehr verbraucht, − = weniger.'">
-                    ({{ trip.wltp_delta_pct > 0 ? '+' : '' }}{{ trip.wltp_delta_pct }} % vs. WLTP)
+                        v-tooltip="$t('trips.wltpTooltip')">
+                    {{ $t('trips.wltpDelta', { sign: trip.wltp_delta_pct > 0 ? '+' : '', value: trip.wltp_delta_pct }) }}
                   </span>
                 </p>
               </div>
               <div class="hidden md:block">
-                <p class="text-gray-400">SoC</p>
+                <p class="text-gray-400">{{ $t('trips.soc') }}</p>
                 <p class="font-semibold">{{ trip.start_soc ?? '–' }}% → {{ trip.end_soc ?? '–' }}%</p>
               </div>
             </div>
@@ -95,7 +95,7 @@
             @change="e => savePurpose(trip, e.target.value)"
             @click.stop
             type="text"
-            placeholder="Fahrtzweck eingeben (z.B. Kundenbesuch, Dienstreise)…"
+            :placeholder="$t('trips.purpose')"
             class="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-tesla-red"
           />
         </div>
@@ -103,7 +103,7 @@
     </div>
 
     <button v-if="trips.length >= limit" @click="loadMore" class="btn-secondary w-full">
-      Mehr laden
+      {{ $t('trips.loadMore') }}
     </button>
 
     <!-- Fahrer-Auswahl-Menue — global einmalig, an body gerendert.
@@ -118,7 +118,7 @@
         <button
           class="block w-full text-left px-4 py-1.5 text-sm hover:bg-gray-700 text-gray-400"
           @click="setDriver(openDriverTrip, null)">
-          – Kein Fahrer
+          – {{ $t('trips.noDriver') }}
         </button>
         <button v-for="d in drivers" :key="d.id"
           class="flex items-center gap-2 w-full text-left px-4 py-1.5 text-sm hover:bg-gray-700"
@@ -134,10 +134,12 @@
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
 import StatCard from '../components/StatCard.vue';
 import api from '../api.js';
 
+const { t, locale } = useI18n();
 const appStore    = useAppStore();
 const trips       = ref([]);
 const stats       = ref({});
@@ -160,15 +162,21 @@ const openDriverTrip = computed(() =>
 const TYPES = ['private', 'business', 'commute'];
 
 const fmt     = (v, d = 0) => (+(v || 0)).toFixed(d);
-const fmtDate = ts => new Date(ts * 1000).toLocaleDateString('de-DE');
-const fmtTime = ts => new Date(ts * 1000).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+// Datumsformat folgt der aktiven App-Sprache.
+const LOCALE_TAG = { de: 'de-DE', en: 'en-US', fr: 'fr-FR', es: 'es-ES', tr: 'tr-TR', el: 'el-GR' };
+const fmtDate = ts => new Date(ts * 1000).toLocaleDateString(LOCALE_TAG[locale.value] || 'de-DE');
+const fmtTime = ts => new Date(ts * 1000).toLocaleTimeString(LOCALE_TAG[locale.value] || 'de-DE', { hour: '2-digit', minute: '2-digit' });
 
-const typeLabel = t => ({ private: 'Privat', business: 'Dienstfahrt', commute: 'Arbeitsweg' }[t] ?? 'Privat');
-const typeBadge = t => ({
+const typeLabel = tt => ({
+  private:  t('trips.typePrivate'),
+  business: t('trips.typeBusiness'),
+  commute:  t('trips.typeCommute'),
+}[tt] ?? t('trips.typePrivate'));
+const typeBadge = tt => ({
   private:  'bg-gray-600 text-gray-200 hover:bg-gray-500',
   business: 'bg-blue-900 text-blue-200 hover:bg-blue-800',
   commute:  'bg-green-900 text-green-200 hover:bg-green-800',
-}[t] ?? 'bg-gray-600 text-gray-200');
+}[tt] ?? 'bg-gray-600 text-gray-200');
 
 function driverBadgeStyle(trip) {
   if (!trip.driver_id || !trip.driver_color) {
@@ -242,11 +250,11 @@ async function load() {
     ...(filterType.value   ? { trip_type: filterType.value }   : {}),
     ...(filterDriver.value ? { driver_id: filterDriver.value } : {}),
   };
-  const [t, s] = await Promise.all([
+  const [tr, s] = await Promise.all([
     api.get('/trips', { params }),
     api.get('/trips/stats', { params: vid ? { vehicle_id: vid } : {} }),
   ]);
-  trips.value   = t.data;
+  trips.value   = tr.data;
   stats.value   = s.data;
   loading.value = false;
 }

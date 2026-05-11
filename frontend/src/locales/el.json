@@ -136,7 +136,22 @@
     "heatmapSummary": "{trips} διαδρομές · σύνολο {km} km",
     "locationHeatmapTitle": "📍 Χάρτης θερμότητας τοποθεσιών",
     "annualReportTitle": "📄 Ετήσια αναφορά",
-    "annualReportGenerate": "Δημιουργία αναφοράς"
+    "annualReportGenerate": "Δημιουργία αναφοράς",
+    "countLabel": "{count} διαδρομές",
+    "totalKm": "Σύνολο km",
+    "totalKmTooltip": "Άθροισμα όλων των καταγεγραμμένων χιλιομέτρων",
+    "avgConsumption": "Μέση κατανάλωση",
+    "avgConsumptionTooltip": "Μέση κατανάλωση ενέργειας ανά 100 km",
+    "privateKm": "Ιδιωτικές διαδρομές",
+    "privateKmTooltip": "Χιλιόμετρα ταξινομημένα ως ιδιωτικές διαδρομές",
+    "businessKm": "Επαγγελματικές διαδρομές",
+    "businessKmTooltip": "Επαγγελματικές διαδρομές + μετακινήσεις προς εργασία",
+    "typeCycleTooltip": "Κάντε κλικ για αλλαγή τύπου διαδρομής",
+    "wltpTooltip": "Απόκλιση από την τιμή WLTP του μοντέλου σας. + = περισσότερη κατανάλωση, − = λιγότερη.",
+    "wltpDelta": "({sign}{value} % vs. WLTP)",
+    "typePrivate": "Ιδιωτικό",
+    "typeBusiness": "Επαγγελματικό",
+    "typeCommute": "Προς εργασία"
   },
   "locationHeatmap": {
     "intro": "Πού οδηγείτε συχνά; Φωτεινές περιοχές = συχνές επισκέψεις.",

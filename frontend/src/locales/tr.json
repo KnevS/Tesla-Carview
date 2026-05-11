@@ -136,7 +136,22 @@
     "heatmapSummary": "{trips} yolculuk · toplam {km} km",
     "locationHeatmapTitle": "📍 Konum ısı haritası",
     "annualReportTitle": "📄 Yıllık rapor",
-    "annualReportGenerate": "Raporu oluştur"
+    "annualReportGenerate": "Raporu oluştur",
+    "countLabel": "{count} yolculuk",
+    "totalKm": "Toplam km",
+    "totalKmTooltip": "Kaydedilmiş tüm yolculuk kilometrelerinin toplamı",
+    "avgConsumption": "Ort. tüketim",
+    "avgConsumptionTooltip": "100 km başına ortalama enerji tüketimi",
+    "privateKm": "Özel yolculuklar",
+    "privateKmTooltip": "Özel yolculuk olarak sınıflandırılan kilometre",
+    "businessKm": "İş yolculukları",
+    "businessKmTooltip": "İş yolculukları + işe gidiş-geliş",
+    "typeCycleTooltip": "Yolculuk türünü değiştirmek için tıklayın",
+    "wltpTooltip": "Modelinizin WLTP değerinden sapma. + = daha fazla tüketildi, − = daha az.",
+    "wltpDelta": "({sign}%{value} vs. WLTP)",
+    "typePrivate": "Özel",
+    "typeBusiness": "İş",
+    "typeCommute": "İşe gidiş"
   },
   "locationHeatmap": {
     "intro": "Sık nereye gidiyorsun? Parlak alanlar = sık ziyaret.",

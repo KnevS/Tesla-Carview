@@ -136,7 +136,22 @@
     "heatmapSummary": "{trips} Fahrt(en) · {km} km gesamt",
     "locationHeatmapTitle": "📍 Standort-Heatmap",
     "annualReportTitle": "📄 Jahresbericht",
-    "annualReportGenerate": "Bericht erstellen"
+    "annualReportGenerate": "Bericht erstellen",
+    "countLabel": "{count} Fahrten",
+    "totalKm": "Gesamt km",
+    "totalKmTooltip": "Summe aller aufgezeichneten Fahrtkilometer",
+    "avgConsumption": "Ø Verbrauch",
+    "avgConsumptionTooltip": "Durchschnittlicher Energieverbrauch pro 100 km",
+    "privateKm": "Privatfahrten",
+    "privateKmTooltip": "Kilometerleistung als Privatfahrten klassifiziert",
+    "businessKm": "Dienstfahrten",
+    "businessKmTooltip": "Dienstfahrten + Arbeitswege",
+    "typeCycleTooltip": "Klicken um Fahrtentyp zu ändern",
+    "wltpTooltip": "Abweichung vom WLTP-Wert deines Modells. + = mehr verbraucht, − = weniger.",
+    "wltpDelta": "({sign}{value} % vs. WLTP)",
+    "typePrivate": "Privat",
+    "typeBusiness": "Dienstfahrt",
+    "typeCommute": "Arbeitsweg"
   },
   "locationHeatmap": {
     "intro": "Wo bist du häufig gefahren? Helle Bereiche = oft besucht. Hover/Klick auf der Karte.",
