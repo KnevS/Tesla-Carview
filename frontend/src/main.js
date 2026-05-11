@@ -10,6 +10,7 @@ import { useAuthStore }  from './store/auth.js';
 import { useAppStore }   from './store/index.js';
 import { useThemeStore } from './store/theme.js';
 import { useLangStore }  from './store/lang.js';
+import { registerSW, chunkLoadErrorGuard } from './lib/swUpdate.js';
 
 const pinia = createPinia();
 const app   = createApp(App);
@@ -25,15 +26,15 @@ const themeStore = useThemeStore();
 const langStore  = useLangStore();
 themeStore.init();
 
-// Session VOR dem ersten Router-Guard wiederherstellen,
-// damit der Guard den korrekten Auth-Zustand sieht.
-// Service-Worker fuer PWA + Push registrieren. Idempotent — wenn schon
-// registriert, gibt der Browser die existierende Registration zurueck.
-// Errors bewusst stillschalten: kein SW = kein Drama (vor allem im
-// Dev-Modus ohne https).
-if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('/sw.js').catch(() => {});
-}
+// Service-Worker registrieren + automatische Update-Logik. Sorgt dafuer,
+// dass die App nach jedem Deploy ohne Strg+Shift+R aktuell wird —
+// inkl. iOS-PWA. Details: src/lib/swUpdate.js
+registerSW();
+
+// Letzte Reissleine: wenn ein Route-Wechsel mit „chunk not found" stirbt
+// (alte index.html-Cache zeigt auf nicht mehr existierende Chunk-Hashes),
+// einmalig reloaden statt stillem Routing-Fehler.
+chunkLoadErrorGuard(router);
 
 authStore.tryRestoreSession()
   .then(async restored => {
