@@ -85,16 +85,15 @@
             <p v-if="demoError" class="text-xs text-red-400 mt-2">{{ demoError }}</p>
           </div>
 
-          <!-- Was den Tester rechtlich erwartet -->
-          <div class="card space-y-2 text-xs text-gray-400">
+          <!-- Was den Tester rechtlich erwartet — Legal-Links nicht
+               hier, sondern im AppFooter unten. Sonst Doppelung. -->
+          <div class="card space-y-1 text-xs text-gray-400">
             <p>
               <strong class="text-gray-300">Wichtig:</strong> Demo-Daten sind frei erfunden — keine Verwendung
               für Buchhaltung, Steuer (Fahrtenbuch), Versicherung. Keine Garantie auf Verfügbarkeit.
             </p>
             <p>
-              Details siehe <RouterLink to="/legal/terms" class="underline hover:text-white">Nutzungsbedingungen</RouterLink>
-              und <RouterLink to="/legal/privacy" class="underline hover:text-white">Datenschutz</RouterLink> — als Tester
-              wird dort automatisch ein zusätzlicher Tester-Zusatz angezeigt.
+              Es gelten Nutzungsbedingungen und Datenschutz inklusive Tester-Zusatz (siehe Footer).
             </p>
           </div>
 
