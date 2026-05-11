@@ -28,7 +28,10 @@
         <template v-if="loaded && demoStatus.enabled">
           <!-- Erklärung — was bekommt der Tester -->
           <div class="card space-y-3">
-            <h2 class="font-semibold flex items-center gap-2">✨ Was du bekommst</h2>
+            <h2 class="font-semibold flex items-center gap-2">
+              <AppIcon name="star" :size="20" class="text-tesla-red" />
+              Was du bekommst
+            </h2>
             <ul class="text-sm text-gray-300 space-y-2">
               <li class="flex gap-2">
                 <span class="text-tesla-red flex-shrink-0">●</span>
@@ -121,6 +124,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/auth.js';
 import { useAppStore }  from '../store/index.js';
 import LangSwitcher     from '../components/LangSwitcher.vue';
+import AppIcon          from '../components/AppIcon.vue';
 
 const router = useRouter();
 const auth   = useAuthStore();

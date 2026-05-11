@@ -4,7 +4,10 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div class="card space-y-4">
-        <h2 class="text-lg font-semibold">🗺️ Fahrten</h2>
+        <h2 class="text-lg font-semibold flex items-center gap-2">
+          <AppIcon name="map" :size="20" class="text-tesla-red" />
+          Fahrten
+        </h2>
         <p class="text-gray-400 text-sm">Alle Fahrtdaten mit Strecke, Verbrauch und SoC.</p>
         <div class="flex gap-3">
           <button @click="download('trips.csv', 'fahrten.csv', 'text/csv')" :disabled="downloading['trips.csv']"
@@ -21,7 +24,10 @@
       </div>
 
       <div class="card space-y-4">
-        <h2 class="text-lg font-semibold">🔋 Ladevorgänge</h2>
+        <h2 class="text-lg font-semibold flex items-center gap-2">
+          <AppIcon name="battery" :size="20" class="text-tesla-red" />
+          Ladevorgänge
+        </h2>
         <p class="text-gray-400 text-sm">Alle Ladesessions mit Energie, Kosten und Ladertyp.</p>
         <div class="flex gap-3">
           <button @click="download('charging.csv', 'ladevorgaenge.csv', 'text/csv')" :disabled="downloading['charging.csv']"
@@ -33,7 +39,10 @@
       </div>
 
       <div class="card space-y-4 md:col-span-2">
-        <h2 class="text-lg font-semibold">💾 Vollständiges Backup</h2>
+        <h2 class="text-lg font-semibold flex items-center gap-2">
+          <AppIcon name="database" :size="20" class="text-tesla-red" />
+          Vollständiges Backup
+        </h2>
         <p class="text-gray-400 text-sm">
           Alle Daten (Fahrten, Laden, Batterie, Betriebsbuch) als eine JSON-Datei.
           Kann für Backups oder den Umzug auf einen anderen Server genutzt werden.
@@ -48,7 +57,10 @@
     </div>
 
     <div class="card space-y-4">
-      <h2 class="text-lg font-semibold">🔔 Benachrichtigungen</h2>
+      <h2 class="text-lg font-semibold flex items-center gap-2">
+        <AppIcon name="alert" :size="20" class="text-tesla-red" />
+        Benachrichtigungen
+      </h2>
       <p class="text-gray-400 text-sm">
         Erhalte eine Browser-Benachrichtigung wenn dein Tesla fertig geladen hat.
       </p>
@@ -72,6 +84,7 @@
 import { ref, onMounted, reactive } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
+import AppIcon from '../components/AppIcon.vue';
 
 const appStore = useAppStore();
 const subscribed = ref(false);

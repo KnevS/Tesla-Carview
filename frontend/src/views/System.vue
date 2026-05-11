@@ -1,6 +1,9 @@
 <template>
   <div class="space-y-6">
-    <h1 class="text-2xl font-bold">📊 System & Version</h1>
+    <h1 class="text-2xl font-bold flex items-center gap-2">
+      <AppIcon name="system" :size="24" class="text-tesla-red" />
+      System &amp; Version
+    </h1>
 
     <!-- System-Health-Karte (Admin-only). Schnelle Diagnose-Ampel
          fuer alle Subsysteme. -->
@@ -64,7 +67,10 @@
     <!-- Version info -->
     <div class="card grid md:grid-cols-2 gap-6">
       <div class="space-y-3">
-        <h2 class="font-semibold text-tesla-red">⚡ Tesla Carview</h2>
+        <h2 class="font-semibold text-tesla-red flex items-center gap-2">
+          <AppIcon name="bolt" :size="20" />
+          Tesla Carview
+        </h2>
         <DataRow label="Version"       :value="'v' + (ver.version ?? '…')"  tooltip="Versionsnummer der Anwendung (aus package.json)" />
         <DataRow label="Git-Hash"      :value="ver.git?.hash ?? '…'"        tooltip="Kurz-Hash des aktuellen Git-Commits – eindeutige Build-ID" />
         <DataRow label="Branch"        :value="ver.git?.branch ?? '…'"      tooltip="Git-Branch der aktuell laufenden Instanz" />
@@ -73,7 +79,7 @@
         <DataRow label="Server-Uptime" :value="fmtUp(ver.uptime)"           tooltip="Wie lange der Backend-Prozess läuft (seit letztem Neustart)" />
       </div>
       <div class="flex flex-col items-center justify-center gap-2 opacity-30 select-none">
-        <div class="text-8xl">⚡</div>
+        <AppIcon name="bolt" :size="128" class="text-tesla-red" />
         <div class="text-sm text-gray-400">Tesla Carview v{{ ver.version }}</div>
       </div>
     </div>
@@ -419,6 +425,7 @@ import { ref, computed, onMounted, h, resolveDirective, withDirectives, reactive
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../store/auth.js';
 import api from '../api.js';
+import AppIcon from '../components/AppIcon.vue';
 
 const auth    = useAuthStore();
 const isAdmin = computed(() => auth.user?.role === 'admin');

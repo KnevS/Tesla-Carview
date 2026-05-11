@@ -4,8 +4,9 @@
        gehoeren. Bezugs-Fahrzeug kommt aus dem App-Store (selectedVehicle). -->
   <div id="service-intervals" class="card space-y-3">
     <div class="flex items-center justify-between flex-wrap gap-2">
-      <h2 class="font-semibold" v-tooltip="'Definiere wiederkehrende Wartungsarbeiten (TÜV, Bremsflüssigkeit, Reifen, …) mit Zeit- oder km-Intervall. Eine fällige Wartung erscheint im Dashboard und löst eine Push-Benachrichtigung aus.'">
-        🔧 Wartungsintervalle
+      <h2 class="font-semibold flex items-center gap-2" v-tooltip="'Definiere wiederkehrende Wartungsarbeiten (TÜV, Bremsflüssigkeit, Reifen, …) mit Zeit- oder km-Intervall. Eine fällige Wartung erscheint im Dashboard und löst eine Push-Benachrichtigung aus.'">
+        <AppIcon name="tool" :size="20" class="text-tesla-red" />
+        Wartungsintervalle
       </h2>
       <div class="flex gap-2">
         <button @click="seedDefaults" :disabled="!canEdit || !vehicle"
@@ -151,6 +152,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useAppStore } from '../store/index.js';
 import { useAuthStore } from '../store/auth.js';
 import api from '../api.js';
+import AppIcon from './AppIcon.vue';
 
 const appStore = useAppStore();
 const auth     = useAuthStore();

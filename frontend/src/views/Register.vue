@@ -10,7 +10,7 @@
       <div class="w-full max-w-md space-y-6">
 
         <div class="text-center">
-          <div class="text-5xl mb-3">⚡</div>
+          <AppIcon name="bolt" :size="56" class="text-tesla-red mx-auto mb-3" />
           <h1 class="text-2xl font-bold">Tesla Carview</h1>
           <p class="text-gray-400 text-sm mt-1">{{ $t('register.title') }}</p>
         </div>
@@ -165,6 +165,7 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../api.js';
 import LangSwitcher from '../components/LangSwitcher.vue';
+import AppIcon     from '../components/AppIcon.vue';
 
 const route   = useRoute();
 const { t }   = useI18n();

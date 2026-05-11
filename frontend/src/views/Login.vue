@@ -12,7 +12,7 @@
       <div class="w-full max-w-sm space-y-6">
 
         <div class="text-center">
-          <div class="text-5xl mb-3">⚡</div>
+          <AppIcon name="bolt" :size="56" class="text-tesla-red mx-auto mb-3" />
           <h1 class="text-2xl font-bold">Tesla Carview</h1>
           <p class="text-gray-400 text-sm mt-1">{{ $t('auth.loginTitle') }}</p>
         </div>
@@ -58,7 +58,7 @@
           <!-- Passkey-Login -->
           <button type="button" @click="loginPasskey" :disabled="passkeyLoading"
             class="w-full py-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm text-gray-200 flex items-center justify-center gap-2 transition">
-            <span>🔑</span>
+            <AppIcon name="lock" :size="16" />
             {{ passkeyLoading ? $t('auth.passkeyAuthenticating') : $t('auth.passkeyBtn') }}
           </button>
         </form>
@@ -116,6 +116,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../store/auth.js';
 import { useAppStore }  from '../store/index.js';
 import LangSwitcher     from '../components/LangSwitcher.vue';
+import AppIcon          from '../components/AppIcon.vue';
 
 const auth   = useAuthStore();
 const app    = useAppStore();

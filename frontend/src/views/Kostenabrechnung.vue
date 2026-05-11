@@ -25,9 +25,10 @@
           CSV Export
         </button>
         <button @click="exportPdf" :disabled="!sessions.length"
-          class="btn-primary text-sm disabled:opacity-40"
+          class="btn-primary text-sm disabled:opacity-40 inline-flex items-center gap-1.5"
           v-tooltip="'Unterschriftsreife PDF-Abrechnung erzeugen — mit Briefkopf, Tabelle, Summen und Unterschriftsfeld. Ideal fuer den Erstattungsantrag beim Arbeitgeber.'">
-          📄 PDF erzeugen
+          <AppIcon name="export" :size="16" />
+          PDF erzeugen
         </button>
       </div>
     </div>
@@ -222,6 +223,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
+import AppIcon from '../components/AppIcon.vue';
 
 const appStore = useAppStore();
 const vehicle  = ref(null);

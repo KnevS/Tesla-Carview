@@ -2,7 +2,7 @@
   <div class="min-h-screen flex items-center justify-center px-4">
     <div class="w-full max-w-sm space-y-6">
       <div class="text-center">
-        <div class="text-5xl mb-3">🔐</div>
+        <AppIcon name="lock" :size="56" class="text-tesla-red mx-auto mb-3" />
         <h1 class="text-xl font-bold">Passwort zurücksetzen</h1>
       </div>
 
@@ -47,6 +47,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import api from '../api.js';
+import AppIcon from '../components/AppIcon.vue';
 
 const route  = useRoute();
 const router = useRouter();

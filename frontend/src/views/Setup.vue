@@ -4,7 +4,7 @@
 
       <!-- Logo / Header -->
       <div class="text-center space-y-2">
-        <div class="text-6xl">⚡</div>
+        <AppIcon name="bolt" :size="64" class="text-tesla-red mx-auto" />
         <h1 class="text-3xl font-bold text-white">Tesla Carview</h1>
         <p class="text-gray-400 text-sm">{{ $t('setup.subtitle') }}</p>
       </div>
@@ -192,6 +192,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../api.js';
+import AppIcon from '../components/AppIcon.vue';
 
 const { t } = useI18n();
 const step = ref(1);

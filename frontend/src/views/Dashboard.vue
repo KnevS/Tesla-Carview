@@ -6,7 +6,7 @@
 
     <!-- Kein Fahrzeug verbunden -->
     <div v-else-if="!appStore.selectedVehicle" class="card text-center space-y-4 py-10">
-      <div class="text-6xl">🚗</div>
+      <AppIcon name="steering" :size="64" class="text-tesla-red mx-auto" />
       <h2 class="text-xl font-semibold">{{ $t('dashboard.noVehicle') }}</h2>
       <p class="text-gray-400 text-sm">{{ $t('dashboard.connectHintDot') }}</p>
       <button @click="connectTesla" class="btn-primary"
@@ -132,6 +132,7 @@ import { useAppStore } from '../store/index.js';
 import StatCard from '../components/StatCard.vue';
 import TeslaUsageWidget from '../components/TeslaUsageWidget.vue';
 import TariffWidget     from '../components/TariffWidget.vue';
+import AppIcon          from '../components/AppIcon.vue';
 import api from '../api.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
