@@ -158,8 +158,10 @@
               {{ trip.driver_name || '– kein Fahrer' }}
               <span class="text-xs opacity-60">▾</span>
             </button>
+            <!-- z-50 + shadow-2xl wie in Trips.vue — sonst liegt das Menue
+                 unter Toasts/Tooltips und Click-Targets sind verdeckt. -->
             <div v-if="showDriverMenu"
-              class="absolute left-0 top-full mt-1 z-20 bg-gray-800 border border-gray-600 rounded-xl shadow-xl min-w-max py-1">
+              class="absolute left-0 top-full mt-1 z-50 bg-gray-800 border border-gray-600 rounded-xl shadow-2xl min-w-max py-1">
               <button class="block w-full text-left px-4 py-1.5 text-sm hover:bg-gray-700 text-gray-400"
                 @click="assignDriver(null)">– Kein Fahrer</button>
               <button v-for="d in drivers" :key="d.id"
