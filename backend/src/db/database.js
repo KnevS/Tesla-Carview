@@ -370,6 +370,14 @@ function runTenantMigrations(db) {
   if (!tCols.includes('driver_id')) {
     db.exec('ALTER TABLE trips ADD COLUMN driver_id INTEGER');
   }
+  // Aussen-Temperatur pro Trip (Wert bei Trip-Ende aus
+  // climate_state.outside_temp). Grundlage fuer die spaetere
+  // Reichweiten-Realismus-pro-Wetter-Auswertung (Verbrauch vs.
+  // Temperatur-Buckets). Aufbau-Phase: nur Daten kapturen, UI folgt
+  // separat nach dem i18n-Refactor in Battery.vue.
+  if (!tCols.includes('outside_temp_avg_c')) {
+    db.exec('ALTER TABLE trips ADD COLUMN outside_temp_avg_c REAL');
+  }
   // BMF-Pflichtangaben fuers elektronische Fahrtenbuch:
   //   business_partner: bei Dienstfahrten der aufgesuchte Geschaeftspartner
   //   locked_at:        wenn ans Finanzamt exportiert → keine Aenderung mehr
