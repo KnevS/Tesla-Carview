@@ -123,7 +123,17 @@
     "soc": "SoC",
     "purpose": "Fahrtzweck eingeben (z.B. Kundenbesuch, Dienstreise)…",
     "assignDriver": "Fahrer zuweisen",
-    "noDriverLabel": "– Fahrer"
+    "noDriverLabel": "– Fahrer",
+    "heatmapTitle": "Aktivitäts-Heatmap",
+    "heatmapTooltip": "Kalender-Heatmap aller Fahrten. Hover für Details, Klick führt zur Fahrtenliste des Tages.",
+    "heatmapPeriodYear": "Jahr",
+    "heatmapPeriodMonth": "Monat",
+    "heatmapPeriodWeek": "Woche",
+    "heatmapPeriodAll": "Alle",
+    "heatmapLegendHint": "💡 Helligkeit = Kilometer pro Tag",
+    "heatmapLess": "weniger",
+    "heatmapMore": "mehr",
+    "heatmapSummary": "{trips} Fahrt(en) · {km} km gesamt"
   },
   "tripDetail": {
     "back": "← Fahrten",

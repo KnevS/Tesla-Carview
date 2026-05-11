@@ -3,10 +3,10 @@
     <!-- Filter-Leiste: Granularitaet + Zeitraum. -->
     <div class="flex items-center gap-2 flex-wrap">
       <select v-model="period" @change="load" class="bg-gray-700 text-white text-sm rounded-lg px-3 py-1.5 border border-gray-600">
-        <option value="year">Jahr</option>
-        <option value="month">Monat</option>
-        <option value="week">Woche</option>
-        <option value="all">Alle</option>
+        <option value="year">{{ $t('trips.heatmapPeriodYear') }}</option>
+        <option value="month">{{ $t('trips.heatmapPeriodMonth') }}</option>
+        <option value="week">{{ $t('trips.heatmapPeriodWeek') }}</option>
+        <option value="all">{{ $t('trips.heatmapPeriodAll') }}</option>
       </select>
 
       <select v-if="period !== 'all'" v-model.number="year" @change="load"
@@ -24,9 +24,8 @@
         <option v-for="w in 53" :key="w" :value="w">KW {{ w }}</option>
       </select>
 
-      <div class="text-xs text-gray-400 ml-auto"
-           v-tooltip="'Helligkeit = Aktivitaet (Kilometer). Hover ueber einen Tag fuer Details.'">
-        💡 Helligkeit = Kilometer pro Tag
+      <div class="text-xs text-gray-400 ml-auto" v-tooltip="$t('trips.heatmapTooltip')">
+        {{ $t('trips.heatmapLegendHint') }}
       </div>
     </div>
 
@@ -72,12 +71,12 @@
 
     <!-- Legende -->
     <div class="flex items-center gap-2 text-xs text-gray-500">
-      <span>weniger</span>
+      <span>{{ $t('trips.heatmapLess') }}</span>
       <div v-for="(c, i) in COLORS" :key="i"
         class="w-4 h-4 rounded-sm" :style="{ background: c }"></div>
-      <span>mehr</span>
+      <span>{{ $t('trips.heatmapMore') }}</span>
       <span class="ml-auto">
-        {{ totalTrips }} Fahrt(en) · {{ totalKm.toFixed(0) }} km gesamt
+        {{ $t('trips.heatmapSummary', { trips: totalTrips, km: totalKm.toFixed(0) }) }}
       </span>
     </div>
   </div>

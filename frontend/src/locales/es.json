@@ -123,7 +123,17 @@
     "soc": "SoC",
     "purpose": "Introducir motivo del viaje (ej. visita cliente, viaje de negocios)…",
     "assignDriver": "Asignar conductor",
-    "noDriverLabel": "– Conductor"
+    "noDriverLabel": "– Conductor",
+    "heatmapTitle": "Mapa de actividad",
+    "heatmapTooltip": "Mapa de calor de todos los viajes. Pasa el ratón para detalles, haz clic para ver los viajes del día.",
+    "heatmapPeriodYear": "Año",
+    "heatmapPeriodMonth": "Mes",
+    "heatmapPeriodWeek": "Semana",
+    "heatmapPeriodAll": "Todo",
+    "heatmapLegendHint": "💡 Brillo = kilómetros por día",
+    "heatmapLess": "menos",
+    "heatmapMore": "más",
+    "heatmapSummary": "{trips} viaje(s) · {km} km en total"
   },
   "tripDetail": {
     "back": "← Viajes",

@@ -123,7 +123,17 @@
     "soc": "SoC",
     "purpose": "Εισαγωγή σκοπού ταξιδιού (π.χ. επίσκεψη πελάτη, επαγγελματικό)…",
     "assignDriver": "Ανάθεση οδηγού",
-    "noDriverLabel": "– Οδηγός"
+    "noDriverLabel": "– Οδηγός",
+    "heatmapTitle": "Χάρτης δραστηριότητας",
+    "heatmapTooltip": "Ημερολογιακός χάρτης θερμότητας όλων των διαδρομών. Περάστε το ποντίκι για λεπτομέρειες, κάντε κλικ για τη λίστα διαδρομών της ημέρας.",
+    "heatmapPeriodYear": "Έτος",
+    "heatmapPeriodMonth": "Μήνας",
+    "heatmapPeriodWeek": "Εβδομάδα",
+    "heatmapPeriodAll": "Όλα",
+    "heatmapLegendHint": "💡 Φωτεινότητα = χιλιόμετρα ανά ημέρα",
+    "heatmapLess": "λιγότερα",
+    "heatmapMore": "περισσότερα",
+    "heatmapSummary": "{trips} διαδρομές · σύνολο {km} km"
   },
   "tripDetail": {
     "back": "← Ταξίδια",

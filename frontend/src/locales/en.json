@@ -123,7 +123,17 @@
     "soc": "SoC",
     "purpose": "Enter trip purpose (e.g. client visit, business trip)…",
     "assignDriver": "Assign driver",
-    "noDriverLabel": "– Driver"
+    "noDriverLabel": "– Driver",
+    "heatmapTitle": "Activity heatmap",
+    "heatmapTooltip": "Calendar heatmap of all trips. Hover for details, click navigates to that day's trip list.",
+    "heatmapPeriodYear": "Year",
+    "heatmapPeriodMonth": "Month",
+    "heatmapPeriodWeek": "Week",
+    "heatmapPeriodAll": "All",
+    "heatmapLegendHint": "💡 Brightness = kilometres per day",
+    "heatmapLess": "less",
+    "heatmapMore": "more",
+    "heatmapSummary": "{trips} trip(s) · {km} km total"
   },
   "tripDetail": {
     "back": "← Trips",

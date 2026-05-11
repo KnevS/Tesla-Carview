@@ -49,6 +49,36 @@ nur verifiziert werden:
 
 Implementierung: `backend/src/services/cryptoService.js`.
 
+## Mandanten-Vertrauensgrenze
+
+Das Multi-Mandanten-Modell behandelt einen Mandanten als **eine
+Vertrauensgruppe**:
+
+- Jeder Mandant hat eine isolierte SQLite-Datenbank (keine Cross-
+  Tenant-Reads moeglich).
+- Innerhalb eines Mandanten sieht die **admin**-Rolle alle Fahrzeuge
+  und alle User-Daten — erforderlich um den Mandanten zu verwalten
+  (Fahrzeuge zuweisen, Reset-Links erzeugen, Legal-Akzeptanzen
+  pruefen).
+- Normale **user**-Konten sehen nur Fahrzeuge, die ihnen ueber die
+  Tabelle `vehicle_users(vehicle_id, user_id)` zugeordnet sind. Die
+  IDOR-Helper in `backend/src/middleware/vehicleAccess.js` setzen das
+  pro Trip-, Charging- und Vehicle-Route durch.
+
+**Empfehlung fuer Mehr-Fahrer-Haushalte / Firmen:**
+
+- Wenn alle Fahrer einander voll vertrauen (ein Haushalt, Familien-
+  Fuhrpark): alle in einen Mandanten, jedes Fahrzeug ueber
+  `vehicle_users` jedem User zuweisen. Bequem.
+- Wenn Fahrer untereinander KEINE GPS- / Fahrtenbuch-Eintraege sehen
+  sollen (unabhaengige Mitarbeiter, steuerrelevante Trennung Privat-/
+  Dienstfahrten pro Person): jedem Fahrer einen **eigenen Mandanten**,
+  Fahrzeug pro Mandant. Die IDOR-Guards sorgen dann fuer die Trennung.
+
+Bewusst keine feingranulare Per-Attribut-Berechtigung innerhalb eines
+Mandanten — die Komplexitaet wird stattdessen auf die Mandanten-Grenze
+verschoben.
+
 ## Authentifizierungs-Flow
 
 ```
