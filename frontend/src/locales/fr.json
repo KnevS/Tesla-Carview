@@ -436,7 +436,9 @@
     "passkeyAuthenticating": "Authentification par passkey…",
     "passkeyCancelled": "Authentification par passkey annulée.",
     "passkeyFailed": "Échec de la connexion par passkey",
-    "tenantHint": "Votre nom de locataire (attribué après l’inscription)"
+    "tenantHint": "Votre nom de locataire (attribué après l’inscription)",
+    "selfHostHint": "Open source · Hébergez votre propre instance pour un usage privé — {link}",
+    "selfHostLink": "sur GitHub"
   },
   "register": {
     "title": "Créer un nouveau locataire",

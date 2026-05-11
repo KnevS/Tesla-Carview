@@ -436,7 +436,9 @@
     "passkeyAuthenticating": "Authenticating with passkey…",
     "passkeyCancelled": "Passkey authentication cancelled.",
     "passkeyFailed": "Passkey sign-in failed",
-    "tenantHint": "Your tenant name (assigned after registration)"
+    "tenantHint": "Your tenant name (assigned after registration)",
+    "selfHostHint": "Open source · Run your own instance for private use — {link}",
+    "selfHostLink": "on GitHub"
   },
   "register": {
     "title": "Register new tenant",

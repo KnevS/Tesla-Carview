@@ -85,6 +85,22 @@
           </RouterLink>
         </p>
 
+        <!-- Self-Host-Hinweis: Open-Source-Projekt, jeder darf eine eigene
+             Instanz fuer private Nutzung aufsetzen. Dezent, ohne Druck;
+             Footer hat schon die Copyright-Zeile, hier nur die
+             zusaetzliche Self-Hosting-Einladung. -->
+        <p class="text-center text-xs text-gray-500 pt-1">
+          <i18n-t keypath="auth.selfHostHint" tag="span">
+            <template #link>
+              <a href="https://github.com/KnevS/Tesla-Carview"
+                 target="_blank" rel="noopener noreferrer"
+                 class="text-blue-400 hover:text-blue-300 hover:underline">
+                {{ $t('auth.selfHostLink') }} ↗
+              </a>
+            </template>
+          </i18n-t>
+        </p>
+
       </div>
     </main>
     <!-- Footer kommt global aus App.vue — nicht hier nochmal einbinden,
