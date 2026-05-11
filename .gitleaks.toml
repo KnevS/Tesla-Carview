@@ -17,11 +17,12 @@ useDefault = true
 
 [[rules]]
 id          = "tesla-vin-real"
-description = "Tesla VIN (17 Zeichen); 5YJ/7SA Prefix, schließt All-Zero-Platzhalter aus"
-# 5YJ = Model S/X/3/Y, 7SA = Cybertruck. Letzte 6 Stellen = Seriennummer;
-# wenn die alle „0" sind, ist es ein Doku-Platzhalter und darf stehen
-# bleiben. Sonst → Alarm.
-regex       = '''\b(?:5YJ|7SA)[A-HJ-NPR-Z0-9]{11}(?!0{6}\b)[A-HJ-NPR-Z0-9]{3}\b'''
+description = "Tesla VIN (17 Zeichen, 5YJ/7SA Prefix)"
+# 5YJ = Model S/X/3/Y, 7SA = Cybertruck. Doku-Platzhalter
+# (5YJ3E1EA1NF000000 etc.) sind in der [allowlist] eingetragen.
+# Go's RE2-Engine kennt keine Lookahead-Patterns — deshalb hier ein
+# simples 17-Zeichen-Match und Filterung ueber die Allowlist.
+regex       = '''\b(?:5YJ|7SA)[A-HJ-NPR-Z0-9]{14}\b'''
 tags        = ["personal-data", "tesla"]
 
 [[rules]]
@@ -65,13 +66,19 @@ paths = [
   '''README\.md''',
   '''NOTICE\.md''',
   '''AUTHORS\.md''',
+  # CLAUDE.md ist Meta-Doku ueber genau diese Regeln; sie zaehlt die
+  # verbotenen Patterns auf und wuerde sonst auf jede dieser Regeln
+  # selbst anschlagen.
+  '''CLAUDE\.md''',
   '''frontend/src/handbook/.*''',
   # gitleaks-Selbstreferenz
   '''\.gitleaks\.toml$''',
 ]
 regexes = [
-  # Default-Demo-VIN endet auf sechs Nullen
-  '''5YJ3E1EA1NF000000''',
+  # Doku-Platzhalter-VINs: alles, was auf sechs Nullen endet
+  # (Konvention: echte VINs haben dort die Seriennummer).
+  '''5YJ[A-HJ-NPR-Z0-9]{8}0{6}''',
+  '''7SA[A-HJ-NPR-Z0-9]{8}0{6}''',
   # Operator-Adresse in README/NOTICE/AUTHORS ist gewollte Attribution
   '''Sven Krische''',
 ]
