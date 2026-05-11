@@ -1,22 +1,22 @@
 <template>
   <div class="space-y-6">
-    <h1 class="text-2xl font-bold">Laden</h1>
+    <h1 class="text-2xl font-bold">{{ $t('charging.title') }}</h1>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <StatCard label="Ladesessions" :value="stats.total_sessions" icon="🔌"
-        tooltip="Anzahl aller automatisch erkannten Ladevorgänge – von Stecker rein bis Stecker raus." />
-      <StatCard label="Geladen gesamt" :value="fmt(stats.total_energy_kwh, 1) + ' kWh'" icon="⚡"
-        tooltip="Summe der nachgeladenen Energie in Kilowattstunden über alle Ladesessions." />
-      <StatCard label="Ladekosten" :value="fmt(stats.total_cost, 2) + ' €'" icon="💶"
-        tooltip="Summierte Kosten aller Ladesessions mit hinterlegtem Preis. Kostenlose Ladungen zählen mit 0 €." />
-      <StatCard label="Max. Ladeleistung" :value="fmt(stats.peak_power, 0) + ' kW'" icon="🚀"
-        tooltip="Höchste je gemessene Ladeleistung. Tesla Model 3/Y: bis 250 kW am V3 Supercharger; AC zu Hause typisch 11 kW." />
+      <StatCard :label="$t('charging.sessions')" :value="stats.total_sessions" icon="🔌"
+        :tooltip="$t('charging.sessionsTooltip')" />
+      <StatCard :label="$t('charging.totalCharged')" :value="fmt(stats.total_energy_kwh, 1) + ' kWh'" icon="⚡"
+        :tooltip="$t('charging.totalChargedTooltip')" />
+      <StatCard :label="$t('charging.totalCost')" :value="fmt(stats.total_cost, 2) + ' €'" icon="💶"
+        :tooltip="$t('charging.totalCostTooltip')" />
+      <StatCard :label="$t('charging.maxPower')" :value="fmt(stats.peak_power, 0) + ' kW'" icon="🚀"
+        :tooltip="$t('charging.maxPowerTooltip')" />
     </div>
 
     <div v-if="stats.byType?.length" class="card">
       <h2 class="text-lg font-semibold mb-4"
-        v-tooltip="'Aufschlüsselung der Ladesessions nach Lade-Technologie.\n\nAC: Wechselstrom (zu Hause, Wallbox, langsam)\nDC: Gleichstrom (Schnelllader, Supercharger)'">
-        Nach Ladertyp
+        v-tooltip="$t('charging.byTypeTooltip')">
+        {{ $t('charging.byType') }}
       </h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div v-for="t in stats.byType" :key="t.charger_type"
@@ -30,7 +30,7 @@
     </div>
 
     <div class="space-y-3">
-      <div v-if="loading" class="text-gray-400">Lade Sessions...</div>
+      <div v-if="loading" class="text-gray-400">{{ $t('charging.loading') }}</div>
       <div v-for="s in sessions" :key="s.id"
         class="card"
         :class="s.is_free ? 'opacity-60 border border-gray-600' : ''">
@@ -44,21 +44,21 @@
               <button v-if="editingLocationId !== s.id"
                 @click="startEditLocation(s)"
                 class="font-semibold text-left hover:text-tesla-red transition"
-                v-tooltip="'Klicken zum Bearbeiten — Ort manuell eintragen oder einem definierten Ladeort zuordnen, falls das Fahrzeug keine GPS-Daten geliefert hat.'">
-                {{ s.location_name || 'Unbekannter Ort' }}
+                v-tooltip="$t('charging.locationEditTooltip')">
+                {{ s.location_name || $t('charging.unknownLocation') }}
               </button>
               <!-- Heim-Wallbox: erkannt via Monta-Sync (chargePointId-Match) oder
                    ueber location_id auf einen home-Ort. Hilft beim raschen
                    Visuellen Erfassen, was zu Hause geladen wurde. -->
               <span v-if="s.is_home_charged"
                 class="text-xs bg-green-900/40 text-green-300 px-2 py-0.5 rounded-full"
-                v-tooltip="'Geladen an der Heim-Wallbox (per Monta erkannt)'">
-                🏠 Zuhause
+                v-tooltip="$t('charging.homeBadgeTooltip')">
+                {{ $t('charging.homeBadge') }}
               </span>
               <span v-if="s.is_free"
                 class="text-xs bg-gray-700 text-gray-400 px-2 py-0.5 rounded-full"
-                v-tooltip="'Diese Ladung ist als kostenlos markiert und wird nicht in der Abrechnung berücksichtigt'">
-                kostenlos
+                v-tooltip="$t('charging.freeTooltip')">
+                {{ $t('charging.free') }}
               </span>
             </div>
 
@@ -70,64 +70,64 @@
             <div v-if="editingLocationId === s.id"
                  class="mt-2 bg-gray-800 rounded-lg p-3 space-y-2 max-w-md">
               <p class="text-xs text-gray-400">
-                Ort manuell eintragen oder zuweisen — Hinweise siehe Tooltip pro Feld.
+                {{ $t('charging.locationEditHint') }}
               </p>
               <div>
-                <label class="text-xs text-gray-400 block mb-0.5">Definierter Ladeort</label>
+                <label class="text-xs text-gray-400 block mb-0.5">{{ $t('charging.locationDefinedLabel') }}</label>
                 <select v-model="locationPickId"
                   class="w-full bg-gray-700 rounded px-2 py-1 text-sm text-white"
-                  v-tooltip="'Direkte Zuordnung zu einem unter „Ladeorte“ definierten Ort. Tarif (€/kWh) und Position werden vom Ladeort uebernommen — Kosten neu berechnet.'">
-                  <option :value="''">— freier Eintrag unten —</option>
+                  v-tooltip="$t('charging.locationDefinedTooltip')">
+                  <option :value="''">{{ $t('charging.locationFreeEntry') }}</option>
                   <option v-for="loc in chargingLocations" :key="loc.id" :value="loc.id">
-                    {{ loc.name }} ({{ loc.type === 'home' ? 'zuhause' : 'auswaerts' }}{{ loc.rate_kwh != null ? `, ${loc.rate_kwh.toFixed(3)} €/kWh` : '' }})
+                    {{ loc.name }} ({{ loc.type === 'home' ? $t('charging.locationTypeHome') : $t('charging.locationTypeAway') }}{{ loc.rate_kwh != null ? `, ${loc.rate_kwh.toFixed(3)} €/kWh` : '' }})
                   </option>
                 </select>
               </div>
               <div v-if="!locationPickId">
-                <label class="text-xs text-gray-400 block mb-0.5">Name / Adresse</label>
+                <label class="text-xs text-gray-400 block mb-0.5">{{ $t('charging.locationNameLabel') }}</label>
                 <input v-model="locationName" type="text"
                   class="w-full bg-gray-700 rounded px-2 py-1 text-sm text-white"
-                  placeholder="z.B. Aldi Schlossplatz, Stuttgart"
-                  v-tooltip="'Frei waehlbarer Anzeigename — erscheint in der Ladeliste und in CSV-Exporten. Wird genommen, wenn kein definierter Ladeort gewaehlt ist.'" />
+                  :placeholder="$t('charging.locationNamePlaceholder')"
+                  v-tooltip="$t('charging.locationNameTooltip')" />
               </div>
               <div v-if="!locationPickId" class="grid grid-cols-2 gap-2">
                 <div>
-                  <label class="text-xs text-gray-400 block mb-0.5">Latitude (optional)</label>
+                  <label class="text-xs text-gray-400 block mb-0.5">{{ $t('charging.locationLatLabel') }}</label>
                   <input v-model="locationLat" type="number" step="any" min="-90" max="90"
                     class="w-full bg-gray-700 rounded px-2 py-1 text-sm text-white"
                     placeholder="48.7758"
-                    v-tooltip="'GPS-Breitengrad. Sobald lat und lon gesetzt sind, gleicht die App automatisch mit definierten Ladeorten ab — Treffer im Umkreis (Standard 200m) wird zugeordnet und der Tarif uebernommen.'" />
+                    v-tooltip="$t('charging.locationLatTooltip')" />
                 </div>
                 <div>
-                  <label class="text-xs text-gray-400 block mb-0.5">Longitude (optional)</label>
+                  <label class="text-xs text-gray-400 block mb-0.5">{{ $t('charging.locationLonLabel') }}</label>
                   <input v-model="locationLon" type="number" step="any" min="-180" max="180"
                     class="w-full bg-gray-700 rounded px-2 py-1 text-sm text-white"
                     placeholder="9.1829"
-                    v-tooltip="'GPS-Laengengrad. Komma in der Eingabe wird als Punkt interpretiert. Hilfreich z.B. wenn das Fahrzeug XP7 keine GPS-Position liefert und der Tarif auf einen Ladeort gemappt werden soll.'" />
+                    v-tooltip="$t('charging.locationLonTooltip')" />
                 </div>
               </div>
               <div class="flex gap-2">
                 <button @click="saveLocation(s)"
                   class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded">
-                  Speichern
+                  {{ $t('charging.save') }}
                 </button>
                 <button @click="editingLocationId = null"
-                  class="text-xs text-gray-400 hover:text-white px-2">Abbrechen</button>
+                  class="text-xs text-gray-400 hover:text-white px-2">{{ $t('charging.cancel') }}</button>
               </div>
             </div>
             <p class="text-sm text-gray-400">{{ fmtDate(s.start_time) }}</p>
             <div class="flex gap-3 mt-2 text-sm">
               <span class="bg-gray-700 rounded-lg px-2 py-0.5"
                 v-tooltip="chargerTypeTooltip(s.charger_type)">{{ chargerTypeLabel(s.charger_type) }}</span>
-              <span v-tooltip="'Batterie-Stand vor und nach dem Laden'">SoC {{ s.start_soc }}% → {{ s.end_soc }}%</span>
+              <span v-tooltip="$t('charging.socTooltip')">SoC {{ s.start_soc }}% → {{ s.end_soc }}%</span>
             </div>
           </div>
           <div class="text-right space-y-1">
             <p class="text-2xl font-bold text-green-400"
-              v-tooltip="'Tatsächlich nachgeladene Energie. Kann durch Ladeverluste etwas niedriger sein als die vom Lader abgegebene Energie.'">
-              +{{ fmt(s.energy_added_kwh, 1) }} kWh
+              v-tooltip="$t('charging.energyAddedTooltip')">
+              {{ $t('charging.kwhAdded', { value: fmt(s.energy_added_kwh, 1) }) }}
             </p>
-            <p class="text-sm text-gray-400">{{ fmt(s.max_power_kw, 0) }} kW max</p>
+            <p class="text-sm text-gray-400">{{ $t('charging.kwMax', { value: fmt(s.max_power_kw, 0) }) }}</p>
             <!-- Kosten & Tarif -->
             <div v-if="!s.is_free">
               <p v-if="s.cost != null" class="text-sm text-gray-300 font-medium">{{ fmt(s.cost, 2) }} {{ s.currency || 'EUR' }}</p>
@@ -135,7 +135,7 @@
               <div v-if="editingRateId === s.id" class="flex items-center gap-1 mt-1 justify-end">
                 <input v-model="rateInput" type="number" step="0.01" min="0"
                   class="w-20 text-xs bg-gray-700 border border-gray-500 rounded px-1 py-0.5 text-right"
-                  placeholder="€/kWh"
+                  :placeholder="$t('charging.rateInputPlaceholder')"
                   @keyup.enter="saveRate(s)"
                   @keyup.escape="editingRateId = null" />
                 <button @click="saveRate(s)" class="text-xs bg-blue-600 hover:bg-blue-500 text-white px-2 py-0.5 rounded">✓</button>
@@ -143,8 +143,8 @@
               </div>
               <button v-else @click="startEditRate(s)"
                 class="text-xs text-gray-500 hover:text-gray-300 transition mt-0.5"
-                v-tooltip="'Ladepreis für diese Session individuell anpassen (überschreibt den Standardtarif)'">
-                {{ s.billing_rate_kwh != null ? fmt(s.billing_rate_kwh, 3) + ' €/kWh' : '✎ Tarif' }}
+                v-tooltip="$t('charging.rateTooltip')">
+                {{ s.billing_rate_kwh != null ? $t('charging.ratePerKwh', { value: fmt(s.billing_rate_kwh, 3) }) : $t('charging.editRate') }}
               </button>
             </div>
             <button @click="toggleFree(s)"
@@ -152,8 +152,8 @@
               :class="s.is_free
                 ? 'bg-gray-700 text-gray-300 hover:bg-green-900 hover:text-green-300'
                 : 'bg-gray-800 text-gray-500 hover:bg-gray-700 hover:text-gray-300'"
-              v-tooltip="s.is_free ? 'Als kostenpflichtig markieren' : 'Als kostenlos markieren (wird aus Abrechnung ausgeschlossen)'">
-              {{ s.is_free ? '↩ kostenpflichtig' : '✕ kostenlos' }}
+              v-tooltip="s.is_free ? $t('charging.unmarkFreeTooltip') : $t('charging.markFreeTooltip')">
+              {{ s.is_free ? $t('charging.unmarkFree') : $t('charging.markFree') }}
             </button>
           </div>
         </div>
@@ -164,10 +164,12 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
 import StatCard from '../components/StatCard.vue';
 import api from '../api.js';
 
+const { t, locale } = useI18n();
 const appStore = useAppStore();
 const sessions = ref([]);
 const stats = ref({ byType: [] });
@@ -185,16 +187,18 @@ const locationLat    = ref('');
 const locationLon    = ref('');
 
 const fmt = (v, d = 0) => (+(v || 0)).toFixed(d);
-const fmtDate = ts => new Date(ts * 1000).toLocaleString('de-DE');
+// Datumsformat folgt der aktiven App-Sprache.
+const LOCALE_TAG = { de: 'de-DE', en: 'en-US', fr: 'fr-FR', es: 'es-ES', tr: 'tr-TR', el: 'el-GR' };
+const fmtDate = ts => new Date(ts * 1000).toLocaleString(LOCALE_TAG[locale.value] || 'de-DE');
 
 function chargerTypeTooltip(type) {
   const map = {
-    'AC':  'Wechselstrom-Laden – zu Hause oder öffentliche Wallbox. Typisch 3,7–22 kW. Schonend für die Batterie.',
-    'DC':  'Gleichstrom-Schnellladen – Autobahn-Schnelllader. Typisch 50–350 kW. Kann Batterie etwas mehr fordern.',
-    'Tesla': 'Tesla Supercharger – V2 bis 150 kW, V3 bis 250 kW. Kosten meist günstiger als andere DC-Schnelllader.',
-    'Combo': 'CCS Combo – europäischer DC-Schnellladestandard. Bis 350 kW möglich.',
+    'AC':    t('charging.chargerTypeAC'),
+    'DC':    t('charging.chargerTypeDC'),
+    'Tesla': t('charging.chargerTypeTesla'),
+    'Combo': t('charging.chargerTypeCombo'),
   };
-  return map[type] || 'Lade-Technologie wurde nicht eindeutig erkannt';
+  return map[type] || t('charging.chargerTypeUnknown');
 }
 
 // Anzeige-Label fuer den Lade-Technologie-Typ. Tesla liefert manchmal
@@ -205,7 +209,7 @@ function chargerTypeTooltip(type) {
 // versteht, dass es kein Bug ist, sondern eine Limitierung der
 // Ladestation.
 function chargerTypeLabel(type) {
-  if (!type || type === 'Invalid') return 'von Ladestation nicht übermittelt';
+  if (!type || type === 'Invalid') return t('charging.chargerTypeNotReported');
   return type;
 }
 
