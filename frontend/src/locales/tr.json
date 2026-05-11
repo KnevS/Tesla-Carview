@@ -244,6 +244,7 @@
     "totalCostTooltip": "Yapılandırılmış tarifeye sahip oturumların toplam maliyeti. Ücretsiz şarjlar 0 € sayılır.",
     "maxPower": "Maks. şarj gücü",
     "maxPowerTooltip": "Ölçülen en yüksek şarj gücü. Tesla Model 3/Y: V3 Supercharger'da 250 kW'a kadar; evde AC tipik 11 kW.",
+    "heatmapTitle": "Şarj ısı haritası (gün × saat)",
     "byType": "Şarj türüne göre",
     "byTypeTooltip": "Şarj teknolojisine göre oturumların dağılımı.\n\nAC: Alternatif akım (ev, wallbox, yavaş)\nDC: Doğru akım (hızlı şarj, Supercharger)",
     "loading": "Oturumlar yükleniyor...",

@@ -19,10 +19,10 @@
     </div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <StatCard :label="$t('trips.totalKm')"        :value="fmt(stats.total_km, 0) + ' km'"          icon="🛣️" :tooltip="$t('trips.totalKmTooltip')" />
-      <StatCard :label="$t('trips.avgConsumption')" :value="fmt(stats.avg_consumption, 1) + ' kWh/100km'" icon="⚡" :tooltip="$t('trips.avgConsumptionTooltip')" />
-      <StatCard :label="$t('trips.privateKm')"      :value="fmt(stats.private_km, 0) + ' km'"         icon="🏠" :tooltip="$t('trips.privateKmTooltip')" />
-      <StatCard :label="$t('trips.businessKm')"     :value="fmt(stats.business_km + stats.commute_km, 0) + ' km'" icon="💼" :tooltip="$t('trips.businessKmTooltip')" />
+      <StatCard :label="$t('trips.totalKm')"        :value="fmt(stats.total_km, 0) + ' km'"          icon="map"      :tooltip="$t('trips.totalKmTooltip')" />
+      <StatCard :label="$t('trips.avgConsumption')" :value="fmt(stats.avg_consumption, 1) + ' kWh/100km'" icon="pulse" :tooltip="$t('trips.avgConsumptionTooltip')" />
+      <StatCard :label="$t('trips.privateKm')"      :value="fmt(stats.private_km, 0) + ' km'"         icon="home"     :tooltip="$t('trips.privateKmTooltip')" />
+      <StatCard :label="$t('trips.businessKm')"     :value="fmt(stats.business_km + stats.commute_km, 0) + ' km'" icon="wallet" :tooltip="$t('trips.businessKmTooltip')" />
     </div>
 
     <div class="space-y-2">

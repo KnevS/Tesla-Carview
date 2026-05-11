@@ -244,6 +244,7 @@
     "totalCostTooltip": "Coste acumulado de las sesiones con tarifa configurada. Las cargas gratuitas cuentan como 0 €.",
     "maxPower": "Potencia máx.",
     "maxPowerTooltip": "Mayor potencia de carga jamás medida. Tesla Model 3/Y: hasta 250 kW en V3 Supercharger; AC en casa típicamente 11 kW.",
+    "heatmapTitle": "Mapa de carga (día × hora)",
     "byType": "Por tipo de cargador",
     "byTypeTooltip": "Desglose de sesiones por tecnología de carga.\n\nAC: corriente alterna (casa, wallbox, lento)\nDC: corriente continua (carga rápida, Supercharger)",
     "loading": "Cargando sesiones...",

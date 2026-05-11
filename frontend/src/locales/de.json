@@ -244,6 +244,7 @@
     "totalCostTooltip": "Summierte Kosten aller Ladesessions mit hinterlegtem Preis. Kostenlose Ladungen zählen mit 0 €.",
     "maxPower": "Max. Ladeleistung",
     "maxPowerTooltip": "Höchste je gemessene Ladeleistung. Tesla Model 3/Y: bis 250 kW am V3 Supercharger; AC zu Hause typisch 11 kW.",
+    "heatmapTitle": "Lade-Heatmap (Wochentag × Stunde)",
     "byType": "Nach Ladertyp",
     "byTypeTooltip": "Aufschlüsselung der Ladesessions nach Lade-Technologie.\n\nAC: Wechselstrom (zu Hause, Wallbox, langsam)\nDC: Gleichstrom (Schnelllader, Supercharger)",
     "loading": "Lade Sessions...",
