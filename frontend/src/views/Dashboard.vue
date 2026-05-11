@@ -16,23 +16,29 @@
     </div>
 
     <template v-else>
+      <!-- Tiles sind klickbar — fuehren in die jeweilige Detail-Ansicht.
+           Hover blendet einen kleinen Pfeil ein als Affordanz. -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 stagger">
         <StatCard label="Gesamtstrecke"
           :value="fmt(stats.total_km, 0) + ' km'"
           icon="🛣️"
-          tooltip="Summe aller aufgezeichneten Fahrtkilometer für das aktuell gewählte Fahrzeug." />
+          to="/trips"
+          tooltip="Summe aller aufgezeichneten Fahrtkilometer für das aktuell gewählte Fahrzeug. Klick: alle Fahrten anzeigen." />
         <StatCard label="Fahrten"
           :value="stats.total_trips"
           icon="🗺️"
-          tooltip="Anzahl der vom System automatisch erkannten Einzelfahrten (jede Fahrt von Park bis Park)." />
+          to="/trips"
+          tooltip="Anzahl der vom System automatisch erkannten Einzelfahrten (jede Fahrt von Park bis Park). Klick: Fahrtenliste." />
         <StatCard label="Geladen"
           :value="fmt(chargingStats.total_energy_kwh, 1) + ' kWh'"
           icon="⚡"
-          tooltip="Insgesamt nachgeladene Energie über alle Ladesessions." />
+          to="/charging"
+          tooltip="Insgesamt nachgeladene Energie über alle Ladesessions. Klick: Ladestatistik." />
         <StatCard label="Ladekosten"
           :value="fmt(chargingStats.total_cost, 2) + ' €'"
           icon="💶"
-          tooltip="Summierte Kosten aller Ladevorgänge mit hinterlegtem Preis. Bei kostenlosen oder unbekannten Ladungen wird 0 € angesetzt." />
+          to="/charging"
+          tooltip="Summierte Kosten aller Ladevorgänge mit hinterlegtem Preis. Bei kostenlosen oder unbekannten Ladungen wird 0 € angesetzt. Klick: Ladestatistik." />
       </div>
 
       <!-- Wartungs-Vorschau: ueberfaellige + bald faellige Eintraege.
