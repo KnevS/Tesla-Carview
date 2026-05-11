@@ -414,6 +414,29 @@
     <div class="card space-y-4">
       <h2 class="font-semibold">⚡ Tesla-Verbindung</h2>
 
+      <!-- Strategie-Erklaerung: Telemetry-first, Polling als Fallback.
+           Macht transparent, wie die App heute lebt und wann was passiert. -->
+      <div class="bg-blue-900/15 border border-blue-700/30 rounded-lg p-3 text-xs text-blue-100 space-y-1">
+        <p class="font-semibold text-sm">🎯 Strategie: Live-Streaming bevorzugt, Polling als Fallback</p>
+        <ol class="list-decimal list-inside space-y-0.5 text-blue-200">
+          <li>
+            <strong>Fleet Telemetry (Push)</strong> — Auto streamt GPS, Speed, Batterie
+            sekündlich. Kostenlos, keine Tesla-API-Calls.
+            <span class="text-gray-400">→ aktivierbar pro VIN unten, sobald Tesla approved.</span>
+          </li>
+          <li>
+            <strong>Fleet API Polling (Pull)</strong> — wenn Telemetry nicht aktiv ist,
+            ruft der Poller alle 30s (online) bzw. 5min (offline) die Tesla-API ab.
+            Kostet API-Budget pro Call.
+            <span class="text-gray-400">→ aktuell aktiver Default.</span>
+          </li>
+        </ol>
+        <p class="text-gray-400 pt-1">
+          Sobald Telemetry für ein Fahrzeug streamt, schaltet der Poller für dieses Auto
+          automatisch auf Heartbeat-Modus (1× pro Stunde, nur für Stammdaten) — spart bis 95 % API-Budget.
+        </p>
+      </div>
+
       <div class="flex items-center gap-3 flex-wrap">
         <span class="text-sm" :class="teslaConnected ? 'text-green-400' : 'text-red-400'">
           {{ teslaConnected ? '● Verbunden' : '● Nicht verbunden' }}
