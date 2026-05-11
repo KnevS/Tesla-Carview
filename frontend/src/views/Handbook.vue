@@ -1,16 +1,23 @@
 <template>
   <div class="max-w-3xl space-y-8 pb-16">
 
-    <!-- Inhaltsverzeichnis -->
+    <!-- Inhaltsverzeichnis. Pro Eintrag das passende AppIcon vorn an,
+         gemappt vom fuehrenden Emoji im Markdown-Heading. -->
     <div v-if="toc.length" class="card space-y-2 text-sm">
-      <h2 class="font-semibold text-base mb-2">{{ tocLabel }}</h2>
+      <h2 class="font-semibold text-base mb-2 flex items-center gap-2">
+        <AppIcon name="book" :size="20" class="text-tesla-red" />
+        {{ tocLabel }}
+      </h2>
       <a v-for="s in toc" :key="s.id" :href="`#${s.id}`"
-        class="block text-gray-400 hover:text-white py-0.5 border-b border-gray-800 last:border-0">
-        {{ s.title }}
+        class="flex items-center gap-2 text-gray-400 hover:text-white py-1 border-b border-gray-800 last:border-0">
+        <AppIcon v-if="s.icon" :name="s.icon" :size="16" class="text-tesla-red flex-shrink-0" />
+        <span class="flex-1">{{ s.title }}</span>
       </a>
     </div>
 
-    <!-- Markdown-Inhalt -->
+    <!-- Markdown-Inhalt. Headings werden vom Markdown-Renderer mit dem
+         passenden SVG-Icon (aus EMOJI_TO_ICON) versehen — siehe
+         lib/icons.js. Sieht damit aus wie das uebrige Tesla-Carview-UI. -->
     <div class="handbook-content prose prose-invert max-w-none" v-html="html"></div>
   </div>
 </template>
@@ -20,6 +27,8 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { marked } from 'marked';
 import { useLangStore } from '../store/lang.js';
 import { i18n } from '../plugins/i18n.js';
+import AppIcon from '../components/AppIcon.vue';
+import { renderIconSvg, extractLeadingEmoji } from '../lib/icons.js';
 
 // Vite import-glob: alle Markdown-Handbücher als Raw-String, lazy.
 const handbookFiles = import.meta.glob('../handbook/handbook.*.md', {
@@ -91,9 +100,21 @@ const html = computed(() => {
       displayText = text;
       id = slugify(text);
     }
-    // Inline-Rendering der ggf. inline-formatierten Überschrift:
+    // Fuehrendes Emoji erkennen und durch das passende AppIcon-SVG
+    // ersetzen, damit der Heading visuell zum Rest der App passt.
+    // Bei depth=2 (Hauptsektionen) machen wir das; tiefere Ebenen
+    // bleiben mit Original-Glyphe, weil sie eher beschreibend sind.
+    let iconHtml = '';
+    if (depth === 2) {
+      const { iconName, rest } = extractLeadingEmoji(displayText);
+      if (iconName) {
+        iconHtml = renderIconSvg(iconName, { size: 22 });
+        displayText = rest;
+      }
+    }
     const inlineHtml = marked.parseInline(displayText);
-    return `<h${depth} id="${id}">${inlineHtml}</h${depth}>\n`;
+    const headingClass = depth === 2 ? ' class="handbook-h-with-icon"' : '';
+    return `<h${depth} id="${id}"${headingClass}>${iconHtml}<span>${inlineHtml}</span></h${depth}>\n`;
   };
 
   marked.setOptions({ gfm: true, breaks: false });
@@ -108,9 +129,13 @@ const toc = computed(() => {
     .map((t) => {
       const text = t.text || '';
       const m = text.match(/^(.*?)\s*\{#([\w-]+)\}\s*$/);
-      const title = (m ? m[1] : text).trim();
+      const rawTitle = (m ? m[1] : text).trim();
       const id = m ? m[2] : slugify(text);
-      return { id, title };
+      // fuehrendes Emoji aus dem TOC-Eintrag entfernen — wir zeigen
+      // stattdessen das passende AppIcon vor dem Text. Konsistent mit
+      // dem Heading-Rendering im Markdown-Body.
+      const { iconName, rest } = extractLeadingEmoji(rawTitle);
+      return { id, title: iconName ? rest : rawTitle, icon: iconName };
     });
 });
 
@@ -146,6 +171,17 @@ onMounted(refresh);
   margin-top: 2rem;
   margin-bottom: 0.75rem;
   scroll-margin-top: 1rem;
+}
+/* Heading mit Icon: Icon links, Text dahinter — flex sorgt fuer
+ * vertikale Mittigkeit, der Tesla-Akzent-Farbton lockt das Auge. */
+.handbook-content :deep(h2.handbook-h-with-icon) {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.handbook-content :deep(h2.handbook-h-with-icon > .handbook-h-icon) {
+  color: var(--accent, #ef4444);
+  flex-shrink: 0;
 }
 .handbook-content :deep(h3) {
   font-size: 1.05rem;
