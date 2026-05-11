@@ -2,6 +2,7 @@ import { randomBytes, createHash } from 'crypto';
 import https from 'https';
 import axios from 'axios';
 import { getMasterDb } from '../db/database.js';
+import { encrypt, decrypt } from './cryptoService.js';
 import {
   assertWithinBudget,
   recordCall,
@@ -62,27 +63,32 @@ export async function exchangeCode(db, code, state) {
 export async function refreshTokens(db) {
   const row = db.prepare('SELECT refresh_token FROM tokens ORDER BY id DESC LIMIT 1').get();
   if (!row) throw new Error('Keine gespeicherten Tokens');
+  // refresh_token kommt aus der DB potenziell verschluesselt — decrypt
+  // toleriert sowohl v1:... als auch Legacy-Klartext (Migration laeuft
+  // beim Start, kann aber zwischenzeitlich noch alte Zeilen treffen).
   const res = await axios.post(`${getAuthBase()}/token`, {
     grant_type:    'refresh_token',
     client_id:     process.env.TESLA_CLIENT_ID,
     client_secret: process.env.TESLA_CLIENT_SECRET,
-    refresh_token: row.refresh_token,
+    refresh_token: decrypt(row.refresh_token),
   });
   saveTokens(db, res.data);
   return res.data.access_token;
 }
 
 function saveTokens(db, data) {
+  // Beide Tokens werden verschluesselt persistiert — auch wenn der
+  // Access-Token nur ~15 min gilt, ist DB-Leak-Sicherheit billig zu haben.
   db.prepare(
     'INSERT INTO tokens (access_token, refresh_token, expires_at) VALUES (?, ?, ?)'
-  ).run(data.access_token, data.refresh_token, Date.now() + data.expires_in * 1000);
+  ).run(encrypt(data.access_token), encrypt(data.refresh_token), Date.now() + data.expires_in * 1000);
 }
 
 export async function getAccessToken(db) {
   const row = db.prepare('SELECT access_token, expires_at FROM tokens ORDER BY id DESC LIMIT 1').get();
   if (!row) throw new Error('Nicht authentifiziert. Bitte zuerst Tesla verbinden.');
   if (Date.now() > row.expires_at - 60000) return refreshTokens(db);
-  return row.access_token;
+  return decrypt(row.access_token);
 }
 
 /** Wrapper: prüft Budget vor jedem Call, zählt nach Erfolg. */
