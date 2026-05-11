@@ -19,14 +19,18 @@
 
         <form @submit.prevent="submit" class="card space-y-4">
 
-          <!-- Mandant (nur anzeigen wenn mehrere vorhanden) -->
+          <!-- Mandant (nur anzeigen wenn mehrere vorhanden). Im Drop-
+               down erscheinen ausschliesslich PSEUDONYME (z.B.
+               „brave-eagle"), nicht der Klarname. Datenschutz:
+               sonst wuerde die oeffentliche Login-Seite verraten,
+               welche Firmen / Personen den Self-Hoster nutzen. -->
           <div v-if="showTenantField">
             <label class="block text-sm text-gray-400 mb-1">{{ $t('auth.tenant') }}</label>
             <select v-if="tenants.length > 0" v-model="form.tenantSlug" class="input">
               <option value="">{{ $t('auth.tenantPlaceholder') }}</option>
-              <option v-for="t in tenants" :key="t.slug" :value="t.slug">{{ t.name }} ({{ t.slug }})</option>
+              <option v-for="t in tenants" :key="t.slug" :value="t.slug">{{ t.pseudonym || t.slug }}</option>
             </select>
-            <input v-else v-model="form.tenantSlug" type="text" class="input" placeholder="mandant-slug"
+            <input v-else v-model="form.tenantSlug" type="text" class="input" placeholder="brave-eagle"
               autocomplete="organization" />
             <p class="text-xs text-gray-500 mt-1">{{ $t('auth.tenantHint') }}</p>
           </div>

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { randomUUID } from 'crypto';
 import { LEGAL_DEFAULTS, LEGAL_SCOPES, LEGAL_LOCALES } from './legalDefaults.js';
 import { encrypt, isEncrypted } from '../services/cryptoService.js';
+import { generatePseudonym } from '../services/pseudonymService.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR   = process.env.DATA_DIR   || './data';
@@ -48,6 +49,11 @@ export function getAllTenants() {
 
 export function getTenantBySlug(slug) {
   return getMasterDb().prepare('SELECT * FROM tenants WHERE slug=?').get(slug) ?? null;
+}
+
+/** Sucht ueber das nach aussen sichtbare Pseudonym (Login-Identifier). */
+export function getTenantByPseudonym(pseudonym) {
+  return getMasterDb().prepare('SELECT * FROM tenants WHERE pseudonym=?').get(pseudonym) ?? null;
 }
 
 export function getTenantById(id) {
@@ -116,13 +122,40 @@ export function createTenant(slug, name) {
   db.exec(schema);
   runTenantMigrations(db);
 
+  // Pseudonym beim Anlegen: einmalig generieren, kollisionsfrei gegen
+  // alle bestehenden Mandanten. Wird auf der Login-Seite statt des
+  // Klarnamens angezeigt.
+  const taken = getMasterDb().prepare(
+    'SELECT pseudonym FROM tenants WHERE pseudonym IS NOT NULL'
+  ).all().map(r => r.pseudonym);
+  const pseudonym = generatePseudonym({ taken });
+
   getMasterDb().prepare(
-    'INSERT INTO tenants (id, slug, name, db_path) VALUES (?, ?, ?, ?)'
-  ).run(id, slug, name, dbPath);
+    'INSERT INTO tenants (id, slug, name, db_path, pseudonym) VALUES (?, ?, ?, ?, ?)'
+  ).run(id, slug, name, dbPath, pseudonym);
 
   tenantConnections.set(id, db);
-  console.log(`[DB] Mandant erstellt: "${name}" (${slug}) → ${dbPath}`);
+  console.log(`[DB] Mandant erstellt: "${name}" (${slug}, Pseudonym: ${pseudonym}) → ${dbPath}`);
   return id;
+}
+
+/** Erzeugt ein neues Pseudonym fuer einen Mandanten, archiviert das alte
+ *  in `pseudonym_history`. Aufrufer muessen Admin-Berechtigung pruefen
+ *  (passiert in routes/system.js). Liefert { previous, current, history }. */
+export function regenerateTenantPseudonym(tenantId) {
+  const master = getMasterDb();
+  const t = master.prepare('SELECT pseudonym, pseudonym_history FROM tenants WHERE id=?').get(tenantId);
+  if (!t) throw new Error('Mandant nicht gefunden');
+  const history = (() => { try { return JSON.parse(t.pseudonym_history || '[]'); } catch { return []; } })();
+  if (t.pseudonym) history.push(t.pseudonym);
+  const taken = master.prepare(
+    'SELECT pseudonym FROM tenants WHERE pseudonym IS NOT NULL AND id != ?'
+  ).all(tenantId).map(r => r.pseudonym);
+  const next = generatePseudonym({ taken, history });
+  master.prepare(
+    'UPDATE tenants SET pseudonym = ?, pseudonym_history = ? WHERE id = ?'
+  ).run(next, JSON.stringify(history), tenantId);
+  return { previous: t.pseudonym, current: next, history };
 }
 
 function runMasterMigrations(master) {
@@ -138,6 +171,33 @@ function runMasterMigrations(master) {
   // anderen sind unberuehrt. Wird beim Demo-Setup auf 1 gesetzt.
   if (!cols.includes('is_demo')) {
     master.exec('ALTER TABLE tenants ADD COLUMN is_demo INTEGER NOT NULL DEFAULT 0');
+  }
+  // Datenschutz-Layer: Pseudonyme statt Klarnamen auf der Login-Seite.
+  // pseudonym ist der aktuell sichtbare Identifier (z.B. „brave-eagle"),
+  // pseudonym_history sammelt frueher vergebene Namen — damit das
+  // Re-Generate-Feature nicht zufaellig auf einen alten Namen zurueck-
+  // springt und der Admin spaeter rekonstruieren kann, unter welchem
+  // Pseudonym sein Mandant frueher gelistet war.
+  if (!cols.includes('pseudonym')) {
+    master.exec('ALTER TABLE tenants ADD COLUMN pseudonym TEXT');
+  }
+  if (!cols.includes('pseudonym_history')) {
+    master.exec("ALTER TABLE tenants ADD COLUMN pseudonym_history TEXT NOT NULL DEFAULT '[]'");
+  }
+  // Backfill: bestehende Mandanten ohne Pseudonym bekommen einen.
+  // Idempotent — laeuft nur fuer Reihen mit NULL.
+  const taken = master.prepare(
+    'SELECT pseudonym FROM tenants WHERE pseudonym IS NOT NULL'
+  ).all().map(r => r.pseudonym);
+  const missing = master.prepare('SELECT id FROM tenants WHERE pseudonym IS NULL').all();
+  if (missing.length) {
+    const upd = master.prepare('UPDATE tenants SET pseudonym = ? WHERE id = ?');
+    for (const t of missing) {
+      const p = generatePseudonym({ taken });
+      taken.push(p);
+      upd.run(p, t.id);
+    }
+    console.log(`[pseudonym] ${missing.length} bestehende(r) Mandant(en) bekamen einen Login-Pseudonym`);
   }
 }
 

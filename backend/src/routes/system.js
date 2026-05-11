@@ -11,6 +11,7 @@ import { auditLog } from '../services/auditService.js';
 import {
   getAllTenants, getDb, getTenantById,
   setTenantStatus, renameTenant, dropTenant,
+  regenerateTenantPseudonym,
 } from '../db/database.js';
 import https from 'https';
 
@@ -299,10 +300,15 @@ router.get('/tenants/:id', requireAuth, requireAdmin, (req, res) => {
     ).get()?.ts ?? null;
   } catch { /* tenant DB unavailable */ }
 
+  let pseudonymHistory = [];
+  try { pseudonymHistory = JSON.parse(t.pseudonym_history || '[]'); } catch { /* invalid JSON */ }
+
   res.json({
     id:           t.id,
     slug:         t.slug,
     name:         t.name,
+    pseudonym:    t.pseudonym,
+    pseudonymHistory,
     status:       t.status ?? 'active',
     suspendedAt:  t.suspended_at ?? null,
     createdAt:    t.created_at,
@@ -335,6 +341,34 @@ router.post('/tenants/:id/suspend', requireAuth, requireAdmin, (req, res) => {
   setTenantStatus(t.id, 'suspended');
   auditLog(req.db, req.user.sub, 'tenant_suspended', req, { tenantId: t.id, slug: t.slug });
   res.json({ ok: true, id: t.id, status: 'suspended' });
+});
+
+// Pseudonym neu generieren — der nach aussen sichtbare Login-Identifier.
+// Admin-only, weil ein Wechsel bedeutet, dass alle berechtigten User
+// sich ab sofort den neuen Pseudonym merken muessen. Alter Name landet
+// in pseudonym_history, Audit-Log behaelt den Verlauf.
+router.post('/tenants/:id/regenerate-pseudonym', requireAuth, requireAdmin, (req, res) => {
+  const t = getTenantById(req.params.id);
+  if (!t) return res.status(404).json({ error: 'Mandant nicht gefunden' });
+  // Nur den eigenen Mandanten umbenennen lassen — sonst koennte ein
+  // Admin-A in einem anderen Mandanten-B dort den Login-Identifier
+  // wechseln, was die User in B aussperrt.
+  if (t.id !== req.tenantId) {
+    return res.status(403).json({ error: 'Nur der eigene Mandant kann sein Pseudonym aendern' });
+  }
+  try {
+    const result = regenerateTenantPseudonym(t.id);
+    auditLog(req.db, req.user.sub, 'tenant_pseudonym_regenerated', req,
+      { tenantId: t.id, previous: result.previous, current: result.current });
+    res.json({
+      ok: true,
+      previous_pseudonym: result.previous,
+      current_pseudonym:  result.current,
+      history_size:       result.history.length,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Mandant reaktivieren

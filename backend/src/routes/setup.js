@@ -77,8 +77,17 @@ router.post('/init', async (req, res) => {
     const ip = (req.headers['x-forwarded-for'] || req.ip || '').toString().split(',')[0]?.trim();
     const ua = (req.headers['user-agent'] || '').slice(0, 512);
     recordSetupAcceptance(db, newUserId, accepts, ip, ua);
-    console.log(`[Setup] Admin "${username}" erstellt (Mandant: ${tenants[0].slug})`);
-    res.json({ ok: true, tenantSlug: tenants[0].slug });
+    // tenants[0] frisch laden — Pseudonym wurde gerade beim
+    // createTenant() vergeben und muss in die Response, damit das
+    // Frontend dem User „dein Login-Identifier heisst jetzt X" zeigen
+    // kann inklusive Hinweis ihn zu merken / Backup zu machen.
+    const tenant = getAllTenants()[0];
+    console.log(`[Setup] Admin "${username}" erstellt (Mandant: ${tenant.slug}, Pseudonym: ${tenant.pseudonym})`);
+    res.json({
+      ok:                true,
+      tenantSlug:        tenant.slug,
+      tenant_pseudonym:  tenant.pseudonym,
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
