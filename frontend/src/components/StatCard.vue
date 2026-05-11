@@ -1,8 +1,24 @@
 <template>
-  <div class="card card-interactive group transition" :class="{ 'cursor-help': tooltip }" v-tooltip="tooltip">
+  <!-- Wenn ein `to`-Prop gesetzt ist, rendert die Karte als RouterLink
+       und führt mit einem Klick zur passenden Detail-Ansicht
+       (Trips/Charging/etc.). Cursor wechselt automatisch auf pointer,
+       Hover-Effekt ist im card-interactive bereits drin.
+       Ohne `to`: rein dekorative Statistik-Karte (Fallback aufs frueher
+       benutzte <div>). -->
+  <component :is="to ? 'RouterLink' : 'div'"
+    :to="to || undefined"
+    class="card card-interactive group transition block no-underline"
+    :class="[
+      tooltip && !to ? 'cursor-help' : '',
+      to ? 'cursor-pointer hover:border-tesla-red/40 focus-visible:outline focus-visible:outline-2 focus-visible:outline-tesla-red' : '',
+    ]"
+    v-tooltip="tooltip">
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">
-        <p class="label">{{ label }}</p>
+        <p class="label flex items-center gap-1">
+          {{ label }}
+          <span v-if="to" class="text-gray-500 text-xs opacity-0 group-hover:opacity-100 transition">→</span>
+        </p>
         <p class="text-3xl font-bold mt-1 kpi-display tracking-tight">
           <!-- Wenn ein numerischer animierbarer Wert mitgegeben wird,
                nutzen wir NumberFlow fuers Count-Up. Sonst (Strings mit
@@ -15,7 +31,7 @@
       </div>
       <span class="text-3xl transition group-hover:scale-110 group-hover:-rotate-3">{{ icon }}</span>
     </div>
-  </div>
+  </component>
 </template>
 
 <script setup>
@@ -28,6 +44,9 @@ const props = defineProps({
   sub:      String,
   icon:     String,
   tooltip:  String,
+  // Optional: macht die Karte klickbar und navigiert dorthin.
+  // Kann ein String wie '/trips' sein oder ein Vue-Router-Object.
+  to:       { type: [String, Object], default: null },
   // Optional explizit numerisch + Format-Pattern, falls value bereits
   // einen String mit Einheit enthaelt. Wenn animate=false, wird
   // NumberFlow nicht benutzt — fuer Werte, die nicht hochzaehlen sollen

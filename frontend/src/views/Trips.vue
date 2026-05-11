@@ -47,9 +47,12 @@
                 v-tooltip="'Fahrer zuweisen'">
                 {{ trip.driver_name || '– Fahrer' }}
               </button>
-              <!-- Fahrer-Dropdown -->
+              <!-- Fahrer-Dropdown — z-50 + shadow-2xl, damit es zuverlaessig
+                   ueber nachfolgenden Trip-Karten / Tooltips / Toasts
+                   liegt und nicht halb verdeckt wirkt. Vorher z-20 lag
+                   unter der z-40 von Notifikations-Toasts. -->
               <div v-if="openDriverMenu === trip.id"
-                class="absolute left-0 top-full mt-1 z-20 bg-gray-800 border border-gray-600 rounded-xl shadow-xl min-w-max py-1"
+                class="absolute left-0 top-full mt-1 z-50 bg-gray-800 border border-gray-600 rounded-xl shadow-2xl min-w-max py-1"
                 @click.stop>
                 <button
                   class="block w-full text-left px-4 py-1.5 text-sm hover:bg-gray-700 text-gray-400"
