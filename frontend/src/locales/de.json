@@ -215,11 +215,23 @@
   "battery": {
     "title": "Batterie & Degradation",
     "rangeHistory": "Reichweiten-Verlauf",
+    "rangeHistoryDays": "Reichweiten-Verlauf ({days} Tage)",
     "degradationOverview": "Degradations-Übersicht",
     "firstMeasurement": "Erste Messung",
     "lastMeasurement": "Letzte Messung",
     "degradation": "Degradation",
-    "noData": "Noch nicht genug Daten für Degradations-Analyse"
+    "noData": "Noch nicht genug Daten für Degradations-Analyse",
+    "noDataLong": "Noch nicht genug Daten für Degradations-Analyse. Es werden mindestens zwei Messungen benötigt.",
+    "daySuffix": "T",
+    "maxRangeLabel": "Max. Reichweite (km)",
+    "tooltipRangeHistory": "Maximale Reichweite des Fahrzeugs (bei 100% SoC) über Zeit. Fällt langsam ab – das ist Batterie-Degradation.",
+    "tooltipFirst": "Älteste in der Datenbank gespeicherte Reichweiten-Messung. Je länger zurück, desto aussagekräftiger die Degradation.",
+    "tooltipLast": "Aktuellste Reichweiten-Messung. Wird vom Poller alle 15 Minuten gespeichert wenn das Fahrzeug online ist.",
+    "tooltipDegradation": "Prozentualer Verlust der maximalen Reichweite seit der ersten Messung.\n\nGrün (<5%): Normaler Verschleiß\nGelb (5–10%): Erhöht, aber unkritisch\nRot (>10%): Deutliche Alterung",
+    "range30": "Kurzzeit-Trend der letzten 30 Tage – zeigt akute Schwankungen",
+    "range90": "Quartals-Trend der letzten 3 Monate – standardmäßige Ansicht",
+    "range180": "Halbjahres-Trend – zeigt saisonale Schwankungen (Winter vs. Sommer)",
+    "range365": "Jahres-Trend – zuverlässigste Aussage über die Batterie-Alterung"
   },
   "control": {
     "title": "Fahrzeugsteuerung",

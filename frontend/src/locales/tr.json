@@ -215,11 +215,23 @@
   "battery": {
     "title": "Batarya & Bozulma",
     "rangeHistory": "Menzil geçmişi",
+    "rangeHistoryDays": "Menzil geçmişi ({days} gün)",
     "degradationOverview": "Bozulma özeti",
     "firstMeasurement": "İlk ölçüm",
     "lastMeasurement": "Son ölçüm",
     "degradation": "Bozulma",
-    "noData": "Bozulma analizi için henüz yeterli veri yok"
+    "noData": "Bozulma analizi için henüz yeterli veri yok",
+    "noDataLong": "Bozulma analizi için henüz yeterli veri yok. En az iki ölçüm gereklidir.",
+    "daySuffix": "g",
+    "maxRangeLabel": "Maks. menzil (km)",
+    "tooltipRangeHistory": "Aracın zaman içindeki azami menzili (%100 SoC'de). Yavaş yavaş düşer – bu batarya bozulmasıdır.",
+    "tooltipFirst": "Veritabanında saklanan en eski menzil ölçümü. Ne kadar geriye giderse, bozulma değeri o kadar anlamlı olur.",
+    "tooltipLast": "En güncel menzil ölçümü. Araç çevrimiçi olduğunda yoklayıcı tarafından her 15 dakikada bir kaydedilir.",
+    "tooltipDegradation": "İlk ölçümden bu yana azami menzilin yüzde olarak kaybı.\n\nYeşil (<%5): Normal aşınma\nSarı (%5–10): Yüksek ama kritik değil\nKırmızı (>%10): Belirgin yaşlanma",
+    "range30": "Son 30 günün kısa vadeli trendi – ani dalgalanmaları gösterir",
+    "range90": "Son 3 ayın çeyreklik trendi – varsayılan görünüm",
+    "range180": "Altı aylık trend – mevsimsel değişimleri gösterir (kış vs. yaz)",
+    "range365": "Yıllık trend – batarya yaşlanmasının en güvenilir göstergesi"
   },
   "control": {
     "title": "Araç kontrolü",
