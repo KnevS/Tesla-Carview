@@ -107,7 +107,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import { marked } from 'marked';
+import { sanitizeMarkdown } from '../../lib/sanitize.js';
 import { useI18n } from 'vue-i18n';
 import api from '../../api.js';
 
@@ -153,7 +153,11 @@ const previewHtml = computed(() => {
   const decorated = bodyMd.value.replace(
     /<<[A-Z_]+>>/g, m => `<span class="legal-placeholder">${m}</span>`
   );
-  return marked.parse(decorated, { breaks: false, gfm: true });
+  // sanitize auch in der Admin-Preview — sonst koennte der Admin im
+  // eigenen Editor ein injiziertes <script> live ausfuehren. Sieht
+  // beim Editieren genauso aus wie die spaeter im Public-View
+  // sanitizierte Variante, also gleich der Wahrheit.
+  return sanitizeMarkdown(decorated);
 });
 
 const fmtDateTime = ts => ts

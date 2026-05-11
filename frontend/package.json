@@ -11,6 +11,7 @@
     "@simplewebauthn/browser": "^10.0.0",
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",
+    "dompurify": "^3.4.2",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.7",
     "leaflet": "^1.9.4",

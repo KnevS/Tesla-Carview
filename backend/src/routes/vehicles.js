@@ -4,11 +4,22 @@ import { validate } from '../middleware/validate.js';
 import { requireCanEditVehicles, requireCanAddVehicles } from '../middleware/auth.js';
 import { getVehicles, getVehicleData } from '../services/teslaApi.js';
 import { registerVin } from '../db/database.js';
+import { assertVehicleAccess, guardAccess } from '../middleware/vehicleAccess.js';
 
 const router = Router();
 
 router.get('/', (req, res) => {
-  res.json(req.db.prepare('SELECT * FROM vehicles').all());
+  // Admins sehen alle Fahrzeuge des Tenants, normale User nur die, fuer
+  // die in vehicle_users eine Zuordnung existiert. Sonst koennte ein
+  // User in einem Multi-Fahrer-Tenant fremde VINs / Display-Namen sehen.
+  if (req.user?.role === 'admin') {
+    return res.json(req.db.prepare('SELECT * FROM vehicles').all());
+  }
+  res.json(req.db.prepare(
+    `SELECT v.* FROM vehicles v
+       JOIN vehicle_users vu ON vu.vehicle_id = v.id
+      WHERE vu.user_id = ?`
+  ).all(req.user.sub));
 });
 
 // POST /api/vehicles/sync — Fahrzeuge vom Tesla-Account synchronisieren.
@@ -37,7 +48,14 @@ router.post('/sync', requireCanAddVehicles, async (req, res) => {
 router.get('/summary', async (req, res) => {
   try {
     const db       = req.db;
-    const vehicles = db.prepare('SELECT * FROM vehicles').all();
+    // Auf eigene Fahrzeuge einschraenken (Admin sieht alle).
+    const vehicles = req.user?.role === 'admin'
+      ? db.prepare('SELECT * FROM vehicles').all()
+      : db.prepare(
+          `SELECT v.* FROM vehicles v
+             JOIN vehicle_users vu ON vu.vehicle_id = v.id
+            WHERE vu.user_id = ?`
+        ).all(req.user.sub);
     const result   = vehicles.map(v => {
       const lastTrip   = db.prepare('SELECT * FROM trips WHERE vehicle_id=? ORDER BY start_time DESC LIMIT 1').get(v.id);
       const totalKm    = db.prepare('SELECT COALESCE(SUM(distance_km),0) as total FROM trips WHERE vehicle_id=?').get(v.id)?.total || 0;
@@ -54,6 +72,9 @@ router.get('/summary', async (req, res) => {
 });
 
 router.get('/:vehicleId/status', async (req, res) => {
+  // Verhindert, dass ein User Tesla-API-Calls auf fremde Fahrzeuge
+  // im Tenant abfeuert (kostet Tesla-Daily-Budget + zeigt SOC/Position).
+  if (guardAccess(res, () => assertVehicleAccess(req.db, req.params.vehicleId, req.user))) return;
   try {
     const data = await getVehicleData(req.db, req.params.vehicleId);
     res.json(data.response);
@@ -79,6 +100,7 @@ const patchSchema = z.object({
 // Aendert Fahrzeug-Grunddaten (Name, Farbe, Tarif, Monta-Konfig …).
 // Endpoint nur fuer Admins oder User mit can_edit_vehicles=1.
 router.put('/:vehicleId', requireCanEditVehicles, validate(patchSchema), (req, res) => {
+  if (guardAccess(res, () => assertVehicleAccess(req.db, req.params.vehicleId, req.user))) return;
   try {
     const db = req.db;
     const { display_name, license_plate, image_color, color, model,
