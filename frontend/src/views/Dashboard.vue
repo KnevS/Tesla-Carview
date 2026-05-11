@@ -1,17 +1,17 @@
 <template>
   <div class="space-y-6">
-    <h1 class="text-2xl font-bold">Dashboard</h1>
+    <h1 class="text-2xl font-bold">{{ $t('dashboard.title') }}</h1>
 
-    <div v-if="loading" class="text-gray-400">Lade Daten...</div>
+    <div v-if="loading" class="text-gray-400">{{ $t('dashboard.loading') }}</div>
 
     <!-- Kein Fahrzeug verbunden -->
     <div v-else-if="!appStore.selectedVehicle" class="card text-center space-y-4 py-10">
       <div class="text-6xl">🚗</div>
-      <h2 class="text-xl font-semibold">Kein Fahrzeug verbunden</h2>
-      <p class="text-gray-400 text-sm">Verbinde deinen Tesla-Account um Fahrtdaten zu sehen.</p>
+      <h2 class="text-xl font-semibold">{{ $t('dashboard.noVehicle') }}</h2>
+      <p class="text-gray-400 text-sm">{{ $t('dashboard.connectHintDot') }}</p>
       <button @click="connectTesla" class="btn-primary"
-        v-tooltip="'Leitet zur Tesla-Anmeldeseite weiter. Nach der Genehmigung wird das Fahrzeug automatisch erkannt.'">
-        Tesla verbinden →
+        v-tooltip="$t('dashboard.connectTooltip')">
+        {{ $t('dashboard.connectBtn') }}
       </button>
     </div>
 
@@ -19,26 +19,26 @@
       <!-- Tiles sind klickbar — fuehren in die jeweilige Detail-Ansicht.
            Hover blendet einen kleinen Pfeil ein als Affordanz. -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 stagger">
-        <StatCard label="Gesamtstrecke"
+        <StatCard :label="$t('dashboard.totalKm')"
           :value="fmt(stats.total_km, 0) + ' km'"
           icon="🛣️"
           to="/trips"
-          tooltip="Summe aller aufgezeichneten Fahrtkilometer für das aktuell gewählte Fahrzeug. Klick: alle Fahrten anzeigen." />
-        <StatCard label="Fahrten"
+          :tooltip="$t('dashboard.totalKmTooltip')" />
+        <StatCard :label="$t('dashboard.trips')"
           :value="stats.total_trips"
           icon="🗺️"
           to="/trips"
-          tooltip="Anzahl der vom System automatisch erkannten Einzelfahrten (jede Fahrt von Park bis Park). Klick: Fahrtenliste." />
-        <StatCard label="Geladen"
+          :tooltip="$t('dashboard.tripsTooltip')" />
+        <StatCard :label="$t('dashboard.charged')"
           :value="fmt(chargingStats.total_energy_kwh, 1) + ' kWh'"
           icon="⚡"
           to="/charging"
-          tooltip="Insgesamt nachgeladene Energie über alle Ladesessions. Klick: Ladestatistik." />
-        <StatCard label="Ladekosten"
+          :tooltip="$t('dashboard.chargedTooltip')" />
+        <StatCard :label="$t('dashboard.chargingCost')"
           :value="fmt(chargingStats.total_cost, 2) + ' €'"
           icon="💶"
           to="/charging"
-          tooltip="Summierte Kosten aller Ladevorgänge mit hinterlegtem Preis. Bei kostenlosen oder unbekannten Ladungen wird 0 € angesetzt. Klick: Ladestatistik." />
+          :tooltip="$t('dashboard.chargingCostTooltip')" />
       </div>
 
       <!-- Wartungs-Vorschau: gesamte Karte fuehrt ins Betriebsbuch zum
@@ -48,9 +48,9 @@
                   to="/logbook#service-intervals"
                   class="card card-interactive group block no-underline border border-yellow-700/40 bg-yellow-900/10">
         <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-          🔧 Wartungs-Vorschau
+          {{ $t('dashboard.serviceTitle') }}
           <span class="text-xs text-gray-400 font-normal">({{ dueServices.length }})</span>
-          <span class="ml-auto text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition">öffnen →</span>
+          <span class="ml-auto text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition">{{ $t('dashboard.openLink') }}</span>
         </h2>
         <div class="space-y-2">
           <div v-for="s in dueServices" :key="s.id"
@@ -61,13 +61,13 @@
               </p>
               <p class="text-xs text-gray-400">
                 <span v-if="s.days_until_due != null">
-                  {{ s.days_until_due < 0 ? `${-s.days_until_due} Tage überfällig` : `in ${s.days_until_due} Tagen` }}
+                  {{ s.days_until_due < 0 ? $t('dashboard.serviceOverdueDays', { n: -s.days_until_due }) : $t('dashboard.serviceInDays', { n: s.days_until_due }) }}
                 </span>
                 <span v-if="s.km_until_due != null" class="ml-2">
-                  · {{ s.km_until_due < 0 ? `${-s.km_until_due} km überfällig` : `noch ${s.km_until_due} km` }}
+                  · {{ s.km_until_due < 0 ? $t('dashboard.serviceOverdueKm', { n: -s.km_until_due }) : $t('dashboard.serviceKmLeft', { n: s.km_until_due }) }}
                 </span>
                 <span v-if="s.days_until_due == null && s.km_until_due == null" class="italic">
-                  noch kein „erledigt"-Eintrag
+                  {{ $t('dashboard.serviceNoDone') }}
                 </span>
               </p>
             </div>
@@ -81,24 +81,24 @@
       <RouterLink v-if="lastTrip" :to="`/trips/${lastTrip.id}`"
                   class="card card-interactive group block no-underline" v-reveal>
         <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-          Letzte Fahrt
-          <span class="ml-auto text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition">öffnen →</span>
+          {{ $t('dashboard.lastTrip') }}
+          <span class="ml-auto text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition">{{ $t('dashboard.openLink') }}</span>
         </h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-          <div v-tooltip="'Startadresse oder GPS-Koordinaten der zuletzt aufgezeichneten Fahrt'">
-            <p class="text-gray-400">Von</p>
-            <p>{{ lastTrip.start_address || 'Unbekannt' }}</p>
+          <div v-tooltip="$t('dashboard.fromTooltip')">
+            <p class="text-gray-400">{{ $t('dashboard.from') }}</p>
+            <p>{{ lastTrip.start_address || $t('dashboard.unknownPlace') }}</p>
           </div>
-          <div v-tooltip="'Zieladresse oder GPS-Koordinaten der zuletzt aufgezeichneten Fahrt'">
-            <p class="text-gray-400">Nach</p>
-            <p>{{ lastTrip.end_address || 'Unbekannt' }}</p>
+          <div v-tooltip="$t('dashboard.toTooltip')">
+            <p class="text-gray-400">{{ $t('dashboard.toLabel') }}</p>
+            <p>{{ lastTrip.end_address || $t('dashboard.unknownPlace') }}</p>
           </div>
-          <div v-tooltip="'Zurückgelegte Strecke der letzten Fahrt in Kilometern'">
-            <p class="text-gray-400">Strecke</p>
+          <div v-tooltip="$t('dashboard.distanceTooltip')">
+            <p class="text-gray-400">{{ $t('dashboard.distance') }}</p>
             <p>{{ fmt(lastTrip.distance_km, 1) }} km</p>
           </div>
-          <div v-tooltip="'Energieverbrauch pro 100 km – niedrige Werte bedeuten effizientes Fahren. Tesla-Durchschnitt: 15–20 kWh/100km'">
-            <p class="text-gray-400">Verbrauch</p>
+          <div v-tooltip="$t('dashboard.consumptionTooltip')">
+            <p class="text-gray-400">{{ $t('dashboard.consumption') }}</p>
             <p>{{ lastTrip.distance_km ? fmt(lastTrip.energy_used_kwh / lastTrip.distance_km * 100, 1) : '–' }} kWh/100km</p>
           </div>
         </div>
@@ -108,9 +108,9 @@
            wo der User auch nach Monat filtern und mehr KPIs sehen kann. -->
       <RouterLink to="/trips" class="card card-interactive group block no-underline">
         <h2 class="text-lg font-semibold mb-4 flex items-center gap-2"
-          v-tooltip="'Gefahrene Kilometer pro Monat – zeigt deine Mobilitätsmuster und saisonale Unterschiede'">
-          Monatsübersicht – Strecke (km)
-          <span class="ml-auto text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition">öffnen →</span>
+          v-tooltip="$t('dashboard.monthlyKmTooltip')">
+          {{ $t('dashboard.monthlyKm') }}
+          <span class="ml-auto text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition">{{ $t('dashboard.openLink') }}</span>
         </h2>
         <div style="height: 200px">
           <Bar v-if="chartData" :data="chartData" :options="chartOptions" />
@@ -125,6 +125,7 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Bar } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js';
 import { useAppStore } from '../store/index.js';
@@ -135,6 +136,7 @@ import api from '../api.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
+const { t } = useI18n();
 const appStore = useAppStore();
 const loading = ref(true);
 
@@ -184,15 +186,15 @@ async function load() {
 
   const allTrips = (await api.get('/trips', { params: { ...params, limit: 500 } })).data;
   const monthly = {};
-  allTrips.forEach(t => {
-    const d = new Date(t.start_time * 1000);
+  allTrips.forEach(tr => {
+    const d = new Date(tr.start_time * 1000);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    monthly[key] = (monthly[key] || 0) + (t.distance_km || 0);
+    monthly[key] = (monthly[key] || 0) + (tr.distance_km || 0);
   });
   const sorted = Object.keys(monthly).sort().slice(-6);
   chartData.value = {
     labels: sorted,
-    datasets: [{ label: 'km', data: sorted.map(k => monthly[k]), backgroundColor: '#E31937', borderRadius: 6 }],
+    datasets: [{ label: t('dashboard.monthlyChartLabel'), data: sorted.map(k => monthly[k]), backgroundColor: '#E31937', borderRadius: 6 }],
   };
   loading.value = false;
 }
