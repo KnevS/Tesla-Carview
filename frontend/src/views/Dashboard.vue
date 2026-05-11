@@ -41,14 +41,16 @@
           tooltip="Summierte Kosten aller Ladevorgänge mit hinterlegtem Preis. Bei kostenlosen oder unbekannten Ladungen wird 0 € angesetzt. Klick: Ladestatistik." />
       </div>
 
-      <!-- Wartungs-Vorschau: ueberfaellige + bald faellige Eintraege.
-           Quelle: /api/service-intervals. Klick auf einen Eintrag fuehrt
-           ins Betriebsbuch, wo der User „erledigt"-stempeln, snoozen
-           oder Intervall anpassen kann. -->
-      <div v-if="dueServices.length" class="card border border-yellow-700/40 bg-yellow-900/10">
+      <!-- Wartungs-Vorschau: gesamte Karte fuehrt ins Betriebsbuch zum
+           Service-Intervalle-Anker. „Pflegen →" pro Eintrag entfaellt
+           damit; redundant, und nested <a> ist invalides HTML. -->
+      <RouterLink v-if="dueServices.length"
+                  to="/logbook#service-intervals"
+                  class="card card-interactive group block no-underline border border-yellow-700/40 bg-yellow-900/10">
         <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
           🔧 Wartungs-Vorschau
           <span class="text-xs text-gray-400 font-normal">({{ dueServices.length }})</span>
+          <span class="ml-auto text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition">öffnen →</span>
         </h2>
         <div class="space-y-2">
           <div v-for="s in dueServices" :key="s.id"
@@ -69,16 +71,19 @@
                 </span>
               </p>
             </div>
-            <RouterLink to="/logbook#service-intervals"
-              class="text-xs text-tesla-red hover:underline whitespace-nowrap">
-              Pflegen →
-            </RouterLink>
           </div>
         </div>
-      </div>
+      </RouterLink>
 
-      <div v-if="lastTrip" class="card" v-reveal>
-        <h2 class="text-lg font-semibold mb-3">Letzte Fahrt</h2>
+      <!-- Letzte Fahrt: gesamte Karte fuehrt zur Detail-Ansicht der
+           konkreten Fahrt (nicht nur zur Liste). Tooltip-DIVs bleiben,
+           verschachtelte Links wuerden ohnehin nicht funktionieren. -->
+      <RouterLink v-if="lastTrip" :to="`/trips/${lastTrip.id}`"
+                  class="card card-interactive group block no-underline" v-reveal>
+        <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+          Letzte Fahrt
+          <span class="ml-auto text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition">öffnen →</span>
+        </h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
           <div v-tooltip="'Startadresse oder GPS-Koordinaten der zuletzt aufgezeichneten Fahrt'">
             <p class="text-gray-400">Von</p>
@@ -97,20 +102,20 @@
             <p>{{ lastTrip.distance_km ? fmt(lastTrip.energy_used_kwh / lastTrip.distance_km * 100, 1) : '–' }} kWh/100km</p>
           </div>
         </div>
-        <RouterLink to="/trips" class="text-tesla-red text-sm mt-3 inline-block hover:underline">
-          Alle Fahrten anzeigen →
-        </RouterLink>
-      </div>
+      </RouterLink>
 
-      <div class="card">
-        <h2 class="text-lg font-semibold mb-4"
+      <!-- Monatsuebersicht: Klick fuehrt zur kompletten Fahrtenliste,
+           wo der User auch nach Monat filtern und mehr KPIs sehen kann. -->
+      <RouterLink to="/trips" class="card card-interactive group block no-underline">
+        <h2 class="text-lg font-semibold mb-4 flex items-center gap-2"
           v-tooltip="'Gefahrene Kilometer pro Monat – zeigt deine Mobilitätsmuster und saisonale Unterschiede'">
           Monatsübersicht – Strecke (km)
+          <span class="ml-auto text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition">öffnen →</span>
         </h2>
         <div style="height: 200px">
           <Bar v-if="chartData" :data="chartData" :options="chartOptions" />
         </div>
-      </div>
+      </RouterLink>
 
       <TariffWidget />
       <TeslaUsageWidget />
