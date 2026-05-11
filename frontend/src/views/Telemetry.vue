@@ -143,8 +143,36 @@
       </div>
     </template>
 
+    <!-- Kein Fahrzeug ausgewählt -->
+    <div v-else-if="!vehicle" class="card text-center py-12 text-gray-400">
+      Kein Fahrzeug ausgewählt — bitte oben rechts ein Fahrzeug wählen.
+    </div>
+
+    <!-- Tesla-OAuth ist abgelaufen / vom User widerrufen → die einzige
+         sinnvolle Aktion ist „Tesla neu verbinden", deshalb prominent. -->
+    <div v-else-if="authError" class="card text-center py-8 space-y-3 border border-yellow-700/40 bg-yellow-900/10">
+      <p class="text-yellow-200 font-semibold">⚠️ Keine Verbindung zum Tesla-Konto</p>
+      <p class="text-sm text-gray-300 max-w-md mx-auto">
+        Der OAuth-Token ist abgelaufen oder die Berechtigung wurde widerrufen.
+        Bitte einmal neu verbinden, dann kommen die Live-Daten wieder.
+      </p>
+      <RouterLink to="/settings" class="btn-primary inline-block text-sm">
+        Einstellungen → Tesla neu verbinden
+      </RouterLink>
+    </div>
+
+    <!-- Fahrzeug schläft / offline → keine Live-Daten verfuegbar -->
+    <div v-else-if="!loading && offline" class="card text-center py-12 space-y-2">
+      <p class="text-gray-300">💤 Fahrzeug schläft oder ist offline.</p>
+      <p class="text-xs text-gray-500">
+        Live-Daten kommen, sobald das Fahrzeug aufwacht — oder du forderst sie unter
+        <RouterLink to="/control" class="text-tesla-red underline">Steuerung</RouterLink> aktiv an.
+      </p>
+    </div>
+
+    <!-- Default: Fahrzeug vorhanden, online erwartet, aber noch nichts geladen -->
     <div v-else-if="!loading && !offline" class="card text-center py-12 text-gray-400">
-      Kein Fahrzeug ausgewählt oder noch keine Daten.
+      Noch keine Daten — Telemetry läuft erst, wenn der Poller das erste Mal vom Tesla antwortet bekommt.
     </div>
   </div>
 </template>
@@ -189,9 +217,14 @@ const DataRow = {
   },
 };
 
-const data    = ref(null);
-const loading = ref(false);
-const offline = ref(false);
+const data       = ref(null);
+const loading    = ref(false);
+const offline    = ref(false);
+// authError = true wenn das Backend 401/403 vom Tesla-Endpoint zurueck-
+// gibt — passiert wenn Tesla unseren OAuth-Token widerrufen oder
+// abgelaufen ist. Spezifischer als 'offline', damit der User weiss
+// dass er handeln muss (neu verbinden) und nicht nur warten.
+const authError  = ref(false);
 let   timer      = null;
 let   leafletMap = null;
 let   posMarker  = null;
@@ -236,7 +269,9 @@ async function updateMap(lat, lon) {
 
 async function refresh() {
   if (!vehicle.value) return;
-  loading.value = true; offline.value = false;
+  loading.value = true;
+  offline.value = false;
+  authError.value = false;
   try {
     const { data: d } = await api.get(`/telemetry/${vehicle.value.id}/live`);
     data.value = d;
@@ -244,7 +279,10 @@ async function refresh() {
       await updateMap(d.drive.lat, d.drive.lon);
     }
   } catch (e) {
-    if (e.response?.status === 503) offline.value = true;
+    const status = e.response?.status;
+    if (status === 503) offline.value = true;
+    else if (status === 401 || status === 403) authError.value = true;
+    // 502/504 deckt das globale Maintenance-Overlay ab.
   } finally { loading.value = false; }
 }
 

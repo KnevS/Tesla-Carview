@@ -17,6 +17,9 @@ async function poll() {
     const tenants = getAllTenants();
     for (const tenant of tenants) {
       if (tenant.status === 'suspended') continue;
+      // Demo-Mandanten haben keine Tesla-Verbindung — sonst wirft die
+      // API 401 und das Log laeuft mit „Nicht authentifiziert" voll.
+      if (tenant.is_demo) continue;
       try {
         const db       = getDb(tenant.id);
         // Beim ersten Lauf (noch keine Fahrzeuge) automatisch vom Tesla-Account synchronisieren
