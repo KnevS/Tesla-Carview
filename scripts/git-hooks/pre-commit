@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# Pre-Commit Hook — verhindert versehentliche Leaks im Public-Repo.
+#
+# Läuft VOR jedem `git commit`. Bei Treffer wird abgebrochen und der
+# Commit erfolgt nicht. Bypass nur mit  --no-verify  (sollte praktisch
+# nie nötig sein; wenn doch, ist gitleaks-Treffer wahrscheinlich falsch
+# konfiguriert, dann lieber .gitleaks.toml-Allowlist anpassen).
+#
+# Aktiviert via:  bash scripts/install-git-hooks.sh
+
+set -euo pipefail
+
+# ─── Stufe 1: gitleaks auf Staged-Diff ─────────────────────────────────
+if command -v gitleaks >/dev/null 2>&1; then
+  echo "→ gitleaks scan (staged) …"
+  if ! gitleaks protect --staged --redact --config .gitleaks.toml; then
+    cat <<'EOF'
+
+✘ gitleaks hat ein potenzielles Secret/PII-Muster gefunden.
+
+Mögliche Reaktionen:
+  - Stelle entfernen: editieren, neu stagen, commit erneut versuchen
+  - Falsch-positiv: .gitleaks.toml → [allowlist] erweitern und committen
+  - Notfall-Bypass: git commit --no-verify   (NUR wenn 100 % sicher)
+
+EOF
+    exit 1
+  fi
+else
+  echo "⚠ gitleaks nicht installiert — Scan übersprungen."
+  echo "  Hinweise: bash scripts/install-git-hooks.sh"
+fi
+
+# ─── Stufe 2: Schwarze Liste an Dateinamen ─────────────────────────────
+# Falls trotz .gitignore eine sensible Datei gestaged wurde (z.B. wenn
+# jemand .gitignore vorher editiert hat), hier hart blockieren.
+BLOCKED=$(git diff --cached --name-only --diff-filter=A | grep -iE \
+  '(^|/)\.env$|(^|/)\.env\.[^/]+$|\.(db|sqlite|key|pem|p12|pfx)$|(^|/)data/' \
+  || true)
+
+if [ -n "$BLOCKED" ]; then
+  echo ""
+  echo "✘ Folgende Dateien dürfen nie ins Repo:"
+  echo "$BLOCKED" | sed 's/^/    /'
+  echo ""
+  echo "  Aus dem Index nehmen:  git rm --cached <datei>"
+  echo "  (.gitignore deckt sie eigentlich ab — bitte nicht überschreiben.)"
+  exit 1
+fi
+
+# ─── Stufe 3: Große Dateien (> 5 MB) anwarnen ──────────────────────────
+# Verhindert versehentlich committete Backups, Bundles, Screenshots etc.
+LARGE=$(git diff --cached --name-only --diff-filter=A | \
+  while read -r f; do
+    if [ -f "$f" ]; then
+      size=$(wc -c <"$f")
+      if [ "$size" -gt 5242880 ]; then
+        echo "$f ($((size/1024/1024)) MB)"
+      fi
+    fi
+  done || true)
+
+if [ -n "$LARGE" ]; then
+  echo ""
+  echo "⚠ Große Dateien (>5 MB) im Commit — sicher gewollt?"
+  echo "$LARGE" | sed 's/^/    /'
+  echo "  Falls nein:  git rm --cached <datei>  und in .gitignore aufnehmen."
+  # Nur Warnung, kein Abbruch — große Bilder/Bundles können legitim sein.
+fi
+
+echo "✓ pre-commit OK"
