@@ -426,6 +426,30 @@ function runTenantMigrations(db) {
   if (!vehiclesCols.includes('odometer_km')) {
     db.exec('ALTER TABLE vehicles ADD COLUMN odometer_km REAL');
   }
+  // option_codes: vollstaendige Liste der Tesla-Werks-Optionen
+  // (Komma-getrennt, z.B. „MDLY,PPSW,W41B,IPMB,SC04,SLR1,…"). Werden
+  // aus vehicle_state.option_codes vom Tesla-Endpoint gezogen und
+  // an die Compositor-URL gehaengt, damit das Vorschaubild Farbe,
+  // Felgen, Spoiler, Trim und Innenraum exakt deines Autos zeigt
+  // statt nur Modell + Farbe wie vorher.
+  // wheel_type / exterior_color / trim_badging / spoiler_type kommen
+  // aus vehicle_config — als getrennte Felder fuer manuelle Edits
+  // und als Fallback, falls option_codes mal nicht geliefert wird.
+  if (!vehiclesCols.includes('option_codes')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN option_codes TEXT');
+  }
+  if (!vehiclesCols.includes('wheel_type')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN wheel_type TEXT');
+  }
+  if (!vehiclesCols.includes('exterior_color')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN exterior_color TEXT');
+  }
+  if (!vehiclesCols.includes('trim_badging')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN trim_badging TEXT');
+  }
+  if (!vehiclesCols.includes('spoiler_type')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN spoiler_type TEXT');
+  }
 
   // charging_sessions
   const csCols = col('charging_sessions');
