@@ -4,6 +4,7 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { randomUUID } from 'crypto';
 import { LEGAL_DEFAULTS, LEGAL_SCOPES, LEGAL_LOCALES } from './legalDefaults.js';
+import { encrypt, isEncrypted } from '../services/cryptoService.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR   = process.env.DATA_DIR   || './data';
@@ -203,7 +204,69 @@ export function initMasterDb() {
     }
   }
 
+  // Einmalige At-Rest-Encryption-Migration: alte Klartext-Reihen in
+  // tokens / users.mfa_secret / virtual_key.private_key_pem auf das
+  // verschluesselte v1:-Format heben. Idempotent — Reihen die bereits
+  // v1: tragen werden uebersprungen.
+  encryptionMigration(tenants);
+
   console.log(`[DB] Master-DB initialisiert (${tenants.length} Mandant(en))`);
+}
+
+/**
+ * Verschluesselt vorhandene Klartext-Reihen sensibler Felder in den
+ * Tenant-DBs. Laeuft beim Backend-Start. Reihen, die bereits das v1:-
+ * Prefix tragen (durch frueheren Lauf oder durch laufende Writes),
+ * werden uebersprungen — die Migration ist also idempotent.
+ *
+ * Fehler werden geloggt, brechen den Start aber nicht ab — die Read-
+ * Side ist tolerant gegenueber Klartext-Legacy, der Service laeuft
+ * weiter (nur mit reduzierter At-Rest-Sicherheit fuer die nicht-
+ * migrierten Reihen, die beim naechsten Write automatisch upgegradet
+ * werden).
+ */
+function encryptionMigration(tenants) {
+  const FIELDS = [
+    { table: 'tokens',      cols: ['access_token', 'refresh_token'] },
+    { table: 'users',       cols: ['mfa_secret'] },
+    { table: 'virtual_key', cols: ['private_key_pem'] },
+  ];
+  let totalUpgraded = 0;
+  for (const t of tenants) {
+    const db = tenantConnections.get(t.id);
+    if (!db) continue;
+    for (const { table, cols } of FIELDS) {
+      const tableExists = db.prepare(
+        "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
+      ).get(table);
+      if (!tableExists) continue;
+      try {
+        const colList = cols.join(', ');
+        const rows = db.prepare(`SELECT id, ${colList} FROM ${table}`).all();
+        for (const row of rows) {
+          const updates = [];
+          const values  = [];
+          for (const col of cols) {
+            const val = row[col];
+            if (val && typeof val === 'string' && !isEncrypted(val)) {
+              updates.push(`${col} = ?`);
+              values.push(encrypt(val));
+            }
+          }
+          if (updates.length) {
+            values.push(row.id);
+            db.prepare(`UPDATE ${table} SET ${updates.join(', ')} WHERE id = ?`).run(...values);
+            totalUpgraded++;
+          }
+        }
+      } catch (err) {
+        console.error(`[crypto-migration] ${t.slug}/${table}:`, err.message);
+      }
+    }
+  }
+  if (totalUpgraded) {
+    console.log(`[crypto-migration] ${totalUpgraded} Reihe(n) auf v1: verschluesselt`);
+  }
 }
 
 function migrateLegacyTokens(master, tdb, tenantId) {

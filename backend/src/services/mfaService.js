@@ -2,6 +2,7 @@ import * as OTPAuth from 'otpauth';
 import QRCode from 'qrcode';
 import bcrypt from 'bcryptjs';
 import { randomBytes } from 'crypto';
+import { encrypt, decrypt } from './cryptoService.js';
 
 const ISSUER = 'Tesla Carview';
 
@@ -32,8 +33,21 @@ export function verifyTotp(secret, token) {
 }
 
 export async function saveMfaSecret(db, userId, secret) {
-  db.prepare('UPDATE users SET mfa_secret=?, mfa_enabled=1 WHERE id=?').run(secret, userId);
+  // TOTP-Secret wird verschluesselt persistiert. Aufrufer verifiziert
+  // zuerst per verifyTotp() mit dem Klartext, danach speichern wir die
+  // verschluesselte Form. Verschluesselungs-Key liegt in data/.encryption-key.
+  db.prepare('UPDATE users SET mfa_secret=?, mfa_enabled=1 WHERE id=?').run(encrypt(secret), userId);
   return generateBackupCodes(db, userId);
+}
+
+/**
+ * Liest das (potenziell verschluesselte) MFA-Secret aus user.mfa_secret
+ * und liefert den Klartext zurueck. Aufrufer (auth.js) braucht das, um
+ * verifyTotp() aufzurufen. decrypt() ist tolerant gegenueber Legacy-
+ * Klartext, damit die Migration nicht zwingend gelaufen sein muss.
+ */
+export function decryptMfaSecret(encryptedOrPlain) {
+  return decrypt(encryptedOrPlain);
 }
 
 export function disableMfa(db, userId) {

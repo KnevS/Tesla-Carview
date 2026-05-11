@@ -9,7 +9,7 @@ import {
   findUserByUsername, verifyPassword,
   recordFailedLogin, resetFailedLogins, isLockedOut,
 } from '../services/userService.js';
-import { verifyTotp, verifyBackupCode } from '../services/mfaService.js';
+import { verifyTotp, verifyBackupCode, decryptMfaSecret } from '../services/mfaService.js';
 import { auditLog } from '../services/auditService.js';
 import { getAuthUrl, exchangeCode, getAccessToken } from '../services/teslaApi.js';
 import { getMasterDb, getDb, getTenantBySlug, getAllTenants, getTenantById } from '../db/database.js';
@@ -141,7 +141,9 @@ router.post('/mfa/verify', loginRateLimit, validate(z.object({
   const user = db.prepare('SELECT * FROM users WHERE id=?').get(payload.sub);
   if (!user?.mfa_secret) return res.status(401).json({ error: 'MFA nicht konfiguriert' });
 
-  const validTotp   = verifyTotp(user.mfa_secret, req.body.code);
+  // mfa_secret liegt in der DB verschluesselt (AES-256-GCM); fuer die
+  // TOTP-Verifikation brauchen wir den Klartext.
+  const validTotp   = verifyTotp(decryptMfaSecret(user.mfa_secret), req.body.code);
   const validBackup = !validTotp && await verifyBackupCode(db, user.id, req.body.code);
 
   if (!validTotp && !validBackup) {

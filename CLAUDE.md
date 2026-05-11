@@ -32,9 +32,14 @@ gecrawlt / im Web-Archive landen. **Was einmal drin ist, ist drin.**
 
 ### Datenbank-Inhalte
 - `*.db`, `*.sqlite` — Tenant-DBs enthalten Live-Daten
-- `data/`-Verzeichnis komplett
+- `data/`-Verzeichnis komplett (enthält auch `.encryption-key`, s. u.)
 - DB-Dumps, SQL-Snapshots mit echten Rows
 - Backup-JSONs aus dem Restore-Endpoint
+
+### Encryption-Key
+- `data/.encryption-key` (32 Bytes, 0600) — entschlüsselt Tesla-Tokens,
+  MFA-Secrets und Virtual-Key Private-Keys at-rest. **Nie ins Repo,
+  nie in Logs, nie in Issues.** Backup zusammen mit `data/`.
 
 ### Build- und Runtime-Artefakte
 - `.env`, `.env.local`, `.env.production` (nur `.env.example` ist OK)

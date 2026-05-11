@@ -5,19 +5,30 @@ import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import { changePassword } from '../services/userService.js';
 import { auditLog } from '../services/auditService.js';
+import { hashToken, timingSafeCompare } from '../services/cryptoService.js';
 
 const router = Router();
 const TOKEN_TTL = 60 * 60; // 1 Stunde
 
-// Speichert Reset-Token im tenant_settings (kein extra Table nötig)
-function storeResetToken(db, userId, token) {
+/**
+ * Reset-Tokens werden NUR als SHA-256-Hash in tenant_settings abgelegt.
+ * Der Raw-Token verlaesst den /generate-Endpoint einmal als JSON-Response
+ * an den Admin (→ Reset-Link); danach existiert er nur noch beim User.
+ * DB-Leak → Angreifer hat Hash, nicht Token, kann das Reset also nicht
+ * ausloesen.
+ *
+ * Der Hash-Vergleich in consumeResetToken() laeuft ueber timingSafeCompare,
+ * damit Angreifer aus der Antwortzeit nicht Zeichen fuer Zeichen den Hash
+ * rekonstruieren koennen.
+ */
+function storeResetToken(db, userId, rawToken) {
   const expires = Math.floor(Date.now() / 1000) + TOKEN_TTL;
   db.prepare(
     `INSERT OR REPLACE INTO tenant_settings (key, value) VALUES (?, ?)`
-  ).run(`reset:${userId}`, JSON.stringify({ token, expires }));
+  ).run(`reset:${userId}`, JSON.stringify({ tokenHash: hashToken(rawToken), expires }));
 }
 
-function consumeResetToken(db, userId, token) {
+function consumeResetToken(db, userId, rawToken) {
   const row = db.prepare("SELECT value FROM tenant_settings WHERE key=?").get(`reset:${userId}`);
   if (!row) return false;
   const data = JSON.parse(row.value);
@@ -25,7 +36,15 @@ function consumeResetToken(db, userId, token) {
     db.prepare("DELETE FROM tenant_settings WHERE key=?").run(`reset:${userId}`);
     return false;
   }
-  if (data.token !== token) return false;
+  // timing-safe Vergleich der Hashes. data.tokenHash kann fehlen, wenn
+  // noch eine alte Klartext-Reihe aus dem Pre-Hash-Schema in der DB liegt
+  // — die laeuft mit Ablauf binnen 1h aus und wird hier hart abgelehnt
+  // (besser: User loest Reset neu aus, als ein insecures Fallback).
+  if (!data.tokenHash) {
+    db.prepare("DELETE FROM tenant_settings WHERE key=?").run(`reset:${userId}`);
+    return false;
+  }
+  if (!timingSafeCompare(data.tokenHash, hashToken(rawToken))) return false;
   db.prepare("DELETE FROM tenant_settings WHERE key=?").run(`reset:${userId}`);
   return true;
 }
