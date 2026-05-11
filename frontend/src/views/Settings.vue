@@ -563,7 +563,7 @@
       </div>
     </div>
 
-    <!-- Outbound-Webhooks (Admin) — TODO i18n -->
+    <!-- Outbound-Webhooks (Admin) -->
     <div v-if="auth.isAdmin" class="card space-y-3">
       <h2 class="font-semibold flex items-center gap-2">
         <AppIcon name="alert" :size="20" class="text-tesla-red" />
@@ -1317,7 +1317,6 @@ async function logout() {
 }
 
 // GPS-Fuzzing (admin) – Privacy-Schutz fuer Trip-Koordinaten
-// TODO i18n: hardcoded English copy, await i18n agent pass
 const gpsFuzzing    = ref({ enabled: false, radius_m: 200 });
 const gpsFuzzingMsg = ref('');
 const gpsFuzzingOk  = ref(false);
@@ -1339,7 +1338,7 @@ async function saveGpsFuzzing() {
       radius_m: radius,
     });
     gpsFuzzing.value = { enabled: !!data.enabled, radius_m: data.radius_m };
-    gpsFuzzingMsg.value = 'Saved ✓'; gpsFuzzingOk.value = true;
+    gpsFuzzingMsg.value = '✓ ' + t('settings.saved'); gpsFuzzingOk.value = true;
   } catch (err) {
     gpsFuzzingMsg.value = err.response?.data?.error || err.message;
     gpsFuzzingOk.value = false;
