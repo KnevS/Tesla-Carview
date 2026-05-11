@@ -120,8 +120,15 @@
       <div v-if="appStore.selectedVehicle" class="space-y-4">
         <div class="flex gap-4 items-center">
           <img :src="vehicleImageUrl" :alt="appStore.selectedVehicle.display_name"
-            class="h-20 object-contain bg-gray-800 rounded-lg px-2"
-            v-tooltip="'Fahrzeugvorschau basierend auf Modell und Farbe'" />
+            class="h-24 object-contain bg-gray-800 rounded-lg px-2"
+            v-tooltip="hasOptionCodes
+              ? 'Vorschau basiert auf den echten Werks-Optionen deines Tesla (Farbe, Felgen, Spoiler, Trim)'
+              : 'Vorschau basiert nur auf Modell + Farbe. Sobald der Tesla-Poller dein Auto erreicht, kommen Felgen + Trim automatisch dazu.'" />
+          <button v-if="!hasOptionCodes && teslaConnected" @click="refreshVehicleOptions" type="button"
+            class="text-xs text-blue-300 hover:text-blue-200 underline whitespace-nowrap"
+            v-tooltip="'Holt option_codes + vehicle_config jetzt aktiv von der Tesla API. Nur wenn das Auto online ist.'">
+            🔄 Werks-Optionen abrufen
+          </button>
           <div class="text-sm">
             <p class="font-semibold text-white text-base">{{ appStore.selectedVehicle.display_name }}</p>
             <p class="text-gray-400">{{ vProfile.license_plate || 'Kein Kennzeichen' }}</p>
@@ -905,11 +912,55 @@ const vProfile = ref({ license_plate: '', model: 'm3', image_color: 'PPSW', cate
 const vMsg = ref('');
 const vOk  = ref(false);
 
+/** Liefert true, wenn der Tesla-API-Sync option_codes mitgebracht hat —
+ *  dann zeigt das Compositor-Bild Farbe, Felgen, Spoiler, Trim usw.
+ *  exakt wie das echte Auto. Ohne option_codes muessen wir auf manuelle
+ *  Farb-/Modell-Auswahl zurueckfallen (das alte Verhalten). */
+const hasOptionCodes = computed(() => {
+  return !!appStore.selectedVehicle?.option_codes;
+});
+
 const vehicleImageUrl = computed(() => {
   const v = appStore.selectedVehicle;
   if (!v) return '';
-  return `https://static-assets.tesla.com/configurator/compositor?&options=${vProfile.value.image_color || 'PPSW'}&view=STUD_3QTR&model=${vProfile.value.model || 'm3'}&size=400`;
+  const model = vProfile.value.model || 'my';
+
+  // Bevorzugter Pfad: vollstaendige Werks-Option-Codes aus Tesla API.
+  // Beispiel: 'MDLY,PPSW,W41B,IPMB,SLR1,SC04,…' → komplettes Compositor-
+  // Rendering mit Felgen, Spoiler, Innenraum, Trim. Der Aufrufer kann
+  // trotzdem image_color als zusaetzlichen Override mitgeben — wir
+  // haengen es einfach hinten an, der Compositor nimmt den letzten
+  // Wert pro Slot.
+  const codes = [];
+  if (v.option_codes) codes.push(v.option_codes);
+  // Manuelle Farbwahl als Override — laesst den Admin gezielt eine andere
+  // Farbe sehen ohne option_codes neu zu holen.
+  if (vProfile.value.image_color) codes.push(vProfile.value.image_color);
+
+  const optionsParam = codes.length ? codes.join(',') : 'PPSW';
+  return `https://static-assets.tesla.com/configurator/compositor?&options=${optionsParam}&view=STUD_3QTR&model=${model}&size=400`;
 });
+
+/** Loest einen Tesla-API-Call zu /api/vehicles/:id/status aus — damit
+ *  laeuft der Poller-Code-Pfad einmalig und schreibt option_codes +
+ *  vehicle_config in die DB. Setzt dann appStore.selectedVehicle frisch,
+ *  damit das Bild sofort neu berechnet wird. */
+async function refreshVehicleOptions() {
+  const v = appStore.selectedVehicle;
+  if (!v) return;
+  try {
+    await api.get(`/vehicles/${v.id}/status`);
+    // Vehicles aus dem Store neu laden, damit option_codes ankommen
+    await appStore.loadVehicles();
+    vMsg.value = '✓ Werks-Optionen aktualisiert';
+    vOk.value = true;
+  } catch (e) {
+    const code = e.response?.status;
+    if (code === 503) vMsg.value = 'Auto offline — sobald es wieder online ist, holt der Poller die Daten automatisch.';
+    else if (code === 401 || code === 403) vMsg.value = 'Tesla-Verbindung abgelaufen — bitte oben neu verbinden.';
+    else vMsg.value = e.response?.data?.error ?? 'Fehler beim Abruf';
+  }
+}
 
 async function saveVehicle() {
   vMsg.value = ''; vOk.value = false;

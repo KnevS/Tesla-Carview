@@ -15,9 +15,34 @@ export async function syncVehicleState(db, vehicle, state) {
   // /api/service-intervals + /api/system/health stets aktuelle Werte
   // finden (Faelligkeit nach km nutzt v.odometer_km).
   const odomKmCurrent = vs?.odometer ? milesToKm(vs.odometer) : null;
+
+  // option_codes + vehicle_config in einem Rutsch mit synchronisieren —
+  // bilden die Grundlage fuer das korrekte Compositor-Vorschaubild
+  // (Farbe, Felgen, Spoiler, Trim). Tesla liefert die Werte teilweise
+  // top-level (option_codes), teilweise unter vehicle_config. COALESCE
+  // sorgt dafuer, dass manuelle Admin-Edits nicht ueberschrieben werden,
+  // wenn Tesla in einem Refresh die Felder mal nicht zurueckliefert.
+  const cfg = state.vehicle_config || {};
   db.prepare(
-    'UPDATE vehicles SET display_name=?, state_updated_at=?, odometer_km=COALESCE(?, odometer_km) WHERE id=?'
-  ).run(state.display_name || vehicle.display_name, now, odomKmCurrent, vehicle.id);
+    `UPDATE vehicles SET
+       display_name      = ?,
+       state_updated_at  = ?,
+       odometer_km       = COALESCE(?, odometer_km),
+       option_codes      = COALESCE(?, option_codes),
+       wheel_type        = COALESCE(?, wheel_type),
+       exterior_color    = COALESCE(?, exterior_color),
+       trim_badging      = COALESCE(?, trim_badging),
+       spoiler_type      = COALESCE(?, spoiler_type)
+     WHERE id=?`
+  ).run(
+    state.display_name || vehicle.display_name, now, odomKmCurrent,
+    state.option_codes || vs?.option_codes || null,
+    cfg.wheel_type     || null,
+    cfg.exterior_color || null,
+    cfg.trim_badging   || null,
+    cfg.spoiler_type   || null,
+    vehicle.id,
+  );
 
   // Batterie-Snapshot (alle 15 Min)
   const lastSnap = db.prepare(
