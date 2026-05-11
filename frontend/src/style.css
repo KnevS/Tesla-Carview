@@ -1,0 +1,587 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --accent:        #E31937;
+  --accent-hover:  #c4162e;
+  --accent-soft:   rgba(227,25,55,0.18);
+  /* Tesla Carview ist eine Dark-Only-App (App-Shell ist immer bg-tesla-dark).
+   * `color-scheme: dark` weist den Browser an, native Form-Widgets im
+   * Dark-Modus zu rendern — sonst kippt ein hell-konfigurierter Browser
+   * z.B. dunkle Schrift in unsere dunklen Eingabefelder. */
+  color-scheme: dark;
+}
+
+html, body {
+  /* Anti-Aliasing fuer schaerfere Schrift in Premium-Layouts. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  @apply text-white font-sans;
+  /* Schwacher Radial-Sheen oben + Atmosphaere unten — die App wirkt
+   * dadurch nicht „flach schwarz", ohne dass es ein Designelement an
+   * sich wird. */
+  background:
+    radial-gradient(1200px 600px at 50% -10%, rgba(227,25,55,0.08), transparent 60%),
+    radial-gradient(900px 500px at 100% 100%, rgba(99,102,241,0.06), transparent 60%),
+    #0F1115;
+  background-attachment: fixed;
+}
+
+/* ─── Premium-Glas-Card ──────────────────────────────────────────────
+ * .card wird in der gesamten App ueberall benutzt. Mit dem Glas-Look
+ * bekommt jede einzelne View automatisch das neue Design — kein
+ * View-fuer-View-Refactor noetig.
+ *
+ *  - leichter Gradient als Untergrund (oben heller, unten dunkler)
+ *  - subtle 1px-Innen-Highlight oben + dezenter Border
+ *  - mehrlagiger Schatten fuer echte Tiefe
+ *  - Backdrop-Blur falls darunter Inhalte durchscheinen
+ *  - .card:hover gibt einen sanften Lift
+ */
+.card {
+  position: relative;
+  border-radius: 1rem;
+  padding: 1.25rem;
+  background-image: linear-gradient(140deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.015) 100%);
+  background-color: rgba(27, 31, 37, 0.65);
+  backdrop-filter: blur(14px) saturate(115%);
+  -webkit-backdrop-filter: blur(14px) saturate(115%);
+  border: 1px solid rgba(255,255,255,0.06);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255,255,255,0.04),
+    0 8px 24px -8px rgba(0,0,0,0.55),
+    0 24px 64px -16px rgba(0,0,0,0.5);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+/* Hover: ganz subtil heben, Border leicht heller — nur bei interaktiven
+ * Cards aktivierbar via .card-interactive. Default-Cards bleiben statisch. */
+.card-interactive { cursor: pointer; }
+.card-interactive:hover {
+  border-color: rgba(255,255,255,0.12);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255,255,255,0.07),
+    0 12px 32px -8px rgba(0,0,0,0.65),
+    0 30px 80px -20px rgba(0,0,0,0.55);
+}
+/* Akzent-Variante — Tesla-Rot subtil eingewoben (z.B. Hero auf Dashboard). */
+.card-accent {
+  background-image: linear-gradient(140deg, rgba(227,25,55,0.16) 0%, rgba(227,25,55,0.03) 55%, rgba(255,255,255,0.015) 100%);
+  border-color: rgba(227,25,55,0.25);
+}
+
+/* ─── Primaere Aktion ───────────────────────────────────────────────
+ * btn-primary mit echtem Gradient + dezentem Glow im Hover.
+ */
+.btn-primary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: linear-gradient(135deg, #E31937 0%, #B0142B 100%);
+  color: #fff;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  padding: 0.55rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255,255,255,0.18),
+    0 1px 0 0 rgba(0,0,0,0.3),
+    0 6px 16px -4px rgba(227,25,55,0.35);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255,255,255,0.22),
+    0 2px 0 0 rgba(0,0,0,0.3),
+    0 12px 28px -6px rgba(227,25,55,0.55);
+}
+.btn-primary:active:not(:disabled) { transform: translateY(0); filter: brightness(0.96); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ─── Sekundaere Aktion ───────────────────────────────────────────── */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  padding: 0.55rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  transition: background 0.18s ease, border-color 0.18s ease, transform 0.12s ease;
+}
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(255,255,255,0.09);
+  border-color: rgba(255,255,255,0.18);
+}
+.btn-secondary:active:not(:disabled) { transform: translateY(0); }
+.btn-secondary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+/* ─── Inputs ──────────────────────────────────────────────────────── */
+.input {
+  width: 100%;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 0.65rem;
+  padding: 0.55rem 0.85rem;
+  color: #fff;
+  font-size: 0.92rem;
+  transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+.input::placeholder { color: rgba(255,255,255,0.35); }
+.input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: rgba(255,255,255,0.06);
+  box-shadow: 0 0 0 3px rgba(227,25,55,0.22);
+}
+
+.label {
+  display: block;
+  font-size: 0.78rem;
+  letter-spacing: 0.02em;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+/* ─── KPI-„Display"-Stil ─────────────────────────────────────────────
+ * Grosse Zahl, tighter Letter-Spacing, leichter Schrift-Verlauf — fuer
+ * Hero-Stats auf dem Dashboard.
+ */
+.kpi-display {
+  font-family: 'system-ui', '-apple-system', 'Segoe UI', Roboto, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1;
+  background: linear-gradient(180deg, #ffffff 0%, #b9bcc4 110%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ─── App-Shell-Hilfsklassen ─────────────────────────────────────── */
+.glass-bar {
+  background: rgba(15, 17, 21, 0.72);
+  backdrop-filter: blur(14px) saturate(115%);
+  -webkit-backdrop-filter: blur(14px) saturate(115%);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Akzent-Ring fuer rundere Status-Indikatoren (z.B. SoC-Ring). */
+.accent-ring {
+  background: conic-gradient(from 0deg, #E31937, #B0142B, #7A0E1F, #E31937);
+}
+
+/* EU-Kennzeichen-Stil bleibt unangetastet — passt zum Premium-Look. */
+.license-plate {
+  display: inline-flex;
+  align-items: center;
+  background: white;
+  color: #111;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
+  padding: 2px 10px 2px 4px;
+  border-radius: 4px;
+  border: 1.5px solid #111;
+  border-left: 8px solid #003DA5;
+  font-family: 'FE-Schrift', 'Arial Narrow', Arial, sans-serif;
+}
+
+/* Reduzierte Animation respektieren — wichtig fuer Barrierefreiheit.
+ * Alle hier definierten Animationen werden auf einfache Opacity-
+ * Uebergaenge reduziert; pulsierende Indikatoren ruhen ganz. */
+@media (prefers-reduced-motion: reduce) {
+  .card, .card-interactive, .btn-primary, .btn-secondary, .input {
+    transition: none;
+  }
+  .card-interactive:hover, .btn-primary:hover, .btn-secondary:hover {
+    transform: none;
+  }
+  .stagger > * { animation: none !important; opacity: 1; transform: none; }
+  .reveal { transition: opacity 0.15s ease; transform: none; }
+  .reveal.is-revealed { transform: none; }
+  .skeleton::after { animation: none; }
+  .pulse-dot, .attention-pulse { animation: none; }
+  .route-fade-enter-active, .route-fade-leave-active { transition: opacity 0.1s ease; }
+  .route-fade-enter-from, .route-fade-leave-to { transform: none; }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ *  ANIMATIONEN — globale Hilfsklassen
+ *  Alle respektieren prefers-reduced-motion (siehe Block weiter unten).
+ * ════════════════════════════════════════════════════════════════════ */
+
+/* Staggered Reveal: jedes direkte Kind-Element des Containers faded
+ * leicht versetzt ein, sobald die Seite mountet. Funktioniert direkt
+ * auf Grid- oder Stack-Containern, z.B. <div class="stagger"> */
+.stagger > * {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: stagger-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.stagger > *:nth-child(1) { animation-delay: 0.02s; }
+.stagger > *:nth-child(2) { animation-delay: 0.08s; }
+.stagger > *:nth-child(3) { animation-delay: 0.14s; }
+.stagger > *:nth-child(4) { animation-delay: 0.20s; }
+.stagger > *:nth-child(5) { animation-delay: 0.26s; }
+.stagger > *:nth-child(6) { animation-delay: 0.32s; }
+.stagger > *:nth-child(7) { animation-delay: 0.38s; }
+.stagger > *:nth-child(8) { animation-delay: 0.44s; }
+.stagger > *:nth-child(n+9) { animation-delay: 0.50s; }
+@keyframes stagger-in {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Reveal-on-Scroll — wird durch v-reveal Directive getriggert (setzt
+ * .is-revealed wenn das Element in den Viewport rutscht). */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.55s ease, transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal.is-revealed { opacity: 1; transform: translateY(0); }
+
+/* Skeleton-Shimmer — sanfter Lichtschein wandert ueber Block. Wird
+ * waehrend des Ladens auf .skeleton-Containern eingesetzt. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255,255,255,0.04);
+  border-radius: 0.6rem;
+}
+.skeleton::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255,255,255,0.06) 50%,
+    transparent 100%);
+  transform: translateX(-100%);
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer { 100% { transform: translateX(100%); } }
+.skeleton-text { height: 0.9rem; margin: 0.35rem 0; }
+.skeleton-line { height: 1px; background: rgba(255,255,255,0.06); }
+
+/* Live-Status-Pulse — fuer Online-Dots, Recording-Indikator usw. */
+.pulse-dot {
+  position: relative;
+  width: 0.5rem; height: 0.5rem;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34,197,94,0.7);
+  animation: pulse-ring 2s cubic-bezier(0.66, 0, 0, 1) infinite;
+}
+.pulse-dot--red { background: var(--accent); box-shadow: 0 0 0 0 rgba(227,25,55,0.7); animation-name: pulse-ring-red; }
+.pulse-dot--yellow { background: #facc15; box-shadow: 0 0 0 0 rgba(250,204,21,0.7); animation-name: pulse-ring-yellow; }
+@keyframes pulse-ring        { 75%, 100% { box-shadow: 0 0 0 10px rgba(34,197,94,0); } }
+@keyframes pulse-ring-red    { 75%, 100% { box-shadow: 0 0 0 10px rgba(227,25,55,0); } }
+@keyframes pulse-ring-yellow { 75%, 100% { box-shadow: 0 0 0 10px rgba(250,204,21,0); } }
+
+/* Verbesserte Page-Transition — wir uebersteuern .route-fade aus App.vue
+ * mit einem etwas reicheren Slide-Fade. App.vue laesst die Klassen
+ * unveraendert, der Look kommt von hier. */
+.route-fade-enter-active { transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.22, 1, 0.36, 1); }
+.route-fade-leave-active { transition: opacity 0.18s ease, transform 0.18s ease; }
+.route-fade-enter-from   { opacity: 0; transform: translateY(8px) scale(0.998); }
+.route-fade-leave-to     { opacity: 0; transform: translateY(-4px) scale(1.002); }
+
+/* Glow-Pulse fuer „etwas Neues hier"-Markierungen, z.B. eine frische
+ * Push-Notification oder eine bald-faellige Wartung. */
+.attention-pulse {
+  animation: attention 1.6s ease-in-out infinite;
+}
+@keyframes attention {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(227,25,55,0.45); }
+  50%      { box-shadow: 0 0 0 6px rgba(227,25,55,0); }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+ *  DESIGN-VARIANTEN
+ *
+ *  Default oben = Premium Glass. Wenn der User in Settings einen
+ *  anderen Stil waehlt, setzt der theme-Store data-design am <html>,
+ *  und die folgenden Override-Bloecke greifen.
+ * ════════════════════════════════════════════════════════════════════ */
+
+/* ─── Cyberpunk-Tesla ────────────────────────────────────────────────
+ *  Neon-Glow, scharfe Kanten (kleinere Radius), Mono-Schrift fuer
+ *  Headlines, Grid-Hintergrund. Akzent leuchtet staerker.
+ */
+html[data-design="cyber"] body {
+  background:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px) 0 0 / 36px 36px,
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px) 0 0 / 36px 36px,
+    radial-gradient(1000px 600px at 50% 0%, rgba(227,25,55,0.14), transparent 60%),
+    #07080B;
+}
+html[data-design="cyber"] .card {
+  border-radius: 0.35rem;
+  background-color: rgba(10, 12, 16, 0.78);
+  background-image: linear-gradient(160deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(227,25,55,0.22);
+  backdrop-filter: blur(8px);
+  box-shadow:
+    inset 0 1px 0 0 rgba(227,25,55,0.18),
+    0 0 0 1px rgba(227,25,55,0.05),
+    0 0 24px -4px rgba(227,25,55,0.25);
+}
+html[data-design="cyber"] .card-interactive:hover {
+  border-color: rgba(227,25,55,0.55);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 32px -2px rgba(227,25,55,0.45);
+  transform: none;
+}
+html[data-design="cyber"] .btn-primary {
+  background: rgba(227,25,55,0.18);
+  border: 1px solid var(--accent);
+  border-radius: 0.35rem;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.85rem;
+  box-shadow: 0 0 18px -2px rgba(227,25,55,0.5), inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+html[data-design="cyber"] .btn-primary:hover:not(:disabled) {
+  background: rgba(227,25,55,0.32);
+  filter: none;
+  box-shadow: 0 0 26px 0 rgba(227,25,55,0.7);
+}
+html[data-design="cyber"] .btn-secondary {
+  border-radius: 0.35rem;
+  background: transparent;
+  border-color: rgba(255,255,255,0.18);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+html[data-design="cyber"] .input {
+  border-radius: 0.25rem;
+  background: rgba(0,0,0,0.4);
+  border-color: rgba(255,255,255,0.18);
+  font-family: 'ui-monospace', 'SFMono-Regular', monospace;
+}
+html[data-design="cyber"] .input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 16px -2px rgba(227,25,55,0.5);
+}
+html[data-design="cyber"] h1,
+html[data-design="cyber"] h2,
+html[data-design="cyber"] .kpi-display {
+  letter-spacing: 0.04em;
+  text-shadow: 0 0 18px rgba(227,25,55,0.4);
+}
+html[data-design="cyber"] .glass-bar {
+  background: rgba(7, 8, 11, 0.85);
+  border-bottom: 1px solid rgba(227,25,55,0.3);
+}
+
+/* ─── Minimal Swiss ─────────────────────────────────────────────────
+ *  Viel Schwarzraum, kein Backdrop-Blur, duenne Trennlinien statt
+ *  Karten-Hintergrund. Grosse Zahlen, kleine Labels.
+ */
+html[data-design="minimal"] body {
+  background:
+    radial-gradient(900px 500px at 50% 0%, rgba(255,255,255,0.025), transparent 60%),
+    #08090C;
+}
+html[data-design="minimal"] .card {
+  background: transparent;
+  background-image: none;
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 1.5rem 0;
+}
+html[data-design="minimal"] .card-interactive:hover {
+  border-top-color: rgba(255,255,255,0.18);
+  transform: none;
+  box-shadow: none;
+}
+html[data-design="minimal"] .btn-primary {
+  background: #ffffff;
+  color: #0F1115;
+  border: 0;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 0;
+  box-shadow: 0 6px 24px -8px rgba(255,255,255,0.25);
+}
+html[data-design="minimal"] .btn-primary:hover:not(:disabled) {
+  background: #f3f4f6;
+  filter: none;
+}
+html[data-design="minimal"] .btn-secondary {
+  border-radius: 999px;
+  background: transparent;
+  border-color: rgba(255,255,255,0.18);
+}
+html[data-design="minimal"] .input {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(255,255,255,0.18);
+  border-radius: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+html[data-design="minimal"] .input:focus {
+  border-bottom-color: var(--accent);
+  box-shadow: none;
+  background: transparent;
+}
+html[data-design="minimal"] h1 { font-weight: 300; letter-spacing: -0.04em; }
+html[data-design="minimal"] h2 { font-weight: 400; letter-spacing: -0.02em; }
+html[data-design="minimal"] .label {
+  text-transform: none;
+  letter-spacing: 0.03em;
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.4);
+}
+html[data-design="minimal"] .glass-bar {
+  background: rgba(8, 9, 12, 0.92);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ─── Sport / Performance ───────────────────────────────────────────
+ *  Mutig, kantig, Akzentbalken links an Karten. Sehr „schnell" wirkend.
+ */
+html[data-design="sport"] body {
+  background:
+    linear-gradient(180deg, #0E1014 0%, #07080B 100%) fixed,
+    radial-gradient(900px 500px at 0% 0%, rgba(227,25,55,0.1), transparent 60%) fixed;
+}
+html[data-design="sport"] .card {
+  border-radius: 0.5rem;
+  background-color: rgba(20, 22, 27, 0.85);
+  background-image: linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-left: 3px solid var(--accent);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255,255,255,0.04),
+    0 10px 28px -10px rgba(0,0,0,0.7);
+  backdrop-filter: blur(6px);
+}
+html[data-design="sport"] .card-interactive:hover {
+  border-left-width: 5px;
+  border-color: rgba(255,255,255,0.16);
+  border-left-color: var(--accent);
+  transform: translateY(-1px);
+}
+html[data-design="sport"] .btn-primary {
+  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-hover) 100%);
+  border-radius: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.88rem;
+  font-weight: 700;
+  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+html[data-design="sport"] .btn-secondary {
+  border-radius: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+html[data-design="sport"] .input {
+  border-radius: 0.35rem;
+  border-color: rgba(255,255,255,0.12);
+}
+html[data-design="sport"] h1, html[data-design="sport"] h2 {
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+html[data-design="sport"] .glass-bar {
+  background: linear-gradient(180deg, rgba(14,16,20,0.95) 0%, rgba(14,16,20,0.85) 100%);
+  border-bottom: 1px solid var(--accent);
+}
+
+/* ─── Design-Preview-Kacheln im Settings-Picker ────────────────────
+ *  Jede Kachel zeigt die wichtigsten visuellen Eigenschaften ihres
+ *  Stils im Miniformat. Damit der User vorher sieht was er bekommt.
+ */
+.design-preview {
+  display: flex; flex-direction: column;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.025);
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.18s ease;
+  gap: 0.6rem;
+}
+.design-preview:hover { border-color: rgba(255,255,255,0.18); transform: translateY(-1px); }
+.design-preview--active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 8px 24px -10px rgba(227,25,55,0.4);
+}
+.design-preview__inner {
+  height: 64px;
+  border-radius: 0.5rem;
+  padding: 0.55rem;
+  display: flex; flex-direction: column; gap: 0.35rem;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.design-preview__chip { width: 30%; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.4); }
+.design-preview__bar  { width: 80%; height: 6px; border-radius: 3px; background: rgba(255,255,255,0.18); }
+.design-preview__bar--short { width: 50%; }
+.design-preview__label { font-size: 0.85rem; }
+
+/* Glass — die Default-Optik */
+.design-preview--glass .design-preview__inner {
+  background: linear-gradient(140deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.01) 100%);
+  backdrop-filter: blur(8px);
+  border-color: rgba(255,255,255,0.06);
+  box-shadow: 0 6px 16px -6px rgba(0,0,0,0.6);
+}
+.design-preview--glass .design-preview__chip { background: var(--accent); }
+
+/* Cyber — Neon-Glow auf scharfem Hintergrund */
+.design-preview--cyber .design-preview__inner {
+  background:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px) 0 0 / 9px 9px,
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px) 0 0 / 9px 9px,
+    rgba(7,8,11,0.95);
+  border-radius: 0.2rem;
+  border-color: rgba(227,25,55,0.35);
+  box-shadow: 0 0 16px -2px rgba(227,25,55,0.4);
+}
+.design-preview--cyber .design-preview__chip { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.design-preview--cyber .design-preview__bar  { background: rgba(227,25,55,0.4); }
+
+/* Minimal — flach, keine Karte, nur Linien */
+.design-preview--minimal .design-preview__inner {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid rgba(255,255,255,0.2);
+  border-radius: 0;
+  padding: 0.6rem 0 0 0;
+  box-shadow: none;
+}
+.design-preview--minimal .design-preview__chip { background: #fff; height: 14px; border-radius: 2px; width: 40%; }
+.design-preview--minimal .design-preview__bar  { background: rgba(255,255,255,0.12); }
+
+/* Sport — Akzentbalken links, kantig */
+.design-preview--sport .design-preview__inner {
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+  border-radius: 0.3rem;
+  border-color: rgba(255,255,255,0.1);
+  border-left: 3px solid var(--accent);
+}
+.design-preview--sport .design-preview__chip { background: var(--accent); border-radius: 1px; }

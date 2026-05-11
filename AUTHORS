@@ -1,0 +1,27 @@
+Tesla Carview — Authors and Contributors
+=========================================
+
+Original author and copyright holder
+------------------------------------
+Sven Krische <it-passion@krische.com>
+https://github.com/KnevS
+
+Tesla Carview was conceived, designed and primarily implemented by
+Sven Krische between 2024 and 2026. The architecture, multi-tenant
+data model, Tesla Fleet API integration, virtual-key signing flow,
+billing/charging-location logic, in-app handbook and the legal stack
+are his original work.
+
+The project is published under the PolyForm Noncommercial 1.0.0
+license — see LICENSE for the full terms. The "Required Notice"
+clause of that license preserves the copyright attribution above:
+every copy and every derivative work must carry this notice.
+
+Contributors
+------------
+Additional contributions are recorded in the git history
+(git log --format='%an <%ae>' | sort -u). Human and AI-assisted
+commits are both credited via standard "Co-Authored-By:" trailers.
+
+If you submit a pull request, your contribution is licensed under
+the same terms (see CONTRIBUTING.md, Developer Certificate of Origin).

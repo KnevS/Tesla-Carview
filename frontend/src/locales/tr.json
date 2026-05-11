@@ -1,0 +1,1138 @@
+{
+  "common": {
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "loading": "Yükleniyor...",
+    "yes": "Evet",
+    "no": "Hayır",
+    "back": "Geri",
+    "close": "Kapat",
+    "confirm": "Onayla",
+    "create": "Oluştur",
+    "add": "Ekle",
+    "remove": "Kaldır",
+    "edit": "Düzenle",
+    "next": "İleri →",
+    "prev": "← Geri",
+    "error": "Hata",
+    "success": "Başarılı",
+    "logout": "Çıkış yap",
+    "noData": "Veri yok",
+    "noVehicle": "Araç bağlı değil",
+    "all": "Tümü",
+    "from": "Başlangıç",
+    "to": "Bitiş",
+    "private": "Özel",
+    "business": "İş",
+    "commute": "İşe gidiş-dönüş",
+    "km": "km",
+    "kwh": "kWh",
+    "donate": "Bağış yap"
+  },
+  "lang": {
+    "title": "Dil / Language",
+    "label": "Görüntüleme dili",
+    "de": "Deutsch",
+    "en": "English",
+    "fr": "Français",
+    "es": "Español",
+    "tr": "Türkçe",
+    "el": "Ελληνικά",
+    "switcher": "Dili değiştir"
+  },
+  "nav": {
+    "dashboard": {
+      "label": "Gösterge",
+      "tooltip": "Temel göstergeler, son seyahat ve aylık istatistiklerle genel bakış"
+    },
+    "trips": {
+      "label": "Seyahatler",
+      "tooltip": "Haritada GPS izi ile kaydedilen tüm seyahatlerin listesi"
+    },
+    "fahrtenbuch": {
+      "label": "Seyahat defteri",
+      "tooltip": "Seyahatleri sınıflandır ve özel/iş/işe gidiş dönüşe göre dağılımı gör"
+    },
+    "abrechnung": {
+      "label": "Faturalama",
+      "tooltip": "Şirket araçları için ev şarjı maliyet hesabı"
+    },
+    "charging": {
+      "label": "Şarj",
+      "tooltip": "Tüm şarj oturumları: şarj eğrileri, maliyetler ve tür dağılımı"
+    },
+    "battery": {
+      "label": "Batarya",
+      "tooltip": "Menzil geçmişi ve zamanla bozulma analizi"
+    },
+    "logbook": {
+      "label": "Bakım defteri",
+      "tooltip": "Bakım, onarım, lastik, muayene ve araç notları"
+    },
+    "telemetry": {
+      "label": "Teknik",
+      "tooltip": "Canlı araç verileri: lastik basıncı, klima, güç, SOC"
+    },
+    "control": {
+      "label": "Kontrol",
+      "tooltip": "Aracı kontrol et: klima, kapılar, şarj, navigasyon"
+    },
+    "export": {
+      "label": "Dışa aktar",
+      "tooltip": "Verileri CSV/JSON olarak dışa aktar, tam yedek oluştur, push bildirimleri"
+    },
+    "system": {
+      "label": "Sistem",
+      "tooltip": "Sürüm bilgileri, CPU/RAM kullanımı ve veritabanı istatistikleri"
+    },
+    "group_overview": "Genel Bakış",
+    "group_analytics": "Analiz",
+    "group_admin": "Yönetim"
+  },
+  "dashboard": {
+    "title": "Gösterge paneli",
+    "loading": "Veriler yükleniyor...",
+    "connectHint": "Seyahat verilerini görmek için aracınızı bağlayın",
+    "connectBtn": "Bağlan →",
+    "totalKm": "Toplam mesafe",
+    "trips": "Seyahatler",
+    "charged": "Şarj edildi",
+    "chargingCost": "Şarj maliyeti",
+    "lastTrip": "Son seyahat",
+    "allTrips": "Tüm seyahatleri gör →",
+    "monthlyKm": "Aylık özet – Mesafe (km)",
+    "distance": "Mesafe",
+    "consumption": "Tüketim",
+    "noTrips": "Henüz seyahat kaydedilmedi."
+  },
+  "trips": {
+    "title": "Seyahatler",
+    "loading": "Seyahatler yükleniyor...",
+    "loadMore": "Daha fazla yükle",
+    "allTypes": "Tüm türler",
+    "allDrivers": "Tüm sürücüler",
+    "noDriver": "Sürücü yok",
+    "filterPrivate": "Özel seyahatler",
+    "filterBusiness": "İş seyahatleri",
+    "filterCommute": "İşe gidiş-dönüş",
+    "start": "Başlangıç",
+    "dest": "Varış",
+    "distance": "Mesafe",
+    "consumption": "Tüketim",
+    "soc": "SoC",
+    "purpose": "Seyahat amacını girin (örn. müşteri ziyareti, iş seyahati)…",
+    "assignDriver": "Sürücü ata",
+    "noDriverLabel": "– Sürücü"
+  },
+  "tripDetail": {
+    "back": "← Seyahatler",
+    "title": "Seyahat detayı",
+    "loading": "Yükleniyor...",
+    "distance": "Mesafe",
+    "duration": "Süre",
+    "avgSpeed": "Ort. hız",
+    "consumption": "Tüketim",
+    "gpsTrack": "GPS izi",
+    "noGps": "Bu seyahat için GPS verisi yok.",
+    "route": "Rota",
+    "speedChart": "Hız & Güç",
+    "battery": "Batarya",
+    "startSoc": "Başlangıç SoC",
+    "endSoc": "Bitiş SoC",
+    "totalEnergy": "Toplam enerji",
+    "driver": "Sürücü",
+    "noDriverAssigned": "– sürücü yok"
+  },
+  "logbook": {
+    "title": "Seyahat defteri",
+    "allMonths": "Tüm aylar",
+    "totalKm": "Toplam km",
+    "private": "Özel seyahatler",
+    "business": "İş seyahatleri",
+    "commute": "İşe gidiş-dönüş",
+    "kmSplit": "Kilometre dağılımı"
+  },
+  "charging": {
+    "title": "Şarj",
+    "sessions": "Oturumlar",
+    "totalCharged": "Toplam şarj",
+    "totalCost": "Şarj maliyeti",
+    "maxPower": "Maks. şarj gücü",
+    "byType": "Şarj türüne göre",
+    "loading": "Oturumlar yükleniyor...",
+    "unknownLocation": "Bilinmeyen konum",
+    "free": "ücretsiz",
+    "markFree": "✕ ücretsiz işaretle",
+    "unmarkFree": "↩ ücretli işaretle",
+    "editRate": "✎ Tarife",
+    "rateTooltip": "Bu oturumun şarj tarifesini bireysel olarak ayarla (varsayılan tarifi geçersiz kılar)",
+    "rateSet": "Ayarla"
+  },
+  "battery": {
+    "title": "Batarya & Bozulma",
+    "rangeHistory": "Menzil geçmişi",
+    "degradationOverview": "Bozulma özeti",
+    "firstMeasurement": "İlk ölçüm",
+    "lastMeasurement": "Son ölçüm",
+    "degradation": "Bozulma",
+    "noData": "Bozulma analizi için henüz yeterli veri yok"
+  },
+  "control": {
+    "title": "Araç kontrolü",
+    "online": "Çevrimiçi",
+    "sleeping": "Uyuyor",
+    "offline": "Çevrimdışı",
+    "wake": "☀️ Uyandır",
+    "sleepHint": "Araç uyuyor veya çevrimdışı",
+    "climate": "🌡 Klima",
+    "on": "Açık",
+    "off": "Kapalı",
+    "temp": "Sıcaklık",
+    "setTemp": "Sıcaklık ayarla",
+    "preCondition": "❄️ Ön ısıtma / Maks-Buz çözme",
+    "vehicle": "🚗 Araç",
+    "doors": "Kapılar",
+    "unlock": "🔓 Aç",
+    "lock": "🔒 Kilitle",
+    "sentryMode": "Sentry modu",
+    "lights": "💡 Işıklar",
+    "horn": "📯 Korna",
+    "charging": "⚡ Şarj",
+    "chargeStart": "Başlat",
+    "chargeStop": "Durdur",
+    "chargeLimit": "Şarj limiti",
+    "setChargeLimit": "Şarj limiti ayarla",
+    "navigation": "🗺️ Navigasyon",
+    "navPlaceholder": "Adres veya yer girin…",
+    "sendNav": "Hedef gönder",
+    "recentNav": "Son kullanılan"
+  },
+  "exportPage": {
+    "title": "Verileri dışa aktar",
+    "tripsLabel": "🗺️ Seyahatler",
+    "tripsDesc": "Mesafe, tüketim ve SoC dahil tüm seyahat verileri",
+    "chargingLabel": "🔋 Şarj oturumları",
+    "backupLabel": "💾 Tam yedek",
+    "backupDesc": "Tüm veriler (seyahatler, şarj, batarya, bakım defteri) tek JSON dosyası",
+    "notifications": "🔔 Bildirimler",
+    "notificationsDesc": "Şarj tamamlandığında tarayıcı bildirimi al",
+    "enableNotifications": "Bildirimleri etkinleştir",
+    "notificationsActive": "✓ Bildirimler aktif",
+    "disableNotifications": "Devre dışı bırak",
+    "downloadFailed": "İndirme başarısız"
+  },
+  "maintenanceLog": {
+    "title": "Servis defteri",
+    "add": "+ Kayıt",
+    "addTooltip": "Yeni servis defteri kaydı oluştur — bakım, onarım veya not",
+    "filterAll": "Tümü",
+    "filterAllTooltip": "Kategoriden bağımsız tüm kayıtları göster",
+    "loading": "Kayıtlar yükleniyor…",
+    "empty": "Henüz kayıt yok. İlk servis defteri kaydını oluştur!",
+    "newEntry": "Yeni kayıt",
+    "entryTitle": "Başlık *",
+    "entryTitleTooltip": "Olayın kısa ve açıklayıcı adı (örn. „Yaz lastiği 2026“)",
+    "dateLabel": "Tarih ve saat",
+    "dateTooltip": "Ne zaman oldu? Varsayılan „şimdi“; geçmişe ve geleceğe yönelik kayıtlar mümkündür.",
+    "nowBtn": "⟳ Şimdi",
+    "nowTooltip": "Şu ana ayarla",
+    "category": "Kategori",
+    "categoryTooltip": "Kayıt türü — sonradan filtrelemeyi kolaylaştırır",
+    "description": "Açıklama",
+    "descriptionTooltip": "İsteğe bağlı: detaylı notlar, yapılan işler, servis vb.",
+    "odometer": "Kilometre",
+    "odometerTooltip": "Kayıt anındaki araç kilometresi",
+    "cost": "Maliyet (€)",
+    "costTooltip": "İsteğe bağlı: bu bakım/onarımın maliyeti — toplam maliyet hesaplamasına yardımcı olur",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "noVehicle": "Araç seçilmedi",
+    "confirmDelete": "Bu kayıt gerçekten silinsin mi?",
+    "deleteTooltip": "Kaydı kalıcı olarak sil",
+    "creator": "Bu kaydın yazarı",
+    "creatorUnknown": "Yazar bilinmiyor — bu kayıt yazar takibi özelliğinden önce oluşturulmuş",
+    "unknown": "👤 bilinmiyor",
+    "dateInlineTooltip": "İşlemin tarih ve saati",
+    "mileageInlineTooltip": "Kayıt anındaki kilometre",
+    "costInlineTooltip": "Bu kayıt için ortaya çıkan maliyet",
+    "cat_note": "Not",
+    "cat_note_tooltip": "Araçla ilgili genel not veya gözlem",
+    "cat_maintenance": "Bakım",
+    "cat_maintenance_tooltip": "Planlı bakım (fren hidroliği, polen filtresi, sileceler vb.)",
+    "cat_repair": "Onarım",
+    "cat_repair_tooltip": "Arıza veya hasar sonrası onarımlar",
+    "cat_tires": "Lastik",
+    "cat_tires_tooltip": "Lastik değişimi, alımı, basınç ölçümü, lastik onarımı",
+    "cat_inspection": "Muayene",
+    "cat_inspection_tooltip": "Resmi muayene (TÜV vb.) veya servis bakımı",
+    "cat_accident": "Kaza",
+    "cat_accident_tooltip": "Kaza hasarı ve buna bağlı onarımlar",
+    "cat_other": "Diğer",
+    "cat_other_tooltip": "Hiçbir kategoriye uymayan diğer olaylar"
+  },
+  "billing": {
+    "title": "Ev şarjı faturalaması",
+    "companyCar": "Şirket aracı",
+    "montaSync": "Monta senkron.",
+    "csvExport": "CSV dışa aktar",
+    "notCompany": "Bu araç özel araç olarak yapılandırıldı",
+    "toSettings": "Ayarlara git",
+    "chargedKwh": "Şarj edilen kWh",
+    "avgRate": "Ort. tarife",
+    "reimbursement": "Geri ödeme tutarı",
+    "inclVat": "KDV dahil",
+    "monthlyOverview": "Aylık özet",
+    "month": "Ay",
+    "sessions": "Oturumlar",
+    "kwhTesla": "kWh (araç)",
+    "kwhMid": "kWh (sayaç)",
+    "rate": "Tarife €/kWh",
+    "amount": "Tutar €",
+    "settled": "Ödendi",
+    "yes": "Evet",
+    "pending": "Beklemede",
+    "total": "Toplam",
+    "chargingSessions": "Şarj oturumları",
+    "date": "Tarih",
+    "location": "Konum",
+    "status": "Durum",
+    "template": "Fatura şablonu",
+    "templateTitle": "Ev şarjı geri ödeme talebi"
+  },
+  "telemetry": {
+    "title": "Araç tekniği",
+    "live": "Canlı",
+    "offline": "Çevrimdışı",
+    "refresh": "Yenile",
+    "sleepHint": "Araç uyuyor veya çevrimdışı",
+    "autoLoad": "Veriler otomatik yükleniyor",
+    "soc": "SOC",
+    "speed": "Hız",
+    "power": "Güç",
+    "odometer": "Kilometre",
+    "livePos": "📍 Canlı konum",
+    "regen": "← Rejenerasyon",
+    "drive": "Tahrik →",
+    "tpms": "🏎 Lastik basıncı (TPMS)",
+    "fl": "ÖS",
+    "fr": "ÖA",
+    "rl": "AS",
+    "rr": "AA",
+    "climate": "🌡 Klima",
+    "insideTemp": "İç sıcaklık",
+    "outsideTemp": "Dış sıcaklık",
+    "targetTemp": "Hedef sıcaklık",
+    "climateOn": "Klima",
+    "frontDefroster": "Ön buz çözme",
+    "rearDefroster": "Arka buz çözme",
+    "charging": "⚡ Şarj",
+    "chargeStatus": "Durum",
+    "chargePower": "Şarj gücü",
+    "chargeRate": "Şarj hızı",
+    "chargeLimit": "Şarj limiti",
+    "timeToFull": "Dolma süresi",
+    "vehicle": "🚗 Araç",
+    "state": "Durum",
+    "locked": "Kilitli",
+    "sentry": "Sentry",
+    "software": "Yazılım",
+    "heading": "Yön"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "vehicleProfile": "🚗 Araç profili",
+    "noVehicle": "Araç bağlı değil.",
+    "category": "Araç kategorisi",
+    "private": "🏠 Özel araç",
+    "privateDesc": "Yalnızca özel seyahatler, seyahat defteri gerekmez",
+    "company": "💼 Şirket aracı",
+    "companyDesc": "Seyahat defteri + maliyet faturalaması aktif",
+    "companyName": "Şirket adı (işveren)",
+    "licensePlate": "Plaka",
+    "model": "Model",
+    "color": "Renk",
+    "electricity": "Ev şarjı tarifesi (€/kWh)",
+    "montaChargePoint": "Monta şarj noktası ID",
+    "montaClientId": "Monta Client ID",
+    "montaClientIdHint": "Partner API: Hub → Uygulama → Client ID",
+    "montaKey": "Monta Client Secret",
+    "montaKeyHint": "Partner API: Hub → Uygulama → Client Secret",
+    "homeCharging": "Ev şarjı / Monta yapılandırması",
+    "drivers": "👤 Sürücüler ve Profiller",
+    "driversHint": "Sürücüler oluştur ve adlandır – seyahatlere atanır ve raporlarda gösterilir.",
+    "noDrivers": "Henüz sürücü oluşturulmadı.",
+    "driverName": "Ad (örn. Ahmet)",
+    "addDriver": "+ Ekle",
+    "setDefault": "★ Varsayılan",
+    "unsetDefault": "☆ Varsayılan",
+    "defaultTooltip": "Varsayılan sürücü – yeni seyahatlere otomatik atanır",
+    "setDefaultTooltip": "Varsayılan sürücü olarak ayarla",
+    "deleteDriverConfirm": "\"{name}\" sürücüsü silinsin mi? Mevcut seyahatler \"sürücüsüz\" olarak ayarlanacak.",
+    "driverSaved": "Sürücü kaydedildi.",
+    "driverError": "Kaydetme hatası.",
+    "mfa": "🔐 İki faktörlü kimlik doğrulama",
+    "mfaEnabled": "✓ MFA etkin",
+    "mfaBackupCodes": "Kalan yedek kodlar:",
+    "mfaDisable": "MFA'yı devre dışı bırak",
+    "mfaDisableConfirm": "Onaylamak için şifre girin:",
+    "mfaConfirmBtn": "Onayla",
+    "mfaNotEnabled": "MFA etkin değil. Daha fazla güvenlik için etkinleştirin.",
+    "mfaActivate": "MFA'yı etkinleştir",
+    "passkey": "🗝️ Passkey (şifresiz giriş)",
+    "passkeyDesc": "Bu cihaz için şifresiz giriş yapmak üzere bir passkey kaydedin.",
+    "passkeyAdded": "Eklendi:",
+    "passkeyRemove": "Kaldır",
+    "passkeyNone": "Henüz passkey kayıtlı değil.",
+    "passkeyAdd": "+ Passkey ekle",
+    "passkeyAdding": "Lütfen bekleyin…",
+    "teslaConnection": "⚡ Araç bağlantısı",
+    "teslaConnected": "● Bağlı",
+    "teslaDisconnected": "● Bağlı değil",
+    "teslaReconnect": "Aracı yeniden bağla",
+    "teslaSync": "🔄 Araçları senkronize et",
+    "teslaSyncing": "Senkronize ediliyor…",
+    "virtualKey": "Sanal anahtar (araç komutları)",
+    "virtualKeyDesc": "Klima, kapılar ve şarjın çalışması için araçta bir kez kaydedin",
+    "telemetrySection": "📡 Filo Telemetrisi (GPS ve gerçek zamanlı veriler)",
+    "telemetryDesc": "GPS izi, hız ve bataryayı canlı olarak bu uygulamaya aktarır",
+    "registerPartner": "🔑 Uygulamayı kaydet",
+    "registering": "Kaydediliyor…",
+    "activateTelemetry": "📡 Telemetriyi etkinleştir",
+    "activating": "Etkinleştiriliyor…",
+    "password": "🔑 Şifre değiştir",
+    "currentPw": "Mevcut şifre",
+    "newPw": "Yeni şifre (en az 12 karakter)",
+    "confirmPw": "Yeni şifreyi onayla",
+    "changePw": "Şifre değiştir",
+    "auditLog": "📝 Son aktiviteler",
+    "noAudit": "Giriş yok",
+    "theme": "🎨 Renk teması",
+    "themeDesc": "Düğmeler ve navigasyon için vurgu rengi. Yerel olarak kaydedilir.",
+    "nav": "🧭 Navigasyonu özelleştir",
+    "navReset": "Sıfırla",
+    "navHint": "Sırayı ↑↓ ile değiştir · Göster/gizle için göz simgesi",
+    "navHide": "Gizle",
+    "navShow": "Göster",
+    "languageTitle": "Dil",
+    "languageHint": "Görüntüleme diliniz. Profilinize senkronize edilir.",
+    "tenantDefaultLocaleTitle": "Kiracı varsayılan dili",
+    "tenantDefaultLocaleHint": "Yeni kullanıcılara ve oturum açılmamış oturumlara önerilir.",
+    "saved": "Kaydedildi"
+  },
+  "auth": {
+    "loginTitle": "Lütfen giriş yapın",
+    "tenant": "Kiracı",
+    "tenantPlaceholder": "— Lütfen seçin —",
+    "username": "Kullanıcı adı",
+    "password": "Şifre",
+    "loginBtn": "Giriş yap",
+    "passkeyBtn": "Passkey ile giriş yap",
+    "registerLink": "Yeni kiracı kaydet",
+    "forgotPw": "Şifremi unuttum",
+    "handbook": "Kılavuz ve yardım",
+    "loginError": "Giriş başarısız",
+    "loggingIn": "Giriş yapılıyor…",
+    "passkeyAuthenticating": "Passkey ile kimlik doğrulanıyor…",
+    "passkeyCancelled": "Passkey doğrulaması iptal edildi.",
+    "passkeyFailed": "Passkey ile giriş başarısız",
+    "tenantHint": "Kiracı adınız (kayıttan sonra atanır)"
+  },
+  "register": {
+    "title": "Yeni kiracı kaydet",
+    "checkingInvite": "Davet bağlantısı kontrol ediliyor…",
+    "noInvite": "Davet bağlantısı almak için bir yöneticiye başvurun",
+    "backToLogin": "← Girişe dön",
+    "tenantName": "Kiracı adı",
+    "tenantSlug": "Kiracı kısa adı (slug)",
+    "adminAccount": "Yönetici hesabı",
+    "passwordStrengths": [
+      "Zayıf",
+      "Orta",
+      "İyi",
+      "Güçlü"
+    ],
+    "created": "Kiracı oluşturuldu!",
+    "credentials": "Giriş bilgileriniz:",
+    "slugLabel": "Kiracı kısa adı:",
+    "slugWarning": "⚠ Kiracı kısa adınızı not edin",
+    "nextSteps": "Önerilen sonraki adımlar:",
+    "step1": "① Araç bağla",
+    "step2": "② MFA kur",
+    "step3": "③ Şarj noktalarını yapılandır",
+    "subtitle": "Her kiracının tamamen izole bir veritabanı vardır.",
+    "tenantNameLabel": "Kiracı adı",
+    "tenantNamePlaceholder": "ör. Muster Ailesi",
+    "tenantNameHint": "Uygulamada görüntülenir",
+    "tenantSlugPlaceholder": "ör. muster",
+    "tenantSlugHint": "Küçük harf, rakam ve -. Giriş için gerekli.",
+    "slugTaken": "Bu kısa ad zaten kullanılıyor.",
+    "usernameHint": "3–32 karakter, harf/rakam/-/_",
+    "passwordMinHint": "En az 12 karakter",
+    "passwordConfirm": "Şifreyi onayla",
+    "creating": "Oluşturuluyor…",
+    "submitBtn": "Kaydol →",
+    "toLogin": "Girişe git →",
+    "inviteRequired": "Kayıt için geçerli bir davet bağlantısı gereklidir.",
+    "inviteCheckFailed": "Davet bağlantısı doğrulanamadı.",
+    "errNameRequired": "Ad gerekli",
+    "errSlugRequired": "Kısa ad gerekli",
+    "errSlugFormat": "Kısa ad: yalnızca küçük harf, rakam ve -",
+    "errAllFields": "Tüm alanları doldurun",
+    "errPwMismatch": "Şifreler eşleşmiyor",
+    "errPwTooShort": "Şifre en az 12 karakter olmalıdır",
+    "errFailed": "Kayıt başarısız"
+  },
+  "mfa": {
+    "setupTitle": "🔐 İki faktörlü kimlik doğrulama kurulumu",
+    "step1Title": "Adım 1: Uygulamayı bağla",
+    "step1Hint": "Kimlik doğrulama uygulamanızı açın",
+    "step2Title": "Adım 2: Kodu onayla",
+    "step2Hint": "Uygulamanızdaki 6 haneli kodu girin",
+    "step3Title": "Adım 3: MFA etkinleştirildi!",
+    "activated": "✓ MFA etkinleştirildi!",
+    "backupWarning": "⚠️ Yedek kodlar – şimdi kaydedin!",
+    "backupOnce": "Bu kodlar yalnızca bir kez gösterilir",
+    "done": "Tamam",
+    "verify": "Onayla",
+    "checking": "Kontrol ediliyor...",
+    "verifyTitle": "🔐 İki faktörlü kimlik doğrulama",
+    "enterCode": "Kimlik doğrulama uygulamasındaki kodu girin",
+    "enterBackup": "Yedek kod girin",
+    "useApp": "Kimlik doğrulama uygulamasını kullan",
+    "useBackup": "Yedek kod kullan",
+    "backToLogin": "Girişe dön"
+  },
+  "setup": {
+    "title": "İlk kurulum – yönetici hesabı oluştur",
+    "welcome": "Hoş geldiniz",
+    "notConfigured": "Tesla Carview henüz kurulmadı",
+    "wizardDesc": "Bu sihirbaz ilk yönetici hesabınızı oluşturur",
+    "featureLocal": "✓ Tüm veriler sunucunuzda kalır",
+    "featureNoCloud": "✓ Bulut yok, veri paylaşımı yok",
+    "featureControl": "✓ Verileriniz üzerinde tam kontrol",
+    "startBtn": "Kurulumu başlat →",
+    "adminAccount": "Yönetici hesabı",
+    "adminDesc": "Bu hesap uygulamaya tam erişime sahiptir",
+    "tenantOptional": "▸ Kiracı adı (isteğe bağlı)",
+    "tenantHint": "Yalnızca birden fazla kiracı işletiyorsanız geçerli",
+    "done": "Kurulum tamamlandı!",
+    "doneDesc": "Yönetici hesabınız başarıyla oluşturuldu",
+    "nextSteps": "Önerilen sonraki adımlar:",
+    "ns1": "① Ayarlarda MFA etkinleştir",
+    "ns2": "② Araç bağla",
+    "ns3": "③ İlk girişten sonra şifreyi değiştir"
+  },
+  "users": {
+    "title": "Kullanıcı yönetimi",
+    "add": "+ Kullanıcı oluştur",
+    "loading": "Kullanıcılar yükleniyor…",
+    "locked": "kilitli",
+    "assignVehicle": "Araç ata",
+    "resetLink": "Sıfırlama bağlantısı",
+    "deactivate": "Devre dışı bırak",
+    "activate": "Etkinleştir",
+    "resetGenerated": "Sıfırlama bağlantısı oluşturuldu",
+    "linkValid": "Bağlantı 60 dakika geçerli",
+    "copy": "Kopyala",
+    "inviteNew": "🔗 Yeni kiracı davet et",
+    "createInvite": "+ Davet bağlantısı oluştur",
+    "inviteDesc": "Yalnızca bu bağlantıya sahip olan yeni kiracı kaydedebilir",
+    "inviteExpiry": "Bağlantı (7 gün geçerli, tek kullanım):",
+    "openInvites": "Açık davetler",
+    "open": "Açık",
+    "expires": "Bitiş:",
+    "revoke": "İptal et",
+    "used": "✓ kullanıldı",
+    "assignTo": "Araç ata:",
+    "newUser": "Yeni kullanıcı oluştur",
+    "role": "Rol",
+    "email": "E-posta (isteğe bağlı)",
+    "allRequired": "Tüm zorunlu alanları doldurun",
+    "pwTooShort": "Şifre en az 12 karakter olmalıdır",
+    "creating": "Oluşturuluyor…"
+  },
+  "data": {
+    "title": "Veri yönetimi",
+    "warning": "⚠ Dikkat – veri silme geri alınamaz",
+    "currentData": "Mevcut veriler",
+    "deleteAll": "Tüm kiracı verilerini sil",
+    "deleteAllDesc": "Tüm seyahatler, şarj oturumları, telemetri, bakım defteri ve denetim kayıtları",
+    "deleteVehicle": "Araç verilerini sil",
+    "deleteVehicleDesc": "Tek bir aracın tüm verilerini siler",
+    "deleteBtn": "Verileri sil",
+    "confirmType": "Onaylamak için yazın:",
+    "confirmText": "VERİLERİ SİL",
+    "deleteSuccess": "Tüm veriler silindi. Yedek oluşturuldu"
+  },
+  "system": {
+    "title": "📊 Sistem & Sürüm",
+    "appTitle": "⚡ Tesla Carview",
+    "version": "Sürüm",
+    "gitHash": "Git hash",
+    "branch": "Dal",
+    "buildDate": "Derleme tarihi",
+    "nodeVersion": "Node.js",
+    "uptime": "Sunucu çalışma süresi",
+    "updates": "🔄 Yazılım güncellemesi",
+    "checkNow": "Şimdi kontrol et",
+    "checking": "Kontrol ediliyor…",
+    "updateAvailable": "Güncelleme mevcut!",
+    "newCommit": "Yeni commit:",
+    "runOnServer": "Sunucuda çalıştır:",
+    "noUpdate": "Güncel – en son sürümü çalıştırıyorsunuz",
+    "dataStays": "✅ Tüm veriler korunur",
+    "autoUpdate": "⏰ Otomatik güncellemeleri ayarla",
+    "cpu": "🖥 CPU",
+    "load": "Yük",
+    "cores": "Çekirdek",
+    "model": "Model",
+    "ram": "💾 Bellek",
+    "used": "Kullanılan",
+    "free": "Boş",
+    "total": "Toplam",
+    "nodeProcess": "⚙️ Node.js süreci",
+    "pid": "PID",
+    "heapUsed": "Heap kullanılan",
+    "heapTotal": "Heap toplam",
+    "rss": "RSS",
+    "processUptime": "Süreç çalışma süresi",
+    "database": "🗄 Veritabanı",
+    "dbSize": "Dosya boyutu",
+    "batterySnapshots": "Batarya anlık görüntüleri",
+    "logbookEntries": "Bakım defteri girişleri",
+    "auditEntries": "Denetim girişleri",
+    "server": "🖥 Sunucu",
+    "hostname": "Ana bilgisayar adı",
+    "platform": "Platform",
+    "arch": "Mimari",
+    "osUptime": "İşletim sistemi çalışma süresi",
+    "tenants": {
+      "heading": "🏢 Kiracılar",
+      "total": "toplam",
+      "empty": "Henüz kiracı oluşturulmadı.",
+      "you": "(siz)",
+      "status": {
+        "active": "Aktif",
+        "suspended": "Duraklatıldı"
+      },
+      "cols": {
+        "status": "Durum",
+        "name": "Ad",
+        "slug": "Slug",
+        "vehicles": "Araçlar",
+        "users": "Kullanıcılar",
+        "size": "DB boyutu",
+        "lastActivity": "Son etkinlik",
+        "actions": "İşlemler"
+      },
+      "actions": {
+        "rename": "Yeniden adlandır",
+        "save": "Kaydet",
+        "cancel": "İptal",
+        "suspend": "Duraklat",
+        "unsuspend": "Yeniden etkinleştir",
+        "delete": "Sil"
+      },
+      "detail": {
+        "loading": "Ayrıntılar yükleniyor…",
+        "vehicles": "Araçlar",
+        "users": "Kullanıcılar",
+        "counts": "Kayıtlar",
+        "dbPath": "DB yolu",
+        "createdAt": "Oluşturulma tarihi",
+        "noVehicles": "Araç yok",
+        "noUsers": "Kullanıcı yok",
+        "trips": "Seyahatler",
+        "charging": "Şarj oturumları",
+        "battery": "Akü anlık görüntüleri",
+        "telemetry": "Telemetri noktaları",
+        "logbook": "Bakım defteri",
+        "audit": "Denetim kayıtları",
+        "role": "Rol",
+        "lastLogin": "Son giriş",
+        "neverLoggedIn": "Hiç giriş yapılmadı"
+      },
+      "delete": {
+        "title": "Kiracıyı kalıcı olarak silmek istiyor musunuz?",
+        "warning": "Bu kiracının tüm verileri silinecek — araçlar, seyahatler, şarj oturumları, kullanıcılar.",
+        "backupNote": "Silmeden önce otomatik olarak veritabanı dosyasının yedek kopyası oluşturulur.",
+        "typeSlug": "Onaylamak için kiracı slug'ını yazın:",
+        "confirm": "Kalıcı olarak sil",
+        "cancel": "İptal"
+      },
+      "errors": {
+        "suspendFailed": "Duraklatma başarısız",
+        "unsuspendFailed": "Yeniden etkinleştirme başarısız",
+        "renameFailed": "Yeniden adlandırma başarısız",
+        "deleteFailed": "Silme başarısız",
+        "loadDetailFailed": "Ayrıntılar yüklenemedi"
+      }
+    }
+  },
+  "drivers": {
+    "noDriver": "– Sürücü yok"
+  },
+  "handbook": {
+    "title": "Tesla Carview Kılavuzu",
+    "version": "Sürüm 2.0 · Kendi Sunucusunda · Çok Kiracılı",
+    "toc": "İçindekiler",
+    "sections": [
+      {
+        "id": "overview",
+        "icon": "🌟",
+        "title": "Genel bakış"
+      },
+      {
+        "id": "requirements",
+        "icon": "📋",
+        "title": "Gereksinimler"
+      },
+      {
+        "id": "installation",
+        "icon": "🚀",
+        "title": "Kurulum"
+      },
+      {
+        "id": "first-setup",
+        "icon": "⚙️",
+        "title": "Tarayıcıda ilk kurulum"
+      },
+      {
+        "id": "virtual-key",
+        "icon": "🔑",
+        "title": "Sanal anahtar kurulumu"
+      },
+      {
+        "id": "charging-locations",
+        "icon": "⚡",
+        "title": "Şarj noktaları ve maliyetler"
+      },
+      {
+        "id": "security",
+        "icon": "🔐",
+        "title": "Güvenlik"
+      },
+      {
+        "id": "multitenancy",
+        "icon": "🏢",
+        "title": "Çok kiracılı yapı"
+      },
+      {
+        "id": "backup",
+        "icon": "💾",
+        "title": "Veri yedekleme"
+      },
+      {
+        "id": "tesla-api",
+        "icon": "⚡",
+        "title": "Tesla Geliştirici API kurulumu"
+      },
+      {
+        "id": "monta",
+        "icon": "🔌",
+        "title": "Monta entegrasyonu (faturalama)"
+      },
+      {
+        "id": "troubleshooting",
+        "icon": "🔧",
+        "title": "Sorun giderme"
+      }
+    ],
+    "overview": {
+      "title": "🌟 Genel bakış",
+      "body": "Tesla Carview, elektrikli araçlar için kendi sunucunuzda barındırılan bir veri kayıt uygulamasıdır. Tüm veriler yalnızca kendi sunucunuzda kalır – bulut yok, veri paylaşımı yok. Uygulama tamamen duyarlıdır ve iPhone/iPad (Safari), Android akıllı telefonlar ve masaüstü tarayıcılarda çalışır.",
+      "features": [
+        {
+          "icon": "🚗",
+          "title": "Seyahat defteri",
+          "desc": "GPS izleri, tüketim, seyahat türü sınıflandırması"
+        },
+        {
+          "icon": "⚡",
+          "title": "Şarj",
+          "desc": "Maliyetli şarj oturumları, GPS konum tespiti"
+        },
+        {
+          "icon": "🔋",
+          "title": "Batarya",
+          "desc": "Bozulma takibi, menzil geçmişi"
+        },
+        {
+          "icon": "📊",
+          "title": "Gösterge paneli",
+          "desc": "İstatistikler, aylık özet, son aktiviteler"
+        },
+        {
+          "icon": "🎮",
+          "title": "Kontrol",
+          "desc": "Klima, kapılar, ışıklar – doğrudan uygulamadan"
+        },
+        {
+          "icon": "📝",
+          "title": "Bakım defteri",
+          "desc": "Bakım, onarım, tarihli maliyetler"
+        },
+        {
+          "icon": "📤",
+          "title": "Dışa aktar",
+          "desc": "Tüm veriler için CSV/JSON, ZIP olarak tam yedek"
+        },
+        {
+          "icon": "🔔",
+          "title": "Push bildirimleri",
+          "desc": "Şarj tamamlandığında tarayıcı bildirimi"
+        },
+        {
+          "icon": "📱",
+          "title": "Mobil optimizasyonu",
+          "desc": "iPhone/iPad (Safari), Android ve masaüstünde tam kullanım"
+        }
+      ]
+    },
+    "requirements": {
+      "title": "📋 Gereksinimler",
+      "serverTitle": "Sunucu",
+      "serverItems": [
+        "Linux sunucu (x86_64, ARM64 veya ARMv7) en az 1 GB RAM",
+        "Docker + Docker Compose (kurulum betiği tarafından yüklenir)",
+        "Genel erişilebilir alan adı + TLS sertifikası (API için gerekli)",
+        "Port 443 (HTTPS) dışarıdan erişilebilir olmalı"
+      ],
+      "teslaTitle": "Tesla Geliştirici Hesabı",
+      "teslaItems": [
+        "developer.tesla.com adresinde kayıt olun",
+        "Uygulama oluştur → Client ID ve Client Secret'ı not edin",
+        "Geri dönüş URL'si: https://<alan-adınız>/api/auth/callback",
+        "Araç komutları için: Fleet API Erişimi başvurun (ücretsiz, 1–3 iş günü)"
+      ]
+    },
+    "installation": {
+      "title": "🚀 Kurulum",
+      "desc": "Kurulum betiği her şeyi otomatik yükler: Docker, nginx, TLS, tesla-http-proxy.",
+      "asRoot": "# Hedef sunucuda root olarak:",
+      "scriptAsks": "# Betik etkileşimli olarak sorar:",
+      "promptDomain": "→ Alan adı (örn. carview.sunucum.com)",
+      "promptClientId": "→ Tesla Client ID ve Client Secret",
+      "promptRedirect": "→ Tesla Yönlendirme URI'si",
+      "promptJwt": "→ JWT Secret (otomatik oluşturulur)",
+      "altTitle": "Alternatif: Manuel yapılandırma",
+      "altDesc": ".env.example dosyasını .env olarak kopyalayın ve tüm değerleri ayarlayın. Ardından: docker compose -f docker-compose.prod.yml up -d"
+    },
+    "firstSetup": {
+      "title": "⚙️ Tarayıcıda ilk kurulum",
+      "steps": [
+        {
+          "title": "Tarayıcıyı aç",
+          "desc": "https://<alan-adınız>/setup adresini açın — otomatik yönlendirileceksiniz."
+        },
+        {
+          "title": "Kiracı oluştur",
+          "desc": "Bir kiracı adı (örn. \"Yılmaz Ailesi\") ve kısa ad (örn. \"yilmaz\") seçin. Kısa ad girişte gereklidir – not edin."
+        },
+        {
+          "title": "Yönetici hesabı oluştur",
+          "desc": "Kullanıcı adı ve şifre belirleyin. Şifre en az 12 karakter olmalıdır. Öneri: 4 kelimeli bir parola cümlesi."
+        },
+        {
+          "title": "Aracı bağla",
+          "desc": "Giriş sonrası: Ayarlar → Hesabı bağla. Kimlik doğrulama için yönlendirileceksiniz."
+        },
+        {
+          "title": "Araçları içe aktar",
+          "desc": "Ayarlar → Araç bağlantısı → Araçları senkronize et'e gidin. Bağlı hesabın tüm araçları otomatik içe aktarılır."
+        }
+      ]
+    },
+    "virtualKey": {
+      "title": "🔑 Sanal anahtar kurulumu",
+      "desc": "Araç komutları (kilit açma, klima vb.) için araçta sanal anahtar kaydedilmelidir.",
+      "steps": [
+        "tesla-http-proxy'nin çalıştığından emin olun: systemctl status tesla-http-proxy",
+        "iPhone Safari'de açın: https://tesla.com/_ak/<alan-adınız>",
+        "Tesla uygulaması 'Uygulamaya izin verilsin mi?' sorar → onaylayın",
+        "Araçın Bluetooth menzilinde kalın — anahtar 30 saniye içinde kabul edilir",
+        "Ayarlar → Araç bağlantısı → Sanal anahtar durumu altında doğrulayın"
+      ]
+    },
+    "chargingLocations": {
+      "title": "⚡ Şarj noktaları ve maliyetler",
+      "desc": "Şarj noktaları GPS ile otomatik tespit edilir ve kWh başına fiyata bağlanır.",
+      "autoTitle": "Otomatik GPS tespiti",
+      "autoDesc": "GPS koordinatları ve yarıçapı (varsayılan 200m) olan bir şarj noktası kaydedildiğinde, şarj başlangıcında doğru konum otomatik tespit edilir ve kayıtlı fiyat/kWh uygulanır.",
+      "createTitle": "Şarj noktası oluştur",
+      "createDesc": "Şarj → Konumlar altında: ad, tür (ev/ofis/genel), fiyat/kWh, GPS koordinatları ve tespit yarıçapı girin.",
+      "adjustTitle": "Maliyetleri manuel ayarla",
+      "adjustDesc": "Şarj listesinde: bir oturuma tıklayın → maliyeti düzenleyin. Maliyetler 0 olarak da ayarlanabilir (örn. ücretsiz şarj).",
+      "freeTitle": "✕ Şarjı ücretsiz olarak işaretle",
+      "freeDesc": "Her oturumda küçük bir '✕ ücretsiz işaretle' düğmesi vardır. Bu şekilde işaretlenen oturumlar gri görünür ve 'ücretsiz' rozeti ile faturalamanın dışında tutulur.",
+      "freeHint": "Tipik kullanım: işveren tarafından sağlanan işyeri şarjı. '↩ ücretli işaretle' düğmesiyle işaret her zaman geri alınabilir."
+    },
+    "security": {
+      "title": "🔐 Güvenlik",
+      "features": [
+        {
+          "icon": "🔑",
+          "title": "Passkey / WebAuthn",
+          "desc": "Parmak izi, Face ID veya donanım anahtarıyla şifresiz giriş"
+        },
+        {
+          "icon": "📱",
+          "title": "TOTP MFA",
+          "desc": "Kimlik doğrulama uygulamasıyla iki faktörlü kimlik doğrulama"
+        },
+        {
+          "icon": "🛡️",
+          "title": "Hesap kilitleme",
+          "desc": "5 başarısız denemeden sonra hesap 15 dakika kilitlenir"
+        },
+        {
+          "icon": "🍪",
+          "title": "Yenileme tokeni",
+          "desc": "httpOnly çerez, 7 gün geçerli, otomatik döndürme"
+        },
+        {
+          "icon": "📋",
+          "title": "Denetim kaydı",
+          "desc": "Tüm girişler, değişiklikler ve güvenlik olayları kaydedilir"
+        },
+        {
+          "icon": "🔒",
+          "title": "HTTPS + HSTS",
+          "desc": "TLS 1.2/1.3, HSTS, OCSP zımbalaması, güvenli başlıklar"
+        }
+      ],
+      "recommendTitle": "Önerilen güvenlik ayarları",
+      "recommend": [
+        "İlk girişten sonra MFA (TOTP) etkinleştirin",
+        "Şifresiz giriş için passkey kurun",
+        "Düzenli veri yedeklemeleri oluşturun (Dışa aktar)",
+        "Güçlü şifre: en az 16 karakter veya 4 kelimeli parola"
+      ]
+    },
+    "multitenancy": {
+      "title": "🏢 Çok kiracılı yapı",
+      "desc": "Tesla Carview, tek bir örnekte birden fazla tamamen izole edilmiş kiracıyı destekler. Her kiracının kendi veritabanı vardır – hiçbir kiracı diğerinin verilerini göremez.",
+      "inviteTitle": "Kiracı oluşturma (davet bağlantısı)",
+      "inviteDesc": "Yeni kiracılar yalnızca davet bağlantısı üzerinden kaydolabilir. Yönetici, bağlantıyı Admin → Kullanıcılar → Davet bağlantısı oluştur altında üretir. Bağlantı 7 gün geçerlidir ve yalnızca bir kez kullanılabilir.",
+      "multiVehicleTitle": "Kiracı başına birden fazla araç",
+      "multiVehicleDesc": "Bağlı hesabın tüm araçları senkronizasyon sırasında otomatik içe aktarılır. Araçlar arasında sağ üstteki navigasyon çubuğundan geçiş yapılır.",
+      "loginTitle": "Kiracı kısa adıyla giriş",
+      "loginDesc": "Birden fazla kiracı varsa girişte kiracı alanı görünür. Tek kiracı varsa otomatik algılanır.",
+      "userMgmtTitle": "Kullanıcı yönetimi",
+      "userMgmtDesc": "Yöneticiler kendi kiracıları içinde ek kullanıcılar oluşturabilir ve araç atayabilir. Admin → Kullanıcılar altında."
+    },
+    "backup": {
+      "title": "💾 Veri yedekleme",
+      "manualTitle": "Manuel dışa aktarma",
+      "manualDesc": "Dışa aktar altında: seyahatler ve şarj oturumları için CSV veya JSON, ve ZIP olarak tam yedek.",
+      "autoTitle": "Otomatik yedekleme (sunucu)",
+      "autoDesc": "SQLite veritabanları Tesla_data Docker birimindedir. Sunucuda otomatik yedekleme için:",
+      "cron": "# Günlük sabah 3'te yedekleme (crontab -e):\n0 3 * * * cp /var/lib/docker/volumes/tesla_data/_data/*.db /backup/",
+      "warningTitle": "Silmeden önce önemli",
+      "warningDesc": "Verileri silmeden önce her zaman dışa aktarma yapın. Silinen veriler kurtarılamaz."
+    },
+    "teslaApi": {
+      "title": "⚡ Tesla Geliştirici API kurulumu",
+      "desc": "Tesla Carview, resmi Tesla Fleet API üzerinden iletişim kurar. Ücretsiz bir Tesla Geliştirici hesabına ve kayıtlı bir uygulamaya ihtiyacınız var.",
+      "step1Title": "Adım 1 – Geliştirici hesabı oluştur",
+      "step1Items": [
+        "developer.tesla.com adresini ziyaret edin ve Tesla hesabınızla giriş yapın.",
+        "Geliştirici Kullanım Koşullarını kabul edin.",
+        "Uygulama Oluştur'a tıklayın."
+      ],
+      "step2Title": "Adım 2 – Uygulamayı yapılandır",
+      "step2Items": [
+        "Uygulama Adı: istediğiniz ad, örn. Tesla Carview",
+        "Açıklama: kısa açıklama (zorunlu)",
+        "İzin Verilen Kaynak: genel uygulama URL'niz",
+        "Yönlendirme URI'si: https://carview.example.com/api/auth/callback",
+        "Kapsamlar (zorunlu): vehicle_device_data, vehicle_cmds, vehicle_charging_cmds, vehicle_location, openid, offline_access",
+        "⚠ vehicle_location, GPS takibi (Filo Telemetrisi) için zorunludur"
+      ],
+      "step3Title": "Adım 3 – Kimlik bilgilerini not et",
+      "step3Desc": "Oluşturma sonrasında alırsınız:",
+      "step3Items": [
+        "Client ID – UUID benzeri bir dize",
+        "Client Secret – yalnızca bir kez görünür, kopyalayın ve güvenli saklayın"
+      ],
+      "step3Hint": "Bu değerleri .env dosyasına girin veya etkileşimli kurulum sihirbazında sağlayın.",
+      "step4Title": "Adım 4 – Fleet API Erişimi başvurusu (komutlar için)",
+      "step4Desc": "Araç komutlarının (klima, kapılar, şarj) çalışması için uygulamanızın Tesla ile ortak olarak kaydedilmesi gerekir.",
+      "step4Hint": "Kurulum betiği FRONTEND_URL ayarlanmışsa bu adımı otomatik çalıştırır. Aksi takdirde Postman veya curl ile manuel olarak. Aktivasyon 1–3 iş günü sürer.",
+      "step5Title": "Adım 5 – Tesla Carview'e bağlan",
+      "step5Items": [
+        "Giriş sonrası: Ayarlar → Araç bağlantısı → Yeniden bağla",
+        "Giriş yapmak ve erişim vermek için yönlendirileceksiniz.",
+        "Yönlendirme sonrası: Ayarlar → 🔄 Araçları senkronize et",
+        "Tüm araçlar uygulamada görünür."
+      ],
+      "step6Title": "Adım 6 – Filo Telemetrisini etkinleştir (GPS takibi)",
+      "step6Desc": "Daha yeni araçlardaki (örn. 2024'ten itibaren Model Y, XP7 VIN) GPS verileri yalnızca Filo Telemetrisi üzerinden gelir — REST API'den değil.",
+      "step6Steps": [
+        "Uygulamayı Tesla ile kaydet – Ayarlar → Filo Telemetrisi → '🔑 Uygulamayı kaydet'. Yalnızca bir kez.",
+        "Filo Telemetri Erişimi başvurusu – Sonraki adım HTTP 404 döndürürse Tesla endpoint'i henüz etkinleştirmemiştir. Tesla Geliştirici Desteği ile iletişime geçin.",
+        "Telemetriyi etkinleştir – Ayarlar → Filo Telemetrisi → '📡 Telemetriyi etkinleştir'."
+      ],
+      "supportTitle": "Tesla Desteği'nden Filo Telemetri Erişimi talep etme",
+      "supportDesc": "Adım 2 404 döndürürse Tesla Geliştirici Destek formuna (developer.tesla.com/dashboard → Destek Talebi) aşağıdaki isteği gönderin:",
+      "supportNote": "⚠ Client ID ve VIN'i kendi değerlerinizle değiştirin. Tesla genellikle birkaç gün içinde yanıt verir."
+    },
+    "monta": {
+      "title": "🔌 Monta entegrasyonu (ev şarjı faturalaması)",
+      "desc": "Şirket aracı sürücüleri için: Tesla Carview, Monta duvar kutunuzdan şarj verilerini doğrudan çekebilir ve işvereniniz için aylık maliyet özeti oluşturabilir.",
+      "warning": "⚠️ Monta entegrasyonu yalnızca Şirket aracı kategorisindeki araçlar için kullanılabilir (Ayarlar → Araç profili → Kategori).",
+      "step1Title": "Adım 1 – Monta API anahtarı oluştur",
+      "step1Items": [
+        "Monta'ya giriş yapın (uygulama veya web: portal.monta.com).",
+        "Ayarlar → API'ye gidin.",
+        "API Anahtarı Oluştur'a tıklayın ve anahtarı kopyalayın (monta_ ile başlar)."
+      ],
+      "step1Hint": "Anahtar yalnızca bir kez görünür – hemen Tesla Carview'e girin.",
+      "step2Title": "Adım 2 – Şarj noktası ID'sini bul",
+      "step2Items": [
+        "Monta portalında: Şarj noktaları → Cihazlarım.",
+        "Şarj Noktası ID'si detay görünümündedir (format: cp_12345).",
+        "Alternatif: GET /api/v1/charge-points API çağrısı tüm şarj noktalarını ID'leriyle döndürür."
+      ],
+      "step3Title": "Adım 3 – Tesla Carview'e gir",
+      "step3Items": [
+        "Ayarlar → Araç profili'ne gidin.",
+        "💼 Şirket aracı kategorisini seçin.",
+        "Ev şarjı tarifesi (€/kWh) girin – örn. 0,34.",
+        "Monta şarj noktası ID'si ve Monta API anahtarı ekleyin.",
+        "Kaydet'e tıklayın."
+      ],
+      "useTitle": "Faturalamayı kullan",
+      "useItems": [
+        "Navigasyonda Faturalama'ya gidin.",
+        "İstenen ayı seçin – tüm ev şarjı oturumları listelenir.",
+        "Ücretsiz oturumlar şarj geçmişinde ✕ ücretsiz işaretle ile işaretlenebilir – faturalamanın dışında tutulurlar.",
+        "PDF dışa aktarma ile imzaya hazır fatura sayfası alırsınız."
+      ]
+    },
+    "troubleshooting": {
+      "title": "🔧 Sorun giderme",
+      "items": [
+        {
+          "q": "Araç GPS verisi döndürmüyor",
+          "a": "Daha yeni modeller (XP7 VIN, örn. Model Y Juniper) REST API üzerinden drive_state sağlamıyor. GPS takibi Filo Telemetrisi kullanır. tesla-http-proxy'nin çalıştığından ve Sanal Anahtarın kayıtlı olduğundan emin olun."
+        },
+        {
+          "q": "Güncellemeden sonra giriş çalışmıyor",
+          "a": "v2.0'a (çok kiracılı) güncellemeden sonra girişte kiracı kısa adı gereklidir. Taşınan veritabanı için kısa ad 'default'tur. Giriş alanına girin."
+        },
+        {
+          "q": "Araç bağlantısı başarısız (401)",
+          "a": "Tesla OAuth tokeni süresi doldu. Ayarlar → Araç bağlantısı'na gidin ve yeniden bağlayın. .env dosyasında TESLA_CLIENT_ID ve TESLA_CLIENT_SECRET'ın doğru olduğundan emin olun."
+        },
+        {
+          "q": "Araç komutları başarısız",
+          "a": "Kontrol edin: 1) tesla-http-proxy çalışıyor (systemctl status tesla-http-proxy) 2) Sanal Anahtar araçta kayıtlı 3) Araç çevrimiçi (uyumüyor)."
+        },
+        {
+          "q": "Telemetri verisi yok / GPS eksik",
+          "a": "Filo Telemetrisi iki adım gerektirir: (1) uygulamayı Tesla'ya kaydet, (2) telemetriyi etkinleştir. Adım 2 HTTP 404 döndürürse, fleet_telemetry_config erişimi Tesla Geliştirici Desteği'nden talep edilmelidir."
+        },
+        {
+          "q": "Backend başlamıyor",
+          "a": "Kayıtları kontrol edin: docker logs tesla-carview-backend. Yaygın nedenler: eksik .env değişkenleri (JWT_SECRET, TESLA_CLIENT_ID), veritabanı taşıma hatası."
+        }
+      ]
+    },
+    "donate": {
+      "title": "❤️ Uygulama işinize yarıyorsa",
+      "desc": "Tesla Carview, kendi kendine barındırılan özel kullanım için ücretsiz ve reklamsızdır (lisans: PolyForm Noncommercial 1.0.0 — ticari yeniden satış veya üçüncü taraflar için SaaS barındırma izni yoktur). Bir şeyler katkıda bulunmak istiyorsanız, bu kuruluşlar desteğinizi takdir eder.",
+      "footer": "Bağışınızın %100'ü doğrudan kuruluşa gider. Ne tutarı ne de verilerinizi görürüz.",
+      "btn": "Bağış yap →",
+      "orgs": [
+        {
+          "name": "Aktion Deutschland Hilft",
+          "desc": "Dünya genelinde hızlı ve etkili afet yardımı için yardım kuruluşları ittifakı.",
+          "url": "https://www.aktion-deutschland-hilft.de/de/spenden/"
+        },
+        {
+          "name": "Lebenshilfe Rems-Murr",
+          "desc": "Rems-Murr bölgesinde engelli bireyler için destek, eşlik ve katılım.",
+          "url": "https://www.lebenshilfe-rems-murr.de/"
+        },
+        {
+          "name": "Radio 7 Drachenkinder",
+          "desc": "Bölgedeki ağır hasta çocuklara yardım – terapileri, gezileri ve dilekleri finanse eder.",
+          "url": "https://www.radio7.de/aktionen/drachenkinder"
+        }
+      ]
+    }
+  },
+  "teslaUsage": {
+    "title": "Tesla API kullanımı",
+    "subtitle": "İçinde bulunulan ay için tahmini Tesla Fleet API maliyetleri.",
+    "period": "Dönem",
+    "limit": "Aylık limit",
+    "freeCredit": "Ücretsiz kredi",
+    "hardStop": "Sıkı durdurma",
+    "hardStopOn": "Sıkı durdurma etkin – yeni çağrılar engellenir",
+    "currency": "Para birimi",
+    "rates": "Tarifeler (çağrı başına USD)",
+    "save": "Tarifeleri kaydet",
+    "reset": "Geçerli ayı sıfırla",
+    "cat": {
+      "vehicle_data": "Araç verisi",
+      "wake": "Uyandırma",
+      "command": "Komutlar",
+      "streaming": "Akış",
+      "other": "Diğer"
+    }
+  },
+  "footer": {
+    "contactPrompt": "Ticari ilgi veya BT-tasarım ve mimari danışmanlık?",
+    "about": "Profil",
+    "imprint": "Künye",
+    "privacy": "Gizlilik",
+    "terms": "Koşullar",
+    "support": "Destek"
+  },
+  "legal": {
+    "imprint": "Künye",
+    "privacy": "Gizlilik Politikası",
+    "terms": "Kullanım Koşulları",
+    "versionInfo": "Sürüm {version} · son değişiklik {date}",
+    "placeholdersWarningAdmin": "Bu sayfa hâlâ doldurulmamış yer tutucular içeriyor. Lütfen yayına almadan önce yönetici düzenleyicisinden doldur:",
+    "acceptCheckboxPrivacy": "{link} okudum ve kabul ediyorum.",
+    "acceptCheckboxTerms": "{link} okudum ve kabul ediyorum.",
+    "acceptModalTitle": "Güncellenmiş yasal koşullar",
+    "acceptModalBody": "Gizlilik Politikası ve/veya Kullanım Koşulları güncellendi. Devam etmeden önce yeni sürümleri lütfen onayla.",
+    "acceptModalSubmit": "Kabul et ve devam et",
+    "adminTitle": "Yasal içerikleri yönet",
+    "adminIntro": "Künye, Gizlilik Politikası ve Kullanım Koşullarını dil başına yönet. Kaydederken değişiklik temelli ise „Sürümü artır“ kutusunu işaretle — tüm kullanıcılar bir sonraki girişte yeniden kabul etmek zorunda kalır.",
+    "adminEditing": "{scope} ({locale}) düzenleniyor",
+    "adminBumpVersion": "Sürümü artır (yeniden kabul gerekli)",
+    "adminSave": "Kaydet",
+    "adminSaved": "Kaydedildi. Geçerli sürüm: {version}",
+    "adminCurrentVersion": "Geçerli sürüm: {version}",
+    "adminLastUpdated": "Son değişiklik: {date}",
+    "adminSyncMode": "Yalnızca varsayılan dili (Almanca) düzenle",
+    "adminSyncModeHint": "Önerilen. Kaydedildiğinde Almanca metin diğer tüm dillere 1:1 kopyalanır. Public görünümde bu sayfanın şu anda yalnızca Almanca olarak güncellendiğine dair bir bildirim gösterilir.",
+    "syncedFromDefaultBanner": "Bu sayfa şu anda yalnızca Almanca olarak güncelleniyor — gördüğünüz içerik Almanca orijinal metindir."
+  },
+  "invite": {
+    "title": "Davetiyeyi kabul et",
+    "subtitle": "{tenant} altında hesabınızı oluşturun. Rol: {role}",
+    "invalidTitle": "Geçersiz davetiye",
+    "errUnknown": "Bu davet bağlantısı bilinmiyor — yönetici onu iptal etmiş olabilir.",
+    "errAlreadyUsed": "Bu davet bağlantısı zaten kullanıldı. Yöneticiden yeni bir bağlantı isteyin.",
+    "errExpired": "Bu davet bağlantısının süresi doldu. Yöneticiden yeni bir bağlantı isteyin.",
+    "errGeneric": "Bağlantı doğrulanamadı.",
+    "toLogin": "Girişe git →",
+    "usernamePlaceholder": "örn. anna",
+    "usernameHint": "3–32 karakter, sadece harf, rakam, - ve _",
+    "passwordPlaceholder": "En az 12 karakter",
+    "passwordHint": "Tavsiye: 4+ kelimeden oluşan bir şifre cümlesi",
+    "submitBtn": "Hesap oluştur →",
+    "errFormIncomplete": "Lütfen tüm alanları doldurun ve gizlilik politikası ile koşulları kabul edin.",
+    "errFailed": "Hesap oluşturulamadı.",
+    "doneText": "Merhaba {username} — {tenant} altındaki hesabınız oluşturuldu. Şimdi giriş yapabilirsiniz.",
+    "roleAdmin": "Yönetici",
+    "roleUser": "Kullanıcı"
+  }
+}

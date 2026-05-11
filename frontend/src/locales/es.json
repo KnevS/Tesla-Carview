@@ -1,0 +1,1138 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "loading": "Cargando...",
+    "yes": "Sí",
+    "no": "No",
+    "back": "Volver",
+    "close": "Cerrar",
+    "confirm": "Confirmar",
+    "create": "Crear",
+    "add": "Añadir",
+    "remove": "Quitar",
+    "edit": "Editar",
+    "next": "Siguiente →",
+    "prev": "← Anterior",
+    "error": "Error",
+    "success": "Éxito",
+    "logout": "Cerrar sesión",
+    "noData": "No hay datos disponibles",
+    "noVehicle": "Ningún vehículo conectado",
+    "all": "Todos",
+    "from": "Desde",
+    "to": "Hasta",
+    "private": "Privado",
+    "business": "Laboral",
+    "commute": "Desplazamiento al trabajo",
+    "km": "km",
+    "kwh": "kWh",
+    "donate": "Donar"
+  },
+  "lang": {
+    "title": "Idioma / Language",
+    "label": "Idioma de visualización",
+    "de": "Deutsch",
+    "en": "English",
+    "fr": "Français",
+    "es": "Español",
+    "tr": "Türkçe",
+    "el": "Ελληνικά",
+    "switcher": "Cambiar idioma"
+  },
+  "nav": {
+    "dashboard": {
+      "label": "Panel",
+      "tooltip": "Resumen con indicadores clave, último viaje y estadísticas mensuales"
+    },
+    "trips": {
+      "label": "Viajes",
+      "tooltip": "Lista de todos los viajes registrados con ruta GPS en un mapa"
+    },
+    "fahrtenbuch": {
+      "label": "Libro de viajes",
+      "tooltip": "Clasificar viajes y ver el desglose privado/laboral/desplazamiento"
+    },
+    "abrechnung": {
+      "label": "Facturación",
+      "tooltip": "Liquidación de costes de carga doméstica para vehículos de empresa"
+    },
+    "charging": {
+      "label": "Carga",
+      "tooltip": "Todas las sesiones de carga con curvas, costes y desglose por tipo"
+    },
+    "battery": {
+      "label": "Batería",
+      "tooltip": "Historial de autonomía y análisis de degradación a lo largo del tiempo"
+    },
+    "logbook": {
+      "label": "Cuaderno",
+      "tooltip": "Mantenimientos, reparaciones, neumáticos, inspecciones y notas del vehículo"
+    },
+    "telemetry": {
+      "label": "Técnica",
+      "tooltip": "Datos del vehículo en tiempo real: presión neumáticos, climatización, potencia, SOC"
+    },
+    "control": {
+      "label": "Control",
+      "tooltip": "Controlar el vehículo: climatización, puertas, carga, navegación"
+    },
+    "export": {
+      "label": "Exportar",
+      "tooltip": "Exportar datos como CSV/JSON, crear copia de seguridad completa, notificaciones push"
+    },
+    "system": {
+      "label": "Sistema",
+      "tooltip": "Información de versión, uso de CPU/RAM y estadísticas de base de datos"
+    },
+    "group_overview": "Resumen",
+    "group_analytics": "Análisis",
+    "group_admin": "Administración"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "loading": "Cargando datos...",
+    "connectHint": "Conecta tu vehículo para ver los datos de viaje",
+    "connectBtn": "Conectar →",
+    "totalKm": "Distancia total",
+    "trips": "Viajes",
+    "charged": "Cargado",
+    "chargingCost": "Coste de carga",
+    "lastTrip": "Último viaje",
+    "allTrips": "Ver todos los viajes →",
+    "monthlyKm": "Resumen mensual – Distancia (km)",
+    "distance": "Distancia",
+    "consumption": "Consumo",
+    "noTrips": "No hay viajes registrados."
+  },
+  "trips": {
+    "title": "Viajes",
+    "loading": "Cargando viajes...",
+    "loadMore": "Cargar más",
+    "allTypes": "Todos los tipos",
+    "allDrivers": "Todos los conductores",
+    "noDriver": "Sin conductor",
+    "filterPrivate": "Viajes privados",
+    "filterBusiness": "Viajes laborales",
+    "filterCommute": "Desplazamientos",
+    "start": "Inicio",
+    "dest": "Destino",
+    "distance": "Distancia",
+    "consumption": "Consumo",
+    "soc": "SoC",
+    "purpose": "Introducir motivo del viaje (ej. visita cliente, viaje de negocios)…",
+    "assignDriver": "Asignar conductor",
+    "noDriverLabel": "– Conductor"
+  },
+  "tripDetail": {
+    "back": "← Viajes",
+    "title": "Detalle del viaje",
+    "loading": "Cargando...",
+    "distance": "Distancia",
+    "duration": "Duración",
+    "avgSpeed": "Vel. media",
+    "consumption": "Consumo",
+    "gpsTrack": "Ruta GPS",
+    "noGps": "No hay datos GPS disponibles para este viaje.",
+    "route": "Ruta",
+    "speedChart": "Velocidad y Potencia",
+    "battery": "Batería",
+    "startSoc": "SoC inicio",
+    "endSoc": "SoC final",
+    "totalEnergy": "Energía total",
+    "driver": "Conductor",
+    "noDriverAssigned": "– sin conductor"
+  },
+  "logbook": {
+    "title": "Libro de viajes",
+    "allMonths": "Todos los meses",
+    "totalKm": "Total km",
+    "private": "Viajes privados",
+    "business": "Viajes laborales",
+    "commute": "Desplazamientos",
+    "kmSplit": "Desglose kilométrico"
+  },
+  "charging": {
+    "title": "Carga",
+    "sessions": "Sesiones",
+    "totalCharged": "Total cargado",
+    "totalCost": "Coste de carga",
+    "maxPower": "Potencia máx.",
+    "byType": "Por tipo de cargador",
+    "loading": "Cargando sesiones...",
+    "unknownLocation": "Ubicación desconocida",
+    "free": "gratuito",
+    "markFree": "✕ marcar gratuito",
+    "unmarkFree": "↩ marcar de pago",
+    "editRate": "✎ Tarifa",
+    "rateTooltip": "Ajustar individualmente la tarifa de esta sesión (anula la tarifa predeterminada)",
+    "rateSet": "Fijar"
+  },
+  "battery": {
+    "title": "Batería y Degradación",
+    "rangeHistory": "Historial de autonomía",
+    "degradationOverview": "Resumen de degradación",
+    "firstMeasurement": "Primera medición",
+    "lastMeasurement": "Última medición",
+    "degradation": "Degradación",
+    "noData": "Todavía no hay suficientes datos para el análisis de degradación"
+  },
+  "control": {
+    "title": "Control del vehículo",
+    "online": "En línea",
+    "sleeping": "Durmiendo",
+    "offline": "Sin conexión",
+    "wake": "☀️ Despertar",
+    "sleepHint": "El vehículo está durmiendo o sin conexión",
+    "climate": "🌡 Climatización",
+    "on": "Encendida",
+    "off": "Apagada",
+    "temp": "Temperatura",
+    "setTemp": "Ajustar temperatura",
+    "preCondition": "❄️ Precalentamiento / Max-Defrost",
+    "vehicle": "🚗 Vehículo",
+    "doors": "Puertas",
+    "unlock": "🔓 Desbloquear",
+    "lock": "🔒 Bloquear",
+    "sentryMode": "Modo Sentry",
+    "lights": "💡 Luces",
+    "horn": "📯 Claxon",
+    "charging": "⚡ Carga",
+    "chargeStart": "Iniciar",
+    "chargeStop": "Detener",
+    "chargeLimit": "Límite de carga",
+    "setChargeLimit": "Ajustar límite de carga",
+    "navigation": "🗺️ Navegación",
+    "navPlaceholder": "Introducir dirección o lugar…",
+    "sendNav": "Enviar destino",
+    "recentNav": "Usado recientemente"
+  },
+  "exportPage": {
+    "title": "Exportar datos",
+    "tripsLabel": "🗺️ Viajes",
+    "tripsDesc": "Todos los datos de viaje con distancia, consumo y SoC",
+    "chargingLabel": "🔋 Sesiones de carga",
+    "backupLabel": "💾 Copia de seguridad completa",
+    "backupDesc": "Todos los datos (viajes, carga, batería, cuaderno) como un archivo JSON",
+    "notifications": "🔔 Notificaciones",
+    "notificationsDesc": "Recibir una notificación del navegador cuando la carga haya terminado",
+    "enableNotifications": "Activar notificaciones",
+    "notificationsActive": "✓ Notificaciones activas",
+    "disableNotifications": "Desactivar",
+    "downloadFailed": "Error al descargar"
+  },
+  "maintenanceLog": {
+    "title": "Libro de servicio",
+    "add": "+ Entrada",
+    "addTooltip": "Crea una nueva entrada — p. ej. mantenimiento, reparación o nota",
+    "filterAll": "Todas",
+    "filterAllTooltip": "Mostrar todas las entradas independientemente de la categoría",
+    "loading": "Cargando entradas…",
+    "empty": "Aún no hay entradas. ¡Crea tu primera entrada del libro de servicio!",
+    "newEntry": "Nueva entrada",
+    "entryTitle": "Título *",
+    "entryTitleTooltip": "Etiqueta corta y descriptiva del evento (p. ej. «Neumáticos verano 2026»)",
+    "dateLabel": "Fecha y hora",
+    "dateTooltip": "¿Cuándo ocurrió? Por defecto «ahora»; se permiten entradas retroactivas y futuras.",
+    "nowBtn": "⟳ Ahora",
+    "nowTooltip": "Establecer al momento actual",
+    "category": "Categoría",
+    "categoryTooltip": "Tipo de entrada — facilita el filtrado posterior",
+    "description": "Descripción",
+    "descriptionTooltip": "Opcional: notas detalladas, trabajos realizados, taller, etc.",
+    "odometer": "Kilometraje",
+    "odometerTooltip": "Kilometraje actual del vehículo en el momento de la entrada",
+    "cost": "Coste (€)",
+    "costTooltip": "Opcional: coste de este mantenimiento/reparación — útil para el cálculo del coste total",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "noVehicle": "No hay vehículo seleccionado",
+    "confirmDelete": "¿Eliminar realmente esta entrada?",
+    "deleteTooltip": "Eliminar la entrada de forma permanente",
+    "creator": "Autor de esta entrada",
+    "creatorUnknown": "Autor desconocido — entrada anterior a la introducción del seguimiento de autores",
+    "unknown": "👤 desconocido",
+    "dateInlineTooltip": "Fecha y hora de la acción",
+    "mileageInlineTooltip": "Kilometraje en el momento de la entrada",
+    "costInlineTooltip": "Coste asociado a esta entrada",
+    "cat_note": "Nota",
+    "cat_note_tooltip": "Nota u observación general sobre el vehículo",
+    "cat_maintenance": "Mantenimiento",
+    "cat_maintenance_tooltip": "Mantenimiento programado (líquido de frenos, filtro de habitáculo, escobillas, etc.)",
+    "cat_repair": "Reparación",
+    "cat_repair_tooltip": "Reparaciones tras averías o daños",
+    "cat_tires": "Neumáticos",
+    "cat_tires_tooltip": "Cambio, compra, control de presión y reparación de neumáticos",
+    "cat_inspection": "Inspección",
+    "cat_inspection_tooltip": "Inspección técnica obligatoria (ITV) o revisión",
+    "cat_accident": "Accidente",
+    "cat_accident_tooltip": "Daños por accidente y reparaciones asociadas",
+    "cat_other": "Otros",
+    "cat_other_tooltip": "Otros eventos que no encajan en ninguna categoría"
+  },
+  "billing": {
+    "title": "Facturación carga doméstica",
+    "companyCar": "Vehículo de empresa",
+    "montaSync": "Sync Monta",
+    "csvExport": "Exportar CSV",
+    "notCompany": "Este vehículo está configurado como vehículo privado",
+    "toSettings": "Ir a ajustes",
+    "chargedKwh": "kWh cargados",
+    "avgRate": "Tarifa media",
+    "reimbursement": "Reembolso",
+    "inclVat": "IVA incluido",
+    "monthlyOverview": "Resumen mensual",
+    "month": "Mes",
+    "sessions": "Sesiones",
+    "kwhTesla": "kWh (vehículo)",
+    "kwhMid": "kWh (contador)",
+    "rate": "Tarifa €/kWh",
+    "amount": "Importe €",
+    "settled": "Liquidado",
+    "yes": "Sí",
+    "pending": "Pendiente",
+    "total": "Total",
+    "chargingSessions": "Sesiones de carga",
+    "date": "Fecha",
+    "location": "Ubicación",
+    "status": "Estado",
+    "template": "Plantilla de facturación",
+    "templateTitle": "Solicitud de reembolso carga doméstica"
+  },
+  "telemetry": {
+    "title": "Técnica del vehículo",
+    "live": "En directo",
+    "offline": "Sin conexión",
+    "refresh": "Actualizar",
+    "sleepHint": "El vehículo está durmiendo o sin conexión",
+    "autoLoad": "Los datos se cargan automáticamente",
+    "soc": "SOC",
+    "speed": "Velocidad",
+    "power": "Potencia",
+    "odometer": "Kilometraje",
+    "livePos": "📍 Posición en vivo",
+    "regen": "← Recuperación",
+    "drive": "Tracción →",
+    "tpms": "🏎 Presión neumáticos (TPMS)",
+    "fl": "DA",
+    "fr": "DD",
+    "rl": "TA",
+    "rr": "TD",
+    "climate": "🌡 Climatización",
+    "insideTemp": "Temperatura interior",
+    "outsideTemp": "Temperatura exterior",
+    "targetTemp": "Temperatura objetivo",
+    "climateOn": "Climatización",
+    "frontDefroster": "Desempañador frontal",
+    "rearDefroster": "Desempañador trasero",
+    "charging": "⚡ Carga",
+    "chargeStatus": "Estado",
+    "chargePower": "Potencia de carga",
+    "chargeRate": "Velocidad de carga",
+    "chargeLimit": "Límite de carga",
+    "timeToFull": "Tiempo hasta lleno",
+    "vehicle": "🚗 Vehículo",
+    "state": "Estado",
+    "locked": "Bloqueado",
+    "sentry": "Sentry",
+    "software": "Software",
+    "heading": "Rumbo"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "vehicleProfile": "🚗 Perfil del vehículo",
+    "noVehicle": "Ningún vehículo conectado.",
+    "category": "Categoría del vehículo",
+    "private": "🏠 Vehículo privado",
+    "privateDesc": "Solo viajes privados, no se requiere libro de viajes",
+    "company": "💼 Vehículo de empresa",
+    "companyDesc": "Libro de viajes + facturación activa",
+    "companyName": "Nombre de la empresa (empleador)",
+    "licensePlate": "Matrícula",
+    "model": "Modelo",
+    "color": "Color",
+    "electricity": "Tarifa carga doméstica (€/kWh)",
+    "montaChargePoint": "ID punto de carga Monta",
+    "montaClientId": "Monta Client ID",
+    "montaClientIdHint": "API de socio: Hub → Aplicación → Client ID",
+    "montaKey": "Monta Client Secret",
+    "montaKeyHint": "API de socio: Hub → Aplicación → Client Secret",
+    "homeCharging": "Carga doméstica / Configuración Monta",
+    "drivers": "👤 Conductores y Perfiles",
+    "driversHint": "Crear y nombrar conductores – asignados a viajes y mostrados en informes.",
+    "noDrivers": "No hay conductores creados.",
+    "driverName": "Nombre (ej. Juan)",
+    "addDriver": "+ Añadir",
+    "setDefault": "★ Por defecto",
+    "unsetDefault": "☆ Por defecto",
+    "defaultTooltip": "Conductor por defecto – asignado automáticamente a nuevos viajes",
+    "setDefaultTooltip": "Establecer como conductor por defecto",
+    "deleteDriverConfirm": "¿Eliminar conductor \"{name}\"? Los viajes existentes se establecerán como \"sin conductor\".",
+    "driverSaved": "Conductor guardado.",
+    "driverError": "Error al guardar.",
+    "mfa": "🔐 Autenticación de dos factores",
+    "mfaEnabled": "✓ MFA activado",
+    "mfaBackupCodes": "Códigos de respaldo restantes:",
+    "mfaDisable": "Desactivar MFA",
+    "mfaDisableConfirm": "Introduce la contraseña para confirmar:",
+    "mfaConfirmBtn": "Confirmar",
+    "mfaNotEnabled": "MFA no activado. Actívalo para mayor seguridad.",
+    "mfaActivate": "Activar MFA",
+    "passkey": "🗝️ Passkey (inicio de sesión sin contraseña)",
+    "passkeyDesc": "Registra un passkey para este dispositivo para iniciar sesión sin contraseña.",
+    "passkeyAdded": "Añadido:",
+    "passkeyRemove": "Eliminar",
+    "passkeyNone": "Ningún passkey registrado.",
+    "passkeyAdd": "+ Añadir passkey",
+    "passkeyAdding": "Por favor espera…",
+    "teslaConnection": "⚡ Conexión del vehículo",
+    "teslaConnected": "● Conectado",
+    "teslaDisconnected": "● No conectado",
+    "teslaReconnect": "Reconectar vehículo",
+    "teslaSync": "🔄 Sincronizar vehículos",
+    "teslaSyncing": "Sincronizando…",
+    "virtualKey": "Llave virtual (comandos del vehículo)",
+    "virtualKeyDesc": "Registrar una vez en el vehículo para que la climatización, puertas y carga funcionen",
+    "telemetrySection": "📡 Fleet Telemetry (GPS y datos en tiempo real)",
+    "telemetryDesc": "Envía la ruta GPS, velocidad y batería en tiempo real a esta app",
+    "registerPartner": "🔑 Registrar app",
+    "registering": "Registrando…",
+    "activateTelemetry": "📡 Activar telemetría",
+    "activating": "Activando…",
+    "password": "🔑 Cambiar contraseña",
+    "currentPw": "Contraseña actual",
+    "newPw": "Nueva contraseña (mín. 12 caracteres)",
+    "confirmPw": "Confirmar nueva contraseña",
+    "changePw": "Cambiar contraseña",
+    "auditLog": "📝 Actividad reciente",
+    "noAudit": "Sin entradas",
+    "theme": "🎨 Esquema de colores",
+    "themeDesc": "Color de acento para botones y navegación. Guardado localmente.",
+    "nav": "🧭 Personalizar navegación",
+    "navReset": "Restablecer",
+    "navHint": "Cambiar orden con ↑↓ · Ojo para mostrar/ocultar",
+    "navHide": "Ocultar",
+    "navShow": "Mostrar",
+    "languageTitle": "Idioma",
+    "languageHint": "Tu idioma de visualización. Se sincroniza con tu perfil.",
+    "tenantDefaultLocaleTitle": "Idioma por defecto del inquilino",
+    "tenantDefaultLocaleHint": "Sugerido a nuevos usuarios y sesiones sin iniciar.",
+    "saved": "Guardado"
+  },
+  "auth": {
+    "loginTitle": "Por favor inicia sesión",
+    "tenant": "Inquilino",
+    "tenantPlaceholder": "— Por favor selecciona —",
+    "username": "Nombre de usuario",
+    "password": "Contraseña",
+    "loginBtn": "Iniciar sesión",
+    "passkeyBtn": "Iniciar sesión con passkey",
+    "registerLink": "Registrar nuevo inquilino",
+    "forgotPw": "¿Olvidaste tu contraseña?",
+    "handbook": "Manual y ayuda",
+    "loginError": "Error al iniciar sesión",
+    "loggingIn": "Iniciando sesión…",
+    "passkeyAuthenticating": "Autenticando con passkey…",
+    "passkeyCancelled": "Autenticación con passkey cancelada.",
+    "passkeyFailed": "Error de inicio de sesión con passkey",
+    "tenantHint": "Tu nombre de inquilino (asignado tras el registro)"
+  },
+  "register": {
+    "title": "Registrar nuevo inquilino",
+    "checkingInvite": "Verificando enlace de invitación…",
+    "noInvite": "Por favor contacta a un administrador para obtener un enlace de invitación",
+    "backToLogin": "← Volver al inicio de sesión",
+    "tenantName": "Nombre del inquilino",
+    "tenantSlug": "Identificador del inquilino (slug)",
+    "adminAccount": "Cuenta de administrador",
+    "passwordStrengths": [
+      "Débil",
+      "Regular",
+      "Buena",
+      "Fuerte"
+    ],
+    "created": "¡Inquilino creado!",
+    "credentials": "Tus credenciales:",
+    "slugLabel": "Identificador de inquilino:",
+    "slugWarning": "⚠ Anota tu identificador de inquilino",
+    "nextSteps": "Próximos pasos recomendados:",
+    "step1": "① Conectar vehículo",
+    "step2": "② Configurar MFA",
+    "step3": "③ Configurar puntos de carga",
+    "subtitle": "Cada inquilino dispone de una base de datos totalmente aislada.",
+    "tenantNameLabel": "Nombre del inquilino",
+    "tenantNamePlaceholder": "p. ej. Familia Muster",
+    "tenantNameHint": "Se muestra en la aplicación",
+    "tenantSlugPlaceholder": "p. ej. muster",
+    "tenantSlugHint": "Minúsculas, dígitos y -. Necesario para iniciar sesión.",
+    "slugTaken": "Este identificador ya está en uso.",
+    "usernameHint": "3–32 caracteres, letras/dígitos/-/_",
+    "passwordMinHint": "Al menos 12 caracteres",
+    "passwordConfirm": "Confirmar contraseña",
+    "creating": "Creando…",
+    "submitBtn": "Registrarse →",
+    "toLogin": "Ir al inicio de sesión →",
+    "inviteRequired": "El registro requiere un enlace de invitación válido.",
+    "inviteCheckFailed": "No se pudo verificar el enlace de invitación.",
+    "errNameRequired": "El nombre es obligatorio",
+    "errSlugRequired": "El identificador es obligatorio",
+    "errSlugFormat": "Identificador: solo minúsculas, dígitos y -",
+    "errAllFields": "Rellena todos los campos",
+    "errPwMismatch": "Las contraseñas no coinciden",
+    "errPwTooShort": "La contraseña debe tener al menos 12 caracteres",
+    "errFailed": "Error de registro"
+  },
+  "mfa": {
+    "setupTitle": "🔐 Configurar autenticación de dos factores",
+    "step1Title": "Paso 1: Conectar app",
+    "step1Hint": "Abre tu aplicación de autenticación",
+    "step2Title": "Paso 2: Confirmar código",
+    "step2Hint": "Introduce el código de 6 dígitos de tu app",
+    "step3Title": "Paso 3: ¡MFA activado!",
+    "activated": "✓ ¡MFA activado!",
+    "backupWarning": "⚠️ Códigos de respaldo – ¡guárdalos ahora!",
+    "backupOnce": "Estos códigos solo se muestran una vez",
+    "done": "Hecho",
+    "verify": "Confirmar",
+    "checking": "Verificando...",
+    "verifyTitle": "🔐 Autenticación de dos factores",
+    "enterCode": "Introduce el código de la app de autenticación",
+    "enterBackup": "Introduce un código de respaldo",
+    "useApp": "Usar app de autenticación",
+    "useBackup": "Usar código de respaldo",
+    "backToLogin": "Volver al inicio de sesión"
+  },
+  "setup": {
+    "title": "Configuración inicial – crear cuenta admin",
+    "welcome": "Bienvenido",
+    "notConfigured": "Tesla Carview aún no ha sido configurado",
+    "wizardDesc": "Este asistente crea tu primera cuenta de administrador",
+    "featureLocal": "✓ Todos los datos permanecen en tu servidor",
+    "featureNoCloud": "✓ Sin nube, sin compartir datos",
+    "featureControl": "✓ Control total sobre tus datos",
+    "startBtn": "Iniciar configuración →",
+    "adminAccount": "Cuenta de administrador",
+    "adminDesc": "Esta cuenta tiene acceso completo a la aplicación",
+    "tenantOptional": "▸ Nombre del inquilino (opcional)",
+    "tenantHint": "Solo relevante si gestionas múltiples inquilinos",
+    "done": "¡Configuración completada!",
+    "doneDesc": "Tu cuenta de administrador se ha creado correctamente",
+    "nextSteps": "Próximos pasos recomendados:",
+    "ns1": "① Activar MFA en ajustes",
+    "ns2": "② Conectar vehículo",
+    "ns3": "③ Cambiar contraseña después del primer inicio de sesión"
+  },
+  "users": {
+    "title": "Gestión de usuarios",
+    "add": "+ Crear usuario",
+    "loading": "Cargando usuarios…",
+    "locked": "bloqueado",
+    "assignVehicle": "Asignar vehículo",
+    "resetLink": "Enlace de restablecimiento",
+    "deactivate": "Desactivar",
+    "activate": "Activar",
+    "resetGenerated": "Enlace de restablecimiento generado",
+    "linkValid": "Enlace válido 60 minutos",
+    "copy": "Copiar",
+    "inviteNew": "🔗 Invitar nuevo inquilino",
+    "createInvite": "+ Crear enlace de invitación",
+    "inviteDesc": "Solo quien tenga este enlace puede registrar un nuevo inquilino",
+    "inviteExpiry": "Enlace (válido 7 días, uso único):",
+    "openInvites": "Invitaciones abiertas",
+    "open": "Abierta",
+    "expires": "Expira:",
+    "revoke": "Revocar",
+    "used": "✓ usado",
+    "assignTo": "Asignar vehículo a:",
+    "newUser": "Crear nuevo usuario",
+    "role": "Rol",
+    "email": "Correo electrónico (opcional)",
+    "allRequired": "Completar todos los campos obligatorios",
+    "pwTooShort": "La contraseña debe tener al menos 12 caracteres",
+    "creating": "Creando…"
+  },
+  "data": {
+    "title": "Gestión de datos",
+    "warning": "⚠ Atención – la eliminación es irreversible",
+    "currentData": "Datos actuales",
+    "deleteAll": "Eliminar todos los datos del inquilino",
+    "deleteAllDesc": "Todos los viajes, sesiones de carga, telemetría, cuaderno y registros de auditoría",
+    "deleteVehicle": "Eliminar datos del vehículo",
+    "deleteVehicleDesc": "Elimina todos los datos de un solo vehículo",
+    "deleteBtn": "Eliminar datos",
+    "confirmType": "Escribe para confirmar:",
+    "confirmText": "ELIMINAR DATOS",
+    "deleteSuccess": "Todos los datos eliminados. Se creó una copia de seguridad"
+  },
+  "system": {
+    "title": "📊 Sistema y Versión",
+    "appTitle": "⚡ Tesla Carview",
+    "version": "Versión",
+    "gitHash": "Hash Git",
+    "branch": "Rama",
+    "buildDate": "Fecha de compilación",
+    "nodeVersion": "Node.js",
+    "uptime": "Tiempo activo del servidor",
+    "updates": "🔄 Actualización de software",
+    "checkNow": "Verificar ahora",
+    "checking": "Verificando…",
+    "updateAvailable": "¡Actualización disponible!",
+    "newCommit": "Nuevo commit:",
+    "runOnServer": "Ejecutar en el servidor:",
+    "noUpdate": "Actualizado – ejecutas la última versión",
+    "dataStays": "✅ Todos los datos se conservan",
+    "autoUpdate": "⏰ Configurar actualizaciones automáticas",
+    "cpu": "🖥 CPU",
+    "load": "Carga",
+    "cores": "Núcleos",
+    "model": "Modelo",
+    "ram": "💾 Memoria",
+    "used": "Usado",
+    "free": "Libre",
+    "total": "Total",
+    "nodeProcess": "⚙️ Proceso Node.js",
+    "pid": "PID",
+    "heapUsed": "Heap usado",
+    "heapTotal": "Heap total",
+    "rss": "RSS",
+    "processUptime": "Tiempo activo del proceso",
+    "database": "🗄 Base de datos",
+    "dbSize": "Tamaño del archivo",
+    "batterySnapshots": "Snapshots de batería",
+    "logbookEntries": "Entradas del cuaderno",
+    "auditEntries": "Entradas de auditoría",
+    "server": "🖥 Servidor",
+    "hostname": "Nombre del host",
+    "platform": "Plataforma",
+    "arch": "Arquitectura",
+    "osUptime": "Tiempo activo del SO",
+    "tenants": {
+      "heading": "🏢 Inquilinos",
+      "total": "en total",
+      "empty": "Aún no hay inquilinos registrados.",
+      "you": "(tú)",
+      "status": {
+        "active": "Activo",
+        "suspended": "Suspendido"
+      },
+      "cols": {
+        "status": "Estado",
+        "name": "Nombre",
+        "slug": "Slug",
+        "vehicles": "Vehículos",
+        "users": "Usuarios",
+        "size": "Tamaño BD",
+        "lastActivity": "Última actividad",
+        "actions": "Acciones"
+      },
+      "actions": {
+        "rename": "Renombrar",
+        "save": "Guardar",
+        "cancel": "Cancelar",
+        "suspend": "Suspender",
+        "unsuspend": "Reactivar",
+        "delete": "Eliminar"
+      },
+      "detail": {
+        "loading": "Cargando detalles…",
+        "vehicles": "Vehículos",
+        "users": "Usuarios",
+        "counts": "Registros",
+        "dbPath": "Ruta BD",
+        "createdAt": "Creado el",
+        "noVehicles": "Sin vehículos",
+        "noUsers": "Sin usuarios",
+        "trips": "Viajes",
+        "charging": "Sesiones de carga",
+        "battery": "Snapshots batería",
+        "telemetry": "Puntos telemetría",
+        "logbook": "Cuaderno",
+        "audit": "Registros de auditoría",
+        "role": "Rol",
+        "lastLogin": "Último inicio de sesión",
+        "neverLoggedIn": "Nunca ha iniciado sesión"
+      },
+      "delete": {
+        "title": "¿Eliminar inquilino permanentemente?",
+        "warning": "Se eliminarán todos los datos de este inquilino — vehículos, viajes, cargas, usuarios.",
+        "backupNote": "Antes de eliminar se crea automáticamente una copia de seguridad de la base de datos.",
+        "typeSlug": "Escribe el slug del inquilino para confirmar:",
+        "confirm": "Eliminar permanentemente",
+        "cancel": "Cancelar"
+      },
+      "errors": {
+        "suspendFailed": "Error al suspender",
+        "unsuspendFailed": "Error al reactivar",
+        "renameFailed": "Error al renombrar",
+        "deleteFailed": "Error al eliminar",
+        "loadDetailFailed": "No se pudieron cargar los detalles"
+      }
+    }
+  },
+  "drivers": {
+    "noDriver": "– Sin conductor"
+  },
+  "handbook": {
+    "title": "Manual Tesla Carview",
+    "version": "Versión 2.0 · Auto-alojado · Multi-inquilino",
+    "toc": "Tabla de contenidos",
+    "sections": [
+      {
+        "id": "overview",
+        "icon": "🌟",
+        "title": "Visión general"
+      },
+      {
+        "id": "requirements",
+        "icon": "📋",
+        "title": "Requisitos"
+      },
+      {
+        "id": "installation",
+        "icon": "🚀",
+        "title": "Instalación"
+      },
+      {
+        "id": "first-setup",
+        "icon": "⚙️",
+        "title": "Configuración inicial en el navegador"
+      },
+      {
+        "id": "virtual-key",
+        "icon": "🔑",
+        "title": "Configurar la llave virtual"
+      },
+      {
+        "id": "charging-locations",
+        "icon": "⚡",
+        "title": "Puntos de carga y costes"
+      },
+      {
+        "id": "security",
+        "icon": "🔐",
+        "title": "Seguridad"
+      },
+      {
+        "id": "multitenancy",
+        "icon": "🏢",
+        "title": "Multi-inquilino"
+      },
+      {
+        "id": "backup",
+        "icon": "💾",
+        "title": "Copia de seguridad"
+      },
+      {
+        "id": "tesla-api",
+        "icon": "⚡",
+        "title": "Configuración API Tesla Developer"
+      },
+      {
+        "id": "monta",
+        "icon": "🔌",
+        "title": "Integración Monta (facturación)"
+      },
+      {
+        "id": "troubleshooting",
+        "icon": "🔧",
+        "title": "Solución de problemas"
+      }
+    ],
+    "overview": {
+      "title": "🌟 Visión general",
+      "body": "Tesla Carview es una aplicación de registro de datos auto-alojada para vehículos eléctricos. Todos los datos permanecen exclusivamente en tu propio servidor – sin nube, sin compartir datos. La app es totalmente responsive y funciona en iPhone/iPad (Safari), smartphones Android y navegadores de escritorio.",
+      "features": [
+        {
+          "icon": "🚗",
+          "title": "Libro de viajes",
+          "desc": "Rutas GPS, consumo, clasificación por tipo de viaje"
+        },
+        {
+          "icon": "⚡",
+          "title": "Carga",
+          "desc": "Sesiones de carga con costes, detección GPS de ubicación"
+        },
+        {
+          "icon": "🔋",
+          "title": "Batería",
+          "desc": "Seguimiento de degradación, historial de autonomía"
+        },
+        {
+          "icon": "📊",
+          "title": "Panel",
+          "desc": "Estadísticas, resumen mensual, actividad reciente"
+        },
+        {
+          "icon": "🎮",
+          "title": "Control",
+          "desc": "Climatización, puertas, luces – directamente desde la app"
+        },
+        {
+          "icon": "📝",
+          "title": "Cuaderno",
+          "desc": "Mantenimientos, reparaciones, costes con fechas"
+        },
+        {
+          "icon": "📤",
+          "title": "Exportar",
+          "desc": "CSV/JSON para todos los datos, copia de seguridad completa en ZIP"
+        },
+        {
+          "icon": "🔔",
+          "title": "Notificaciones push",
+          "desc": "Notificación del navegador cuando la carga ha terminado"
+        },
+        {
+          "icon": "📱",
+          "title": "Optimizado para móvil",
+          "desc": "Totalmente usable en iPhone/iPad (Safari), Android y escritorio"
+        }
+      ]
+    },
+    "requirements": {
+      "title": "📋 Requisitos",
+      "serverTitle": "Servidor",
+      "serverItems": [
+        "Servidor Linux (x86_64, ARM64 o ARMv7) con mín. 1 GB de RAM",
+        "Docker + Docker Compose (instalado por el script de configuración)",
+        "Dominio accesible públicamente + certificado TLS (necesario para la API)",
+        "El puerto 443 (HTTPS) debe ser accesible desde el exterior"
+      ],
+      "teslaTitle": "Cuenta Tesla Developer",
+      "teslaItems": [
+        "Registrarse en developer.tesla.com",
+        "Crear una app → anotar el Client ID y el Client Secret",
+        "URL de retorno: https://<tu-dominio>/api/auth/callback",
+        "Para comandos del vehículo: solicitar acceso Fleet API (gratuito, 1–3 días hábiles)"
+      ]
+    },
+    "installation": {
+      "title": "🚀 Instalación",
+      "desc": "El script de configuración instala todo automáticamente: Docker, nginx, TLS, tesla-http-proxy.",
+      "asRoot": "# Como root en el servidor de destino:",
+      "scriptAsks": "# El script pregunta interactivamente:",
+      "promptDomain": "→ Dominio (ej. carview.miservidor.es)",
+      "promptClientId": "→ Tesla Client ID y Client Secret",
+      "promptRedirect": "→ Tesla Redirect URI",
+      "promptJwt": "→ JWT Secret (generado automáticamente)",
+      "altTitle": "Alternativa: Configuración manual",
+      "altDesc": "Copia .env.example → .env y ajusta todos los valores. Luego: docker compose -f docker-compose.prod.yml up -d"
+    },
+    "firstSetup": {
+      "title": "⚙️ Configuración inicial en el navegador",
+      "steps": [
+        {
+          "title": "Abrir navegador",
+          "desc": "Abre https://<tu-dominio>/setup — serás redirigido automáticamente."
+        },
+        {
+          "title": "Crear inquilino",
+          "desc": "Elige un nombre de inquilino (ej. \"Familia García\") y un identificador (ej. \"garcia\"). El identificador es necesario al iniciar sesión – anótalo."
+        },
+        {
+          "title": "Crear cuenta admin",
+          "desc": "Establece nombre de usuario y contraseña. La contraseña debe tener al menos 12 caracteres. Recomendación: una frase de paso de 4 palabras."
+        },
+        {
+          "title": "Conectar vehículo",
+          "desc": "Tras iniciar sesión: Ajustes → Conectar cuenta. Serás redirigido para autenticarte."
+        },
+        {
+          "title": "Importar vehículos",
+          "desc": "Ve a Ajustes → Conexión vehículo → Sincronizar vehículos. Todos los vehículos de la cuenta conectada se importan automáticamente."
+        }
+      ]
+    },
+    "virtualKey": {
+      "title": "🔑 Configurar la llave virtual",
+      "desc": "Para los comandos del vehículo (desbloquear, climatización, etc.) se debe registrar una llave virtual en el vehículo.",
+      "steps": [
+        "Asegúrate de que tesla-http-proxy está funcionando: systemctl status tesla-http-proxy",
+        "Abre en Safari del iPhone: https://tesla.com/_ak/<tu-dominio>",
+        "La app Tesla pregunta '¿Permitir aplicación?' → confirmar",
+        "Permanece dentro del rango Bluetooth del vehículo — la llave se acepta en 30 segundos",
+        "Verifica en Ajustes → Conexión vehículo → Estado llave virtual"
+      ]
+    },
+    "chargingLocations": {
+      "title": "⚡ Puntos de carga y costes",
+      "desc": "Los puntos de carga se detectan automáticamente por GPS y se asocian con un precio por kWh.",
+      "autoTitle": "Detección GPS automática",
+      "autoDesc": "Cuando se almacena un punto de carga con coordenadas GPS y radio (200m por defecto), la ubicación correcta se detecta automáticamente al inicio de la carga y se aplica el precio/kWh almacenado.",
+      "createTitle": "Crear un punto de carga",
+      "createDesc": "En Carga → Ubicaciones: introduce nombre, tipo (hogar/oficina/público), precio/kWh, coordenadas GPS y radio de detección.",
+      "adjustTitle": "Ajustar costes manualmente",
+      "adjustDesc": "En la lista de carga: haz clic en una sesión → editar costes. Los costes también pueden establecerse en 0 (ej. carga gratuita).",
+      "freeTitle": "✕ Marcar carga como gratuita",
+      "freeDesc": "Cada sesión tiene un botón '✕ marcar gratuito'. Las sesiones así marcadas aparecen en gris con la insignia 'gratuito' y se excluyen automáticamente de la facturación.",
+      "freeHint": "Caso de uso típico: carga en el lugar de trabajo proporcionada por el empleador. Usa el botón '↩ marcar de pago' para deshacer el marcado."
+    },
+    "security": {
+      "title": "🔐 Seguridad",
+      "features": [
+        {
+          "icon": "🔑",
+          "title": "Passkey / WebAuthn",
+          "desc": "Inicio de sesión sin contraseña con huella dactilar, Face ID o llave de hardware"
+        },
+        {
+          "icon": "📱",
+          "title": "MFA TOTP",
+          "desc": "Autenticación de dos factores con app de autenticación"
+        },
+        {
+          "icon": "🛡️",
+          "title": "Bloqueo de cuenta",
+          "desc": "Cuenta bloqueada tras 5 intentos fallidos durante 15 minutos"
+        },
+        {
+          "icon": "🍪",
+          "title": "Refresh token",
+          "desc": "Cookie httpOnly, válida 7 días, rotación automática"
+        },
+        {
+          "icon": "📋",
+          "title": "Registro de auditoría",
+          "desc": "Todos los inicios de sesión, cambios y eventos de seguridad registrados"
+        },
+        {
+          "icon": "🔒",
+          "title": "HTTPS + HSTS",
+          "desc": "TLS 1.2/1.3, HSTS, OCSP stapling, cabeceras seguras"
+        }
+      ],
+      "recommendTitle": "Ajustes de seguridad recomendados",
+      "recommend": [
+        "Activar MFA (TOTP) después del primer inicio de sesión",
+        "Configurar un passkey para inicio de sesión sin contraseña",
+        "Crear copias de seguridad regulares (Exportar)",
+        "Contraseña fuerte: mín. 16 caracteres o frase de 4 palabras"
+      ]
+    },
+    "multitenancy": {
+      "title": "🏢 Multi-inquilino",
+      "desc": "Tesla Carview soporta múltiples inquilinos completamente aislados en una misma instancia. Cada inquilino tiene su propia base de datos – ningún inquilino puede ver los datos de otro.",
+      "inviteTitle": "Crear inquilinos (enlace de invitación)",
+      "inviteDesc": "Los nuevos inquilinos solo pueden registrarse mediante un enlace de invitación. Un administrador genera el enlace en Admin → Usuarios → Crear enlace de invitación. El enlace es válido durante 7 días y solo puede usarse una vez.",
+      "multiVehicleTitle": "Múltiples vehículos por inquilino",
+      "multiVehicleDesc": "Todos los vehículos de una cuenta conectada se importan automáticamente al sincronizar. Cambia entre vehículos en la barra de navegación superior derecha.",
+      "loginTitle": "Inicio de sesión con identificador de inquilino",
+      "loginDesc": "Con múltiples inquilinos, aparece un campo de inquilino al iniciar sesión. Con un solo inquilino, se detecta automáticamente.",
+      "userMgmtTitle": "Gestión de usuarios",
+      "userMgmtDesc": "Los administradores pueden crear usuarios adicionales y asignar vehículos dentro de su inquilino. En Admin → Usuarios."
+    },
+    "backup": {
+      "title": "💾 Copia de seguridad",
+      "manualTitle": "Exportación manual",
+      "manualDesc": "En Exportar: CSV o JSON para viajes y sesiones de carga, y copia de seguridad completa en ZIP.",
+      "autoTitle": "Copia de seguridad automática (servidor)",
+      "autoDesc": "Las bases de datos SQLite están en el volumen Docker tesla_data. Para copias de seguridad automáticas en el servidor:",
+      "cron": "# Copia de seguridad diaria a las 3am (crontab -e):\n0 3 * * * cp /var/lib/docker/volumes/tesla_data/_data/*.db /backup/",
+      "warningTitle": "Importante antes de eliminar",
+      "warningDesc": "Siempre crea una exportación antes de eliminar datos. Los datos eliminados no pueden recuperarse."
+    },
+    "teslaApi": {
+      "title": "⚡ Configuración API Tesla Developer",
+      "desc": "Tesla Carview se comunica a través de la API oficial Tesla Fleet. Necesitas una cuenta Tesla Developer gratuita y una aplicación registrada.",
+      "step1Title": "Paso 1 – Crear cuenta de desarrollador",
+      "step1Items": [
+        "Visita developer.tesla.com e inicia sesión con tu cuenta Tesla.",
+        "Acepta los Términos de servicio para desarrolladores.",
+        "Haz clic en Crear aplicación."
+      ],
+      "step2Title": "Paso 2 – Configurar la aplicación",
+      "step2Items": [
+        "Nombre de la aplicación: cualquier nombre, ej. Tesla Carview",
+        "Descripción: descripción breve (obligatoria)",
+        "Origen permitido: tu URL de aplicación pública",
+        "URI de redirección: https://carview.example.com/api/auth/callback",
+        "Scopes (requeridos): vehicle_device_data, vehicle_cmds, vehicle_charging_cmds, vehicle_location, openid, offline_access",
+        "⚠ vehicle_location es necesario para el seguimiento GPS (Fleet Telemetry)"
+      ],
+      "step3Title": "Paso 3 – Anotar credenciales",
+      "step3Desc": "Tras la creación recibes:",
+      "step3Items": [
+        "Client ID – una cadena similar a UUID",
+        "Client Secret – visible solo una vez, copia y almacena de forma segura"
+      ],
+      "step3Hint": "Introduce estos valores en el archivo .env o proporciónelos en el asistente de configuración interactivo.",
+      "step4Title": "Paso 4 – Solicitar acceso Fleet API (para comandos)",
+      "step4Desc": "Para que los comandos del vehículo (climatización, puertas, carga) funcionen, tu aplicación debe estar registrada como partner con Tesla.",
+      "step4Hint": "El script de configuración ejecuta este paso automáticamente si FRONTEND_URL está configurado. Si no, manualmente vía Postman o curl. Tarda 1–3 días hábiles en activarse.",
+      "step5Title": "Paso 5 – Conectar en Tesla Carview",
+      "step5Items": [
+        "Tras iniciar sesión: Ajustes → Conexión vehículo → Reconectar",
+        "Serás redirigido para iniciar sesión y conceder acceso.",
+        "Tras la redirección: Ajustes → 🔄 Sincronizar vehículos",
+        "Todos los vehículos aparecen en la aplicación."
+      ],
+      "step6Title": "Paso 6 – Activar Fleet Telemetry (seguimiento GPS)",
+      "step6Desc": "Los datos GPS en vehículos más nuevos (ej. Model Y desde 2024, VIN XP7) provienen exclusivamente de Fleet Telemetry — no de la API REST.",
+      "step6Steps": [
+        "Registrar app con Tesla – Ajustes → Fleet Telemetry → '🔑 Registrar app'. Solo una vez.",
+        "Solicitar acceso Fleet Telemetry – Si el siguiente paso devuelve HTTP 404, Tesla no ha habilitado el endpoint aún. Contacta con el soporte de Tesla Developer.",
+        "Activar telemetría – Ajustes → Fleet Telemetry → '📡 Activar telemetría'."
+      ],
+      "supportTitle": "Solicitar acceso Fleet Telemetry al soporte de Tesla",
+      "supportDesc": "Si el paso 2 devuelve 404, envía la siguiente solicitud al formulario de soporte Tesla Developer (developer.tesla.com/dashboard → Support Inquiry):",
+      "supportNote": "⚠ Sustituye el Client ID y el VIN por tus propios valores. Tesla suele responder en pocos días."
+    },
+    "monta": {
+      "title": "🔌 Integración Monta (facturación carga doméstica)",
+      "desc": "Para conductores de vehículos de empresa: Tesla Carview puede obtener datos de carga directamente de tu wallbox Monta y crear un estado de costes mensual para tu empleador.",
+      "warning": "⚠️ La integración Monta solo está disponible para vehículos de la categoría Vehículo de empresa (Ajustes → Perfil del vehículo → Categoría).",
+      "step1Title": "Paso 1 – Crear clave API Monta",
+      "step1Items": [
+        "Inicia sesión en Monta (app o web: portal.monta.com).",
+        "Ve a Ajustes → API.",
+        "Haz clic en Crear clave API y copia la clave (comienza con monta_)."
+      ],
+      "step1Hint": "La clave solo es visible una vez – introdúcela inmediatamente en Tesla Carview.",
+      "step2Title": "Paso 2 – Encontrar el ID del punto de carga",
+      "step2Items": [
+        "En el portal Monta: Puntos de carga → Mis dispositivos.",
+        "El ID del punto de carga está en la vista de detalles (formato: cp_12345).",
+        "Alternativa: la llamada API GET /api/v1/charge-points devuelve todos los puntos de carga con IDs."
+      ],
+      "step3Title": "Paso 3 – Introducir en Tesla Carview",
+      "step3Items": [
+        "Ve a Ajustes → Perfil del vehículo.",
+        "Selecciona la categoría 💼 Vehículo de empresa.",
+        "Introduce la tarifa de carga doméstica (€/kWh) – ej. 0,34.",
+        "Añade el ID del punto de carga Monta y la clave API Monta.",
+        "Haz clic en Guardar."
+      ],
+      "useTitle": "Usar la facturación",
+      "useItems": [
+        "Ve a Facturación en la navegación.",
+        "Selecciona el mes deseado – se listan todas las sesiones de carga doméstica.",
+        "Las sesiones gratuitas se pueden marcar con ✕ marcar gratuito en el historial – se excluyen de la facturación.",
+        "La exportación en PDF te proporciona una hoja de facturación lista para firmar."
+      ]
+    },
+    "troubleshooting": {
+      "title": "🔧 Solución de problemas",
+      "items": [
+        {
+          "q": "El vehículo no devuelve datos GPS",
+          "a": "Los modelos más nuevos (VIN XP7, ej. Model Y Juniper) no proporcionan drive_state vía API REST. El seguimiento GPS usa Fleet Telemetry. Asegúrate de que tesla-http-proxy está funcionando y la llave virtual está registrada."
+        },
+        {
+          "q": "El inicio de sesión falla tras la actualización",
+          "a": "Tras actualizar a v2.0 (multi-inquilino), se requiere un identificador de inquilino al iniciar sesión. El identificador para la base de datos migrada es 'default'. Introdúcelo en el campo de inicio de sesión."
+        },
+        {
+          "q": "La conexión del vehículo falla (401)",
+          "a": "El token OAuth ha caducado. Ve a Ajustes → Conexión vehículo y reconecta. Asegúrate de que TESLA_CLIENT_ID y TESLA_CLIENT_SECRET en .env son correctos."
+        },
+        {
+          "q": "Los comandos del vehículo fallan",
+          "a": "Comprueba: 1) tesla-http-proxy está funcionando (systemctl status tesla-http-proxy) 2) La llave virtual está registrada 3) El vehículo está en línea (no durmiendo)."
+        },
+        {
+          "q": "Sin datos de telemetría / GPS ausente",
+          "a": "Fleet Telemetry requiere dos pasos: (1) registrar la app con Tesla, (2) activar la telemetría. Si el paso 2 devuelve HTTP 404, debes solicitar el acceso fleet_telemetry_config al soporte de Tesla Developer."
+        },
+        {
+          "q": "El backend no arranca",
+          "a": "Comprueba los logs: docker logs tesla-carview-backend. Causas frecuentes: variables .env faltantes (JWT_SECRET, TESLA_CLIENT_ID), error de migración de base de datos."
+        }
+      ]
+    },
+    "donate": {
+      "title": "❤️ Si la app te resulta útil",
+      "desc": "Tesla Carview es gratuito y sin publicidad para uso privado y autoalojado (licencia: PolyForm Noncommercial 1.0.0 — no se permite la reventa comercial ni el alojamiento SaaS para terceros). Si quieres contribuir, estas organizaciones agradecerían tu apoyo.",
+      "footer": "El 100% de tu donación va directamente a la organización. No vemos ni el importe ni tus datos.",
+      "btn": "Donar →",
+      "orgs": [
+        {
+          "name": "Aktion Deutschland Hilft",
+          "desc": "Alianza de organizaciones de ayuda para asistencia humanitaria rápida y eficaz en todo el mundo.",
+          "url": "https://www.aktion-deutschland-hilft.de/de/spenden/"
+        },
+        {
+          "name": "Lebenshilfe Rems-Murr",
+          "desc": "Apoyo, acompañamiento y participación para personas con discapacidad en el distrito de Rems-Murr.",
+          "url": "https://www.lebenshilfe-rems-murr.de/"
+        },
+        {
+          "name": "Radio 7 Drachenkinder",
+          "desc": "Ayuda para niños gravemente enfermos en la región – financia terapias, excursiones y deseos.",
+          "url": "https://www.radio7.de/aktionen/drachenkinder"
+        }
+      ]
+    }
+  },
+  "teslaUsage": {
+    "title": "Uso de API Tesla",
+    "subtitle": "Costos previstos de la Tesla Fleet API en el mes actual.",
+    "period": "Período",
+    "limit": "Límite mensual",
+    "freeCredit": "Crédito gratuito",
+    "hardStop": "Parada forzada en",
+    "hardStopOn": "Parada forzada activa – nuevas llamadas bloqueadas",
+    "currency": "Moneda",
+    "rates": "Tarifas (USD por llamada)",
+    "save": "Guardar tarifas",
+    "reset": "Reiniciar el mes actual",
+    "cat": {
+      "vehicle_data": "Datos del vehículo",
+      "wake": "Activación",
+      "command": "Comandos",
+      "streaming": "Streaming",
+      "other": "Otros"
+    }
+  },
+  "footer": {
+    "contactPrompt": "¿Interés comercial o consultoría de diseño IT y arquitectura?",
+    "about": "Perfil",
+    "imprint": "Aviso legal",
+    "privacy": "Privacidad",
+    "terms": "Condiciones",
+    "support": "Apoyar"
+  },
+  "legal": {
+    "imprint": "Aviso legal",
+    "privacy": "Política de privacidad",
+    "terms": "Condiciones de uso",
+    "versionInfo": "Versión {version} · última modificación {date}",
+    "placeholdersWarningAdmin": "Esta página todavía contiene marcadores sin completar. Complétalos en el editor de administración antes de publicarla:",
+    "acceptCheckboxPrivacy": "He leído y acepto la {link}.",
+    "acceptCheckboxTerms": "He leído y acepto las {link}.",
+    "acceptModalTitle": "Términos legales actualizados",
+    "acceptModalBody": "La política de privacidad y/o las condiciones de uso han sido actualizadas. Confirma las nuevas versiones antes de continuar.",
+    "acceptModalSubmit": "Aceptar y continuar",
+    "adminTitle": "Administrar contenido legal",
+    "adminIntro": "Mantén el aviso legal, la política de privacidad y las condiciones de uso por idioma. Al guardar, marca «Aumentar versión» si el cambio es material — todos los usuarios deberán volver a aceptarlo en su siguiente inicio de sesión.",
+    "adminEditing": "Editando {scope} ({locale})",
+    "adminBumpVersion": "Aumentar versión (re-aceptación obligatoria)",
+    "adminSave": "Guardar",
+    "adminSaved": "Guardado. Versión actual: {version}",
+    "adminCurrentVersion": "Versión actual: {version}",
+    "adminLastUpdated": "Última modificación: {date}",
+    "adminSyncMode": "Mantener solo el idioma por defecto (alemán)",
+    "adminSyncModeHint": "Recomendado. Al guardar, el texto en alemán se copia 1:1 a todos los demás idiomas. La vista pública muestra un aviso de que esta página solo se mantiene actualmente en alemán.",
+    "syncedFromDefaultBanner": "Esta página solo se mantiene actualmente en alemán — el contenido mostrado es la versión alemana original."
+  },
+  "invite": {
+    "title": "Aceptar invitación",
+    "subtitle": "Crea tu cuenta en {tenant}. Rol: {role}",
+    "invalidTitle": "Invitación no válida",
+    "errUnknown": "Este enlace de invitación es desconocido — es posible que el administrador lo haya revocado.",
+    "errAlreadyUsed": "Este enlace de invitación ya fue usado. Pide al administrador uno nuevo.",
+    "errExpired": "Este enlace de invitación ha expirado. Pide al administrador uno nuevo.",
+    "errGeneric": "El enlace no pudo ser verificado.",
+    "toLogin": "Ir al inicio de sesión →",
+    "usernamePlaceholder": "p. ej. anna",
+    "usernameHint": "3–32 caracteres, solo letras, dígitos, - y _",
+    "passwordPlaceholder": "Al menos 12 caracteres",
+    "passwordHint": "Recomendación: una frase de contraseña de 4+ palabras",
+    "submitBtn": "Crear cuenta →",
+    "errFormIncomplete": "Por favor, rellena todos los campos y acepta la política de privacidad y los términos.",
+    "errFailed": "No se pudo crear la cuenta.",
+    "doneText": "Hola {username} — tu cuenta en {tenant} ha sido creada. Ya puedes iniciar sesión.",
+    "roleAdmin": "Administrador",
+    "roleUser": "Usuario"
+  }
+}

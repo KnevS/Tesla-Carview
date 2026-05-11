@@ -1,0 +1,59 @@
+version: '3.9'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        GIT_HASH: ${GIT_HASH:-unknown}
+        GIT_BRANCH: ${GIT_BRANCH:-unknown}
+        BUILD_DATE: ${BUILD_DATE:-}
+    container_name: tesla-carview-backend
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    volumes:
+      - tesla_data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - tesla-net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: tesla-carview-frontend
+    restart: unless-stopped
+    networks:
+      - tesla-net
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:alpine
+    container_name: tesla-carview-nginx
+    restart: unless-stopped
+    ports:
+      - '8080:80'
+    volumes:
+      - ./deploy/nginx-internal.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - tesla-net
+    depends_on:
+      - frontend
+      - backend
+
+volumes:
+  tesla_data:
+
+networks:
+  tesla-net:
+    driver: bridge

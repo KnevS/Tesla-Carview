@@ -1,0 +1,83 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Secrets (in GitHub Repository Settings → Secrets):
+#   DEPLOY_HOST      – IP oder Hostname des Zielservers
+#   DEPLOY_USER      – SSH-Benutzer (z.B. root oder deploy)
+#   DEPLOY_SSH_KEY   – privater SSH-Key (ed25519 empfohlen)
+#   DEPLOY_APP_DIR   – Pfad auf dem Server (Standard: /opt/tesla-carview)
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  check-secrets:
+    name: Secrets vorhanden?
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.check.outputs.ready }}
+    steps:
+      - id: check
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          KEY:  ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          if [ -n "$HOST" ] && [ -n "$KEY" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    name: Deploy via SSH
+    needs: check-secrets
+    if: needs.check-secrets.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            APP_DIR="${{ secrets.DEPLOY_APP_DIR }}"
+            APP_DIR="${APP_DIR:-/opt/tesla-carview}"
+            cd "$APP_DIR"
+            sudo git fetch origin main
+            sudo git reset --hard origin/main
+            GIT_HASH=$(sudo git rev-parse --short HEAD)
+            GIT_BRANCH=$(sudo git rev-parse --abbrev-ref HEAD)
+            BUILD_DATE=$(sudo git log -1 --format=%ci)
+            # docker compose liest .env automatisch aus dem CWD; das ist robuster
+            # als 'sudo --preserve-env' (verbietet diese Server-sudoers-Policy)
+            # oder Inline-Vars vor sudo (werden gestrippt). Die .env wird nur
+            # fuer den Build geschrieben und danach geloescht — keine Spur.
+            # Drei einzelne echo-tee statt printf — printf '\n' wurde durch
+            # appleboy/ssh-action irgendwo verstuemmelt, sodass alles in
+            # einer Zeile landete und docker die Werte nicht parsen konnte.
+            # WICHTIG: /etc/sudoers.d/sven-deploy erlaubt NOPASSWD nur fuer
+            # docker und git — `sudo tee/cat/rm` wuerden ein Passwort
+            # verlangen und im SSH-Skript ohne TTY silent haengen. Daher:
+            # Env-File in /tmp (sven hat dort schreibrecht ohne sudo) und
+            # via `--env-file` an docker compose mitgeben (laeuft mit sudo).
+            ENV_TMP=$(mktemp /tmp/tcv-deploy-env.XXXXXX)
+            {
+              echo "GIT_HASH=$GIT_HASH"
+              echo "GIT_BRANCH=$GIT_BRANCH"
+              echo "BUILD_DATE=$BUILD_DATE"
+            } > "$ENV_TMP"
+            echo "--- env-file fuer den Build: ---"
+            cat "$ENV_TMP"
+            echo "--- ---"
+            sudo docker compose --env-file "$ENV_TMP" \
+              -f /opt/tesla-carview/docker-compose.prod.yml up -d --build backend frontend
+            rm -f "$ENV_TMP"
+            sudo docker system prune -f
+            echo "Deployment erfolgreich: $(date) | $GIT_HASH"

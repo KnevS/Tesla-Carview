@@ -1,0 +1,430 @@
+# 📖 Tesla Carview Kullanım Kılavuzu
+
+> ℹ️ **Yöneticiler ve kendi sunucusunu işletenler için not:** Bu kılavuz uygulamayı kullanıcı bakış açısından açıklar. Kurulum, ortam değişkenleri, yedekleme/geri yükleme, gece bakımı ve demo modunun etkinleştirilmesi **teknik dokümantasyonda** [`docs/`](https://github.com/KnevS/Tesla-Carview/blob/main/docs/README.en.md) (İngilizce) klasöründe belgelenmiştir; özellikle [10-configuration](https://github.com/KnevS/Tesla-Carview/blob/main/docs/10-configuration.en.md) ve [11-operations](https://github.com/KnevS/Tesla-Carview/blob/main/docs/11-operations.en.md).
+
+Sürüm 2.0 · Self-Hosted · Çoklu Kiracı (Multi-Tenant)
+
+## 🌟 Genel Bakış {#overview}
+
+Tesla Carview, Tesla araçlar için **kendi sunucunda barındırılan** bir veri kaydetme uygulamasıdır. Tüm veriler yalnızca senin sunucunda kalır — bulut yok, veri paylaşımı yok. Uygulama tamamen **responsive**'dir ve **iPhone/iPad (Safari)**, Android telefonlar ve masaüstü tarayıcılarında çalışır.
+
+**Özellikler özet:**
+
+- 🚗 **Yol defteri** — GPS rotaları, tüketim, sürüş türü kategorizasyonu
+- ⚡ **Şarj** — Maliyetli şarj seansları, GPS ile konum tespiti
+- 🔋 **Batarya** — Aşınma takibi, menzil geçmişi
+- 📊 **Pano** — İstatistikler, aylık özet, son etkinlikler
+- 🎮 **Kontrol** — Klima, kapılar, ışıklar — doğrudan uygulamadan
+- 📝 **Servis defteri** — Bakım, onarım, tarihli maliyetler
+- 📤 **Dışa aktarma** — Tüm veriler için CSV/JSON, ZIP olarak tam yedek
+- 🔔 **Push bildirimleri** — Şarj bittiğinde tarayıcı bildirimi
+- 📱 **Mobil için optimize** — iPhone/iPad (Safari), Android ve masaüstünde tam kullanılabilir
+
+## 📋 Gereksinimler {#requirements}
+
+### Sunucu
+
+- En az 1 GB RAM ile Linux sunucu (x86_64, ARM64 veya ARMv7)
+- Docker + Docker Compose (kurulum betiği yükler)
+- Genel olarak erişilebilen bir alan adı + TLS sertifikası (Tesla API için zorunlu)
+- 443 numaralı port (HTTPS) dışarıdan erişilebilir olmalı
+
+### Tesla Developer Hesabı
+
+- `developer.tesla.com` adresinden kayıt
+- Uygulama oluştur → Client ID ve Client Secret'ı not et
+- Geri çağrı (Callback) URL'si: `https://<senin-domainin>/api/auth/callback`
+- Araç komutları için: Fleet API erişimi başvurusu (ücretsiz, 1–3 iş günü)
+
+## 🚀 Kurulum {#installation}
+
+Kurulum betiği her şeyi otomatik kurar: Docker, nginx, TLS, tesla-http-proxy.
+
+```bash
+# Hedef sunucuda root olarak:
+curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/setup.sh | bash
+
+# Betik etkileşimli olarak şunları sorar:
+# → Alan adı (örn. carview.sunucum.com)
+# → Tesla Client ID ve Client Secret
+# → Tesla Redirect URI
+# → JWT Secret (otomatik oluşturulur)
+```
+
+> **Alternatif: Manuel yapılandırma**
+>
+> `.env.example` dosyasını `.env` olarak kopyala ve tüm değerleri ayarla. Sonra: `docker compose -f docker-compose.prod.yml up -d`
+
+## ⚙️ Tarayıcıda ilk kurulum {#first-setup}
+
+1. **Tarayıcıyı aç** — `https://<senin-domainin>/setup` adresini aç — otomatik yönlendirilirsin.
+2. **Kiracı (tenant) oluştur** — Bir kiracı adı (örn. „Yılmaz Ailesi") ve kısa kod (örn. „yilmaz") seç. Kısa kod, girişte gereklidir — bir yere not et.
+3. **Yönetici hesabı oluştur** — Kullanıcı adı ve parola belirle. Parola en az 12 karakter olmalı. Öneri: 4 kelimelik bir parola cümlesi (passphrase).
+4. **Tesla'yı bağla** — Girişten sonra: **Ayarlar → Tesla hesabı bağla**. Tesla'ya yönlendirilir ve orada giriş yaparsın.
+5. **Araçları içe aktar** — **Ayarlar → Tesla Bağlantısı → Araçları senkronize et** menüsüne git. Bağlı Tesla hesabındaki tüm araçlar otomatik içe aktarılır. Tek bir hesapta birden fazla Tesla varsa hepsi tek seferde görünür.
+
+## 🔑 Virtual Key kurulumu {#virtual-key}
+
+Araç komutları (kapı açma, klima vb.) için araca bir Virtual Key kaydedilmelidir. Bu yalnızca yeni araçlar için gereklidir (`vehicle_command_protocol_required: true`).
+
+1. **tesla-http-proxy**'nin çalıştığından emin ol:
+
+   ```bash
+   systemctl status tesla-http-proxy
+   ```
+
+2. iPhone'da Safari'de aç: `https://tesla.com/_ak/<senin-domainin>`
+3. Tesla uygulaması „Bu uygulamaya izin ver?" diye sorar → onayla
+4. Aracın Bluetooth menzilinde kal — anahtar 30 saniye içinde kabul edilir
+5. **Ayarlar → Araç bağlantısı → Virtual Key durumu** altından doğrula
+
+## ⚡ Şarj noktaları ve maliyetler {#charging-locations}
+
+Şarj noktaları GPS ile otomatik tanınır ve kWh başına bir fiyatla eşleştirilir.
+
+**Otomatik GPS tanıma** — Bir şarj noktası GPS koordinatları ve yarıçapla (varsayılan 200 m) tanımlıysa, şarj başlangıcında uygun konum otomatik tespit edilir ve kayıtlı kWh fiyatı uygulanır.
+
+**Şarj noktası oluşturma** — **Şarj → Konumlar** altında: ad, tür (Ev/Ofis/Halka açık), kWh fiyatı, GPS koordinatları ve tanıma yarıçapı gir.
+
+**Maliyetleri elle düzenleme** — Şarj listesinde: bir seansa tıkla → maliyeti düzenle. Maliyet 0 da yapılabilir (örn. ücretsiz şarj).
+
+**✕ Şarjı ücretsiz olarak işaretle** — **Şarj geçmişinde** her seansın küçük bir *„✕ ücretsiz"* düğmesi vardır. Böyle işaretlenen şarjlar gri gösterilir, *„ücretsiz"* rozeti taşır ve **ev şarjı hesaplamasından otomatik olarak hariç tutulur** — hem aylık özetlerden hem de tekil değerlendirmelerden.
+
+Tipik kullanım: işverenin sağladığı, özel hesaba dahil edilmemesi gereken iş yeri şarjı. *„↩ ücretli"* düğmesiyle işaret istediğin zaman geri alınabilir.
+
+## 🔐 Güvenlik {#security}
+
+- 🔑 **Passkey / WebAuthn** — Parmak izi, Face ID veya donanım anahtarıyla parolasız giriş
+- 📱 **TOTP MFA** — Authenticator uygulamasıyla iki faktörlü kimlik doğrulama
+- 🛡️ **Hesap kilitleme** — 5 başarısız denemeden sonra hesap 15 dakika kilitlenir
+- 🍪 **Refresh token** — httpOnly çerez, 7 gün geçerli, otomatik rotasyon
+- 📋 **Denetim günlüğü** — Tüm girişler, değişiklikler ve güvenlik olayları kayıt altına alınır
+- 🔒 **HTTPS + HSTS** — TLS 1.2/1.3, HSTS, OCSP stapling, güvenli başlıklar
+
+**Önerilen güvenlik ayarları:**
+
+- İlk girişten sonra MFA'yı (TOTP) etkinleştir
+- Parolasız giriş için bir passkey kur
+- Düzenli olarak yedek (export) al
+- Güçlü parola: en az 16 karakter veya 4 kelimelik passphrase
+
+**Yeni kullanıcılar için zorunlu MFA.** Yeni hesaplar varsayılan olarak `MFA-zorunlu` bayrağıyla oluşturulur — kullanıcı ilk girişinde uygulama otomatik olarak **`/mfa/setup`** sayfasına yönlendirir ve TOTP kurulumu tamamlanmadan kullanıcıyı bırakmaz. Yöneticiler bu bayrağı kullanıcı kaydında (**Yönetici → Kullanıcılar**) kapatabilir veya tekrar açabilir. Yönetici hesapları için MFA zorunlu değildir, ancak şiddetle önerilir.
+
+## 🏢 Çoklu kiracı (Multi-Tenant) {#multitenancy}
+
+Tesla Carview, tek bir örnek üzerinde tamamen izole edilmiş birden fazla kiracıyı destekler. Her kiracının kendi veritabanı vardır — bir kiracı asla başka bir kiracının verilerini göremez.
+
+**Kiracı oluşturma (davet bağlantısı)** — Yeni kiracılar yalnızca bir **davet bağlantısıyla** kayıt olabilir. Bir yönetici, **Yönetici → Kullanıcılar → Davet bağlantısı oluştur** altında bağlantıyı üretir ve isteğe bağlı bir **not** ekleyebilir (ör. „Ahmet Yılmaz için, XY firması") — böylece davet daha sonra tanınabilir. Bağlantı 7 gün geçerlidir ve sadece bir kez kullanılabilir. Geçerli bir bağlantı olmadan `/register` kapalıdır. Mevcut davetler **yeniden gönderilebilir** (aynı not, yeni token), **bloke edilebilir** (listede görünür kalır ama kullanılamaz) veya kalıcı olarak **silinebilir**.
+
+**Kiracı başına birden fazla araç** — Bir Tesla hesabındaki tüm araçlar senkronizasyonda otomatik içe aktarılır. **Ayarlar → Tesla Bağlantısı → 🔄 Araçları senkronize et** ile senkronizasyon istediğin zaman tetiklenebilir — hesaba yeni bir araç eklendiyse kullanışlıdır. Araçlar arasında gezinmek için navigasyon çubuğunun sağ üstünü kullan.
+
+**Kiracı koduyla giriş** — Birden fazla kiracı varsa girişte bir kiracı alanı belirir. Tek kiracıda otomatik tanınır.
+
+**Kullanıcı yönetimi** — Yöneticiler, kendi kiracıları içinde başka kullanıcılar oluşturabilir ve onlara araç atayabilir; **Yönetici → Kullanıcılar** altında. Kullanıcı başına üç yetki ayarlanabilir:
+
+- **Araçları düzenle** — Kullanıcının araç temel verilerini (ad, plaka, renk, elektrik tarifesi, Monta yapılandırması) değiştirmesine izin verir. Yeni kullanıcılarda varsayılan: kapalı.
+- **Araç ekle** — Kullanıcının Tesla hesabından yeni araçları senkronize etmesine izin verir. Varsayılan: kapalı.
+- **MFA zorunlu** — İlk girişte TOTP kurulumunu zorunlu kılar (yukarıdaki Güvenlik bölümüne bakın). Yeni kullanıcılarda varsayılan: açık.
+
+Yöneticiler bu üç hakka örtük olarak sahiptir — kutucuklar yönetici hesaplarda gizlenir. Ayrıca kullanıcı yönetimi sayfasının başlığında, etkin (yönetici olmayan) bir kullanıcının atanmış aracı yoksa turuncu bir **görev kartı** belirir; tek tıkla araç atama veya „Araç ekle" hakkını verme kısayollarıyla.
+
+## 💾 Yedekleme {#backup}
+
+**Manuel dışa aktarma** — **Dışa aktarma** altında: Sürüşler ve şarj seansları için CSV veya JSON, ayrıca ZIP olarak tam yedek.
+
+**Otomatik yedek (sunucu)** — SQLite veritabanları `tesla_data` Docker birimindedir. Sunucuda otomatik yedekleme için:
+
+```bash
+# Saat 03:00'te günlük yedek (crontab -e):
+0 3 * * * cp /var/lib/docker/volumes/tesla_data/_data/*.db /backup/
+```
+
+> ⚠️ **Silmeden önce önemli**
+>
+> Veri silmeden önce mutlaka bir export al. Silinen veriler geri getirilemez.
+
+## ⚡ Tesla Developer API kurulumu {#tesla-api}
+
+Tesla Carview, resmi **Tesla Fleet API** üzerinden iletişim kurar. Bunun için ücretsiz bir Tesla Developer hesabına ve kayıtlı bir uygulamaya ihtiyacın var.
+
+### Adım 1 – Geliştirici hesabı oluştur
+
+1. `developer.tesla.com` adresine git ve Tesla hesabınla giriş yap.
+2. Developer Terms of Service'i kabul et.
+3. **Create Application**'a tıkla.
+
+### Adım 2 – Uygulamayı yapılandır
+
+1. **Application Name:** istediğin ad, örn. *Tesla Carview*
+2. **Description:** kısa açıklama (zorunlu)
+3. **Allowed Origin:** uygulamanın herkese açık URL'si, örn.
+
+   ```
+   https://carview.example.com
+   ```
+
+4. **Redirect URI:** uygulamanın geri çağrı URL'si:
+
+   ```
+   https://carview.example.com/api/auth/callback
+   ```
+
+5. **Scopes (zorunlu):** `vehicle_device_data`, `vehicle_cmds`, `vehicle_charging_cmds`, `vehicle_location`, `openid`, `offline_access`
+6. ⚠ `vehicle_location`, GPS takibi (Fleet Telemetry) için zorunludur
+
+### Adım 3 – Kimlik bilgilerini not et
+
+Oluşturduktan sonra şunları alırsın:
+
+- **Client ID** — UUID benzeri bir karakter dizisi
+- **Client Secret** — yalnızca bir kez görünür, hemen kopyala ve güvenli bir yere kaydet
+
+```env
+TESLA_CLIENT_ID=abc123def456...
+TESLA_CLIENT_SECRET=tsl_secret_...
+```
+
+Bu değerleri `.env` dosyasına yaz veya etkileşimli kurulum sihirbazına gir.
+
+### Adım 4 – Fleet API erişimi başvurusu (komutlar için)
+
+Araç komutlarının (klima, kapılar, şarj) çalışması için uygulamanın Tesla'da *partner* olarak kayıtlı olması gerekir. Bu, bir defalık şu uç nokta üzerinden yapılır:
+
+```
+POST https://fleet-api.prd.na.vn.cloud.tesla.com/api/1/partner_accounts
+```
+
+`FRONTEND_URL` ayarlıysa kurulum betiği bu adımı otomatik yapar. Aksi hâlde Postman veya curl ile manuel yap. Etkinleşmesi 1–3 iş gününü bulur.
+
+### Adım 5 – Tesla Carview içinde bağlan
+
+1. Girişten sonra: **Ayarlar → Tesla Bağlantısı → Tesla'yı yeniden bağla**
+2. Tesla'ya yönlendirilirsin; orada giriş yapıp uygulamaya erişim izni vermelisin.
+3. Yönlendirmeden sonra: **Ayarlar → 🔄 Araçları senkronize et**
+4. Tesla hesabındaki tüm araçlar uygulamada görünür.
+
+### Adım 6 – Fleet Telemetry'yi etkinleştirme (GPS takibi)
+
+Daha yeni araçlarda (örn. 2024'ten itibaren Model Y, XP7 VIN) GPS verisi yalnızca **Fleet Telemetry** üzerinden gelir — REST API'den değil. Bunun için iki tek seferlik adım gerekir:
+
+1. **Uygulamayı Tesla'da kaydet** — Ayarlar → Fleet Telemetry → *„🔑 Uygulamayı Tesla'da kaydet"*'e tıkla. Bir defalık.
+2. **Fleet Telemetry erişimi iste** — Sonraki adım „HTTP 404" ile başarısız olursa Tesla, uç noktayı henüz açmamıştır. Bu durumda Tesla Developer Support'a başvur (aşağıya bak).
+3. **Telemetriyi etkinleştir** — Ayarlar → Fleet Telemetry → *„📡 Telemetriyi etkinleştir"*'e tıkla. Aracı GPS, hız ve batarya verilerini akıtacak şekilde yapılandırır.
+
+**Tesla Support'tan Fleet Telemetry erişimi istemek**
+
+Adım 2, 404 ile başarısız olursa aşağıdaki talebi Tesla Developer Support formuna gönder (`developer.tesla.com/dashboard → Support Inquiry`):
+
+```
+Subject: Fleet Telemetry Access Request – Self-Hosted App for Personal Use
+
+Hello Tesla Developer Support,
+
+I am requesting approval for fleet_telemetry_config access for a
+self-hosted application used exclusively for personal purposes
+(own vehicle, single user).
+
+Context:
+- App name: MyCarviewApp
+- Client ID: a1b2c3d4-0000-0000-0000-e5f6a7b8c9d0
+- Hosting: self-hosted on private infrastructure
+- User scope: single user (vehicle owner)
+- Vehicle VIN: 5YJ3E1EA1NF000000
+
+Current status:
+- OAuth, polling, charging control, and vehicle commands work.
+- fleet_telemetry_config returns HTTP 404.
+
+Use case:
+Personal monitoring of my own vehicle (location, charging state,
+drive state) via my self-hosted backend. No third-party access,
+no commercial use, no data sharing.
+
+Could you please review and enable fleet_telemetry_config?
+
+Thank you
+```
+
+⚠ Client ID ve VIN'i kendi değerlerinle değiştir. Tesla genellikle birkaç gün içinde yanıt verir.
+
+## 🔌 Monta entegrasyonu (faturalandırma) {#monta}
+
+Şirket aracı sürücüleri için: Tesla Carview, **Monta wallbox**'tan şarj verilerini doğrudan çekip işverenin için aylık masraf hesabı oluşturabilir.
+
+> ⚠️ Monta entegrasyonu yalnızca **Şirket aracı** kategorisindeki araçlar için kullanılabilir (Ayarlar → Araç profili → Kategori).
+
+### Adım 1 – Monta API anahtarı oluştur
+
+1. **Monta**'ya giriş yap (uygulama veya web: `portal.monta.com`).
+2. **Ayarlar → API**'ye git.
+3. **API Anahtarı oluştur**'a tıkla ve anahtarı kopyala (`monta_` ile başlar).
+
+Anahtar yalnızca bir kez görünür — hemen Tesla Carview'a gir.
+
+### Adım 2 – Charge-Point ID'sini bul
+
+1. Monta portalında: **Şarj noktaları → Cihazlarım**'ı seç.
+2. **Charge-Point ID** detay görünümünde yer alır (biçim: `cp_12345`).
+3. Alternatif: `GET /api/v1/charge-points` API çağrısı tüm şarj noktalarını ID'leriyle döndürür.
+
+### Adım 3 – Tesla Carview'a girme
+
+1. **Ayarlar → Araç profili**'ne git.
+2. **💼 Şirket aracı** kategorisini seç.
+3. **Wallbox elektrik fiyatı (€/kWh)** gir, örn. `0.34`.
+4. **Monta Charge-Point ID** ve **Monta API anahtarını** ekle.
+5. **Kaydet**'e tıkla.
+
+### Ev wallbox tespiti
+
+Araçta bir **Monta Charge-Point ID** yapılandırıldığında, senkronizasyondan dönen tüm oturumlar tanım gereği ev wallbox'ında yapılan şarjlardır. Uygulama eşleşen yerel oturumları otomatik olarak **ev şarjı** olarak işaretler ve şarj listesinde 🏠 rozeti, faturalandırmada 🏠 işareti gösterir. Bu işaret aylık raporda da güçlü bir „ev/dış" sinyali olarak kullanılır — GPS tabanlı eşleşmeden bağımsızdır, böylece araç şarj sırasında GPS konumu sağlamasa bile oturum doğru sınıflandırılır.
+
+### Faturalandırmayı kullanma
+
+- Navigasyondan **Faturalandırma**'ya git.
+- İstediğin ayı seç — tüm ev şarjları listelenir.
+- Ücretsiz olan şarjları (örn. işverende) şarj geçmişinde **✕ ücretsiz** ile işaretleyebilirsin — bunlar faturadan çıkarılır.
+- **PDF dışa aktar** ile imzaya hazır bir fatura sayfası alırsın.
+
+## 📝 Servis defteri {#logbook}
+
+**Servis defteri**'ni araç işletimiyle ilgili her şeyi belgelemek için kullan: bakım, onarımlar, lastik değişimi, muayene, kazalar ve serbest notlar. Her giriş otomatik olarak şunları alır:
+
+- **Tarih ve saat** — oluştururken varsayılan olarak „şimdi"; geriye dönük ve ileri tarihli girişler de mümkündür.
+- **Yazar** — oturum açan kullanıcı yazar olarak kaydedilir ve her girişin yanında **👤 kullanıcı adı** olarak görüntülenir. Bu özellikten önceki girişler „👤 bilinmiyor" olarak görünür.
+- **Kategori ve isteğe bağlı alanlar** — o anki kilometre, maliyet, serbest açıklama.
+
+Bu sayede daha sonra hangi notu veya bakımı kimin kaydettiği takip edilebilir — birden fazla aktif kullanıcısı olan kiracılarda özellikle yararlıdır.
+
+## 📍 Konumu manuel girme (GPS olmadan) {#manual-location}
+
+Tesla'n GPS göndermiyorsa (Fleet Telemetry'siz XP7-VIN'lerde veya bağlantı kesintilerinde tipik), şarj konumunu ve yolculuk adreslerini elle güncelleyebilirsin:
+
+- **Şarj konumu** — şarj listesinde konum adına tıkla, satır içi düzenleyici açılır. Üç yol: tanımlı bir şarj konumu seç (tarife / konum miras alınır), serbest ad gir veya enlem/boylam koordinatlarını manuel gir (yapılandırılmış yarıçap içinde tanımlı konumlarla otomatik eşleşme, varsayılan 200 m).
+- **Yolculuk adresleri** — `Yolculuk ayrıntısı → ✎ Düzenle` altında: serbest metinle başlangıç ve bitiş adresi, harita için isteğe bağlı enlem/boylam.
+
+Her düzenlenebilir alanda, ne işe yaradığını, ne zaman gerektiğini ve kaydedince ne olacağını açıklayan bir mouse-over ipucu vardır.
+
+## 🎮 Genişletilmiş araç kontrolü {#control-extended}
+
+**Kontrol** sayfası artık Tesla mobil uygulamasının kapsamına oldukça yakındır:
+
+| Alan | Fonksiyonlar |
+|---|---|
+| Klima | Aç/kapat, hedef sıcaklık, ön klimalandırma max-defrost, **climate keeper modları** (kapalı / koruma / 🐶 köpek / ⛺ kamp), direksiyon ısıtması |
+| Koltuklar | 5 koltuk (sürücü, yolcu, arka sol/orta/sağ) × 4 ısıtma kademesi |
+| Gövde | Kapılar, sentry modu, ön bagaj ve bagaj kapağı tetikleyici, tüm camları havalandır/kapat, ışıklar ve korna |
+| Şarj | Başlat/durdur, şarj limiti kaydırıcı, **şarj akımı kaydırıcı (5–48 A)**, şarj kapağı aç/kapat |
+| Boombox | Harici hoparlörler üzerinden 9 hazır Tesla sesi (yalnızca Boombox donanımına sahip araçlar; araç hareketsiz olmalı) |
+| Kalkış zaman planı | Günlük kalkış saati, isteğe bağlı yalnızca Pzt–Cum — Tesla, ön klimalandırmayı yaklaşık 20–30 dk önce başlatır; araç prize takılı olmalı |
+| Off-Peak şarj | Dinamik tarifeler (Tibber, aWattar, gece tarifesi) için sabit şarj başlangıç saati. Kalkış zaman planından farklı olarak araç **geriye doğru hesaplamaz** — saat başlangıçtır, hazır olma süresi değil. Şarj limit dolana kadar devam eder. |
+| Yazılım güncellemesi | Durum (mevcut / indiriliyor / yükleniyor / zamanlanmış), „Şimdi yükle" 1 dk gecikmeli planlar, „İptal" zamanlanmış yüklemeyi siler |
+
+Notlar:
+- Komutlar için aktif **Virtual Key** ve çalışan `tesla-http-proxy` gerekir (Hızlı başlangıç bölümüne bakın).
+- Araç uykudayken komutlar reddedilir — önce „☀️ Uyandır" düğmesine bas (~30 sn).
+- Climate keeper yalnızca sürücü aracı terk ederken klima açıksa çalışır.
+
+## 📜 Yasal içerik yönetimi {#legal-admin}
+
+**Yönetici → Yasal içerik** altında yönetici künye, gizlilik politikası ve kullanım koşullarını günceller. Üç önemli nokta:
+
+- **Varsayılan dili koru, diğerleri takip etsin** — Senkronizasyon modu varsayılan olarak açıktır: Almancayı düzenlersin, diğer beş yerel ayar aynı metni byte-byte yansıtır. Ön yüz mavi bir uyarı şeridi gösterir („şu anda yalnızca Almanca olarak güncellenmektedir"). Senkronizasyon modu, tek bir yerel ayarı bireysel olarak düzenlemek için düzenleme başına kapatılabilir.
+- **Sürüm artışı tarihi otomatik günceller** — Kaydetmede „Sürümü artır" işaretlendiğinde, arka uç önce gövdedeki „Stand:" / „Last updated:" / „Son güncelleme" satırına bugünün tarihini yazar ve ancak ondan sonra sürümü artırır. Böylece her büyük sürüm o satırı elle güncellemen gerekmeden doğru tarihi taşır. Sürüm artışı olmayan basit gövde düzeltmeleri tarihi değişmeden bırakır.
+- **Onay takibi** — Her sürüm artışı, tüm aktif kullanıcıları gizlilik ve koşulları yeniden kabul etmeye zorlar — onay penceresi o ana kadar girişi engeller. Onaylar GDPR uyumlu şekilde kullanıcı + sürüm + IP + zaman damgası olarak kiracı veritabanına kaydedilir.
+
+## 🔧 Servis aralıkları {#service-intervals}
+
+**Ayarlar → Servis aralıkları** altında her araç için tekrar eden servis görevleri tanımlarsın (muayene, bakım, fren hidroliği, mevsimsel lastik değişimi, polen filtresi, silecekler, klima bakımı). Her kayıt **zaman aralığı** (ay), **km aralığı** veya her ikisini de kabul eder. „Standartları oluştur" Tesla için tipik bir listeyi önceden doldurur.
+
+Uygulama „X gün / Y km içinde vade" hesaplar ve süresi geçmiş ya da yakında dolacak öğeleri panelin üstünde gösterir. **Günlük push hatırlatması** (Web-Push), bir aralık < 30 gün veya < 1.000 km kalınca tetiklenir. Anti-spam: her push girişi „bildirildi" olarak işaretler; bir sonraki hatırlatma yalnızca „Tamam" damgası veya 30 günlük erteleme sonrası gelir. „Tamam" otomatik olarak bugünün tarihini ve mevcut kilometreyi atar.
+
+## 📋 Denetim günlüğü {#audit-log}
+
+**Yönetici → Denetim günlüğü** altında yöneticiler tüm güvenlikle ilgili olayları görür: girişler (başarılı + başarısız), hesap kilitleri, MFA kurulumu, yetki değişiklikleri, Tesla komutları, KVKK/GDPR onayları, kullanıcı oluşturma. Eylem, kullanıcı kimliği ve tarih aralığına göre filtrelenebilir. Eylemler renkle kodlanır (başarısızlık için kırmızı, kimlik doğrulama için mavi, yönetici işlemleri için mor). Detay bloğu JSON'u açar. **CSV dışa aktarma**, filtrelenmiş kümeyi Excel'e hazır şekilde verir (noktalı virgül, BOM) — GDPR erişim talepleri veya olay sonrası analiz için uygundur. Veriler kiracı bazında izole edilmiştir.
+
+## 📄 PDF gider belgesi {#pdf-billing}
+
+**Faturalandırma** sayfasındaki **„📄 PDF erzeugen"** butonu imzalanmaya hazır bir A4 belgesi üretir: şirket / araç / dönem başlığı; oturum tablosu (Monta tarafından tespit edilen ev şarjları için 🏠 işareti dahil); toplamlar (oturum / kWh / tutar); imza alanları. Üretim tamamen tarayıcıda `jsPDF` ile yapılır — şarj verileri makinenden ayrılmaz.
+
+## 💸 Dinamik elektrik fiyatı {#dynamic-tariff}
+
+Dinamik bir elektrik tarifeniz varsa (Tibber, aWattar HOURLY, EPEX spot), **Ayarlar → Elektrik fiyatı API'si** altında bir sağlayıcı yapılandırın:
+
+| Sağlayıcı | API Token | Fiyat tabanı |
+|---|---|---|
+| **aWattar** (DE/AT) | gerekmez — kamuya açık | EPEX spot fiyatı, isteğe bağlı + ct/kWh ek ücret |
+| **Tibber** (DE/SE/NO/NL/…) | developer.tibber.com'dan token | Vergiler dahil son müşteri fiyatı |
+
+Pano daha sonra şu anki fiyatı, 24 saatlik bir grafiği ve „en ucuz 4 saatlik pencere" önerisini gösteren bir **tarife widget'ı** görüntüler. **„🚗 Şarjı en ucuz pencereye planla"** tıkı, o pencerenin başlangıcını doğrudan aktif aracın `set_scheduled_charging` ayarına yazar. Fiyatlar 30 dakika önbelleğe alınır. Sağlayıcı yapılandırılmadığında widget gizlenir ve dışa giden hiçbir istek yapılmaz.
+
+## 📒 Vergi dairesi için yolculuk defteri (Alman BMF uyumlu) {#fahrtenbuch-bmf}
+
+Yolculuk defteri, Alman vergi dairelerinin BMF kurallarına göre elektronik yolculuk defteri olarak kabul ettiği bir PDF üretir. Özel/iş kilometrajının ayrılması gereken her ülkede de benzer şekilde faydalıdır.
+
+**Adım adım:**
+
+1. **Her yolculuğu sınıflandır** — tür rozetine tıklayarak Özel → İş → İşe gidiş arasında geçiş yap.
+2. **İş yolculuklarında iki alanı doldur** (BMF zorunluluğu):
+   - **İş ortağı** — kimi ziyaret ettin?
+   - **Amaç** — iş gerekçesi.
+3. **Ayı seç** üstteki filtreden.
+4. **„📄 Finanzamt-PDF" tıkla** — sıralı numaralandırma, her yolculuğun başlangıç ve bitiş kilometresi, mesafe, başlangıç → varış, iş ortağı ve amaçla A4 yatay belge.
+
+**Manipülasyon koruması** — dışa aktarımdan sonra dahil edilen yolculuklar otomatik olarak değişikliklere karşı kilitlenir. Kilitli yolculuklar 🔒 simgesi gösterir. Dışa aktarımdan önce yapılan düzeltmeler yolculuk başına bir **değişiklik geçmişine** kaydedilir.
+
+**Manuel kayıt** — bir yolculuk eksikse **„+ Manuell"** ile tamamen kendin gir. Zorunlu: başlangıç ve bitiş saati. Manuel kayıtlar ✍ rozeti taşır.
+
+**Ardışık yolculukları birleştir** — telemetri bir yolculuğu ikiye bölmüşse (kısa duraklama, GPS boşluğu), ilk yolculukta **„Mit nächster zusammenführen"** tıkla.
+
+## 📱 Akıllı telefon ve Tesla içinde kullanım (PWA kurulumu) {#mobile-tesla-install}
+
+Tesla Carview bir PWA'dır — App Store olmadan yerel uygulama gibi kurulabilir.
+
+**Android / Tesla / Chrome / Edge:** altta „Carview als App installieren" şeridi belirir → **Installieren** dokun. Simge ana ekrana iner.
+
+**iPhone / iPad (Safari):** **Paylaş** → **„Ana Ekrana Ekle"**.
+
+**Tesla ekranı:** arabada tarayıcıyı aç, Carview URL'sini gir. Düzen Tesla ekran boyutuna uyum sağlar; dar görünümde yolculuk defteri büyük dokunma hedefleri olan kart düzenine geçer. **„◫ Karten"** butonu bu görünümü zorlar.
+
+## 🟢 Sistem durumu (yönetici) {#system-health}
+
+**System** altında yöneticiler beş kontrolle renkli trafik ışığı kartı görür:
+
+- **Tesla OAuth token** — bağlı mı? ne zaman sona eriyor?
+- **Virtual Key** — oluşturuldu mu? (imzalı komutlar için gerekli)
+- **Fleet Telemetry** — son veri noktası ne zaman geldi?
+- **Tesla poller** — uygulama aracı en son ne zaman sorguladı?
+- **Kiracı DB** — veritabanı boyutu
+
+Yeşil (her şey yolunda), sarı (dikkat, örn. token yakında dolacak) veya kırmızı (eylem gerekli).
+
+## 🔧 Sorun giderme {#troubleshooting}
+
+**Araç GPS verisi döndürmüyor**
+Daha yeni Tesla modelleri (XP7 VIN, örn. Model Y Juniper) REST API üzerinden `drive_state` vermez. GPS takibi Fleet Telemetry ile yapılır. tesla-http-proxy'nin çalıştığından ve Virtual Key'in kayıtlı olduğundan emin ol.
+
+**Güncellemeden sonra giriş yapılamıyor**
+v2.0'a (multi-tenant) geçişten sonra girişte bir kiracı kodu gerekir. Taşınan veritabanının kodu „default"tur. Onu giriş alanına yaz veya „Kiracı seç"'e tıkla.
+
+**Tesla bağlantısı başarısız (401)**
+Tesla OAuth tokenı süresi dolmuş. Ayarlar → Tesla Bağlantısı'na git ve Tesla hesabını yeniden bağla. `.env` dosyasındaki `TESLA_CLIENT_ID` ve `TESLA_CLIENT_SECRET` değerlerinin doğru olduğundan emin ol.
+
+**Araç komutları başarısız oluyor**
+Kontrol et: 1) tesla-http-proxy çalışıyor (`systemctl status tesla-http-proxy`) 2) Virtual Key araçta kayıtlı (Ayarlar → Araç bağlantısı) 3) Araç çevrimiçi (uyumuyor).
+
+**Telemetri verisi yok / GPS eksik**
+Fleet Telemetry iki adım gerektirir: (1) uygulamayı Tesla'da kaydet (Ayarlar → „🔑 Uygulamayı kaydet"), (2) telemetriyi etkinleştir (Ayarlar → „📡 Telemetriyi etkinleştir"). Adım 2, HTTP 404 ile başarısız olursa Tesla Developer Support'tan `fleet_telemetry_config` erişimi iste — kılavuzun „Adım 6"'sında bir şablon var. Ayrıca `developer.tesla.com` üzerindeki uygulama scope'larında `vehicle_location` etkin olmalı.
+
+**Backend başlamıyor**
+Logları kontrol et: `docker logs tesla-carview-backend`. Sık nedenler: eksik `.env` değişkenleri (`JWT_SECRET`, `TESLA_CLIENT_ID`), veritabanı taşıma hataları.
+
+## ❤️ Uygulama senin için bir değer ifade ediyorsa {#donations}
+
+Tesla Carview, **kendi kendine barındırılan özel kullanım için** ücretsizdir ve reklamsızdır (lisans: PolyForm Noncommercial 1.0.0 — ticari yeniden satış veya üçüncü taraflar için SaaS barındırma izni yoktur). Geri vermek istersen aşağıdaki kuruluşlar desteğine sevinir.
+
+- **[Aktion Deutschland Hilft](https://www.aktion-deutschland-hilft.de/de/spenden/)** — Dünya çapında hızlı ve etkili afet yardımı sağlayan yardım kuruluşları birliği.
+- **[Lebenshilfe Rems-Murr](https://www.lebenshilfe-rems-murr.de/)** — Rems-Murr bölgesindeki engelli bireyler için destek, eşlik ve katılım.
+- **[Radio 7 Drachenkinder](https://www.radio7.de/aktionen/drachenkinder)** — Bölgedeki ağır hasta çocuklara yardım — terapileri, gezileri ve dilekleri finanse eder.
+
+Bağışının %100'ü doğrudan kuruma gider. Ne tutarı ne de verilerini biz görürüz.

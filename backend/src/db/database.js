@@ -1,0 +1,521 @@
+import Database from 'better-sqlite3';
+import { readFileSync, mkdirSync, existsSync, copyFileSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+import { randomUUID } from 'crypto';
+import { LEGAL_DEFAULTS, LEGAL_SCOPES, LEGAL_LOCALES } from './legalDefaults.js';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const DATA_DIR   = process.env.DATA_DIR   || './data';
+const TENANTS_DIR = join(DATA_DIR, 'tenants');
+
+let masterDb = null;
+const tenantConnections = new Map();
+
+function ensureDirs() {
+  mkdirSync(DATA_DIR,    { recursive: true });
+  mkdirSync(TENANTS_DIR, { recursive: true });
+}
+
+export function getMasterDb() {
+  if (!masterDb) {
+    ensureDirs();
+    masterDb = new Database(join(DATA_DIR, 'master.db'));
+    masterDb.pragma('journal_mode = WAL');
+    masterDb.pragma('foreign_keys = ON');
+  }
+  return masterDb;
+}
+
+export function getDb(tenantId) {
+  if (!tenantId) throw new Error('tenantId erforderlich');
+  if (tenantConnections.has(tenantId)) return tenantConnections.get(tenantId);
+
+  const tenant = getMasterDb().prepare('SELECT * FROM tenants WHERE id=?').get(tenantId);
+  if (!tenant) throw new Error(`Mandant nicht gefunden: ${tenantId}`);
+
+  const db = new Database(tenant.db_path);
+  db.pragma('journal_mode = WAL');
+  db.pragma('foreign_keys = ON');
+  tenantConnections.set(tenantId, db);
+  return db;
+}
+
+export function getAllTenants() {
+  return getMasterDb().prepare('SELECT * FROM tenants ORDER BY created_at').all();
+}
+
+export function getTenantBySlug(slug) {
+  return getMasterDb().prepare('SELECT * FROM tenants WHERE slug=?').get(slug) ?? null;
+}
+
+export function getTenantById(id) {
+  return getMasterDb().prepare('SELECT * FROM tenants WHERE id=?').get(id) ?? null;
+}
+
+export function getTenantByVin(vin) {
+  return getMasterDb().prepare(
+    'SELECT t.* FROM tenants t JOIN vin_registry v ON v.tenant_id=t.id WHERE v.vin=?'
+  ).get(vin) ?? null;
+}
+
+export function registerVin(vin, tenantId) {
+  getMasterDb().prepare(
+    'INSERT OR REPLACE INTO vin_registry (vin, tenant_id) VALUES (?, ?)'
+  ).run(vin, tenantId);
+}
+
+export function setTenantStatus(id, status) {
+  const suspendedAt = status === 'suspended' ? Math.floor(Date.now() / 1000) : null;
+  getMasterDb().prepare(
+    'UPDATE tenants SET status=?, suspended_at=? WHERE id=?'
+  ).run(status, suspendedAt, id);
+}
+
+export function renameTenant(id, name) {
+  getMasterDb().prepare('UPDATE tenants SET name=? WHERE id=?').run(name, id);
+}
+
+export function closeTenantConnection(id) {
+  const db = tenantConnections.get(id);
+  if (db) { try { db.close(); } catch { /* ignore */ } }
+  tenantConnections.delete(id);
+}
+
+export function dropTenant(id) {
+  const master = getMasterDb();
+  closeTenantConnection(id);
+  // ON DELETE CASCADE räumt vin_registry + refresh_tokens auf
+  master.prepare('DELETE FROM tenants WHERE id=?').run(id);
+}
+
+/** Stellt sicher, dass es einen Demo-Mandanten gibt — idempotent.
+ *  Wird beim Backend-Start aufgerufen, wenn DEMO_ENABLED=true. */
+export function ensureDemoTenant() {
+  const master = getMasterDb();
+  const existing = master.prepare(
+    "SELECT id FROM tenants WHERE is_demo = 1 LIMIT 1"
+  ).get();
+  if (existing) return existing.id;
+  const id = createTenant('demo', 'Demo-Sandbox');
+  master.prepare('UPDATE tenants SET is_demo = 1 WHERE id = ?').run(id);
+  console.log('[Demo] Demo-Mandant angelegt — slug=demo, id=', id);
+  return id;
+}
+
+export function createTenant(slug, name) {
+  ensureDirs();
+  const id     = randomUUID();
+  const dbPath = join(TENANTS_DIR, `${id}.db`);
+
+  const db = new Database(dbPath);
+  db.pragma('journal_mode = WAL');
+  db.pragma('foreign_keys = ON');
+  const schema = readFileSync(join(__dirname, 'schema.sql'), 'utf8');
+  db.exec(schema);
+  runTenantMigrations(db);
+
+  getMasterDb().prepare(
+    'INSERT INTO tenants (id, slug, name, db_path) VALUES (?, ?, ?, ?)'
+  ).run(id, slug, name, dbPath);
+
+  tenantConnections.set(id, db);
+  console.log(`[DB] Mandant erstellt: "${name}" (${slug}) → ${dbPath}`);
+  return id;
+}
+
+function runMasterMigrations(master) {
+  const cols = master.prepare('PRAGMA table_info(tenants)').all().map(c => c.name);
+  if (!cols.includes('status')) {
+    master.exec("ALTER TABLE tenants ADD COLUMN status TEXT NOT NULL DEFAULT 'active'");
+  }
+  if (!cols.includes('suspended_at')) {
+    master.exec('ALTER TABLE tenants ADD COLUMN suspended_at INTEGER');
+  }
+  // is_demo: kennzeichnet einen Mandanten als Demo-/Sandbox-Mandant.
+  // Die Demo-Routen verwenden ausschliesslich diesen Mandanten; alle
+  // anderen sind unberuehrt. Wird beim Demo-Setup auf 1 gesetzt.
+  if (!cols.includes('is_demo')) {
+    master.exec('ALTER TABLE tenants ADD COLUMN is_demo INTEGER NOT NULL DEFAULT 0');
+  }
+}
+
+/**
+ * Schreibt initiale Default-Inhalte für /legal/{imprint,privacy,terms} in
+ * `legal_content`. INSERT OR IGNORE: bestehende Admin-Bearbeitungen werden
+ * nie überschrieben. Beim allerersten Start sieht ein Admin Platzhalter
+ * (`<<NAME>>`, `<<EMAIL>>` …); das Frontend warnt, solange welche im aktiven
+ * Inhalt stehen.
+ */
+function seedLegalDefaults(master) {
+  const stmt = master.prepare(
+    'INSERT OR IGNORE INTO legal_content (scope, locale, version, body_md) VALUES (?, ?, 1, ?)'
+  );
+  for (const scope of LEGAL_SCOPES) {
+    for (const locale of LEGAL_LOCALES) {
+      const body = LEGAL_DEFAULTS[scope]?.[locale];
+      if (body) stmt.run(scope, locale, body);
+    }
+  }
+}
+
+export function initMasterDb() {
+  ensureDirs();
+  const master = getMasterDb();
+  master.exec(readFileSync(join(__dirname, 'master-schema.sql'), 'utf8'));
+  runMasterMigrations(master);
+  seedLegalDefaults(master);
+
+  const tenantCount = master.prepare('SELECT COUNT(*) as n FROM tenants').get().n;
+  const legacyPath  = process.env.DB_PATH || join(DATA_DIR, 'tesla-carview.db');
+
+  if (tenantCount === 0 && existsSync(legacyPath)) {
+    const id      = randomUUID();
+    const newPath = join(TENANTS_DIR, `${id}.db`);
+    copyFileSync(legacyPath, newPath);
+
+    const tdb = new Database(newPath);
+    tdb.pragma('journal_mode = WAL');
+    tdb.pragma('foreign_keys = ON');
+    runTenantMigrations(tdb);
+    migrateLegacyTokens(master, tdb, id);
+
+    master.prepare(
+      'INSERT INTO tenants (id, slug, name, db_path) VALUES (?, ?, ?, ?)'
+    ).run(id, 'default', 'Default', newPath);
+
+    const vins = tdb.prepare('SELECT vin FROM vehicles WHERE vin IS NOT NULL').all();
+    const vinStmt = master.prepare('INSERT OR IGNORE INTO vin_registry (vin, tenant_id) VALUES (?, ?)');
+    for (const { vin } of vins) vinStmt.run(vin, id);
+
+    tenantConnections.set(id, tdb);
+    console.log(`[DB] Legacy-DB als Mandant "default" migriert (${id})`);
+  }
+
+  const tenants = master.prepare('SELECT * FROM tenants').all();
+  for (const t of tenants) {
+    if (!tenantConnections.has(t.id)) {
+      const db = new Database(t.db_path);
+      db.pragma('journal_mode = WAL');
+      db.pragma('foreign_keys = ON');
+      runTenantMigrations(db);
+      tenantConnections.set(t.id, db);
+    }
+  }
+
+  console.log(`[DB] Master-DB initialisiert (${tenants.length} Mandant(en))`);
+}
+
+function migrateLegacyTokens(master, tdb, tenantId) {
+  try {
+    const tokens = tdb.prepare('SELECT * FROM refresh_tokens WHERE expires_at > unixepoch()').all();
+    const ins = master.prepare(
+      `INSERT OR IGNORE INTO refresh_tokens
+       (tenant_id, user_id, token_hash, expires_at, ip_address, user_agent, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`
+    );
+    for (const t of tokens) {
+      ins.run(tenantId, t.user_id, t.token_hash, t.expires_at, t.ip_address, t.user_agent, t.created_at);
+    }
+  } catch { /* ignore if table missing */ }
+}
+
+function runTenantMigrations(db) {
+  const col = (tbl) => db.prepare(`PRAGMA table_info(${tbl})`).all().map(c => c.name);
+
+  // users: email, lang
+  const uCols = col('users');
+  if (!uCols.includes('email')) {
+    db.exec('ALTER TABLE users ADD COLUMN email TEXT');
+    db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email) WHERE email IS NOT NULL');
+  }
+  if (!uCols.includes('lang')) {
+    db.exec("ALTER TABLE users ADD COLUMN lang TEXT DEFAULT 'de'");
+  }
+
+  // trips
+  const tCols = col('trips');
+  if (!tCols.includes('start_odometer_km')) {
+    db.exec('ALTER TABLE trips ADD COLUMN start_odometer_km REAL');
+    db.exec('ALTER TABLE trips ADD COLUMN end_odometer_km REAL');
+    db.exec("ALTER TABLE trips ADD COLUMN source TEXT DEFAULT 'odometer'");
+  }
+  if (!tCols.includes('trip_type')) {
+    db.exec("ALTER TABLE trips ADD COLUMN trip_type TEXT NOT NULL DEFAULT 'private'");
+    db.exec('ALTER TABLE trips ADD COLUMN purpose TEXT');
+  }
+  if (!tCols.includes('driver_id')) {
+    db.exec('ALTER TABLE trips ADD COLUMN driver_id INTEGER');
+  }
+  // BMF-Pflichtangaben fuers elektronische Fahrtenbuch:
+  //   business_partner: bei Dienstfahrten der aufgesuchte Geschaeftspartner
+  //   locked_at:        wenn ans Finanzamt exportiert → keine Aenderung mehr
+  //   exported_at:      letzter Finanzamt-PDF-Export
+  //   is_manual:        1 wenn manuell eingegeben (kein Tesla-Auto-Trip)
+  if (!tCols.includes('business_partner')) {
+    db.exec('ALTER TABLE trips ADD COLUMN business_partner TEXT');
+    db.exec('ALTER TABLE trips ADD COLUMN locked_at INTEGER');
+    db.exec('ALTER TABLE trips ADD COLUMN exported_at INTEGER');
+    db.exec('ALTER TABLE trips ADD COLUMN is_manual INTEGER NOT NULL DEFAULT 0');
+  }
+  // Aenderungshistorie pro Trip — BMF verlangt, dass nachtraegliche
+  // Aenderungen dokumentiert werden („technisch ausgeschlossen oder
+  // dokumentiert"). Wir loggen field/old/new + user + timestamp.
+  db.exec(`CREATE TABLE IF NOT EXISTS trip_changes (
+    id INTEGER PRIMARY KEY,
+    trip_id INTEGER NOT NULL REFERENCES trips(id) ON DELETE CASCADE,
+    changed_by_user_id INTEGER,
+    changed_at INTEGER DEFAULT (unixepoch()),
+    field TEXT NOT NULL,
+    old_value TEXT,
+    new_value TEXT
+  )`);
+
+  // drivers
+  db.exec(`CREATE TABLE IF NOT EXISTS drivers (
+    id         INTEGER PRIMARY KEY,
+    name       TEXT NOT NULL,
+    color      TEXT DEFAULT '#6b7280',
+    is_default INTEGER DEFAULT 0,
+    created_at INTEGER DEFAULT (unixepoch())
+  )`);
+
+  // vehicles
+  const vCols = col('vehicles');
+  if (!vCols.includes('category')) {
+    db.exec("ALTER TABLE vehicles ADD COLUMN category TEXT NOT NULL DEFAULT 'private'");
+    db.exec('ALTER TABLE vehicles ADD COLUMN company_name TEXT');
+    db.exec('ALTER TABLE vehicles ADD COLUMN electricity_rate_kwh REAL DEFAULT 0.30');
+    db.exec('ALTER TABLE vehicles ADD COLUMN monta_api_key TEXT');
+    db.exec('ALTER TABLE vehicles ADD COLUMN monta_charge_point_id TEXT');
+  }
+  if (!vCols.includes('monta_client_id')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN monta_client_id TEXT');
+  }
+  // state_updated_at + odometer_km direkt auf vehicles — der Poller
+  // pflegt beides bei jedem Tesla-API-Call. odometer_km wird zusaetzlich
+  // im JOIN von service-intervals (Faelligkeit nach km) gebraucht; ohne
+  // die Spalte wirft die Route 500 „no such column: v.odometer_km".
+  const vehiclesCols = col('vehicles');
+  if (!vehiclesCols.includes('state_updated_at')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN state_updated_at INTEGER');
+  }
+  if (!vehiclesCols.includes('odometer_km')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN odometer_km REAL');
+  }
+
+  // charging_sessions
+  const csCols = col('charging_sessions');
+  if (!csCols.includes('location_id')) {
+    db.exec('ALTER TABLE charging_sessions ADD COLUMN location_id INTEGER');
+    db.exec('ALTER TABLE charging_sessions ADD COLUMN energy_kwh_mid REAL');
+    db.exec('ALTER TABLE charging_sessions ADD COLUMN billing_rate_kwh REAL');
+    db.exec('ALTER TABLE charging_sessions ADD COLUMN monta_session_id TEXT');
+    db.exec("ALTER TABLE charging_sessions ADD COLUMN billing_status TEXT DEFAULT 'pending'");
+  }
+  if (!csCols.includes('is_free')) {
+    db.exec('ALTER TABLE charging_sessions ADD COLUMN is_free INTEGER NOT NULL DEFAULT 0');
+  }
+  // is_home_charged: explizites Flag „an der Heim-Wallbox geladen".
+  // Wird von der Monta-Synchronisation gesetzt, wenn der konfigurierte
+  // home charge point matcht — und kann auch manuell ueber die UI
+  // gesetzt werden. Vorteile gegenueber „location_id auf home zeigen":
+  // bleibt erhalten, wenn der Admin den Heim-Ort spaeter umbenennt
+  // oder der location_id-Link sich anders aendert.
+  if (!csCols.includes('is_home_charged')) {
+    db.exec('ALTER TABLE charging_sessions ADD COLUMN is_home_charged INTEGER NOT NULL DEFAULT 0');
+  }
+
+  // charging_locations (mit lat/lon/radius)
+  db.exec(`CREATE TABLE IF NOT EXISTS charging_locations (
+    id         INTEGER PRIMARY KEY,
+    vehicle_id INTEGER REFERENCES vehicles(id) ON DELETE CASCADE,
+    name       TEXT NOT NULL,
+    address    TEXT,
+    type       TEXT NOT NULL DEFAULT 'home',
+    rate_kwh   REAL,
+    is_default INTEGER DEFAULT 0,
+    lat        REAL,
+    lon        REAL,
+    radius_m   INTEGER DEFAULT 200,
+    created_at INTEGER DEFAULT (unixepoch())
+  )`);
+  const clCols = col('charging_locations');
+  if (!clCols.includes('lat'))      db.exec('ALTER TABLE charging_locations ADD COLUMN lat REAL');
+  if (!clCols.includes('lon'))      db.exec('ALTER TABLE charging_locations ADD COLUMN lon REAL');
+  if (!clCols.includes('radius_m')) db.exec('ALTER TABLE charging_locations ADD COLUMN radius_m INTEGER DEFAULT 200');
+
+  // vehicle_users
+  db.exec(`CREATE TABLE IF NOT EXISTS vehicle_users (
+    vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+    user_id    INTEGER NOT NULL REFERENCES users(id)    ON DELETE CASCADE,
+    PRIMARY KEY (vehicle_id, user_id)
+  )`);
+
+  // tenant_settings
+  db.exec(`CREATE TABLE IF NOT EXISTS tenant_settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT
+  )`);
+
+  // tesla_api_usage – Zähler je Monat × Kategorie × Endpoint
+  db.exec(`CREATE TABLE IF NOT EXISTS tesla_api_usage (
+    id              INTEGER PRIMARY KEY,
+    period          TEXT    NOT NULL,            -- "YYYY-MM"
+    category        TEXT    NOT NULL,            -- vehicle_data | wake | command | streaming_signal | other
+    endpoint        TEXT    NOT NULL,            -- z. B. "GET /api/1/vehicles/:id/vehicle_data"
+    count           INTEGER NOT NULL DEFAULT 0,
+    cost_usd        REAL    NOT NULL DEFAULT 0,
+    last_call_at    INTEGER,
+    UNIQUE (period, category, endpoint)
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_tesla_usage_period ON tesla_api_usage(period)');
+
+  // tesla_usage_events – aus Tesla-Validierungs-Mails (Webhook)
+  db.exec(`CREATE TABLE IF NOT EXISTS tesla_usage_events (
+    id           INTEGER PRIMARY KEY,
+    received_at  INTEGER NOT NULL DEFAULT (unixepoch()),
+    subject      TEXT,
+    period       TEXT,
+    spend_usd    REAL,
+    threshold    TEXT,
+    raw_body     TEXT
+  )`);
+
+  // Default-Tarife & Limit – Tesla 2024er Preisliste (USD); Admin kann anpassen
+  const seed = (k, v) => db.prepare(
+    'INSERT OR IGNORE INTO tenant_settings (key, value) VALUES (?, ?)'
+  ).run(k, v);
+  seed('tesla_usage.currency',           'USD');
+  seed('tesla_usage.monthly_limit_usd',  '50');
+  seed('tesla_usage.free_credit_usd',    '10');
+  seed('tesla_usage.hard_stop_enabled',  '0');
+  seed('tesla_usage.hard_stop_pct',      '90');
+  seed('tesla_usage.rate_vehicle_data',  '0.005');
+  seed('tesla_usage.rate_wake',          '0.005');
+  seed('tesla_usage.rate_command',       '0.005');
+  seed('tesla_usage.rate_streaming_signal','0.000005');
+  seed('tesla_usage.rate_other',         '0.005');
+
+  // i18n – Mandanten-Standard-Sprache (User-Profil-Auswahl überschreibt sie)
+  seed('i18n.default_locale',            'de');
+
+  // billing_periods
+  db.exec(`CREATE TABLE IF NOT EXISTS billing_periods (
+    id           INTEGER PRIMARY KEY,
+    vehicle_id   INTEGER NOT NULL REFERENCES vehicles(id),
+    period_start INTEGER NOT NULL,
+    period_end   INTEGER NOT NULL,
+    total_kwh    REAL DEFAULT 0,
+    total_amount REAL DEFAULT 0,
+    rate_kwh     REAL,
+    status       TEXT DEFAULT 'draft',
+    notes        TEXT,
+    created_at   INTEGER DEFAULT (unixepoch())
+  )`);
+
+  // oauth_pkce (lokal, wird auch in master gepflegt)
+  db.exec(`CREATE TABLE IF NOT EXISTS oauth_pkce (
+    state         TEXT PRIMARY KEY,
+    code_verifier TEXT NOT NULL,
+    created_at    INTEGER DEFAULT (unixepoch())
+  )`);
+
+  // legal_acceptance — DSGVO-Nachweis: wer hat welche Version von Privacy/Terms
+  // wann akzeptiert? Wir behalten alle Versionen (UNIQUE statt PRIMARY KEY auf
+  // user/scope/version), damit eine Akzept-Historie auditierbar bleibt.
+  db.exec(`CREATE TABLE IF NOT EXISTS legal_acceptance (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    scope       TEXT    NOT NULL,
+    version     INTEGER NOT NULL,
+    accepted_at INTEGER NOT NULL DEFAULT (unixepoch()),
+    ip_address  TEXT,
+    user_agent  TEXT,
+    UNIQUE (user_id, scope, version)
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_legal_acceptance_user ON legal_acceptance(user_id)');
+
+  // Feinkoernige Permissions auf User-Ebene (zusaetzlich zur Rolle).
+  // - mfa_required:       Pflicht-MFA-Setup nach erstem Login (per Default
+  //                        fuer alle neu eingeladenen non-admin-User gesetzt).
+  // - can_edit_vehicles:  darf Fahrzeug-Grunddaten bearbeiten (sonst nur Admin).
+  // - can_add_vehicles:   darf neue Fahrzeuge hinzufuegen / per Tesla-Sync
+  //                        importieren (sonst nur Admin).
+  const userCols = db.prepare('PRAGMA table_info(users)').all().map(c => c.name);
+  if (!userCols.includes('mfa_required')) {
+    db.exec("ALTER TABLE users ADD COLUMN mfa_required INTEGER NOT NULL DEFAULT 0");
+  }
+  if (!userCols.includes('can_edit_vehicles')) {
+    db.exec("ALTER TABLE users ADD COLUMN can_edit_vehicles INTEGER NOT NULL DEFAULT 0");
+  }
+  if (!userCols.includes('can_add_vehicles')) {
+    db.exec("ALTER TABLE users ADD COLUMN can_add_vehicles INTEGER NOT NULL DEFAULT 0");
+  }
+
+  // user_invites — Admin laed neue User in den eigenen Mandanten ein.
+  // Token-basierter Selbstregistrierungs-Link, einmalig verwendbar.
+  db.exec(`CREATE TABLE IF NOT EXISTS user_invites (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    token               TEXT NOT NULL UNIQUE,
+    role                TEXT NOT NULL DEFAULT 'user',
+    created_by_user_id  INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    created_at          INTEGER NOT NULL DEFAULT (unixepoch()),
+    expires_at          INTEGER NOT NULL,
+    used_at             INTEGER,
+    used_by_user_id     INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    note                TEXT
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_user_invites_token ON user_invites(token)');
+
+  // users.expires_at — fuer Demo-Tester, die nach 14 Tagen rueckstandlos
+  // geloescht werden. Bleibt fuer Echt-Accounts NULL.
+  const usersCols = col('users');
+  if (!usersCols.includes('expires_at')) {
+    db.exec('ALTER TABLE users ADD COLUMN expires_at INTEGER');
+  }
+
+  // logbook_entries: created_by_user_id — wer hat den Eintrag erstellt?
+  // Nullable, weil historische Eintraege keinen User kennen. Wir zeigen
+  // im UI „— unbekannt —", wenn null.
+  const lbCols = col('logbook_entries');
+  if (!lbCols.includes('created_by_user_id')) {
+    db.exec('ALTER TABLE logbook_entries ADD COLUMN created_by_user_id INTEGER');
+  }
+
+  // Wartungsintervalle — pro Fahrzeug definierte Service-/Wartungs-Pflichten
+  // mit zeitlichem oder km-Intervall. Liefert dem Dashboard eine
+  // „faellig in X Tagen / Y km"-Karte und speist taegliche Push-
+  // Erinnerungen. UNIQUE(vehicle_id, kind) verhindert versehentliche
+  // Duplikate beim Seeding.
+  db.exec(`CREATE TABLE IF NOT EXISTS service_intervals (
+    id INTEGER PRIMARY KEY,
+    vehicle_id INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+    kind TEXT NOT NULL,
+    label TEXT NOT NULL,
+    interval_months INTEGER,
+    interval_km INTEGER,
+    last_done_at INTEGER,
+    last_done_km REAL,
+    snoozed_until INTEGER,
+    is_active INTEGER NOT NULL DEFAULT 1,
+    notified_at INTEGER,
+    created_at INTEGER DEFAULT (unixepoch()),
+    updated_at INTEGER DEFAULT (unixepoch()),
+    UNIQUE(vehicle_id, kind)
+  )`);
+
+  // Indexes
+  db.exec('CREATE INDEX IF NOT EXISTS idx_trips_vehicle      ON trips(vehicle_id, start_time DESC)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_charging_vehicle   ON charging_sessions(vehicle_id, start_time DESC)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_battery_vehicle    ON battery_snapshots(vehicle_id, timestamp DESC)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_logbook_vehicle    ON logbook_entries(vehicle_id, entry_date DESC)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_trip_points        ON trip_points(trip_id, timestamp)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_charging_points    ON charging_points(session_id, timestamp)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_audit_logs         ON audit_logs(user_id, created_at DESC)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_telemetry_vehicle  ON telemetry_points(vehicle_id, timestamp DESC)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_telemetry_trip     ON telemetry_points(trip_id, timestamp)');
+}
+
+// Alias für Abwärtskompatibilität
+export function initDb() { return initMasterDb(); }

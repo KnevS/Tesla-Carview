@@ -1,0 +1,1138 @@
+{
+  "common": {
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "loading": "Lade...",
+    "yes": "Ja",
+    "no": "Nein",
+    "back": "Zurück",
+    "close": "Schließen",
+    "confirm": "Bestätigen",
+    "create": "Anlegen",
+    "add": "Hinzufügen",
+    "remove": "Entfernen",
+    "edit": "Bearbeiten",
+    "next": "Weiter →",
+    "prev": "← Zurück",
+    "error": "Fehler",
+    "success": "Erfolgreich",
+    "logout": "Abmelden",
+    "noData": "Keine Daten vorhanden",
+    "noVehicle": "Kein Fahrzeug verbunden",
+    "all": "Alle",
+    "from": "Von",
+    "to": "Nach",
+    "private": "Privat",
+    "business": "Dienstfahrt",
+    "commute": "Arbeitsweg",
+    "km": "km",
+    "kwh": "kWh",
+    "donate": "Spenden"
+  },
+  "lang": {
+    "title": "Sprache / Language",
+    "label": "Anzeigesprache",
+    "de": "Deutsch",
+    "en": "English",
+    "fr": "Français",
+    "es": "Español",
+    "tr": "Türkçe",
+    "el": "Ελληνικά",
+    "switcher": "Sprache wechseln"
+  },
+  "nav": {
+    "dashboard": {
+      "label": "Dashboard",
+      "tooltip": "Übersicht mit Kennzahlen, letzter Fahrt und Monatsstatistik"
+    },
+    "trips": {
+      "label": "Fahrten",
+      "tooltip": "Liste aller aufgezeichneten Fahrten mit GPS-Track auf einer Karte"
+    },
+    "fahrtenbuch": {
+      "label": "Fahrtenbuch",
+      "tooltip": "Fahrten klassifizieren und Auswertung nach Privat/Dienst/Arbeitsweg"
+    },
+    "abrechnung": {
+      "label": "Abrechnung",
+      "tooltip": "Kostenabrechnung Heimladen für Dienstwagen"
+    },
+    "charging": {
+      "label": "Laden",
+      "tooltip": "Alle Ladevorgänge mit Ladekurven, Kosten und Aufschlüsselung nach Ladertyp"
+    },
+    "battery": {
+      "label": "Batterie",
+      "tooltip": "Reichweiten-Verlauf und Degradations-Analyse über Zeit"
+    },
+    "logbook": {
+      "label": "Betriebsbuch",
+      "tooltip": "Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug"
+    },
+    "telemetry": {
+      "label": "Technik",
+      "tooltip": "Live-Fahrzeugdaten: Reifendruck, Klima, Leistung, SOC – wie der Track-Mode"
+    },
+    "control": {
+      "label": "Steuerung",
+      "tooltip": "Fahrzeug steuern: Klima, Türen, Laden, Navigation"
+    },
+    "export": {
+      "label": "Export",
+      "tooltip": "Daten als CSV/JSON exportieren, Vollbackup erstellen, Push-Benachrichtigungen"
+    },
+    "system": {
+      "label": "System",
+      "tooltip": "Versionsinformationen, CPU-/RAM-Auslastung und Datenbankstatistiken"
+    },
+    "group_overview": "Übersicht",
+    "group_analytics": "Auswertung",
+    "group_admin": "Verwaltung"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "loading": "Lade Daten...",
+    "connectHint": "Verbinde deinen Tesla-Account um Fahrtdaten zu sehen",
+    "connectBtn": "Tesla verbinden →",
+    "totalKm": "Gesamtstrecke",
+    "trips": "Fahrten",
+    "charged": "Geladen",
+    "chargingCost": "Ladekosten",
+    "lastTrip": "Letzte Fahrt",
+    "allTrips": "Alle Fahrten anzeigen →",
+    "monthlyKm": "Monatsübersicht – Strecke (km)",
+    "distance": "Strecke",
+    "consumption": "Verbrauch",
+    "noTrips": "Noch keine Fahrten aufgezeichnet."
+  },
+  "trips": {
+    "title": "Fahrten",
+    "loading": "Lade Fahrten...",
+    "loadMore": "Mehr laden",
+    "allTypes": "Alle Typen",
+    "allDrivers": "Alle Fahrer",
+    "noDriver": "Kein Fahrer",
+    "filterPrivate": "Privatfahrten",
+    "filterBusiness": "Dienstfahrten",
+    "filterCommute": "Arbeitswege",
+    "start": "Start",
+    "dest": "Ziel",
+    "distance": "Strecke",
+    "consumption": "Verbrauch",
+    "soc": "SoC",
+    "purpose": "Fahrtzweck eingeben (z.B. Kundenbesuch, Dienstreise)…",
+    "assignDriver": "Fahrer zuweisen",
+    "noDriverLabel": "– Fahrer"
+  },
+  "tripDetail": {
+    "back": "← Fahrten",
+    "title": "Fahrtdetail",
+    "loading": "Lade...",
+    "distance": "Strecke",
+    "duration": "Dauer",
+    "avgSpeed": "Ø Geschw.",
+    "consumption": "Verbrauch",
+    "gpsTrack": "GPS-Track",
+    "noGps": "Keine GPS-Daten für diese Fahrt vorhanden.",
+    "route": "Route",
+    "speedChart": "Geschwindigkeit & Leistung",
+    "battery": "Batterie",
+    "startSoc": "Start SoC",
+    "endSoc": "End SoC",
+    "totalEnergy": "Verbrauch gesamt",
+    "driver": "Fahrer",
+    "noDriverAssigned": "– kein Fahrer"
+  },
+  "logbook": {
+    "title": "Fahrtenbuch",
+    "allMonths": "Alle Monate",
+    "totalKm": "Gesamt km",
+    "private": "Privatfahrten",
+    "business": "Dienstfahrten",
+    "commute": "Arbeitswege",
+    "kmSplit": "Kilometeraufteilung"
+  },
+  "charging": {
+    "title": "Laden",
+    "sessions": "Ladesessions",
+    "totalCharged": "Geladen gesamt",
+    "totalCost": "Ladekosten",
+    "maxPower": "Max. Ladeleistung",
+    "byType": "Nach Ladertyp",
+    "loading": "Lade Sessions...",
+    "unknownLocation": "Unbekannter Ort",
+    "free": "kostenlos",
+    "markFree": "✕ kostenlos",
+    "unmarkFree": "↩ kostenpflichtig",
+    "editRate": "✎ Tarif",
+    "rateTooltip": "Ladepreis für diese Session individuell anpassen (überschreibt den Standardtarif)",
+    "rateSet": "Setzen"
+  },
+  "battery": {
+    "title": "Batterie & Degradation",
+    "rangeHistory": "Reichweiten-Verlauf",
+    "degradationOverview": "Degradations-Übersicht",
+    "firstMeasurement": "Erste Messung",
+    "lastMeasurement": "Letzte Messung",
+    "degradation": "Degradation",
+    "noData": "Noch nicht genug Daten für Degradations-Analyse"
+  },
+  "control": {
+    "title": "Fahrzeugsteuerung",
+    "online": "Online",
+    "sleeping": "Schläft",
+    "offline": "Offline",
+    "wake": "☀️ Aufwecken",
+    "sleepHint": "Fahrzeug schläft oder ist offline",
+    "climate": "🌡 Klimaanlage",
+    "on": "Ein",
+    "off": "Aus",
+    "temp": "Temperatur",
+    "setTemp": "Temperatur setzen",
+    "preCondition": "❄️ Vorklimatisierung / Max-Defrost",
+    "vehicle": "🚗 Fahrzeug",
+    "doors": "Türen",
+    "unlock": "🔓 Öffnen",
+    "lock": "🔒 Sperren",
+    "sentryMode": "Sentry-Mode",
+    "lights": "💡 Lichter",
+    "horn": "📯 Hupen",
+    "charging": "⚡ Laden",
+    "chargeStart": "Start",
+    "chargeStop": "Stop",
+    "chargeLimit": "Ladelimit",
+    "setChargeLimit": "Ladelimit setzen",
+    "navigation": "🗺️ Navigation",
+    "navPlaceholder": "Adresse oder Ort eingeben…",
+    "sendNav": "Ziel senden",
+    "recentNav": "Zuletzt verwendet"
+  },
+  "exportPage": {
+    "title": "Daten exportieren",
+    "tripsLabel": "🗺️ Fahrten",
+    "tripsDesc": "Alle Fahrtdaten mit Strecke, Verbrauch und SoC",
+    "chargingLabel": "🔋 Ladevorgänge",
+    "backupLabel": "💾 Vollständiges Backup",
+    "backupDesc": "Alle Daten (Fahrten, Laden, Batterie, Betriebsbuch) als eine JSON-Datei",
+    "notifications": "🔔 Benachrichtigungen",
+    "notificationsDesc": "Erhalte eine Browser-Benachrichtigung wenn dein Tesla fertig geladen hat",
+    "enableNotifications": "Benachrichtigungen aktivieren",
+    "notificationsActive": "✓ Benachrichtigungen aktiv",
+    "disableNotifications": "Deaktivieren",
+    "downloadFailed": "Download fehlgeschlagen"
+  },
+  "maintenanceLog": {
+    "title": "Betriebsbuch",
+    "add": "+ Eintrag",
+    "addTooltip": "Neuen Eintrag im Betriebsbuch anlegen – z.B. Wartung, Reparatur oder Notiz",
+    "filterAll": "Alle",
+    "filterAllTooltip": "Alle Einträge unabhängig von der Kategorie anzeigen",
+    "loading": "Lade Einträge...",
+    "empty": "Noch keine Einträge. Erstelle deinen ersten Betriebsbuch-Eintrag!",
+    "newEntry": "Neuer Eintrag",
+    "entryTitle": "Titel *",
+    "entryTitleTooltip": "Kurze, aussagekräftige Bezeichnung des Ereignisses (z.B. „Reifenwechsel Sommer 2026“)",
+    "dateLabel": "Datum & Uhrzeit",
+    "dateTooltip": "Wann ist die Aktion passiert? Standard ist „jetzt“; rückwirkende und geplante Eintragungen sind möglich.",
+    "nowBtn": "⟳ Jetzt",
+    "nowTooltip": "Auf den aktuellen Zeitpunkt setzen",
+    "category": "Kategorie",
+    "categoryTooltip": "Art des Eintrags – erleichtert das spätere Filtern",
+    "description": "Beschreibung",
+    "descriptionTooltip": "Optional: detailliertere Notizen, durchgeführte Arbeiten, Werkstatt etc.",
+    "odometer": "Kilometerstand",
+    "odometerTooltip": "Aktueller Tachostand des Fahrzeugs zum Zeitpunkt des Eintrags",
+    "cost": "Kosten (€)",
+    "costTooltip": "Optional: Kosten für diese Wartung/Reparatur – hilft bei der Gesamtkostenrechnung",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "noVehicle": "Kein Fahrzeug ausgewählt",
+    "confirmDelete": "Eintrag wirklich löschen?",
+    "deleteTooltip": "Eintrag unwiderruflich löschen",
+    "creator": "Ersteller dieses Eintrags",
+    "creatorUnknown": "Ersteller unbekannt — Eintrag stammt aus einer Version vor der Erstellerverfolgung",
+    "unknown": "👤 unbekannt",
+    "dateInlineTooltip": "Datum und Uhrzeit der Aktion",
+    "mileageInlineTooltip": "Kilometerstand zum Zeitpunkt des Eintrags",
+    "costInlineTooltip": "Anfallende Kosten für diesen Eintrag",
+    "cat_note": "Notiz",
+    "cat_note_tooltip": "Allgemeine Notiz oder Beobachtung zum Fahrzeug",
+    "cat_maintenance": "Wartung",
+    "cat_maintenance_tooltip": "Geplante Wartungsarbeiten (Bremsflüssigkeit, Klimafilter, Wischerblätter etc.)",
+    "cat_repair": "Reparatur",
+    "cat_repair_tooltip": "Reparaturen nach Defekten oder Schäden",
+    "cat_tires": "Reifen",
+    "cat_tires_tooltip": "Reifenwechsel, Reifenkauf, Druckmessungen, Reifenreparatur",
+    "cat_inspection": "Inspektion",
+    "cat_inspection_tooltip": "Hauptuntersuchung (HU/TÜV) oder Service-Inspektion",
+    "cat_accident": "Unfall",
+    "cat_accident_tooltip": "Unfallschäden und damit verbundene Reparaturen",
+    "cat_other": "Sonstiges",
+    "cat_other_tooltip": "Andere Ereignisse, die in keine der Kategorien passen"
+  },
+  "billing": {
+    "title": "Kostenabrechnung Heimladen",
+    "companyCar": "Dienstwagen",
+    "montaSync": "Monta Sync",
+    "csvExport": "CSV Export",
+    "notCompany": "Dieses Fahrzeug ist als Privatfahrzeug konfiguriert",
+    "toSettings": "Zu den Einstellungen",
+    "chargedKwh": "Geladene kWh",
+    "avgRate": "Ø Strompreis",
+    "reimbursement": "Erstattungsbetrag",
+    "inclVat": "inkl. MwSt.",
+    "monthlyOverview": "Monatsübersicht",
+    "month": "Monat",
+    "sessions": "Sessions",
+    "kwhTesla": "kWh (Tesla)",
+    "kwhMid": "kWh (MID)",
+    "rate": "Tarif €/kWh",
+    "amount": "Betrag €",
+    "settled": "Abgerechnet",
+    "yes": "Ja",
+    "pending": "Ausstehend",
+    "total": "Summe",
+    "chargingSessions": "Ladesessions",
+    "date": "Datum",
+    "location": "Ort",
+    "status": "Status",
+    "template": "Abrechnungsvorlage",
+    "templateTitle": "Erstattungsantrag Ladekosten Dienstwagen"
+  },
+  "telemetry": {
+    "title": "Fahrzeugtechnik",
+    "live": "Live",
+    "offline": "Offline",
+    "refresh": "Aktualisieren",
+    "sleepHint": "Fahrzeug schläft oder ist offline",
+    "autoLoad": "Daten werden automatisch geladen",
+    "soc": "SOC",
+    "speed": "Geschwindigkeit",
+    "power": "Leistung",
+    "odometer": "Kilometerstand",
+    "livePos": "📍 Live-Position",
+    "regen": "← Rekuperation",
+    "drive": "Antrieb →",
+    "tpms": "🏎 Reifendruck (TPMS)",
+    "fl": "VL",
+    "fr": "VR",
+    "rl": "HL",
+    "rr": "HR",
+    "climate": "🌡 Klima",
+    "insideTemp": "Innentemperatur",
+    "outsideTemp": "Außentemperatur",
+    "targetTemp": "Solltemperatur",
+    "climateOn": "Klimaanlage",
+    "frontDefroster": "Frontscheibenheiz.",
+    "rearDefroster": "Heckscheibenheiz.",
+    "charging": "⚡ Laden",
+    "chargeStatus": "Status",
+    "chargePower": "Ladeleistung",
+    "chargeRate": "Ladegeschwind.",
+    "chargeLimit": "Ladelimit",
+    "timeToFull": "Zeit bis voll",
+    "vehicle": "🚗 Fahrzeug",
+    "state": "Zustand",
+    "locked": "Verriegelt",
+    "sentry": "Sentry",
+    "software": "Software",
+    "heading": "Richtung"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "vehicleProfile": "🚗 Fahrzeugprofil",
+    "noVehicle": "Kein Fahrzeug verbunden.",
+    "category": "Fahrzeugkategorie",
+    "private": "🏠 Privatfahrzeug",
+    "privateDesc": "Nur Privatfahrten, kein Fahrtenbuch nötig",
+    "company": "💼 Dienstwagen",
+    "companyDesc": "Fahrtenbuch + Kostenabrechnung aktiv",
+    "companyName": "Firmenname (Arbeitgeber)",
+    "licensePlate": "Kennzeichen",
+    "model": "Modell",
+    "color": "Farbe",
+    "electricity": "Strompreis Wallbox (€/kWh)",
+    "montaChargePoint": "Monta Charge-Point-ID",
+    "montaClientId": "Monta Client ID",
+    "montaClientIdHint": "Partner API: Hub → Anwendung → Client ID",
+    "montaKey": "Monta Client Secret",
+    "montaKeyHint": "Partner API: Hub → Anwendung → Client Secret",
+    "homeCharging": "Heimladen / Monta-Konfiguration",
+    "drivers": "👤 Fahrer & Profile",
+    "driversHint": "Fahrer anlegen und benennen – werden bei Fahrten zugewiesen und in der Auswertung angezeigt.",
+    "noDrivers": "Noch keine Fahrer angelegt.",
+    "driverName": "Name (z.B. Sven)",
+    "addDriver": "+ Hinzufügen",
+    "setDefault": "★ Standard",
+    "unsetDefault": "☆ Standard",
+    "defaultTooltip": "Standard-Fahrer – wird bei neuen Fahrten auto-zugewiesen",
+    "setDefaultTooltip": "Als Standard-Fahrer setzen",
+    "deleteDriverConfirm": "Fahrer \"{name}\" löschen? Bestehende Fahrten werden auf \"kein Fahrer\" gesetzt.",
+    "driverSaved": "Fahrer gespeichert.",
+    "driverError": "Fehler beim Speichern.",
+    "mfa": "🔐 Zwei-Faktor-Authentifizierung",
+    "mfaEnabled": "✓ MFA ist aktiviert",
+    "mfaBackupCodes": "Noch verwendbare Backup-Codes:",
+    "mfaDisable": "MFA deaktivieren",
+    "mfaDisableConfirm": "Passwort zur Bestaetigung eingeben:",
+    "mfaConfirmBtn": "Bestaetigen",
+    "mfaNotEnabled": "MFA ist nicht aktiviert. Aktiviere es fuer mehr Sicherheit.",
+    "mfaActivate": "MFA aktivieren",
+    "passkey": "🗝️ Passkey (Passwortlos anmelden)",
+    "passkeyDesc": "Registriere einen Passkey für dieses Gerät, um dich künftig ohne Passwort anzumelden.",
+    "passkeyAdded": "Hinzugefügt:",
+    "passkeyRemove": "Entfernen",
+    "passkeyNone": "Noch kein Passkey registriert.",
+    "passkeyAdd": "+ Passkey hinzufügen",
+    "passkeyAdding": "Bitte warten…",
+    "teslaConnection": "⚡ Tesla-Verbindung",
+    "teslaConnected": "● Verbunden",
+    "teslaDisconnected": "● Nicht verbunden",
+    "teslaReconnect": "Tesla neu verbinden",
+    "teslaSync": "🔄 Fahrzeuge synchronisieren",
+    "teslaSyncing": "Synchronisiere…",
+    "virtualKey": "Virtual Key (Fahrzeugbefehle)",
+    "virtualKeyDesc": "Einmalig am Fahrzeug registrieren damit Klima, Türen und Laden funktionieren",
+    "telemetrySection": "📡 Fleet Telemetrie (GPS & Echtzeit-Daten)",
+    "telemetryDesc": "Sendet GPS-Track, Geschwindigkeit und Batterie live an diese App",
+    "registerPartner": "🔑 App bei Tesla registrieren",
+    "registering": "Registriere…",
+    "activateTelemetry": "📡 Telemetrie aktivieren",
+    "activating": "Wird aktiviert…",
+    "password": "🔑 Passwort ändern",
+    "currentPw": "Aktuelles Passwort",
+    "newPw": "Neues Passwort (mind. 12 Zeichen)",
+    "confirmPw": "Neues Passwort wiederholen",
+    "changePw": "Passwort ändern",
+    "auditLog": "📝 Letzte Aktivitäten",
+    "noAudit": "Keine Einträge",
+    "theme": "🎨 Farbschema",
+    "themeDesc": "Akzentfarbe für Schaltflächen und Navigation. Wird lokal gespeichert.",
+    "nav": "🧭 Navigationsleiste anpassen",
+    "navReset": "Zurücksetzen",
+    "navHint": "Reihenfolge mit ↑↓ ändern · Auge zum Ein-/Ausblenden",
+    "navHide": "Ausblenden",
+    "navShow": "Einblenden",
+    "languageTitle": "Sprache",
+    "languageHint": "Deine Anzeigesprache. Wird mit deinem Profil synchronisiert.",
+    "tenantDefaultLocaleTitle": "Standardsprache des Mandanten",
+    "tenantDefaultLocaleHint": "Wird neuen Benutzern und nicht eingeloggten Sitzungen vorgeschlagen.",
+    "saved": "Gespeichert"
+  },
+  "auth": {
+    "loginTitle": "Bitte anmelden",
+    "tenant": "Mandant",
+    "tenantPlaceholder": "— Bitte wählen —",
+    "username": "Benutzername",
+    "password": "Passwort",
+    "loginBtn": "Anmelden",
+    "passkeyBtn": "Mit Passkey anmelden",
+    "registerLink": "Neuen Mandanten registrieren",
+    "forgotPw": "Passwort vergessen?",
+    "handbook": "Handbuch & Hilfe",
+    "loginError": "Anmeldung fehlgeschlagen",
+    "loggingIn": "Anmelden…",
+    "passkeyAuthenticating": "Passkey-Authentifizierung…",
+    "passkeyCancelled": "Passkey-Authentifizierung abgebrochen.",
+    "passkeyFailed": "Passkey-Anmeldung fehlgeschlagen",
+    "tenantHint": "Dein Mandantenname (nach Registrierung vergeben)"
+  },
+  "register": {
+    "title": "Neuen Mandanten registrieren",
+    "checkingInvite": "Einladungslink wird geprüft…",
+    "noInvite": "Bitte wende dich an einen Administrator um einen Einladungslink zu erhalten",
+    "backToLogin": "← Zum Login",
+    "tenantName": "Mandantenname",
+    "tenantSlug": "Mandanten-Kürzel (Slug)",
+    "adminAccount": "Administrator-Konto",
+    "passwordStrengths": [
+      "Schwach",
+      "Mittel",
+      "Gut",
+      "Stark"
+    ],
+    "created": "Mandant erstellt!",
+    "credentials": "Deine Zugangsdaten:",
+    "slugLabel": "Mandant-Kürzel:",
+    "slugWarning": "⚠ Notiere dir das Mandanten-Kürzel",
+    "nextSteps": "Empfohlene nächste Schritte:",
+    "step1": "① Tesla-Fahrzeug verbinden",
+    "step2": "② MFA einrichten",
+    "step3": "③ Ladeorte konfigurieren",
+    "subtitle": "Jeder Mandant hat eine vollständig isolierte Datenbank.",
+    "tenantNameLabel": "Name des Mandanten",
+    "tenantNamePlaceholder": "z.B. Familie Muster",
+    "tenantNameHint": "Wird in der App angezeigt",
+    "tenantSlugPlaceholder": "z.B. muster",
+    "tenantSlugHint": "Nur Kleinbuchstaben, Zahlen und -. Wird zum Einloggen benötigt.",
+    "slugTaken": "Dieses Kürzel ist bereits vergeben.",
+    "usernameHint": "3–32 Zeichen, Buchstaben/Zahlen/-/_",
+    "passwordMinHint": "Mindestens 12 Zeichen",
+    "passwordConfirm": "Passwort bestätigen",
+    "creating": "Wird erstellt…",
+    "submitBtn": "Registrieren →",
+    "toLogin": "Zum Login →",
+    "inviteRequired": "Registrierung nur mit einem gültigen Einladungslink möglich.",
+    "inviteCheckFailed": "Einladungslink konnte nicht geprüft werden.",
+    "errNameRequired": "Name ist erforderlich",
+    "errSlugRequired": "Kürzel ist erforderlich",
+    "errSlugFormat": "Kürzel: nur Kleinbuchstaben, Zahlen und -",
+    "errAllFields": "Alle Felder ausfüllen",
+    "errPwMismatch": "Passwörter stimmen nicht überein",
+    "errPwTooShort": "Passwort muss mindestens 12 Zeichen lang sein",
+    "errFailed": "Registrierung fehlgeschlagen"
+  },
+  "mfa": {
+    "setupTitle": "🔐 Zwei-Faktor-Authentifizierung einrichten",
+    "step1Title": "Schritt 1: App verbinden",
+    "step1Hint": "Öffne deine Authenticator-App",
+    "step2Title": "Schritt 2: Code bestätigen",
+    "step2Hint": "Gib den 6-stelligen Code aus deiner App ein",
+    "step3Title": "Schritt 3: MFA aktiviert!",
+    "activated": "✓ MFA aktiviert!",
+    "backupWarning": "⚠️ Backup-Codes – jetzt sichern!",
+    "backupOnce": "Diese Codes werden nur einmal angezeigt",
+    "done": "Fertig",
+    "verify": "Bestaetigen",
+    "checking": "Pruefen...",
+    "verifyTitle": "🔐 Zwei-Faktor-Authentifizierung",
+    "enterCode": "Code aus der Authenticator-App eingeben",
+    "enterBackup": "Backup-Code eingeben",
+    "useApp": "Authenticator-App nutzen",
+    "useBackup": "Backup-Code nutzen",
+    "backToLogin": "Zurück zum Login"
+  },
+  "setup": {
+    "title": "Erstkonfiguration – Admin-Konto anlegen",
+    "welcome": "Willkommen",
+    "notConfigured": "Tesla Carview wurde noch nicht eingerichtet",
+    "wizardDesc": "Dieser Assistent legt deinen ersten Administrator-Account an",
+    "featureLocal": "✓ Alle Fahrzeugdaten bleiben lokal auf deinem Server",
+    "featureNoCloud": "✓ Keine Cloud, keine Datenweitergabe",
+    "featureControl": "✓ Vollständige Kontrolle über deine Daten",
+    "startBtn": "Einrichten starten →",
+    "adminAccount": "Administrator-Konto",
+    "adminDesc": "Dieses Konto hat vollen Zugriff auf die Anwendung",
+    "tenantOptional": "▸ Mandantenname (optional)",
+    "tenantHint": "Nur relevant wenn du mehrere Mandanten betreiben möchtest",
+    "done": "Setup abgeschlossen!",
+    "doneDesc": "Dein Administrator-Konto wurde erfolgreich angelegt",
+    "nextSteps": "Empfohlene nächste Schritte:",
+    "ns1": "① MFA in den Einstellungen aktivieren",
+    "ns2": "② Tesla-Fahrzeug verbinden",
+    "ns3": "③ Passwort nach dem ersten Login ändern"
+  },
+  "users": {
+    "title": "Benutzerverwaltung",
+    "add": "+ Benutzer anlegen",
+    "loading": "Lade Benutzer…",
+    "locked": "gesperrt",
+    "assignVehicle": "Fahrzeug zuweisen",
+    "resetLink": "Reset-Link",
+    "deactivate": "Sperren",
+    "activate": "Aktivieren",
+    "resetGenerated": "Reset-Link generiert",
+    "linkValid": "Link ist 60 Minuten gültig",
+    "copy": "Kopieren",
+    "inviteNew": "🔗 Neuen Mandanten einladen",
+    "createInvite": "+ Einladungslink erstellen",
+    "inviteDesc": "Nur wer diesen Link besitzt, kann einen neuen Mandanten registrieren",
+    "inviteExpiry": "Link (7 Tage gültig, einmalig verwendbar):",
+    "openInvites": "Offene Einladungen",
+    "open": "Offen",
+    "expires": "Läuft ab:",
+    "revoke": "Widerrufen",
+    "used": "✓ genutzt",
+    "assignTo": "Fahrzeug zuweisen an:",
+    "newUser": "Neuen Benutzer anlegen",
+    "role": "Rolle",
+    "email": "E-Mail (optional)",
+    "allRequired": "Alle Pflichtfelder ausfüllen",
+    "pwTooShort": "Passwort muss mindestens 12 Zeichen lang sein",
+    "creating": "Wird erstellt…"
+  },
+  "data": {
+    "title": "Datenverwaltung",
+    "warning": "⚠ Achtung – Datenlöschung ist unwiderruflich",
+    "currentData": "Aktueller Datenbestand",
+    "deleteAll": "Alle Mandantendaten löschen",
+    "deleteAllDesc": "Alle Fahrten, Ladesessions, Telemetrie, Betriebsbuch und Audit-Logs",
+    "deleteVehicle": "Fahrzeugdaten löschen",
+    "deleteVehicleDesc": "Löscht alle Daten eines einzelnen Fahrzeugs",
+    "deleteBtn": "Daten löschen",
+    "confirmType": "Zur Bestätigung eingeben:",
+    "confirmText": "DATEN LÖSCHEN",
+    "deleteSuccess": "Alle Daten gelöscht. Backup wurde erstellt"
+  },
+  "system": {
+    "title": "📊 System & Version",
+    "appTitle": "⚡ Tesla Carview",
+    "version": "Version",
+    "gitHash": "Git-Hash",
+    "branch": "Branch",
+    "buildDate": "Build-Datum",
+    "nodeVersion": "Node.js",
+    "uptime": "Server-Uptime",
+    "updates": "🔄 Software-Update",
+    "checkNow": "Jetzt prüfen",
+    "checking": "Prüfe…",
+    "updateAvailable": "Update verfügbar!",
+    "newCommit": "Neuer Commit:",
+    "runOnServer": "Auf dem Server ausführen:",
+    "noUpdate": "Aktuell – du läufst den neuesten Build",
+    "dataStays": "✅ Alle Daten bleiben erhalten",
+    "autoUpdate": "⏰ Automatische Updates einrichten",
+    "cpu": "🖥 CPU",
+    "load": "Auslastung",
+    "cores": "Kerne",
+    "model": "Modell",
+    "ram": "💾 Arbeitsspeicher",
+    "used": "Belegt",
+    "free": "Frei",
+    "total": "Gesamt",
+    "nodeProcess": "⚙️ Node.js Prozess",
+    "pid": "PID",
+    "heapUsed": "Heap belegt",
+    "heapTotal": "Heap gesamt",
+    "rss": "RSS",
+    "processUptime": "Prozess-Uptime",
+    "database": "🗄 Datenbank",
+    "dbSize": "Dateigröße",
+    "batterySnapshots": "Akku-Snapshots",
+    "logbookEntries": "Betriebsbuch",
+    "auditEntries": "Audit-Einträge",
+    "server": "🖥 Server",
+    "hostname": "Hostname",
+    "platform": "Plattform",
+    "arch": "Architektur",
+    "osUptime": "OS-Uptime",
+    "tenants": {
+      "heading": "🏢 Mandanten",
+      "total": "insgesamt",
+      "empty": "Noch keine Mandanten angelegt.",
+      "you": "(du)",
+      "status": {
+        "active": "Aktiv",
+        "suspended": "Pausiert"
+      },
+      "cols": {
+        "status": "Status",
+        "name": "Name",
+        "slug": "Slug",
+        "vehicles": "Fahrzeuge",
+        "users": "User",
+        "size": "DB-Größe",
+        "lastActivity": "Letzte Aktivität",
+        "actions": "Aktionen"
+      },
+      "actions": {
+        "rename": "Umbenennen",
+        "save": "Speichern",
+        "cancel": "Abbrechen",
+        "suspend": "Pausieren",
+        "unsuspend": "Reaktivieren",
+        "delete": "Löschen"
+      },
+      "detail": {
+        "loading": "Lade Details…",
+        "vehicles": "Fahrzeuge",
+        "users": "Benutzer",
+        "counts": "Datensätze",
+        "dbPath": "DB-Pfad",
+        "createdAt": "Erstellt am",
+        "noVehicles": "Keine Fahrzeuge angelegt",
+        "noUsers": "Keine Benutzer",
+        "trips": "Fahrten",
+        "charging": "Ladevorgänge",
+        "battery": "Akku-Snapshots",
+        "telemetry": "Telemetrie-Punkte",
+        "logbook": "Betriebsbuch",
+        "audit": "Audit-Logs",
+        "role": "Rolle",
+        "lastLogin": "Letzter Login",
+        "neverLoggedIn": "Noch nie angemeldet"
+      },
+      "delete": {
+        "title": "Mandant endgültig löschen?",
+        "warning": "Alle Daten dieses Mandanten werden gelöscht — Fahrzeuge, Fahrten, Ladevorgänge, Benutzer.",
+        "backupNote": "Vor dem Löschen wird automatisch eine Backup-Kopie der DB-Datei erstellt.",
+        "typeSlug": "Zur Bestätigung den Mandanten-Slug eingeben:",
+        "confirm": "Endgültig löschen",
+        "cancel": "Abbrechen"
+      },
+      "errors": {
+        "suspendFailed": "Pausieren fehlgeschlagen",
+        "unsuspendFailed": "Reaktivieren fehlgeschlagen",
+        "renameFailed": "Umbenennen fehlgeschlagen",
+        "deleteFailed": "Löschen fehlgeschlagen",
+        "loadDetailFailed": "Details konnten nicht geladen werden"
+      }
+    }
+  },
+  "drivers": {
+    "noDriver": "– Kein Fahrer"
+  },
+  "handbook": {
+    "title": "Tesla Carview Handbuch",
+    "version": "Version 2.0 · Self-Hosted · Multi-Tenant",
+    "toc": "Inhaltsverzeichnis",
+    "sections": [
+      {
+        "id": "overview",
+        "icon": "🌟",
+        "title": "Überblick"
+      },
+      {
+        "id": "requirements",
+        "icon": "📋",
+        "title": "Voraussetzungen"
+      },
+      {
+        "id": "installation",
+        "icon": "🚀",
+        "title": "Installation"
+      },
+      {
+        "id": "first-setup",
+        "icon": "⚙️",
+        "title": "Erst-Setup im Browser"
+      },
+      {
+        "id": "virtual-key",
+        "icon": "🔑",
+        "title": "Virtual Key einrichten"
+      },
+      {
+        "id": "charging-locations",
+        "icon": "⚡",
+        "title": "Ladeorte & Kosten"
+      },
+      {
+        "id": "security",
+        "icon": "🔐",
+        "title": "Sicherheit"
+      },
+      {
+        "id": "multitenancy",
+        "icon": "🏢",
+        "title": "Multi-Mandanten"
+      },
+      {
+        "id": "backup",
+        "icon": "💾",
+        "title": "Datensicherung"
+      },
+      {
+        "id": "tesla-api",
+        "icon": "⚡",
+        "title": "Tesla Developer API einrichten"
+      },
+      {
+        "id": "monta",
+        "icon": "🔌",
+        "title": "Monta-Integration (Abrechnung)"
+      },
+      {
+        "id": "troubleshooting",
+        "icon": "🔧",
+        "title": "Fehlerbehebung"
+      }
+    ],
+    "overview": {
+      "title": "🌟 Überblick",
+      "body": "Tesla Carview ist eine selbst gehostete Datenlogger-App für Tesla-Fahrzeuge. Alle Daten bleiben ausschließlich auf deinem eigenen Server – keine Cloud, keine Datenweitergabe. Die App ist vollständig responsive und läuft auf iPhone/iPad (Safari), Android-Smartphones sowie Desktop-Browsern.",
+      "features": [
+        {
+          "icon": "🚗",
+          "title": "Fahrtenbuch",
+          "desc": "GPS-Tracks, Verbrauch, Fahrttyp-Kategorisierung"
+        },
+        {
+          "icon": "⚡",
+          "title": "Laden",
+          "desc": "Ladesessions mit Kosten, GPS-Standort-Erkennung"
+        },
+        {
+          "icon": "🔋",
+          "title": "Batterie",
+          "desc": "Degradations-Tracking, Reichweiten-Verlauf"
+        },
+        {
+          "icon": "📊",
+          "title": "Dashboard",
+          "desc": "Statistiken, monatliche Übersicht, letzte Aktivitäten"
+        },
+        {
+          "icon": "🎮",
+          "title": "Steuerung",
+          "desc": "Klimaanlage, Türen, Licht – direkt aus der App"
+        },
+        {
+          "icon": "📝",
+          "title": "Betriebsbuch",
+          "desc": "Wartungen, Reparaturen, Kosten mit Datum"
+        },
+        {
+          "icon": "📤",
+          "title": "Export",
+          "desc": "CSV/JSON für alle Daten, Vollbackup als ZIP"
+        },
+        {
+          "icon": "🔔",
+          "title": "Push-Nachrichten",
+          "desc": "Browser-Benachrichtigung bei Ladeende"
+        },
+        {
+          "icon": "📱",
+          "title": "Mobile-optimiert",
+          "desc": "Vollständig nutzbar auf iPhone/iPad (Safari), Android und Desktop"
+        }
+      ]
+    },
+    "requirements": {
+      "title": "📋 Voraussetzungen",
+      "serverTitle": "Server",
+      "serverItems": [
+        "Linux-Server (x86_64, ARM64 oder ARMv7) mit min. 1 GB RAM",
+        "Docker + Docker Compose (wird vom Setup-Script installiert)",
+        "Öffentlich erreichbare Domain + TLS-Zertifikat (für Tesla API erforderlich)",
+        "Port 443 (HTTPS) muss von außen erreichbar sein"
+      ],
+      "teslaTitle": "Tesla Developer Account",
+      "teslaItems": [
+        "Registrierung auf developer.tesla.com",
+        "App anlegen → Client ID und Client Secret notieren",
+        "Callback-URL: https://<deine-domain>/api/auth/callback",
+        "Für Fahrzeugbefehle: Fleet API Access beantragen (kostenlos, 1–3 Werktage)"
+      ]
+    },
+    "installation": {
+      "title": "🚀 Installation",
+      "desc": "Das Setup-Script installiert alles automatisch: Docker, nginx, TLS, tesla-http-proxy.",
+      "asRoot": "# Als root auf dem Zielserver:",
+      "scriptAsks": "# Das Script fragt interaktiv ab:",
+      "promptDomain": "→ Domain (z.B. carview.meinserver.de)",
+      "promptClientId": "→ Tesla Client ID und Client Secret",
+      "promptRedirect": "→ Tesla Redirect URI",
+      "promptJwt": "→ JWT Secret (wird automatisch generiert)",
+      "altTitle": "Alternative: Manuelle Konfiguration",
+      "altDesc": "Kopiere .env.example → .env und passe alle Werte an. Dann: docker compose -f docker-compose.prod.yml up -d"
+    },
+    "firstSetup": {
+      "title": "⚙️ Erst-Setup im Browser",
+      "steps": [
+        {
+          "title": "Browser öffnen",
+          "desc": "Öffne https://<deine-domain>/setup — du wirst automatisch weitergeleitet."
+        },
+        {
+          "title": "Mandanten anlegen",
+          "desc": "Wähle einen Mandantennamen (z.B. \"Familie Muster\") und ein Kürzel (z.B. \"muster\"). Das Kürzel wird beim Login benötigt – notiere es dir."
+        },
+        {
+          "title": "Admin-Konto erstellen",
+          "desc": "Lege Benutzername und Passwort fest. Das Passwort muss mindestens 12 Zeichen lang sein. Empfehlung: eine Passphrase aus 4 Wörtern."
+        },
+        {
+          "title": "Tesla verbinden",
+          "desc": "Nach dem Login: Einstellungen → Tesla-Account verbinden. Du wirst zu Tesla weitergeleitet und musst dich dort anmelden."
+        },
+        {
+          "title": "Fahrzeuge importieren",
+          "desc": "Gehe zu Einstellungen → Tesla-Verbindung → Fahrzeuge synchronisieren. Alle Fahrzeuge des verbundenen Tesla-Accounts werden automatisch übernommen."
+        }
+      ]
+    },
+    "virtualKey": {
+      "title": "🔑 Virtual Key einrichten",
+      "desc": "Für Fahrzeugbefehle (Türen öffnen, Klimaanlage etc.) muss ein Virtual Key am Fahrzeug registriert werden.",
+      "steps": [
+        "Stelle sicher, dass tesla-http-proxy läuft: systemctl status tesla-http-proxy",
+        "Öffne auf dem iPhone in Safari: https://tesla.com/_ak/<deine-domain>",
+        "Die Tesla-App fragt \"App zulassen?\" → bestätigen",
+        "In Bluetooth-Reichweite des Fahrzeugs bleiben — der Key wird innerhalb von 30 Sekunden akzeptiert",
+        "Verifizieren unter Einstellungen → Fahrzeugverbindung → Virtual Key Status"
+      ]
+    },
+    "chargingLocations": {
+      "title": "⚡ Ladeorte & Kosten",
+      "desc": "Ladeorte werden per GPS automatisch erkannt und mit einem Preis pro kWh verknüpft.",
+      "autoTitle": "Automatische GPS-Erkennung",
+      "autoDesc": "Wenn ein Ladeort mit GPS-Koordinaten und Radius (Standard 200m) hinterlegt ist, wird beim Ladestart automatisch der passende Ort erkannt und der hinterlegte Preis/kWh angewendet.",
+      "createTitle": "Ladeort anlegen",
+      "createDesc": "Unter Laden → Ladeorte: Name, Typ (Zuhause/Büro/Öffentlich), Preis/kWh, GPS-Koordinaten und Erkennungsradius eingeben.",
+      "adjustTitle": "Kosten manuell anpassen",
+      "adjustDesc": "In der Ladeliste: Klick auf eine Session → Kosten bearbeiten. Kosten können auch auf 0 gesetzt werden (z.B. Gratis-Laden).",
+      "freeTitle": "✕ Ladung als kostenlos markieren",
+      "freeDesc": "In der Ladehistorie hat jede Session einen kleinen Button \"✕ kostenlos\". Damit markierte Ladungen erscheinen ausgegraut mit dem Badge \"kostenlos\" und werden automatisch aus der Heimladen-Abrechnung ausgeschlossen.",
+      "freeHint": "Typischer Anwendungsfall: Laden am Arbeitsplatz, das vom Arbeitgeber gestellt wird. Mit dem Button \"↩ kostenpflichtig\" lässt sich die Markierung jederzeit rückgängig machen."
+    },
+    "security": {
+      "title": "🔐 Sicherheit",
+      "features": [
+        {
+          "icon": "🔑",
+          "title": "Passkey / WebAuthn",
+          "desc": "Passwortloser Login mit Fingerabdruck, Face ID oder Hardware-Key"
+        },
+        {
+          "icon": "📱",
+          "title": "TOTP-MFA",
+          "desc": "Zwei-Faktor-Authentifizierung mit Authenticator-App"
+        },
+        {
+          "icon": "🛡️",
+          "title": "Account-Lockout",
+          "desc": "Konto wird nach 5 Fehlversuchen für 15 min gesperrt"
+        },
+        {
+          "icon": "🍪",
+          "title": "Refresh-Token",
+          "desc": "httpOnly-Cookie, 7 Tage gültig, automatische Rotation"
+        },
+        {
+          "icon": "📋",
+          "title": "Audit-Log",
+          "desc": "Alle Logins, Änderungen und Sicherheitsereignisse protokolliert"
+        },
+        {
+          "icon": "🔒",
+          "title": "HTTPS + HSTS",
+          "desc": "TLS 1.2/1.3, HSTS, OCSP-Stapling, sichere Headers"
+        }
+      ],
+      "recommendTitle": "Empfohlene Sicherheitseinstellungen",
+      "recommend": [
+        "MFA (TOTP) nach dem ersten Login aktivieren",
+        "Passkey einrichten für passwortlosen Login",
+        "Regelmäßig Datensicherung erstellen (Export)",
+        "Starkes Passwort: min. 16 Zeichen oder 4-Wort-Passphrase"
+      ]
+    },
+    "multitenancy": {
+      "title": "🏢 Multi-Mandanten",
+      "desc": "Tesla Carview unterstützt mehrere vollständig isolierte Mandanten auf einer Instanz. Jeder Mandant hat seine eigene Datenbank – ein Mandant kann niemals Daten eines anderen sehen.",
+      "inviteTitle": "Mandanten anlegen (Einladungslink)",
+      "inviteDesc": "Neue Mandanten können nur über einen Einladungslink registriert werden. Ein Administrator generiert den Link unter Admin → Benutzer → Einladungslink erstellen. Der Link ist 7 Tage gültig und kann nur einmal verwendet werden.",
+      "multiVehicleTitle": "Mehrere Fahrzeuge pro Mandant",
+      "multiVehicleDesc": "Alle Fahrzeuge eines Tesla-Accounts werden beim Synchronisieren automatisch importiert. Zwischen Fahrzeugen wechselst du oben rechts in der Navigationsleiste.",
+      "loginTitle": "Login mit Mandanten-Kürzel",
+      "loginDesc": "Bei mehreren Mandanten erscheint beim Login ein Mandanten-Feld. Bei nur einem Mandanten wird er automatisch erkannt.",
+      "userMgmtTitle": "Benutzerverwaltung",
+      "userMgmtDesc": "Administratoren können innerhalb ihres Mandanten weitere Benutzer anlegen und Fahrzeuge zuweisen. Unter Admin → Benutzer."
+    },
+    "backup": {
+      "title": "💾 Datensicherung",
+      "manualTitle": "Manueller Export",
+      "manualDesc": "Unter Export: CSV oder JSON für Fahrten und Ladesessions, sowie Vollbackup als ZIP.",
+      "autoTitle": "Automatisches Backup (Server)",
+      "autoDesc": "Die SQLite-Datenbanken liegen im Docker-Volume tesla_data. Für automatische Backups auf dem Server:",
+      "cron": "# Tägliches Backup um 3 Uhr (crontab -e):\n0 3 * * * cp /var/lib/docker/volumes/tesla_data/_data/*.db /backup/",
+      "warningTitle": "Wichtig vor dem Löschen",
+      "warningDesc": "Immer zuerst einen Export erstellen, bevor du Daten löschst. Gelöschte Daten können nicht wiederhergestellt werden."
+    },
+    "teslaApi": {
+      "title": "⚡ Tesla Developer API einrichten",
+      "desc": "Tesla Carview kommuniziert über die offizielle Tesla Fleet API. Dazu brauchst du einen kostenlosen Tesla Developer Account und eine registrierte App.",
+      "step1Title": "Schritt 1 – Developer Account anlegen",
+      "step1Items": [
+        "Rufe developer.tesla.com auf und melde dich mit deinem Tesla-Account an.",
+        "Akzeptiere die Developer Terms of Service.",
+        "Klicke auf Create Application."
+      ],
+      "step2Title": "Schritt 2 – App konfigurieren",
+      "step2Items": [
+        "Application Name: beliebiger Name, z. B. Tesla Carview",
+        "Description: kurze Beschreibung (Pflichtfeld)",
+        "Allowed Origin: deine öffentliche App-URL",
+        "Redirect URI: https://carview.example.com/api/auth/callback",
+        "Scopes (erforderlich): vehicle_device_data, vehicle_cmds, vehicle_charging_cmds, vehicle_location, openid, offline_access",
+        "⚠ vehicle_location ist für GPS-Tracking (Fleet Telemetry) zwingend erforderlich"
+      ],
+      "step3Title": "Schritt 3 – Zugangsdaten notieren",
+      "step3Desc": "Nach dem Erstellen erhältst du:",
+      "step3Items": [
+        "Client ID – eine UUID-artige Zeichenkette",
+        "Client Secret – einmalig sichtbar, sofort kopieren und sicher speichern"
+      ],
+      "step3Hint": "Diese Werte trägst du in die .env-Datei ein oder gibst sie beim interaktiven Setup-Wizard an.",
+      "step4Title": "Schritt 4 – Fleet API Access beantragen (für Befehle)",
+      "step4Desc": "Damit Fahrzeugbefehle (Klima, Türen, Laden) funktionieren, muss deine App als Partner bei Tesla registriert sein.",
+      "step4Hint": "Das Setup-Script führt diesen Schritt automatisch aus, wenn FRONTEND_URL gesetzt ist. Sonst manuell via Postman oder curl. Dauert 1–3 Werktage bis zur Aktivierung.",
+      "step5Title": "Schritt 5 – In Tesla Carview verbinden",
+      "step5Items": [
+        "Nach dem Login: Einstellungen → Tesla-Verbindung → Tesla neu verbinden",
+        "Du wirst zu Tesla weitergeleitet und musst dich dort anmelden und der App Zugriff erlauben.",
+        "Nach der Weiterleitung: Einstellungen → 🔄 Fahrzeuge synchronisieren",
+        "Alle Fahrzeuge des Tesla-Accounts erscheinen in der App."
+      ],
+      "step6Title": "Schritt 6 – Fleet Telemetrie aktivieren (GPS-Tracking)",
+      "step6Desc": "GPS-Daten kommen bei neueren Fahrzeugen (z. B. Model Y ab 2024, XP7-VIN) ausschließlich über Fleet Telemetry — nicht über die REST-API.",
+      "step6Steps": [
+        "App bei Tesla registrieren – Einstellungen → Fleet Telemetrie → \"🔑 App bei Tesla registrieren\" klicken. Einmalig nötig.",
+        "Fleet Telemetry Access beantragen – Wenn der nächste Schritt mit \"HTTP 404\" scheitert, hat Tesla den Endpoint noch nicht freigeschaltet. Dann den Tesla Developer Support kontaktieren.",
+        "Telemetrie aktivieren – Einstellungen → Fleet Telemetrie → \"📡 Telemetrie aktivieren\" klicken."
+      ],
+      "supportTitle": "Fleet Telemetry Access beim Tesla Support beantragen",
+      "supportDesc": "Falls Schritt 2 mit 404 scheitert, schicke folgende Anfrage ans Tesla Developer Support-Formular (developer.tesla.com/dashboard → Support Inquiry):",
+      "supportNote": "⚠ Client ID und VIN durch eigene Werte ersetzen. Tesla antwortet erfahrungsgemäß innerhalb weniger Tage."
+    },
+    "monta": {
+      "title": "🔌 Monta-Integration (Heimlade-Abrechnung)",
+      "desc": "Für Dienstwagen-Fahrer: Tesla Carview kann Ladedaten direkt aus deiner Monta-Wallbox abrufen und daraus eine monatliche Kostenabrechnung für deinen Arbeitgeber erstellen.",
+      "warning": "⚠️ Monta-Integration ist nur für Fahrzeuge der Kategorie Dienstwagen verfügbar (Einstellungen → Fahrzeugprofil → Kategorie).",
+      "step1Title": "Schritt 1 – Monta Partner API Zugangsdaten erstellen",
+      "step1Items": [
+        "Melde dich im Monta Operator Hub an (hub.monta.com).",
+        "Gehe zu Einstellungen → Anwendungen → Neue Anwendung erstellen.",
+        "Kopiere Client ID und Client Secret – beide werden in Tesla Carview benötigt."
+      ],
+      "step1Hint": "Das Client Secret ist nur einmal sichtbar – sofort in Tesla Carview eintragen.",
+      "step2Title": "Schritt 2 – Charge-Point-ID herausfinden",
+      "step2Items": [
+        "Im Monta-Portal: Ladepunkte → Meine Geräte auswählen.",
+        "Die Charge-Point-ID steht in der Detailansicht (Format: cp_12345).",
+        "Alternativ: API-Aufruf GET /api/v1/charge-points liefert alle Ladepunkte mit IDs."
+      ],
+      "step3Title": "Schritt 3 – In Tesla Carview eintragen",
+      "step3Items": [
+        "Gehe zu Einstellungen → Fahrzeugprofil.",
+        "Wähle Kategorie 💼 Dienstwagen.",
+        "Trage Strompreis Wallbox (€/kWh) ein – z. B. 0.34.",
+        "Füge Monta Charge-Point-ID und Monta API-Key ein.",
+        "Klicke Speichern."
+      ],
+      "useTitle": "Abrechnung nutzen",
+      "useItems": [
+        "Gehe zu Abrechnung in der Navigation.",
+        "Wähle den gewünschten Monat – alle Heim-Ladevorgänge werden aufgelistet.",
+        "Ladungen, die kostenlos waren, kannst du in der Ladehistorie mit ✕ kostenlos markieren – sie werden aus der Abrechnung ausgeschlossen.",
+        "Mit PDF exportieren erhältst du ein unterschriftsreifes Abrechnungsblatt."
+      ]
+    },
+    "troubleshooting": {
+      "title": "🔧 Fehlerbehebung",
+      "items": [
+        {
+          "q": "Das Fahrzeug gibt keine GPS-Daten zurück",
+          "a": "Neuere Tesla-Modelle (XP7-VIN, z.B. Model Y Juniper) liefern keinen drive_state via REST-API. GPS-Tracking erfolgt über Fleet Telemetry. Stelle sicher, dass tesla-http-proxy läuft und der Virtual Key registriert ist."
+        },
+        {
+          "q": "Login funktioniert nicht nach dem Update",
+          "a": "Bei einem Update auf v2.0 (Multi-Tenant) wird beim Login ein Mandanten-Kürzel benötigt. Das Kürzel für die migrierte Datenbank ist \"default\". Gib es im Login-Feld ein oder klicke auf \"Mandant auswählen\"."
+        },
+        {
+          "q": "Tesla-Verbindung schlägt fehl (401)",
+          "a": "Der Tesla OAuth-Token ist abgelaufen. Gehe zu Einstellungen → Tesla-Verbindung und verbinde dein Tesla-Konto erneut. Stelle sicher, dass TESLA_CLIENT_ID und TESLA_CLIENT_SECRET in der .env korrekt sind."
+        },
+        {
+          "q": "Fahrzeugbefehle schlagen fehl",
+          "a": "Prüfe: 1) tesla-http-proxy läuft (systemctl status tesla-http-proxy) 2) Virtual Key ist am Fahrzeug registriert (Einstellungen → Fahrzeugverbindung) 3) Das Fahrzeug ist online (nicht schlafen)."
+        },
+        {
+          "q": "Keine Telemetrie-Daten / GPS fehlt",
+          "a": "Fleet Telemetry erfordert zwei Schritte: (1) App bei Tesla registrieren, (2) Telemetrie aktivieren. Falls Schritt 2 mit HTTP 404 scheitert, muss der fleet_telemetry_config-Zugang beim Tesla Developer Support beantragt werden. Außerdem muss vehicle_location in den App-Scopes auf developer.tesla.com aktiviert sein."
+        },
+        {
+          "q": "Backend startet nicht",
+          "a": "Prüfe die Logs: docker logs tesla-carview-backend. Häufige Ursachen: fehlende .env-Variablen (JWT_SECRET, TESLA_CLIENT_ID), Datenbank-Migrationsfehler."
+        }
+      ]
+    },
+    "donate": {
+      "title": "❤️ Wenn dir die App etwas wert ist",
+      "desc": "Tesla Carview ist für die private, selbst gehostete Nutzung kostenlos und werbefrei (Lizenz: PolyForm Noncommercial 1.0.0 — kommerzieller Verkauf oder SaaS-Hosting für Dritte sind nicht gestattet). Falls du etwas zurückgeben möchtest, freuen sich diese Organisationen über deine Unterstützung.",
+      "footer": "100 % deiner Spende geht direkt an die Einrichtung. Wir sehen weder den Betrag noch deine Daten.",
+      "btn": "Spenden →",
+      "orgs": [
+        {
+          "name": "Aktion Deutschland Hilft",
+          "desc": "Bündnis von Hilfsorganisationen für schnelle und wirkungsvolle Katastrophenhilfe weltweit.",
+          "url": "https://www.aktion-deutschland-hilft.de/de/spenden/"
+        },
+        {
+          "name": "Lebenshilfe Rems-Murr",
+          "desc": "Unterstützung, Begleitung und Teilhabe für Menschen mit Behinderung im Rems-Murr-Kreis.",
+          "url": "https://www.lebenshilfe-rems-murr.de/"
+        },
+        {
+          "name": "Radio 7 Drachenkinder",
+          "desc": "Hilfe für schwer kranke Kinder in der Region – finanziert Therapien, Ausflüge und Wünsche.",
+          "url": "https://www.radio7.de/aktionen/drachenkinder"
+        }
+      ]
+    }
+  },
+  "teslaUsage": {
+    "title": "Tesla API-Nutzung",
+    "subtitle": "Voraussichtliche Tesla-Fleet-API-Kosten im laufenden Monat.",
+    "period": "Zeitraum",
+    "limit": "Monatslimit",
+    "freeCredit": "Free-Credit",
+    "hardStop": "Hard-Stop bei",
+    "hardStopOn": "Hard-Stop aktiv – weitere Calls werden blockiert",
+    "currency": "Währung",
+    "rates": "Tarife (USD pro Aufruf)",
+    "save": "Tarife speichern",
+    "reset": "Aktuellen Monat zurücksetzen",
+    "cat": {
+      "vehicle_data": "Vehicle-Data",
+      "wake": "Wake",
+      "command": "Commands",
+      "streaming": "Streaming",
+      "other": "Sonstige"
+    }
+  },
+  "footer": {
+    "contactPrompt": "Kommerzielles Interesse oder IT-Design- & Architektur-Beratung?",
+    "about": "Profil",
+    "imprint": "Impressum",
+    "privacy": "Datenschutz",
+    "terms": "Nutzungsbedingungen",
+    "support": "Unterstützen"
+  },
+  "legal": {
+    "imprint": "Impressum",
+    "privacy": "Datenschutz",
+    "terms": "Nutzungsbedingungen",
+    "versionInfo": "Version {version} · zuletzt geändert {date}",
+    "placeholdersWarningAdmin": "Diese Seite enthält noch unausgefüllte Platzhalter. Bitte vor Live-Schaltung im Admin-Editor vervollständigen:",
+    "acceptCheckboxPrivacy": "Ich habe die {link} gelesen und akzeptiere sie.",
+    "acceptCheckboxTerms": "Ich habe die {link} gelesen und akzeptiere sie.",
+    "acceptModalTitle": "Aktualisierte rechtliche Hinweise",
+    "acceptModalBody": "Datenschutz und/oder Nutzungsbedingungen wurden aktualisiert. Bitte bestätige die neuen Versionen, bevor du fortfährst.",
+    "acceptModalSubmit": "Akzeptieren und fortfahren",
+    "adminTitle": "Rechtliche Inhalte verwalten",
+    "adminIntro": "Pflege Impressum, Datenschutz und Nutzungsbedingungen pro Sprache. Beim Speichern „Version erhöhen“ anhaken, wenn die Änderung materiell ist — dann müssen alle Nutzer beim nächsten Login erneut zustimmen.",
+    "adminEditing": "Bearbeite {scope} ({locale})",
+    "adminBumpVersion": "Version erhöhen (Re-Akzept-Pflicht)",
+    "adminSave": "Speichern",
+    "adminSaved": "Gespeichert. Aktuelle Version: {version}",
+    "adminCurrentVersion": "Aktuelle Version: {version}",
+    "adminLastUpdated": "Zuletzt geändert: {date}",
+    "adminSyncMode": "Nur Default-Sprache (Deutsch) pflegen",
+    "adminSyncModeHint": "Empfohlen. Beim Speichern wird der deutsche Text 1:1 in alle anderen Sprachen kopiert. Im Public-View wird dort ein Hinweis eingeblendet, dass die Seite derzeit nur auf Deutsch gepflegt wird.",
+    "syncedFromDefaultBanner": "Diese Seite wird derzeit nur auf Deutsch gepflegt — der angezeigte Inhalt ist die deutsche Originalfassung."
+  },
+  "invite": {
+    "title": "Einladung annehmen",
+    "subtitle": "Konto in {tenant} anlegen. Rolle: {role}",
+    "invalidTitle": "Einladung ungültig",
+    "errUnknown": "Dieser Einladungslink ist unbekannt — möglicherweise hat ihn der Administrator widerrufen.",
+    "errAlreadyUsed": "Dieser Einladungslink wurde bereits verwendet. Frag den Administrator nach einem neuen.",
+    "errExpired": "Dieser Einladungslink ist abgelaufen. Frag den Administrator nach einem neuen.",
+    "errGeneric": "Der Link konnte nicht überprüft werden.",
+    "toLogin": "Zum Login →",
+    "usernamePlaceholder": "z.B. anna",
+    "usernameHint": "3–32 Zeichen, nur Buchstaben, Zahlen, - und _",
+    "passwordPlaceholder": "Mindestens 12 Zeichen",
+    "passwordHint": "Empfehlung: Passphrase aus 4+ Wörtern",
+    "submitBtn": "Konto anlegen →",
+    "errFormIncomplete": "Bitte alle Felder ausfüllen und Datenschutz/Nutzungsbedingungen akzeptieren.",
+    "errFailed": "Konto konnte nicht angelegt werden.",
+    "doneText": "Hallo {username} — dein Konto in {tenant} wurde erstellt. Du kannst dich jetzt einloggen.",
+    "roleAdmin": "Administrator",
+    "roleUser": "Benutzer"
+  }
+}

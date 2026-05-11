@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Hintergrund: dunkles Anthrazit, passend zum App-Shell (bg-tesla-dark). -->
+  <rect width="512" height="512" rx="96" fill="#1a1a1a"/>
+  <!-- Blitz-Symbol (Tesla-typisch) in Tesla-Rot. -->
+  <path d="M308 96 L160 290 L240 290 L204 416 L368 220 L284 220 Z"
+        fill="#E31937" stroke="#ffffff" stroke-width="6" stroke-linejoin="round"/>
+</svg>
