@@ -450,6 +450,20 @@ function runTenantMigrations(db) {
   if (!vehiclesCols.includes('spoiler_type')) {
     db.exec('ALTER TABLE vehicles ADD COLUMN spoiler_type TEXT');
   }
+  // Fleet-Telemetry pro VIN: wann hat die App den configure-Call
+  // erfolgreich abgesetzt? Wann kam das letzte gestreamte Signal
+  // an? Beides treibt den Status-Indikator in der Settings-Karte
+  // (gruen=streamt aktiv, gelb=registriert aber kein Signal, rot=
+  // nicht registriert, grau=Approval-fehlt-Hinweis).
+  if (!vehiclesCols.includes('telemetry_configured_at')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN telemetry_configured_at INTEGER');
+  }
+  if (!vehiclesCols.includes('telemetry_last_signal_at')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN telemetry_last_signal_at INTEGER');
+  }
+  if (!vehiclesCols.includes('telemetry_last_error')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN telemetry_last_error TEXT');
+  }
 
   // charging_sessions
   const csCols = col('charging_sessions');

@@ -100,11 +100,17 @@ export async function startFleetTelemetryServer(server) {
         if (point && vin) storePoint(vin, ts, point);
 
         // Streaming-Signale zählen (1 Datum = 1 abrechenbarer Wert).
+        // Plus: pro VIN den Zeitpunkt des letzten Signals merken — das
+        // Settings-UI rendert daraus den live/idle-Status-Indikator.
         if (vin && payload.data?.length) {
           const tenant = getTenantByVin(vin);
           if (tenant) {
             try {
-              recordCall(getDb(tenant.id), 'streaming_signal', 'fleet_telemetry', payload.data.length);
+              const tdb = getDb(tenant.id);
+              recordCall(tdb, 'streaming_signal', 'fleet_telemetry', payload.data.length);
+              tdb.prepare(
+                'UPDATE vehicles SET telemetry_last_signal_at = ? WHERE vin = ?'
+              ).run(Math.floor(Date.now() / 1000), vin);
             } catch { /* Counter-Fehler dürfen den Stream nicht abreißen */ }
           }
         }
