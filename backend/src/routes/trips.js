@@ -85,6 +85,61 @@ router.get('/stats', (req, res) => {
   }
 });
 
+/**
+ * GET /api/trips/consumption-by-temp
+ *
+ * Liefert den Durchschnittsverbrauch (kWh/100km) gebucketet auf 5-Grad-
+ * Schritte der Aussentemperatur (outside_temp_avg_c). Grundlage fuer
+ * den geplanten „Reichweiten-Realismus pro Wetter"-Chart in Battery.vue
+ * (UI folgt separat, sobald der i18n-Refactor abgeschlossen ist).
+ *
+ * Buckets mit weniger als 3 Trips werden mit `avg_kwh_per_100km: null`
+ * gemeldet, damit das Frontend Luecken im Chart markieren kann.
+ *
+ * Schutz: restrictToOwnVehicles + optional vehicle_id.
+ */
+router.get('/consumption-by-temp', (req, res) => {
+  const db = req.db;
+  const { vehicle_id } = req.query;
+  try {
+    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
+    const conds = [
+      'outside_temp_avg_c IS NOT NULL',
+      'distance_km > 1',
+      'energy_used_kwh IS NOT NULL',
+      'energy_used_kwh > 0',
+    ];
+    const params = [];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+    const where = 'WHERE ' + conds.join(' AND ') + restrict.fragment;
+    params.push(...restrict.params);
+
+    // Bucket-Breite 5°C: floor(t/5)*5 — z.B. -7°C → -10, 12°C → 10.
+    // SQLite hat kein integer-div per Default; CAST(... AS INTEGER)
+    // rundet bei negativen Zahlen Richtung Null, deshalb FLOOR-Imitat:
+    // (t - (t % 5 + 5) % 5) bleibt korrekt fuer negative t.
+    const rows = db.prepare(
+      `SELECT
+         CAST(outside_temp_avg_c - ((outside_temp_avg_c % 5 + 5) % 5) AS INTEGER) AS temp_bucket,
+         AVG(energy_used_kwh / distance_km * 100.0) AS raw_avg,
+         COUNT(*) AS sample_size
+       FROM trips
+       ${where}
+       GROUP BY temp_bucket
+       ORDER BY temp_bucket`
+    ).all(...params);
+
+    const buckets = rows.map(r => ({
+      temp_bucket:        r.temp_bucket,
+      avg_kwh_per_100km:  r.sample_size >= 3 ? Number(r.raw_avg?.toFixed(2)) : null,
+      sample_size:        r.sample_size,
+    }));
+    res.json({ bucket_width_c: 5, min_samples: 3, buckets });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Fahrtenbuch: Fahrten mit Klassifikations-Filter + Monatsgruppen
 router.get('/logbook', (req, res) => {
   const db = req.db;

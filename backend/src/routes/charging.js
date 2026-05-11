@@ -26,6 +26,49 @@ router.get('/', (req, res) => {
   }
 });
 
+/** GET /api/charging/heatmap
+ *
+ *  Liefert pro Wochentag × Stunde:
+ *   - count: wie viele Ladesessions in diesem Slot gestartet
+ *   - avg_kw: durchschnittliche max_power_kw in diesem Slot
+ *   - total_kwh: Summe der geladenen Energie in diesem Slot
+ *
+ *  Damit kann das Frontend zwei Heatmaps zeigen:
+ *  - Haeufigkeit (count) → wann lade ich typischerweise
+ *  - Leistung (avg_kw) → wo gibt's die schnelleren Ladungen
+ *
+ *  Aggregation per strftime: weekday 0..6 (Sonntag=0), hour 0..23. */
+router.get('/heatmap', (req, res) => {
+  const { vehicle_id } = req.query;
+  try {
+    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
+    const conds  = ['start_time IS NOT NULL'];
+    const params = [];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+    const where = 'WHERE ' + conds.join(' AND ') + restrict.fragment;
+    params.push(...restrict.params);
+
+    // strftime ohne 'localtime' waere UTC — User-Wahrnehmung ist aber lokal.
+    // 'localtime' ist der Modifier in SQLite.
+    const rows = req.db.prepare(
+      `SELECT
+         CAST(strftime('%w', datetime(start_time, 'unixepoch', 'localtime')) AS INTEGER) AS weekday,
+         CAST(strftime('%H', datetime(start_time, 'unixepoch', 'localtime')) AS INTEGER) AS hour,
+         COUNT(*)                              AS count,
+         COALESCE(AVG(max_power_kw), 0)        AS avg_kw,
+         COALESCE(SUM(energy_added_kwh), 0)    AS total_kwh,
+         COALESCE(MAX(max_power_kw), 0)        AS peak_kw
+       FROM charging_sessions
+       ${where}
+       GROUP BY weekday, hour
+       ORDER BY weekday, hour`
+    ).all(...params);
+    res.json({ cells: rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/stats', (req, res) => {
   const { vehicle_id } = req.query;
   try {
