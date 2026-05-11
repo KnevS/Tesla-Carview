@@ -4,7 +4,7 @@
 
       <!-- Header -->
       <div class="text-center space-y-2">
-        <div class="text-6xl">⚡</div>
+        <AppIcon name="bolt" :size="64" class="text-tesla-red mx-auto" />
         <h1 class="text-2xl font-bold text-white">{{ $t('invite.title') }}</h1>
         <p v-if="invite" class="text-gray-400 text-sm">
           {{ $t('invite.subtitle', { tenant: invite.tenantName, role: roleLabel }) }}
@@ -106,6 +106,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../api.js';
+import AppIcon from '../components/AppIcon.vue';
 
 const route   = useRoute();
 const { t }   = useI18n();

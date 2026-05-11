@@ -32,9 +32,10 @@
           CSV
         </button>
         <button @click="exportFinanzamtPdf" :disabled="!trips.length"
-          class="btn-primary text-sm min-h-[44px] disabled:opacity-40"
+          class="btn-primary text-sm min-h-[44px] disabled:opacity-40 inline-flex items-center justify-center gap-1.5"
           v-tooltip="'Finanzamt-konformes PDF nach BMF-Standard — mit Kilometerstaenden, Reisezielen, Zweck und Geschaeftspartner pro Fahrt. Anerkannt durch deutsche Finanzaemter.'">
-          📄 Finanzamt-PDF
+          <AppIcon name="export" :size="16" />
+          Finanzamt-PDF
         </button>
       </div>
     </div>
@@ -42,13 +43,14 @@
     <!-- BMF-Hinweis: nur einblenden, wenn der Filter auf einen kompletten
          Monat zeigt — das ist der Use-Case fuers Finanzamt. -->
     <div v-if="selMonth" class="card bg-blue-900/15 border border-blue-700/40 text-sm space-y-1">
-      <p class="text-blue-200">
-        💡 <strong>So nutzt du das Fahrtenbuch fuers Finanzamt:</strong>
+      <p class="text-blue-200 flex items-center gap-2">
+        <AppIcon name="info" :size="16" class="text-blue-300 flex-shrink-0" />
+        <strong>So nutzt du das Fahrtenbuch fuers Finanzamt:</strong>
       </p>
       <ul class="text-xs text-gray-300 list-disc list-inside space-y-0.5">
         <li>Klassifiziere jede Fahrt (Privat / Dienst / Arbeitsweg) — Klick auf den Typ-Badge wechselt durch.</li>
         <li>Bei Dienstfahrten: <strong>Geschäftspartner</strong> + <strong>Zweck</strong> ausfüllen. BMF verlangt beide.</li>
-        <li>Mit <strong>„📄 Finanzamt-PDF"</strong> exportieren — die Fahrten werden danach gegen Aenderungen gesperrt (BMF-Manipulationsschutz).</li>
+        <li>Mit <strong>„Finanzamt-PDF"</strong> exportieren — die Fahrten werden danach gegen Aenderungen gesperrt (BMF-Manipulationsschutz).</li>
         <li>Aenderungen vor dem Export werden in der Aenderungs-Historie pro Fahrt protokolliert.</li>
       </ul>
     </div>

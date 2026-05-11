@@ -1,6 +1,9 @@
 <template>
   <div class="max-w-lg mx-auto space-y-6">
-    <h1 class="text-2xl font-bold">🔐 Zwei-Faktor-Authentifizierung einrichten</h1>
+    <h1 class="text-2xl font-bold flex items-center gap-2">
+      <AppIcon name="lock" :size="24" class="text-tesla-red" />
+      Zwei-Faktor-Authentifizierung einrichten
+    </h1>
 
     <!-- Banner: User wurde vom Router-Guard hierhin gezwungen, weil sein
          Profil mfa_required=1 hat (Pflicht-MFA fuer neue Benutzer). -->
@@ -81,6 +84,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../store/auth.js';
 import api from '../api.js';
+import AppIcon from '../components/AppIcon.vue';
 
 const router      = useRouter();
 const route       = useRoute();

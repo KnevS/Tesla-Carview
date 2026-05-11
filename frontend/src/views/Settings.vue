@@ -109,8 +109,9 @@
 
     <!-- Vehicle profile -->
     <div class="card space-y-4">
-      <h2 class="font-semibold" v-tooltip="'Kennzeichen, Farbe und Modell des Fahrzeugs einstellen – wird auf Dashboard und Technik-Seite angezeigt'">
-        🚗 Fahrzeugprofil
+      <h2 class="font-semibold flex items-center gap-2" v-tooltip="'Kennzeichen, Farbe und Modell des Fahrzeugs einstellen – wird auf Dashboard und Technik-Seite angezeigt'">
+        <AppIcon name="steering" :size="20" class="text-tesla-red" />
+        {{ $t('settings.vehicleProfileTitle') }}
       </h2>
       <!-- Hinweis-Banner: User ohne Edit-Recht sieht den Bereich
            read-only. Inputs sind weiter sichtbar fuer Transparenz, aber
@@ -348,9 +349,10 @@
     </div>
 
     <div class="card space-y-3">
-      <h2 class="font-semibold"
+      <h2 class="font-semibold flex items-center gap-2"
         v-tooltip="'Zwei-Faktor-Authentifizierung schützt dein Konto: auch wenn dein Passwort gestohlen wird, kann sich niemand ohne deinen zweiten Faktor anmelden.'">
-        🔐 Zwei-Faktor-Authentifizierung
+        <AppIcon name="lock" :size="20" class="text-tesla-red" />
+        {{ $t('settings.mfaTitle') }}
       </h2>
       <div v-if="mfaStatus.mfaEnabled" class="space-y-3">
         <div class="flex items-center gap-2 text-green-400">
@@ -610,9 +612,10 @@
 
     <!-- Design-Stil -->
     <div class="card space-y-3">
-      <h2 class="font-semibold"
+      <h2 class="font-semibold flex items-center gap-2"
         v-tooltip="'Optisches Erscheinungsbild der App — wird sofort live übernommen und lokal gespeichert. Jeder Benutzer kann seinen Stil unabhaengig waehlen.'">
-        ✨ Design-Stil
+        <AppIcon name="star" :size="20" class="text-tesla-red" />
+        {{ $t('settings.designStyleTitle') }}
       </h2>
       <p class="text-xs text-gray-500">
         Vier komplette Design-Sprachen. Klick auf eine Karte → wird sofort live angewendet.

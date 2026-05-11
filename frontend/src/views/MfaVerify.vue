@@ -2,7 +2,7 @@
   <div class="min-h-screen flex items-center justify-center px-4">
     <div class="w-full max-w-sm space-y-6">
       <div class="text-center">
-        <div class="text-5xl mb-3">🔐</div>
+        <AppIcon name="lock" :size="56" class="text-tesla-red mx-auto mb-3" />
         <h1 class="text-xl font-bold">Zwei-Faktor-Authentifizierung</h1>
         <p class="text-gray-400 text-sm mt-1">
           {{ useBackup ? 'Backup-Code eingeben' : 'Code aus der Authenticator-App eingeben' }}
@@ -52,6 +52,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/auth.js';
 import { useAppStore }  from '../store/index.js';
+import AppIcon from '../components/AppIcon.vue';
 
 const auth      = useAuthStore();
 const app       = useAppStore();
