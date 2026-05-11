@@ -452,34 +452,60 @@
         </div>
       </div>
 
-      <!-- Fleet Telemetrie -->
+      <!-- Fleet Telemetrie: Live-GPS + Fahrdaten via WebSocket vom Auto.
+           Status pro VIN: gruener Punkt = Auto streamt gerade,
+           gelb = registriert aber kein Signal in den letzten 15 min,
+           rot = noch nicht registriert,
+           grau = Tesla-Approval fehlt (404). -->
       <div class="border-t border-gray-700 pt-4 space-y-3">
         <div>
           <p class="font-medium text-sm">📡 Fleet Telemetrie (GPS &amp; Echtzeit-Daten)</p>
-          <p class="text-xs text-gray-400 mt-0.5">Sendet GPS-Track, Geschwindigkeit und Batterie live an diese App</p>
+          <p class="text-xs text-gray-400 mt-0.5">
+            Pusht Position, Geschwindigkeit, Batterie sekündlich vom Auto an diese App.
+            Benötigt Tesla-Partner-Approval pro Application-Client.
+          </p>
         </div>
         <div class="flex flex-wrap gap-2">
           <button @click="registerPartner" :disabled="partnerBusy"
             class="btn-secondary text-sm"
-            v-tooltip="'Einmalig: Registriert diese App als Tesla-Partner. Muss vor der Telemetrie-Aktivierung gemacht werden.'">
+            v-tooltip="'Einmalig: registriert diese App als Tesla-Partner. Vor der Telemetrie-Aktivierung nötig.'">
             {{ partnerBusy ? 'Registriere…' : '🔑 App bei Tesla registrieren' }}
           </button>
-          <button @click="configureTelemetry" :disabled="telemetryBusy"
-            class="btn-primary text-sm"
-            v-tooltip="'Registriert diese App bei Tesla als Telemetrie-Empfänger. Einmalig nötig – danach werden GPS und Fahrdaten automatisch übertragen.'">
-            {{ telemetryBusy ? 'Wird aktiviert…' : '📡 Telemetrie aktivieren' }}
+          <button @click="loadTelemetryStatus" class="btn-secondary text-sm"
+            v-tooltip="'Status pro Fahrzeug aktualisieren'">
+            🔄 Status
           </button>
         </div>
         <div v-if="partnerResult" class="rounded-lg px-3 py-2 text-sm"
           :class="partnerResult.ok ? 'bg-green-900/30 text-green-300' : 'bg-red-900/30 text-red-300'">
-          {{ partnerResult.ok ? '✓ App erfolgreich registriert – jetzt Telemetrie aktivieren' : '✗ ' + partnerResult.error }}
+          {{ partnerResult.ok ? '✓ App erfolgreich registriert – jetzt pro Fahrzeug aktivieren' : '✗ ' + partnerResult.error }}
         </div>
-        <div v-if="telemetryResults.length" class="space-y-2">
-          <div v-for="r in telemetryResults" :key="r.vin"
-            class="rounded-lg px-3 py-2 text-sm"
-            :class="r.ok ? 'bg-green-900/30 text-green-300' : 'bg-red-900/30 text-red-300'">
-            <span class="font-mono text-xs">{{ r.vin }}</span>
-            <span class="ml-2">{{ r.ok ? '✓ Aktiviert' : '✗ ' + (r.error?.error || r.error || 'Fehler') }}</span>
+
+        <!-- Status pro VIN — Live-Dot, Aktion, Letztes Signal. -->
+        <div v-if="telemetryStatus.vehicles?.length" class="space-y-2">
+          <div v-for="v in telemetryStatus.vehicles" :key="v.vin"
+            class="bg-gray-800/60 rounded-lg p-3 flex items-center gap-3 flex-wrap">
+            <span class="text-lg leading-none" :class="telemetryDotClass(v.status)"
+              v-tooltip="telemetryStatusLabel(v.status)">●</span>
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-sm truncate">{{ v.display_name || v.vin }}</p>
+              <p class="text-xs text-gray-400 font-mono">{{ v.vin }}</p>
+              <p class="text-xs mt-0.5" :class="telemetryTextClass(v.status)">
+                {{ telemetryStatusLabel(v.status) }}
+                <span v-if="v.last_signal_at" class="text-gray-500 ml-1">
+                  · letztes Signal {{ relativeAgo(v.last_signal_at) }}
+                </span>
+              </p>
+              <p v-if="v.last_error" class="text-xs text-red-300 mt-0.5 truncate"
+                 v-tooltip="v.last_error">{{ v.last_error }}</p>
+            </div>
+            <button v-if="v.status !== 'streaming'"
+              @click="configureTelemetryFor(v.vin)" :disabled="telemetryBusyFor === v.vin"
+              class="btn-primary text-xs whitespace-nowrap">
+              {{ telemetryBusyFor === v.vin ? '…'
+                 : v.status === 'not_registered' ? '📡 Aktivieren'
+                 : '🔁 Neu konfigurieren' }}
+            </button>
           </div>
         </div>
       </div>
@@ -838,8 +864,8 @@ const virtualKeyHost  = window.location.hostname;
 const syncingVehicles  = ref(false);
 const syncMsg          = ref('');
 const syncOk           = ref(false);
-const telemetryBusy    = ref(false);
-const telemetryResults = ref([]);
+const telemetryBusyFor = ref(null);          // VIN gerade in Bearbeitung
+const telemetryStatus  = ref({ vehicles: [] });
 const partnerBusy      = ref(false);
 const partnerResult    = ref(null);
 
@@ -847,8 +873,9 @@ async function registerPartner() {
   partnerBusy.value = true;
   partnerResult.value = null;
   try {
-    const { data } = await api.post('/fleet/partner/register');
+    await api.post('/fleet/partner/register');
     partnerResult.value = { ok: true };
+    await loadTelemetryStatus();
   } catch (err) {
     partnerResult.value = { ok: false, error: err.response?.data?.error ?? err.message };
   } finally {
@@ -856,17 +883,53 @@ async function registerPartner() {
   }
 }
 
-async function configureTelemetry() {
-  telemetryBusy.value = true;
-  telemetryResults.value = [];
+async function loadTelemetryStatus() {
   try {
-    const { data } = await api.post('/fleet/telemetry/configure', {}, { timeout: 100000 });
-    telemetryResults.value = data.results;
-  } catch (err) {
-    telemetryResults.value = [{ vin: '–', ok: false, error: err.response?.data?.error ?? err.message }];
-  } finally {
-    telemetryBusy.value = false;
-  }
+    const { data } = await api.get('/fleet/telemetry/status');
+    telemetryStatus.value = data;
+  } catch { telemetryStatus.value = { vehicles: [] }; }
+}
+
+async function configureTelemetryFor(vin) {
+  if (telemetryBusyFor.value) return;
+  telemetryBusyFor.value = vin;
+  try {
+    await api.post(`/fleet/telemetry/configure/${encodeURIComponent(vin)}`, {}, { timeout: 100000 });
+  } catch { /* Fehler kommen via Status-Refresh als last_error wieder */ }
+  await loadTelemetryStatus();
+  telemetryBusyFor.value = null;
+}
+
+const TELEMETRY_LABELS = {
+  streaming:        'Live — Auto streamt aktuell',
+  registered_idle:  'Registriert — wartet auf Signal vom Auto',
+  not_registered:   'Noch nicht registriert',
+  approval_missing: 'Tesla-Approval fehlt — Antrag im Developer-Portal',
+  error:            'Letzter Versuch fehlgeschlagen',
+};
+const telemetryStatusLabel = s => TELEMETRY_LABELS[s] || s;
+const telemetryDotClass    = s => ({
+  streaming:        'text-green-400',
+  registered_idle:  'text-yellow-400',
+  not_registered:   'text-red-400',
+  approval_missing: 'text-gray-500',
+  error:            'text-red-400',
+}[s] || 'text-gray-400');
+const telemetryTextClass = s => ({
+  streaming:        'text-green-300',
+  registered_idle:  'text-yellow-200',
+  not_registered:   'text-red-200',
+  approval_missing: 'text-gray-400',
+  error:            'text-red-200',
+}[s] || 'text-gray-300');
+
+/** Relative Zeitangabe „vor 3 min" / „vor 2h" — fuer last_signal_at-Anzeige. */
+function relativeAgo(ts) {
+  const diff = Math.max(0, Math.floor(Date.now() / 1000) - ts);
+  if (diff < 60)       return `vor ${diff}s`;
+  if (diff < 3600)     return `vor ${Math.floor(diff / 60)} min`;
+  if (diff < 86400)    return `vor ${Math.floor(diff / 3600)}h`;
+  return `vor ${Math.floor(diff / 86400)}d`;
 }
 
 const teslaAuthUrl = ref('');
@@ -1113,6 +1176,7 @@ onMounted(async () => {
   loadTenantDefaultLocale();
   loadTenantPseudonym();
   loadTariffConfig();
+  loadTelemetryStatus();
   const [mfa, audit, teslaStatus] = await Promise.all([
     api.get('/mfa/status'),
     api.get('/users/me/audit'),
