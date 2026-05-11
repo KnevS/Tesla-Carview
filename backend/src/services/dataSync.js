@@ -1,6 +1,7 @@
 import { sendChargingCompleteNotification } from './notifications.js';
 import { maybeAutoClassify } from './geofenceClassifier.js';
 import { maybeFuzz } from './gpsFuzzing.js';
+import { dispatch as dispatchWebhook } from './webhookDispatcher.js';
 
 const BATTERY_SNAPSHOT_INTERVAL = 15 * 60;
 const MODEL_Y_USABLE_KWH = 75;
@@ -165,6 +166,16 @@ function finishOdometerTrip(db, vehicle, charge, odomKm, now, outsideTempC = nul
   // Auto-Klassifikation anhand der Geofences (Home/Work). No-op wenn
   // der User schon manuell gesetzt hat oder kein Geofence matched.
   try { maybeAutoClassify(db, active.id); } catch { /* ignore */ }
+
+  // trip.completed-Webhook (best-effort, darf den Sync nie crashen)
+  dispatchWebhook(db, 'trip.completed', {
+    trip_id:    active.id,
+    vehicle_id: vehicle.id,
+    start_time: active.start_time,
+    end_time:   now,
+    distance_km: distKm,
+    trip_type:   active.trip_type ?? 'private',
+  }).catch(() => { /* dispatcher swallows errors itself */ });
 }
 
 function keepOdometerTripAlive(db, vehicle, odomKm) {
@@ -236,6 +247,16 @@ function finishGpsTrip(db, vehicle, drive, charge, now, outsideTempC = null) {
     outsideTempC,
     active.id,
   );
+
+  // trip.completed-Webhook (best-effort, darf den Sync nie crashen)
+  dispatchWebhook(db, 'trip.completed', {
+    trip_id:     active.id,
+    vehicle_id:  vehicle.id,
+    start_time:  active.start_time,
+    end_time:    now,
+    distance_km: distKm,
+    trip_type:   active.trip_type ?? 'private',
+  }).catch(() => { /* dispatcher swallows errors itself */ });
 }
 
 // ---- Lade-Tracking ---------------------------------------------------------
@@ -312,6 +333,15 @@ function finishActiveCharging(db, vehicle, charge, now) {
 
   console.log(`[Sync] Laden beendet: +${energyKwh.toFixed(1)} kWh${cost != null ? `, ${cost.toFixed(2)} EUR` : ''}`);
   sendChargingCompleteNotification(vehicle, charge, db).catch(() => {});
+
+  // charging.completed-Webhook (best-effort)
+  dispatchWebhook(db, 'charging.completed', {
+    session_id:        active.id,
+    vehicle_id:        vehicle.id,
+    energy_added_kwh:  energyKwh,
+    cost,
+    location_name:     active.location_name ?? null,
+  }).catch(() => { /* dispatcher swallows errors itself */ });
 }
 
 // ---- GPS Helpers -----------------------------------------------------------
