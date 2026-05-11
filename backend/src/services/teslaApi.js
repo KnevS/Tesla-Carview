@@ -47,6 +47,8 @@ export async function exchangeCode(db, code, state) {
   if (!row) throw new Error('PKCE-State nicht gefunden oder abgelaufen');
   master.prepare('DELETE FROM oauth_pkce WHERE state=?').run(state);
 
+  // 15s Timeout reicht reichlich fuer einen OAuth-Token-Tausch.
+  // Verhindert haengen-bleibende Promises bei Tesla-Auth-Outage (Audit L11).
   const res = await axios.post(`${getAuthBase()}/token`, {
     grant_type:    'authorization_code',
     client_id:     process.env.TESLA_CLIENT_ID,
@@ -55,7 +57,7 @@ export async function exchangeCode(db, code, state) {
     redirect_uri:  process.env.TESLA_REDIRECT_URI,
     code_verifier: row.code_verifier,
     audience:      getFleetApiUrl(),
-  });
+  }, { timeout: 15_000 });
   saveTokens(db, res.data);
   return res.data;
 }
@@ -64,14 +66,13 @@ export async function refreshTokens(db) {
   const row = db.prepare('SELECT refresh_token FROM tokens ORDER BY id DESC LIMIT 1').get();
   if (!row) throw new Error('Keine gespeicherten Tokens');
   // refresh_token kommt aus der DB potenziell verschluesselt — decrypt
-  // toleriert sowohl v1:... als auch Legacy-Klartext (Migration laeuft
-  // beim Start, kann aber zwischenzeitlich noch alte Zeilen treffen).
+  // toleriert sowohl v1:... als auch Legacy-Klartext.
   const res = await axios.post(`${getAuthBase()}/token`, {
     grant_type:    'refresh_token',
     client_id:     process.env.TESLA_CLIENT_ID,
     client_secret: process.env.TESLA_CLIENT_SECRET,
     refresh_token: decrypt(row.refresh_token),
-  });
+  }, { timeout: 15_000 });
   saveTokens(db, res.data);
   return res.data.access_token;
 }
@@ -104,11 +105,17 @@ async function trackedCall(db, method, path, fn) {
   return result;
 }
 
+// 20s default-Timeout fuer Fleet-API-Calls. Tesla's /vehicle_data kann
+// gelegentlich langsam sein (Auto wacht auf), aber 20s ist die obere
+// Schwelle bevor wir lieber neu versuchen. Verhindert Hang bei Outage.
+const FLEET_TIMEOUT_MS = 20_000;
+
 export async function apiGet(db, path) {
   return trackedCall(db, 'GET', path, async () => {
     const token = await getAccessToken(db);
     const res   = await axios.get(`${getFleetApiUrl()}${path}`, {
       headers: { Authorization: `Bearer ${token}` },
+      timeout: FLEET_TIMEOUT_MS,
     });
     return res.data;
   });
@@ -119,6 +126,7 @@ export async function apiPost(db, path, body) {
     const token = await getAccessToken(db);
     const res   = await axios.post(`${getFleetApiUrl()}${path}`, body, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      timeout: FLEET_TIMEOUT_MS,
     });
     return res.data;
   });

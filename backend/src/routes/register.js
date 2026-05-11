@@ -80,7 +80,8 @@ router.post('/', validate(registerSchema), async (req, res) => {
     const { getDb } = await import('../db/database.js');
     const db = getDb(tenantId);
     const newUserId = await createUser(db, adminUsername, adminPassword, 'admin');
-    const ip = (req.headers['x-forwarded-for'] || req.ip || '').toString().split(',')[0]?.trim();
+    // req.ip statt XFF-Parse (trust proxy=1) — XFF-Spoofing fix (Audit M8).
+    const ip = req.ip;
     const ua = (req.headers['user-agent'] || '').slice(0, 512);
     recordRegistrationAcceptance(db, newUserId, accepts, ip, ua);
 

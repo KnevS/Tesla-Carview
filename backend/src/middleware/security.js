@@ -43,3 +43,26 @@ export const apiRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+/** Sensitive Endpoints, die token-/code-basierte Zustellung haben
+ *  (Reset, Invite-Accept, Webhook) — token-Entropie schuetzt ohnehin,
+ *  aber Defense-in-Depth gegen Brute-Force-Versuche und Spam (Audit M6).
+ *  Eng genug, dass legitime User nicht stoppen (5 in 5 min). */
+export const sensitiveTokenRateLimit = rateLimit({
+  windowMs: 5 * 60 * 1000,
+  max: 5,
+  message: { error: 'Zu viele Versuche. Bitte 5 Minuten warten.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+/** Setup-Endpoint: ein einzelner Bootstrap-Aufruf reicht. 3 pro IP
+ *  pro Stunde verhindern Setup-Race-Hijack (Audit H3 — zusammen mit
+ *  SETUP_TOKEN-Gate). */
+export const setupRateLimit = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 3,
+  message: { error: 'Setup-Endpoint Rate-Limit. Bitte 1 Stunde warten.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});

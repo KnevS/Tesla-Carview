@@ -10,6 +10,7 @@ import {
   recordWebhookEvent,
 } from '../services/teslaUsage.js';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
+import { sensitiveTokenRateLimit } from '../middleware/security.js';
 import { getAllTenants, getDb } from '../db/database.js';
 
 const router = Router();
@@ -19,7 +20,10 @@ const router = Router();
 
 export const webhookRouter = Router();
 
-webhookRouter.post('/webhook/email', (req, res) => {
+// Rate-Limit auch wenn das Webhook-Secret die Haupt-Absicherung ist —
+// schuetzt bei geleaktem Secret vor DoS-Floods, indem die zu
+// verarbeitenden Events pro IP eingeschraenkt werden (Audit M6).
+webhookRouter.post('/webhook/email', sensitiveTokenRateLimit, (req, res) => {
   const expected = process.env.TESLA_USAGE_WEBHOOK_SECRET;
   if (!expected) return res.status(503).json({ error: 'Webhook secret not configured' });
   const got = req.get('X-Webhook-Secret');

@@ -33,7 +33,7 @@ router.post('/confirm', loginRateLimit, validate(z.object({
   code:       z.string().length(6).regex(/^\d+$/),
 })), async (req, res, next) => {
   let payload;
-  try { payload = jwt.verify(req.body.setupToken, process.env.JWT_SECRET); }
+  try { payload = jwt.verify(req.body.setupToken, process.env.JWT_SECRET, { algorithms: ['HS256'] }); }
   catch { return res.status(400).json({ error: 'Setup-Token abgelaufen. Bitte neu starten.' }); }
   if (payload.sub !== req.user.sub) return res.status(403).json({ error: 'Ungueltiger Token' });
   if (!verifyTotp(payload.mfa_setup_secret, req.body.code)) {

@@ -84,7 +84,8 @@ authedRouter.post('/accept', (req, res) => {
   ).get(scope, version);
   if (!exists) return res.status(404).json({ error: 'unknown scope/version' });
 
-  const ip = (req.headers['x-forwarded-for'] || req.ip || '').toString().split(',')[0]?.trim();
+  // req.ip statt manueller XFF-Parse — verhindert XFF-Spoofing (Audit M8).
+  const ip = req.ip;
   const ua = (req.headers['user-agent'] || '').slice(0, 512);
   try {
     // JWT-Payload nutzt `sub` (nicht `id`) für die User-ID — siehe

@@ -12,9 +12,17 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { getMasterDb, getDb } from '../db/database.js';
 import { createUser } from '../services/userService.js';
+import { sensitiveTokenRateLimit } from '../middleware/security.js';
 import { LEGAL_ACCEPT_REQUIRED } from '../db/legalDefaults.js';
 
 const router = Router();
+
+// Rate-Limit beide oeffentlichen Routen — der Token hat 256-bit-Entropie
+// (siehe routes/users.js), aber Defense-in-Depth gegen Spam und
+// Token-Enumeration. 5 Treffer pro IP / 5 min ist eng genug, dass
+// Brute-Force ausser Reichweite bleibt, aber legitime Klicks
+// (Mehrfach-Tab, Refresh) noch durchgehen (Audit M6).
+router.use(sensitiveTokenRateLimit);
 
 /** Sucht ein User-Invite quer ueber alle Tenant-DBs. Liefert
  *  {tenant, db, invite} oder null, wenn der Token nirgends existiert. */
@@ -102,7 +110,9 @@ router.post('/:token/accept', async (req, res) => {
     const userId = await createUser(db, username, password, role);
 
     // Invite verbrannt + Akzeptanzen + audit
-    const ip = (req.headers['x-forwarded-for'] || req.ip || '').toString().split(',')[0]?.trim();
+    // req.ip statt manueller XFF-Parse (trust proxy ist gesetzt) —
+    // verhindert XFF-Spoofing in Audit-Logs (Audit M8).
+    const ip = req.ip;
     const ua = (req.headers['user-agent'] || '').slice(0, 512);
 
     db.prepare(
