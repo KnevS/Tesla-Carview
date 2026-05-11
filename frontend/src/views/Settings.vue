@@ -4,7 +4,10 @@
 
     <!-- Sprache (User-Preference) -->
     <div class="card space-y-3">
-      <h2 class="font-semibold">🌐 {{ $t('settings.languageTitle') }}</h2>
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="globe" :size="20" class="text-tesla-red" />
+        {{ $t('settings.languageTitle') }}
+      </h2>
       <p class="text-sm text-gray-400">{{ $t('settings.languageHint') }}</p>
       <div class="flex flex-wrap gap-2">
         <button
@@ -23,7 +26,10 @@
 
     <!-- Mandanten-Standardsprache (nur Admin) -->
     <div v-if="auth.isAdmin" class="card space-y-3">
-      <h2 class="font-semibold">🏢 {{ $t('settings.tenantDefaultLocaleTitle') }}</h2>
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="users" :size="20" class="text-tesla-red" />
+        {{ $t('settings.tenantDefaultLocaleTitle') }}
+      </h2>
       <p class="text-sm text-gray-400">{{ $t('settings.tenantDefaultLocaleHint') }}</p>
       <div class="flex flex-wrap gap-2">
         <button
@@ -44,7 +50,10 @@
     <!-- Mandanten-Pseudonym (Admin) — nach aussen sichtbarer Login-
          Identifier. Aus Datenschutz nicht der Klarname. -->
     <div v-if="auth.isAdmin" class="card space-y-3">
-      <h2 class="font-semibold">{{ $t('settings.pseudonymTitle') }}</h2>
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="lock" :size="20" class="text-tesla-red" />
+        {{ $t('settings.pseudonymTitle') }}
+      </h2>
       <p class="text-sm text-gray-400">{{ $t('settings.pseudonymIntro') }}</p>
       <div class="bg-black/30 rounded-lg p-3 flex items-center justify-between gap-3 flex-wrap">
         <div class="min-w-0">
@@ -267,7 +276,10 @@
     <!-- Wartungsintervalle ist in das Betriebsbuch umgezogen — passt
          thematisch besser dort hin (Bezug zu Wartungs-Eintraegen). -->
     <div class="card space-y-2">
-      <h2 class="font-semibold">🔧 Wartungsintervalle</h2>
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="tool" :size="20" class="text-tesla-red" />
+        {{ $t('settings.serviceIntervalsTitle') }}
+      </h2>
       <p class="text-sm text-gray-400">
         Die Verwaltung von Wartungsintervallen ist jetzt direkt im
         <RouterLink to="/logbook#service-intervals" class="text-tesla-red hover:underline">Betriebsbuch</RouterLink>
@@ -406,7 +418,10 @@
 
     <!-- Geofences fuer Auto-Klassifikation Privat / Arbeitsweg / Dienst -->
     <div v-if="appStore.selectedVehicle" class="card space-y-3">
-      <h2 class="font-semibold">{{ $t('settings.geofenceTitle') }}</h2>
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="pin" :size="20" class="text-tesla-red" />
+        {{ $t('settings.geofenceTitle') }}
+      </h2>
       <GeofenceManager />
     </div>
 
@@ -442,7 +457,10 @@
 
     <!-- Tesla Verbindung -->
     <div class="card space-y-4">
-      <h2 class="font-semibold">⚡ Tesla-Verbindung</h2>
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="bolt" :size="20" class="text-tesla-red" />
+        {{ $t('settings.teslaConnectionTitle') }}
+      </h2>
 
       <!-- Strategie-Erklaerung: Telemetry-first, Polling als Fallback. -->
       <div class="bg-blue-900/15 border border-blue-700/30 rounded-lg p-3 text-xs text-blue-100 space-y-1">
@@ -495,7 +513,10 @@
       <!-- Fleet Telemetrie: Live-GPS + Fahrdaten via WebSocket vom Auto. -->
       <div class="border-t border-gray-700 pt-4 space-y-3">
         <div>
-          <p class="font-medium text-sm">{{ $t('settings.telemetryHeader') }}</p>
+          <p class="font-medium text-sm flex items-center gap-2">
+            <AppIcon name="pulse" :size="16" class="text-tesla-red" />
+            {{ $t('settings.telemetryHeader') }}
+          </p>
           <p class="text-xs text-gray-400 mt-0.5">{{ $t('settings.telemetryIntro') }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
@@ -544,12 +565,18 @@
 
     <!-- Outbound-Webhooks (Admin) — TODO i18n -->
     <div v-if="auth.isAdmin" class="card space-y-3">
-      <h2 class="font-semibold">🔔 Outbound Webhooks</h2>
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="alert" :size="20" class="text-tesla-red" />
+        {{ $t('settings.webhooksTitle') }}
+      </h2>
       <WebhookManager />
     </div>
 
     <div class="card space-y-3">
-      <h2 class="font-semibold">🔑 Passwort ändern</h2>
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="lock" :size="20" class="text-tesla-red" />
+        {{ $t('settings.passwordChangeTitle') }}
+      </h2>
       <div class="space-y-2">
         <input v-model="pw.current" type="password" placeholder="Aktuelles Passwort"
           class="w-full bg-gray-700 rounded-lg px-3 py-2 text-white"

@@ -89,21 +89,28 @@
 
     <!-- Heatmap: Aktivitaet pro Tag, Filter nach Jahr/Monat/Woche/Alle. -->
     <div class="card space-y-3">
-      <h2 class="font-semibold" v-tooltip="$t('trips.heatmapTooltip')">
-        🗓️ {{ $t('trips.heatmapTitle') }}
+      <h2 class="font-semibold flex items-center gap-2" v-tooltip="$t('trips.heatmapTooltip')">
+        <AppIcon name="calendar" :size="20" class="text-tesla-red" />
+        {{ $t('trips.heatmapTitle') }}
       </h2>
       <TripsHeatmap />
     </div>
 
     <!-- Standort-Heatmap auf Leaflet — wo war ich oft. -->
     <div class="card space-y-3">
-      <h2 class="font-semibold">{{ $t('trips.locationHeatmapTitle') }}</h2>
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="pin" :size="20" class="text-tesla-red" />
+        {{ $t('trips.locationHeatmapTitle') }}
+      </h2>
       <LocationHeatmap />
     </div>
 
     <!-- Jahresbericht-PDF clientseitig via jsPDF. -->
     <div class="card space-y-3">
-      <h2 class="font-semibold">{{ $t('trips.annualReportTitle') }}</h2>
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="export" :size="20" class="text-tesla-red" />
+        {{ $t('trips.annualReportTitle') }}
+      </h2>
       <AnnualReportButton />
     </div>
 
@@ -376,6 +383,7 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
 import TripsHeatmap from '../components/TripsHeatmap.vue';
+import AppIcon from '../components/AppIcon.vue';
 import LocationHeatmap from '../components/LocationHeatmap.vue';
 import AnnualReportButton from '../components/AnnualReportButton.vue';
 

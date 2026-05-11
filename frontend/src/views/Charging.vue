@@ -32,7 +32,10 @@
     <!-- Lade-Heatmap: wann (Wochentag × Stunde) ladet du typischerweise,
          und wo gab's die hoechsten Leistungen. -->
     <div class="card">
-      <h2 class="text-lg font-semibold mb-3">🗓️ {{ $t('charging.heatmapTitle') }}</h2>
+      <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+        <AppIcon name="calendar" :size="20" class="text-tesla-red" />
+        {{ $t('charging.heatmapTitle') }}
+      </h2>
       <ChargingHeatmap />
     </div>
 
@@ -174,6 +177,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
 import StatCard from '../components/StatCard.vue';
+import AppIcon from '../components/AppIcon.vue';
 import ChargingHeatmap from '../components/ChargingHeatmap.vue';
 import api from '../api.js';
 
