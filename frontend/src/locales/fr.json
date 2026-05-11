@@ -123,7 +123,17 @@
     "soc": "SoC",
     "purpose": "Saisir le motif du trajet (ex. visite client, déplacement pro)…",
     "assignDriver": "Attribuer un conducteur",
-    "noDriverLabel": "– Conducteur"
+    "noDriverLabel": "– Conducteur",
+    "heatmapTitle": "Heatmap d'activité",
+    "heatmapTooltip": "Heatmap calendaire de tous les trajets. Survolez pour les détails, cliquez pour la liste des trajets du jour.",
+    "heatmapPeriodYear": "Année",
+    "heatmapPeriodMonth": "Mois",
+    "heatmapPeriodWeek": "Semaine",
+    "heatmapPeriodAll": "Tout",
+    "heatmapLegendHint": "💡 Luminosité = kilomètres par jour",
+    "heatmapLess": "moins",
+    "heatmapMore": "plus",
+    "heatmapSummary": "{trips} trajet(s) · {km} km au total"
   },
   "tripDetail": {
     "back": "← Trajets",

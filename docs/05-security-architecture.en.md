@@ -15,8 +15,65 @@ on a self-operated server. The main threats are:
 | Cookie theft (CSRF) | `SameSite=Strict` + JSON API (no form submit) |
 | Man-in-the-middle | TLS 1.3, HSTS, OCSP stapling |
 | Clickjacking | `X-Frame-Options: DENY` + CSP `frame-src 'none'` |
-| Data leak from DB compromise | Password hashes (bcrypt), token hashes (SHA-256), MFA codes (bcrypt) |
+| Data leak from DB compromise | Password hashes (bcrypt), token hashes (SHA-256), MFA codes (bcrypt) **+ AES-256-GCM at-rest** for Tesla tokens, MFA secret, Virtual-Key private key (see "Encryption at rest" below) |
+| Stored XSS via admin markdown (legal pages) | `DOMPurify` before `v-html`, allow-list of tags/attributes, URL schemes restricted to http(s)/mailto/tel |
+| IDOR (user A reads user B's data within the same tenant) | `assertVehicleAccess`/`assertTripAccess`/`assertChargingAccess` helpers in every mutating route; admins see everything within their tenant, regular users see only vehicles linked via `vehicle_users` |
+| Setup-race hijack (attacker registers the first admin) | Optional `SETUP_TOKEN` env gate (header `X-Setup-Token`) + rate limit + atomic check-then-write |
+| Tenant enumeration via login page | Pseudonyms instead of real names on the login page (curated `adjective-noun` pool) |
 | Outdated dependencies | Enable Dependabot alerts in the repository |
+
+## Encryption at rest (since 2026-05)
+
+Two-way encryption (AES-256-GCM) for DB columns whose plaintext the
+backend needs at runtime and therefore cannot be hashed:
+
+| Data | Table.column | Format |
+|---|---|---|
+| Tesla OAuth access token | `tokens.access_token` | `v1:iv:tag:ciphertext` |
+| Tesla OAuth refresh token | `tokens.refresh_token` | `v1:iv:tag:ciphertext` |
+| TOTP MFA secret | `users.mfa_secret` | `v1:iv:tag:ciphertext` |
+| Tesla Virtual-Key private key (PEM) | `virtual_key.private_key_pem` | `v1:iv:tag:ciphertext` |
+
+**Key persistence:** `data/.encryption-key` (32 bytes, mode 0600). Auto-
+generated on first backend start. **Include it in your backup** — without
+the key, Tesla connections, MFA setups and Virtual-Keys are unrecoverable.
+
+One-way hashed (SHA-256 + `timingSafeEqual`) for random tokens that are
+only verified, never replayed:
+
+| Data | Method |
+|---|---|
+| Session refresh tokens | SHA-256, raw value only in the httpOnly cookie |
+| Password-reset tokens | SHA-256, in `tenant_settings` |
+
+Implementation: `backend/src/services/cryptoService.js`.
+
+## Tenant trust boundary
+
+The multi-tenant model treats one tenant as **one trust group**:
+
+- Each tenant has an isolated SQLite database (no cross-tenant reads possible).
+- Within a tenant, the **admin** role sees every vehicle and every user's data —
+  needed to administer the tenant (assigning vehicles, generating reset links,
+  managing legal acceptances, etc.).
+- Regular **user** accounts see only vehicles linked to them via the
+  `vehicle_users(vehicle_id, user_id)` table. The IDOR helpers in
+  `backend/src/middleware/vehicleAccess.js` enforce this on every trip,
+  charging and vehicle endpoint.
+
+**Recommendation for multi-driver households / companies:**
+
+- If all drivers fully trust each other (one household, family fleet):
+  put everyone into one tenant, assign every vehicle to every user via
+  `vehicle_users`. Convenient.
+- If drivers should NOT see each other's GPS / Fahrtenbuch entries
+  (independent employees, tax-relevant private vs. business split per
+  driver): give each driver **their own tenant**, register each vehicle
+  in the respective tenant. The IDOR guards then enforce the boundary.
+
+There is intentionally no fine-grained per-attribute permission model
+within a tenant — that complexity is pushed up to the tenant boundary
+instead.
 
 ## Authentication flow
 

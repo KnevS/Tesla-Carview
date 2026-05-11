@@ -90,9 +90,8 @@
     <!-- Heatmap: Aktivitaet pro Tag, Filter nach Jahr/Monat/Woche/Alle.
          Klick auf einen Tag fuehrt in die Fahrtenliste. -->
     <div class="card space-y-3">
-      <h2 class="font-semibold"
-          v-tooltip="'Aktivitaets-Heatmap aller Fahrten. Hover fuer Details, Klick fuer die Fahrtenliste des Tages.'">
-        🗓️ Aktivitaets-Heatmap
+      <h2 class="font-semibold" v-tooltip="$t('trips.heatmapTooltip')">
+        🗓️ {{ $t('trips.heatmapTitle') }}
       </h2>
       <TripsHeatmap />
     </div>

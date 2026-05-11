@@ -123,7 +123,17 @@
     "soc": "SoC",
     "purpose": "Seyahat amacını girin (örn. müşteri ziyareti, iş seyahati)…",
     "assignDriver": "Sürücü ata",
-    "noDriverLabel": "– Sürücü"
+    "noDriverLabel": "– Sürücü",
+    "heatmapTitle": "Aktivite ısı haritası",
+    "heatmapTooltip": "Tüm yolculukların takvim ısı haritası. Detaylar için üzerine gelin, gün yolculuk listesine gitmek için tıklayın.",
+    "heatmapPeriodYear": "Yıl",
+    "heatmapPeriodMonth": "Ay",
+    "heatmapPeriodWeek": "Hafta",
+    "heatmapPeriodAll": "Tümü",
+    "heatmapLegendHint": "💡 Parlaklık = günlük kilometre",
+    "heatmapLess": "az",
+    "heatmapMore": "çok",
+    "heatmapSummary": "{trips} yolculuk · toplam {km} km"
   },
   "tripDetail": {
     "back": "← Seyahatler",
