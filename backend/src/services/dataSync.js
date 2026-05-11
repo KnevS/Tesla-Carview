@@ -1,5 +1,6 @@
 import { sendChargingCompleteNotification } from './notifications.js';
 import { maybeAutoClassify } from './geofenceClassifier.js';
+import { maybeFuzz } from './gpsFuzzing.js';
 
 const BATTERY_SNAPSHOT_INTERVAL = 15 * 60;
 const MODEL_Y_USABLE_KWH = 75;
@@ -170,10 +171,13 @@ function handleDriving(db, vehicle, drive, charge, now) {
     'SELECT * FROM trips WHERE vehicle_id=? AND end_time IS NULL ORDER BY id DESC LIMIT 1'
   ).get(vehicle.id);
   if (!active) {
+    // GPS-Fuzzing nur fuer den aggregierten Trip-Start, NICHT fuer
+    // trip_points — sonst zerstoert das die Karten-Linie.
+    const fuzzed = maybeFuzz(db, drive.latitude, drive.longitude);
     db.prepare(
       `INSERT INTO trips (vehicle_id, start_time, start_lat, start_lon, start_soc, source)
        VALUES (?, ?, ?, ?, ?, 'gps')`
-    ).run(vehicle.id, now, drive.latitude, drive.longitude, charge?.battery_level);
+    ).run(vehicle.id, now, fuzzed.lat, fuzzed.lon, charge?.battery_level);
   } else {
     db.prepare(
       `INSERT INTO trip_points (trip_id, timestamp, lat, lon, speed_kmh, power_kw, soc)
@@ -199,13 +203,19 @@ function finishGpsTrip(db, vehicle, drive, charge, now) {
   const avgSpeed = points.length ? points.reduce((s, p) => s + (p.speed_kmh || 0), 0) / points.length : 0;
   const maxSpeed = points.length ? Math.max(...points.map(p => p.speed_kmh || 0)) : 0;
 
+  // GPS-Fuzzing nur fuer das aggregierte Trip-Ende — trip_points
+  // bleiben unangetastet (Karten-Track soll prazise bleiben).
+  const rawLat = drive?.latitude  ?? active.start_lat;
+  const rawLon = drive?.longitude ?? active.start_lon;
+  const fuzzed = maybeFuzz(db, rawLat, rawLon);
+
   db.prepare(
     `UPDATE trips SET end_time=?, end_lat=?, end_lon=?, end_soc=?,
      distance_km=?, avg_speed_kmh=?, max_speed_kmh=? WHERE id=?`
   ).run(
     now,
-    drive?.latitude  ?? active.start_lat,
-    drive?.longitude ?? active.start_lon,
+    fuzzed.lat,
+    fuzzed.lon,
     charge?.battery_level,
     distKm, avgSpeed, maxSpeed,
     active.id,

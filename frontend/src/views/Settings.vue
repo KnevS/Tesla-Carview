@@ -410,6 +410,38 @@
       <GeofenceManager />
     </div>
 
+    <!-- GPS-Fuzzing-Modus (Admin) -->
+    <!-- TODO i18n -->
+    <div v-if="auth.isAdmin" class="card space-y-3">
+      <h2 class="font-semibold">🛡️ GPS Fuzzing Mode</h2>
+      <p class="text-xs text-gray-400">
+        When active, new trip start/end coordinates are rounded to an approximate location.
+        Existing trips remain untouched. GPS tracks on the map stay precise — only the
+        aggregated start/end pin is fuzzed.
+      </p>
+      <div class="flex items-center gap-3">
+        <label class="inline-flex items-center gap-2 cursor-pointer">
+          <input type="checkbox" v-model="gpsFuzzing.enabled" class="accent-tesla-red" />
+          <span class="text-sm">Enable GPS fuzzing for new trips</span>
+        </label>
+      </div>
+      <div class="grid grid-cols-2 gap-3 text-sm">
+        <div>
+          <label class="label">Radius (meters)</label>
+          <input v-model.number="gpsFuzzing.radius_m" type="number" min="50" max="5000" step="50"
+                 class="input" :disabled="!gpsFuzzing.enabled" />
+        </div>
+        <div class="flex items-end text-xs text-gray-500">
+          <span>50 m = neighborhood, 200 m = block, 1000 m = district</span>
+        </div>
+      </div>
+      <div class="flex gap-2 items-center">
+        <button @click="saveGpsFuzzing" class="btn-primary text-sm">Save</button>
+        <span v-if="gpsFuzzingMsg" :class="gpsFuzzingOk ? 'text-green-400' : 'text-red-400'"
+              class="text-xs">{{ gpsFuzzingMsg }}</span>
+      </div>
+    </div>
+
     <!-- Tesla Verbindung -->
     <div class="card space-y-4">
       <h2 class="font-semibold">⚡ Tesla-Verbindung</h2>
@@ -1251,6 +1283,37 @@ async function logout() {
   router.push('/login');
 }
 
+// GPS-Fuzzing (admin) – Privacy-Schutz fuer Trip-Koordinaten
+// TODO i18n: hardcoded English copy, await i18n agent pass
+const gpsFuzzing    = ref({ enabled: false, radius_m: 200 });
+const gpsFuzzingMsg = ref('');
+const gpsFuzzingOk  = ref(false);
+
+async function loadGpsFuzzing() {
+  if (!auth.isAdmin) return;
+  try {
+    const { data } = await api.get('/system/tenant-settings/gps-fuzzing');
+    gpsFuzzing.value = { enabled: !!data.enabled, radius_m: data.radius_m || 200 };
+  } catch { /* ignore */ }
+}
+
+async function saveGpsFuzzing() {
+  gpsFuzzingMsg.value = '';
+  try {
+    const radius = Math.max(50, Math.min(5000, +gpsFuzzing.value.radius_m || 200));
+    const { data } = await api.put('/system/tenant-settings/gps-fuzzing', {
+      enabled:  !!gpsFuzzing.value.enabled,
+      radius_m: radius,
+    });
+    gpsFuzzing.value = { enabled: !!data.enabled, radius_m: data.radius_m };
+    gpsFuzzingMsg.value = 'Saved ✓'; gpsFuzzingOk.value = true;
+  } catch (err) {
+    gpsFuzzingMsg.value = err.response?.data?.error || err.message;
+    gpsFuzzingOk.value = false;
+  }
+  setTimeout(() => { gpsFuzzingMsg.value = ''; }, 2500);
+}
+
 // Tesla API-Nutzung (admin)
 const usageCfg = ref(null);
 const usageMsg = ref('');
@@ -1288,6 +1351,7 @@ async function resetUsageMonth() {
 }
 
 loadUsageConfig();
+loadGpsFuzzing();
 </script>
 
 <style scoped>

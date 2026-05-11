@@ -13,6 +13,7 @@ import {
   setTenantStatus, renameTenant, dropTenant,
   regenerateTenantPseudonym,
 } from '../db/database.js';
+import { getFuzzingConfig, setFuzzingConfig } from '../services/gpsFuzzing.js';
 import https from 'https';
 
 const router = Router();
@@ -443,6 +444,34 @@ router.put('/tenant-settings/default-locale', requireAuth, requireAdmin,
     auditLog(req.db, req.user.sub, 'tenant_default_locale_set', req,
       { defaultLocale: req.body.defaultLocale });
     res.json({ ok: true, defaultLocale: req.body.defaultLocale });
+  });
+
+// ───────────────────────── GPS-Fuzzing-Modus (Datenschutz) ─────────────────────
+// Schuetzt die Genauigkeit von Trip-Start/Ende-Koordinaten, indem neue
+// Trips auf ein Gitter mit Radius X gerundet werden. Bestehende Trips
+// bleiben unberuehrt. Telemetrie-Punkte / Trip-Track bleiben praezise —
+// gefuzzt werden nur die aggregierten Start/End-Lat/Lon der trips-Tabelle.
+router.get('/tenant-settings/gps-fuzzing', requireAuth, (req, res) => {
+  try {
+    res.json(getFuzzingConfig(req.db));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.put('/tenant-settings/gps-fuzzing', requireAuth, requireAdmin,
+  validate(z.object({
+    enabled:  z.boolean(),
+    radius_m: z.number().int().min(50).max(5000),
+  })),
+  (req, res) => {
+    try {
+      setFuzzingConfig(req.db, req.body);
+      auditLog(req.db, req.user.sub, 'tenant_gps_fuzzing_set', req, req.body);
+      res.json({ ok: true, ...getFuzzingConfig(req.db) });
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
   });
 
 function fetchJson(url) {
