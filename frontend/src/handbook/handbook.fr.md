@@ -128,6 +128,14 @@ Tesla Carview prend en charge plusieurs locataires entièrement isolés sur une 
 
 Les administrateurs disposent implicitement de ces trois droits — les cases à cocher sont masquées pour les comptes admin. L'en-tête de la page de gestion des utilisateurs affiche également une **carte de tâches** orange dès qu'un utilisateur actif (non admin) n'a aucun véhicule attribué — avec des boutons rapides pour attribuer un véhicule ou accorder le droit « Ajouter des véhicules ».
 
+**Pseudonyme de locataire (protection des données)** — La page de connexion publique **n'affiche pas** votre vrai nom de locataire, mais un pseudonyme aléatoire de type `adjectif-nom` comme `brave-eagle` ou `quiet-otter`. Ainsi, personne ne peut voir de l'extérieur quelle personne ou société utilise cette instance auto-hébergée.
+
+- Le pseudonyme est **attribué automatiquement** à la création du locataire.
+- Consultez-le sous **Paramètres → 🔐 Pseudonyme du locataire**.
+- Le bouton **« Régénérer »** en attribue un nouveau ; l'ancien part dans un historique et ne sera plus suggéré par hasard.
+- **À retenir.** Avec plusieurs locataires, le pseudonyme est votre unique identifiant lors de la connexion — notez-le à côté du mot de passe dans votre gestionnaire de mots de passe. Sans sauvegarde, le perdre signifie repartir d'un environnement vide.
+- Le **slug interne** et le nom réel restent dans la base et restent visibles aux administrateurs — seule la page de connexion est anonymisée.
+
 ## 💾 Sauvegarde {#backup}
 
 **Export manuel** — Sous **Export** : CSV ou JSON pour les trajets et sessions de recharge, ainsi qu'une sauvegarde complète au format ZIP.
@@ -376,6 +384,18 @@ Le carnet de bord génère un PDF reconnu par les administrations fiscales allem
 **Saisie manuelle** — si un trajet manque, utilisez **« + Manuell »** pour le saisir entièrement. Obligatoire : heure de début et de fin. Les entrées manuelles portent un badge ✍.
 
 **Fusionner des trajets consécutifs** — quand la télémétrie a divisé un trajet en deux (bref arrêt, coupure GPS), cliquez sur **« Mit nächster zusammenführen »** sur le premier trajet.
+
+## 🗓️ Heatmap d'activité {#trips-heatmap}
+
+Au-dessus de l'aperçu mensuel dans le carnet de bord vous trouverez une **heatmap calendaire de tous les trajets** :
+
+- **Filtre du haut** : choisir la granularité — `Année`, `Mois`, `Semaine` ou `Tout`. Pour `Année/Mois/Semaine` un second sélecteur permet de choisir la période exacte.
+- **Luminosité** par jour selon les kilomètres parcourus ; cellule sombre = aucun trajet, vert clair = beaucoup.
+- **Survol** d'un jour : info-bulle avec date + nombre de trajets + kilomètres totaux.
+- **Clic** sur un jour non vide : ouvre la liste des trajets filtrée sur cette date — utile pour répondre rapidement à « qu'ai-je fait ce jour-là ? ».
+- Le pied de page montre la légende et le total cumulé du filtre actif.
+
+Source de données : les mêmes trajets que le carnet de bord BMF — la heatmap est une pure visualisation, elle n'écrit rien.
 
 ## 📱 Utilisation sur smartphone et dans la Tesla (installation PWA) {#mobile-tesla-install}
 

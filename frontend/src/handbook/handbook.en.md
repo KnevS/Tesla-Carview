@@ -128,6 +128,14 @@ Tesla Carview supports multiple fully isolated tenants on a single instance. Eac
 
 Administrators implicitly hold all three rights — the checkboxes are hidden for admin accounts. The header of the user-management page also shows an orange **task card** whenever an active non-admin user has no assigned vehicle, with one-click shortcuts to assign a vehicle or grant the "Add vehicle" right.
 
+**Tenant pseudonym (privacy layer)** — The public login page does **not** display your real tenant name; instead it shows a random `adjective-noun` pseudonym such as `brave-eagle` or `quiet-otter`. That way no outsider can tell which person or company is using this self-hosted instance.
+
+- The pseudonym is **assigned automatically** when the tenant is created.
+- Review it under **Settings → 🔐 Tenant pseudonym**.
+- The **"Regenerate"** button assigns a new one; the previous pseudonym moves into history and won't be picked again by chance.
+- **Memorise it.** With multiple tenants the pseudonym is your only login identifier — keep it next to the password in your password manager. Losing it without a backup means starting from a blank tenant environment.
+- The **internal slug** and the real name remain in the database and stay visible to admins — only the login page is anonymised.
+
 ## 💾 Backup {#backup}
 
 **Manual export** — Under **Export**: CSV or JSON for trips and charging sessions, plus a full backup as ZIP.
@@ -376,6 +384,18 @@ The German logbook view is designed so the generated PDF is **accepted by German
 **Manual entry** — if a trip is missing (Tesla didn't deliver GPS, connection dropped, …) use **"+ Manuell"** to enter it from scratch. Required: start and end time. Recommended: start/end odometer or distance. Manual entries carry a ✍ badge.
 
 **Merge consecutive trips** — when telemetry split a single drive into two (brief stop at a traffic light, GPS gap), click **"Mit nächster zusammenführen"** on the first trip. End values come from the later trip, distance is summed, GPS points are merged.
+
+## 🗓️ Activity heatmap {#trips-heatmap}
+
+Above the monthly overview in the Logbook view you'll find a **calendar-style heatmap of all trips**:
+
+- **Top filter**: pick the granularity — `Year`, `Month`, `Week` or `All`. For `Year/Month/Week` a second selector picks the concrete period.
+- **Cell brightness** corresponds to the kilometres driven that day; dark cell = no trip, bright green = a lot.
+- **Hover** over a cell to see date + trip count + total km in a tooltip.
+- **Click** on a non-empty cell to jump to the trip list filtered by that date — quickly answers "what did I do that day?".
+- The footer shows the colour-scale legend plus the grand total of the active filter.
+
+Data source: the same trips the BMF-compliant logbook uses — the heatmap is a pure visualisation and never writes anything.
 
 ## 📱 Use on smartphone and inside the Tesla (PWA install) {#mobile-tesla-install}
 

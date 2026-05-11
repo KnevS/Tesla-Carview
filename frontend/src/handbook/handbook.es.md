@@ -128,6 +128,14 @@ Tesla Carview admite varios inquilinos totalmente aislados en una misma instanci
 
 Los administradores tienen estos tres derechos de forma implícita: las casillas se ocultan en las cuentas de administrador. Además, en la cabecera de la página de gestión de usuarios aparece una **tarjeta de tareas** naranja en cuanto un usuario activo (no admin) no tiene ningún vehículo asignado, con botones rápidos para asignar un vehículo o conceder el derecho «Añadir vehículos».
 
+**Pseudónimo de inquilino (capa de privacidad)** — La página pública de inicio de sesión **no muestra** el nombre real del inquilino, sino un pseudónimo aleatorio de tipo `adjetivo-sustantivo` como `brave-eagle` o `quiet-otter`. Así nadie desde fuera puede saber qué persona o empresa usa este auto-hospedaje.
+
+- El pseudónimo se **asigna automáticamente** al crear el inquilino.
+- Revísalo en **Ajustes → 🔐 Pseudónimo del inquilino**.
+- El botón **«Regenerar»** asigna uno nuevo; el anterior pasa al historial y no se volverá a sugerir por azar.
+- **Recuérdalo.** Con varios inquilinos, el pseudónimo es tu único identificador de inicio de sesión — guárdalo junto a la contraseña en tu gestor de contraseñas. Perderlo sin copia de seguridad implica empezar desde un entorno vacío.
+- El **slug interno** y el nombre real permanecen en la base y siguen visibles para los administradores — solo la página de inicio de sesión está anonimizada.
+
 ## 💾 Copia de seguridad {#backup}
 
 **Exportación manual** — En **Exportación**: CSV o JSON para viajes y sesiones de carga, además de copia completa como ZIP.
@@ -376,6 +384,18 @@ El libro de viajes genera un PDF reconocido por las administraciones fiscales al
 **Entrada manual** — si falta un viaje, usa **"+ Manuell"** para introducirlo completo. Obligatorio: hora de inicio y fin. Las entradas manuales llevan un badge ✍.
 
 **Fusionar viajes consecutivos** — cuando la telemetría dividió un viaje en dos (parada breve, hueco GPS), pulsa **"Mit nächster zusammenführen"** en el primer viaje.
+
+## 🗓️ Mapa de actividad {#trips-heatmap}
+
+Sobre el resumen mensual del cuaderno de bitácora encontrarás un **mapa de calor de todos los viajes** en estilo calendario:
+
+- **Filtro superior**: elige la granularidad — `Año`, `Mes`, `Semana` o `Todo`. Para `Año/Mes/Semana` aparece un segundo selector con el periodo concreto.
+- **Brillo de cada celda** según los kilómetros del día; celda oscura = sin viajes, verde claro = muchos.
+- **Pasa el ratón** sobre un día para ver fecha + número de viajes + km totales en un tooltip.
+- **Haz clic** sobre un día no vacío para ir directamente a la lista de viajes de ese día — responde rápido a «¿qué hice ese día?».
+- El pie muestra la leyenda de la escala y el total del filtro activo.
+
+Origen de los datos: los mismos viajes que usa el cuaderno BMF — el mapa es solo visualización, no escribe nada.
 
 ## 📱 Uso en smartphone y en el Tesla (instalación PWA) {#mobile-tesla-install}
 
