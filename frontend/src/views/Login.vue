@@ -83,8 +83,9 @@
 
       </div>
     </main>
-
-    <AppFooter />
+    <!-- Footer kommt global aus App.vue — nicht hier nochmal einbinden,
+         sonst doppelt sobald ein eingeloggter User auf /login zurueck-
+         navigiert. -->
   </div>
 </template>
 
@@ -95,7 +96,6 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../store/auth.js';
 import { useAppStore }  from '../store/index.js';
 import LangSwitcher     from '../components/LangSwitcher.vue';
-import AppFooter        from '../components/AppFooter.vue';
 
 const auth   = useAuthStore();
 const app    = useAppStore();

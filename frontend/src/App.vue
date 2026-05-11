@@ -10,9 +10,16 @@
         </transition>
       </RouterView>
     </main>
-    <!-- Globaler Footer mit Kontakt-Hinweis (nur für eingeloggte Pages — Login/Register tragen ihn selbst) -->
+    <!-- Globaler Footer — single source of truth. Erscheint auf jeder
+         Route, inklusive Login/Register/Reset/Demo. Die Versions-Zeile
+         (v2.0.0 · git-hash) blendet sich nur ein, wenn versionInfo
+         gesetzt ist, was erst nach erfolgreichem Login passiert.
+         Vorher (v-if="authStore.isAuthenticated"): Login.vue und
+         Register.vue trugen einen eigenen <AppFooter />. Sobald ein
+         eingeloggter User wieder auf /login navigierte (z.B. ueber
+         Browser-Back), wurden BEIDE Footer gerendert — sichtbar
+         duplizierte Legal-/Kontakt-Zeile. -->
     <AppFooter
-      v-if="authStore.isAuthenticated"
       :show-version="!!versionInfo"
       :version="versionInfo?.version || ''"
       :build-hash="versionInfo?.git?.hash || ''"

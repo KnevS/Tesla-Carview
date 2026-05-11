@@ -155,8 +155,7 @@
         </template>
       </div>
     </main>
-
-    <AppFooter />
+    <!-- Footer kommt global aus App.vue — siehe Begruendung in Login.vue. -->
   </div>
 </template>
 
@@ -166,7 +165,6 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../api.js';
 import LangSwitcher from '../components/LangSwitcher.vue';
-import AppFooter    from '../components/AppFooter.vue';
 
 const route   = useRoute();
 const { t }   = useI18n();
