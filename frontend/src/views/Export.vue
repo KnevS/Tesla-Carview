@@ -49,9 +49,10 @@
         </p>
         <button @click="download('backup.json', `tesla-carview-backup-${today}.json`, 'application/json')"
           :disabled="downloading['backup.json']"
-          class="btn-primary inline-block"
+          class="btn-primary inline-flex items-center gap-1.5"
           v-tooltip="'Komplette Datenbank-Sicherung im JSON-Format.\nEnthält: Fahrzeuge, Fahrten + GPS-Punkte, Ladevorgänge + Ladekurven, Batterie-Snapshots, Betriebsbuch.\nKeine Passwörter oder Tokens enthalten.'">
-          {{ downloading['backup.json'] ? '⏳ Wird erstellt…' : '💾 Backup herunterladen' }}
+          <AppIcon :name="downloading['backup.json'] ? 'clock' : 'download'" :size="16" />
+          {{ downloading['backup.json'] ? 'Wird erstellt…' : 'Backup herunterladen' }}
         </button>
       </div>
     </div>

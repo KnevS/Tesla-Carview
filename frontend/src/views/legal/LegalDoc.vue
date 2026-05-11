@@ -3,8 +3,9 @@
     <!-- Banner: noch unausgefüllte Platzhalter? Admin-Hinweis. -->
     <div v-if="hasPlaceholders && isAdmin"
          class="card border border-yellow-700/60 bg-yellow-900/20">
-      <p class="text-sm text-yellow-300">
-        ⚠️ {{ $t('legal.placeholdersWarningAdmin') }}
+      <p class="text-sm text-yellow-300 flex items-center gap-1.5 flex-wrap">
+        <AppIcon name="alert" :size="16" />
+        {{ $t('legal.placeholdersWarningAdmin') }}
         <RouterLink to="/admin/legal" class="underline hover:text-yellow-100">
           /admin/legal
         </RouterLink>
@@ -14,8 +15,9 @@
     <!-- Banner: Sprache wird nur auf Deutsch gepflegt. -->
     <div v-if="meta?.synced_from_default"
          class="card border border-blue-700/60 bg-blue-900/15">
-      <p class="text-sm text-blue-300">
-        🌐 {{ $t('legal.syncedFromDefaultBanner') }}
+      <p class="text-sm text-blue-300 flex items-center gap-1.5">
+        <AppIcon name="globe" :size="16" />
+        {{ $t('legal.syncedFromDefaultBanner') }}
       </p>
     </div>
 
@@ -77,6 +79,7 @@ import api from '../../api.js';
 import { useAuthStore } from '../../store/auth.js';
 import { useLangStore } from '../../store/lang.js';
 import { i18n } from '../../plugins/i18n.js';
+import AppIcon from '../../components/AppIcon.vue';
 
 const props = defineProps({
   scope: { type: String, required: true }, // 'imprint' | 'privacy' | 'terms'

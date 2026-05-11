@@ -3,7 +3,10 @@
     <h1 class="text-2xl font-bold">Datenverwaltung</h1>
 
     <div class="bg-yellow-900/30 border border-yellow-700 rounded-xl p-4 text-sm text-yellow-300">
-      <p class="font-semibold">⚠ Achtung – Datenlöschung ist unwiderruflich</p>
+      <p class="font-semibold flex items-center gap-2">
+        <AppIcon name="alert" :size="18" />
+        Achtung – Datenlöschung ist unwiderruflich
+      </p>
       <p class="mt-1 text-yellow-400/80">
         Ohne vorheriges Backup können gelöschte Daten nicht wiederhergestellt werden.
         Erstelle unten ein <strong>vollständiges Backup</strong> bevor du etwas löschst.
@@ -13,7 +16,8 @@
     <!-- Backup & Restore -->
     <div class="card space-y-4 border border-blue-700/40">
       <h2 class="font-semibold flex items-center gap-2">
-        💾 Vollständiges Backup &amp; Restore
+        <AppIcon name="database" :size="20" class="text-tesla-red" />
+        Vollständiges Backup &amp; Restore
       </h2>
       <p class="text-sm text-gray-400">
         Lädt <em>alle</em> Daten dieses Mandanten als eine einzige JSON-Datei herunter
@@ -168,6 +172,7 @@
 import { ref, onMounted } from 'vue';
 import api from '../api.js';
 import { useAppStore } from '../store/index.js';
+import AppIcon from '../components/AppIcon.vue';
 
 const app     = useAppStore();
 const info    = ref(null);

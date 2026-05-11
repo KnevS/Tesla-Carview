@@ -1,7 +1,10 @@
 <template>
   <div class="card space-y-3" v-if="configured">
     <div class="flex items-center justify-between flex-wrap gap-2">
-      <h2 class="font-semibold">💸 Strompreis ({{ providerLabel }})</h2>
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="wallet" :size="20" class="text-tesla-red" />
+        Strompreis ({{ providerLabel }})
+      </h2>
       <span v-if="current" class="text-2xl font-bold"
             :class="priceColor(current.ct_per_kwh)">
         {{ current.ct_per_kwh.toFixed(1).replace('.', ',') }} ct/kWh
@@ -34,9 +37,10 @@
 
     <div class="flex gap-2 flex-wrap">
       <button v-if="best4h && allowApply" @click="applyOffPeak"
-              class="text-xs btn-secondary py-1 px-3"
+              class="text-xs btn-secondary py-1 px-3 inline-flex items-center gap-1.5"
               v-tooltip="'Setzt set_scheduled_charging im Auto auf den Beginn des günstigsten 4h-Fensters. Auto wartet bis zur Uhrzeit und lädt dann.'">
-        🚗 Lade-Plan auf günstigstes Fenster
+        <AppIcon name="steering" :size="14" />
+        Lade-Plan auf günstigstes Fenster
       </button>
     </div>
   </div>
@@ -46,6 +50,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
+import AppIcon from './AppIcon.vue';
 
 defineProps({
   // Erlaubt das Auto-Set-Verhalten zu unterdruecken (z.B. wenn Widget

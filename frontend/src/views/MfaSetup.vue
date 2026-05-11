@@ -60,9 +60,10 @@
         <h2 class="font-semibold">MFA aktiviert!</h2>
       </div>
       <div class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-3">
-        <p class="text-yellow-300 text-sm font-semibold mb-2"
+        <p class="text-yellow-300 text-sm font-semibold mb-2 flex items-center gap-1.5"
           v-tooltip="'Diese Codes sind die letzte Rettung wenn du keinen Zugriff auf deine Authenticator-App hast. Verliere sie nicht!'">
-          ⚠️ Backup-Codes – jetzt sichern!
+          <AppIcon name="alert" :size="16" />
+          Backup-Codes – jetzt sichern!
         </p>
         <p class="text-gray-300 text-sm mb-3">
           Diese Codes werden <strong>nur einmal</strong> angezeigt. Speichere sie sicher

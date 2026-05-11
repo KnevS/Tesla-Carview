@@ -154,7 +154,10 @@
                 :class="vProfile.category === 'company' ? 'border-tesla-red' : 'border-transparent'">
                 <input type="radio" v-model="vProfile.category" value="company" class="accent-tesla-red" />
                 <div>
-                  <p class="font-medium text-sm">💼 Dienstwagen</p>
+                  <p class="font-medium text-sm flex items-center gap-1.5">
+                    <AppIcon name="wallet" :size="14" class="text-tesla-red" />
+                    Dienstwagen
+                  </p>
                   <p class="text-xs text-gray-400">Fahrtenbuch + Kostenabrechnung aktiv</p>
                 </div>
               </label>
@@ -231,8 +234,9 @@
 
     <!-- Strompreis-API (Admin-only) -->
     <div v-if="auth.isAdmin" class="card space-y-3">
-      <h2 class="font-semibold" v-tooltip="'Mit dynamischem Stromtarif (Tibber, aWattar, EPEX) das Lade-Fenster automatisch optimieren. Die App holt stuendliche Preise und schlaegt das guenstigste 4h-Fenster vor — bzw. setzt es auf Wunsch direkt im Auto.'">
-        💸 Strompreis-API (dynamischer Tarif)
+      <h2 class="font-semibold flex items-center gap-2" v-tooltip="'Mit dynamischem Stromtarif (Tibber, aWattar, EPEX) das Lade-Fenster automatisch optimieren. Die App holt stuendliche Preise und schlaegt das guenstigste 4h-Fenster vor — bzw. setzt es auf Wunsch direkt im Auto.'">
+        <AppIcon name="wallet" :size="20" class="text-tesla-red" />
+        Strompreis-API (dynamischer Tarif)
       </h2>
       <p class="text-xs text-gray-400">
         Quelle für stündliche Strompreise. Nur Admin — sichtbar im Dashboard-Widget für alle Nutzer.
@@ -715,9 +719,10 @@
 
     <!-- Tesla API-Nutzung (admin only) -->
     <div v-if="auth.isAdmin" class="card space-y-3">
-      <h2 class="font-semibold"
+      <h2 class="font-semibold flex items-center gap-2"
         v-tooltip="'Tarife und Schwellwerte für die Tesla-Fleet-API-Nutzung – passt zur Tesla-Preisliste, kann jederzeit angepasst werden, sobald Tesla sie ändert.'">
-        💸 Tesla API-Nutzung
+        <AppIcon name="wallet" :size="20" class="text-tesla-red" />
+        Tesla API-Nutzung
       </h2>
 
       <p v-if="usageMsg" :class="usageOk ? 'text-green-400' : 'text-red-400'" class="text-xs">{{ usageMsg }}</p>
