@@ -29,7 +29,11 @@
           v-tooltip="it.tooltip"
           @click="closeNow"
         >
-          <span class="nav-group-item-icon" aria-hidden="true">{{ it.icon }}</span>
+          <!-- AppIcon rendert den benannten SVG; Fallback auf Emoji bei
+               unbekanntem Namen wuerde im AppIcon-Komponenten-Code
+               passieren, aber wir setzen ihn hier auch nochmal als
+               Belt-and-Suspenders. -->
+          <AppIcon :name="it.icon" :size="18" class="nav-group-item-icon" />
           <span class="nav-group-item-label">{{ it.label }}</span>
         </RouterLink>
       </div>
@@ -40,6 +44,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import AppIcon from './AppIcon.vue';
 
 defineProps({
   title:  { type: String,  required: true },
@@ -173,7 +178,8 @@ onBeforeUnmount(() => {
   outline: 1px solid rgba(99,102,241,0.4);
   color: white;
 }
-.nav-group-item-icon { font-size: 1.05rem; width: 1.4rem; text-align: center; }
+.nav-group-item-icon { width: 1.4rem; height: 1.4rem; flex-shrink: 0; opacity: 0.85; }
+.nav-group-item:hover .nav-group-item-icon { opacity: 1; }
 .nav-group-item-label { flex: 1; }
 
 /* Slide-Animation: gleitet sanft aus dem Trigger heraus nach unten,
