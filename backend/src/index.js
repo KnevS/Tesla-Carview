@@ -44,6 +44,7 @@ import userInviteRoutes from './routes/userInvites.js';
 import serviceIntervalRoutes from './routes/serviceIntervals.js';
 import auditRoutes from './routes/audit.js';
 import tariffRoutes from './routes/tariff.js';
+import webhookRoutes from './routes/webhooks.js';
 
 const app    = express();
 const PORT   = process.env.PORT || 3000;
@@ -107,6 +108,7 @@ app.use('/api/legal',              legalAuthedRoutes);   // /accept, /acceptance
 app.use('/api/service-intervals',  serviceIntervalRoutes);
 app.use('/api/audit',              auditRoutes);
 app.use('/api/tariff',             tariffRoutes);
+app.use('/api/webhooks',           webhookRoutes);
 
 // Globaler Error-Handler — fängt alle ungehandelten Throws/Rejects der Routes
 app.use((err, _req, res, _next) => {

@@ -691,6 +691,24 @@ function runTenantMigrations(db) {
     UNIQUE(vehicle_id, kind)
   )`);
 
+  // Outbound-Webhooks pro Mandant. Admin definiert eine Ziel-URL, der
+  // Dispatcher schickt einen HMAC-signierten JSON-POST bei
+  // trip.completed / charging.completed / service.due. Aufruf bleibt
+  // best-effort — ein fehlgeschlagener Webhook darf den auslosenden
+  // Flow nicht crashen (siehe services/webhookDispatcher.js).
+  db.exec(`CREATE TABLE IF NOT EXISTS webhooks (
+    id            INTEGER PRIMARY KEY,
+    name          TEXT NOT NULL,
+    url           TEXT NOT NULL,
+    secret        TEXT NOT NULL,
+    events        TEXT NOT NULL DEFAULT '[]',
+    is_active     INTEGER NOT NULL DEFAULT 1,
+    created_at    INTEGER DEFAULT (unixepoch()),
+    last_fired_at INTEGER,
+    last_status   INTEGER,
+    last_error    TEXT
+  )`);
+
   // Indexes
   db.exec('CREATE INDEX IF NOT EXISTS idx_trips_vehicle      ON trips(vehicle_id, start_time DESC)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_charging_vehicle   ON charging_sessions(vehicle_id, start_time DESC)');

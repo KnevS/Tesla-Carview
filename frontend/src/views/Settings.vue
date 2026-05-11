@@ -544,6 +544,12 @@
       </div>
     </div>
 
+    <!-- Outbound-Webhooks (Admin) — TODO i18n -->
+    <div v-if="auth.isAdmin" class="card space-y-3">
+      <h2 class="font-semibold">🔔 Outbound Webhooks</h2>
+      <WebhookManager />
+    </div>
+
     <div class="card space-y-3">
       <h2 class="font-semibold">🔑 Passwort ändern</h2>
       <div class="space-y-2">
@@ -756,6 +762,7 @@ import { useAuthStore } from '../store/auth.js';
 import { useAppStore }  from '../store/index.js';
 import { useNavStore }   from '../store/nav.js';
 import GeofenceManager from '../components/GeofenceManager.vue';
+import WebhookManager from '../components/WebhookManager.vue';
 import { useThemeStore, THEMES, DESIGNS } from '../store/theme.js';
 import { useLangStore, LANGS } from '../store/lang.js';
 

@@ -16,6 +16,7 @@
  */
 
 import { getAllTenants, getDb } from '../db/database.js';
+import { dispatch as dispatchWebhook } from './webhookDispatcher.js';
 
 const CHECK_INTERVAL_MS = 24 * 3600 * 1000;          // taeglich
 const STARTUP_DELAY_MS  = 60 * 1000;                 // 1 Min nach Server-Start
@@ -122,6 +123,17 @@ async function runOnce() {
 
       // Marker setzen, damit nicht morgen die gleiche Push erneut rausgeht.
       db.prepare('UPDATE service_intervals SET notified_at = ? WHERE id = ?').run(now, it.id);
+
+      // service.due-Webhook (best-effort) — feuert genau einmal pro
+      // Faelligkeits-Zyklus, weil notified_at hier oben gesetzt wurde.
+      dispatchWebhook(db, 'service.due', {
+        service_interval_id: it.id,
+        vehicle_id:          it.vehicle_id,
+        kind:                it.kind,
+        label:               it.label,
+        description:         desc,
+        odometer_km:         it.odometer_km ?? null,
+      }).catch(() => { /* dispatcher swallows errors itself */ });
     }
   }
 }
