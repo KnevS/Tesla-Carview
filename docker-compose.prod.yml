@@ -1,6 +1,15 @@
 version: '3.9'
 
 services:
+  # Resource-Limits sind bewusst konservativ:
+  #   - Host hat aktuell 1 CPU / 2 GB RAM / 0 Swap (siehe ops-docs)
+  #   - Backend laeuft im Idle bei ~40 MB RSS, peakt waehrend Migration
+  #     / Backup-Erzeugung auf 100-200 MB. 384 MB Cap gibt Headroom,
+  #     aber verhindert Runaway-Eskalation (z.B. durch schlecht
+  #     getypte Trip-Export-Querys auf grossen Datenmengen).
+  #   - Nginx + Frontend halten quasi nichts, 64 MB reichen mit Luft.
+  #   - cpus '0.75' fuer Backend laesst der CLI / SSH-Session genug
+  #     Headroom, falls der Poller eine Schleife dreht.
   backend:
     build:
       context: ./backend
@@ -19,6 +28,14 @@ services:
       - "host.docker.internal:host-gateway"
     networks:
       - tesla-net
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+          cpus: '0.75'
+        reservations:
+          memory: 96M
+    mem_swappiness: 10
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
       interval: 15s
@@ -36,6 +53,11 @@ services:
       - tesla-net
     depends_on:
       - backend
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: '0.25'
 
   nginx:
     image: nginx:alpine
@@ -50,6 +72,11 @@ services:
     depends_on:
       - frontend
       - backend
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: '0.25'
 
 volumes:
   tesla_data:
