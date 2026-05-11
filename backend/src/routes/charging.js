@@ -1,13 +1,23 @@
 import { Router } from 'express';
 import { matchChargingLocation } from '../services/dataSync.js';
+import {
+  assertVehicleAccess, assertChargingAccess,
+  restrictToOwnVehicles, guardAccess,
+} from '../middleware/vehicleAccess.js';
 
 const router = Router();
 
 router.get('/', (req, res) => {
   const { vehicle_id, limit = 50, offset = 0 } = req.query;
   try {
-    const where  = vehicle_id ? 'WHERE vehicle_id = ?' : '';
-    const params = vehicle_id ? [vehicle_id, +limit, +offset] : [+limit, +offset];
+    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
+    const conds  = [];
+    const params = [];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+    const where = conds.length || restrict.fragment
+      ? 'WHERE ' + (conds.length ? conds.join(' AND ') : '1=1') + restrict.fragment
+      : '';
+    params.push(...restrict.params, +limit, +offset);
     res.json(req.db.prepare(
       `SELECT * FROM charging_sessions ${where} ORDER BY start_time DESC LIMIT ? OFFSET ?`
     ).all(...params));
@@ -19,8 +29,14 @@ router.get('/', (req, res) => {
 router.get('/stats', (req, res) => {
   const { vehicle_id } = req.query;
   try {
-    const where  = vehicle_id ? 'WHERE vehicle_id = ?' : '';
-    const params = vehicle_id ? [vehicle_id] : [];
+    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
+    const conds  = [];
+    const params = [];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+    const where = conds.length || restrict.fragment
+      ? 'WHERE ' + (conds.length ? conds.join(' AND ') : '1=1') + restrict.fragment
+      : '';
+    params.push(...restrict.params);
     const stats  = req.db.prepare(
       `SELECT COUNT(*) as total_sessions,
               COALESCE(SUM(energy_added_kwh), 0) as total_energy_kwh,
@@ -40,6 +56,7 @@ router.get('/stats', (req, res) => {
 });
 
 router.get('/:id', (req, res) => {
+  if (guardAccess(res, () => assertChargingAccess(req.db, req.params.id, req.user))) return;
   try {
     const session = req.db.prepare('SELECT * FROM charging_sessions WHERE id=?').get(req.params.id);
     if (!session) return res.status(404).json({ error: 'Ladesession nicht gefunden' });
@@ -55,6 +72,7 @@ router.get('/:id', (req, res) => {
 router.post('/', (req, res) => {
   const { vehicle_id, start_time, end_time, location_name, lat, lon, charger_type,
           start_soc, end_soc, energy_added_kwh, max_power_kw, cost, currency } = req.body;
+  if (guardAccess(res, () => assertVehicleAccess(req.db, vehicle_id, req.user))) return;
   try {
     const result = req.db.prepare(
       `INSERT INTO charging_sessions
@@ -71,6 +89,7 @@ router.post('/', (req, res) => {
 
 // PATCH /api/charging/:id — Kosten anpassen (inkl. auf 0 setzen)
 router.patch('/:id', (req, res) => {
+  if (guardAccess(res, () => assertChargingAccess(req.db, req.params.id, req.user))) return;
   try {
     const session = req.db.prepare('SELECT * FROM charging_sessions WHERE id=?').get(req.params.id);
     if (!session) return res.status(404).json({ error: 'Ladesession nicht gefunden' });
@@ -124,6 +143,7 @@ router.patch('/:id', (req, res) => {
 
 // POST /api/charging/:id/assign-location — Ladeort manuell zuweisen oder per GPS ermitteln
 router.post('/:id/assign-location', (req, res) => {
+  if (guardAccess(res, () => assertChargingAccess(req.db, req.params.id, req.user))) return;
   try {
     const session = req.db.prepare('SELECT * FROM charging_sessions WHERE id=?').get(req.params.id);
     if (!session) return res.status(404).json({ error: 'Ladesession nicht gefunden' });
@@ -153,6 +173,7 @@ router.post('/:id/assign-location', (req, res) => {
 
 // DELETE /api/charging/:id
 router.delete('/:id', (req, res) => {
+  if (guardAccess(res, () => assertChargingAccess(req.db, req.params.id, req.user))) return;
   try {
     const session = req.db.prepare('SELECT id FROM charging_sessions WHERE id=?').get(req.params.id);
     if (!session) return res.status(404).json({ error: 'Ladesession nicht gefunden' });

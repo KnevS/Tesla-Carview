@@ -72,7 +72,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
-import { marked } from 'marked';
+import { sanitizeMarkdown } from '../../lib/sanitize.js';
 import api from '../../api.js';
 import { useAuthStore } from '../../store/auth.js';
 import { useLangStore } from '../../store/lang.js';
@@ -135,7 +135,9 @@ async function load() {
       /<<[A-Z_]+>>/g,
       m => `<span class="legal-placeholder">${m}</span>`
     );
-    html.value = marked.parse(decorated, { breaks: false, gfm: true });
+    // sanitize VOR v-html — diese Seite ist oeffentlich (auch unauth),
+    // ein <script> im Markdown wuerde jeden Besucher exploiten.
+    html.value = sanitizeMarkdown(decorated);
   } catch (err) {
     meta.value = null;
     html.value = `<p class="text-red-400">${err.message}</p>`;

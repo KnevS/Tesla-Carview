@@ -2,6 +2,10 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import { logChanges, isLocked } from '../services/tripAudit.js';
+import {
+  assertVehicleAccess, assertTripAccess,
+  restrictToOwnVehicles, guardAccess,
+} from '../middleware/vehicleAccess.js';
 
 const router = Router();
 
@@ -24,8 +28,12 @@ router.get('/', (req, res) => {
     if (vehicle_id) { conds.push('t.vehicle_id = ?'); params.push(vehicle_id); }
     if (driver_id === 'null') { conds.push('t.driver_id IS NULL'); }
     else if (driver_id) { conds.push('t.driver_id = ?'); params.push(driver_id); }
-    const where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
-    params.push(+limit, +offset);
+    // Auf eigene Fahrzeuge einschraenken — Admins sehen alles im Tenant.
+    const restrict = restrictToOwnVehicles(req, 't.vehicle_id');
+    const where = conds.length
+      ? 'WHERE ' + conds.join(' AND ') + restrict.fragment
+      : (restrict.fragment ? 'WHERE 1=1' + restrict.fragment : '');
+    params.push(...restrict.params, +limit, +offset);
     const trips = db.prepare(
       `SELECT t.*, v.display_name as vehicle_name, d.name as driver_name, d.color as driver_color
        FROM trips t
@@ -43,8 +51,14 @@ router.get('/stats', (req, res) => {
   const db = req.db;
   const { vehicle_id } = req.query;
   try {
-    const where = vehicle_id ? 'WHERE vehicle_id = ?' : '';
-    const params = vehicle_id ? [vehicle_id] : [];
+    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
+    const conds  = [];
+    const params = [];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+    const where = conds.length || restrict.fragment
+      ? 'WHERE ' + (conds.length ? conds.join(' AND ') : '1=1') + restrict.fragment
+      : '';
+    params.push(...restrict.params);
     const stats = db.prepare(
       `SELECT
          COUNT(*) as total_trips,
@@ -97,8 +111,14 @@ router.get('/logbook/months', (req, res) => {
   const db = req.db;
   const { vehicle_id } = req.query;
   try {
-    const where = vehicle_id ? 'WHERE vehicle_id = ?' : '';
-    const params = vehicle_id ? [vehicle_id] : [];
+    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
+    const conds  = [];
+    const params = [];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+    const where = conds.length || restrict.fragment
+      ? 'WHERE ' + (conds.length ? conds.join(' AND ') : '1=1') + restrict.fragment
+      : '';
+    params.push(...restrict.params);
     const rows = db.prepare(
       `SELECT
          strftime('%Y-%m', datetime(start_time,'unixepoch')) as month,
@@ -121,6 +141,7 @@ router.get('/logbook/months', (req, res) => {
 
 router.patch('/:id/driver', (req, res) => {
   const db = req.db;
+  if (guardAccess(res, () => assertTripAccess(db, req.params.id, req.user))) return;
   const { driver_id } = req.body;
   const before = db.prepare('SELECT * FROM trips WHERE id=?').get(req.params.id);
   if (!before) return res.status(404).json({ error: 'Fahrt nicht gefunden' });
@@ -136,6 +157,7 @@ router.patch('/:id/driver', (req, res) => {
 
 router.get('/:id', (req, res) => {
   const db = req.db;
+  if (guardAccess(res, () => assertTripAccess(db, req.params.id, req.user))) return;
   try {
     const trip = db.prepare(
       `SELECT t.*, d.name as driver_name, d.color as driver_color
@@ -168,6 +190,7 @@ router.post('/', (req, res) => {
     start_address, end_address, distance_km, energy_used_kwh, avg_speed_kmh,
     max_speed_kmh, start_soc, end_soc,
   } = req.body;
+  if (guardAccess(res, () => assertVehicleAccess(db, vehicle_id, req.user))) return;
   try {
     const result = db.prepare(
       `INSERT INTO trips (vehicle_id, start_time, end_time, start_lat, start_lon,
@@ -190,6 +213,7 @@ router.patch('/:id/business-partner', validate(z.object({
   business_partner: z.string().max(500).nullable(),
 })), (req, res) => {
   const db = req.db;
+  if (guardAccess(res, () => assertTripAccess(db, req.params.id, req.user))) return;
   const before = db.prepare('SELECT * FROM trips WHERE id=?').get(req.params.id);
   if (!before) return res.status(404).json({ error: 'Fahrt nicht gefunden' });
   if (checkLocked(req, res, before)) return;
@@ -201,6 +225,7 @@ router.patch('/:id/business-partner', validate(z.object({
 
 // GET /api/trips/:id/history — Aenderungsverlauf
 router.get('/:id/history', (req, res) => {
+  if (guardAccess(res, () => assertTripAccess(req.db, req.params.id, req.user))) return;
   const rows = req.db.prepare(
     `SELECT tc.*, u.username AS changed_by_username
        FROM trip_changes tc
@@ -227,6 +252,7 @@ router.post('/manual', validate(z.object({
   driver_id:         z.number().int().positive().optional().nullable(),
 })), (req, res) => {
   const b = req.body;
+  if (guardAccess(res, () => assertVehicleAccess(req.db, b.vehicle_id, req.user))) return;
   // distance_km automatisch aus Odometer-Diff ableiten, falls nicht gegeben.
   let distKm = b.distance_km;
   if (distKm == null && b.start_odometer_km != null && b.end_odometer_km != null) {
@@ -260,6 +286,8 @@ router.post('/:id/merge', validate(z.object({
   other_trip_id: z.number().int().positive(),
 })), (req, res) => {
   const db = req.db;
+  if (guardAccess(res, () => assertTripAccess(db, req.params.id,    req.user))) return;
+  if (guardAccess(res, () => assertTripAccess(db, req.body.other_trip_id, req.user))) return;
   const a = db.prepare('SELECT * FROM trips WHERE id=?').get(req.params.id);
   const b = db.prepare('SELECT * FROM trips WHERE id=?').get(req.body.other_trip_id);
   if (!a || !b) return res.status(404).json({ error: 'Fahrt nicht gefunden' });
@@ -299,6 +327,7 @@ router.post('/:id/split', validate(z.object({
   at: z.number().int().positive(),
 })), (req, res) => {
   const db = req.db;
+  if (guardAccess(res, () => assertTripAccess(db, req.params.id, req.user))) return;
   const a = db.prepare('SELECT * FROM trips WHERE id=?').get(req.params.id);
   if (!a) return res.status(404).json({ error: 'Fahrt nicht gefunden' });
   if (checkLocked(req, res, a)) return;
@@ -345,6 +374,7 @@ router.post('/:id/split', validate(z.object({
  *  unangetastet. Leere Strings werden als „nichts gesetzt" interpretiert. */
 router.patch('/:id/location', (req, res) => {
   const db = req.db;
+  if (guardAccess(res, () => assertTripAccess(db, req.params.id, req.user))) return;
   const norm = v => (typeof v === 'string' && v.trim() === '') ? null : v;
   const { start_address, end_address, start_lat, start_lon, end_lat, end_lon } = req.body;
   // Koordinaten-Validierung — nur falls mitgegeben.
@@ -385,6 +415,7 @@ router.patch('/:id/location', (req, res) => {
 
 router.patch('/:id/classify', (req, res) => {
   const db = req.db;
+  if (guardAccess(res, () => assertTripAccess(db, req.params.id, req.user))) return;
   const { trip_type, purpose } = req.body;
   const allowed = ['private', 'business', 'commute'];
   if (!allowed.includes(trip_type)) {
@@ -427,6 +458,7 @@ router.post('/logbook/finanzamt-lock', validate(z.object({
 
 router.delete('/:id', (req, res) => {
   const db = req.db;
+  if (guardAccess(res, () => assertTripAccess(db, req.params.id, req.user))) return;
   try {
     db.prepare('DELETE FROM trips WHERE id = ?').run(req.params.id);
     res.json({ success: true });

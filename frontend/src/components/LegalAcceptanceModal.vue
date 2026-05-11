@@ -80,7 +80,7 @@
 
 <script setup>
 import { ref, reactive, computed, onMounted, watch } from 'vue';
-import { marked } from 'marked';
+import { sanitizeMarkdown } from '../lib/sanitize.js';
 import { useAuthStore } from '../store/auth.js';
 import { useLangStore } from '../store/lang.js';
 import { i18n } from '../plugins/i18n.js';
@@ -126,7 +126,10 @@ async function loadRendered(scope) {
       body = body.replace(/<<(DATUM|DATE)>>/g, fmtLong);
     }
     body = body.replace(/<<[A-Z_]+>>/g, m => `<span class="legal-placeholder">${m}</span>`);
-    rendered.value[scope] = marked.parse(body, { breaks: false, gfm: true });
+    // sanitize VOR v-html — sonst koennte ein boeswilliger Admin
+    // <script>/<img onerror>-Payloads in Legal-Texte schreiben und
+    // damit jeden Besucher der oeffentlichen /legal-Seiten XSSen.
+    rendered.value[scope] = sanitizeMarkdown(body);
   } catch {
     rendered.value[scope] = null;
   }
