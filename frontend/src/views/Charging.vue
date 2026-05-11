@@ -198,11 +198,14 @@ function chargerTypeTooltip(type) {
 }
 
 // Anzeige-Label fuer den Lade-Technologie-Typ. Tesla liefert manchmal
-// 'Invalid' wenn die Hardware nicht erkannt wurde — in der UI sieht das
-// nach einem technischen Fehler aus, also ersetzen wir es durch ein
-// freundliches Wort. Leere Werte zeigen wir ebenfalls weich.
+// 'Invalid' wenn die Wallbox/Säule die Technologie nicht uebermittelt
+// (typisch: aeltere AC-Wallboxen, einige unbranded DC-Schnelllader).
+// 'Invalid' sieht in der UI nach Fehler aus — wir ersetzen es durch
+// eine erklaerende Formulierung statt nur 'unbekannt', damit der User
+// versteht, dass es kein Bug ist, sondern eine Limitierung der
+// Ladestation.
 function chargerTypeLabel(type) {
-  if (!type || type === 'Invalid') return 'unbekannt';
+  if (!type || type === 'Invalid') return 'von Ladestation nicht übermittelt';
   return type;
 }
 
