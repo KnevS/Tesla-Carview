@@ -176,6 +176,16 @@
     "typeBusiness": "Pro",
     "typeCommute": "Domicile-travail"
   },
+  "chargingHeatmap": {
+    "intro": "Quand et à quelle vitesse charges-tu ? Plus clair = plus fréquent / plus de puissance. Survol pour détails.",
+    "modeCount": "Fréquence",
+    "modeAvgKw": "Ø Puissance (kW)",
+    "modeKwh": "Énergie (kWh)",
+    "less": "moins",
+    "more": "plus",
+    "summary": "{count} sessions · ø {peak} kW max",
+    "hoverDetail": "{sessions} session(s), ø {avg} kW, {kwh} kWh, max {peak} kW"
+  },
   "locationHeatmap": {
     "intro": "Où conduisez-vous souvent ? Les zones lumineuses = visitées souvent.",
     "days": "jours",
@@ -707,7 +717,13 @@
     "geofenceNamePlaceholder": "Nom (ex. Domicile, Bureau Paris)",
     "geofenceRadius": "Rayon",
     "geofenceUseGPS": "Position actuelle",
-    "geofenceSave": "Enregistrer"
+    "geofenceSave": "Enregistrer",
+    "gpsFuzzingTitle": "Mode flou GPS",
+    "gpsFuzzingIntro": "Actif : les nouvelles coordonnées de départ/arrivée sont arrondies à une position approximative. Les trajets existants restent inchangés. Les traces GPS sur la carte restent précises — seul le point agrégé est flouté.",
+    "gpsFuzzingEnable": "Activer le flou GPS pour les nouveaux trajets",
+    "gpsFuzzingRadius": "Rayon (mètres)",
+    "gpsFuzzingRadiusHint": "50 m = voisinage · 200 m = pâté de maisons · 1000 m = quartier",
+    "gpsFuzzingSave": "Enregistrer"
   },
   "auth": {
     "loginTitle": "Veuillez vous connecter",

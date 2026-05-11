@@ -411,32 +411,30 @@
     </div>
 
     <!-- GPS-Fuzzing-Modus (Admin) -->
-    <!-- TODO i18n -->
     <div v-if="auth.isAdmin" class="card space-y-3">
-      <h2 class="font-semibold">🛡️ GPS Fuzzing Mode</h2>
-      <p class="text-xs text-gray-400">
-        When active, new trip start/end coordinates are rounded to an approximate location.
-        Existing trips remain untouched. GPS tracks on the map stay precise — only the
-        aggregated start/end pin is fuzzed.
-      </p>
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="lock" :size="20" class="text-tesla-red" />
+        {{ $t('settings.gpsFuzzingTitle') }}
+      </h2>
+      <p class="text-xs text-gray-400">{{ $t('settings.gpsFuzzingIntro') }}</p>
       <div class="flex items-center gap-3">
         <label class="inline-flex items-center gap-2 cursor-pointer">
           <input type="checkbox" v-model="gpsFuzzing.enabled" class="accent-tesla-red" />
-          <span class="text-sm">Enable GPS fuzzing for new trips</span>
+          <span class="text-sm">{{ $t('settings.gpsFuzzingEnable') }}</span>
         </label>
       </div>
       <div class="grid grid-cols-2 gap-3 text-sm">
         <div>
-          <label class="label">Radius (meters)</label>
+          <label class="label">{{ $t('settings.gpsFuzzingRadius') }}</label>
           <input v-model.number="gpsFuzzing.radius_m" type="number" min="50" max="5000" step="50"
                  class="input" :disabled="!gpsFuzzing.enabled" />
         </div>
         <div class="flex items-end text-xs text-gray-500">
-          <span>50 m = neighborhood, 200 m = block, 1000 m = district</span>
+          <span>{{ $t('settings.gpsFuzzingRadiusHint') }}</span>
         </div>
       </div>
       <div class="flex gap-2 items-center">
-        <button @click="saveGpsFuzzing" class="btn-primary text-sm">Save</button>
+        <button @click="saveGpsFuzzing" class="btn-primary text-sm">{{ $t('settings.gpsFuzzingSave') }}</button>
         <span v-if="gpsFuzzingMsg" :class="gpsFuzzingOk ? 'text-green-400' : 'text-red-400'"
               class="text-xs">{{ gpsFuzzingMsg }}</span>
       </div>
@@ -670,7 +668,7 @@
             <button @click="navStore.moveDown(link.key)" :disabled="idx === navStore.allLinks.length - 1"
               class="text-gray-500 hover:text-white disabled:opacity-20 leading-none text-xs transition">▼</button>
           </div>
-          <span class="text-base w-6 text-center">{{ link.icon }}</span>
+          <span class="w-6 flex items-center justify-center"><AppIcon :name="link.icon" :size="18" /></span>
           <span class="flex-1 text-sm" :class="link.visible ? 'text-white' : 'text-gray-600 line-through'">
             {{ link.label }}
             <span class="text-[10px] uppercase tracking-wide text-gray-500 ml-1">{{ groupLabel(link.group) }}</span>
@@ -762,6 +760,7 @@ import { useAuthStore } from '../store/auth.js';
 import { useAppStore }  from '../store/index.js';
 import { useNavStore }   from '../store/nav.js';
 import GeofenceManager from '../components/GeofenceManager.vue';
+import AppIcon from '../components/AppIcon.vue';
 import WebhookManager from '../components/WebhookManager.vue';
 import { useThemeStore, THEMES, DESIGNS } from '../store/theme.js';
 import { useLangStore, LANGS } from '../store/lang.js';

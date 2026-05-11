@@ -176,6 +176,16 @@
     "typeBusiness": "Business",
     "typeCommute": "Commute"
   },
+  "chargingHeatmap": {
+    "intro": "When and how fast do you charge? Brighter = more often / more power. Hover a cell for details.",
+    "modeCount": "Frequency",
+    "modeAvgKw": "Avg power (kW)",
+    "modeKwh": "Energy (kWh)",
+    "less": "less",
+    "more": "more",
+    "summary": "{count} sessions · ø {peak} kW peak",
+    "hoverDetail": "{sessions} session(s), ø {avg} kW, {kwh} kWh, peak {peak} kW"
+  },
   "locationHeatmap": {
     "intro": "Where do you drive often? Bright areas = visited often. Hover/click on the map.",
     "days": "days",
@@ -707,7 +717,13 @@
     "geofenceNamePlaceholder": "Name (e.g. Home, Stuttgart office)",
     "geofenceRadius": "Radius",
     "geofenceUseGPS": "Current location",
-    "geofenceSave": "Save"
+    "geofenceSave": "Save",
+    "gpsFuzzingTitle": "GPS fuzzing mode",
+    "gpsFuzzingIntro": "When active, new trip start/end coordinates are rounded to an approximate location. Existing trips remain untouched. GPS tracks on the map stay precise — only the aggregated start/end pin is fuzzed.",
+    "gpsFuzzingEnable": "Enable GPS fuzzing for new trips",
+    "gpsFuzzingRadius": "Radius (metres)",
+    "gpsFuzzingRadiusHint": "50 m = neighbourhood · 200 m = block · 1000 m = district",
+    "gpsFuzzingSave": "Save"
   },
   "auth": {
     "loginTitle": "Please sign in",

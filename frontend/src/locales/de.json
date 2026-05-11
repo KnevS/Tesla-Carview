@@ -176,6 +176,16 @@
     "typeBusiness": "Dienstfahrt",
     "typeCommute": "Arbeitsweg"
   },
+  "chargingHeatmap": {
+    "intro": "Wann und wie schnell ladest du? Heller = häufiger / mehr Leistung. Hover über eine Zelle für Details.",
+    "modeCount": "Häufigkeit",
+    "modeAvgKw": "Ø Leistung (kW)",
+    "modeKwh": "Energie (kWh)",
+    "less": "weniger",
+    "more": "mehr",
+    "summary": "{count} Sessions · ø {peak} kW Peak",
+    "hoverDetail": "{sessions} Session(s), ø {avg} kW, {kwh} kWh, Peak {peak} kW"
+  },
   "locationHeatmap": {
     "intro": "Wo bist du häufig gefahren? Helle Bereiche = oft besucht. Hover/Klick auf der Karte.",
     "days": "Tage",
@@ -591,7 +601,13 @@
     "geofenceNamePlaceholder": "Name (z.B. Zuhause, Büro Stuttgart)",
     "geofenceRadius": "Radius",
     "geofenceUseGPS": "Aktueller Standort",
-    "geofenceSave": "Speichern"
+    "geofenceSave": "Speichern",
+    "gpsFuzzingTitle": "GPS-Fuzzing-Modus",
+    "gpsFuzzingIntro": "Aktiv: neue Fahrt-Start/Ende-Koordinaten werden auf eine ungefähre Position gerundet. Bestehende Fahrten bleiben unberührt. GPS-Tracks auf der Karte bleiben präzise — nur der aggregierte Start/Ende-Pin wird unscharf.",
+    "gpsFuzzingEnable": "GPS-Fuzzing für neue Fahrten aktivieren",
+    "gpsFuzzingRadius": "Radius (Meter)",
+    "gpsFuzzingRadiusHint": "50 m = Nachbarschaft · 200 m = Block · 1000 m = Stadtteil",
+    "gpsFuzzingSave": "Speichern"
   },
   "auth": {
     "loginTitle": "Bitte anmelden",

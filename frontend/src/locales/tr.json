@@ -176,6 +176,16 @@
     "typeBusiness": "İş",
     "typeCommute": "İşe gidiş"
   },
+  "chargingHeatmap": {
+    "intro": "Ne zaman ve ne kadar hızlı şarj ediyorsun? Daha parlak = daha sık / daha fazla güç. Detay için üzerine gelin.",
+    "modeCount": "Sıklık",
+    "modeAvgKw": "Ø Güç (kW)",
+    "modeKwh": "Enerji (kWh)",
+    "less": "az",
+    "more": "çok",
+    "summary": "{count} oturum · ø {peak} kW tepe",
+    "hoverDetail": "{sessions} oturum, ø {avg} kW, {kwh} kWh, tepe {peak} kW"
+  },
   "locationHeatmap": {
     "intro": "Sık nereye gidiyorsun? Parlak alanlar = sık ziyaret.",
     "days": "gün",
@@ -707,7 +717,13 @@
     "geofenceNamePlaceholder": "Ad (örn. Ev, İstanbul ofisi)",
     "geofenceRadius": "Yarıçap",
     "geofenceUseGPS": "Mevcut konum",
-    "geofenceSave": "Kaydet"
+    "geofenceSave": "Kaydet",
+    "gpsFuzzingTitle": "GPS bulanıklaştırma modu",
+    "gpsFuzzingIntro": "Etkin: yeni yolculukların başlangıç/bitiş koordinatları yaklaşık bir konuma yuvarlanır. Mevcut yolculuklar değişmez. Haritadaki GPS izleri net kalır — yalnızca toplu başlangıç/bitiş pini bulanıklaşır.",
+    "gpsFuzzingEnable": "Yeni yolculuklar için GPS bulanıklaştırmayı etkinleştir",
+    "gpsFuzzingRadius": "Yarıçap (metre)",
+    "gpsFuzzingRadiusHint": "50 m = mahalle · 200 m = sokak · 1000 m = semt",
+    "gpsFuzzingSave": "Kaydet"
   },
   "auth": {
     "loginTitle": "Lütfen giriş yapın",

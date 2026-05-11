@@ -176,6 +176,16 @@
     "typeBusiness": "Laboral",
     "typeCommute": "Desplazamiento"
   },
+  "chargingHeatmap": {
+    "intro": "¿Cuándo y a qué velocidad cargas? Más claro = más frecuente / más potencia. Pasa el ratón para detalles.",
+    "modeCount": "Frecuencia",
+    "modeAvgKw": "Ø Potencia (kW)",
+    "modeKwh": "Energía (kWh)",
+    "less": "menos",
+    "more": "más",
+    "summary": "{count} sesiones · ø {peak} kW pico",
+    "hoverDetail": "{sessions} sesión(es), ø {avg} kW, {kwh} kWh, pico {peak} kW"
+  },
   "locationHeatmap": {
     "intro": "¿Dónde conduces a menudo? Áreas brillantes = visitadas frecuentemente.",
     "days": "días",
@@ -707,7 +717,13 @@
     "geofenceNamePlaceholder": "Nombre (p. ej. Casa, Oficina Madrid)",
     "geofenceRadius": "Radio",
     "geofenceUseGPS": "Ubicación actual",
-    "geofenceSave": "Guardar"
+    "geofenceSave": "Guardar",
+    "gpsFuzzingTitle": "Modo difuminado GPS",
+    "gpsFuzzingIntro": "Activo: las coordenadas de inicio/fin de nuevos viajes se redondean a una ubicación aproximada. Los viajes existentes no se ven afectados. Las trazas GPS en el mapa se mantienen precisas — solo se difumina el punto agregado.",
+    "gpsFuzzingEnable": "Activar difuminado GPS para nuevos viajes",
+    "gpsFuzzingRadius": "Radio (metros)",
+    "gpsFuzzingRadiusHint": "50 m = vecindario · 200 m = manzana · 1000 m = distrito",
+    "gpsFuzzingSave": "Guardar"
   },
   "auth": {
     "loginTitle": "Por favor inicia sesión",

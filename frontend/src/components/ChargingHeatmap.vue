@@ -1,15 +1,12 @@
 <template>
   <div class="space-y-3">
     <div class="flex items-center justify-between gap-2 flex-wrap">
-      <p class="text-xs text-gray-400">
-        <!-- TODO i18n: nach dem laufenden i18n-Refactor an die Locales hängen -->
-        Wann und wie schnell ladet du? Heller = häufiger / mehr Leistung. Klick auf eine Zelle: Sessions dieses Slots.
-      </p>
+      <p class="text-xs text-gray-400">{{ $t('chargingHeatmap.intro') }}</p>
       <select v-model="mode"
               class="bg-gray-700 text-white text-xs rounded-lg px-2 py-1 border border-gray-600">
-        <option value="count">Häufigkeit</option>
-        <option value="avg_kw">Ø Leistung (kW)</option>
-        <option value="total_kwh">Energie (kWh)</option>
+        <option value="count">{{ $t('chargingHeatmap.modeCount') }}</option>
+        <option value="avg_kw">{{ $t('chargingHeatmap.modeAvgKw') }}</option>
+        <option value="total_kwh">{{ $t('chargingHeatmap.modeKwh') }}</option>
       </select>
     </div>
 
@@ -40,22 +37,24 @@
 
     <!-- Legende -->
     <div class="flex items-center gap-2 text-xs text-gray-500">
-      <span>weniger</span>
+      <span>{{ $t('chargingHeatmap.less') }}</span>
       <div v-for="(c, i) in COLORS" :key="i"
            class="w-4 h-4 rounded-sm" :style="{ background: c }"></div>
-      <span>mehr</span>
+      <span>{{ $t('chargingHeatmap.more') }}</span>
       <span class="ml-auto">
-        {{ totalSessions }} Sessions · ø {{ avgPeak.toFixed(1) }} kW Peak
+        {{ $t('chargingHeatmap.summary', { count: totalSessions, peak: avgPeak.toFixed(1) }) }}
       </span>
     </div>
 
     <!-- Hover-Info -->
     <p v-if="hover && hoverCell" class="text-xs text-gray-300">
       {{ DAY_LABELS_LONG[hover.d] }} {{ String(hover.h).padStart(2, '0') }}:00 →
-      <strong>{{ hoverCell.count }}</strong> Session(s),
-      ø <strong>{{ hoverCell.avg_kw.toFixed(1) }} kW</strong>,
-      <strong>{{ hoverCell.total_kwh.toFixed(1) }} kWh</strong>,
-      Peak <strong>{{ hoverCell.peak_kw.toFixed(0) }} kW</strong>
+      {{ $t('chargingHeatmap.hoverDetail', {
+          sessions: hoverCell.count,
+          avg: hoverCell.avg_kw.toFixed(1),
+          kwh: hoverCell.total_kwh.toFixed(1),
+          peak: hoverCell.peak_kw.toFixed(0)
+      }) }}
     </p>
   </div>
 </template>

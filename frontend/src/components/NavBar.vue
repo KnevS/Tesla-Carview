@@ -74,11 +74,12 @@
     <div class="md:hidden flex overflow-x-auto gap-1 px-4 pb-2">
       <RouterLink v-for="link in mobileLinks" :key="link.to" :to="link.to"
         v-tooltip="link.tooltip"
-        class="flex-shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition"
+        class="flex-shrink-0 px-3 py-1.5 rounded-lg text-sm font-medium transition inline-flex items-center gap-1.5"
         :class="$route.path === link.to ? 'active-mobile' : 'text-gray-300 hover:bg-gray-700'"
         :style="$route.path === link.to ? { backgroundColor: 'var(--accent)' } : {}"
       >
-        {{ link.icon }} {{ link.label }}
+        <AppIcon :name="link.icon" :size="16" />
+        {{ link.label }}
       </RouterLink>
     </div>
   </nav>
