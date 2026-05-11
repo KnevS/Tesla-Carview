@@ -209,25 +209,31 @@ const fileInput     = ref(null);
 async function downloadBackup() {
   backupBusy.value = true;
   try {
-    // /api/data/backup liefert grosses JSON mit attachment-Header.
-    // Wir laden es per fetch (axios kann groessere Blobs auch, aber
-    // mit Headers nervt es); per Anker speichern.
-    const token = api.defaults.headers.common.Authorization;
-    const r = await fetch('/api/data/backup', {
-      headers: token ? { Authorization: token } : {},
-      credentials: 'include',
-    });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const blob = await r.blob();
-    const filename = (r.headers.get('content-disposition') || '')
+    // Backup ueber den axios-Client laden — der Request-Interceptor in
+    // api.js setzt automatisch den Authorization-Header aus dem Auth-
+    // Store + cycelt bei 401 den Token via /auth/refresh durch. fetch()
+    // direkt aufzurufen hat den Token frueher ignoriert und 401 geliefert.
+    //
+    // responseType:'blob' damit axios kein JSON.parse erzwingt — sonst
+    // wuerde der Browser den Download intern parsen und das Original-
+    // JSON wuerde nie als File ankommen.
+    const res = await api.get('/data/backup', { responseType: 'blob' });
+    const filename = (res.headers['content-disposition'] || '')
       .match(/filename="([^"]+)"/)?.[1]
       || `tesla-carview-backup-${new Date().toISOString().slice(0,10)}.json`;
     const a = Object.assign(document.createElement('a'),
-      { href: URL.createObjectURL(blob), download: filename });
+      { href: URL.createObjectURL(res.data), download: filename });
     a.click();
     URL.revokeObjectURL(a.href);
   } catch (err) {
-    alert('Backup-Download fehlgeschlagen: ' + err.message);
+    // axios-Errors haben err.response.status; bei Blob-Response liegt
+    // der eigentliche Server-Text noch als Blob, nicht als String vor.
+    const status = err.response?.status;
+    let msg = err.message;
+    if (err.response?.data instanceof Blob) {
+      try { msg = await err.response.data.text(); } catch { /* keep msg */ }
+    }
+    alert(`Backup-Download fehlgeschlagen${status ? ` (HTTP ${status})` : ''}: ${msg}`);
   } finally {
     backupBusy.value = false;
   }
