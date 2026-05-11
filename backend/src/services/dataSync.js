@@ -9,9 +9,16 @@ const milesToKm = m => m * 1.60934;
 export async function syncVehicleState(db, vehicle, state) {
   const now = Math.floor(Date.now() / 1000);
 
-  const drive  = state.drive_state;
-  const charge = state.charge_state;
-  const vs     = state.vehicle_state;
+  const drive   = state.drive_state;
+  const charge  = state.charge_state;
+  const vs      = state.vehicle_state;
+  const climate = state.climate_state;
+  // Aussentemperatur bei diesem Sync — wird beim Trip-Abschluss
+  // persistiert (Annaeherung an „Mittelwert ueber die Fahrt"; ein
+  // echter Durchschnitt aus telemetry_points kann spaeter folgen).
+  const outsideTempC = typeof climate?.outside_temp === 'number'
+    ? climate.outside_temp
+    : null;
 
   // display_name + odometer_km direkt mitziehen, damit
   // /api/service-intervals + /api/system/health stets aktuelle Werte
@@ -75,7 +82,7 @@ export async function syncVehicleState(db, vehicle, state) {
   if (driveValid && drive.shift_state !== 'P') {
     handleDriving(db, vehicle, drive, charge, now);
   } else if (driveValid) {
-    finishGpsTrip(db, vehicle, drive, charge, now);
+    finishGpsTrip(db, vehicle, drive, charge, now, outsideTempC);
   }
 
   // Odometer-basiertes Tracking — greift auch, wenn drive_state vorhanden,
@@ -87,7 +94,7 @@ export async function syncVehicleState(db, vehicle, state) {
     const wasPresent = cache.is_user_present;
 
     if (!wasPresent && nowPresent)       startOdometerTrip(db, vehicle, charge, odomKm, now);
-    else if (wasPresent && !nowPresent)  finishOdometerTrip(db, vehicle, charge, odomKm, now);
+    else if (wasPresent && !nowPresent)  finishOdometerTrip(db, vehicle, charge, odomKm, now, outsideTempC);
     else if (nowPresent && odomKm)       keepOdometerTripAlive(db, vehicle, odomKm);
 
     db.prepare(`
@@ -131,7 +138,7 @@ function startOdometerTrip(db, vehicle, charge, odomKm, now) {
   ).run(vehicle.id, now, charge?.battery_level, odomKm);
 }
 
-function finishOdometerTrip(db, vehicle, charge, odomKm, now) {
+function finishOdometerTrip(db, vehicle, charge, odomKm, now, outsideTempC = null) {
   const active = db.prepare(
     'SELECT * FROM trips WHERE vehicle_id=? AND end_time IS NULL ORDER BY id DESC LIMIT 1'
   ).get(vehicle.id);
@@ -144,10 +151,16 @@ function finishOdometerTrip(db, vehicle, charge, odomKm, now) {
     ? (startSoc - endSoc) / 100 * MODEL_Y_USABLE_KWH
     : null;
 
+  // outside_temp_avg_c: aktuell der Wert beim Trip-Abschluss
+  // (Annaeherung an Mittelwert ueber die Fahrt). Ein echter Durchschnitt
+  // aus telemetry_points kann hier spaeter ergaenzt werden. COALESCE
+  // mit dem alten Wert, damit ein nachlaufendes Re-Sync ohne Climate-
+  // Payload einen bereits geschriebenen Wert nicht ueberschreibt.
   db.prepare(
-    `UPDATE trips SET end_time=?, end_soc=?, end_odometer_km=?, distance_km=?, energy_used_kwh=?
+    `UPDATE trips SET end_time=?, end_soc=?, end_odometer_km=?, distance_km=?, energy_used_kwh=?,
+       outside_temp_avg_c=COALESCE(?, outside_temp_avg_c)
      WHERE id=?`
-  ).run(now, endSoc, odomKm, distKm, energyKwh, active.id);
+  ).run(now, endSoc, odomKm, distKm, energyKwh, outsideTempC, active.id);
 
   // Auto-Klassifikation anhand der Geofences (Home/Work). No-op wenn
   // der User schon manuell gesetzt hat oder kein Geofence matched.
@@ -192,7 +205,7 @@ function handleDriving(db, vehicle, drive, charge, now) {
   }
 }
 
-function finishGpsTrip(db, vehicle, drive, charge, now) {
+function finishGpsTrip(db, vehicle, drive, charge, now, outsideTempC = null) {
   const active = db.prepare(
     'SELECT * FROM trips WHERE vehicle_id=? AND end_time IS NULL ORDER BY id DESC LIMIT 1'
   ).get(vehicle.id);
@@ -211,13 +224,16 @@ function finishGpsTrip(db, vehicle, drive, charge, now) {
 
   db.prepare(
     `UPDATE trips SET end_time=?, end_lat=?, end_lon=?, end_soc=?,
-     distance_km=?, avg_speed_kmh=?, max_speed_kmh=? WHERE id=?`
+       distance_km=?, avg_speed_kmh=?, max_speed_kmh=?,
+       outside_temp_avg_c=COALESCE(?, outside_temp_avg_c)
+     WHERE id=?`
   ).run(
     now,
     fuzzed.lat,
     fuzzed.lon,
     charge?.battery_level,
     distKm, avgSpeed, maxSpeed,
+    outsideTempC,
     active.id,
   );
 }

@@ -20,21 +20,53 @@
 
       <!-- Rechts: Fahrzeug, Sprache, Handbuch, Einstellungen, Logout -->
       <div class="flex items-center gap-2">
-        <select v-if="appStore.vehicles.length > 1" v-model="appStore.selectedVehicleId"
-          v-tooltip="'Aktives Fahrzeug auswählen'"
-          class="bg-gray-700 text-white text-sm rounded-lg px-3 py-1.5 border border-gray-600">
-          <option v-for="v in appStore.vehicles" :key="v.id" :value="v.id">{{ v.display_name }}</option>
-        </select>
-        <span v-else-if="appStore.selectedVehicle" class="text-sm text-gray-300 truncate max-w-[8rem]"
-          v-tooltip="appStore.selectedVehicle.display_name">
-          🚗 {{ appStore.selectedVehicle.display_name }}
+        <!-- Mehrfach-Fahrzeuge: Silhouette + Dropdown. Bei nur einem
+             Fahrzeug eine Chip-Anzeige mit Silhouette in echter
+             Lackfarbe statt des generischen Auto-Emojis. -->
+        <div v-if="appStore.vehicles.length > 1" class="flex items-center gap-2"
+             v-tooltip="'Aktives Fahrzeug auswählen'">
+          <VehicleSilhouette v-if="appStore.selectedVehicle"
+            :model="appStore.selectedVehicle.model"
+            :color="appStore.selectedVehicle.image_color"
+            :width="32" :height="18" />
+          <select v-model="appStore.selectedVehicleId"
+            class="bg-gray-700 text-white text-sm rounded-lg px-3 py-1.5 border border-gray-600">
+            <option v-for="v in appStore.vehicles" :key="v.id" :value="v.id">{{ v.display_name }}</option>
+          </select>
+        </div>
+        <span v-else-if="appStore.selectedVehicle"
+              class="flex items-center gap-2 text-sm text-gray-200 truncate max-w-[10rem]"
+              v-tooltip="appStore.selectedVehicle.display_name">
+          <VehicleSilhouette
+            :model="appStore.selectedVehicle.model"
+            :color="appStore.selectedVehicle.image_color"
+            :width="32" :height="18" />
+          <span class="truncate">{{ appStore.selectedVehicle.display_name }}</span>
         </span>
 
         <LangSwitcher compact />
 
-        <RouterLink to="/handbook" class="icon-btn" v-tooltip="$t('auth.handbook')">📖</RouterLink>
-        <RouterLink to="/settings" class="icon-btn" v-tooltip="$t('settings.title')">⚙️</RouterLink>
-        <button @click="logout" class="icon-btn icon-btn-danger" v-tooltip="$t('common.logout')">⏻</button>
+        <RouterLink to="/handbook" class="icon-btn" v-tooltip="$t('auth.handbook')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+          </svg>
+        </RouterLink>
+        <RouterLink to="/settings" class="icon-btn" v-tooltip="$t('settings.title')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </RouterLink>
+        <button @click="logout" class="icon-btn icon-btn-danger" v-tooltip="$t('common.logout')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0" />
+            <line x1="12" y1="2" x2="12" y2="12" />
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -61,6 +93,7 @@ import { useAuthStore } from '../store/auth.js';
 import { useNavStore, NAV_GROUPS } from '../store/nav.js';
 import NavGroup     from './NavGroup.vue';
 import LangSwitcher from './LangSwitcher.vue';
+import VehicleSilhouette from './VehicleSilhouette.vue';
 
 const appStore  = useAppStore();
 const authStore = useAuthStore();

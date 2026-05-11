@@ -1,20 +1,20 @@
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold">🎮 Fahrzeugsteuerung</h1>
+      <h1 class="text-2xl font-bold">{{ $t('control.title') }}</h1>
       <div class="flex items-center gap-3">
         <span class="text-sm" :class="stateColor">{{ stateLabel }}</span>
         <button @click="wakeUp" :disabled="busy || vehicleState === 'online'"
-          class="btn-secondary text-sm" v-tooltip="'Fahrzeug aufwecken (benötigt ~30s)'">
-          ☀️ Aufwecken
+          class="btn-secondary text-sm" v-tooltip="$t('control.wakeTooltip')">
+          {{ $t('control.wake') }}
         </button>
       </div>
     </div>
 
     <!-- Hinweis wenn schläft -->
     <div v-if="vehicleState === 'asleep' || vehicleState === 'offline'" class="card bg-yellow-900/30 border border-yellow-700 text-yellow-200 text-sm space-y-1">
-      <p class="font-semibold">Fahrzeug schläft oder ist offline</p>
-      <p>Befehle werden automatisch versucht. Falls nötig zuerst "Aufwecken" drücken (~30s).</p>
+      <p class="font-semibold">{{ $t('control.sleepHint') }}</p>
+      <p>{{ $t('control.sleepHintDetail') }}</p>
     </div>
 
     <!-- Toast — Teleport, kein clipping durch .card-Backdrop. -->
@@ -30,25 +30,25 @@
     <div class="grid md:grid-cols-2 gap-6">
       <!-- Klimaanlage -->
       <div class="card space-y-4">
-        <h2 class="font-semibold text-lg">🌡 Klimaanlage</h2>
+        <h2 class="font-semibold text-lg">{{ $t('control.climate') }}</h2>
 
         <div class="flex items-center justify-between">
-          <span class="text-gray-300">Klimaanlage</span>
+          <span class="text-gray-300">{{ $t('control.climateLabel') }}</span>
           <div class="flex gap-2">
             <button @click="cmd('auto_conditioning_start')" :disabled="busy"
               class="px-4 py-2 rounded-lg bg-green-700 hover:bg-green-600 text-white text-sm font-medium transition disabled:opacity-40">
-              Ein
+              {{ $t('control.on') }}
             </button>
             <button @click="cmd('auto_conditioning_stop')" :disabled="busy"
               class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition disabled:opacity-40">
-              Aus
+              {{ $t('control.off') }}
             </button>
           </div>
         </div>
 
         <div class="space-y-2">
           <div class="flex items-center justify-between text-sm">
-            <span class="text-gray-300">Temperatur</span>
+            <span class="text-gray-300">{{ $t('control.temp') }}</span>
             <div class="flex items-center gap-3">
               <button @click="temp = Math.max(15, temp - 0.5)" class="w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold transition">−</button>
               <span class="text-white font-bold text-xl w-14 text-center">{{ temp.toFixed(1) }}°C</span>
@@ -57,15 +57,15 @@
           </div>
           <button @click="cmd('set_temps', { driver_temp: temp, passenger_temp: temp })" :disabled="busy"
             class="w-full py-2 rounded-lg bg-tesla-red hover:bg-red-700 text-white text-sm font-medium transition disabled:opacity-40">
-            Temperatur setzen
+            {{ $t('control.setTemp') }}
           </button>
         </div>
 
         <div class="border-t border-gray-700 pt-3 space-y-2">
           <button @click="cmd('set_preconditioning_max', { on: true })" :disabled="busy"
             class="w-full py-2 rounded-lg bg-blue-800 hover:bg-blue-700 text-white text-sm font-medium transition disabled:opacity-40"
-            v-tooltip="'Maximale Heizleistung für schnelles Vorklimatisieren (Batterie + Scheiben)'">
-            ❄️ Vorklimatisierung / Max-Defrost
+            v-tooltip="$t('control.preConditionTooltip')">
+            {{ $t('control.preCondition') }}
           </button>
 
           <!-- Climate Keeper / Pet / Camp Mode — laeuft nur, wenn das
@@ -73,20 +73,20 @@
                weggegangen ist. Gut fuer Hund im Auto (Dog) oder
                Uebernachtung (Camp). -->
           <div>
-            <p class="text-xs text-gray-400 mb-1">Klima-Modus (laufend)</p>
+            <p class="text-xs text-gray-400 mb-1">{{ $t('control.climateMode') }}</p>
             <div class="grid grid-cols-4 gap-1">
               <button @click="cmd('set_climate_keeper_mode', { climate_keeper_mode: 0 })" :disabled="busy"
                 class="py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-white text-xs transition disabled:opacity-40"
-                v-tooltip="'Climate-Keeper aus — Klima stoppt beim Aussteigen.'">Aus</button>
+                v-tooltip="$t('control.keeperOffTooltip')">{{ $t('control.keeperOff') }}</button>
               <button @click="cmd('set_climate_keeper_mode', { climate_keeper_mode: 1 })" :disabled="busy"
                 class="py-1.5 rounded bg-blue-700 hover:bg-blue-600 text-white text-xs transition disabled:opacity-40"
-                v-tooltip="'Klima halten — Innenraum bleibt auf Solltemperatur, auch wenn der Fahrer aussteigt.'">Halten</button>
+                v-tooltip="$t('control.keeperKeepTooltip')">{{ $t('control.keeperKeep') }}</button>
               <button @click="cmd('set_climate_keeper_mode', { climate_keeper_mode: 2 })" :disabled="busy"
                 class="py-1.5 rounded bg-yellow-700 hover:bg-yellow-600 text-white text-xs transition disabled:opacity-40"
-                v-tooltip="'Hund-Modus — Klima haelt auf 20°C, Display zeigt Hinweis fuer Passanten und aktuelle Innentemperatur.'">🐶 Hund</button>
+                v-tooltip="$t('control.keeperDogTooltip')">{{ $t('control.keeperDog') }}</button>
               <button @click="cmd('set_climate_keeper_mode', { climate_keeper_mode: 3 })" :disabled="busy"
                 class="py-1.5 rounded bg-purple-700 hover:bg-purple-600 text-white text-xs transition disabled:opacity-40"
-                v-tooltip="'Camp-Modus — fuer Uebernachtung im Auto: Klima, USB-Strom und Innenraum-Beleuchtung bleiben aktiv.'">⛺ Camp</button>
+                v-tooltip="$t('control.keeperCampTooltip')">{{ $t('control.keeperCamp') }}</button>
             </div>
           </div>
 
@@ -96,8 +96,8 @@
                den klassischen Endpunkt zurueck, falls 4xx. -->
           <button @click="toggleSteeringWheel" :disabled="busy"
             class="w-full py-2 rounded-lg bg-orange-700 hover:bg-orange-600 text-white text-sm font-medium transition disabled:opacity-40"
-            v-tooltip="'Lenkradheizung an-/ausschalten. Klima muss dazu aktiv sein.'">
-            🔥 Lenkradheizung umschalten
+            v-tooltip="$t('control.steeringWheelTooltip')">
+            {{ $t('control.steeringWheel') }}
           </button>
         </div>
       </div>
@@ -106,8 +106,8 @@
            2 mittel, 3 hoch. Klima muss aktiv sein, sonst lehnt das
            Auto den Befehl ab. -->
       <div class="card space-y-3">
-        <h2 class="font-semibold text-lg">🪑 Sitzheizung</h2>
-        <p class="text-xs text-gray-500">Klimaanlage muss aktiv sein, damit die Sitzheizung anspringt.</p>
+        <h2 class="font-semibold text-lg">{{ $t('control.seatHeater') }}</h2>
+        <p class="text-xs text-gray-500">{{ $t('control.seatHeaterHint') }}</p>
         <div v-for="seat in SEATS" :key="seat.id" class="flex items-center gap-2">
           <span class="text-sm text-gray-300 flex-1">{{ seat.label }}</span>
           <div class="flex gap-1">
@@ -120,7 +120,7 @@
                 : ['bg-orange-900 hover:bg-orange-800 text-orange-200',
                    'bg-orange-700 hover:bg-orange-600 text-white',
                    'bg-orange-500 hover:bg-orange-400 text-white'][lvl - 2]"
-              v-tooltip="lvl === 1 ? 'Aus' : `Stufe ${lvl - 1} (${['niedrig','mittel','hoch'][lvl - 2]})`">
+              v-tooltip="lvl === 1 ? $t('control.seatLevelOff') : $t('control.seatLevelTooltip', { level: lvl - 1, label: seatLevelLabels[lvl - 2] })">
               {{ lvl - 1 }}
             </button>
           </div>
@@ -129,34 +129,34 @@
 
       <!-- Fahrzeug -->
       <div class="card space-y-4">
-        <h2 class="font-semibold text-lg">🚗 Fahrzeug</h2>
+        <h2 class="font-semibold text-lg">{{ $t('control.vehicle') }}</h2>
 
         <div class="flex items-center justify-between">
-          <span class="text-gray-300">Türen</span>
+          <span class="text-gray-300">{{ $t('control.doors') }}</span>
           <div class="flex gap-2">
             <button @click="cmd('door_unlock')" :disabled="busy"
               class="px-4 py-2 rounded-lg bg-yellow-700 hover:bg-yellow-600 text-white text-sm font-medium transition disabled:opacity-40"
-              v-tooltip="'Alle Türen entriegeln'">
-              🔓 Öffnen
+              v-tooltip="$t('control.unlockTooltip')">
+              {{ $t('control.unlock') }}
             </button>
             <button @click="cmd('door_lock')" :disabled="busy"
               class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition disabled:opacity-40"
-              v-tooltip="'Alle Türen verriegeln'">
-              🔒 Sperren
+              v-tooltip="$t('control.lockTooltip')">
+              {{ $t('control.lock') }}
             </button>
           </div>
         </div>
 
         <div class="flex items-center justify-between border-t border-gray-700 pt-3">
-          <span class="text-gray-300">Sentry-Mode</span>
+          <span class="text-gray-300">{{ $t('control.sentryMode') }}</span>
           <div class="flex gap-2">
             <button @click="cmd('set_sentry_mode', { on: true })" :disabled="busy"
               class="px-4 py-2 rounded-lg bg-purple-800 hover:bg-purple-700 text-white text-sm font-medium transition disabled:opacity-40">
-              Ein
+              {{ $t('control.on') }}
             </button>
             <button @click="cmd('set_sentry_mode', { on: false })" :disabled="busy"
               class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition disabled:opacity-40">
-              Aus
+              {{ $t('control.off') }}
             </button>
           </div>
         </div>
@@ -164,13 +164,13 @@
         <div class="flex gap-2 border-t border-gray-700 pt-3">
           <button @click="cmd('flash_lights')" :disabled="busy"
             class="flex-1 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition disabled:opacity-40"
-            v-tooltip="'Lichter kurz blinken lassen'">
-            💡 Lichter
+            v-tooltip="$t('control.lightsTooltip')">
+            {{ $t('control.lights') }}
           </button>
           <button @click="cmd('honk_horn')" :disabled="busy"
             class="flex-1 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition disabled:opacity-40"
-            v-tooltip="'Kurz hupen'">
-            📯 Hupen
+            v-tooltip="$t('control.hornTooltip')">
+            {{ $t('control.horn') }}
           </button>
         </div>
 
@@ -179,13 +179,13 @@
         <div class="grid grid-cols-2 gap-2 border-t border-gray-700 pt-3">
           <button @click="cmd('actuate_trunk', { which_trunk: 'front' })" :disabled="busy"
             class="py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition disabled:opacity-40"
-            v-tooltip="'Vorderen Kofferraum (Frunk) entriegeln/oeffnen.'">
-            📦 Frunk
+            v-tooltip="$t('control.frunkTooltip')">
+            {{ $t('control.frunk') }}
           </button>
           <button @click="cmd('actuate_trunk', { which_trunk: 'rear' })" :disabled="busy"
             class="py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition disabled:opacity-40"
-            v-tooltip="'Hinteren Kofferraum (Heckklappe) toggeln — nur bei Modellen mit elektrisch betaetigter Klappe.'">
-            📦 Heckklappe
+            v-tooltip="$t('control.trunkTooltip')">
+            {{ $t('control.trunk') }}
           </button>
         </div>
 
@@ -195,48 +195,48 @@
         <div class="grid grid-cols-2 gap-2">
           <button @click="cmd('window_control', { command: 'vent', lat: 0, lon: 0 })" :disabled="busy"
             class="py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition disabled:opacity-40"
-            v-tooltip="'Fenster luefte (alle Fenster spaltbreit oeffnen).'">
-            🪟 Fenster lüften
+            v-tooltip="$t('control.windowVentTooltip')">
+            {{ $t('control.windowVent') }}
           </button>
           <button @click="cmd('window_control', { command: 'close', lat: 0, lon: 0 })" :disabled="busy"
             class="py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition disabled:opacity-40"
-            v-tooltip="'Alle Fenster schliessen.'">
-            🪟 Fenster zu
+            v-tooltip="$t('control.windowCloseTooltip')">
+            {{ $t('control.windowClose') }}
           </button>
         </div>
       </div>
 
       <!-- Laden -->
       <div class="card space-y-4">
-        <h2 class="font-semibold text-lg">⚡ Laden</h2>
+        <h2 class="font-semibold text-lg">{{ $t('control.charging') }}</h2>
 
         <div class="flex items-center justify-between">
-          <span class="text-gray-300">Laden</span>
+          <span class="text-gray-300">{{ $t('control.chargeLabel') }}</span>
           <div class="flex gap-2">
             <button @click="cmd('charge_start')" :disabled="busy"
               class="px-4 py-2 rounded-lg bg-green-700 hover:bg-green-600 text-white text-sm font-medium transition disabled:opacity-40">
-              Start
+              {{ $t('control.chargeStart') }}
             </button>
             <button @click="cmd('charge_stop')" :disabled="busy"
               class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition disabled:opacity-40">
-              Stop
+              {{ $t('control.chargeStop') }}
             </button>
           </div>
         </div>
 
         <div class="space-y-2 border-t border-gray-700 pt-3">
           <div class="flex justify-between text-sm">
-            <span class="text-gray-300">Ladelimit</span>
+            <span class="text-gray-300">{{ $t('control.chargeLimit') }}</span>
             <span class="text-white font-bold">{{ chargeLimit }}%</span>
           </div>
           <input type="range" min="50" max="100" step="5" v-model.number="chargeLimit"
             class="w-full accent-tesla-red" />
           <div class="flex justify-between text-xs text-gray-500">
-            <span>50% (Alltag)</span><span>80% (Standard)</span><span>100% (Reise)</span>
+            <span>{{ $t('control.chargeLimitDaily') }}</span><span>{{ $t('control.chargeLimitStandard') }}</span><span>{{ $t('control.chargeLimitTrip') }}</span>
           </div>
           <button @click="cmd('set_charge_limit', { percent: chargeLimit })" :disabled="busy"
             class="w-full py-2 rounded-lg bg-tesla-red hover:bg-red-700 text-white text-sm font-medium transition disabled:opacity-40">
-            Ladelimit setzen
+            {{ $t('control.setChargeLimit') }}
           </button>
         </div>
 
@@ -244,15 +244,15 @@
              Beim DC-Schnellladen ignoriert das Fahrzeug den Wert. -->
         <div class="space-y-2 border-t border-gray-700 pt-3">
           <div class="flex justify-between text-sm">
-            <span class="text-gray-300">Ladestrom (AC)</span>
+            <span class="text-gray-300">{{ $t('control.chargeAmps') }}</span>
             <span class="text-white font-bold">{{ chargeAmps }} A</span>
           </div>
           <input type="range" min="5" max="48" step="1" v-model.number="chargeAmps"
             class="w-full accent-tesla-red" />
           <button @click="cmd('set_charging_amps', { charging_amps: chargeAmps })" :disabled="busy"
             class="w-full py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition disabled:opacity-40"
-            v-tooltip="'Maximaler Ladestrom an der Wallbox (5–48 A). Niedriger = schonender, langsamer; hoeher = schneller, mehr Waerme.'">
-            Ladestrom setzen
+            v-tooltip="$t('control.chargeAmpsTooltip')">
+            {{ $t('control.setChargeAmps') }}
           </button>
         </div>
 
@@ -262,13 +262,13 @@
         <div class="grid grid-cols-2 gap-2 border-t border-gray-700 pt-3">
           <button @click="cmd('charge_port_door_open')" :disabled="busy"
             class="py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition disabled:opacity-40"
-            v-tooltip="'Ladeklappe oeffnen (Tesla- und CCS-Buchsen). Bei verriegeltem Stecker hilft das oft beim Trennen.'">
-            🔓 Ladeklappe auf
+            v-tooltip="$t('control.chargePortOpenTooltip')">
+            {{ $t('control.chargePortOpen') }}
           </button>
           <button @click="cmd('charge_port_door_close')" :disabled="busy"
             class="py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium transition disabled:opacity-40"
-            v-tooltip="'Ladeklappe schliessen — geht nur, wenn kein Stecker eingesteckt ist.'">
-            🔒 Ladeklappe zu
+            v-tooltip="$t('control.chargePortCloseTooltip')">
+            {{ $t('control.chargePortClose') }}
           </button>
         </div>
       </div>
@@ -277,8 +277,8 @@
            ueber die externen Lautsprecher des Fahrzeugs. Funktioniert nur
            bei Modellen mit Boombox-Hardware (Model S/X Plaid, neuere Y/3). -->
       <div class="card space-y-3">
-        <h2 class="font-semibold text-lg">📻 Boombox</h2>
-        <p class="text-xs text-gray-500">Spielt Tesla-Sounds ueber die externen Lautsprecher (gemaess Tesla-API erlaubt). Fahrzeug muss stehen — wird im Fahrbetrieb ignoriert.</p>
+        <h2 class="font-semibold text-lg">{{ $t('control.boombox') }}</h2>
+        <p class="text-xs text-gray-500">{{ $t('control.boomboxHint') }}</p>
         <div class="grid grid-cols-3 gap-2">
           <button v-for="sound in BOOMBOX_SOUNDS" :key="sound.id"
             @click="cmd('remote_boombox', { sound: sound.id })" :disabled="busy"
@@ -294,32 +294,29 @@
            Der Zeitwert wird in Minuten ab Mitternacht uebertragen.
            Optional auf Wochentage beschraenken. -->
       <div class="card space-y-3">
-        <h2 class="font-semibold text-lg">⏰ Vorklim-Zeitplan</h2>
-        <p class="text-xs text-gray-500">
-          Tesla bringt den Innenraum + die Batterie bis zur eingestellten Abfahrtszeit auf Solltemperatur.
-          Funktioniert nur, wenn das Fahrzeug ans Stromnetz angeschlossen ist.
-        </p>
+        <h2 class="font-semibold text-lg">{{ $t('control.departure') }}</h2>
+        <p class="text-xs text-gray-500">{{ $t('control.departureHint') }}</p>
         <div class="flex items-center gap-3">
-          <label class="text-sm text-gray-300 flex-1">Abfahrtszeit</label>
+          <label class="text-sm text-gray-300 flex-1">{{ $t('control.departureTime') }}</label>
           <input v-model="departureTime" type="time" required
             class="bg-gray-700 rounded px-2 py-1 text-white text-sm w-32"
-            v-tooltip="'Uhrzeit, zu der das Auto fahrbereit sein soll. Tesla startet die Vorklimatisierung typisch 20-30 Min vorher.'" />
+            v-tooltip="$t('control.departureTimeTooltip')" />
         </div>
         <div class="flex items-center gap-3">
-          <label class="text-sm text-gray-300 flex-1">Nur an Werktagen (Mo–Fr)</label>
+          <label class="text-sm text-gray-300 flex-1">{{ $t('control.departureWeekdays') }}</label>
           <input v-model="departureWeekdays" type="checkbox" class="accent-tesla-red"
-            v-tooltip="'Wenn aktiv, laeuft die Vorklimatisierung nur an Werktagen — sinnvoll fuer den Pendel-Alltag.'" />
+            v-tooltip="$t('control.departureWeekdaysTooltip')" />
         </div>
         <div class="flex gap-2">
           <button @click="saveDeparture" :disabled="busy"
             class="flex-1 py-2 rounded-lg bg-tesla-red hover:bg-red-700 text-white text-sm transition disabled:opacity-40"
-            v-tooltip="'Vorklim-Zeitplan an das Fahrzeug senden.'">
-            Zeitplan setzen
+            v-tooltip="$t('control.departureSaveTooltip')">
+            {{ $t('control.departureSave') }}
           </button>
           <button @click="cmd('set_scheduled_departure', { enable: false })" :disabled="busy"
             class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm transition disabled:opacity-40"
-            v-tooltip="'Geplanten Zeitplan deaktivieren.'">
-            Aus
+            v-tooltip="$t('control.departureDisableTooltip')">
+            {{ $t('control.departureDisable') }}
           </button>
         </div>
       </div>
@@ -340,28 +337,24 @@
            dominiert dann den Lade-Beginn, die Vorklim laeuft trotzdem
            rechtzeitig vor dem departure_time. -->
       <div class="card space-y-3">
-        <h2 class="font-semibold text-lg">💸 Off-Peak laden</h2>
-        <p class="text-xs text-gray-500">
-          Lade-Start auf einen festen Zeitpunkt verzögern — sinnvoll bei dynamischen Tarifen
-          (Tibber, aWattar, …) oder Nachtstrom-Vertrag. Das Auto lädt dann ab dieser Uhrzeit,
-          bis das Ladelimit erreicht ist.
-        </p>
+        <h2 class="font-semibold text-lg">{{ $t('control.offPeak') }}</h2>
+        <p class="text-xs text-gray-500">{{ $t('control.offPeakHint') }}</p>
         <div class="flex items-center gap-3">
-          <label class="text-sm text-gray-300 flex-1">Lade-Start</label>
+          <label class="text-sm text-gray-300 flex-1">{{ $t('control.offPeakStart') }}</label>
           <input v-model="offPeakStart" type="time" required
             class="bg-gray-700 rounded px-2 py-1 text-white text-sm w-32"
-            v-tooltip="'Uhrzeit, ab der das Auto zu laden beginnt. Stecke das Auto vorher an die Wallbox – es wartet still bis zur eingestellten Zeit.'" />
+            v-tooltip="$t('control.offPeakStartTooltip')" />
         </div>
         <div class="flex gap-2">
           <button @click="saveOffPeak" :disabled="busy"
             class="flex-1 py-2 rounded-lg bg-tesla-red hover:bg-red-700 text-white text-sm transition disabled:opacity-40"
-            v-tooltip="'Geplanten Lade-Start an das Fahrzeug senden.'">
-            Lade-Plan setzen
+            v-tooltip="$t('control.offPeakSaveTooltip')">
+            {{ $t('control.offPeakSave') }}
           </button>
           <button @click="cmd('set_scheduled_charging', { enable: false })" :disabled="busy"
             class="px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm transition disabled:opacity-40"
-            v-tooltip="'Off-Peak-Plan deaktivieren — Auto laedt sofort beim Anstecken.'">
-            Aus
+            v-tooltip="$t('control.offPeakDisableTooltip')">
+            {{ $t('control.offPeakDisable') }}
           </button>
         </div>
       </div>
@@ -369,62 +362,62 @@
       <!-- Software-Update — zeigt aktuellen Status (verfuegbar / im
            Download / Install in Progress) und erlaubt das Einplanen. -->
       <div class="card space-y-3">
-        <h2 class="font-semibold text-lg">⬆️ Software-Update</h2>
+        <h2 class="font-semibold text-lg">{{ $t('control.softwareUpdate') }}</h2>
         <div class="text-sm">
-          <p v-if="!swUpdate" class="text-gray-500">Status wird geladen…</p>
+          <p v-if="!swUpdate" class="text-gray-500">{{ $t('control.swStatusLoading') }}</p>
           <template v-else>
             <p class="text-gray-300">
-              Status: <span class="font-mono text-white">{{ swStatusLabel }}</span>
+              {{ $t('control.swStatus') }}: <span class="font-mono text-white">{{ swStatusLabel }}</span>
             </p>
             <p v-if="swUpdate.version" class="text-gray-300">
-              Version: <span class="font-mono text-white">{{ swUpdate.version }}</span>
+              {{ $t('control.swVersion') }}: <span class="font-mono text-white">{{ swUpdate.version }}</span>
             </p>
             <p v-if="swUpdate.downloadPercentage" class="text-gray-400 text-xs">
-              Download {{ swUpdate.downloadPercentage }}% · Installation {{ swUpdate.installPercentage ?? 0 }}%
+              {{ $t('control.swDownloadInstall', { download: swUpdate.downloadPercentage, install: swUpdate.installPercentage ?? 0 }) }}
             </p>
             <p v-if="swUpdate.scheduledTimeMs" class="text-blue-300 text-xs">
-              Geplant für {{ fmtScheduled(swUpdate.scheduledTimeMs) }}
+              {{ $t('control.swScheduledFor', { when: fmtScheduled(swUpdate.scheduledTimeMs) }) }}
             </p>
           </template>
         </div>
         <div class="flex gap-2">
           <button @click="loadSoftwareUpdate" :disabled="busy"
             class="flex-1 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white text-sm transition disabled:opacity-40"
-            v-tooltip="'Status aus dem Fahrzeug neu abrufen.'">
-            🔄 Aktualisieren
+            v-tooltip="$t('control.swRefreshTooltip')">
+            {{ $t('control.swRefresh') }}
           </button>
           <button @click="cmd('schedule_software_update', { offset_sec: 60 })"
             :disabled="busy || !canInstallUpdate"
             class="flex-1 py-2 rounded-lg bg-tesla-red hover:bg-red-700 text-white text-sm transition disabled:opacity-40"
-            v-tooltip="'Update sofort einplanen (in 1 Minute starten). Fahrzeug muss geparkt und ans Stromnetz angeschlossen sein.'">
-            Jetzt installieren
+            v-tooltip="$t('control.swInstallTooltip')">
+            {{ $t('control.swInstall') }}
           </button>
           <button v-if="swUpdate?.scheduledTimeMs"
             @click="cmd('cancel_software_update')" :disabled="busy"
             class="py-2 px-3 rounded-lg bg-yellow-800 hover:bg-yellow-700 text-white text-sm transition disabled:opacity-40"
-            v-tooltip="'Geplantes Update abbrechen.'">
-            Abbrechen
+            v-tooltip="$t('control.swCancelTooltip')">
+            {{ $t('control.swCancel') }}
           </button>
         </div>
       </div>
 
       <!-- Navigation -->
       <div class="card space-y-4">
-        <h2 class="font-semibold text-lg">🗺️ Navigation</h2>
-        <p class="text-sm text-gray-400">Ziel direkt ans Fahrzeug senden — öffnet Navigation im Auto.</p>
+        <h2 class="font-semibold text-lg">{{ $t('control.navigation') }}</h2>
+        <p class="text-sm text-gray-400">{{ $t('control.navHint') }}</p>
 
         <div class="space-y-2">
-          <input v-model="navAddress" type="text" placeholder="Adresse oder Ort eingeben…"
+          <input v-model="navAddress" type="text" :placeholder="$t('control.navPlaceholder')"
             class="w-full bg-gray-800 border border-gray-600 rounded-lg px-3 py-2 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-tesla-red"
             @keyup.enter="sendNav" />
           <button @click="sendNav" :disabled="busy || !navAddress.trim()"
             class="w-full py-2 rounded-lg bg-tesla-red hover:bg-red-700 text-white text-sm font-medium transition disabled:opacity-40">
-            Ziel senden
+            {{ $t('control.sendNav') }}
           </button>
         </div>
 
         <div v-if="recentDests.length" class="border-t border-gray-700 pt-3 space-y-1">
-          <p class="text-xs text-gray-500 mb-2">Zuletzt verwendet</p>
+          <p class="text-xs text-gray-500 mb-2">{{ $t('control.recentNav') }}</p>
           <button v-for="d in recentDests" :key="d" @click="navAddress = d"
             class="w-full text-left px-3 py-1.5 rounded-lg text-sm text-gray-300 hover:bg-gray-700 transition truncate">
             📍 {{ d }}
@@ -437,9 +430,11 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
 
+const { t, locale } = useI18n();
 const appStore = useAppStore();
 const vehicle  = computed(() => appStore.selectedVehicle);
 
@@ -462,28 +457,34 @@ const offPeakStart      = ref('23:00');
 // Tesla-Heizungs-Schluessel: 0 = Fahrer, 1 = Beifahrer,
 // 2 = hinten links, 4 = hinten rechts, 5 = hinten Mitte.
 // (Nummer 3 fehlt absichtlich — Tesla-API-Konvention.)
-const SEATS = [
-  { id: 0, label: 'Fahrer' },
-  { id: 1, label: 'Beifahrer' },
-  { id: 2, label: 'Hinten links' },
-  { id: 5, label: 'Hinten Mitte' },
-  { id: 4, label: 'Hinten rechts' },
-];
+const SEATS = computed(() => [
+  { id: 0, label: t('control.seatDriver') },
+  { id: 1, label: t('control.seatPassenger') },
+  { id: 2, label: t('control.seatRearLeft') },
+  { id: 5, label: t('control.seatRearCenter') },
+  { id: 4, label: t('control.seatRearRight') },
+]);
+
+const seatLevelLabels = computed(() => [
+  t('control.seatLevelLow'),
+  t('control.seatLevelMedium'),
+  t('control.seatLevelHigh'),
+]);
 
 // Boombox-Sounds wie in der Tesla-API. 0 = Stop, 1–9 sind verschiedene
 // vorinstallierte Sounds (Hupe, Pups, Ziege, …). Wir benennen sie auf
 // Deutsch, damit die UI verstaendlich ist.
-const BOOMBOX_SOUNDS = [
-  { id: 0, icon: '⏹', label: 'Stop',     tooltip: 'Aktuellen Boombox-Sound stoppen.' },
-  { id: 1, icon: '📯', label: 'Hupe',     tooltip: 'Standard-Hupton — wie der echte Hupen-Befehl, aber ohne Lichtblitz.' },
-  { id: 2, icon: '🐐', label: 'Ziege',    tooltip: 'Ziegen-Meckern — Tesla-Klassiker.' },
-  { id: 3, icon: '😊', label: 'Applaus',  tooltip: 'Applaus-Sound.' },
-  { id: 4, icon: '🐦', label: 'Vogel',    tooltip: 'Vogelgezwitscher.' },
-  { id: 5, icon: '🤡', label: 'Clown',    tooltip: 'Lustiger Clown-Sound.' },
-  { id: 6, icon: '🎵', label: 'Sound 6',  tooltip: 'Tesla-Boombox-Sound Nr. 6.' },
-  { id: 7, icon: '🎵', label: 'Sound 7',  tooltip: 'Tesla-Boombox-Sound Nr. 7.' },
-  { id: 8, icon: '🎵', label: 'Sound 8',  tooltip: 'Tesla-Boombox-Sound Nr. 8.' },
-];
+const BOOMBOX_SOUNDS = computed(() => [
+  { id: 0, icon: '⏹', label: t('control.boomboxStop'),     tooltip: t('control.boomboxStopTooltip') },
+  { id: 1, icon: '📯', label: t('control.boomboxHorn'),     tooltip: t('control.boomboxHornTooltip') },
+  { id: 2, icon: '🐐', label: t('control.boomboxGoat'),     tooltip: t('control.boomboxGoatTooltip') },
+  { id: 3, icon: '😊', label: t('control.boomboxApplause'), tooltip: t('control.boomboxApplauseTooltip') },
+  { id: 4, icon: '🐦', label: t('control.boomboxBird'),     tooltip: t('control.boomboxBirdTooltip') },
+  { id: 5, icon: '🤡', label: t('control.boomboxClown'),    tooltip: t('control.boomboxClownTooltip') },
+  { id: 6, icon: '🎵', label: t('control.boomboxSound', { n: 6 }), tooltip: t('control.boomboxSoundTooltip', { n: 6 }) },
+  { id: 7, icon: '🎵', label: t('control.boomboxSound', { n: 7 }), tooltip: t('control.boomboxSoundTooltip', { n: 7 }) },
+  { id: 8, icon: '🎵', label: t('control.boomboxSound', { n: 8 }), tooltip: t('control.boomboxSoundTooltip', { n: 8 }) },
+]);
 
 const stateColor = computed(() => ({
   online:  'text-green-400',
@@ -493,9 +494,9 @@ const stateColor = computed(() => ({
 }[vehicleState.value] ?? 'text-gray-400'));
 
 const stateLabel = computed(() => ({
-  online:  'Online',
-  asleep:  'Schläft',
-  offline: 'Offline',
+  online:  t('control.online'),
+  asleep:  t('control.sleeping'),
+  offline: t('control.offline'),
   unknown: '—',
 }[vehicleState.value] ?? '—'));
 
@@ -524,7 +525,7 @@ function timeToMinutes(hhmm) {
  *  konvertiert wird. */
 async function saveDeparture() {
   const minutes = timeToMinutes(departureTime.value);
-  if (minutes == null) { showToast('Bitte Uhrzeit im Format HH:MM eingeben', false); return; }
+  if (minutes == null) { showToast(t('control.toastInvalidTime'), false); return; }
   await cmd('set_scheduled_departure', {
     enable: true,
     departure_time: minutes,
@@ -541,7 +542,7 @@ async function saveDeparture() {
  *  erreicht ist. */
 async function saveOffPeak() {
   const minutes = timeToMinutes(offPeakStart.value);
-  if (minutes == null) { showToast('Bitte Uhrzeit im Format HH:MM eingeben', false); return; }
+  if (minutes == null) { showToast(t('control.toastInvalidTime'), false); return; }
   await cmd('set_scheduled_charging', { enable: true, time: minutes });
 }
 
@@ -554,21 +555,25 @@ async function loadSoftwareUpdate() {
 }
 
 const swStatusLabel = computed(() => ({
-  unknown:                'unbekannt',
-  available:              'Update verfügbar',
-  scheduled:              'Update eingeplant',
-  installing:             'wird installiert',
-  downloading:            'Download läuft',
-  downloading_wifi_wait:  'Wartet auf WLAN',
-  '':                     'aktuell',
-}[swUpdate.value?.status] || swUpdate.value?.status || 'unbekannt'));
+  unknown:                t('control.swStatusUnknown'),
+  available:              t('control.swStatusAvailable'),
+  scheduled:              t('control.swStatusScheduled'),
+  installing:             t('control.swStatusInstalling'),
+  downloading:            t('control.swStatusDownloading'),
+  downloading_wifi_wait:  t('control.swStatusDownloadingWifi'),
+  '':                     t('control.swStatusCurrent'),
+}[swUpdate.value?.status] || swUpdate.value?.status || t('control.swStatusUnknown')));
 
 const canInstallUpdate = computed(() =>
   swUpdate.value && ['available', 'downloading_wifi_wait'].includes(swUpdate.value.status)
 );
 
+// Locale-abhaengiges Datumsformat — Tesla liefert ms-Timestamp, wir
+// formatieren in der aktiv ausgewaehlten App-Sprache.
+const LOCALE_TAG = { de: 'de-DE', en: 'en-US', fr: 'fr-FR', es: 'es-ES', tr: 'tr-TR', el: 'el-GR' };
 function fmtScheduled(ms) {
-  return new Date(ms).toLocaleString('de-DE',
+  const tag = LOCALE_TAG[locale.value] || 'de-DE';
+  return new Date(ms).toLocaleString(tag,
     { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
 }
 
@@ -584,26 +589,26 @@ async function toggleSteeringWheel() {
       // on=true → letztlich ein Toggle bzw. eine 3-Stufen-Logik;
       // wir senden „on" als Default, das Auto entscheidet selbst.
       await api.post(`/commands/${vehicle.value.id}/remote_steering_wheel_heat_climate_request`, { on: true });
-      showToast('Lenkradheizung geschickt', true);
+      showToast(t('control.toastSteeringSent'), true);
     } catch {
       await api.post(`/commands/${vehicle.value.id}/remote_steering_wheel_heater_request`, { on: true });
-      showToast('Lenkradheizung geschickt (alter Endpunkt)', true);
+      showToast(t('control.toastSteeringSentLegacy'), true);
     }
   } catch (e) {
-    showToast(e.response?.data?.error || 'Fehler', false);
+    showToast(e.response?.data?.error || t('control.toastError'), false);
   } finally { busy.value = false; }
 }
 
 async function wakeUp() {
   if (!vehicle.value) return;
   busy.value = true;
-  showToast('Fahrzeug wird aufgeweckt…', true);
+  showToast(t('control.toastWaking'), true);
   try {
     const { data } = await api.post(`/commands/${vehicle.value.id}/wake_up`, {});
     vehicleState.value = data.state === 'online' ? 'online' : 'asleep';
-    showToast(data.state === 'online' ? 'Fahrzeug ist online!' : 'Timeout – Fahrzeug antwortet nicht', data.state === 'online');
+    showToast(data.state === 'online' ? t('control.toastOnline') : t('control.toastWakeTimeout'), data.state === 'online');
   } catch (e) {
-    showToast('Fehler beim Aufwecken', false);
+    showToast(t('control.toastWakeError'), false);
   } finally { busy.value = false; }
 }
 
@@ -613,17 +618,17 @@ async function cmd(command, body = {}) {
   try {
     const { data } = await api.post(`/commands/${vehicle.value.id}/${command}`, body);
     if (data?.result === false) {
-      showToast(data.reason || 'Befehl abgelehnt', false);
+      showToast(data.reason || t('control.toastRejected'), false);
     } else {
-      showToast('Befehl gesendet', true);
+      showToast(t('control.toastSent'), true);
       vehicleState.value = 'online';
     }
   } catch (e) {
     if (e.response?.data?.code === 'ASLEEP') {
-      showToast('Fahrzeug schläft – zuerst aufwecken', false);
+      showToast(t('control.toastAsleep'), false);
       vehicleState.value = 'asleep';
     } else {
-      showToast(e.response?.data?.error || 'Fehler beim Senden', false);
+      showToast(e.response?.data?.error || t('control.toastSendError'), false);
     }
   } finally { busy.value = false; }
 }
@@ -631,9 +636,12 @@ async function cmd(command, body = {}) {
 async function sendNav() {
   const address = navAddress.value.trim();
   if (!address) return;
+  // Tesla-API erwartet locale-Tag (zB de-DE). Wir mappen den aktiven
+  // App-Locale-Code auf den passenden Region-Tag.
+  const navLocale = LOCALE_TAG[locale.value] || 'de-DE';
   await cmd('navigation_request', {
     type: 'share_ext_content_raw',
-    locale: 'de-DE',
+    locale: navLocale,
     timestamp_ms: Date.now(),
     value: { 'android.intent.extra.TEXT': address },
   });
