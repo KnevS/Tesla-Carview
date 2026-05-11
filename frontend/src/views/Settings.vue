@@ -44,25 +44,21 @@
     <!-- Mandanten-Pseudonym (Admin) — nach aussen sichtbarer Login-
          Identifier. Aus Datenschutz nicht der Klarname. -->
     <div v-if="auth.isAdmin" class="card space-y-3">
-      <h2 class="font-semibold">🔐 Mandanten-Pseudonym (Login-Identifier)</h2>
-      <p class="text-sm text-gray-400">
-        Auf der öffentlichen Login-Seite erscheint dein Mandant unter diesem
-        Pseudonym — nicht unter dem Klarnamen. So sieht niemand von außen,
-        welche Firma oder Person diesen Self-Hoster nutzt.
-      </p>
+      <h2 class="font-semibold">{{ $t('settings.pseudonymTitle') }}</h2>
+      <p class="text-sm text-gray-400">{{ $t('settings.pseudonymIntro') }}</p>
       <div class="bg-black/30 rounded-lg p-3 flex items-center justify-between gap-3 flex-wrap">
         <div class="min-w-0">
-          <p class="text-xs text-gray-500 uppercase tracking-wide">Aktuell</p>
+          <p class="text-xs text-gray-500 uppercase tracking-wide">{{ $t('settings.pseudonymCurrent') }}</p>
           <p class="text-xl font-mono font-bold text-white tracking-wider">{{ tenantPseudonym || '…' }}</p>
         </div>
         <button @click="confirmRegeneratePseudonym = true"
           class="btn-secondary text-sm"
-          v-tooltip="'Erzeugt einen neuen Pseudonym — alle berechtigten User müssen sich den neuen merken'">
-          🔄 Neu generieren
+          v-tooltip="$t('settings.pseudonymRegenerateTip')">
+          {{ $t('settings.pseudonymRegenerate') }}
         </button>
       </div>
       <div v-if="tenantPseudonymHistory.length" class="text-xs text-gray-500">
-        Frühere Pseudonyme: <span class="font-mono">{{ tenantPseudonymHistory.join(', ') }}</span>
+        {{ $t('settings.pseudonymHistory') }}: <span class="font-mono">{{ tenantPseudonymHistory.join(', ') }}</span>
       </div>
 
       <!-- Confirmation-Modal mit kritischen Hinweisen. Teleport-to-body,
@@ -73,32 +69,27 @@
              class="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-4"
              @click.self="confirmRegeneratePseudonym = false">
           <div class="card max-w-md space-y-3">
-            <h3 class="font-semibold text-lg">Pseudonym neu generieren?</h3>
+            <h3 class="font-semibold text-lg">{{ $t('settings.pseudonymConfirmTitle') }}</h3>
             <p class="text-sm text-gray-300">
-              Aktuell: <span class="font-mono">{{ tenantPseudonym }}</span>
+              {{ $t('settings.pseudonymCurrent') }}: <span class="font-mono">{{ tenantPseudonym }}</span>
             </p>
             <div class="bg-yellow-900/20 border border-yellow-700/40 rounded-lg p-3 text-sm space-y-2 text-yellow-200">
-              <p>⚠ <strong>Wichtig — bitte vor dem Klick lesen:</strong></p>
+              <p>{{ $t('settings.pseudonymWarnHeader') }}</p>
               <ul class="list-disc list-inside space-y-1 text-xs text-yellow-100">
-                <li><strong>Alle User</strong> deines Mandanten müssen sich den
-                  neuen Pseudonym merken — vorher informieren!</li>
-                <li>Der alte Pseudonym landet in der History und wird nie
-                  wieder zufällig vergeben.</li>
-                <li><strong>Bei Verlust des neuen Namens ohne Backup</strong>
-                  ist eine Wiederherstellung nur durch Neu-Aufsetzen einer
-                  leeren Mandantenumgebung möglich — alle Daten wären verloren.</li>
-                <li>Empfehlung: <RouterLink to="/data" class="underline">
-                  jetzt ein Backup ziehen</RouterLink>.</li>
+                <li>{{ $t('settings.pseudonymWarnUsers') }}</li>
+                <li>{{ $t('settings.pseudonymWarnHistory') }}</li>
+                <li>{{ $t('settings.pseudonymWarnBackup') }}</li>
+                <li><RouterLink to="/data" class="underline">{{ $t('settings.pseudonymBackupCta') }}</RouterLink></li>
               </ul>
             </div>
             <div class="flex gap-2">
               <button @click="confirmRegeneratePseudonym = false" class="btn-secondary flex-1">
-                Abbrechen
+                {{ $t('settings.pseudonymCancel') }}
               </button>
               <button @click="doRegeneratePseudonym"
                 :disabled="regeneratingPseudonym"
                 class="btn-primary flex-1">
-                {{ regeneratingPseudonym ? '…' : 'Ja, jetzt neu generieren' }}
+                {{ regeneratingPseudonym ? '…' : $t('settings.pseudonymConfirm') }}
               </button>
             </div>
             <p v-if="regenerateError" class="text-red-400 text-sm">{{ regenerateError }}</p>
@@ -413,31 +404,24 @@
       </button>
     </div>
 
+    <!-- Geofences fuer Auto-Klassifikation Privat / Arbeitsweg / Dienst -->
+    <div v-if="appStore.selectedVehicle" class="card space-y-3">
+      <h2 class="font-semibold">{{ $t('settings.geofenceTitle') }}</h2>
+      <GeofenceManager />
+    </div>
+
     <!-- Tesla Verbindung -->
     <div class="card space-y-4">
       <h2 class="font-semibold">⚡ Tesla-Verbindung</h2>
 
-      <!-- Strategie-Erklaerung: Telemetry-first, Polling als Fallback.
-           Macht transparent, wie die App heute lebt und wann was passiert. -->
+      <!-- Strategie-Erklaerung: Telemetry-first, Polling als Fallback. -->
       <div class="bg-blue-900/15 border border-blue-700/30 rounded-lg p-3 text-xs text-blue-100 space-y-1">
-        <p class="font-semibold text-sm">🎯 Strategie: Live-Streaming bevorzugt, Polling als Fallback</p>
+        <p class="font-semibold text-sm">{{ $t('settings.teslaStrategyTitle') }}</p>
         <ol class="list-decimal list-inside space-y-0.5 text-blue-200">
-          <li>
-            <strong>Fleet Telemetry (Push)</strong> — Auto streamt GPS, Speed, Batterie
-            sekündlich. Kostenlos, keine Tesla-API-Calls.
-            <span class="text-gray-400">→ aktivierbar pro VIN unten, sobald Tesla approved.</span>
-          </li>
-          <li>
-            <strong>Fleet API Polling (Pull)</strong> — wenn Telemetry nicht aktiv ist,
-            ruft der Poller alle 30s (online) bzw. 5min (offline) die Tesla-API ab.
-            Kostet API-Budget pro Call.
-            <span class="text-gray-400">→ aktuell aktiver Default.</span>
-          </li>
+          <li>{{ $t('settings.teslaStrategyTelemetry') }}</li>
+          <li>{{ $t('settings.teslaStrategyPolling') }}</li>
         </ol>
-        <p class="text-gray-400 pt-1">
-          Sobald Telemetry für ein Fahrzeug streamt, schaltet der Poller für dieses Auto
-          automatisch auf Heartbeat-Modus (1× pro Stunde, nur für Stammdaten) — spart bis 95 % API-Budget.
-        </p>
+        <p class="text-gray-400 pt-1">{{ $t('settings.teslaStrategyFooter') }}</p>
       </div>
 
       <div class="flex items-center gap-3 flex-wrap">
@@ -478,28 +462,19 @@
         </div>
       </div>
 
-      <!-- Fleet Telemetrie: Live-GPS + Fahrdaten via WebSocket vom Auto.
-           Status pro VIN: gruener Punkt = Auto streamt gerade,
-           gelb = registriert aber kein Signal in den letzten 15 min,
-           rot = noch nicht registriert,
-           grau = Tesla-Approval fehlt (404). -->
+      <!-- Fleet Telemetrie: Live-GPS + Fahrdaten via WebSocket vom Auto. -->
       <div class="border-t border-gray-700 pt-4 space-y-3">
         <div>
-          <p class="font-medium text-sm">📡 Fleet Telemetrie (GPS &amp; Echtzeit-Daten)</p>
-          <p class="text-xs text-gray-400 mt-0.5">
-            Pusht Position, Geschwindigkeit, Batterie sekündlich vom Auto an diese App.
-            Benötigt Tesla-Partner-Approval pro Application-Client.
-          </p>
+          <p class="font-medium text-sm">{{ $t('settings.telemetryHeader') }}</p>
+          <p class="text-xs text-gray-400 mt-0.5">{{ $t('settings.telemetryIntro') }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
           <button @click="registerPartner" :disabled="partnerBusy"
-            class="btn-secondary text-sm"
-            v-tooltip="'Einmalig: registriert diese App als Tesla-Partner. Vor der Telemetrie-Aktivierung nötig.'">
-            {{ partnerBusy ? 'Registriere…' : '🔑 App bei Tesla registrieren' }}
+            class="btn-secondary text-sm">
+            {{ partnerBusy ? '…' : $t('settings.telemetryRegisterApp') }}
           </button>
-          <button @click="loadTelemetryStatus" class="btn-secondary text-sm"
-            v-tooltip="'Status pro Fahrzeug aktualisieren'">
-            🔄 Status
+          <button @click="loadTelemetryStatus" class="btn-secondary text-sm">
+            {{ $t('settings.telemetryRefreshStatus') }}
           </button>
         </div>
         <div v-if="partnerResult" class="rounded-lg px-3 py-2 text-sm"
@@ -519,7 +494,7 @@
               <p class="text-xs mt-0.5" :class="telemetryTextClass(v.status)">
                 {{ telemetryStatusLabel(v.status) }}
                 <span v-if="v.last_signal_at" class="text-gray-500 ml-1">
-                  · letztes Signal {{ relativeAgo(v.last_signal_at) }}
+                  · {{ $t('settings.telemetryLastSignal', { ago: relativeAgo(v.last_signal_at) }) }}
                 </span>
               </p>
               <p v-if="v.last_error" class="text-xs text-red-300 mt-0.5 truncate"
@@ -529,8 +504,8 @@
               @click="configureTelemetryFor(v.vin)" :disabled="telemetryBusyFor === v.vin"
               class="btn-primary text-xs whitespace-nowrap">
               {{ telemetryBusyFor === v.vin ? '…'
-                 : v.status === 'not_registered' ? '📡 Aktivieren'
-                 : '🔁 Neu konfigurieren' }}
+                 : v.status === 'not_registered' ? $t('settings.telemetryActivate')
+                 : $t('settings.telemetryReconfigure') }}
             </button>
           </div>
         </div>
@@ -742,17 +717,20 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import api from '../api.js';
 import { useAuthStore } from '../store/auth.js';
 import { useAppStore }  from '../store/index.js';
 import { useNavStore }   from '../store/nav.js';
+import GeofenceManager from '../components/GeofenceManager.vue';
 import { useThemeStore, THEMES, DESIGNS } from '../store/theme.js';
 import { useLangStore, LANGS } from '../store/lang.js';
 
 const auth     = useAuthStore();
 const appStore = useAppStore();
-const navStore   = useNavStore();
+const navStore = useNavStore();
+const { t }    = useI18n();
 
 // Group-Labels + farbige Markierung im Customization-UI — gleiche
 // Gruppen-IDs wie die NavBar-Dropdowns ('overview', 'analytics',
@@ -926,14 +904,15 @@ async function configureTelemetryFor(vin) {
   telemetryBusyFor.value = null;
 }
 
-const TELEMETRY_LABELS = {
-  streaming:        'Live — Auto streamt aktuell',
-  registered_idle:  'Registriert — wartet auf Signal vom Auto',
-  not_registered:   'Noch nicht registriert',
-  approval_missing: 'Tesla-Approval fehlt — Antrag im Developer-Portal',
-  error:            'Letzter Versuch fehlgeschlagen',
+// Status-Label kommt aus i18n — die Map merkt sich nur den Key.
+const TELEMETRY_KEYS = {
+  streaming:        'settings.telemetryStatusStreaming',
+  registered_idle:  'settings.telemetryStatusIdle',
+  not_registered:   'settings.telemetryStatusNotReg',
+  approval_missing: 'settings.telemetryStatusApproval',
+  error:            'settings.telemetryStatusError',
 };
-const telemetryStatusLabel = s => TELEMETRY_LABELS[s] || s;
+const telemetryStatusLabel = s => TELEMETRY_KEYS[s] ? t(TELEMETRY_KEYS[s]) : s;
 const telemetryDotClass    = s => ({
   streaming:        'text-green-400',
   registered_idle:  'text-yellow-400',

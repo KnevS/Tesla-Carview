@@ -1,4 +1,5 @@
 import { sendChargingCompleteNotification } from './notifications.js';
+import { maybeAutoClassify } from './geofenceClassifier.js';
 
 const BATTERY_SNAPSHOT_INTERVAL = 15 * 60;
 const MODEL_Y_USABLE_KWH = 75;
@@ -146,6 +147,10 @@ function finishOdometerTrip(db, vehicle, charge, odomKm, now) {
     `UPDATE trips SET end_time=?, end_soc=?, end_odometer_km=?, distance_km=?, energy_used_kwh=?
      WHERE id=?`
   ).run(now, endSoc, odomKm, distKm, energyKwh, active.id);
+
+  // Auto-Klassifikation anhand der Geofences (Home/Work). No-op wenn
+  // der User schon manuell gesetzt hat oder kein Geofence matched.
+  try { maybeAutoClassify(db, active.id); } catch { /* ignore */ }
 }
 
 function keepOdometerTripAlive(db, vehicle, odomKm) {

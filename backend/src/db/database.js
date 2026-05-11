@@ -465,6 +465,23 @@ function runTenantMigrations(db) {
     db.exec('ALTER TABLE vehicles ADD COLUMN telemetry_last_error TEXT');
   }
 
+  // Geofences pro Mandant: definiert Home/Work-Standorte, anhand derer
+  // neue Trips automatisch als Privat / Arbeitsweg / Dienst klassifiziert
+  // werden. radius_m default 200 m — kleiner Polygon-Ersatz, fuer einen
+  // Self-Hosting-Use-Case mehr als ausreichend (Polygone wuerden einen
+  // Map-Editor brauchen, der hier nicht den Komplexitaets-Aufwand wert ist).
+  db.exec(`CREATE TABLE IF NOT EXISTS geofences (
+    id          INTEGER PRIMARY KEY,
+    vehicle_id  INTEGER REFERENCES vehicles(id) ON DELETE CASCADE,
+    kind        TEXT NOT NULL CHECK(kind IN ('home','work','other')),
+    name        TEXT NOT NULL,
+    lat         REAL NOT NULL,
+    lon         REAL NOT NULL,
+    radius_m    INTEGER NOT NULL DEFAULT 200,
+    created_at  INTEGER DEFAULT (unixepoch())
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_geofences_vehicle ON geofences(vehicle_id)');
+
   // charging_sessions
   const csCols = col('charging_sessions');
   if (!csCols.includes('location_id')) {

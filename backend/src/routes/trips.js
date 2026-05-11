@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import { logChanges, isLocked } from '../services/tripAudit.js';
+import { wltpDeltaPct } from '../services/wltp.js';
 import {
   assertVehicleAccess, assertTripAccess,
   restrictToOwnVehicles, guardAccess,
@@ -35,12 +36,18 @@ router.get('/', (req, res) => {
       : (restrict.fragment ? 'WHERE 1=1' + restrict.fragment : '');
     params.push(...restrict.params, +limit, +offset);
     const trips = db.prepare(
-      `SELECT t.*, v.display_name as vehicle_name, d.name as driver_name, d.color as driver_color
+      `SELECT t.*, v.display_name as vehicle_name, v.model as vehicle_model,
+              d.name as driver_name, d.color as driver_color
        FROM trips t
        JOIN vehicles v ON v.id = t.vehicle_id
        LEFT JOIN drivers d ON d.id = t.driver_id
        ${where} ORDER BY t.start_time DESC LIMIT ? OFFSET ?`
     ).all(...params);
+    // WLTP-Delta pro Trip aus (model, distance, energy) berechnen.
+    // Liefert null wenn Daten unvollstaendig — Frontend zeigt dann '—'.
+    for (const t of trips) {
+      t.wltp_delta_pct = wltpDeltaPct(t.vehicle_model, t.distance_km, t.energy_used_kwh);
+    }
     res.json(trips);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -170,6 +177,133 @@ router.get('/heatmap', (req, res) => {
     ).all(...params);
 
     res.json({ period, year: y || null, month: m || null, week: w || null, days: rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/trips/annual-report?year=YYYY[&vehicle_id=...]
+ *
+ * Aggregierte Daten fuer den Jahresbericht-PDF — der Client
+ * (jsPDF) rendert das tatsaechliche PDF. Liefert:
+ *   - Gesamtkilometer + nach Typ
+ *   - Top 5 haeufige Strecken (Start-Adresse → Ziel-Adresse)
+ *   - Total kWh + Total Kosten
+ *   - CO2-Vergleich vs Diesel-Aequivalent (lokal, default 2.65 kg/L Diesel × 7L/100km)
+ */
+router.get('/annual-report', (req, res) => {
+  const db = req.db;
+  const year = parseInt(req.query.year, 10) || new Date().getFullYear();
+  const { vehicle_id } = req.query;
+  try {
+    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
+    const conds  = [`strftime('%Y', datetime(start_time, 'unixepoch')) = ?`];
+    const params = [String(year)];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+    const where  = 'WHERE ' + conds.join(' AND ') + restrict.fragment;
+    params.push(...restrict.params);
+
+    const totals = db.prepare(
+      `SELECT
+          COUNT(*) AS trips,
+          COALESCE(SUM(distance_km), 0) AS km,
+          COALESCE(SUM(energy_used_kwh), 0) AS kwh,
+          COALESCE(SUM(CASE WHEN trip_type='private'  THEN distance_km ELSE 0 END), 0) AS km_private,
+          COALESCE(SUM(CASE WHEN trip_type='business' THEN distance_km ELSE 0 END), 0) AS km_business,
+          COALESCE(SUM(CASE WHEN trip_type='commute'  THEN distance_km ELSE 0 END), 0) AS km_commute
+       FROM trips ${where}`
+    ).get(...params);
+
+    const topRoutes = db.prepare(
+      `SELECT start_address || ' → ' || end_address AS route,
+              COUNT(*) AS trips,
+              COALESCE(SUM(distance_km), 0) AS km
+         FROM trips ${where}
+          AND start_address IS NOT NULL AND end_address IS NOT NULL
+         GROUP BY route
+         ORDER BY trips DESC
+         LIMIT 5`
+    ).all(...params);
+
+    const charging = db.prepare(
+      `SELECT COALESCE(SUM(energy_added_kwh), 0) AS kwh,
+              COALESCE(SUM(cost), 0) AS cost
+         FROM charging_sessions
+        WHERE strftime('%Y', datetime(start_time, 'unixepoch')) = ?
+          ${vehicle_id ? 'AND vehicle_id = ?' : ''}
+          ${restrict.fragment}`
+    ).get(...(vehicle_id ? [String(year), vehicle_id] : [String(year)]),
+          ...restrict.params);
+
+    // CO2-Vergleich: 7 L/100km Diesel * 2.65 kg CO2/L  = ~18.5 kg / 100 km
+    // Tesla: ~ Strommix; Operator kann via tenant_settings override
+    // setzen (default deutscher Strom-Mix ~ 0.38 kg CO2/kWh).
+    const dieselKgPer100km = 7 * 2.65;
+    const gridKgPerKwh     = 0.38;
+    const co2_tesla_kg     = (charging.kwh || totals.kwh) * gridKgPerKwh;
+    const co2_diesel_kg    = totals.km * dieselKgPer100km / 100;
+    const co2_saved_kg     = Math.max(0, co2_diesel_kg - co2_tesla_kg);
+
+    res.json({
+      year,
+      totals,
+      topRoutes,
+      charging,
+      co2: {
+        tesla_kg:  Math.round(co2_tesla_kg),
+        diesel_kg: Math.round(co2_diesel_kg),
+        saved_kg:  Math.round(co2_saved_kg),
+        diesel_assumption_lphkm: 7,
+        grid_kg_per_kwh:         gridKgPerKwh,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/trips/location-heatmap
+ *
+ * Liefert eine Liste von Geo-Punkten mit Gewichten fuer die Karte —
+ * aggregiert per Grid-Cell (Lat/Lon auf 3 Nachkommastellen gerundet,
+ * ~111 m Auflösung), damit der Client nicht 100k Einzelpunkte
+ * rendert. Default-Zeitraum: letzte 12 Monate.
+ *
+ * IDOR via restrictToOwnVehicles.
+ */
+router.get('/location-heatmap', (req, res) => {
+  const db = req.db;
+  const { vehicle_id, since } = req.query;
+  try {
+    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
+    const conds  = ['start_lat IS NOT NULL', 'start_lon IS NOT NULL'];
+    const params = [];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+    const sinceTs = since
+      ? parseInt(since, 10)
+      : Math.floor(Date.now() / 1000) - 365 * 86400;
+    conds.push('start_time >= ?');
+    params.push(sinceTs);
+    const where = 'WHERE ' + conds.join(' AND ') + restrict.fragment;
+    params.push(...restrict.params);
+
+    // Pro Trip-Start + -Ende ein Punkt; mehrere Trips am gleichen Punkt
+    // erhoehen das Gewicht.
+    const rows = db.prepare(
+      `SELECT ROUND(lat, 3) AS lat, ROUND(lon, 3) AS lon, COUNT(*) AS weight
+         FROM (
+           SELECT start_lat AS lat, start_lon AS lon FROM trips ${where}
+           UNION ALL
+           SELECT end_lat   AS lat, end_lon   AS lon FROM trips ${where}
+                  AND end_lat IS NOT NULL AND end_lon IS NOT NULL
+         )
+        GROUP BY ROUND(lat, 3), ROUND(lon, 3)
+        ORDER BY weight DESC
+        LIMIT 5000`
+    ).all(...params, ...params);
+    res.json({ since: sinceTs, points: rows });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

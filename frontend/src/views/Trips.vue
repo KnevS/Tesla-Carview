@@ -70,7 +70,15 @@
               </div>
               <div class="hidden md:block">
                 <p class="text-gray-400">Verbrauch</p>
-                <p class="font-semibold">{{ trip.distance_km ? fmt(trip.energy_used_kwh / trip.distance_km * 100, 1) : '–' }} kWh/100km</p>
+                <p class="font-semibold">
+                  {{ trip.distance_km ? fmt(trip.energy_used_kwh / trip.distance_km * 100, 1) : '–' }} kWh/100km
+                  <span v-if="trip.wltp_delta_pct != null"
+                        :class="trip.wltp_delta_pct > 0 ? 'text-red-300' : 'text-green-300'"
+                        class="text-xs font-normal ml-1"
+                        v-tooltip="'Abweichung vom WLTP-Wert deines Modells. + = mehr verbraucht, − = weniger.'">
+                    ({{ trip.wltp_delta_pct > 0 ? '+' : '' }}{{ trip.wltp_delta_pct }} % vs. WLTP)
+                  </span>
+                </p>
               </div>
               <div class="hidden md:block">
                 <p class="text-gray-400">SoC</p>

@@ -87,13 +87,24 @@
       </div>
     </div>
 
-    <!-- Heatmap: Aktivitaet pro Tag, Filter nach Jahr/Monat/Woche/Alle.
-         Klick auf einen Tag fuehrt in die Fahrtenliste. -->
+    <!-- Heatmap: Aktivitaet pro Tag, Filter nach Jahr/Monat/Woche/Alle. -->
     <div class="card space-y-3">
       <h2 class="font-semibold" v-tooltip="$t('trips.heatmapTooltip')">
         🗓️ {{ $t('trips.heatmapTitle') }}
       </h2>
       <TripsHeatmap />
+    </div>
+
+    <!-- Standort-Heatmap auf Leaflet — wo war ich oft. -->
+    <div class="card space-y-3">
+      <h2 class="font-semibold">{{ $t('trips.locationHeatmapTitle') }}</h2>
+      <LocationHeatmap />
+    </div>
+
+    <!-- Jahresbericht-PDF clientseitig via jsPDF. -->
+    <div class="card space-y-3">
+      <h2 class="font-semibold">{{ $t('trips.annualReportTitle') }}</h2>
+      <AnnualReportButton />
     </div>
 
     <!-- Monatsübersicht (Tabelle bleibt unveraendert, ist meist nur am
@@ -365,6 +376,8 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
 import TripsHeatmap from '../components/TripsHeatmap.vue';
+import LocationHeatmap from '../components/LocationHeatmap.vue';
+import AnnualReportButton from '../components/AnnualReportButton.vue';
 
 const appStore  = useAppStore();
 const trips     = ref([]);
