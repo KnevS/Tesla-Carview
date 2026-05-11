@@ -3,7 +3,7 @@
     <div class="navbar-inner">
       <!-- Logo -->
       <RouterLink to="/" class="brand" v-tooltip="$t('auth.handbook')">
-        <span class="brand-icon">⚡</span>
+        <span class="brand-icon"><AppIcon name="bolt" :size="20" /></span>
         <span class="brand-name">Tesla Carview</span>
       </RouterLink>
 
@@ -95,6 +95,7 @@ import { useNavStore, NAV_GROUPS } from '../store/nav.js';
 import NavGroup     from './NavGroup.vue';
 import LangSwitcher from './LangSwitcher.vue';
 import VehicleSilhouette from './VehicleSilhouette.vue';
+import AppIcon from './AppIcon.vue';
 
 const appStore  = useAppStore();
 const authStore = useAuthStore();

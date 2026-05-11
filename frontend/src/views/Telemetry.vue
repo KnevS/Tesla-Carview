@@ -1,7 +1,10 @@
 <template>
   <div class="space-y-6">
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold">🏎 Fahrzeugtechnik</h1>
+      <h1 class="text-2xl font-bold flex items-center gap-2">
+        <AppIcon name="gauge" :size="24" class="text-tesla-red" />
+        Fahrzeugtechnik
+      </h1>
       <div class="flex items-center gap-3">
         <span :class="online ? 'text-green-400' : 'text-gray-400'" class="text-sm flex items-center gap-1.5">
           <span class="relative flex h-2 w-2">
@@ -55,7 +58,10 @@
 
       <!-- Live GPS Position -->
       <div class="card space-y-3" v-if="data.drive?.lat && data.drive?.lon">
-        <h2 class="font-semibold">📍 Live-Position</h2>
+        <h2 class="font-semibold flex items-center gap-2">
+          <AppIcon name="pin" :size="20" class="text-tesla-red" />
+          Live-Position
+        </h2>
         <div id="live-map" style="height: 280px; border-radius: 10px;"></div>
       </div>
 
@@ -85,8 +91,9 @@
       <div class="grid md:grid-cols-2 gap-4">
         <!-- Tire pressure Track-Mode style -->
         <div class="card space-y-4">
-          <h2 class="font-semibold" v-tooltip="'Reifenluftdruck aller vier Räder in bar. Grün = ok, Gelb = grenzwertig, Rot = zu niedrig/hoch'">
-            🏎 Reifendruck (TPMS)
+          <h2 class="font-semibold flex items-center gap-2" v-tooltip="'Reifenluftdruck aller vier Räder in bar. Grün = ok, Gelb = grenzwertig, Rot = zu niedrig/hoch'">
+            <AppIcon name="gauge" :size="20" class="text-tesla-red" />
+            Reifendruck (TPMS)
           </h2>
           <div class="relative mx-auto w-52 h-36">
             <!-- Car silhouette -->
@@ -124,7 +131,10 @@
       <!-- Charging + Vehicle -->
       <div class="grid md:grid-cols-2 gap-4">
         <div class="card space-y-3">
-          <h2 class="font-semibold" v-tooltip="'Aktueller Ladestatus und Ladedetails'">⚡ Laden</h2>
+          <h2 class="font-semibold flex items-center gap-2" v-tooltip="'Aktueller Ladestatus und Ladedetails'">
+            <AppIcon name="bolt" :size="20" class="text-tesla-red" />
+            Laden
+          </h2>
           <DataRow label="Status"          :value="data.charge.charging_state ?? '—'"                              tooltip="Charging = aktiv, Disconnected = nicht angesteckt, Complete = voll" />
           <DataRow label="Ladeleistung"    :value="data.charge.charger_power_kw ? data.charge.charger_power_kw + ' kW' : '—'" tooltip="Aktuelle Ladeleistung in kW" />
           <DataRow label="Ladegeschwind."  :value="data.charge.charge_rate_kph ? data.charge.charge_rate_kph + ' km/h' : '—'" tooltip="Mit welcher Reichweite pro Stunde wird geladen" />
@@ -133,7 +143,10 @@
         </div>
 
         <div class="card space-y-3">
-          <h2 class="font-semibold" v-tooltip="'Allgemeiner Fahrzeugzustand'">🚗 Fahrzeug</h2>
+          <h2 class="font-semibold flex items-center gap-2" v-tooltip="'Allgemeiner Fahrzeugzustand'">
+            <AppIcon name="steering" :size="20" class="text-tesla-red" />
+            Fahrzeug
+          </h2>
           <DataRow label="Zustand"     :value="data.state"                                            tooltip="Online, Asleep, Driving, Charging" />
           <DataRow label="Verriegelt"  :value="data.vehicle.locked ? '🔒 Ja' : '🔓 Nein'"           tooltip="Ob das Fahrzeug gerade verriegelt ist" />
           <DataRow label="Sentry"      :value="data.vehicle.sentry_mode ? '👁 Aktiv' : 'Inaktiv'"   tooltip="Sentry-Mode überwacht das Fahrzeug mit Kameras bei Einbruchversuchen" />
@@ -151,7 +164,10 @@
     <!-- Tesla-OAuth ist abgelaufen / vom User widerrufen → die einzige
          sinnvolle Aktion ist „Tesla neu verbinden", deshalb prominent. -->
     <div v-else-if="authError" class="card text-center py-8 space-y-3 border border-yellow-700/40 bg-yellow-900/10">
-      <p class="text-yellow-200 font-semibold">⚠️ Keine Verbindung zum Tesla-Konto</p>
+      <p class="text-yellow-200 font-semibold flex items-center justify-center gap-2">
+        <AppIcon name="alert" :size="20" />
+        Keine Verbindung zum Tesla-Konto
+      </p>
       <p class="text-sm text-gray-300 max-w-md mx-auto">
         Der OAuth-Token ist abgelaufen oder die Berechtigung wurde widerrufen.
         Bitte einmal neu verbinden, dann kommen die Live-Daten wieder.
@@ -181,6 +197,7 @@
 import { ref, computed, onMounted, onUnmounted, watch, nextTick, h, resolveDirective, withDirectives } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
+import AppIcon from '../components/AppIcon.vue';
 
 const appStore = useAppStore();
 const vehicle  = computed(() => appStore.selectedVehicle);

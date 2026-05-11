@@ -1,9 +1,10 @@
 <template>
   <div class="card space-y-3">
     <div class="flex items-center justify-between">
-      <h2 class="font-semibold"
+      <h2 class="font-semibold flex items-center gap-2"
         v-tooltip="'Voraussichtliche Tesla-Fleet-API-Kosten im laufenden Monat — basiert auf den von Tesla veröffentlichten Tarifen je Kategorie.'">
-        💸 Tesla API-Nutzung
+        <AppIcon name="wallet" :size="20" class="text-tesla-red" />
+        Tesla API-Nutzung
       </h2>
       <span class="text-xs text-gray-500" v-if="data">{{ data.period }}</span>
     </div>
@@ -64,6 +65,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import api from '../api.js';
+import AppIcon from './AppIcon.vue';
 
 const data    = ref(null);
 const loading = ref(false);

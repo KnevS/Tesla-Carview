@@ -13,20 +13,23 @@
                : 'border border-green-700/40 bg-green-900/10'">
       <div class="flex items-center justify-between flex-wrap gap-2">
         <h2 class="font-semibold flex items-center gap-2">
-          <span>{{ health.summary === 'error' ? '🔴' : health.summary === 'warn' ? '🟡' : '🟢' }}</span>
+          <AppIcon :name="health.summary === 'error' ? 'alert' : health.summary === 'warn' ? 'info' : 'check'" :size="20"
+                   :class="health.summary === 'error' ? 'text-red-400' : health.summary === 'warn' ? 'text-yellow-400' : 'text-green-400'" />
           System-Status
         </h2>
-        <button @click="loadHealth" class="text-xs btn-secondary py-1 px-2"
+        <button @click="loadHealth" class="text-xs btn-secondary py-1 px-2 inline-flex items-center gap-1.5"
           v-tooltip="'Health-Status neu abfragen.'">
-          🔄 Aktualisieren
+          <AppIcon name="refresh" :size="14" />
+          Aktualisieren
         </button>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
         <div v-for="c in health.checks" :key="c.key"
              class="bg-gray-800 rounded-lg p-2 flex items-start gap-2">
-          <span class="text-lg leading-tight">
-            {{ c.status === 'error' ? '❌' : c.status === 'warn' ? '⚠️' : c.status === 'ok' ? '✅' : '❔' }}
-          </span>
+          <AppIcon
+            :name="c.status === 'error' ? 'x' : c.status === 'warn' ? 'alert' : c.status === 'ok' ? 'check' : 'info'"
+            :size="18"
+            :class="c.status === 'error' ? 'text-red-400' : c.status === 'warn' ? 'text-yellow-400' : c.status === 'ok' ? 'text-green-400' : 'text-gray-400'" />
           <div class="min-w-0">
             <p class="font-medium">{{ c.label }}</p>
             <p class="text-xs text-gray-400">{{ c.message }}</p>
@@ -41,8 +44,9 @@
            Scheduler laeuft taeglich ~03:30 Europe/Berlin. -->
       <div class="border-t border-white/5 pt-3 mt-2 space-y-2">
         <div class="flex items-center justify-between gap-3 flex-wrap">
-          <p class="text-sm font-medium">
-            🌙 Nächtliche Wartung
+          <p class="text-sm font-medium flex items-center gap-1.5">
+            <AppIcon name="clock" :size="16" class="text-indigo-300" />
+            Nächtliche Wartung
             <span v-if="maintLog.auto_update_enabled" class="text-xs text-green-300 ml-2">Auto-Update: AN</span>
             <span v-else class="text-xs text-gray-500 ml-2">Auto-Update: aus</span>
           </p>
@@ -87,8 +91,9 @@
     <!-- Update-Status (admin only) -->
     <div v-if="isAdmin" class="card space-y-3">
       <div class="flex items-center justify-between">
-        <h2 class="font-semibold" v-tooltip="'Vergleicht den aktuell laufenden Build mit dem neuesten Commit auf GitHub'">
-          🔄 Software-Update
+        <h2 class="font-semibold flex items-center gap-2" v-tooltip="'Vergleicht den aktuell laufenden Build mit dem neuesten Commit auf GitHub'">
+          <AppIcon name="refresh" :size="20" class="text-tesla-red" />
+          Software-Update
         </h2>
         <button @click="checkUpdate" :disabled="updateChecking"
           class="btn-secondary text-xs px-3 py-1"
@@ -113,9 +118,10 @@
               <p class="text-gray-500"># Auf dem Server ausführen:</p>
               <p>bash /opt/tesla-carview/deploy/update.sh</p>
             </div>
-            <p class="text-xs text-gray-500 mt-2">
-              ✅ Alle Daten bleiben erhalten – die Datenbanken liegen im Docker-Volume
-              <code>tesla_data</code> und werden beim Update nicht berührt.
+            <p class="text-xs text-gray-500 mt-2 flex items-start gap-1.5">
+              <AppIcon name="check" :size="14" class="text-green-400 flex-shrink-0 mt-0.5" />
+              <span>Alle Daten bleiben erhalten – die Datenbanken liegen im Docker-Volume
+              <code>tesla_data</code> und werden beim Update nicht berührt.</span>
             </p>
           </div>
         </div>
@@ -174,7 +180,10 @@
 
         <!-- RAM -->
         <div class="card space-y-3">
-          <h2 class="font-semibold" v-tooltip="'Arbeitsspeichernutzung des gesamten Systems'">💾 Arbeitsspeicher</h2>
+          <h2 class="font-semibold flex items-center gap-2" v-tooltip="'Arbeitsspeichernutzung des gesamten Systems'">
+            <AppIcon name="database" :size="20" class="text-tesla-red" />
+            Arbeitsspeicher
+          </h2>
           <div>
             <div class="flex justify-between text-sm mb-1">
               <span class="text-gray-400">Belegt</span>
@@ -389,7 +398,10 @@
         class="fixed inset-0 bg-black/70 z-[1000] flex items-center justify-center p-4"
         @click.self="deleteTarget = null">
         <div class="card max-w-md w-full space-y-4">
-          <h3 class="text-lg font-semibold text-red-300">⚠️ {{ tt('delete.title') }}</h3>
+          <h3 class="text-lg font-semibold text-red-300 flex items-center gap-2">
+            <AppIcon name="alert" :size="20" />
+            {{ tt('delete.title') }}
+          </h3>
           <p class="text-sm text-gray-300">
             „<span class="font-semibold text-white">{{ deleteTarget.name }}</span>"
             (<code class="text-gray-400">{{ deleteTarget.slug }}</code>)

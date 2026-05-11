@@ -8,7 +8,7 @@
       :aria-label="$t('lang.switcher')"
       :title="$t('lang.switcher')"
     >
-      <span class="text-base leading-none">🌐</span>
+      <AppIcon name="globe" :size="16" />
       <span class="ml-1 text-sm font-medium tracking-wide">{{ currentLang.code.toUpperCase() }}</span>
       <span class="ml-0.5 text-xs opacity-70" aria-hidden="true">▾</span>
     </button>
@@ -37,6 +37,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useLangStore, LANGS } from '../store/lang.js';
 import { useAuthStore } from '../store/auth.js';
+import AppIcon from './AppIcon.vue';
 
 defineProps({
   /** Compact = nur Globe + Code; Standard zeigt etwas mehr Padding für die NavBar */

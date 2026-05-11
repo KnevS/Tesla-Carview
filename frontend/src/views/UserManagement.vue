@@ -9,7 +9,10 @@
          derzeit: aktive Nicht-Admin-Benutzer ohne Fahrzeug-Zuweisung. -->
     <div v-if="adminTasks.usersWithoutVehicle?.length"
          class="card border border-orange-700/60 bg-orange-900/15 space-y-2">
-      <p class="text-sm font-semibold text-orange-300">⚠️ Offene Aufgaben</p>
+      <p class="text-sm font-semibold text-orange-300 flex items-center gap-1.5">
+        <AppIcon name="alert" :size="16" />
+        Offene Aufgaben
+      </p>
       <p class="text-xs text-orange-200/80">
         Folgende Benutzer haben noch kein Fahrzeug zugewiesen. Weise ein Auto zu
         oder gib dem Benutzer das Recht, selbst eines anzulegen:
@@ -303,6 +306,7 @@
 import { ref, onMounted } from 'vue';
 import api from '../api.js';
 import { useAppStore } from '../store/index.js';
+import AppIcon from '../components/AppIcon.vue';
 
 const app     = useAppStore();
 const users   = ref([]);

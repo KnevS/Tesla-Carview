@@ -35,7 +35,7 @@
 
     <!-- Kein Dienstwagen -->
     <div v-if="vehicle && vehicle.category !== 'company'" class="card text-center py-12 space-y-3">
-      <p class="text-4xl">💼</p>
+      <AppIcon name="wallet" :size="48" class="text-tesla-red mx-auto" />
       <p class="text-gray-300 font-medium">Dieses Fahrzeug ist als Privatfahrzeug konfiguriert</p>
       <p class="text-sm text-gray-500">Unter Einstellungen → Fahrzeugkategorie auf "Dienstwagen" ändern.</p>
       <RouterLink to="/settings" class="btn-primary inline-block text-sm">Zu den Einstellungen</RouterLink>

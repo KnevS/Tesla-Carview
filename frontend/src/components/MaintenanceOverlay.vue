@@ -3,7 +3,9 @@
     <div v-if="visible" class="maint-overlay">
       <div class="maint-card">
         <!-- Animiertes Tesla-Logo / Blitz: dezent, kein Spam. -->
-        <div class="maint-bolt" aria-hidden="true">⚡</div>
+        <div class="maint-bolt" aria-hidden="true">
+          <AppIcon name="bolt" :size="64" class="text-tesla-red" />
+        </div>
 
         <h1 class="maint-title">Carview wird gerade aktualisiert</h1>
         <p class="maint-sub">
@@ -43,6 +45,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { i18n } from '../plugins/i18n.js';
+import AppIcon from './AppIcon.vue';
 
 // Geschaetzte Recovery-Zeit nach Deploy-Start: typisch 180 s (Backend
 // rebuild + Healthcheck). Wir starten mit dem vollen Wert und zaehlen
