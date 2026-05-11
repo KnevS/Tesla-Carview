@@ -43,6 +43,11 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 | **Navigation** | Individuell sortierbare und ein-/ausblendbare Navigationspunkte |
 | **Mobile / Tesla** | Installierbare PWA für iPhone/iPad (Safari), Android, Tesla-Fahrzeug-Browser und Desktop. Kompakte Karten-Ansicht im Fahrtenbuch für schmale Bildschirme. |
 | **System-Status** | Ampel-Karte (Tesla-Token, Virtual Key, Fleet Telemetry, Poller, DB) — grün/gelb/rot auf einen Blick |
+| **Aktivitäts-Heatmap** | Kalender-Heatmap aller Fahrten (Jahr/Monat/Woche/Alle) im Fahrtenbuch, Klick führt zur Fahrtenliste des Tages |
+| **Mandanten-Pseudonym** | Datenschutz: Login-Seite zeigt zufälligen `adjective-noun`-Pseudonym statt Klarnamen, vom Admin neu generierbar |
+| **Fleet Telemetry primär** | WebSocket-Streaming als bevorzugte Datenquelle (Tesla-Approval-pflichtig). Wenn aktiv → Poller schaltet auf 1×/h-Heartbeat, spart >95 % API-Budget. Sonst API-Polling als Fallback |
+| **Encryption at rest** | AES-256-GCM für Tesla-OAuth-Tokens, TOTP MFA-Secret, Virtual-Key Private-Key. Hash + timing-safe Compare für Password-Reset-Tokens. Auto-generierter Key in `data/.encryption-key` |
+| **Auto-Update PWA** | Service-Worker erkennt Deploys und reloaded automatisch — kein `Strg+Shift+R` mehr nötig, auch iOS-PWA |
 
 ---
 

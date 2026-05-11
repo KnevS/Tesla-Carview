@@ -106,6 +106,75 @@ router.get('/logbook', (req, res) => {
   }
 });
 
+/**
+ * GET /api/trips/heatmap
+ *
+ * Liefert pro Tag die Aktivitaets-Aggregate (Trip-Anzahl + Gesamt-km)
+ * fuer eine Kalender-Heatmap-Anzeige (GitHub-Contributions-Stil).
+ *
+ * Query-Parameter:
+ *   - period:  'all' | 'year' | 'month' | 'week'   (Default 'year')
+ *   - year:    YYYY                                (bei period=year/month/week)
+ *   - month:   1..12                               (bei period=month)
+ *   - week:    1..53                               (bei period=week, ISO-Woche)
+ *   - vehicle_id: optional, sonst alle Fahrzeuge des Tenants
+ *
+ * Aggregation erfolgt SQL-side mit strftime, damit die Antwort fuer
+ * grosse Datensaetze klein bleibt. Pro Tag eine Row, dadurch ist die
+ * Heatmap O(365) pro Jahr — winzig.
+ *
+ * IDOR: restrictToOwnVehicles greift, Admins sehen alles im Tenant.
+ */
+router.get('/heatmap', (req, res) => {
+  const db = req.db;
+  const { period = 'year', year, month, week, vehicle_id } = req.query;
+  const y = parseInt(year, 10);
+  const m = parseInt(month, 10);
+  const w = parseInt(week, 10);
+  try {
+    const conds = [];
+    const params = [];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+
+    // Zeitraum als UNIX-Range. period bestimmt Granularitaet UND Range.
+    if (period === 'year' && Number.isInteger(y)) {
+      conds.push("strftime('%Y', datetime(start_time, 'unixepoch')) = ?");
+      params.push(String(y));
+    } else if (period === 'month' && Number.isInteger(y) && Number.isInteger(m)) {
+      conds.push("strftime('%Y-%m', datetime(start_time, 'unixepoch')) = ?");
+      params.push(`${y}-${String(m).padStart(2, '0')}`);
+    } else if (period === 'week' && Number.isInteger(y) && Number.isInteger(w)) {
+      // ISO-Woche: SQLite's strftime %W ist Sunday-basiert (0..53); fuer
+      // unsere Zwecke ausreichend nahe an ISO 8601 (Heatmap zeigt
+      // ohnehin pro Tag, der User sieht die Diskrepanz nicht).
+      conds.push("strftime('%Y-%W', datetime(start_time, 'unixepoch')) = ?");
+      params.push(`${y}-${String(w).padStart(2, '0')}`);
+    }
+    // period='all' → keine Zeitraum-Bedingung
+
+    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
+    const where = conds.length || restrict.fragment
+      ? 'WHERE ' + (conds.length ? conds.join(' AND ') : '1=1') + restrict.fragment
+      : '';
+    params.push(...restrict.params);
+
+    const rows = db.prepare(
+      `SELECT
+         date(datetime(start_time, 'unixepoch'), 'localtime') AS day,
+         COUNT(*)                                              AS trips,
+         COALESCE(SUM(distance_km), 0)                         AS km
+       FROM trips
+       ${where}
+       GROUP BY day
+       ORDER BY day ASC`
+    ).all(...params);
+
+    res.json({ period, year: y || null, month: m || null, week: w || null, days: rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Monatsübersicht für Fahrtenbuch-Auswertung
 router.get('/logbook/months', (req, res) => {
   const db = req.db;

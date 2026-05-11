@@ -15,8 +15,39 @@ auf einem selbst betriebenen Server. Die Hauptbedrohungen sind:
 | Cookie-Diebstahl (CSRF) | `SameSite=Strict` + JSON-API (kein Formular-Submit) |
 | Man-in-the-Middle | TLS 1.3, HSTS, OCSP-Stapling |
 | Clickjacking | `X-Frame-Options: DENY` + CSP `frame-src 'none'` |
-| Datenleck bei DB-Kompromittierung | Passwort-Hashes (bcrypt), Token-Hashes (SHA-256), MFA-Codes (bcrypt) |
+| Datenleck bei DB-Kompromittierung | Passwort-Hashes (bcrypt), Token-Hashes (SHA-256), MFA-Codes (bcrypt) **+ AES-256-GCM at-rest** für Tesla-Tokens, MFA-Secret, Virtual-Key Private-Key (siehe „Encryption at rest" unten) |
+| Stored-XSS via Admin-Markdown (Legal-Texte) | `DOMPurify` vor `v-html`, Allow-List Tags + Attribute, Link-Schemata auf http(s)/mailto/tel beschränkt |
+| IDOR (User A liest Daten von User B im selben Tenant) | `assertVehicleAccess`/`assertTripAccess`/`assertChargingAccess`-Helper in jeder mutierenden Route; Admin sieht alles im Tenant, normale User nur via `vehicle_users` zugeordnete Fahrzeuge |
+| Setup-Race-Hijack (Angreifer registriert ersten Admin) | Optionales `SETUP_TOKEN`-ENV-Gate (Header `X-Setup-Token`) + Rate-Limit + atomare Check-then-Write |
+| Mandanten-Enumeration über Login-Seite | Pseudonyme statt Klarnamen (kuratierte `adjective-noun`-Pool) |
 | Veraltete Abhaengigkeiten | Dependabot-Alerts im Repository aktivieren |
+
+## Encryption at rest (seit 2026-05)
+
+Zweiseitige Verschlüsselung (AES-256-GCM) für die DB-Felder, deren
+Klartext das Backend zur Laufzeit braucht und die deshalb nicht gehashed
+werden können:
+
+| Daten | Tabelle.Spalte | Format |
+|---|---|---|
+| Tesla OAuth Access-Token | `tokens.access_token` | `v1:iv:tag:ciphertext` |
+| Tesla OAuth Refresh-Token | `tokens.refresh_token` | `v1:iv:tag:ciphertext` |
+| TOTP MFA-Secret | `users.mfa_secret` | `v1:iv:tag:ciphertext` |
+| Tesla Virtual-Key Private-Key (PEM) | `virtual_key.private_key_pem` | `v1:iv:tag:ciphertext` |
+
+**Key-Persistenz:** `data/.encryption-key` (32 Bytes, mode 0600). Beim
+ersten Backend-Start automatisch generiert. **Gehört ins Backup** —
+ohne Key sind Tesla-Verbindungen, MFA-Setups und Virtual-Keys verloren.
+
+Einseitig gehashed (SHA-256 + `timingSafeEqual`) für Random-Tokens, die
+nur verifiziert werden:
+
+| Daten | Verfahren |
+|---|---|
+| Session-Refresh-Tokens | SHA-256, Raw nur im httpOnly-Cookie |
+| Password-Reset-Tokens | SHA-256, in `tenant_settings` |
+
+Implementierung: `backend/src/services/cryptoService.js`.
 
 ## Authentifizierungs-Flow
 
