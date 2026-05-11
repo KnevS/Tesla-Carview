@@ -136,7 +136,22 @@
     "heatmapSummary": "{trips} trip(s) · {km} km total",
     "locationHeatmapTitle": "📍 Location heatmap",
     "annualReportTitle": "📄 Annual report",
-    "annualReportGenerate": "Generate report"
+    "annualReportGenerate": "Generate report",
+    "countLabel": "{count} trips",
+    "totalKm": "Total km",
+    "totalKmTooltip": "Sum of all recorded trip kilometres",
+    "avgConsumption": "Avg. consumption",
+    "avgConsumptionTooltip": "Average energy consumption per 100 km",
+    "privateKm": "Private trips",
+    "privateKmTooltip": "Distance classified as private trips",
+    "businessKm": "Business trips",
+    "businessKmTooltip": "Business trips + commute",
+    "typeCycleTooltip": "Click to change trip type",
+    "wltpTooltip": "Deviation from your model's WLTP value. + = more consumed, − = less.",
+    "wltpDelta": "({sign}{value} % vs. WLTP)",
+    "typePrivate": "Private",
+    "typeBusiness": "Business",
+    "typeCommute": "Commute"
   },
   "locationHeatmap": {
     "intro": "Where do you drive often? Bright areas = visited often. Hover/click on the map.",

@@ -136,7 +136,22 @@
     "heatmapSummary": "{trips} trajet(s) · {km} km au total",
     "locationHeatmapTitle": "📍 Carte de chaleur des lieux",
     "annualReportTitle": "📄 Rapport annuel",
-    "annualReportGenerate": "Générer le rapport"
+    "annualReportGenerate": "Générer le rapport",
+    "countLabel": "{count} trajets",
+    "totalKm": "Total km",
+    "totalKmTooltip": "Somme de tous les kilomètres enregistrés",
+    "avgConsumption": "Conso. moy.",
+    "avgConsumptionTooltip": "Consommation énergétique moyenne pour 100 km",
+    "privateKm": "Trajets privés",
+    "privateKmTooltip": "Kilométrage classé comme trajets privés",
+    "businessKm": "Trajets pro",
+    "businessKmTooltip": "Trajets pro + domicile-travail",
+    "typeCycleTooltip": "Cliquer pour changer le type de trajet",
+    "wltpTooltip": "Écart par rapport à la valeur WLTP de votre modèle. + = plus consommé, − = moins.",
+    "wltpDelta": "({sign}{value} % vs. WLTP)",
+    "typePrivate": "Privé",
+    "typeBusiness": "Pro",
+    "typeCommute": "Domicile-travail"
   },
   "locationHeatmap": {
     "intro": "Où conduisez-vous souvent ? Les zones lumineuses = visitées souvent.",
