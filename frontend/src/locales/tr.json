@@ -436,7 +436,9 @@
     "passkeyAuthenticating": "Passkey ile kimlik doğrulanıyor…",
     "passkeyCancelled": "Passkey doğrulaması iptal edildi.",
     "passkeyFailed": "Passkey ile giriş başarısız",
-    "tenantHint": "Kiracı adınız (kayıttan sonra atanır)"
+    "tenantHint": "Kiracı adınız (kayıttan sonra atanır)",
+    "selfHostHint": "Açık kaynak · Özel kullanım için kendi örneğinizi barındırın — {link}",
+    "selfHostLink": "GitHub'da"
   },
   "register": {
     "title": "Yeni kiracı kaydet",

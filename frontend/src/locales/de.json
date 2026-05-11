@@ -436,7 +436,9 @@
     "passkeyAuthenticating": "Passkey-Authentifizierung…",
     "passkeyCancelled": "Passkey-Authentifizierung abgebrochen.",
     "passkeyFailed": "Passkey-Anmeldung fehlgeschlagen",
-    "tenantHint": "Dein Mandantenname (nach Registrierung vergeben)"
+    "tenantHint": "Dein Mandantenname (nach Registrierung vergeben)",
+    "selfHostHint": "Open Source · Eigene Instanz für private Nutzung selbst betreiben — {link}",
+    "selfHostLink": "auf GitHub"
   },
   "register": {
     "title": "Neuen Mandanten registrieren",

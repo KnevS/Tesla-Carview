@@ -436,7 +436,9 @@
     "passkeyAuthenticating": "Autenticando con passkey…",
     "passkeyCancelled": "Autenticación con passkey cancelada.",
     "passkeyFailed": "Error de inicio de sesión con passkey",
-    "tenantHint": "Tu nombre de inquilino (asignado tras el registro)"
+    "tenantHint": "Tu nombre de inquilino (asignado tras el registro)",
+    "selfHostHint": "Open source · Aloja tu propia instancia para uso privado — {link}",
+    "selfHostLink": "en GitHub"
   },
   "register": {
     "title": "Registrar nuevo inquilino",
