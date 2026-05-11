@@ -3,13 +3,13 @@
     <h1 class="text-2xl font-bold">{{ $t('charging.title') }}</h1>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <StatCard :label="$t('charging.sessions')" :value="stats.total_sessions" icon="🔌"
+      <StatCard :label="$t('charging.sessions')" :value="stats.total_sessions" icon="plus"
         :tooltip="$t('charging.sessionsTooltip')" />
-      <StatCard :label="$t('charging.totalCharged')" :value="fmt(stats.total_energy_kwh, 1) + ' kWh'" icon="⚡"
+      <StatCard :label="$t('charging.totalCharged')" :value="fmt(stats.total_energy_kwh, 1) + ' kWh'" icon="bolt"
         :tooltip="$t('charging.totalChargedTooltip')" />
-      <StatCard :label="$t('charging.totalCost')" :value="fmt(stats.total_cost, 2) + ' €'" icon="💶"
+      <StatCard :label="$t('charging.totalCost')" :value="fmt(stats.total_cost, 2) + ' €'" icon="wallet"
         :tooltip="$t('charging.totalCostTooltip')" />
-      <StatCard :label="$t('charging.maxPower')" :value="fmt(stats.peak_power, 0) + ' kW'" icon="🚀"
+      <StatCard :label="$t('charging.maxPower')" :value="fmt(stats.peak_power, 0) + ' kW'" icon="pulse"
         :tooltip="$t('charging.maxPowerTooltip')" />
     </div>
 
@@ -27,6 +27,13 @@
           <p class="text-sm text-gray-400">{{ fmt(t.energy, 1) }} kWh</p>
         </div>
       </div>
+    </div>
+
+    <!-- Lade-Heatmap: wann (Wochentag × Stunde) ladet du typischerweise,
+         und wo gab's die hoechsten Leistungen. -->
+    <div class="card">
+      <h2 class="text-lg font-semibold mb-3">🗓️ {{ $t('charging.heatmapTitle') }}</h2>
+      <ChargingHeatmap />
     </div>
 
     <div class="space-y-3">
@@ -167,6 +174,7 @@ import { ref, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
 import StatCard from '../components/StatCard.vue';
+import ChargingHeatmap from '../components/ChargingHeatmap.vue';
 import api from '../api.js';
 
 const { t, locale } = useI18n();

@@ -21,22 +21,22 @@
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 stagger">
         <StatCard :label="$t('dashboard.totalKm')"
           :value="fmt(stats.total_km, 0) + ' km'"
-          icon="🛣️"
+          icon="map"
           to="/trips"
           :tooltip="$t('dashboard.totalKmTooltip')" />
         <StatCard :label="$t('dashboard.trips')"
           :value="stats.total_trips"
-          icon="🗺️"
+          icon="pin"
           to="/trips"
           :tooltip="$t('dashboard.tripsTooltip')" />
         <StatCard :label="$t('dashboard.charged')"
           :value="fmt(chargingStats.total_energy_kwh, 1) + ' kWh'"
-          icon="⚡"
+          icon="bolt"
           to="/charging"
           :tooltip="$t('dashboard.chargedTooltip')" />
         <StatCard :label="$t('dashboard.chargingCost')"
           :value="fmt(chargingStats.total_cost, 2) + ' €'"
-          icon="💶"
+          icon="wallet"
           to="/charging"
           :tooltip="$t('dashboard.chargingCostTooltip')" />
       </div>
