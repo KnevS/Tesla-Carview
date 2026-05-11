@@ -134,7 +134,7 @@ router.post('/mfa/verify', loginRateLimit, validate(z.object({
 })), async (req, res) => {
   let payload;
   try {
-    payload = jwt.verify(req.body.tempToken, process.env.JWT_SECRET);
+    payload = jwt.verify(req.body.tempToken, process.env.JWT_SECRET, { algorithms: ['HS256'] });
   } catch {
     return res.status(401).json({ error: 'Temporaeres Token abgelaufen. Bitte neu anmelden.' });
   }
@@ -264,6 +264,10 @@ router.get('/callback', async (req, res) => {
     if (!pkce) return res.redirect(`${process.env.FRONTEND_URL}/?auth_error=invalid_state`);
     const db = getDb(pkce.tenant_id);
     await exchangeCode(db, code, state);
+    // FRONTEND_URL ist Operator-kontrolliert, aber wir escapen es per
+    // JSON.stringify, damit ein Single-Quote oder ungewollter Whitespace
+    // im ENV-Wert nicht das Inline-<script> sprengt (Audit M5).
+    const targetUrl = JSON.stringify(`${process.env.FRONTEND_URL}/?tesla_connected=1`);
     res.send(`<!DOCTYPE html><html><head><title>Verbunden</title></head><body>
 <script>
   try {
@@ -271,10 +275,10 @@ router.get('/callback', async (req, res) => {
       window.opener.postMessage({ type: 'tesla_connected' }, window.opener.location.origin);
       setTimeout(() => window.close(), 300);
     } else {
-      window.location.replace('${process.env.FRONTEND_URL}/?tesla_connected=1');
+      window.location.replace(${targetUrl});
     }
   } catch(e) {
-    window.location.replace('${process.env.FRONTEND_URL}/?tesla_connected=1');
+    window.location.replace(${targetUrl});
   }
 <\/script>
 <p style="font-family:sans-serif;text-align:center;margin-top:80px">Tesla verbunden ✓<br><small>Dieses Fenster schließt sich automatisch.</small></p>

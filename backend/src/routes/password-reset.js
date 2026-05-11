@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { randomBytes } from 'crypto';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
+import { sensitiveTokenRateLimit } from '../middleware/security.js';
 import { validate } from '../middleware/validate.js';
 import { changePassword } from '../services/userService.js';
 import { auditLog } from '../services/auditService.js';
@@ -70,7 +71,9 @@ router.post('/generate', requireAuth, requireAdmin, validate(z.object({
 });
 
 // POST /api/password-reset/apply — Neues Passwort setzen (kein Auth erforderlich)
-router.post('/apply', validate(z.object({
+// Rate-Limit: 5 pro 5 min pro IP, Defense-in-Depth gegen Brute-Force
+// auf 256-bit-Entropie-Tokens (Audit M6).
+router.post('/apply', sensitiveTokenRateLimit, validate(z.object({
   userId:      z.number().int().positive(),
   token:       z.string().length(64),
   newPassword: z.string().min(12).max(256),

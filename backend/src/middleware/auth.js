@@ -7,7 +7,10 @@ export function requireAuth(req, res, next) {
     return res.status(401).json({ error: 'Nicht authentifiziert' });
   }
   try {
-    req.user = jwt.verify(header.slice(7), process.env.JWT_SECRET);
+    // algorithms-Allowlist verhindert alg:none / RSA-Verwechslung —
+    // jsonwebtoken v9 mitigiert das bereits, aber explizit ist sicherer
+    // gegen kuenftige Lib-Regressionen (Defense-in-Depth aus Audit M4).
+    req.user = jwt.verify(header.slice(7), process.env.JWT_SECRET, { algorithms: ['HS256'] });
   } catch {
     return res.status(401).json({ error: 'Token ungueltig oder abgelaufen' });
   }
