@@ -65,43 +65,46 @@
         Frühere Pseudonyme: <span class="font-mono">{{ tenantPseudonymHistory.join(', ') }}</span>
       </div>
 
-      <!-- Confirmation-Modal mit kritischen Hinweisen.
-           Sichtbar genug, dass der Admin nicht versehentlich klickt. -->
-      <div v-if="confirmRegeneratePseudonym"
-           class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-           @click.self="confirmRegeneratePseudonym = false">
-        <div class="card max-w-md space-y-3">
-          <h3 class="font-semibold text-lg">Pseudonym neu generieren?</h3>
-          <p class="text-sm text-gray-300">
-            Aktuell: <span class="font-mono">{{ tenantPseudonym }}</span>
-          </p>
-          <div class="bg-yellow-900/20 border border-yellow-700/40 rounded-lg p-3 text-sm space-y-2 text-yellow-200">
-            <p>⚠ <strong>Wichtig — bitte vor dem Klick lesen:</strong></p>
-            <ul class="list-disc list-inside space-y-1 text-xs text-yellow-100">
-              <li><strong>Alle User</strong> deines Mandanten müssen sich den
-                neuen Pseudonym merken — vorher informieren!</li>
-              <li>Der alte Pseudonym landet in der History und wird nie
-                wieder zufällig vergeben.</li>
-              <li><strong>Bei Verlust des neuen Namens ohne Backup</strong>
-                ist eine Wiederherstellung nur durch Neu-Aufsetzen einer
-                leeren Mandantenumgebung möglich — alle Daten wären verloren.</li>
-              <li>Empfehlung: <RouterLink to="/data" class="underline">
-                jetzt ein Backup ziehen</RouterLink>.</li>
-            </ul>
+      <!-- Confirmation-Modal mit kritischen Hinweisen. Teleport-to-body,
+           damit der Modal-Hintergrund nicht halb durch die umgebende
+           .card-backdrop-filter durchschimmert (Stacking-Context-Bug). -->
+      <Teleport to="body">
+        <div v-if="confirmRegeneratePseudonym"
+             class="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-4"
+             @click.self="confirmRegeneratePseudonym = false">
+          <div class="card max-w-md space-y-3">
+            <h3 class="font-semibold text-lg">Pseudonym neu generieren?</h3>
+            <p class="text-sm text-gray-300">
+              Aktuell: <span class="font-mono">{{ tenantPseudonym }}</span>
+            </p>
+            <div class="bg-yellow-900/20 border border-yellow-700/40 rounded-lg p-3 text-sm space-y-2 text-yellow-200">
+              <p>⚠ <strong>Wichtig — bitte vor dem Klick lesen:</strong></p>
+              <ul class="list-disc list-inside space-y-1 text-xs text-yellow-100">
+                <li><strong>Alle User</strong> deines Mandanten müssen sich den
+                  neuen Pseudonym merken — vorher informieren!</li>
+                <li>Der alte Pseudonym landet in der History und wird nie
+                  wieder zufällig vergeben.</li>
+                <li><strong>Bei Verlust des neuen Namens ohne Backup</strong>
+                  ist eine Wiederherstellung nur durch Neu-Aufsetzen einer
+                  leeren Mandantenumgebung möglich — alle Daten wären verloren.</li>
+                <li>Empfehlung: <RouterLink to="/data" class="underline">
+                  jetzt ein Backup ziehen</RouterLink>.</li>
+              </ul>
+            </div>
+            <div class="flex gap-2">
+              <button @click="confirmRegeneratePseudonym = false" class="btn-secondary flex-1">
+                Abbrechen
+              </button>
+              <button @click="doRegeneratePseudonym"
+                :disabled="regeneratingPseudonym"
+                class="btn-primary flex-1">
+                {{ regeneratingPseudonym ? '…' : 'Ja, jetzt neu generieren' }}
+              </button>
+            </div>
+            <p v-if="regenerateError" class="text-red-400 text-sm">{{ regenerateError }}</p>
           </div>
-          <div class="flex gap-2">
-            <button @click="confirmRegeneratePseudonym = false" class="btn-secondary flex-1">
-              Abbrechen
-            </button>
-            <button @click="doRegeneratePseudonym"
-              :disabled="regeneratingPseudonym"
-              class="btn-primary flex-1">
-              {{ regeneratingPseudonym ? '…' : 'Ja, jetzt neu generieren' }}
-            </button>
-          </div>
-          <p v-if="regenerateError" class="text-red-400 text-sm">{{ regenerateError }}</p>
         </div>
-      </div>
+      </Teleport>
     </div>
 
     <!-- Vehicle profile -->

@@ -370,42 +370,47 @@
       </div>
     </template>
 
-    <!-- Lösch-Bestätigungsmodal -->
-    <div v-if="deleteTarget"
-      class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
-      @click.self="deleteTarget = null">
-      <div class="card max-w-md w-full space-y-4">
-        <h3 class="text-lg font-semibold text-red-300">⚠️ {{ tt('delete.title') }}</h3>
-        <p class="text-sm text-gray-300">
-          „<span class="font-semibold text-white">{{ deleteTarget.name }}</span>"
-          (<code class="text-gray-400">{{ deleteTarget.slug }}</code>)
-        </p>
-        <p class="text-sm text-yellow-300">{{ tt('delete.warning') }}</p>
-        <p class="text-xs text-gray-500">{{ tt('delete.backupNote') }}</p>
-        <div class="space-y-2">
-          <label class="text-sm text-gray-400">
-            {{ tt('delete.typeSlug') }} <code class="text-yellow-300">{{ deleteTarget.slug }}</code>
-          </label>
-          <input v-model="deleteSlugInput" type="text"
-            class="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1.5 text-sm font-mono" />
-        </div>
-        <p v-if="deleteError" class="text-sm text-red-400">{{ deleteError }}</p>
-        <div class="flex justify-end gap-2 pt-2">
-          <button @click="deleteTarget = null; deleteSlugInput = ''; deleteError = ''"
-            class="btn-secondary text-sm">{{ tt('delete.cancel') }}</button>
-          <button @click="confirmDelete"
-            :disabled="deleteSlugInput !== deleteTarget.slug || deleting"
-            class="px-3 py-1.5 rounded bg-red-600 text-white text-sm font-medium
-                   hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed">
-            {{ deleting ? '…' : tt('delete.confirm') }}
-          </button>
-        </div>
-      </div>
-    </div>
-
     <div v-else-if="isAdmin === false" class="card text-gray-400 text-sm text-center py-6">
       Systemdetails sind nur für Administratoren sichtbar.
     </div>
+
+    <!-- Lösch-Bestätigungsmodal — Teleport ans Ende, damit es die
+         v-if='stats' / v-else-if='isAdmin === false'-Kette nicht
+         unterbricht. Render via to=body garantiert ueberlagerungsfreie
+         Anzeige unabhaengig von der .card-Backdrop-Stacking-Context. -->
+    <Teleport to="body">
+      <div v-if="deleteTarget"
+        class="fixed inset-0 bg-black/70 z-[1000] flex items-center justify-center p-4"
+        @click.self="deleteTarget = null">
+        <div class="card max-w-md w-full space-y-4">
+          <h3 class="text-lg font-semibold text-red-300">⚠️ {{ tt('delete.title') }}</h3>
+          <p class="text-sm text-gray-300">
+            „<span class="font-semibold text-white">{{ deleteTarget.name }}</span>"
+            (<code class="text-gray-400">{{ deleteTarget.slug }}</code>)
+          </p>
+          <p class="text-sm text-yellow-300">{{ tt('delete.warning') }}</p>
+          <p class="text-xs text-gray-500">{{ tt('delete.backupNote') }}</p>
+          <div class="space-y-2">
+            <label class="text-sm text-gray-400">
+              {{ tt('delete.typeSlug') }} <code class="text-yellow-300">{{ deleteTarget.slug }}</code>
+            </label>
+            <input v-model="deleteSlugInput" type="text"
+              class="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1.5 text-sm font-mono" />
+          </div>
+          <p v-if="deleteError" class="text-sm text-red-400">{{ deleteError }}</p>
+          <div class="flex justify-end gap-2 pt-2">
+            <button @click="deleteTarget = null; deleteSlugInput = ''; deleteError = ''"
+              class="btn-secondary text-sm">{{ tt('delete.cancel') }}</button>
+            <button @click="confirmDelete"
+              :disabled="deleteSlugInput !== deleteTarget.slug || deleting"
+              class="px-3 py-1.5 rounded bg-red-600 text-white text-sm font-medium
+                     hover:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed">
+              {{ deleting ? '…' : tt('delete.confirm') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 

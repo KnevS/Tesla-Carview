@@ -90,9 +90,10 @@
       </div>
     </div>
 
-    <!-- Edit / Add Modal -->
+    <!-- Edit / Add Modal — Teleport: kein clipping durch .card-Backdrop. -->
+    <Teleport to="body">
     <div v-if="form.show"
-         class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+         class="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-4">
       <div class="card w-full max-w-md space-y-3">
         <h3 class="text-lg font-bold">{{ form.id ? 'Intervall bearbeiten' : 'Neues Intervall' }}</h3>
         <div>
@@ -141,6 +142,7 @@
         </div>
       </div>
     </div>
+    </Teleport>
   </div>
 </template>
 

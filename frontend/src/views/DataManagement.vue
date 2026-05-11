@@ -135,28 +135,31 @@
       </div>
     </div>
 
-    <!-- Fahrzeug-Bestätigungsdialog -->
-    <div v-if="deleteVehicleTarget" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div class="bg-gray-800 rounded-xl p-6 max-w-sm w-full space-y-4">
-        <h3 class="font-semibold text-red-400">Fahrzeugdaten löschen</h3>
-        <p class="text-sm text-gray-300">
-          Alle Daten von <strong>{{ deleteVehicleTarget.display_name }}</strong> werden unwiderruflich gelöscht.
-        </p>
-        <p class="text-sm text-red-300 font-semibold">
-          Zur Bestätigung eingeben: <code class="font-mono bg-gray-900 px-1">DATEN LÖSCHEN</code>
-        </p>
-        <input v-model="vehicleDeleteConfirm" type="text" class="input font-mono" placeholder="DATEN LÖSCHEN" />
-        <div v-if="vehicleDeleteError" class="text-red-400 text-sm">{{ vehicleDeleteError }}</div>
-        <div class="flex gap-2">
-          <button @click="deleteVehicleTarget = null; vehicleDeleteConfirm = ''" class="btn-secondary flex-1">Abbrechen</button>
-          <button @click="deleteVehicleData"
-            :disabled="deleting || vehicleDeleteConfirm !== 'DATEN LÖSCHEN'"
-            class="flex-1 bg-red-900 hover:bg-red-800 disabled:opacity-50 text-red-200 py-2 px-4 rounded-lg text-sm">
-            Löschen
-          </button>
+    <!-- Fahrzeug-Bestätigungsdialog — Teleport to body, sonst frisst der
+         .card-Stacking-Context die Overlay-Optik. -->
+    <Teleport to="body">
+      <div v-if="deleteVehicleTarget" class="fixed inset-0 bg-black/60 flex items-center justify-center z-[1000] p-4">
+        <div class="bg-gray-800 rounded-xl p-6 max-w-sm w-full space-y-4">
+          <h3 class="font-semibold text-red-400">Fahrzeugdaten löschen</h3>
+          <p class="text-sm text-gray-300">
+            Alle Daten von <strong>{{ deleteVehicleTarget.display_name }}</strong> werden unwiderruflich gelöscht.
+          </p>
+          <p class="text-sm text-red-300 font-semibold">
+            Zur Bestätigung eingeben: <code class="font-mono bg-gray-900 px-1">DATEN LÖSCHEN</code>
+          </p>
+          <input v-model="vehicleDeleteConfirm" type="text" class="input font-mono" placeholder="DATEN LÖSCHEN" />
+          <div v-if="vehicleDeleteError" class="text-red-400 text-sm">{{ vehicleDeleteError }}</div>
+          <div class="flex gap-2">
+            <button @click="deleteVehicleTarget = null; vehicleDeleteConfirm = ''" class="btn-secondary flex-1">Abbrechen</button>
+            <button @click="deleteVehicleData"
+              :disabled="deleting || vehicleDeleteConfirm !== 'DATEN LÖSCHEN'"
+              class="flex-1 bg-red-900 hover:bg-red-800 disabled:opacity-50 text-red-200 py-2 px-4 rounded-lg text-sm">
+              Löschen
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
 
   </div>
 </template>

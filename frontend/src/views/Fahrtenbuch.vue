@@ -269,9 +269,11 @@
       </div>
     </div>
 
-    <!-- Modal: Manuelle Fahrt-Erfassung -->
+    <!-- Modal: Manuelle Fahrt-Erfassung — Teleport: kein clipping durch
+         .card-Backdrop-Stacking-Context. -->
+    <Teleport to="body">
     <div v-if="manualForm.show"
-      class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+      class="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-4">
       <div class="card w-full max-w-md space-y-3 max-h-[90vh] overflow-y-auto">
         <h3 class="text-lg font-bold">Manuelle Fahrt anlegen</h3>
         <p class="text-xs text-gray-400">
@@ -345,6 +347,7 @@
         </div>
       </div>
     </div>
+    </Teleport>
   </div>
 </template>
 
