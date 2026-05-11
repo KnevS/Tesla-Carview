@@ -29,7 +29,15 @@
         </p>
         <p v-if="sub" class="text-gray-400 text-sm mt-1">{{ sub }}</p>
       </div>
-      <span class="text-3xl transition group-hover:scale-110 group-hover:-rotate-3">{{ icon }}</span>
+      <!-- Icon: bevorzugt AppIcon-Set (benannter SVG-Icon-Pfad), fuer
+           Rueckwaertskompatibilitaet aber auch direkt Emoji oder
+           sonstigen Text. AppIcon faellt bei unbekanntem Namen
+           automatisch auf den Text-Fallback. -->
+      <span class="transition group-hover:scale-110 group-hover:-rotate-3 text-tesla-red"
+            :class="{ 'text-3xl': isEmoji }">
+        <AppIcon v-if="!isEmoji" :name="icon" :size="36" />
+        <template v-else>{{ icon }}</template>
+      </span>
     </div>
   </component>
 </template>
@@ -37,6 +45,15 @@
 <script setup>
 import { computed } from 'vue';
 import NumberFlow from './NumberFlow.vue';
+import AppIcon from './AppIcon.vue';
+
+/** Wenn `icon` ein gepflegter AppIcon-Name ist (a-z, dash erlaubt),
+ *  rendern wir die SVG. Sonst gehen wir davon aus dass es ein Emoji
+ *  oder anderer Anzeige-Text ist und rendern as-is. Diese Heuristik
+ *  laesst die App schrittweise von Emoji auf benannte Icons migrieren,
+ *  ohne dass beim ersten Schritt alles auf einmal ausgetauscht werden
+ *  muss. */
+const ICON_NAME_RX = /^[a-z][a-z0-9-]*$/;
 
 const props = defineProps({
   label:    String,
@@ -54,6 +71,8 @@ const props = defineProps({
   animate:  { type: Boolean, default: true },
   decimals: { type: Number, default: 0 },
 });
+
+const isEmoji = computed(() => !props.icon || !ICON_NAME_RX.test(props.icon));
 
 /** Extrahiert eine Zahl + Prefix/Suffix aus value, wenn moeglich. So
  *  funktioniert das Count-Up auch bei Werten wie „123 km" oder „45,3 €"
