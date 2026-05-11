@@ -8,10 +8,10 @@
     <div v-if="loading" class="text-gray-400">Lade...</div>
     <template v-else-if="trip">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Strecke"    :value="fmt(trip.distance_km, 1) + ' km'" icon="🛣️" />
-        <StatCard label="Dauer"      :value="duration"                          icon="⏱️" />
-        <StatCard label="Ø Geschw."  :value="fmt(trip.avg_speed_kmh, 0) + ' km/h'" icon="🏎️" />
-        <StatCard label="Verbrauch"  :value="consumption + ' kWh/100km'"        icon="⚡" />
+        <StatCard label="Strecke"    :value="fmt(trip.distance_km, 1) + ' km'" icon="map" />
+        <StatCard label="Dauer"      :value="duration"                          icon="clock" />
+        <StatCard label="Ø Geschw."  :value="fmt(trip.avg_speed_kmh, 0) + ' km/h'" icon="gauge" />
+        <StatCard label="Verbrauch"  :value="consumption + ' kWh/100km'"        icon="bolt" />
       </div>
 
       <!-- GPS-Karte + Schieber -->
