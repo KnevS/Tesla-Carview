@@ -111,8 +111,7 @@
 
       </div>
     </main>
-
-    <AppFooter />
+    <!-- Footer kommt global aus App.vue — siehe Begruendung in Login.vue. -->
   </div>
 </template>
 
@@ -122,7 +121,6 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '../store/auth.js';
 import { useAppStore }  from '../store/index.js';
 import LangSwitcher     from '../components/LangSwitcher.vue';
-import AppFooter        from '../components/AppFooter.vue';
 
 const router = useRouter();
 const auth   = useAuthStore();
