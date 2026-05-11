@@ -11,9 +11,18 @@
  *     Service-Worker uebernehmen sofort.
  */
 
-const CACHE = 'tcv-v1';
+// Cache-Version bei JEDEM Deploy bumpen, das index.html-Caching-Verhalten
+// (s. unten) loest das normalerweise — aber wenn ein User noch eine alte
+// SW-Version installiert hat, sorgt der Bump dafuer dass das alte Set
+// von Chunk-Referenzen sicher invalidiert wird.
+const CACHE = 'tcv-v2';
+// Icons und Manifest sind selten geaendert + hash-los; safe vorzucachen.
+// index.html ('/') BEWUSST NICHT mehr im SHELL — die wird ueber den
+// network-first-Pfad unten frisch geholt, sonst zeigt das SW bei jedem
+// Deploy fuer einen Reload-Cycle ein veraltetes Bundle-Manifest und das
+// dynamische Import von chunk-XYZ.js scheitert (Click-Handler fehlen,
+// 'Fahrer kann nicht ausgewaehlt werden' usw.).
 const SHELL = [
-  '/',
   '/manifest.webmanifest',
   '/icon-192.png',
   '/icon-512.png',
@@ -33,12 +42,40 @@ self.addEventListener('activate', event => {
   );
 });
 
+// Erkennt Navigations-Requests bzw. die Einstiegs-HTML. Diese muessen
+// IMMER frisch sein, damit das im index.html eingebettete Chunk-Manifest
+// (mit den aktuellen Vite-Hash-Namen) zur aktuellen /assets/-Auslieferung
+// passt. Wenn das auseinanderlaeuft, schlagen dynamische Imports fehl
+// und Komponenten rendern halb (Click-Handler-Wirrwarr).
+function isHtmlEntry(req, url) {
+  if (req.mode === 'navigate') return true;
+  return req.method === 'GET' && req.headers.get('accept')?.includes('text/html');
+}
+
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   // API + Auth + tesla — strikt online: keine veralteten Daten anzeigen.
   if (url.pathname.startsWith('/api/')) return;
   if (event.request.method !== 'GET') return;
-  // Stale-while-revalidate fuer alles andere (App-Shell, Bundles, Icons).
+
+  // HTML/Navigations-Requests: network-first, mit Cache nur als
+  // Offline-Fallback. Verhindert das Deploy-vs-Cache-Race.
+  if (isHtmlEntry(event.request, url)) {
+    event.respondWith(
+      fetch(event.request)
+        .then(res => {
+          if (res.ok) caches.open(CACHE).then(c => c.put(event.request, res.clone()));
+          return res;
+        })
+        .catch(() => caches.match(event.request).then(r => r || caches.match('/')))
+    );
+    return;
+  }
+
+  // Statische Assets (hashed JS/CSS, Icons): stale-while-revalidate ist
+  // hier sicher, weil Vite jedem Asset einen content-hash gibt — eine
+  // alte gecachte Datei ist entweder identisch zur neuen oder hat
+  // einen anderen URL-Pfad.
   event.respondWith(
     caches.open(CACHE).then(async cache => {
       const cached = await cache.match(event.request);
