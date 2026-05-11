@@ -128,6 +128,14 @@ Tesla Carview, tek bir örnek üzerinde tamamen izole edilmiş birden fazla kira
 
 Yöneticiler bu üç hakka örtük olarak sahiptir — kutucuklar yönetici hesaplarda gizlenir. Ayrıca kullanıcı yönetimi sayfasının başlığında, etkin (yönetici olmayan) bir kullanıcının atanmış aracı yoksa turuncu bir **görev kartı** belirir; tek tıkla araç atama veya „Araç ekle" hakkını verme kısayollarıyla.
 
+**Kiracı takma adı (gizlilik katmanı)** — Açık giriş sayfasında kiracı **gerçek adıyla görünmez**, bunun yerine `brave-eagle`, `quiet-otter` gibi rastgele bir `sıfat-isim` takma adı görünür. Böylece dışarıdan kimse bu self-hosting örneğini hangi kişi veya şirketin kullandığını göremez.
+
+- Takma ad kiracı oluşturulurken **otomatik olarak atanır**.
+- **Ayarlar → 🔐 Kiracı takma adı** altından kontrol edebilirsiniz.
+- **«Yenile»** düğmesi yeni bir takma ad atar; eskisi geçmişe taşınır ve rastgele tekrar önerilmez.
+- **Unutmayın.** Birden fazla kiracı varsa, takma ad girişte tek tanımlayıcınızdır — parolanızın yanına parola yöneticinize kaydedin. Yedek olmadan kaybedilirse boş bir kiracı ortamından başlamak gerekir.
+- **Dahili slug** ve gerçek ad veritabanında kalır ve yöneticilere görünür — yalnızca giriş sayfası anonimleştirilmiştir.
+
 ## 💾 Yedekleme {#backup}
 
 **Manuel dışa aktarma** — **Dışa aktarma** altında: Sürüşler ve şarj seansları için CSV veya JSON, ayrıca ZIP olarak tam yedek.
@@ -376,6 +384,18 @@ Yolculuk defteri, Alman vergi dairelerinin BMF kurallarına göre elektronik yol
 **Manuel kayıt** — bir yolculuk eksikse **„+ Manuell"** ile tamamen kendin gir. Zorunlu: başlangıç ve bitiş saati. Manuel kayıtlar ✍ rozeti taşır.
 
 **Ardışık yolculukları birleştir** — telemetri bir yolculuğu ikiye bölmüşse (kısa duraklama, GPS boşluğu), ilk yolculukta **„Mit nächster zusammenführen"** tıkla.
+
+## 🗓️ Aktivite ısı haritası {#trips-heatmap}
+
+Yolculuk defterinde aylık özetin üstünde **tüm yolculuklara ait takvim ısı haritası** bulunur:
+
+- **Üst filtre**: ayrıntı düzeyini seçin — `Yıl`, `Ay`, `Hafta` veya `Tümü`. `Yıl/Ay/Hafta` için ikinci bir seçici döneme göre filtreler.
+- **Hücre parlaklığı** o günün kilometresine göre; koyu hücre = yolculuk yok, açık yeşil = çok.
+- **Bir günün üzerine gelince** tooltip'te tarih + yolculuk sayısı + toplam km görünür.
+- **Dolu bir güne tıklamak** o tarihe göre filtrelenmiş yolculuk listesine götürür — „o gün ne yaptım?" sorusuna hızlı yanıt.
+- Alt kısımda renk skalası açıklaması ve etkin filtrenin toplamı yer alır.
+
+Veri kaynağı: BMF yolculuk defteriyle aynı yolculuklar — ısı haritası salt görselleştirmedir, hiçbir veri yazmaz.
 
 ## 📱 Akıllı telefon ve Tesla içinde kullanım (PWA kurulumu) {#mobile-tesla-install}
 

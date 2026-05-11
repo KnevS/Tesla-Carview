@@ -128,6 +128,14 @@ Tesla Carview unterstützt mehrere vollständig isolierte Mandanten auf einer In
 
 Administratoren haben diese Rechte implizit — die Häkchen sind bei Admin-Konten ausgeblendet. Im Kopfbereich der Benutzerverwaltung erscheint zudem eine orangefarbene **Aufgabenkarte**, sobald ein aktiver Benutzer noch keinem Fahrzeug zugewiesen ist — mit Direkt-Buttons zum Zuweisen oder zum Erteilen des Rechts „Fahrzeuge anlegen".
 
+**Mandanten-Pseudonym (Datenschutz-Layer)** — Auf der öffentlichen Login-Seite erscheint dein Mandant **nicht mit Klarnamen**, sondern mit einem zufälligen `adjektiv-substantiv`-Pseudonym im Stil `brave-eagle`, `quiet-otter`. So sieht niemand von außen, welche Person oder Firma den Self-Hoster nutzt.
+
+- Der Pseudonym wird **automatisch beim Anlegen** des Mandanten vergeben.
+- Du findest ihn unter **Einstellungen → 🔐 Mandanten-Pseudonym**.
+- Mit dem Button **„Neu generieren"** vergibt das System einen neuen Pseudonym; der alte wandert in eine History und wird nicht zufällig wieder vorgeschlagen.
+- **Wichtig zu merken:** Beim Login mit mehreren Mandanten ist der Pseudonym dein einziges Auswahlmerkmal — schreibe ihn neben dem Passwort in deinen Passwort-Manager. Bei Verlust ohne Backup ist nur Neu-Aufsetzen einer leeren Mandantenumgebung möglich.
+- Der **interne Slug** und Klarname bleiben in der Datenbank erhalten und sind im Admin-Bereich sichtbar — nur die Login-Seite ist anonymisiert.
+
 ## 💾 Datensicherung {#backup}
 
 **Manueller Export** — Unter **Export**: CSV oder JSON für Fahrten und Ladesessions, sowie Vollbackup als ZIP.
@@ -376,6 +384,18 @@ Das Fahrtenbuch ist so ausgestaltet, dass der erzeugte **PDF-Export von deutsche
 **Manuelle Fahrt nachtragen** — falls eine Fahrt fehlt (z.B. weil Tesla keine GPS-Daten lieferte oder eine Verbindung kurz aus war), kannst du sie via **„+ Manuell"** komplett selbst eintragen. Pflichtangaben: Start- und Endzeit. Empfohlen: Kilometerstände Start/Ende oder die Strecke. Manuelle Einträge erscheinen mit einem ✍-Symbol.
 
 **Mehrere Fahrten zusammenführen** — wenn die Telemetrie eine Fahrt versehentlich in zwei Teile zerlegt hat (kurzer Halt an der Ampel, GPS-Aussetzer), klicke bei der ersten Fahrt auf **„Mit nächster zusammenführen"**. Die Endwerte werden vom späteren Trip übernommen, die Distanz summiert, GPS-Punkte verschmolzen.
+
+## 🗓️ Aktivitäts-Heatmap {#trips-heatmap}
+
+Im Fahrtenbuch findest du oberhalb der Monatsübersicht eine **Heatmap aller Fahrten** im klassischen Kalender-Stil:
+
+- **Filter oben**: Granularität wählen — `Jahr`, `Monat`, `Woche` oder `Alle`. Bei `Jahr/Monat/Woche` erscheint ein zweiter Selektor für den konkreten Zeitraum.
+- **Farbintensität** pro Tag entspricht den gefahrenen Kilometern; dunkler Block = kein Fahrtag, hellgrün = viel.
+- **Hover** über einen Tag zeigt Datum + Anzahl Fahrten + Gesamt-km in einem Tooltip.
+- **Klick** auf einen nicht-leeren Tag navigiert direkt zur Fahrtenliste mit Datumsfilter — schnelle Antwort auf „was war an dem Tag?".
+- Footer zeigt die Skala-Legende sowie das Gesamt-Total des aktuellen Filters.
+
+Datenbasis: dieselben Trips wie das BMF-Fahrtenbuch — die Heatmap ist eine reine Visualisierung, sie schreibt nichts.
 
 ## 📱 Auf Smartphone und im Tesla nutzen (PWA-Install) {#mobile-tesla-install}
 
