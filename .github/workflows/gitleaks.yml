@@ -3,8 +3,13 @@ name: Secret-Scan
 # Letzte Reissleine gegen Secret/PII-Leaks im Public-Repo. Lokaler
 # pre-commit-Hook + GitHub Push-Protection laufen davor — das hier ist
 # der Fallback, falls Hook bypassed oder Push-Protection das Pattern
-# nicht kennt. Bricht den Build bei Treffer; Output ist redacted, das
-# eigentliche Secret erscheint nicht im Action-Log.
+# nicht kennt. Bricht den Build bei Treffer; --redact unterdrueckt das
+# eigentliche Secret im Action-Log.
+#
+# Hinweis zur Action-Wahl:  gitleaks/gitleaks-action@v2 erzwingt eine
+# Lizenz, sobald der Free-Tier-Check der GitHub-API im Rate-Limit
+# strandet (passiert auf Public-Repos regelmaessig). Wir rufen das
+# offizielle Docker-Image direkt auf — kein License-Gate, gleicher Code.
 
 on:
   push:
@@ -24,16 +29,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Bei Pushes vollständige Historie scannen, bei PRs nur den Diff
-          # zur Base — sonst dauert es auf großen Branches unnötig lange.
-          fetch-depth: ${{ github.event_name == 'pull_request' && 0 || 50 }}
+          # Volle Historie scannen, damit auch alte Commits gegen die
+          # aktuellen Regeln gecheckt werden. Bei Pull-Requests reicht
+          # eigentlich der Diff, aber fetch-depth: 0 ist einfacher und
+          # kostet auf diesem kleinen Repo <1s.
+          fetch-depth: 0
 
-      - name: Run gitleaks
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          # Pfad auf unsere projekt-spezifische Config (VIN-Regex etc.)
-          GITLEAKS_CONFIG: .gitleaks.toml
-          # --redact: Trefferwerte werden im Log durch ****  ersetzt
-          GITLEAKS_ENABLE_COMMENTS: true
-          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: true
-          GITLEAKS_ENABLE_SUMMARY: true
+      - name: Run gitleaks (via official image)
+        run: |
+          docker run --rm \
+            -v "$PWD:/repo" \
+            -w /repo \
+            zricethezav/gitleaks:latest \
+            detect \
+              --source=. \
+              --config=.gitleaks.toml \
+              --redact \
+              --verbose \
+              --exit-code=1 \
+              --no-banner
