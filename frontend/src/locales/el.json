@@ -176,6 +176,16 @@
     "typeBusiness": "Επαγγελματικό",
     "typeCommute": "Προς εργασία"
   },
+  "chargingHeatmap": {
+    "intro": "Πότε και πόσο γρήγορα φορτίζεις; Πιο φωτεινό = πιο συχνά / περισσότερη ισχύς. Hover για λεπτομέρειες.",
+    "modeCount": "Συχνότητα",
+    "modeAvgKw": "Ø Ισχύς (kW)",
+    "modeKwh": "Ενέργεια (kWh)",
+    "less": "λιγότερα",
+    "more": "περισσότερα",
+    "summary": "{count} συνεδρίες · ø {peak} kW peak",
+    "hoverDetail": "{sessions} συνεδρία(ες), ø {avg} kW, {kwh} kWh, peak {peak} kW"
+  },
   "locationHeatmap": {
     "intro": "Πού οδηγείτε συχνά; Φωτεινές περιοχές = συχνές επισκέψεις.",
     "days": "ημέρες",
@@ -707,7 +717,13 @@
     "geofenceNamePlaceholder": "Όνομα (π.χ. Σπίτι, Γραφείο Αθήνας)",
     "geofenceRadius": "Ακτίνα",
     "geofenceUseGPS": "Τρέχουσα τοποθεσία",
-    "geofenceSave": "Αποθήκευση"
+    "geofenceSave": "Αποθήκευση",
+    "gpsFuzzingTitle": "Λειτουργία GPS-fuzzing",
+    "gpsFuzzingIntro": "Ενεργό: οι νέες συντεταγμένες αρχής/τέλους διαδρομής στρογγυλοποιούνται σε προσεγγιστική τοποθεσία. Υπάρχουσες διαδρομές δεν επηρεάζονται. Τα GPS-tracks στον χάρτη παραμένουν ακριβή — μόνο η συγκεντρωτική καρφίτσα αρχής/τέλους θολώνει.",
+    "gpsFuzzingEnable": "Ενεργοποίηση GPS-fuzzing για νέες διαδρομές",
+    "gpsFuzzingRadius": "Ακτίνα (μέτρα)",
+    "gpsFuzzingRadiusHint": "50 m = γειτονιά · 200 m = τετράγωνο · 1000 m = συνοικία",
+    "gpsFuzzingSave": "Αποθήκευση"
   },
   "auth": {
     "loginTitle": "Παρακαλώ συνδεθείτε",
