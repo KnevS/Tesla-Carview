@@ -1,11 +1,11 @@
 <template>
   <div class="space-y-6">
-    <h1 class="text-2xl font-bold">Batterie & Degradation</h1>
+    <h1 class="text-2xl font-bold">{{ $t('battery.title') }}</h1>
 
     <div class="card">
       <h2 class="text-lg font-semibold mb-4"
-        v-tooltip="'Maximale Reichweite des Fahrzeugs (bei 100% SoC) über Zeit. Fällt langsam ab – das ist Batterie-Degradation.'">
-        Reichweiten-Verlauf ({{ days }} Tage)
+        v-tooltip="$t('battery.tooltipRangeHistory')">
+        {{ $t('battery.rangeHistoryDays', { days }) }}
       </h2>
       <div class="flex gap-2 mb-4">
         <button v-for="d in dayRanges" :key="d.value"
@@ -13,7 +13,7 @@
           v-tooltip="d.tooltip"
           class="px-3 py-1 rounded-lg text-sm transition"
           :class="days === d.value ? 'bg-tesla-red text-white' : 'bg-gray-700 text-gray-300'"
-        >{{ d.value }}T</button>
+        >{{ d.value }}{{ $t('battery.daySuffix') }}</button>
       </div>
       <div style="height: 250px">
         <Line v-if="chartData" :data="chartData" :options="chartOpts" />
@@ -21,32 +21,33 @@
     </div>
 
     <div class="card">
-      <h2 class="text-lg font-semibold mb-3">Degradations-Übersicht</h2>
+      <h2 class="text-lg font-semibold mb-3">{{ $t('battery.degradationOverview') }}</h2>
       <div v-if="degradation.length > 1" class="grid grid-cols-3 gap-4 text-center">
-        <div v-tooltip="'Älteste in der Datenbank gespeicherte Reichweiten-Messung. Je länger zurück, desto aussagekräftiger die Degradation.'">
-          <p class="text-gray-400 text-sm">Erste Messung</p>
+        <div v-tooltip="$t('battery.tooltipFirst')">
+          <p class="text-gray-400 text-sm">{{ $t('battery.firstMeasurement') }}</p>
           <p class="text-xl font-bold">{{ fmt(degradation[0]?.max_range, 0) }} km</p>
           <p class="text-gray-400 text-xs">{{ degradation[0]?.day }}</p>
         </div>
-        <div v-tooltip="'Aktuellste Reichweiten-Messung. Wird vom Poller alle 15 Minuten gespeichert wenn das Fahrzeug online ist.'">
-          <p class="text-gray-400 text-sm">Letzte Messung</p>
+        <div v-tooltip="$t('battery.tooltipLast')">
+          <p class="text-gray-400 text-sm">{{ $t('battery.lastMeasurement') }}</p>
           <p class="text-xl font-bold">{{ fmt(degradation.at(-1)?.max_range, 0) }} km</p>
           <p class="text-gray-400 text-xs">{{ degradation.at(-1)?.day }}</p>
         </div>
-        <div v-tooltip="'Prozentualer Verlust der maximalen Reichweite seit der ersten Messung.\n\nGrün (<5%): Normaler Verschleiß\nGelb (5–10%): Erhöht, aber unkritisch\nRot (>10%): Deutliche Alterung'">
-          <p class="text-gray-400 text-sm">Degradation</p>
+        <div v-tooltip="$t('battery.tooltipDegradation')">
+          <p class="text-gray-400 text-sm">{{ $t('battery.degradation') }}</p>
           <p class="text-xl font-bold"
             :class="degradationPct > 10 ? 'text-red-400' : degradationPct > 5 ? 'text-yellow-400' : 'text-green-400'"
           >{{ fmt(degradationPct, 1) }}%</p>
         </div>
       </div>
-      <p v-else class="text-gray-400">Noch nicht genug Daten für Degradations-Analyse. Es werden mindestens zwei Messungen benötigt.</p>
+      <p v-else class="text-gray-400">{{ $t('battery.noDataLong') }}</p>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler } from 'chart.js';
 import { useAppStore } from '../store/index.js';
@@ -54,18 +55,21 @@ import api from '../api.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler);
 
+const { t } = useI18n();
 const appStore = useAppStore();
 const days = ref(90);
 const degradation = ref([]);
 const chartData = ref(null);
 const fmt = (v, d = 0) => (+(v || 0)).toFixed(d);
 
-const dayRanges = [
-  { value: 30,  tooltip: 'Kurzzeit-Trend der letzten 30 Tage – zeigt akute Schwankungen' },
-  { value: 90,  tooltip: 'Quartals-Trend der letzten 3 Monate – standardmäßige Ansicht' },
-  { value: 180, tooltip: 'Halbjahres-Trend – zeigt saisonale Schwankungen (Winter vs. Sommer)' },
-  { value: 365, tooltip: 'Jahres-Trend – zuverlässigste Aussage über die Batterie-Alterung' },
-];
+// Day-Range-Tooltips kommen über $t — als computed, damit sie bei
+// Sprachwechsel automatisch neu generiert werden.
+const dayRanges = computed(() => [
+  { value: 30,  tooltip: t('battery.range30')  },
+  { value: 90,  tooltip: t('battery.range90')  },
+  { value: 180, tooltip: t('battery.range180') },
+  { value: 365, tooltip: t('battery.range365') },
+]);
 
 const degradationPct = computed(() => {
   if (degradation.value.length < 2) return 0;
@@ -91,7 +95,7 @@ async function load() {
   chartData.value = {
     labels: data.map(d => d.day),
     datasets: [{
-      label: 'Max. Reichweite (km)',
+      label: t('battery.maxRangeLabel'),
       data: data.map(d => d.max_range),
       borderColor: '#10b981',
       backgroundColor: 'rgba(16,185,129,0.1)',

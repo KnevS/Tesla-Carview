@@ -215,11 +215,23 @@
   "battery": {
     "title": "Battery & Degradation",
     "rangeHistory": "Range history",
+    "rangeHistoryDays": "Range history ({days} days)",
     "degradationOverview": "Degradation overview",
     "firstMeasurement": "First measurement",
     "lastMeasurement": "Last measurement",
     "degradation": "Degradation",
-    "noData": "Not enough data for degradation analysis yet"
+    "noData": "Not enough data for degradation analysis yet",
+    "noDataLong": "Not enough data for degradation analysis yet. At least two measurements are required.",
+    "daySuffix": "d",
+    "maxRangeLabel": "Max. range (km)",
+    "tooltipRangeHistory": "Maximum range of the vehicle (at 100% SoC) over time. Decreases slowly – that is battery degradation.",
+    "tooltipFirst": "Oldest range measurement stored in the database. The further back, the more meaningful the degradation reading.",
+    "tooltipLast": "Most recent range measurement. Saved by the poller every 15 minutes while the vehicle is online.",
+    "tooltipDegradation": "Percent loss of maximum range since the first measurement.\n\nGreen (<5%): Normal wear\nYellow (5–10%): Elevated, but not critical\nRed (>10%): Significant aging",
+    "range30": "Short-term trend of the last 30 days – shows acute fluctuations",
+    "range90": "Quarterly trend over the last 3 months – default view",
+    "range180": "Half-year trend – shows seasonal variations (winter vs. summer)",
+    "range365": "Yearly trend – most reliable indicator of battery aging"
   },
   "control": {
     "title": "Vehicle control",

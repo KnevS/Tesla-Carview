@@ -215,11 +215,23 @@
   "battery": {
     "title": "Batterie & Dégradation",
     "rangeHistory": "Historique d'autonomie",
+    "rangeHistoryDays": "Historique d'autonomie ({days} jours)",
     "degradationOverview": "Aperçu dégradation",
     "firstMeasurement": "Première mesure",
     "lastMeasurement": "Dernière mesure",
     "degradation": "Dégradation",
-    "noData": "Pas encore assez de données pour l'analyse de dégradation"
+    "noData": "Pas encore assez de données pour l'analyse de dégradation",
+    "noDataLong": "Pas encore assez de données pour l'analyse de dégradation. Au moins deux mesures sont requises.",
+    "daySuffix": "j",
+    "maxRangeLabel": "Autonomie max. (km)",
+    "tooltipRangeHistory": "Autonomie maximale du véhicule (à 100% SoC) dans le temps. Diminue lentement – c'est la dégradation de la batterie.",
+    "tooltipFirst": "Mesure d'autonomie la plus ancienne enregistrée. Plus elle est ancienne, plus la dégradation est significative.",
+    "tooltipLast": "Mesure d'autonomie la plus récente. Enregistrée par le collecteur toutes les 15 minutes lorsque le véhicule est en ligne.",
+    "tooltipDegradation": "Perte en pourcentage de l'autonomie maximale depuis la première mesure.\n\nVert (<5%) : Usure normale\nJaune (5–10%) : Élevée mais non critique\nRouge (>10%) : Vieillissement marqué",
+    "range30": "Tendance court terme sur les 30 derniers jours – montre les variations brutes",
+    "range90": "Tendance trimestrielle sur les 3 derniers mois – vue par défaut",
+    "range180": "Tendance semestrielle – montre les variations saisonnières (hiver vs. été)",
+    "range365": "Tendance annuelle – indicateur le plus fiable du vieillissement de la batterie"
   },
   "control": {
     "title": "Contrôle du véhicule",
