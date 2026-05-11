@@ -53,58 +53,28 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAppStore }  from '../store/index.js';
 import { useAuthStore } from '../store/auth.js';
+import { useNavStore, NAV_GROUPS } from '../store/nav.js';
 import NavGroup     from './NavGroup.vue';
 import LangSwitcher from './LangSwitcher.vue';
 
 const appStore  = useAppStore();
 const authStore = useAuthStore();
+const navStore  = useNavStore();
 const router    = useRouter();
 const route     = useRoute();
 const { t }     = useI18n();
 
-/* Gruppen-Struktur — Single Source of Truth.
- * Falls eine Route hier fehlt, taucht sie in der NavBar nicht auf.
- * Admin-Items werden serverseitig durch authStore.isAdmin gefiltert. */
-const NAV_GROUPS = [
-  {
-    id: 'overview', adminOnly: false,
-    items: [
-      { key: 'dashboard', to: '/',          icon: '🏠' },
-      { key: 'telemetry', to: '/telemetry', icon: '🏎' },
-      { key: 'control',   to: '/control',   icon: '🎮' },
-      { key: 'battery',   to: '/battery',   icon: '📊' },
-    ],
-  },
-  {
-    id: 'analytics', adminOnly: false,
-    items: [
-      { key: 'trips',       to: '/trips',            icon: '🗺️' },
-      { key: 'fahrtenbuch', to: '/fahrtenbuch',      icon: '📋' },
-      { key: 'charging',    to: '/charging',         icon: '🔋' },
-      { key: 'logbook',     to: '/logbook',          icon: '📓' },
-      { key: 'abrechnung',  to: '/kostenabrechnung', icon: '💶' },
-      { key: 'export',      to: '/export',           icon: '💾' },
-    ],
-  },
-  {
-    id: 'admin', adminOnly: true,
-    items: [
-      // Admin-Items — Routes existieren bereits in der App
-      { key: 'users',  to: '/admin/users', icon: '👥', label: 'Benutzer',         tooltip: 'Benutzerverwaltung – Konten anlegen, Fahrzeuge zuweisen, Reset-Links generieren' },
-      { key: 'data',   to: '/admin/data',  icon: '🗑️', label: 'Daten',            tooltip: 'Datenverwaltung – Daten löschen und Datenbestand einsehen' },
-      { key: 'legal',  to: '/admin/legal', icon: '⚖️',  label: 'Rechtliches',      tooltip: 'Impressum, Datenschutz und Nutzungsbedingungen pro Sprache pflegen' },
-      { key: 'audit',  to: '/admin/audit', icon: '📋', label: 'Audit-Log',         tooltip: 'Sicherheitsrelevante Ereignisse einsehen — Logins, Berechtigungs-Änderungen, Tesla-Befehle, Akzeptanzen' },
-      { key: 'system', to: '/system',      icon: '📈', label: 'System',           tooltip: 'Versionsinformationen, CPU-/RAM-Auslastung und Datenbankstatistiken' },
-    ],
-  },
-];
+// Beim Mount: stelle sicher, dass die persistierte Reihenfolge alle
+// aktuell bekannten Routen kennt (App-Updates fuegen evtl. neue hinzu).
+onMounted(() => navStore.sync());
 
-/** Items mit übersetzten Labels/Tooltips anreichern. Fallback: Hardcoded label/tooltip oder die i18n-Keys aus nav.{key} */
+/** Items mit i18n-Labels/Tooltips anreichern. Fallback: das hartkodierte
+ *  Label/Tooltip aus der Store-Definition. */
 function localize(items) {
   return items.map(it => ({
     ...it,
@@ -113,10 +83,11 @@ function localize(items) {
   }));
 }
 
+/** Gruppen kommen aus dem Store — er filtert admin-only Items, wendet
+ *  die user-spezifische Reihenfolge an und entfernt versteckte Punkte.
+ *  Damit zeigt die NavBar exakt, was der User in Settings konfiguriert. */
 const visibleGroups = computed(() =>
-  NAV_GROUPS
-    .filter(g => !g.adminOnly || authStore.isAdmin)
-    .map(g => ({ ...g, items: localize(g.items) }))
+  navStore.visibleGroups.map(g => ({ ...g, items: localize(g.items) }))
 );
 
 /** Aktive Gruppe = jene mit dem aktuellen Route-Pfad — für Highlighting */
@@ -128,10 +99,8 @@ const activeGroupId = computed(() => {
   return null;
 });
 
-/** Mobile: flache Liste aller (sichtbaren) Items */
-const mobileLinks = computed(() =>
-  visibleGroups.value.flatMap(g => g.items)
-);
+/** Mobile: flache Liste aller sichtbaren Items (auch user-gefiltert) */
+const mobileLinks = computed(() => localize(navStore.visibleLinks));
 
 async function logout() {
   if (!confirm(t('common.logout') + '?')) return;
