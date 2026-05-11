@@ -138,7 +138,10 @@
         </div>
       </div>
 
-      <!-- Step 3: Fertig -->
+      <!-- Step 3: Fertig + Pseudonym-Anzeige.
+           Der Pseudonym ist auf der Login-Seite das einzige sichtbare
+           Merkmal des Mandanten (Datenschutz — kein Klarname mehr).
+           Daher gross hervorgehoben + harte Merk-/Backup-Warnung. -->
       <div v-if="step === 3" class="card space-y-4 text-center">
         <div class="text-5xl">🎉</div>
         <h2 class="font-semibold text-lg">Setup abgeschlossen!</h2>
@@ -146,11 +149,45 @@
           Dein Administrator-Konto <strong class="text-white">{{ form.username }}</strong>
           wurde erfolgreich angelegt.
         </p>
+
+        <div v-if="assignedPseudonym"
+             class="bg-blue-900/30 border border-blue-700/50 rounded-lg p-4 text-left space-y-3">
+          <p class="text-sm text-blue-200">
+            🔐 <strong>Dein Login-Identifier (Mandant-Pseudonym)</strong>
+          </p>
+          <p class="text-2xl font-mono font-bold text-white tracking-wider text-center py-2 bg-black/30 rounded">
+            {{ assignedPseudonym }}
+          </p>
+          <p class="text-xs text-gray-300 leading-relaxed">
+            Aus Datenschutzgründen erscheint dein Mandant auf der Login-Seite
+            nicht mit Klarnamen, sondern mit diesem Pseudonym. So sieht niemand
+            von außen, welche Firma oder Person diesen Self-Hoster nutzt.
+          </p>
+          <div class="border-t border-blue-700/40 pt-3 space-y-2 text-xs">
+            <p class="text-yellow-300">
+              ⚠ <strong>Bitte sorgfältig merken oder sicher notieren.</strong>
+              Bei mehreren Mandanten ist das Pseudonym dein einziges
+              Auswahlkriterium beim Login.
+            </p>
+            <p class="text-gray-300">
+              💾 <strong>Lege jetzt ein Backup an</strong>
+              (Einstellungen → Daten → Backup herunterladen).
+              Bei Verlust des Pseudonyms ohne Backup ist eine Wiederherstellung
+              nur durch Neu-Aufsetzen einer leeren Mandantenumgebung möglich
+              — alle Daten wären dann verloren.
+            </p>
+            <p class="text-gray-400">
+              Der Pseudonym lässt sich später vom Admin neu generieren
+              (Einstellungen → Mandanten-Pseudonym ändern).
+            </p>
+          </div>
+        </div>
+
         <div class="bg-gray-800 rounded-lg p-3 text-left text-sm space-y-1">
           <p class="text-gray-400">Empfohlene nächste Schritte:</p>
-          <p class="text-gray-300">① MFA in den Einstellungen aktivieren</p>
-          <p class="text-gray-300">② Tesla-Fahrzeug verbinden</p>
-          <p class="text-gray-300">③ Passwort nach dem ersten Login ändern</p>
+          <p class="text-gray-300">① Pseudonym sicher notieren + Backup ziehen</p>
+          <p class="text-gray-300">② MFA in den Einstellungen aktivieren</p>
+          <p class="text-gray-300">③ Tesla-Fahrzeug verbinden</p>
         </div>
         <RouterLink to="/login" class="btn-primary inline-block w-full text-center">
           Zum Login →
@@ -208,6 +245,8 @@ const strengthLabel = computed(() => {
   return labels[passwordStrength.value] || '';
 });
 
+const assignedPseudonym = ref('');
+
 async function submit() {
   error.value = '';
   if (!form.value.username || !form.value.password) {
@@ -231,13 +270,16 @@ async function submit() {
     const accepts = {};
     if (legalVersions.value.privacy) accepts.privacy = legalVersions.value.privacy;
     if (legalVersions.value.terms)   accepts.terms   = legalVersions.value.terms;
-    await api.post('/setup/init', {
+    const { data } = await api.post('/setup/init', {
       username:   form.value.username,
       password:   form.value.password,
       tenantName: form.value.tenantName || undefined,
       tenantSlug: form.value.tenantSlug || undefined,
       accepts:    Object.keys(accepts).length ? accepts : undefined,
     });
+    // Pseudonym wird automatisch vom Backend vergeben — auf Step 3
+    // groß anzeigen, damit der Admin ihn sich merkt.
+    assignedPseudonym.value = data.tenant_pseudonym || '';
     step.value = 3;
   } catch (err) {
     error.value = err.response?.data?.error ?? 'Fehler beim Erstellen des Kontos';

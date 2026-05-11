@@ -41,6 +41,69 @@
       <p v-if="tenantSaved" class="text-xs text-green-400">✓ {{ $t('settings.saved') }}</p>
     </div>
 
+    <!-- Mandanten-Pseudonym (Admin) — nach aussen sichtbarer Login-
+         Identifier. Aus Datenschutz nicht der Klarname. -->
+    <div v-if="auth.isAdmin" class="card space-y-3">
+      <h2 class="font-semibold">🔐 Mandanten-Pseudonym (Login-Identifier)</h2>
+      <p class="text-sm text-gray-400">
+        Auf der öffentlichen Login-Seite erscheint dein Mandant unter diesem
+        Pseudonym — nicht unter dem Klarnamen. So sieht niemand von außen,
+        welche Firma oder Person diesen Self-Hoster nutzt.
+      </p>
+      <div class="bg-black/30 rounded-lg p-3 flex items-center justify-between gap-3 flex-wrap">
+        <div class="min-w-0">
+          <p class="text-xs text-gray-500 uppercase tracking-wide">Aktuell</p>
+          <p class="text-xl font-mono font-bold text-white tracking-wider">{{ tenantPseudonym || '…' }}</p>
+        </div>
+        <button @click="confirmRegeneratePseudonym = true"
+          class="btn-secondary text-sm"
+          v-tooltip="'Erzeugt einen neuen Pseudonym — alle berechtigten User müssen sich den neuen merken'">
+          🔄 Neu generieren
+        </button>
+      </div>
+      <div v-if="tenantPseudonymHistory.length" class="text-xs text-gray-500">
+        Frühere Pseudonyme: <span class="font-mono">{{ tenantPseudonymHistory.join(', ') }}</span>
+      </div>
+
+      <!-- Confirmation-Modal mit kritischen Hinweisen.
+           Sichtbar genug, dass der Admin nicht versehentlich klickt. -->
+      <div v-if="confirmRegeneratePseudonym"
+           class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+           @click.self="confirmRegeneratePseudonym = false">
+        <div class="card max-w-md space-y-3">
+          <h3 class="font-semibold text-lg">Pseudonym neu generieren?</h3>
+          <p class="text-sm text-gray-300">
+            Aktuell: <span class="font-mono">{{ tenantPseudonym }}</span>
+          </p>
+          <div class="bg-yellow-900/20 border border-yellow-700/40 rounded-lg p-3 text-sm space-y-2 text-yellow-200">
+            <p>⚠ <strong>Wichtig — bitte vor dem Klick lesen:</strong></p>
+            <ul class="list-disc list-inside space-y-1 text-xs text-yellow-100">
+              <li><strong>Alle User</strong> deines Mandanten müssen sich den
+                neuen Pseudonym merken — vorher informieren!</li>
+              <li>Der alte Pseudonym landet in der History und wird nie
+                wieder zufällig vergeben.</li>
+              <li><strong>Bei Verlust des neuen Namens ohne Backup</strong>
+                ist eine Wiederherstellung nur durch Neu-Aufsetzen einer
+                leeren Mandantenumgebung möglich — alle Daten wären verloren.</li>
+              <li>Empfehlung: <RouterLink to="/data" class="underline">
+                jetzt ein Backup ziehen</RouterLink>.</li>
+            </ul>
+          </div>
+          <div class="flex gap-2">
+            <button @click="confirmRegeneratePseudonym = false" class="btn-secondary flex-1">
+              Abbrechen
+            </button>
+            <button @click="doRegeneratePseudonym"
+              :disabled="regeneratingPseudonym"
+              class="btn-primary flex-1">
+              {{ regeneratingPseudonym ? '…' : 'Ja, jetzt neu generieren' }}
+            </button>
+          </div>
+          <p v-if="regenerateError" class="text-red-400 text-sm">{{ regenerateError }}</p>
+        </div>
+      </div>
+    </div>
+
     <!-- Vehicle profile -->
     <div class="card space-y-4">
       <h2 class="font-semibold" v-tooltip="'Kennzeichen, Farbe und Modell des Fahrzeugs einstellen – wird auf Dashboard und Technik-Seite angezeigt'">
@@ -658,6 +721,40 @@ async function saveTenantDefault(code) {
   finally { tenantSaving.value = false; }
 }
 
+// ── Mandanten-Pseudonym (Login-Identifier, Admin) ──
+const tenantPseudonym        = ref('');
+const tenantPseudonymHistory = ref([]);
+const confirmRegeneratePseudonym = ref(false);
+const regeneratingPseudonym  = ref(false);
+const regenerateError        = ref('');
+
+async function loadTenantPseudonym() {
+  if (!auth.isAdmin || !auth.tenantId) return;
+  try {
+    const { data } = await api.get(`/system/tenants/${auth.tenantId}`);
+    tenantPseudonym.value        = data.pseudonym || '';
+    tenantPseudonymHistory.value = data.pseudonymHistory || [];
+  } catch { /* admin endpoint nicht erreichbar — Anzeige bleibt leer */ }
+}
+
+async function doRegeneratePseudonym() {
+  if (regeneratingPseudonym.value) return;
+  regeneratingPseudonym.value = true;
+  regenerateError.value = '';
+  try {
+    const { data } = await api.post(`/system/tenants/${auth.tenantId}/regenerate-pseudonym`);
+    tenantPseudonym.value = data.current_pseudonym;
+    if (data.previous_pseudonym) {
+      tenantPseudonymHistory.value = [...tenantPseudonymHistory.value, data.previous_pseudonym];
+    }
+    confirmRegeneratePseudonym.value = false;
+  } catch (err) {
+    regenerateError.value = err.response?.data?.error || err.message;
+  } finally {
+    regeneratingPseudonym.value = false;
+  }
+}
+
 // Fahrerverwaltung
 const DRIVER_COLORS = [
   '#6b7280','#ef4444','#f97316','#eab308',
@@ -944,6 +1041,7 @@ async function saveTariffConfig() {
 onMounted(async () => {
   loadDrivers();
   loadTenantDefaultLocale();
+  loadTenantPseudonym();
   loadTariffConfig();
   const [mfa, audit, teslaStatus] = await Promise.all([
     api.get('/mfa/status'),

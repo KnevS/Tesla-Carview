@@ -12,7 +12,7 @@ import {
 import { verifyTotp, verifyBackupCode, decryptMfaSecret } from '../services/mfaService.js';
 import { auditLog } from '../services/auditService.js';
 import { getAuthUrl, exchangeCode, getAccessToken } from '../services/teslaApi.js';
-import { getMasterDb, getDb, getTenantBySlug, getAllTenants, getTenantById } from '../db/database.js';
+import { getMasterDb, getDb, getTenantBySlug, getTenantByPseudonym, getAllTenants, getTenantById } from '../db/database.js';
 
 const router = Router();
 
@@ -46,9 +46,12 @@ function setRefreshCookie(res, token) {
   });
 }
 
-function resolveTenant(tenantSlug) {
-  if (tenantSlug) {
-    return getTenantBySlug(tenantSlug);
+/** Akzeptiert sowohl den internen slug als auch den nach aussen
+ *  sichtbaren Pseudonym (Login-Seite uebergibt heute den slug aus dem
+ *  Dropdown-Wert; getippt kann aber auch der Pseudonym kommen). */
+function resolveTenant(tenantIdent) {
+  if (tenantIdent) {
+    return getTenantBySlug(tenantIdent) ?? getTenantByPseudonym(tenantIdent);
   }
   const tenants = getAllTenants();
   if (tenants.length === 1) return tenants[0];
@@ -225,9 +228,18 @@ router.get('/me', requireAuth, (req, res) => {
   });
 });
 
-// GET /api/auth/tenants — öffentlich, gibt verfügbare Slugs zurück (ohne sensitive Infos)
+// GET /api/auth/tenants — öffentlich. Liefert pro Mandant NUR den
+// Pseudonym (z.B. „brave-eagle") als Display-Name nach aussen, NICHT
+// den Klarnamen. Datenschutz-Hintergrund: ohne diese Schicht koennte
+// jeder, der die Login-URL kennt, auflisten welche Firmen / Personen
+// den Self-Hoster nutzen. Slug bleibt in der Response (internes
+// Routing in der API), Frontend zeigt ausschliesslich den Pseudonym.
 router.get('/tenants', (_req, res) => {
-  const tenants = getAllTenants().map(t => ({ slug: t.slug, name: t.name }));
+  const tenants = getAllTenants().map(t => ({
+    slug:      t.slug,
+    pseudonym: t.pseudonym,
+    is_demo:   t.is_demo === 1,
+  }));
   res.json(tenants);
 });
 
