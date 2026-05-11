@@ -588,10 +588,17 @@
           Zurücksetzen
         </button>
       </div>
-      <p class="text-xs text-gray-500">Reihenfolge mit ↑↓ ändern · Auge zum Ein-/Ausblenden</p>
+      <p class="text-xs text-gray-500">
+        Reihenfolge mit ↑↓ ändern · Auge zum Ein-/Ausblenden ·
+        Änderungen wirken auf Desktop-Dropdowns + Mobile-Strip, lokal gespeichert.
+      </p>
+      <!-- Items sind nach Gruppen-Zugehoerigkeit (Übersicht / Auswertung
+           / Admin) farbig gerahmt, damit klar ist, wo sie in der Bar
+           landen. Reihenfolge innerhalb der Gruppe wird respektiert. -->
       <div class="space-y-1">
         <div v-for="(link, idx) in navStore.allLinks" :key="link.key"
-          class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-gray-800 transition">
+          class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-gray-800 transition border-l-2"
+          :class="groupBorder(link.group)">
           <div class="flex flex-col gap-0.5">
             <button @click="navStore.moveUp(link.key)" :disabled="idx === 0"
               class="text-gray-500 hover:text-white disabled:opacity-20 leading-none text-xs transition">▲</button>
@@ -601,6 +608,7 @@
           <span class="text-base w-6 text-center">{{ link.icon }}</span>
           <span class="flex-1 text-sm" :class="link.visible ? 'text-white' : 'text-gray-600 line-through'">
             {{ link.label }}
+            <span class="text-[10px] uppercase tracking-wide text-gray-500 ml-1">{{ groupLabel(link.group) }}</span>
           </span>
           <button @click="navStore.toggleVisible(link.key)"
             v-tooltip="link.visible ? 'Ausblenden' : 'Einblenden'"
@@ -693,6 +701,17 @@ import { useLangStore, LANGS } from '../store/lang.js';
 const auth     = useAuthStore();
 const appStore = useAppStore();
 const navStore   = useNavStore();
+
+// Group-Labels + farbige Markierung im Customization-UI — gleiche
+// Gruppen-IDs wie die NavBar-Dropdowns ('overview', 'analytics',
+// 'admin'). Border-Color macht visuell klar, wo das Item landet.
+const GROUP_LABELS = { overview: 'Übersicht', analytics: 'Auswertung', admin: 'Admin' };
+const groupLabel  = id => GROUP_LABELS[id] || id;
+const groupBorder = id => ({
+  overview:  'border-blue-500/40',
+  analytics: 'border-green-500/40',
+  admin:     'border-red-500/40',
+}[id] || 'border-gray-700');
 const themeStore = useThemeStore();
 const langStore  = useLangStore();
 const router     = useRouter();
