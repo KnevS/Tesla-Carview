@@ -17,13 +17,15 @@
       <p>Befehle werden automatisch versucht. Falls nötig zuerst "Aufwecken" drücken (~30s).</p>
     </div>
 
-    <!-- Toast -->
-    <transition name="fade">
-      <div v-if="toast" class="fixed top-20 right-4 z-50 px-4 py-3 rounded-xl shadow-xl text-sm font-medium"
-        :class="toast.ok ? 'bg-green-800 text-green-100' : 'bg-red-900 text-red-200'">
-        {{ toast.msg }}
-      </div>
-    </transition>
+    <!-- Toast — Teleport, kein clipping durch .card-Backdrop. -->
+    <Teleport to="body">
+      <transition name="fade">
+        <div v-if="toast" class="fixed top-20 right-4 z-[1000] px-4 py-3 rounded-xl shadow-xl text-sm font-medium"
+          :class="toast.ok ? 'bg-green-800 text-green-100' : 'bg-red-900 text-red-200'">
+          {{ toast.msg }}
+        </div>
+      </transition>
+    </Teleport>
 
     <div class="grid md:grid-cols-2 gap-6">
       <!-- Klimaanlage -->

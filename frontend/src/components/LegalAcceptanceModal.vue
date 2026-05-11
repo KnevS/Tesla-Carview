@@ -1,4 +1,5 @@
 <template>
+  <Teleport to="body">
   <div v-if="visible"
        class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[1000] p-4"
        role="dialog"
@@ -76,6 +77,7 @@
       </footer>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>
