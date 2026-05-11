@@ -2,6 +2,27 @@
 
 > 🇬🇧 [Read in English](04-tesla-api.en.md)
 
+## Datenquellen-Strategie (Telemetry-first, Polling als Fallback)
+
+Seit der Hybrid-Poller-Umstellung (2026-05) priorisiert Tesla Carview
+**Fleet Telemetry (Push)** über das Polling. Beide Pfade sind aktiv,
+aber der Poller schaltet automatisch in den Heartbeat-Modus, sobald
+Telemetry für ein Fahrzeug streamt:
+
+| Pfad | Latenz | Kosten | Voraussetzung |
+|---|---|---|---|
+| **1. Fleet Telemetry (WebSocket Push)** | 1–5 Sek live | kostenlos | Approved Virtual Key + HTTPS-Endpoint + Tesla-Whitelisting der VIN |
+| **2. Fleet API Polling (Pull)** | 30s online / 5min idle | $-Budget pro Call | Nur OAuth-Token |
+| **3. Heartbeat-Polling** | 1×/h | minimal | Greift automatisch wenn Telemetry für eine VIN aktiv ist |
+
+Implementierung: `backend/src/services/poller.js`, Streaming-Server in
+`backend/src/services/fleetTelemetry.js`, Status-Indikator pro VIN in
+Settings → ⚡ Tesla-Verbindung → 📡 Fleet Telemetrie.
+
+> Fleet Telemetry erfordert Approval pro **Application-Client-ID** im
+> Tesla Developer Portal. Ohne Approval liefert die Konfigurations-API
+> HTTP 404 — der Fallback-Polling-Pfad funktioniert weiterhin.
+
 ## Tesla Developer Account erstellen
 
 1. Auf https://developer.tesla.com einen Account erstellen

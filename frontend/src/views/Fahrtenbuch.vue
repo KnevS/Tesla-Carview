@@ -87,6 +87,16 @@
       </div>
     </div>
 
+    <!-- Heatmap: Aktivitaet pro Tag, Filter nach Jahr/Monat/Woche/Alle.
+         Klick auf einen Tag fuehrt in die Fahrtenliste. -->
+    <div class="card space-y-3">
+      <h2 class="font-semibold"
+          v-tooltip="'Aktivitaets-Heatmap aller Fahrten. Hover fuer Details, Klick fuer die Fahrtenliste des Tages.'">
+        🗓️ Aktivitaets-Heatmap
+      </h2>
+      <TripsHeatmap />
+    </div>
+
     <!-- Monatsübersicht (Tabelle bleibt unveraendert, ist meist nur am
          Desktop relevant). -->
     <div v-if="!selMonth && months.length" class="card space-y-3 hidden md:block">
@@ -355,6 +365,7 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
+import TripsHeatmap from '../components/TripsHeatmap.vue';
 
 const appStore  = useAppStore();
 const trips     = ref([]);
