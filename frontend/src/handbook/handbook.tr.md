@@ -20,6 +20,15 @@ Tesla Carview, Tesla araçlar için **kendi sunucunda barındırılan** bir veri
 - 🔔 **Push bildirimleri** — Şarj bittiğinde tarayıcı bildirimi
 - 📱 **Mobil için optimize** — iPhone/iPad (Safari), Android ve masaüstünde tam kullanılabilir
 
+## 🔀 Sıralama yönü {#sort-order}
+
+Kronolojik girişler içeren tüm listelerde (sürüşler, şarj seansları, servis defteri kayıtları, faturalandırma, denetim olayları, kullanıcı listesi, yasal metin sürümleri) sağ üst köşede bir **sıralama düğmesi** bulunur. Bir tıklama şu ikisi arasında geçiş yapar:
+
+- ↓ **Önce en yeniler** (varsayılan)
+- ↑ **Önce en eskiler**
+
+Seçilen sıralama **görünüm başına tarayıcıda kaydedilir** (`localStorage`) ve sayfa yenileme ve sekme kapatma sonrası korunur — her liste için farklı ayarlayabilirsin (örn. yol defteri "en yeniler üstte", kullanıcı listesi "son giriş en altta").
+
 ## 📋 Gereksinimler {#requirements}
 
 ### Sunucu

@@ -20,6 +20,15 @@ Tesla Carview est une application **auto-hébergée** d'enregistrement de donné
 - 🔔 **Notifications push** — Notification du navigateur en fin de recharge
 - 📱 **Optimisé mobile** — Pleinement utilisable sur iPhone/iPad (Safari), Android et bureau
 
+## 🔀 Ordre de tri {#sort-order}
+
+Toutes les listes contenant des entrées chronologiques (trajets, sessions de recharge, entrées du carnet d'entretien, facturation, événements d'audit, liste des utilisateurs, versions des textes légaux) disposent d'un **bouton de tri** en haut à droite. Un clic alterne entre :
+
+- ↓ **Plus récents d'abord** (par défaut)
+- ↑ **Plus anciens d'abord**
+
+L'ordre choisi est **enregistré par vue dans votre navigateur** (`localStorage`) et persiste après rechargement et fermeture de l'onglet — vous pouvez le régler différemment pour chaque liste (par exemple carnet de bord « plus récents d'abord », liste utilisateurs « dernière connexion en bas »).
+
 ## 📋 Prérequis {#requirements}
 
 ### Serveur

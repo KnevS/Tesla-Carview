@@ -20,6 +20,15 @@ Tesla Carview ist eine **selbst gehostete** Datenlogger-App für Tesla-Fahrzeuge
 - 🔔 **Push-Nachrichten** — Browser-Benachrichtigung bei Ladeende
 - 📱 **Mobile-optimiert** — Vollständig nutzbar auf iPhone/iPad (Safari), Android und Desktop
 
+## 🔀 Sortierreihenfolge {#sort-order}
+
+In allen Listen mit chronologischen Einträgen (Fahrten, Lade-Sessions, Betriebsbuch-Einträge, Kostenabrechnung, Audit-Events, Benutzer-Liste, Rechtstexte-Versionen) befindet sich oben rechts ein **Sortier-Toggle**. Ein Klick wechselt zwischen:
+
+- ↓ **Neueste zuerst** (Standard)
+- ↑ **Älteste zuerst**
+
+Die gewählte Reihenfolge wird **pro Ansicht im Browser gespeichert** (`localStorage`) und überdauert Neuladen und Schließen des Tabs — du kannst sie pro Liste unterschiedlich einstellen (z. B. Fahrtenbuch „neueste oben", Benutzerliste „letzter Login zuletzt").
+
 ## 📋 Voraussetzungen {#requirements}
 
 ### Server
