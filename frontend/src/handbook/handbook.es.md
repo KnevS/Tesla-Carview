@@ -2,7 +2,7 @@
 
 > ℹ️ **Nota para administradores y auto-alojadores:** Este manual describe la app desde la perspectiva del usuario. Instalación, variables de entorno, copias de seguridad/restauración, mantenimiento nocturno y la activación del modo demo se documentan en la **documentación técnica** de la carpeta [`docs/`](https://github.com/KnevS/Tesla-Carview/blob/main/docs/README.en.md) (en inglés), especialmente [10-configuration](https://github.com/KnevS/Tesla-Carview/blob/main/docs/10-configuration.en.md) y [11-operations](https://github.com/KnevS/Tesla-Carview/blob/main/docs/11-operations.en.md).
 
-Versión 2.0 · Auto-alojado · Multi-inquilino
+Versión 2.1 · Auto-alojado · Multi-inquilino
 
 ## 🌟 Visión general {#overview}
 

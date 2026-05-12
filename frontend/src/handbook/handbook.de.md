@@ -1,6 +1,6 @@
 # 📖 Tesla Carview Handbuch
 
-Version 2.0 · Self-Hosted · Multi-Tenant
+Version 2.1 · Self-Hosted · Multi-Tenant
 
 > ℹ️ **Hinweis für Administratoren und Self-Hoster:** Dieses Handbuch beschreibt die App aus Benutzersicht. Themen wie Installation, ENV-Variablen, Backup/Restore-Workflows, nächtliche Wartung oder das Aktivieren des Demo-Modus sind in der **technischen Dokumentation** im [`docs/`](https://github.com/KnevS/Tesla-Carview/blob/main/docs/README.md)-Ordner des Repositorys zu finden — insbesondere [10-configuration](https://github.com/KnevS/Tesla-Carview/blob/main/docs/10-configuration.md) (alle ENV-Optionen) und [11-operations](https://github.com/KnevS/Tesla-Carview/blob/main/docs/11-operations.md) (Backup, Wartung, Demo).
 
