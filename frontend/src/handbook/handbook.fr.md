@@ -2,7 +2,7 @@
 
 > ℹ️ **Note pour les administrateurs et self-hosters :** Ce manuel couvre l'app du point de vue utilisateur. L'installation, les variables d'environnement, la sauvegarde/restauration, la maintenance nocturne et l'activation du mode démo sont documentés dans la **documentation technique** du dossier [`docs/`](https://github.com/KnevS/Tesla-Carview/blob/main/docs/README.en.md) (en anglais), en particulier [10-configuration](https://github.com/KnevS/Tesla-Carview/blob/main/docs/10-configuration.en.md) et [11-operations](https://github.com/KnevS/Tesla-Carview/blob/main/docs/11-operations.en.md).
 
-Version 2.0 · Auto-hébergé · Multi-locataire
+Version 2.1 · Auto-hébergé · Multi-locataire
 
 ## 🌟 Aperçu {#overview}
 

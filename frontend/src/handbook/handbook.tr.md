@@ -2,7 +2,7 @@
 
 > ℹ️ **Yöneticiler ve kendi sunucusunu işletenler için not:** Bu kılavuz uygulamayı kullanıcı bakış açısından açıklar. Kurulum, ortam değişkenleri, yedekleme/geri yükleme, gece bakımı ve demo modunun etkinleştirilmesi **teknik dokümantasyonda** [`docs/`](https://github.com/KnevS/Tesla-Carview/blob/main/docs/README.en.md) (İngilizce) klasöründe belgelenmiştir; özellikle [10-configuration](https://github.com/KnevS/Tesla-Carview/blob/main/docs/10-configuration.en.md) ve [11-operations](https://github.com/KnevS/Tesla-Carview/blob/main/docs/11-operations.en.md).
 
-Sürüm 2.0 · Self-Hosted · Çoklu Kiracı (Multi-Tenant)
+Sürüm 2.1 · Self-Hosted · Çoklu Kiracı (Multi-Tenant)
 
 ## 🌟 Genel Bakış {#overview}
 

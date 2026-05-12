@@ -2,7 +2,7 @@
 
 > ℹ️ **Σημείωση για διαχειριστές και self-hosters:** Αυτό το εγχειρίδιο περιγράφει την εφαρμογή από την οπτική του χρήστη. Εγκατάσταση, μεταβλητές περιβάλλοντος, αντίγραφα ασφαλείας/επαναφορά, νυχτερινή συντήρηση και ενεργοποίηση demo περιγράφονται στην **τεχνική τεκμηρίωση** του φακέλου [`docs/`](https://github.com/KnevS/Tesla-Carview/blob/main/docs/README.en.md) (στα Αγγλικά), ιδιαίτερα [10-configuration](https://github.com/KnevS/Tesla-Carview/blob/main/docs/10-configuration.en.md) και [11-operations](https://github.com/KnevS/Tesla-Carview/blob/main/docs/11-operations.en.md).
 
-Έκδοση 2.0 · Self-Hosted · Multi-Tenant
+Έκδοση 2.1 · Self-Hosted · Multi-Tenant
 
 ## 🌟 Επισκόπηση {#overview}
 
