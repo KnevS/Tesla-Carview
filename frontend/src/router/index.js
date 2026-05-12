@@ -28,6 +28,7 @@ import Imprint        from '../views/legal/Imprint.vue';
 import Privacy        from '../views/legal/Privacy.vue';
 import Terms          from '../views/legal/Terms.vue';
 import InviteAccept   from '../views/InviteAccept.vue';
+import Pair           from '../views/Pair.vue';
 const LegalAdmin     = () => import('../views/admin/LegalAdmin.vue');
 const AuditLog       = () => import('../views/admin/AuditLog.vue');
 
@@ -49,6 +50,10 @@ const routes = [
   { path: '/legal/terms',   component: Terms,         meta: { public: true,  title: 'Nutzungsbedingungen' } },
   // Selbst-Registrierung per Einladungslink
   { path: '/invite/:token', component: InviteAccept,  meta: { public: true,  title: 'Einladung annehmen' } },
+  // QR-Pair-Landing: konsumiert einen 60s-Token, der von einem
+  // eingeloggten Geraet in Settings erzeugt wurde. Public, weil der
+  // Token selbst die Auth darstellt.
+  { path: '/pair/:token',   component: Pair,          meta: { public: true,  title: 'Geräte-Login' } },
   // Geschuetzt
   { path: '/',              component: Dashboard,     meta: { title: 'Dashboard' } },
   { path: '/trips',         component: Trips,         meta: { title: 'Fahrten' } },

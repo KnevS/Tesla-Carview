@@ -759,7 +759,16 @@
     "gpsFuzzingEnable": "Activar difuminado GPS para nuevos viajes",
     "gpsFuzzingRadius": "Radio (metros)",
     "gpsFuzzingRadiusHint": "50 m = vecindario · 200 m = manzana · 1000 m = distrito",
-    "gpsFuzzingSave": "Guardar"
+    "gpsFuzzingSave": "Guardar",
+    "passkeyTooltip": "Los passkeys permiten iniciar sesión sin contraseña con Touch ID, Face ID o llave de seguridad.",
+    "passkeyDevice": "Dispositivo",
+    "passkeyAddTooltip": "Se abrirá un diálogo — confirma con huella, reconocimiento facial o llave de seguridad",
+    "pairQrBtn": "📱 QR para el navegador Tesla",
+    "pairQrTooltip": "Crea un código de 60 segundos para que otro dispositivo (navegador Tesla, iPhone) inicie sesión sin contraseña.",
+    "pairQrTitle": "Código QR para inicio de sesión en dispositivo",
+    "pairQrDesc": "Escanea este código con el navegador Tesla u otro dispositivo. El código es válido 60 segundos y solo se puede usar una vez.",
+    "pairQrExpiresIn": "Caduca en {seconds} segundos",
+    "pairQrNew": "Nuevo código"
   },
   "auth": {
     "loginTitle": "Por favor inicia sesión",
@@ -779,7 +788,11 @@
     "passkeyFailed": "Error de inicio de sesión con passkey",
     "tenantHint": "Tu nombre de inquilino (asignado tras el registro)",
     "selfHostHint": "Open source · Aloja tu propia instancia para uso privado — {link}",
-    "selfHostLink": "en GitHub"
+    "selfHostLink": "en GitHub",
+    "pairTitle": "Inicio de sesión en dispositivo",
+    "pairWaiting": "Verificando código…",
+    "pairSuccess": "Inicio de sesión correcto — redirigiendo…",
+    "pairError": "Código no válido o caducado — genera uno nuevo en los ajustes."
   },
   "register": {
     "title": "Registrar nuevo inquilino",

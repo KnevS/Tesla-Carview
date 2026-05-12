@@ -759,7 +759,16 @@
     "gpsFuzzingEnable": "Yeni yolculuklar için GPS bulanıklaştırmayı etkinleştir",
     "gpsFuzzingRadius": "Yarıçap (metre)",
     "gpsFuzzingRadiusHint": "50 m = mahalle · 200 m = sokak · 1000 m = semt",
-    "gpsFuzzingSave": "Kaydet"
+    "gpsFuzzingSave": "Kaydet",
+    "passkeyTooltip": "Passkey'ler Touch ID, Face ID veya güvenlik anahtarı ile parolasız oturum açmayı sağlar.",
+    "passkeyDevice": "Cihaz",
+    "passkeyAddTooltip": "Tarayıcı diyaloğu açılır — parmak izi, yüz tanıma veya güvenlik anahtarı ile onaylayın",
+    "pairQrBtn": "📱 Tesla tarayıcısı için QR",
+    "pairQrTooltip": "Başka bir cihazın (Tesla tarayıcısı, iPhone) parolasız oturum açabileceği 60 saniyelik kod oluşturur.",
+    "pairQrTitle": "Cihaz oturum açma için QR kodu",
+    "pairQrDesc": "Bu kodu Tesla tarayıcısı veya başka bir cihazla tarayın. Kod 60 saniye geçerlidir ve yalnızca bir kez kullanılabilir.",
+    "pairQrExpiresIn": "{seconds} saniye sonra sona erer",
+    "pairQrNew": "Yeni kod"
   },
   "auth": {
     "loginTitle": "Lütfen giriş yapın",
@@ -779,7 +788,11 @@
     "passkeyFailed": "Passkey ile giriş başarısız",
     "tenantHint": "Kiracı adınız (kayıttan sonra atanır)",
     "selfHostHint": "Açık kaynak · Özel kullanım için kendi örneğinizi barındırın — {link}",
-    "selfHostLink": "GitHub'da"
+    "selfHostLink": "GitHub'da",
+    "pairTitle": "Cihaz oturum açma",
+    "pairWaiting": "Kod doğrulanıyor…",
+    "pairSuccess": "Başarıyla oturum açıldı — yönlendiriliyor…",
+    "pairError": "Kod geçersiz veya süresi dolmuş — lütfen ayarlardan yenisini oluşturun."
   },
   "register": {
     "title": "Yeni kiracı kaydet",
