@@ -67,3 +67,11 @@ You will receive an acknowledgement within 72 hours.
 - The MFA secret is not additionally encrypted at rest in the DB (DB access already requires OS-level access)
 - No CSRF token (mitigated by `SameSite=Strict` cookie + JSON API)
 - No second factor on password change (only the current password is required)
+
+## Cyclic security review
+
+Security is a process, not a state — the existing setup is verified automatically on a recurring basis:
+
+- **Per commit / pull request**: `gitleaks` (secret scan, `.github/workflows/gitleaks.yml`) and `npm audit` + `trivy fs` (`.github/workflows/security.yml`).
+- **Weekly (Mon 06:00 UTC)**: `security.yml` also runs on cron so that new CVEs against unchanged code are caught promptly.
+- **Operator side** (on the live host): two cron jobs check container health, TLS cert remaining lifetime, fail2ban, auth anomalies, disk and Tesla API status (`security-check.sh` daily) plus npm audit, certbot renew, fail2ban banlist (`security-audit.sh` weekly). These scripts are operational and not part of the repository.

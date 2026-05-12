@@ -1,0 +1,94 @@
+name: Security
+
+# Zyklische Sicherheits-Pruefungen, die ueber den reinen Secret-Scan
+# (gitleaks.yml) und den Syntax-CI (ci.yml) hinausgehen:
+#
+#  - npm audit fuer Backend + Frontend, fail auf high / critical
+#  - Wochentliche Vollausfuehrung (Mo 06:00 UTC) selbst ohne Code-
+#    Aenderung — neue CVEs koennen jederzeit gegen unveraenderten
+#    Code auftauchen.
+#
+# Ergaenzt das server-seitige /opt/monitoring/bin/security-audit.sh,
+# das die gleiche Familie an Checks auf dem Live-Host wochentlich faehrt.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Montag 06:00 UTC — neue CVEs aus dem Wochenende fangen, bevor
+    # die Woche losgeht.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  npm-audit-backend:
+    name: npm audit · backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      # Produktive Abhaengigkeiten zaehlen — dev-deps koennen auch
+      # auffaellig sein, brechen aber nicht den Live-Betrieb.
+      - name: Audit (production only)
+        run: npm audit --omit=dev --audit-level=high
+
+      # Informational: dev-deps NICHT fail-erzwingend, aber im Log
+      # sichtbar, damit Drift erkennbar bleibt.
+      - name: Audit (incl. dev-deps, informational)
+        if: always()
+        run: npm audit --audit-level=high || true
+
+  npm-audit-frontend:
+    name: npm audit · frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Audit (production only)
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Audit (incl. dev-deps, informational)
+        if: always()
+        run: npm audit --audit-level=high || true
+
+  trivy-fs:
+    name: trivy · repository filesystem
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Trivy scant das Repo nach bekannten Vulns in Lockfiles
+      # (package-lock.json, Dockerfile-Basisimages). Schneller und
+      # umfassender als npm audit allein.
+      - name: Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: 'HIGH,CRITICAL'
+          # Lockfiles brauchen ggf. lange — fail nur bei den Severities,
+          # die wirklich blocken sollen.
+          exit-code: '1'
+          ignore-unfixed: true
+          # SARIF-Upload sparen wir uns hier (private code, simple repo).

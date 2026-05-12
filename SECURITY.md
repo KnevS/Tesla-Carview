@@ -67,3 +67,11 @@ Rückmeldung erfolgt innerhalb von 72 Stunden.
 - MFA-Secret wird nicht zusätzlich verschlüsselt in der DB gespeichert (der DB-Zugriff setzt bereits OS-Zugriffsschutz voraus)
 - Kein CSRF-Token (gemindert durch `SameSite=Strict` Cookie + JSON-API)
 - Kein 2. Faktor beim Passwort-Ändern (nur aktuelles Passwort erforderlich)
+
+## Zyklische Sicherheitsprüfung
+
+Sicherheit ist kein Zustand, sondern ein Prozess — wir verifizieren das vorhandene Setup regelmäßig automatisiert:
+
+- **Pro Commit / Pull-Request**: `gitleaks` (Secret-Scan, `.github/workflows/gitleaks.yml`) und `npm audit` + `trivy fs` (`.github/workflows/security.yml`).
+- **Wöchentlich (Mo 06:00 UTC)**: `security.yml` läuft zusätzlich per Cron, damit neue CVEs gegen unveränderten Code rechtzeitig auffallen.
+- **Operator-seitig** (auf dem Live-Host): zwei Cron-Jobs prüfen Container-Health, TLS-Cert-Restlaufzeit, fail2ban, Auth-Anomalien, Disk und Tesla-API-Status (`security-check.sh` täglich) sowie npm audit, certbot-Renew, fail2ban-Banlist (`security-audit.sh` wöchentlich). Diese Skripte sind betriebsintern und nicht Teil des Repos.
