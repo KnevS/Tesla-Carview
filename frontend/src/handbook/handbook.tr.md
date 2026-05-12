@@ -104,6 +104,7 @@ Tipik kullanım: işverenin sağladığı, özel hesaba dahil edilmemesi gereken
 ## 🔐 Güvenlik {#security}
 
 - 🔑 **Passkey / WebAuthn** — Parmak izi, Face ID veya donanım anahtarıyla parolasız giriş
+- 📱 **Araç için QR oturum açma** — Ayarlarda oluşturulan tek seferlik kod (60 s), Tesla tarayıcısı veya başka bir cihazla taranabilir — araçta parola yazmaya gerek yok
 - 📱 **TOTP MFA** — Authenticator uygulamasıyla iki faktörlü kimlik doğrulama
 - 🛡️ **Hesap kilitleme** — 5 başarısız denemeden sonra hesap 15 dakika kilitlenir
 - 🍪 **Refresh token** — httpOnly çerez, 7 gün geçerli, otomatik rotasyon

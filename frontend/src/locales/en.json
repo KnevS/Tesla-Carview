@@ -759,7 +759,16 @@
     "gpsFuzzingEnable": "Enable GPS fuzzing for new trips",
     "gpsFuzzingRadius": "Radius (metres)",
     "gpsFuzzingRadiusHint": "50 m = neighbourhood · 200 m = block · 1000 m = district",
-    "gpsFuzzingSave": "Save"
+    "gpsFuzzingSave": "Save",
+    "passkeyTooltip": "Passkeys enable passwordless login via Touch ID, Face ID or security key.",
+    "passkeyDevice": "Device",
+    "passkeyAddTooltip": "Browser will prompt — confirm with fingerprint, face recognition or security key",
+    "pairQrBtn": "📱 QR for Tesla browser",
+    "pairQrTooltip": "Creates a 60-second code that lets another device (Tesla browser, iPhone) log in without a password.",
+    "pairQrTitle": "QR code for device login",
+    "pairQrDesc": "Scan this code with the Tesla browser or another device. The code is valid for 60 seconds and can only be used once.",
+    "pairQrExpiresIn": "Expires in {seconds} seconds",
+    "pairQrNew": "New code"
   },
   "auth": {
     "loginTitle": "Please sign in",
@@ -779,7 +788,11 @@
     "passkeyFailed": "Passkey sign-in failed",
     "tenantHint": "Your tenant name (assigned after registration)",
     "selfHostHint": "Open source · Run your own instance for private use — {link}",
-    "selfHostLink": "on GitHub"
+    "selfHostLink": "on GitHub",
+    "pairTitle": "Device login",
+    "pairWaiting": "Verifying code…",
+    "pairSuccess": "Signed in successfully — redirecting…",
+    "pairError": "Code invalid or expired — please generate a new one in settings."
   },
   "register": {
     "title": "Register new tenant",

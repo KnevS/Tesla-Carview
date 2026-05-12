@@ -104,6 +104,7 @@ Cas typique : recharge sur le lieu de travail, payée par l'employeur, qui ne do
 ## 🔐 Sécurité {#security}
 
 - 🔑 **Passkey / WebAuthn** — Connexion sans mot de passe avec empreinte digitale, Face ID ou clé matérielle
+- 📱 **Connexion QR pour la voiture** — Jeton à usage unique (60 s) créé dans les paramètres, scannable avec le navigateur Tesla ou un autre appareil — pas de saisie de mot de passe dans la voiture
 - 📱 **TOTP MFA** — Authentification à deux facteurs avec une application authenticator
 - 🛡️ **Verrouillage de compte** — Le compte est verrouillé pendant 15 min après 5 tentatives échouées
 - 🍪 **Refresh token** — Cookie httpOnly, valable 7 jours, rotation automatique

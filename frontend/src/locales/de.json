@@ -759,7 +759,16 @@
     "gpsFuzzingEnable": "GPS-Fuzzing für neue Fahrten aktivieren",
     "gpsFuzzingRadius": "Radius (Meter)",
     "gpsFuzzingRadiusHint": "50 m = Nachbarschaft · 200 m = Block · 1000 m = Stadtteil",
-    "gpsFuzzingSave": "Speichern"
+    "gpsFuzzingSave": "Speichern",
+    "passkeyTooltip": "Passkeys ermöglichen passwortlosen Login per Touch ID, Face ID oder Sicherheitsschlüssel.",
+    "passkeyDevice": "Gerät",
+    "passkeyAddTooltip": "Browser-Dialog öffnet sich – Fingerabdruck, Gesichtserkennung oder Sicherheitsschlüssel bestätigen",
+    "pairQrBtn": "📱 QR für Tesla-Browser",
+    "pairQrTooltip": "Erzeugt einen 60-Sekunden-Code, mit dem ein anderes Gerät (Tesla-Browser, iPhone) ohne Passwort einloggen kann.",
+    "pairQrTitle": "QR-Code für Geräte-Anmeldung",
+    "pairQrDesc": "Scanne diesen Code mit dem Tesla-Browser oder einem anderen Gerät. Der Code ist nur 60 Sekunden gültig und kann nur einmal verwendet werden.",
+    "pairQrExpiresIn": "Gültig noch {seconds} Sekunden",
+    "pairQrNew": "Neuen Code"
   },
   "auth": {
     "loginTitle": "Bitte anmelden",
@@ -779,7 +788,11 @@
     "passkeyFailed": "Passkey-Anmeldung fehlgeschlagen",
     "tenantHint": "Dein Mandantenname (nach Registrierung vergeben)",
     "selfHostHint": "Open Source · Eigene Instanz für private Nutzung selbst betreiben — {link}",
-    "selfHostLink": "auf GitHub"
+    "selfHostLink": "auf GitHub",
+    "pairTitle": "Geräte-Anmeldung",
+    "pairWaiting": "Code wird geprüft…",
+    "pairSuccess": "Erfolgreich angemeldet — Weiterleitung…",
+    "pairError": "Code ungültig oder abgelaufen — bitte neu in den Einstellungen erzeugen."
   },
   "register": {
     "title": "Neuen Mandanten registrieren",
