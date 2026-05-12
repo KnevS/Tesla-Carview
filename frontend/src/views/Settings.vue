@@ -1080,6 +1080,51 @@ const hasOptionCodes = computed(() => {
   return !!appStore.selectedVehicle?.option_codes;
 });
 
+// Mapping der semantischen vehicle_config-Felder auf Tesla-Compositor-Codes.
+// Tesla liefert fuer Juniper-VINs (XP7…) keinen kompletten option_codes-String
+// mehr, sondern nur die strukturierten Einzelfelder (wheel_type,
+// exterior_color, spoiler_type). Ohne dieses Mapping landete das Bild
+// ohne Felgen/Lack im Compositor-Fallback.
+//
+// Codes sind gegen static-assets.tesla.com/configurator/compositor verifiziert
+// (groessere Antwort-Bytes = Compositor rendert das Detail, identische
+// Antwort-Bytes wie ohne Code = der Code wird ignoriert).
+const WHEEL_CODE_MAP = {
+  UberTurbine21Black: 'WY21P',  // 21" Ueberturbine schwarz (Performance Y)
+  UberTurbine21:      'WY21P',
+  Induction20:        'WY20P',  // 20" Induction (Long Range Y)
+  Gemini19:           'WY19B',  // 19" Gemini (Basis Y Juniper)
+  Apollo19:           'WY19B',
+};
+const COLOR_CODE_MAP = {
+  PearlWhite:     'PPSW',
+  MidnightSilver: 'PMNG',
+  DeepBlue:       'PPSB',
+  RedMulticoat:   'PPMR',
+  SolidBlack:     'PBSB',
+  UltraRed:       'PR01',
+  StealthGrey:    'PMNG',
+  Quicksilver:    'PQSI',
+};
+const SPOILER_CODE_MAP = {
+  Passive: 'SPTP',
+  Active:  'SPTA',
+};
+
+/** Baut aus den Einzelfeldern eine Tesla-Compositor-Options-Liste, wenn
+ *  option_codes fehlt. Unbekannte Werte werden uebersprungen, damit der
+ *  Compositor sie nicht stillschweigend ignorieren muss. */
+function buildFallbackOptionCodes(v) {
+  const codes = ['MDLY']; // Basis-Modelltag fuer Y; Compositor braucht das Modell-Token
+  const w = WHEEL_CODE_MAP[v.wheel_type];
+  const c = COLOR_CODE_MAP[v.exterior_color];
+  const s = SPOILER_CODE_MAP[v.spoiler_type];
+  if (w) codes.push(w);
+  if (c) codes.push(c);
+  if (s) codes.push(s);
+  return codes.join(',');
+}
+
 const vehicleImageUrl = computed(() => {
   const v = appStore.selectedVehicle;
   if (!v) return '';
@@ -1091,13 +1136,18 @@ const vehicleImageUrl = computed(() => {
   // trotzdem image_color als zusaetzlichen Override mitgeben — wir
   // haengen es einfach hinten an, der Compositor nimmt den letzten
   // Wert pro Slot.
+  //
+  // Fallback fuer Juniper-Fahrzeuge: aus wheel_type/exterior_color/
+  // spoiler_type eine Options-Liste konstruieren, sonst rendert der
+  // Compositor das Auto ohne Felgen.
   const codes = [];
   if (v.option_codes) codes.push(v.option_codes);
+  else                codes.push(buildFallbackOptionCodes(v));
   // Manuelle Farbwahl als Override — laesst den Admin gezielt eine andere
   // Farbe sehen ohne option_codes neu zu holen.
   if (vProfile.value.image_color) codes.push(vProfile.value.image_color);
 
-  const optionsParam = codes.length ? codes.join(',') : 'PPSW';
+  const optionsParam = codes.filter(Boolean).join(',') || 'PPSW';
   return `https://static-assets.tesla.com/configurator/compositor?&options=${optionsParam}&view=STUD_3QTR&model=${model}&size=400`;
 });
 
