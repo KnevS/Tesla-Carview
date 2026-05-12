@@ -28,7 +28,10 @@
     "commute": "İşe gidiş-dönüş",
     "km": "km",
     "kwh": "kWh",
-    "donate": "Bağış yap"
+    "donate": "Bağış yap",
+    "sortNewestFirst": "Önce en yeniler",
+    "sortOldestFirst": "Önce en eskiler",
+    "sortToggleTooltip": "Sıralama yönünü tersine çevir"
   },
   "lang": {
     "title": "Dil / Language",

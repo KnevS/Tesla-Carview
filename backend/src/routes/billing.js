@@ -6,7 +6,7 @@ const router = Router();
 // Heimlade-Sessions für Abrechnung (nur Ladeort-Typ 'home')
 router.get('/:vehicleId/sessions', (req, res) => {
   const db = req.db;
-  const { from, to, status } = req.query;
+  const { from, to, status, sort } = req.query;
   const conds = ['cs.vehicle_id = ?'];
   const params = [req.params.vehicleId];
 
@@ -25,12 +25,14 @@ router.get('/:vehicleId/sessions', (req, res) => {
   if (to)   { conds.push('cs.start_time <= ?'); params.push(+to); }
   if (status) { conds.push('cs.billing_status = ?'); params.push(status); }
 
+  // Sortierreihenfolge: desc (Default, neueste zuerst) oder asc.
+  const orderDir = sort === 'asc' ? 'ASC' : 'DESC';
   const sessions = db.prepare(
     `SELECT cs.*, cl.name as location_name_resolved, cl.rate_kwh as location_rate
      FROM charging_sessions cs
      LEFT JOIN charging_locations cl ON cl.id = cs.location_id
      WHERE ${conds.join(' AND ')}
-     ORDER BY cs.start_time DESC`
+     ORDER BY cs.start_time ${orderDir}`
   ).all(...params);
 
   const vehicle = db.prepare('SELECT * FROM vehicles WHERE id=?').get(req.params.vehicleId);

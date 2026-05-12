@@ -78,7 +78,10 @@
 
     <!-- Übersicht: alle Einträge -->
     <div class="card space-y-2">
-      <h2 class="font-semibold text-sm text-gray-300">Alle Einträge</h2>
+      <div class="flex items-center justify-between">
+        <h2 class="font-semibold text-sm text-gray-300">Alle Einträge</h2>
+        <SortToggle v-model:direction="sortDir" />
+      </div>
       <table class="w-full text-sm">
         <thead class="text-gray-500">
           <tr>
@@ -90,7 +93,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="r in allRows" :key="`${r.scope}/${r.locale}`"
+          <tr v-for="r in sortedRows" :key="`${r.scope}/${r.locale}`"
               class="border-t border-gray-800 hover:bg-gray-800/50 cursor-pointer"
               @click="scope = r.scope; locale = r.locale;">
             <td class="px-2 py-1">{{ scopeLabel(r.scope) }}</td>
@@ -110,6 +113,8 @@ import { ref, computed, watch, onMounted } from 'vue';
 import { sanitizeMarkdown } from '../../lib/sanitize.js';
 import { useI18n } from 'vue-i18n';
 import api from '../../api.js';
+import SortToggle from '../../components/SortToggle.vue';
+import { useSortDirection } from '../../composables/useSortDirection.js';
 
 const { t } = useI18n();
 const SCOPES  = ['imprint', 'privacy', 'terms'];
@@ -136,6 +141,17 @@ const saving  = ref(false);
 const savedMsg = ref('');
 const error   = ref('');
 const allRows = ref([]);
+// Sortierreihenfolge nach updated_at pro View in localStorage.
+// Default desc (juengste Aenderung oben). Client-seitig, weil
+// allRows ein kompakter Index-Snapshot des Backends ist und das
+// /legal/index-Endpoint keine Sortierung kennt.
+const { direction: sortDir } = useSortDirection('legalAdmin');
+const sortedRows = computed(() => {
+  const arr = [...allRows.value];
+  const dir = sortDir.value === 'asc' ? 1 : -1;
+  arr.sort((a, b) => ((a.updated_at || 0) - (b.updated_at || 0)) * dir);
+  return arr;
+});
 
 const scopeLabelMap = {
   imprint: () => t('legal.imprint'),

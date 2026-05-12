@@ -1,11 +1,14 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between flex-wrap gap-3">
       <h1 class="text-2xl font-bold">{{ $t('maintenanceLog.title') }}</h1>
-      <button @click="openForm" class="btn-primary"
-        v-tooltip="$t('maintenanceLog.addTooltip')">
-        {{ $t('maintenanceLog.add') }}
-      </button>
+      <div class="flex items-center gap-2">
+        <SortToggle v-model:direction="sortDir" />
+        <button @click="openForm" class="btn-primary"
+          v-tooltip="$t('maintenanceLog.addTooltip')">
+          {{ $t('maintenanceLog.add') }}
+        </button>
+      </div>
     </div>
 
     <!-- Wartungsintervalle pro Fahrzeug — gehören thematisch ins
@@ -119,6 +122,8 @@ import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
 import ServiceIntervalsCard from '../components/ServiceIntervalsCard.vue';
+import SortToggle from '../components/SortToggle.vue';
+import { useSortDirection } from '../composables/useSortDirection.js';
 
 const { t, locale } = useI18n();
 const appStore = useAppStore();
@@ -126,6 +131,8 @@ const entries = ref([]);
 const loading = ref(true);
 const showForm = ref(false);
 const filterCat = ref('');
+// Sortierreihenfolge pro View in localStorage. Default desc (Neueste oben).
+const { direction: sortDir } = useSortDirection('logbook');
 
 // Kategorien sind in der DB englische Keys (note/maintenance/repair/...).
 // Die Anzeige kommt aus den i18n-Keys. Computed, damit der Sprachwechsel
@@ -177,7 +184,11 @@ function openForm() {
 async function load() {
   loading.value = true;
   const vid = appStore.selectedVehicle?.id;
-  const params = { ...(vid ? { vehicle_id: vid } : {}), ...(filterCat.value ? { category: filterCat.value } : {}) };
+  const params = {
+    ...(vid ? { vehicle_id: vid } : {}),
+    ...(filterCat.value ? { category: filterCat.value } : {}),
+    sort: sortDir.value,
+  };
   const { data } = await api.get('/logbook', { params });
   entries.value = data;
   loading.value = false;
@@ -207,4 +218,6 @@ async function deleteEntry(id) {
 
 onMounted(load);
 watch(() => appStore.selectedVehicleId, load);
+// Sortierwechsel triggert Reload, damit Backend mit korrektem ORDER BY liefert.
+watch(sortDir, load);
 </script>

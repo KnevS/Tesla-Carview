@@ -28,7 +28,10 @@
     "commute": "Desplazamiento al trabajo",
     "km": "km",
     "kwh": "kWh",
-    "donate": "Donar"
+    "donate": "Donar",
+    "sortNewestFirst": "Más recientes primero",
+    "sortOldestFirst": "Más antiguos primero",
+    "sortToggleTooltip": "Invertir el orden"
   },
   "lang": {
     "title": "Idioma / Language",

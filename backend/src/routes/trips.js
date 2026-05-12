@@ -22,7 +22,7 @@ function checkLocked(req, res, trip) {
 
 router.get('/', (req, res) => {
   const db = req.db;
-  const { vehicle_id, limit = 50, offset = 0, driver_id } = req.query;
+  const { vehicle_id, limit = 50, offset = 0, driver_id, sort } = req.query;
   try {
     const conds = [];
     const params = [];
@@ -35,13 +35,15 @@ router.get('/', (req, res) => {
       ? 'WHERE ' + conds.join(' AND ') + restrict.fragment
       : (restrict.fragment ? 'WHERE 1=1' + restrict.fragment : '');
     params.push(...restrict.params, +limit, +offset);
+    // Sortierreihenfolge: desc (Default, neueste zuerst) oder asc.
+    const orderDir = sort === 'asc' ? 'ASC' : 'DESC';
     const trips = db.prepare(
       `SELECT t.*, v.display_name as vehicle_name, v.model as vehicle_model,
               d.name as driver_name, d.color as driver_color
        FROM trips t
        JOIN vehicles v ON v.id = t.vehicle_id
        LEFT JOIN drivers d ON d.id = t.driver_id
-       ${where} ORDER BY t.start_time DESC LIMIT ? OFFSET ?`
+       ${where} ORDER BY t.start_time ${orderDir} LIMIT ? OFFSET ?`
     ).all(...params);
     // WLTP-Delta pro Trip aus (model, distance, energy) berechnen.
     // Liefert null wenn Daten unvollstaendig — Frontend zeigt dann '—'.
@@ -143,7 +145,7 @@ router.get('/consumption-by-temp', (req, res) => {
 // Fahrtenbuch: Fahrten mit Klassifikations-Filter + Monatsgruppen
 router.get('/logbook', (req, res) => {
   const db = req.db;
-  const { vehicle_id, year, month, trip_type } = req.query;
+  const { vehicle_id, year, month, trip_type, sort } = req.query;
   try {
     const conds = [];
     const params = [];
@@ -152,6 +154,8 @@ router.get('/logbook', (req, res) => {
     if (year)  { conds.push("strftime('%Y', datetime(start_time,'unixepoch')) = ?"); params.push(year); }
     if (month) { conds.push("strftime('%m', datetime(start_time,'unixepoch')) = ?"); params.push(month.padStart(2,'0')); }
     const where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
+    // Sortierreihenfolge: desc (Default, neueste zuerst) oder asc.
+    const orderDir = sort === 'asc' ? 'ASC' : 'DESC';
     const trips = db.prepare(
       `SELECT t.id, t.start_time, t.end_time, t.start_lat, t.start_lon, t.end_lat, t.end_lon,
               t.start_address, t.end_address, t.distance_km, t.energy_used_kwh,
@@ -160,7 +164,7 @@ router.get('/logbook', (req, res) => {
               t.driver_id, t.is_manual, t.locked_at, t.exported_at,
               d.name as driver_name, d.color as driver_color
        FROM trips t LEFT JOIN drivers d ON d.id = t.driver_id
-       ${where} ORDER BY t.start_time DESC`
+       ${where} ORDER BY t.start_time ${orderDir}`
     ).all(...params);
     res.json(trips);
   } catch (err) {

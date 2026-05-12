@@ -8,7 +8,7 @@ import {
 const router = Router();
 
 router.get('/', (req, res) => {
-  const { vehicle_id, limit = 50, offset = 0 } = req.query;
+  const { vehicle_id, limit = 50, offset = 0, sort } = req.query;
   try {
     const restrict = restrictToOwnVehicles(req, 'vehicle_id');
     const conds  = [];
@@ -18,8 +18,10 @@ router.get('/', (req, res) => {
       ? 'WHERE ' + (conds.length ? conds.join(' AND ') : '1=1') + restrict.fragment
       : '';
     params.push(...restrict.params, +limit, +offset);
+    // Sortierreihenfolge: desc (Default, neueste zuerst) oder asc.
+    const orderDir = sort === 'asc' ? 'ASC' : 'DESC';
     res.json(req.db.prepare(
-      `SELECT * FROM charging_sessions ${where} ORDER BY start_time DESC LIMIT ? OFFSET ?`
+      `SELECT * FROM charging_sessions ${where} ORDER BY start_time ${orderDir} LIMIT ? OFFSET ?`
     ).all(...params));
   } catch (err) {
     res.status(500).json({ error: err.message });

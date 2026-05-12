@@ -23,6 +23,7 @@
           v-tooltip="'Kompakte Karten-Ansicht — empfohlen fuer Smartphone und das Tesla-Display.'">
           {{ showCompactView ? '☷ Tabelle' : '◫ Karten' }}
         </button>
+        <SortToggle v-model:direction="sortDir" />
         <button @click="manualForm.show = true" class="btn-secondary text-sm min-h-[44px]"
           v-tooltip="'Fahrt komplett manuell anlegen — fuer Fahrzeuge ohne Auto-Erfassung oder zur Nachpflege.'">
           + Manuell
@@ -388,6 +389,8 @@ import TripsHeatmap from '../components/TripsHeatmap.vue';
 import AppIcon from '../components/AppIcon.vue';
 import LocationHeatmap from '../components/LocationHeatmap.vue';
 import AnnualReportButton from '../components/AnnualReportButton.vue';
+import SortToggle from '../components/SortToggle.vue';
+import { useSortDirection } from '../composables/useSortDirection.js';
 
 const appStore  = useAppStore();
 const trips     = ref([]);
@@ -396,6 +399,8 @@ const loading   = ref(false);
 const selYear   = ref(String(new Date().getFullYear()));
 const selMonth  = ref('');
 const selType   = ref('');
+// Sortierreihenfolge pro View in localStorage. Default desc (Neueste oben).
+const { direction: sortDir } = useSortDirection('fahrtenbuch');
 
 // Karten-/Tabellen-Umschalter (manueller Override). Initial: bei
 // schmalem Viewport (< 768 px) automatisch Karten. localStorage merkt
@@ -549,7 +554,7 @@ async function load() {
   const base = vid ? { vehicle_id: vid } : {};
 
   const [tripsRes, monthsRes] = await Promise.all([
-    api.get('/trips/logbook', { params: { ...base, year: selYear.value, month: selMonth.value || undefined, trip_type: selType.value || undefined } }),
+    api.get('/trips/logbook', { params: { ...base, year: selYear.value, month: selMonth.value || undefined, trip_type: selType.value || undefined, sort: sortDir.value } }),
     api.get('/trips/logbook/months', { params: { ...base } }),
   ]);
 
@@ -696,4 +701,6 @@ async function exportFinanzamtPdf() {
 
 onMounted(load);
 watch(() => appStore.selectedVehicleId, load);
+// Sortierwechsel triggert Reload, damit Backend mit korrektem ORDER BY liefert.
+watch(sortDir, load);
 </script>
