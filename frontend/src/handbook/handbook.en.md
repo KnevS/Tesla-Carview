@@ -20,6 +20,15 @@ Tesla Carview is a **self-hosted** data-logger app for Tesla vehicles. All data 
 - 🔔 **Push notifications** — Browser notification when charging ends
 - 📱 **Mobile-optimised** — Fully usable on iPhone/iPad (Safari), Android and desktop
 
+## 🔀 Sort order {#sort-order}
+
+Every list with chronological entries (trips, charging sessions, service-log entries, billing statements, audit events, user list, legal-content versions) has a **sort toggle** in the top-right corner. One click switches between:
+
+- ↓ **Newest first** (default)
+- ↑ **Oldest first**
+
+The chosen order is **stored per view in your browser** (`localStorage`) and survives reloads and tab closing — you can set it differently for each list (e.g. trip log "newest first", user list "oldest login last").
+
 ## 📋 Requirements {#requirements}
 
 ### Server
