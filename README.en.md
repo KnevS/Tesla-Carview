@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-> 🇩🇪 [Auf Deutsch lesen](README.md)
+> **Current version: v2.1.0** · 🇩🇪 [Auf Deutsch lesen](README.md)
 
 > **© 2024–2026 Sven Krische** · Licensed under [PolyForm Noncommercial 1.0.0](LICENSE) · [AUTHORS](AUTHORS) · [NOTICE](NOTICE.md)
 > Original design, architecture and implementation by Sven Krische ([@KnevS](https://github.com/KnevS)).
@@ -51,7 +51,7 @@ Runs on: **Linux servers** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), local
 
 ---
 
-## Multi-tenant architecture (v2.0)
+## Multi-tenant architecture (since v2.0)
 
 Since v2.0 Tesla Carview supports **multiple tenants** with full data isolation:
 

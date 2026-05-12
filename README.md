@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-> 🇬🇧 [Read in English](README.en.md)
+> **Aktuelle Version: v2.1.0** · 🇬🇧 [Read in English](README.en.md)
 
 > **© 2024–2026 Sven Krische** · Lizenz: [PolyForm Noncommercial 1.0.0](LICENSE) · [AUTHORS](AUTHORS) · [NOTICE](NOTICE.md)
 > Original-Entwurf, Architektur und Implementierung von Sven Krische ([@KnevS](https://github.com/KnevS)).
@@ -51,7 +51,7 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 
 ---
 
-## Multi-Mandanten-Architektur (v2.0)
+## Multi-Mandanten-Architektur (seit v2.0)
 
 Seit v2.0 unterstützt Tesla Carview **mehrere Mandanten** mit vollständiger Datenisolierung:
 
