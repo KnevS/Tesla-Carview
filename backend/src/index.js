@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import http from 'http';
+import { readFileSync } from 'fs';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -69,8 +70,16 @@ initMasterDb();
 // Tesla-Pflicht: Public-Key-Endpoint (öffentlich)
 app.use('/.well-known/appspecific', telemetryConfigRoutes);
 
+// Version aus package.json einlesen — Single Source of Truth fuer alle
+// version-anzeigenden Endpoints (Health, /api/system/version, Footer).
+// Beim Start einmalig gecached: package.json aendert sich zur Laufzeit nicht.
+const APP_VERSION = (() => {
+  try { return JSON.parse(readFileSync(new URL('../package.json', import.meta.url))).version; }
+  catch { return 'unknown'; }
+})();
+
 // Öffentliche Routen
-app.get('/api/health', (_req, res) => res.json({ status: 'ok', version: '2.0.0' }));
+app.get('/api/health', (_req, res) => res.json({ status: 'ok', version: APP_VERSION }));
 app.use('/api/setup',          setupRoutes);
 app.use('/api/auth',           authRoutes);
 app.use('/api/register',       registerRoutes);
