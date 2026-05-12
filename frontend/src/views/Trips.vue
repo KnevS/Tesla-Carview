@@ -14,6 +14,7 @@
           <option v-for="d in drivers" :key="d.id" :value="d.id">{{ d.name }}</option>
           <option value="null">{{ $t('trips.noDriver') }}</option>
         </select>
+        <SortToggle v-model:direction="sortDir" />
         <div class="text-sm text-gray-400">{{ $t('trips.countLabel', { count: trips.length }) }}</div>
       </div>
     </div>
@@ -137,6 +138,8 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
 import StatCard from '../components/StatCard.vue';
+import SortToggle from '../components/SortToggle.vue';
+import { useSortDirection } from '../composables/useSortDirection.js';
 import api from '../api.js';
 
 const { t, locale } = useI18n();
@@ -149,6 +152,8 @@ const limit       = ref(50);
 const filterType  = ref('');
 const filterDriver = ref('');
 const openDriverMenu = ref(null);
+// Sortierreihenfolge pro View in localStorage. Default desc (Neueste oben).
+const { direction: sortDir } = useSortDirection('trips');
 // Position des Fahrer-Menue (per Teleport) — wird beim Klick auf den
 // Badge per getBoundingClientRect() befuellt und als 'position: fixed'
 // Style ans Menue gehaengt. Beim Scrollen schliessen wir das Menue
@@ -246,6 +251,7 @@ async function load() {
   const vid = appStore.selectedVehicle?.id;
   const params = {
     limit: limit.value,
+    sort: sortDir.value,
     ...(vid           ? { vehicle_id: vid }          : {}),
     ...(filterType.value   ? { trip_type: filterType.value }   : {}),
     ...(filterDriver.value ? { driver_id: filterDriver.value } : {}),
@@ -267,6 +273,8 @@ onMounted(async () => {
   await load();
 });
 watch(() => appStore.selectedVehicleId, load);
+// Sortierwechsel triggert Reload, damit Backend mit korrektem ORDER BY liefert.
+watch(sortDir, load);
 
 // Dropdown schliessen bei Klick ausserhalb + bei Scroll/Resize
 // (Position passt sonst nicht mehr — native UX: Menue zu, neu oeffnen).

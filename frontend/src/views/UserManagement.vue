@@ -1,8 +1,11 @@
 <template>
   <div class="max-w-4xl space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between flex-wrap gap-3">
       <h1 class="text-2xl font-bold">Benutzerverwaltung</h1>
-      <button @click="showCreate = true" class="btn-primary text-sm">+ Benutzer anlegen</button>
+      <div class="flex items-center gap-2">
+        <SortToggle v-model:direction="sortDir" />
+        <button @click="showCreate = true" class="btn-primary text-sm">+ Benutzer anlegen</button>
+      </div>
     </div>
 
     <!-- Admin-Aufgaben (offene To-Dos für den Tenant-Admin):
@@ -39,7 +42,7 @@
     <!-- Benutzerliste -->
     <div class="card divide-y divide-gray-700">
       <div v-if="loading" class="p-4 text-center text-gray-500">Lade Benutzer…</div>
-      <div v-for="user in users" :key="user.id"
+      <div v-for="user in sortedUsers" :key="user.id"
         class="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2">
@@ -303,13 +306,28 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import api from '../api.js';
 import { useAppStore } from '../store/index.js';
 import AppIcon from '../components/AppIcon.vue';
+import SortToggle from '../components/SortToggle.vue';
+import { useSortDirection } from '../composables/useSortDirection.js';
 
 const app     = useAppStore();
 const users   = ref([]);
+// Sortierreihenfolge nach last_login pro View in localStorage.
+// Default desc (juengster Login zuerst).
+const { direction: sortDir } = useSortDirection('users');
+// Client-seitige Sortierung — die Userliste pro Tenant ist klein
+// genug, dass eine eigene Backend-Route Overkill waere.
+// User ohne last_login werden bei desc ans Ende, bei asc an den
+// Anfang sortiert (treat-as-0 hat Spezialposition).
+const sortedUsers = computed(() => {
+  const arr = [...users.value];
+  const dir = sortDir.value === 'asc' ? 1 : -1;
+  arr.sort((a, b) => ((a.last_login || 0) - (b.last_login || 0)) * dir);
+  return arr;
+});
 const vehicles = ref([]);
 const vehicleMap = ref({});  // userId → [{id, display_name}]
 const loading  = ref(true);

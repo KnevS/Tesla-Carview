@@ -1,6 +1,9 @@
 <template>
   <div class="space-y-6">
-    <h1 class="text-2xl font-bold">{{ $t('charging.title') }}</h1>
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <h1 class="text-2xl font-bold">{{ $t('charging.title') }}</h1>
+      <SortToggle v-model:direction="sortDir" />
+    </div>
 
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <StatCard :label="$t('charging.sessions')" :value="stats.total_sessions" icon="plus"
@@ -179,6 +182,8 @@ import { useAppStore } from '../store/index.js';
 import StatCard from '../components/StatCard.vue';
 import AppIcon from '../components/AppIcon.vue';
 import ChargingHeatmap from '../components/ChargingHeatmap.vue';
+import SortToggle from '../components/SortToggle.vue';
+import { useSortDirection } from '../composables/useSortDirection.js';
 import api from '../api.js';
 
 const { t, locale } = useI18n();
@@ -186,6 +191,8 @@ const appStore = useAppStore();
 const sessions = ref([]);
 const stats = ref({ byType: [] });
 const loading = ref(true);
+// Sortierreihenfolge pro View in localStorage. Default desc (Neueste oben).
+const { direction: sortDir } = useSortDirection('charging');
 const editingRateId = ref(null);
 const rateInput = ref('');
 
@@ -228,8 +235,13 @@ function chargerTypeLabel(type) {
 async function load() {
   loading.value = true;
   const vid = appStore.selectedVehicle?.id;
-  const params = vid ? { vehicle_id: vid } : {};
-  const [s, st] = await Promise.all([api.get('/charging', { params }), api.get('/charging/stats', { params })]);
+  const baseParams = vid ? { vehicle_id: vid } : {};
+  // Sortier-Param nur an /charging — /charging/stats nutzt aggregierte
+  // Daten unabhaengig von Reihenfolge.
+  const [s, st] = await Promise.all([
+    api.get('/charging', { params: { ...baseParams, sort: sortDir.value } }),
+    api.get('/charging/stats', { params: baseParams }),
+  ]);
   sessions.value = s.data;
   stats.value = st.data;
   loading.value = false;
@@ -309,4 +321,6 @@ async function loadLocations() {
 
 onMounted(async () => { await load(); loadLocations(); });
 watch(() => appStore.selectedVehicleId, async () => { await load(); loadLocations(); });
+// Sortierwechsel triggert Reload, damit Backend mit korrektem ORDER BY liefert.
+watch(sortDir, load);
 </script>

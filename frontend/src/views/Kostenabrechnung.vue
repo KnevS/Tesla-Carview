@@ -30,6 +30,7 @@
           <AppIcon name="export" :size="16" />
           PDF erzeugen
         </button>
+        <SortToggle v-model:direction="sortDir" />
       </div>
     </div>
 
@@ -224,6 +225,8 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
 import AppIcon from '../components/AppIcon.vue';
+import SortToggle from '../components/SortToggle.vue';
+import { useSortDirection } from '../composables/useSortDirection.js';
 
 const appStore = useAppStore();
 const vehicle  = ref(null);
@@ -233,6 +236,8 @@ const syncing  = ref(false);
 const toast    = ref(null);
 const selYear  = ref(String(new Date().getFullYear()));
 const selMonth = ref(String(new Date().getMonth() + 1).padStart(2, '0'));
+// Sortierreihenfolge pro View in localStorage. Default desc (Neueste oben).
+const { direction: sortDir } = useSortDirection('kostenabrechnung');
 
 const years = computed(() => Array.from({ length: 5 }, (_, i) => String(new Date().getFullYear() - i)));
 
@@ -289,7 +294,7 @@ function buildParams() {
   const to = selMonth.value
     ? Math.floor(new Date(`${selYear.value}-${selMonth.value}-01`).setMonth(+selMonth.value) / 1000)
     : Math.floor(new Date(`${+selYear.value + 1}-01-01`).getTime() / 1000);
-  return { from, to };
+  return { from, to, sort: sortDir.value };
 }
 
 async function updateSession(s, patch) {
@@ -429,6 +434,8 @@ function exportCsv() {
 
 onMounted(load);
 watch(() => appStore.selectedVehicleId, load);
+// Sortierwechsel triggert Reload, damit Backend mit korrektem ORDER BY liefert.
+watch(sortDir, load);
 </script>
 
 <style scoped>

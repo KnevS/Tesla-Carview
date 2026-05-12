@@ -28,7 +28,10 @@
     "commute": "Μετακίνηση εργασίας",
     "km": "χλμ",
     "kwh": "kWh",
-    "donate": "Δωρεά"
+    "donate": "Δωρεά",
+    "sortNewestFirst": "Νεότερα πρώτα",
+    "sortOldestFirst": "Παλαιότερα πρώτα",
+    "sortToggleTooltip": "Αντιστροφή σειράς ταξινόμησης"
   },
   "lang": {
     "title": "Γλώσσα / Language",

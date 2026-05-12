@@ -28,7 +28,10 @@
     "commute": "Arbeitsweg",
     "km": "km",
     "kwh": "kWh",
-    "donate": "Spenden"
+    "donate": "Spenden",
+    "sortNewestFirst": "Neueste zuerst",
+    "sortOldestFirst": "Älteste zuerst",
+    "sortToggleTooltip": "Sortierreihenfolge umkehren"
   },
   "lang": {
     "title": "Sprache / Language",

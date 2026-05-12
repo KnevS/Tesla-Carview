@@ -20,6 +20,8 @@ const querySchema = z.object({
   to:      z.coerce.number().int().nonnegative().optional(),
   limit:   z.coerce.number().int().min(1).max(500).default(100),
   offset:  z.coerce.number().int().min(0).default(0),
+  // Sortierreihenfolge nach created_at. desc = neueste zuerst (Default).
+  sort:    z.enum(['asc', 'desc']).default('desc'),
 });
 
 /** Wandelt die geparsten Filter in WHERE-SQL + Parameter um. Wird von
@@ -43,13 +45,14 @@ router.get('/', (req, res) => {
   const parse = querySchema.safeParse(req.query);
   if (!parse.success) return res.status(400).json({ error: parse.error.errors[0]?.message });
   const { where, params } = buildWhere(parse.data);
+  const orderDir = parse.data.sort === 'asc' ? 'ASC' : 'DESC';
   const rows = req.db.prepare(
     `SELECT a.id, a.user_id, a.action, a.ip_address, a.user_agent, a.details, a.created_at,
             u.username
        FROM audit_logs a
        LEFT JOIN users u ON u.id = a.user_id
        ${where}
-       ORDER BY a.created_at DESC
+       ORDER BY a.created_at ${orderDir}
        LIMIT ? OFFSET ?`
   ).all(...params, parse.data.limit, parse.data.offset);
 

@@ -28,7 +28,10 @@
     "commute": "Trajet domicile-travail",
     "km": "km",
     "kwh": "kWh",
-    "donate": "Faire un don"
+    "donate": "Faire un don",
+    "sortNewestFirst": "Plus récents d'abord",
+    "sortOldestFirst": "Plus anciens d'abord",
+    "sortToggleTooltip": "Inverser l'ordre de tri"
   },
   "lang": {
     "title": "Langue / Language",

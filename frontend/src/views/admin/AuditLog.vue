@@ -2,10 +2,13 @@
   <div class="max-w-6xl mx-auto space-y-6">
     <div class="flex items-center justify-between flex-wrap gap-3">
       <h1 class="text-2xl font-bold">📋 Audit-Log</h1>
-      <button @click="exportCsv" class="btn-secondary text-sm"
-        v-tooltip="'Aktuell gefiltertes Set als CSV herunterladen — geeignet fuer DSGVO-Auskunftsanfragen oder Forensik.'">
-        CSV-Export
-      </button>
+      <div class="flex items-center gap-2">
+        <SortToggle v-model:direction="sortDir" />
+        <button @click="exportCsv" class="btn-secondary text-sm"
+          v-tooltip="'Aktuell gefiltertes Set als CSV herunterladen — geeignet fuer DSGVO-Auskunftsanfragen oder Forensik.'">
+          CSV-Export
+        </button>
+      </div>
     </div>
 
     <p class="text-sm text-gray-400">
@@ -110,8 +113,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import api from '../../api.js';
+import SortToggle from '../../components/SortToggle.vue';
+import { useSortDirection } from '../../composables/useSortDirection.js';
 
 const rows    = ref([]);
 const total   = ref(0);
@@ -119,6 +124,8 @@ const actions = ref([]);
 const loading = ref(true);
 const limit   = 100;
 const offset  = ref(0);
+// Sortierreihenfolge pro View in localStorage. Default desc (Neueste oben).
+const { direction: sortDir } = useSortDirection('audit');
 
 const filter = ref({
   action: '', user_id: null,
@@ -146,7 +153,7 @@ function actionClass(a) {
 }
 
 function buildParams() {
-  const p = { limit, offset: offset.value };
+  const p = { limit, offset: offset.value, sort: sortDir.value };
   if (filter.value.action) p.action = filter.value.action;
   if (filter.value.user_id) p.user_id = filter.value.user_id;
   // Date → unix (lokale Mitternacht resp. Tagesende)
@@ -199,4 +206,6 @@ async function exportCsv() {
 }
 
 onMounted(async () => { await Promise.all([load(), loadActions()]); });
+// Sortierwechsel: zurueck zur ersten Seite + Reload mit neuer ORDER BY.
+watch(sortDir, () => { offset.value = 0; load(); });
 </script>

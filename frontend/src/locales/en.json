@@ -28,7 +28,10 @@
     "commute": "Commute",
     "km": "km",
     "kwh": "kWh",
-    "donate": "Donate"
+    "donate": "Donate",
+    "sortNewestFirst": "Newest first",
+    "sortOldestFirst": "Oldest first",
+    "sortToggleTooltip": "Reverse sort order"
   },
   "lang": {
     "title": "Language / Sprache",

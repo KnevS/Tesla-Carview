@@ -6,20 +6,22 @@ const CATEGORIES = ['note', 'maintenance', 'repair', 'tire', 'inspection', 'acci
 
 router.get('/', (req, res) => {
   const db = req.db;
-  const { vehicle_id, category, limit = 50, offset = 0 } = req.query;
+  const { vehicle_id, category, limit = 50, offset = 0, sort } = req.query;
   try {
     const conditions = [];
     const params = [];
     if (vehicle_id) { conditions.push('le.vehicle_id = ?'); params.push(vehicle_id); }
     if (category)   { conditions.push('le.category = ?');   params.push(category); }
     const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
+    // Sortierreihenfolge: desc (Default, neueste zuerst) oder asc.
+    const orderDir = sort === 'asc' ? 'ASC' : 'DESC';
     // LEFT JOIN users → Username des Erstellers fuer die Anzeige.
     // Bleibt NULL fuer historische Eintraege ohne created_by_user_id.
     const entries = db.prepare(
       `SELECT le.*, u.username AS created_by_username
          FROM logbook_entries le
          LEFT JOIN users u ON u.id = le.created_by_user_id
-         ${where} ORDER BY le.entry_date DESC LIMIT ? OFFSET ?`
+         ${where} ORDER BY le.entry_date ${orderDir} LIMIT ? OFFSET ?`
     ).all(...params, +limit, +offset);
     res.json(entries);
   } catch (err) {
