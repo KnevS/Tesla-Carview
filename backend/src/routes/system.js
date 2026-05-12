@@ -14,6 +14,7 @@ import {
   regenerateTenantPseudonym,
 } from '../db/database.js';
 import { getFuzzingConfig, setFuzzingConfig } from '../services/gpsFuzzing.js';
+import { getTenantStatus as getCircuitStatus, CIRCUIT_THRESHOLD } from '../services/teslaCircuitBreaker.js';
 import https from 'https';
 
 const router = Router();
@@ -161,7 +162,32 @@ router.get('/health', requireAuth, (req, res) => {
       message: 'Status nicht verfuegbar (vehicles.state_updated_at fehlt)' });
   }
 
-  // 5. Datenbanken-Groesse — primaer informativ
+  // 5. Tesla API Circuit Breaker — zeigt, ob der Poller diesen
+  //    Mandanten gerade wegen 403-Serie pausiert hat. Wenn open:
+  //    Tesla-Account ist wahrscheinlich gesperrt (Billing-Limit), und
+  //    der Admin sollte in developer.tesla.com nachsehen.
+  try {
+    const cb = getCircuitStatus(req.tenantId);
+    if (cb.open) {
+      const minsLeft = Math.max(1, Math.round((cb.paused_until_ms - Date.now()) / 60000));
+      checks.push({ key: 'tesla_circuit_breaker', label: 'Tesla API Circuit Breaker', status: 'error',
+        message: `Pausiert für ~${minsLeft} Min — Tesla-Account vermutlich gesperrt. ` +
+          `Bitte in developer.tesla.com Billing & Limits prüfen.`,
+        meta: cb });
+    } else if (cb.consecutive_403s > 0) {
+      checks.push({ key: 'tesla_circuit_breaker', label: 'Tesla API Circuit Breaker', status: 'warn',
+        message: `${cb.consecutive_403s}/${CIRCUIT_THRESHOLD} aufeinanderfolgende 403er — bei ${CIRCUIT_THRESHOLD} pausiert der Poller`,
+        meta: cb });
+    } else {
+      checks.push({ key: 'tesla_circuit_breaker', label: 'Tesla API Circuit Breaker', status: 'ok',
+        message: 'Geschlossen — Tesla-API antwortet normal',
+        meta: cb });
+    }
+  } catch (e) {
+    checks.push({ key: 'tesla_circuit_breaker', label: 'Tesla API Circuit Breaker', status: 'unknown', message: e.message });
+  }
+
+  // 6. Datenbanken-Groesse — primaer informativ
   try {
     const tenantSize = db.prepare("SELECT page_count * page_size AS size FROM pragma_page_count(), pragma_page_size()").get()?.size;
     checks.push({ key: 'tenant_db_size', label: 'Tenant-DB', status: 'ok',

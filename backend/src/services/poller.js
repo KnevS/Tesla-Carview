@@ -1,6 +1,12 @@
 import { getVehicleData, getVehicles } from './teslaApi.js';
 import { getAllTenants, getDb, registerVin } from '../db/database.js';
 import { syncVehicleState } from './dataSync.js';
+import {
+  isOpen as isCircuitOpen,
+  record403,
+  recordSuccess,
+  recordOtherFailure,
+} from './teslaCircuitBreaker.js';
 
 /**
  * Hybrid-Polling-Strategie.
@@ -47,6 +53,11 @@ async function poll() {
       if (tenant.status === 'suspended') continue;
       // Demo-Mandanten haben keine Tesla-Verbindung.
       if (tenant.is_demo) continue;
+      // Circuit Breaker: bei N+ aufeinanderfolgenden 403ern pausiert
+      // der Poller diesen Mandanten 1h lang. Saves Budget + verhindert
+      // weitere Schaden-Calls, falls Tesla das Konto wegen
+      // Billing-Limit gesperrt hat.
+      if (isCircuitOpen(tenant.id)) continue;
       try {
         const db = getDb(tenant.id);
         // Erstlauf: Fahrzeugliste vom Tesla-Account ziehen.
@@ -60,10 +71,25 @@ async function poll() {
               if (v.vin) registerVin(v.vin, tenant.id);
             }
             if (list.length) console.log(`[Poller] ${list.length} Fahrzeug(e) für Mandant "${tenant.slug}" synchronisiert`);
-          } catch { /* kein Token oder API nicht erreichbar */ }
+            recordSuccess(tenant.id, tenant.slug);
+          } catch (err) {
+            // kein Token / API nicht erreichbar — aber 403 zaehlt fuer den Breaker.
+            if (err.response?.status === 403) {
+              record403(tenant.id, tenant.slug);
+              continue; // weiter zum naechsten Mandanten
+            }
+            if (err.message && err.response?.status !== 401) recordOtherFailure(tenant.id);
+          }
         }
         const vehicles = db.prepare('SELECT * FROM vehicles').all();
+        // Wenn der erste Call fuer diesen Mandanten 403 liefert, ist
+        // jeder weitere Call fuer dieselbe VIN ebenfalls 403 — Konto-
+        // weit gilt dieselbe Sperre. Wir brechen die innere Schleife
+        // also nach dem ersten 403 ab, statt den Counter pro Fahrzeug
+        // hochzudrehen.
+        let tenant403 = false;
         for (const vehicle of vehicles) {
+          if (tenant403) break;
           // Hybrid-Entscheidung pro Fahrzeug:
           // - via Telemetry abgedeckt UND letzter Polling-Call < 1h:
           //   ueberspringen. Streaming liefert die Live-Daten frisch.
@@ -83,10 +109,21 @@ async function poll() {
             if (!state) continue;
             if (state.state === 'online' && !covered) anyActivePolling = true;
             await syncVehicleState(db, vehicle, state);
+            recordSuccess(tenant.id, tenant.slug);
           } catch (err) {
+            if (err.response?.status === 403) {
+              // Konto-weite Sperre — Breaker triggern und naechsten
+              // Mandanten anfahren. 403 ist bei Tesla Fleet API immer
+              // ein Account-Level-Signal (EXCEEDED_LIMIT / disabled),
+              // niemals ein vehicle-spezifischer Permission-Issue.
+              record403(tenant.id, tenant.slug);
+              tenant403 = true;
+              break;
+            }
             if (err.response?.status !== 408) {
               console.error(`[Poller] Fahrzeug ${vehicle.display_name} (${tenant.slug}):`, err.message);
             }
+            recordOtherFailure(tenant.id);
           }
         }
       } catch (err) {
