@@ -650,6 +650,13 @@
     "montaClientIdHint": "Partner API: Hub → Uygulama → Client ID",
     "montaKey": "Monta Client Secret",
     "montaKeyHint": "Partner API: Hub → Uygulama → Client Secret",
+    "abrp": {
+      "sectionTip": "A Better Route Planner (ABRP), Tesla'nızın canlı verilerini alır — batarya seviyesi, hız, konum — ve daha hassas rotalar ile şarj durağı hesaplar. Token güvenli şekilde saklanır ve yalnızca sürüş sırasında iletilir.",
+      "tokenLabel": "ABRP Kullanıcı Token'ı",
+      "tokenTooltip": "Kişisel ABRP token'ınızı ABRP uygulamasında veya web sitesinde bulabilirsiniz: Profil → Live Data → Üçüncü Taraf Uygulamayı Bağla",
+      "tokenHint": "ABRP uygulama veya web sitesi: Profil → Live Data → Üçüncü Taraf Uygulamayı Bağla → token'ı göster",
+      "activeHint": "ABRP aktif — canlı telemetri iletiliyor"
+    },
     "homeCharging": "Ev şarjı / Monta yapılandırması",
     "drivers": "👤 Sürücüler ve Profiller",
     "driversHint": "Sürücüler oluştur ve adlandır – seyahatlere atanır ve raporlarda gösterilir.",

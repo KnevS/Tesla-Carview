@@ -650,6 +650,13 @@
     "montaClientIdHint": "Partner API: Hub → Anwendung → Client ID",
     "montaKey": "Monta Client Secret",
     "montaKeyHint": "Partner API: Hub → Anwendung → Client Secret",
+    "abrp": {
+      "sectionTip": "A Better Route Planner (ABRP) empfängt Live-Daten deines Tesla — Akkustand, Geschwindigkeit, Position — und berechnet damit präzisere Routen und Ladestopps. Der Token wird sicher gespeichert und nur während der Fahrt gesendet.",
+      "tokenLabel": "ABRP User Token",
+      "tokenTooltip": "Deinen persönlichen ABRP-Token findest du in der ABRP-App oder Website unter: Profil → Live Data → Drittanbieter verbinden",
+      "tokenHint": "ABRP-App oder -Website: Profil → Live Data → Drittanbieter verbinden → Token anzeigen",
+      "activeHint": "ABRP aktiv — Live-Telemetrie wird übertragen"
+    },
     "homeCharging": "Heimladen / Monta-Konfiguration",
     "drivers": "👤 Fahrer & Profile",
     "driversHint": "Fahrer anlegen und benennen – werden bei Fahrten zugewiesen und in der Auswertung angezeigt.",
