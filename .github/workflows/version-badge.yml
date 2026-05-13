@@ -1,0 +1,52 @@
+name: Update Version Badge
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/package.json'
+      - 'frontend/package.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-badge:
+    name: Sync version badge in READMEs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version from package.json
+        id: ver
+        run: |
+          VERSION=$(node -p "require('./backend/package.json').version")
+          echo "version=v${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Detected version: v${VERSION}"
+
+      - name: Update version badge in READMEs and CHANGELOG
+        run: |
+          V="${{ steps.ver.outputs.version }}"
+          BADGE_FRAGMENT="version-${V}-E31937"
+
+          # Update README.md and README.en.md badge URLs
+          sed -i "s|version-v[0-9.]*-E31937|${BADGE_FRAGMENT}|g" README.md README.en.md
+
+          echo "Updated badge to ${V} in README.md and README.en.md"
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md README.en.md
+          if git diff --cached --quiet; then
+            echo "No badge changes needed."
+          else
+            git commit -m "chore: update version badge to ${{ steps.ver.outputs.version }}"
+            git push
+          fi

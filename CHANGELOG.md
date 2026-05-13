@@ -1,0 +1,65 @@
+# Changelog
+
+Alle relevanten Änderungen werden in dieser Datei dokumentiert.
+Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
+
+> 🇬🇧 [Read in English](CHANGELOG.en.md)
+
+---
+
+## [v2.1.0] — 2026-05-14
+
+### Neu
+- **GitHub Wiki** — umfangreiches, laienverständliches Wiki mit 16 Seiten (Installation, Netzwerkzugang, Raspberry-Pi-Speicher, Sicherheit, Backup, Troubleshooting u.v.m.) Automatische Synchronisation aus dem Repo bei jedem Push
+- **Tesla Model Y Favicon** — Seitenprofilsilhouette als App-Icon in allen Browsern, als PWA-Icon und iOS-Home-Screen-Icon (ersetzt Blitz-Platzhalter)
+- **Netzwerk-Anleitung für Laien** (`docs/14-network-access`) — DynDNS, Cloudflare Tunnel, FritzBox-Setup, CG-NAT-Erkennung, VPS-Optionen mit Entscheidungsbaum
+- **Raspberry-Pi-Speicher-Anleitung** (`docs/15-raspberry-pi-storage`) — USB-SSD, NVMe M.2 HAT+, PXE-Boot, Samsung-T7-Quirk-Fix, Migrationsleitfaden von SD-Karte
+- **InfoTip-Komponente** — globale `<InfoTip text="…" />`-Komponente für Inline-Erläuterungen (ⓘ-Icon mit Hover-Tooltip)
+- **Benutzerhandbuch Wiki-Hinweis** — alle 6 Sprachversionen des In-App-Handbuchs verweisen auf das GitHub Wiki
+- **Eingeloggt-bleiben-Option** — „Remember me"-Checkbox im Login setzt 90-Tage-Session (statt 7 Tage Standard)
+
+### Verbessert
+- **Usability** — umfassende Tooltip-Abdeckung in Fahrtdetail, GrokChat, Fahrtenbuch, Logbuch, Benutzerverwaltung und weiteren Ansichten
+- **Login-Seite** — für Tesla-Touchscreen optimiert (größere Eingabefelder, kein QR-Code-Umweg)
+- **Favicon** — Ersetzte Lightning-Bolt-Platzhalter durch Tesla Model Y Silhouette
+
+### Entfernt
+- **QR-Pair-Login** — Komplettes Entfernen des QR-Code-basierten Geräte-Logins (technisch nicht sinnvoll; Tesla-Browser hat Touchscreen-Tastatur)
+
+---
+
+## [v2.0.0] — 2026-05-12
+
+### Neu
+- **Multi-Mandanten-Architektur** — vollständige Datenisolierung, eigene SQLite-DB pro Mandant
+- **Einladungslinks** — neuer Mandant nur per Einladungslink (7 Tage, einmalig, mit optionaler Notiz)
+- **Mandanten-Pseudonym** — datenschutzkonformer Login-Identifier statt Klarname, Admin-regenerierbar
+- **Passwortloses sudo via SSH-Agent** — `pam_ssh_agent_auth` für deploy-sicheres Rechtekonzept
+- **AES-256-GCM Encryption at rest** — Tesla-OAuth-Token, TOTP-Secrets, Virtual-Key per AES-GCM verschlüsselt
+- **Audit-Log** — Admin-Viewer für sicherheitsrelevante Ereignisse (CSV-Export, DSGVO-konform)
+- **Fleet Telemetry Primär** — WebSocket-Streaming als bevorzugte Datenquelle, spart >95 % API-Budget
+- **Vollbackup + Restore** — JSON-Export aller 25 Tabellen, sicherheits-aware Restore mit Vor-Backup
+- **GitHub Actions CI/CD** — gitleaks, OWASP-Dependency-Check, Auto-Deploy via SSH
+
+### Verbessert
+- Poller schaltet bei aktivem Fleet-Telemetry auf 1×/h-Heartbeat
+- Automatische Nacht-Wartung (WAL-Checkpoint, VACUUM, Auto-Update)
+- Service-Worker + PWA-Auto-Update — kein manueller Browser-Reload mehr
+
+---
+
+## [v1.x] — Frühere Versionen
+
+Die initiale Einzelmandanten-Version enthielt:
+- Dashboard, Fahrten, Laden, Batterie, Technik-Telemetrie
+- Fahrtenbuch (BMF-konform) inkl. PDF-Export
+- Steuerung (Klima, Türen, Laden, Sentry, Navigation)
+- Wartungsintervalle + Betriebsbuch
+- Push-Benachrichtigungen (Web Push)
+- Mehrsprachigkeit (DE/EN/FR/ES/TR/EL)
+- aWattar + Tibber-Integration (Dynamischer Tarif)
+- Installierbare PWA (iOS, Android, Tesla-Browser)
+
+---
+
+*Versionierung folgt [Semantic Versioning](https://semver.org/lang/de/). Breaking changes → Major, neue Features → Minor, Bugfixes → Patch.*

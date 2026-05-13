@@ -1541,6 +1541,8 @@
     "loading": "Yükleniyor …",
     "error": "Gönderilemedi.",
     "startListening": "Ses girişini başlat",
-    "stopListening": "Ses girişini durdur"
+    "stopListening": "Ses girişini durdur",
+    "sendTooltip": "Mesaj gönder (veya Enter'a bas)",
+    "budgetTooltip": "Bugünkü maliyet / günlük bütçe (sent cinsinden). Gece yarısı sıfırlanır."
   }
 }
