@@ -89,9 +89,14 @@
       "label": "System",
       "tooltip": "Version info, CPU/RAM usage and database statistics"
     },
+    "grok": {
+      "label": "Grok",
+      "tooltip": "Chat with Grok AI — ask questions about your trips, charging data and your Tesla"
+    },
     "group_overview": "Overview",
     "group_analytics": "Analytics",
-    "group_admin": "Administration"
+    "group_admin": "Administration",
+    "group_ai": "AI Assistant"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -1530,5 +1535,21 @@
     "doneText": "Hello {username} — your account in {tenant} was created. You can now log in.",
     "roleAdmin": "Administrator",
     "roleUser": "User"
+  },
+  "grok": {
+    "title": "Grok Chat",
+    "newChat": "New Chat",
+    "placeholder": "Ask Grok something about your trips, charging data or your Tesla …",
+    "send": "Send",
+    "budgetLabel": "today",
+    "budgetExceeded": "Daily budget reached — available again tomorrow.",
+    "contextToggle": "Include vehicle data",
+    "emptyState": "No chats yet — start a new one.",
+    "welcomeHint": "Start a new chat and ask Grok about your Tesla data.",
+    "deleteChat": "Delete chat",
+    "loading": "Loading …",
+    "error": "Failed to send.",
+    "startListening": "Start voice input",
+    "stopListening": "Stop voice input"
   }
 }

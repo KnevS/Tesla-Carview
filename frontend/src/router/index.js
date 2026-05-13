@@ -69,6 +69,7 @@ const routes = [
   { path: '/telemetry',     component: Telemetry,     meta: { title: 'Fahrzeugtechnik' } },
   { path: '/control',       component: Control,       meta: { title: 'Steuerung' } },
   { path: '/system',        component: System,        meta: { title: 'System' } },
+  { path: '/grok',          component: () => import('../views/GrokChat.vue'), meta: { title: 'Grok Chat' } },
   // Admin
   { path: '/admin/users',   component: UserManagement, meta: { title: 'Benutzerverwaltung', admin: true } },
   { path: '/admin/data',    component: DataManagement, meta: { title: 'Datenverwaltung',    admin: true } },
