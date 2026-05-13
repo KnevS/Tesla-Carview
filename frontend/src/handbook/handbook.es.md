@@ -104,6 +104,7 @@ Caso de uso típico: cargas en el lugar de trabajo pagadas por la empresa, que n
 ## 🔐 Seguridad {#security}
 
 - 🔑 **Passkey / WebAuthn** — Inicio de sesión sin contraseña con huella digital, Face ID o llave hardware
+- 📱 **Inicio de sesión QR para el coche** — Token de un solo uso (60 s) creado en los ajustes, escaneable con el navegador Tesla u otro dispositivo — sin tener que escribir contraseña en el coche
 - 📱 **TOTP MFA** — Autenticación de dos factores con app de autenticación
 - 🛡️ **Bloqueo de cuenta** — La cuenta se bloquea durante 15 min tras 5 intentos fallidos
 - 🍪 **Refresh token** — Cookie httpOnly, válida 7 días, rotación automática
