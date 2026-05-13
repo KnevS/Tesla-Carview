@@ -797,7 +797,9 @@
     "pairTitle": "Device login",
     "pairWaiting": "Verifying code…",
     "pairSuccess": "Signed in successfully — redirecting…",
-    "pairError": "Code invalid or expired — please generate a new one in settings."
+    "pairError": "Code invalid or expired — please generate a new one in settings.",
+    "teslaHint": "Using the Tesla browser? Use the QR code from the System menu on your smartphone to log in without a password.",
+    "teslaHintLink": "Instructions in handbook"
   },
   "register": {
     "title": "Register new tenant",
