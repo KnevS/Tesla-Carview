@@ -1,6 +1,8 @@
 # 📖 Tesla Carview Kullanım Kılavuzu
 
 > ℹ️ **Yöneticiler ve kendi sunucusunu işletenler için not:** Bu kılavuz uygulamayı kullanıcı bakış açısından açıklar. Kurulum, ortam değişkenleri, yedekleme/geri yükleme, gece bakımı ve demo modunun etkinleştirilmesi **teknik dokümantasyonda** [`docs/`](https://github.com/KnevS/Tesla-Carview/blob/main/docs/README.en.md) (İngilizce) klasöründe belgelenmiştir; özellikle [10-configuration](https://github.com/KnevS/Tesla-Carview/blob/main/docs/10-configuration.en.md) ve [11-operations](https://github.com/KnevS/Tesla-Carview/blob/main/docs/11-operations.en.md).
+>
+> 📚 **Tesla Carview'e yeni misiniz?** **[GitHub Wiki](https://github.com/KnevS/Tesla-Carview/wiki)** rehberli bir giriş sunar: adım adım kurulum, statik IP olmadan ağ erişimi (DynDNS, Cloudflare Tunnel), Raspberry Pi depolama (SD kart yerine SSD) — BT uzmanı olmayanlar için yazılmıştır.
 
 Sürüm 2.1 · Self-Hosted · Çoklu Kiracı (Multi-Tenant)
 
