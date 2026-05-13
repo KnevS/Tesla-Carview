@@ -351,8 +351,14 @@ function toggleSpeech() {
     inputText.value += e.results[0][0].transcript + ' ';
   };
   recognition.onend = () => { listening.value = false; };
-  recognition.start();
-  listening.value = true;
+  recognition.onerror = () => { listening.value = false; recognition = null; };
+  try {
+    recognition.start();
+    listening.value = true;
+  } catch {
+    listening.value = false;
+    recognition = null;
+  }
 }
 
 onMounted(async () => {
@@ -459,10 +465,20 @@ watch(vehicleId, () => { loadChats(); });
 
 .chat-delete {
   opacity: 0;
-  padding: 0.15rem;
+  padding: 0.25rem;
   border-radius: 0.25rem;
+  min-width: 28px;
+  min-height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .chat-item:hover .chat-delete { opacity: 1; }
+
+/* Touch-Geraete (Tesla-Browser, iPhone) haben kein hover → immer sichtbar */
+@media (hover: none) {
+  .chat-delete { opacity: 0.5; }
+}
 
 /* Main */
 .grok-main {
