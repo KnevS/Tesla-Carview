@@ -1,7 +1,79 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Hintergrund: dunkles Anthrazit, passend zum App-Shell (bg-tesla-dark). -->
-  <rect width="512" height="512" rx="96" fill="#1a1a1a"/>
-  <!-- Blitz-Symbol (Tesla-typisch) in Tesla-Rot. -->
-  <path d="M308 96 L160 290 L240 290 L204 416 L368 220 L284 220 Z"
-        fill="#E31937" stroke="#ffffff" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- Rounded square background — matches app dark shell -->
+  <rect width="512" height="512" rx="90" fill="#111111"/>
+
+  <!-- Tesla Model Y side silhouette — light silver body -->
+  <!--
+    Ground line: y=400
+    Front wheel center: x=152, y=400 | r=54
+    Rear wheel center:  x=378, y=400 | r=54
+    Car body path goes clockwise from front air dam
+  -->
+  <path d="
+    M 64,385
+    C 60,370 62,345 76,320
+    L 92,300
+    L 130,272
+    L 170,238
+    C 185,226 205,218 226,215
+    L 355,211
+    C 380,211 412,224 438,252
+    L 458,285
+    L 466,326
+    L 463,370
+    L 452,388
+    L 432,395
+    C 422,372 402,357 378,357
+    C 354,357 334,372 324,395
+    L 206,395
+    C 196,372 176,357 152,357
+    C 128,357 108,372 98,395
+    L 74,392
+    Z
+  " fill="#d0d0d0"/>
+
+  <!-- Window glass area — darker to show cabin -->
+  <path d="
+    M 175,240
+    C 188,228 206,220 226,217
+    L 350,213
+    C 372,213 398,222 422,246
+    L 432,260
+    L 226,260
+    C 206,260 189,253 175,240
+    Z
+  " fill="#2a2a2a" opacity="0.85"/>
+
+  <!-- Window highlight / glass reflection line -->
+  <path d="M 200,228 L 410,224" stroke="#e0e0e0" stroke-width="3" opacity="0.25" stroke-linecap="round"/>
+
+  <!-- Door line -->
+  <line x1="290" y1="215" x2="287" y2="390" stroke="#999" stroke-width="2.5" opacity="0.4"/>
+
+  <!-- Front wheel — outer ring -->
+  <circle cx="152" cy="400" r="54" fill="#1a1a1a" stroke="#b0b0b0" stroke-width="7"/>
+  <!-- Front wheel — rim spokes suggestion -->
+  <circle cx="152" cy="400" r="34" fill="#111111" stroke="#888" stroke-width="3"/>
+  <circle cx="152" cy="400" r="13" fill="#999"/>
+
+  <!-- Rear wheel — outer ring -->
+  <circle cx="378" cy="400" r="54" fill="#1a1a1a" stroke="#b0b0b0" stroke-width="7"/>
+  <circle cx="378" cy="400" r="34" fill="#111111" stroke="#888" stroke-width="3"/>
+  <circle cx="378" cy="400" r="13" fill="#999"/>
+
+  <!-- Tesla T badge on car body — signature red -->
+  <path d="
+    M 255,310 L 255,355
+    M 240,310 L 270,310
+    M 234,300 L 276,300
+    M 234,300 C 234,300 237,310 240,310
+    M 276,300 C 276,300 273,310 270,310
+  " stroke="#E31937" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Front light strip (Model Y distinctive DRL) -->
+  <path d="M 71,306 L 106,288" stroke="#E8E8E8" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
+  <!-- Rear light strip -->
+  <path d="M 453,296 L 462,334" stroke="#E31937" stroke-width="5" stroke-linecap="round" opacity="0.8"/>
+
 </svg>
