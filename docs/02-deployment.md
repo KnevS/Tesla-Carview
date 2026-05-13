@@ -21,6 +21,10 @@ Tesla Carview läuft auf **allen gängigen Linux-Plattformen**:
 - Optional: eigene Domain mit A-Record auf die Server-IP (für HTTPS)
 - Tesla Developer Account ([04-tesla-api.md](./04-tesla-api.md))
 
+> **Raspberry Pi?** Lies zuerst [15-raspberry-pi-storage.md](15-raspberry-pi-storage.md) — SD-Karten sterben unter Dauerlast. USB-SSD oder NVMe einrichten dauert 20 Minuten und spart viel Ärger.
+>
+> **Keine statische IP?** [14-network-access.md](14-network-access.md) erklärt DynDNS, Cloudflare Tunnel und VPS-Optionen Schritt für Schritt.
+
 ---
 
 ## 📦 Automatisches Setup (für alle)
