@@ -20,13 +20,31 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Clone wiki repository
+      - name: Clone or init wiki repository
         run: |
-          git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git" wiki-repo
+          WIKI_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git"
+
+          if git clone "$WIKI_URL" wiki-repo 2>/dev/null; then
+            echo "WIKI_EXISTED=true" >> "$GITHUB_ENV"
+          else
+            # Wiki repo does not exist yet — initialize it with a first commit
+            echo "Wiki repo not found — initializing..."
+            mkdir wiki-repo
+            cd wiki-repo
+            git init -b master
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            echo "# Tesla Carview Wiki" > Home.md
+            echo "Content is being synced — please wait a moment." >> Home.md
+            git add Home.md
+            git commit -m "wiki: initialize"
+            git remote add origin "$WIKI_URL"
+            git push -u origin master
+            echo "WIKI_EXISTED=false" >> "$GITHUB_ENV"
+          fi
 
       - name: Copy wiki source files
         run: |
-          # Copy all hand-authored wiki pages
           cp .github/wiki/*.md wiki-repo/
 
       - name: Inject auto-update timestamp into Home.md
@@ -35,13 +53,11 @@ jobs:
           COMMIT_SHA="${{ github.sha }}"
           SHORT_SHA="${COMMIT_SHA:0:7}"
 
-          # Append or update the auto-generated footer line
           if grep -q "<!-- wiki-autosync -->" wiki-repo/Home.md; then
-            sed -i "s|<!-- wiki-autosync -->.*|<!-- wiki-autosync --> *Auto-synced from commit [\`${SHORT_SHA}\`](https://github.com/${{ github.repository }}/commit/${COMMIT_SHA}) on ${TIMESTAMP}*|" wiki-repo/Home.md
+            sed -i "s|<!-- wiki-autosync -->.*|<!-- wiki-autosync --> *Auto-synced from [\`${SHORT_SHA}\`](https://github.com/${{ github.repository }}/commit/${COMMIT_SHA}) · ${TIMESTAMP}*|" wiki-repo/Home.md
           else
-            echo "" >> wiki-repo/Home.md
-            echo "---" >> wiki-repo/Home.md
-            echo "<!-- wiki-autosync --> *Auto-synced from commit [\`${SHORT_SHA}\`](https://github.com/${{ github.repository }}/commit/${COMMIT_SHA}) on ${TIMESTAMP}*" >> wiki-repo/Home.md
+            printf '\n---\n<!-- wiki-autosync --> *Auto-synced from [`%s`](https://github.com/%s/commit/%s) · %s*\n' \
+              "$SHORT_SHA" "${{ github.repository }}" "$COMMIT_SHA" "$TIMESTAMP" >> wiki-repo/Home.md
           fi
 
       - name: Commit and push to wiki
@@ -54,5 +70,7 @@ jobs:
             echo "No wiki changes to push."
           else
             git commit -m "wiki: auto-sync from ${{ github.repository }}@${{ github.sha }}"
-            git push
+            # Push to whichever branch GitHub created (master or main)
+            BRANCH=$(git rev-parse --abbrev-ref HEAD)
+            git push origin "$BRANCH"
           fi
