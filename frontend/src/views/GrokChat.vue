@@ -11,7 +11,8 @@
       </div>
 
       <!-- Budget-Badge -->
-      <div class="budget-bar" :class="budgetClass">
+      <div class="budget-bar" :class="budgetClass"
+        v-tooltip="$t('grok.budgetTooltip')">
         <AppIcon name="sparkles" :size="14" />
         <span>{{ formatCt(usage.cost_ct) }} / {{ formatCt(usage.budget_ct) }}</span>
         <span class="budget-label">{{ $t('grok.budgetLabel') }}</span>
@@ -124,7 +125,9 @@
             <AppIcon name="mic" :size="18" />
           </button>
 
-          <button class="btn-primary send-btn" @click="send" :disabled="!inputText.trim() || streaming || budgetExceeded">
+          <button class="btn-primary send-btn" @click="send"
+            :disabled="!inputText.trim() || streaming || budgetExceeded"
+            v-tooltip="$t('grok.sendTooltip')">
             <AppIcon name="send" :size="16" />
           </button>
         </div>

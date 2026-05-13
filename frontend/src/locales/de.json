@@ -1541,6 +1541,8 @@
     "loading": "Lädt …",
     "error": "Fehler beim Senden.",
     "startListening": "Spracheingabe starten",
-    "stopListening": "Spracheingabe stoppen"
+    "stopListening": "Spracheingabe stoppen",
+    "sendTooltip": "Nachricht senden (oder Enter drücken)",
+    "budgetTooltip": "Kosten heute / Tagesbudget in Cent. Wird täglich um Mitternacht zurückgesetzt."
   }
 }

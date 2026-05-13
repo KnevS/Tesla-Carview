@@ -1541,6 +1541,8 @@
     "loading": "Cargando …",
     "error": "Error al enviar.",
     "startListening": "Iniciar entrada de voz",
-    "stopListening": "Detener entrada de voz"
+    "stopListening": "Detener entrada de voz",
+    "sendTooltip": "Enviar mensaje (o pulsar Enter)",
+    "budgetTooltip": "Coste hoy / presupuesto diario en céntimos. Se reinicia a medianoche."
   }
 }

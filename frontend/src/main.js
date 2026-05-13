@@ -4,6 +4,7 @@ import App from './App.vue';
 import router from './router/index.js';
 import { tooltipDirective } from './directives/tooltip.js';
 import { revealDirective }  from './directives/reveal.js';
+import InfoTip from './components/InfoTip.vue';
 import { i18n } from './plugins/i18n.js';
 import './style.css';
 import { useAuthStore }  from './store/auth.js';
@@ -19,6 +20,7 @@ app.use(i18n);
 app.use(router);
 app.directive('tooltip', tooltipDirective);
 app.directive('reveal',  revealDirective);
+app.component('InfoTip', InfoTip);
 
 const authStore  = useAuthStore();
 const appStore   = useAppStore();

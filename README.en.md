@@ -1,6 +1,10 @@
 # ⚡ Tesla Carview
 
-> **Current version: v2.1.0** · 🇩🇪 [Auf Deutsch lesen](README.md)
+[![Version](https://img.shields.io/badge/version-v2.1.0-E31937?style=flat-square)](CHANGELOG.md)
+[![License](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.en.md)
+
+> 🇩🇪 [Auf Deutsch lesen](README.md) · 📋 [Changelog](CHANGELOG.md) · 📚 [Documentation](docs/README.en.md)
 
 > **© 2024–2026 Sven Krische** · Licensed under [PolyForm Noncommercial 1.0.0](LICENSE) · [AUTHORS](AUTHORS) · [NOTICE](NOTICE.md)
 > Original design, architecture and implementation by Sven Krische ([@KnevS](https://github.com/KnevS)).

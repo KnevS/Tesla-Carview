@@ -8,10 +8,14 @@
     <div v-if="loading" class="text-gray-400">Lade...</div>
     <template v-else-if="trip">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Strecke"    :value="fmt(trip.distance_km, 1) + ' km'" icon="map" />
-        <StatCard label="Dauer"      :value="duration"                          icon="clock" />
-        <StatCard label="Ø Geschw."  :value="fmt(trip.avg_speed_kmh, 0) + ' km/h'" icon="gauge" />
-        <StatCard label="Verbrauch"  :value="consumption + ' kWh/100km'"        icon="bolt" />
+        <StatCard label="Strecke"    :value="fmt(trip.distance_km, 1) + ' km'" icon="map"
+          tooltip="Gesamtstrecke dieser Fahrt in Kilometern" />
+        <StatCard label="Dauer"      :value="duration"                          icon="clock"
+          tooltip="Gesamtfahrtdauer von Start bis Ziel" />
+        <StatCard label="Ø Geschw."  :value="fmt(trip.avg_speed_kmh, 0) + ' km/h'" icon="gauge"
+          tooltip="Durchschnittsgeschwindigkeit — Strecke geteilt durch Fahrzeit (ohne Standzeiten)" />
+        <StatCard label="Verbrauch"  :value="consumption + ' kWh/100km'"        icon="bolt"
+          tooltip="Energieverbrauch pro 100 km — das wichtigste Effizienzmaß für Elektrofahrzeuge" />
       </div>
 
       <!-- GPS-Karte + Schieber -->
@@ -24,22 +28,26 @@
 
           <!-- Datenpanel am Slider-Punkt -->
           <div class="grid grid-cols-4 gap-3 mt-3 text-center text-sm">
-            <div class="bg-gray-800 rounded-xl p-3">
+            <div class="bg-gray-800 rounded-xl p-3"
+              v-tooltip="'Momentane Geschwindigkeit an diesem Punkt der Fahrt'">
               <p class="text-gray-400 text-xs mb-1">Geschwindigkeit</p>
               <p class="text-white font-bold text-lg">{{ sliderPt.speed_kmh ?? '–' }} <span class="text-xs font-normal text-gray-400">km/h</span></p>
             </div>
-            <div class="bg-gray-800 rounded-xl p-3">
+            <div class="bg-gray-800 rounded-xl p-3"
+              v-tooltip="'Motorleistung: positiv = Antrieb, negativ = Rekuperation (Energie zurückgewinnen beim Bremsen)'">
               <p class="text-gray-400 text-xs mb-1">Leistung</p>
               <p class="font-bold text-lg" :class="(sliderPt.power_kw ?? 0) >= 0 ? 'text-red-400' : 'text-green-400'">
                 {{ sliderPt.power_kw !== undefined ? (sliderPt.power_kw >= 0 ? '+' : '') + sliderPt.power_kw : '–' }}
                 <span class="text-xs font-normal text-gray-400">kW</span>
               </p>
             </div>
-            <div class="bg-gray-800 rounded-xl p-3">
+            <div class="bg-gray-800 rounded-xl p-3"
+              v-tooltip="'Batterieladezustand in Prozent an diesem Punkt'">
               <p class="text-gray-400 text-xs mb-1">Batterie</p>
               <p class="text-white font-bold text-lg">{{ sliderPt.battery_level ?? '–' }} <span class="text-xs font-normal text-gray-400">%</span></p>
             </div>
-            <div class="bg-gray-800 rounded-xl p-3">
+            <div class="bg-gray-800 rounded-xl p-3"
+              v-tooltip="'Zeitstempel dieses Datenpunkts — ziehe den Schieber um die Route zeitlich abzuspielen'">
               <p class="text-gray-400 text-xs mb-1">Uhrzeit</p>
               <p class="text-white font-bold text-lg text-sm">{{ sliderPt.timestamp ? fmtTime(sliderPt.timestamp) : '–' }}</p>
             </div>
@@ -188,12 +196,12 @@
       <div class="card">
         <h2 class="text-lg font-semibold mb-3">Batterie</h2>
         <div class="flex gap-8">
-          <div>
+          <div v-tooltip="'Batterieladezustand zu Fahrtbeginn'">
             <p class="text-gray-400 text-sm">Start SoC</p>
             <p class="text-3xl font-bold text-green-400">{{ trip.start_soc }}%</p>
           </div>
           <div class="text-2xl self-center text-gray-500">→</div>
-          <div>
+          <div v-tooltip="'Batterieladezustand bei Fahrtende — unter 20% wird rot markiert'">
             <p class="text-gray-400 text-sm">End SoC</p>
             <p class="text-3xl font-bold" :class="trip.end_soc < 20 ? 'text-red-400' : 'text-yellow-400'">{{ trip.end_soc }}%</p>
           </div>

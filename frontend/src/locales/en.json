@@ -1541,6 +1541,8 @@
     "loading": "Loading …",
     "error": "Failed to send.",
     "startListening": "Start voice input",
-    "stopListening": "Stop voice input"
+    "stopListening": "Stop voice input",
+    "sendTooltip": "Send message (or press Enter)",
+    "budgetTooltip": "Cost today / daily budget in cents. Resets at midnight."
   }
 }

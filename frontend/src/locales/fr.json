@@ -1541,6 +1541,8 @@
     "loading": "Chargement …",
     "error": "Erreur d'envoi.",
     "startListening": "Démarrer la saisie vocale",
-    "stopListening": "Arrêter la saisie vocale"
+    "stopListening": "Arrêter la saisie vocale",
+    "sendTooltip": "Envoyer le message (ou appuyer sur Entrée)",
+    "budgetTooltip": "Coût du jour / budget quotidien en centimes. Réinitialisé à minuit."
   }
 }
