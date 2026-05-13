@@ -1,6 +1,8 @@
 # 📖 Manuel Tesla Carview
 
 > ℹ️ **Note pour les administrateurs et self-hosters :** Ce manuel couvre l'app du point de vue utilisateur. L'installation, les variables d'environnement, la sauvegarde/restauration, la maintenance nocturne et l'activation du mode démo sont documentés dans la **documentation technique** du dossier [`docs/`](https://github.com/KnevS/Tesla-Carview/blob/main/docs/README.en.md) (en anglais), en particulier [10-configuration](https://github.com/KnevS/Tesla-Carview/blob/main/docs/10-configuration.en.md) et [11-operations](https://github.com/KnevS/Tesla-Carview/blob/main/docs/11-operations.en.md).
+>
+> 📚 **Nouveau sur Tesla Carview ?** Le **[Wiki GitHub](https://github.com/KnevS/Tesla-Carview/wiki)** propose une introduction guidée : installation pas à pas, accès réseau sans IP fixe (DynDNS, Cloudflare Tunnel), stockage Raspberry Pi (SSD au lieu de carte SD) — rédigé pour les non-informaticiens.
 
 Version 2.1 · Auto-hébergé · Multi-locataire
 
