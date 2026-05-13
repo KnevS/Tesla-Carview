@@ -11,6 +11,10 @@ on:
 #   DEPLOY_SSH_KEY   – privater SSH-Key (ed25519 empfohlen)
 #   DEPLOY_APP_DIR   – Pfad auf dem Server (Standard: /opt/tesla-carview)
 
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
