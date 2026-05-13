@@ -16,6 +16,7 @@ Diese Dokumentation richtet sich an **Self-Hoster, Administratoren und Entwickle
 |---|---|
 | [01-quickstart.md](01-quickstart.md) | Schnellstart: Repo klonen, Backend + Frontend lokal starten |
 | [02-deployment.md](02-deployment.md) | Produktiv-Deployment auf Linux-Server / Raspberry Pi mit Docker + nginx + Let's Encrypt |
+| [14-network-access.md](14-network-access.md) | **Von außen erreichbar** ohne statische IP — DynDNS, FritzBox, Cloudflare Tunnel, VPS, eigene Domain |
 | [07-setup-wizard.md](07-setup-wizard.md) | Interaktiver Konfigurations-Assistent (`deploy/setup-wizard.sh`) |
 | [08-dokploy.md](08-dokploy.md) | Alternative: Deployment via Dokploy |
 
@@ -49,6 +50,7 @@ Diese Dokumentation richtet sich an **Self-Hoster, Administratoren und Entwickle
 | Frage | Antwort |
 |---|---|
 | „Wie installiere ich Tesla Carview auf meinem Server?" | [02-deployment.md](02-deployment.md) |
+| „Wie erreiche ich die App von unterwegs / ohne feste IP?" | [14-network-access.md](14-network-access.md) |
 | „Welche ENV-Variable steuert X?" | [10-configuration.md](10-configuration.md) |
 | „Wie erstelle ich ein Backup?" | [11-operations.md](11-operations.md) |
 | „Mein Tesla wird nicht angezeigt — was nun?" | [Benutzer-Handbuch → Fehlerbehebung](../frontend/src/handbook/handbook.de.md#-fehlerbehebung) |
