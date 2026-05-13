@@ -797,7 +797,9 @@
     "pairTitle": "Cihaz oturum açma",
     "pairWaiting": "Kod doğrulanıyor…",
     "pairSuccess": "Başarıyla oturum açıldı — yönlendiriliyor…",
-    "pairError": "Kod geçersiz veya süresi dolmuş — lütfen ayarlardan yenisini oluşturun."
+    "pairError": "Kod geçersiz veya süresi dolmuş — lütfen ayarlardan yenisini oluşturun.",
+    "teslaHint": "Tesla tarayıcısını mı kullanıyorsunuz? Şifresi olmadan giriş yapmak için akıllı telefonunuzdaki Sistem menüsündeki QR kodunu kullanın.",
+    "teslaHintLink": "Kullanım kılavuzunda talimatlar"
   },
   "register": {
     "title": "Yeni kiracı kaydet",

@@ -797,7 +797,9 @@
     "pairTitle": "Inicio de sesión en dispositivo",
     "pairWaiting": "Verificando código…",
     "pairSuccess": "Inicio de sesión correcto — redirigiendo…",
-    "pairError": "Código no válido o caducado — genera uno nuevo en los ajustes."
+    "pairError": "Código no válido o caducado — genera uno nuevo en los ajustes.",
+    "teslaHint": "¿Usas el navegador de Tesla? Usa el código QR del menú Sistema en tu smartphone para iniciar sesión sin contraseña.",
+    "teslaHintLink": "Instrucciones en el manual"
   },
   "register": {
     "title": "Registrar nuevo inquilino",

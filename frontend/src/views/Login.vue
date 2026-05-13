@@ -55,13 +55,23 @@
             {{ loading ? $t('auth.loggingIn') : $t('auth.loginBtn') }}
           </button>
 
-          <!-- Passkey-Login -->
-          <button type="button" @click="loginPasskey" :disabled="passkeyLoading"
+          <!-- Passkey-Login: nur anzeigen wenn Platform-Authenticator vorhanden -->
+          <button v-if="hasPasskey" type="button" @click="loginPasskey" :disabled="passkeyLoading"
             class="w-full py-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm text-gray-200 flex items-center justify-center gap-2 transition">
             <AppIcon name="lock" :size="16" />
             {{ passkeyLoading ? $t('auth.passkeyAuthenticating') : $t('auth.passkeyBtn') }}
           </button>
         </form>
+
+        <!-- QR-Pair-Hinweis fuer Tesla-Browser: erscheint nur wenn kein
+             Platform-Authenticator vorhanden (= kein Fingerabdruck/Face-ID,
+             typisch fuer Tesla-Display oder Kiosk-Browser). -->
+        <div v-if="!hasPasskey" class="card text-sm text-center space-y-2 py-3">
+          <p class="text-gray-400">{{ $t('auth.teslaHint') }}</p>
+          <a href="/handbook#virtual-key" class="text-tesla-red hover:underline text-xs">
+            {{ $t('auth.teslaHintLink') }} →
+          </a>
+        </div>
 
         <div class="text-center space-y-2">
           <RouterLink to="/register" class="text-sm text-tesla-red hover:underline block">
@@ -129,6 +139,7 @@ const loading        = ref(false);
 const passkeyLoading = ref(false);
 const error          = ref('');
 const tenants        = ref([]);
+const hasPasskey     = ref(false);
 
 // Demo-Sandbox: nur noch der Schalter „aktiviert ja/nein" wird hier
 // gebraucht, damit ggf. ein Link auf /demo eingeblendet wird. Die
@@ -146,6 +157,12 @@ onMounted(async () => {
     const { data } = await (await import('../api.js')).default.get('/demo/status');
     demoStatus.value = data;
   } catch { /* Demo nicht aktiv — kein Drama */ }
+  // Passkey-Button nur zeigen wenn Platform-Authenticator verfuegbar
+  // (Fingerabdruck/Face-ID). Im Tesla-Browser nicht vorhanden → verstecken.
+  if (window.PublicKeyCredential?.isUserVerifyingPlatformAuthenticatorAvailable) {
+    hasPasskey.value = await window.PublicKeyCredential
+      .isUserVerifyingPlatformAuthenticatorAvailable().catch(() => false);
+  }
 });
 
 async function submit() {

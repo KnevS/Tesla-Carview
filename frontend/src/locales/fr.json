@@ -797,7 +797,9 @@
     "pairTitle": "Connexion d'appareil",
     "pairWaiting": "Vérification du code…",
     "pairSuccess": "Connexion réussie — redirection…",
-    "pairError": "Code invalide ou expiré — veuillez en générer un nouveau dans les paramètres."
+    "pairError": "Code invalide ou expiré — veuillez en générer un nouveau dans les paramètres.",
+    "teslaHint": "Vous utilisez le navigateur Tesla ? Utilisez le QR code du menu Système sur votre smartphone pour vous connecter sans mot de passe.",
+    "teslaHintLink": "Instructions dans le manuel"
   },
   "register": {
     "title": "Créer un nouveau locataire",
