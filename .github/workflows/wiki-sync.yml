@@ -20,34 +20,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Clone or init wiki repository
+      - name: Check if wiki exists
+        id: wiki-check
         run: |
-          WIKI_URL="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git"
-
-          if git clone "$WIKI_URL" wiki-repo 2>/dev/null; then
-            echo "WIKI_EXISTED=true" >> "$GITHUB_ENV"
+          if git ls-remote \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git" \
+            HEAD &>/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "✅ Wiki repository exists — syncing content."
           else
-            # Wiki repo does not exist yet — initialize it with a first commit
-            echo "Wiki repo not found — initializing..."
-            mkdir wiki-repo
-            cd wiki-repo
-            git init -b master
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            echo "# Tesla Carview Wiki" > Home.md
-            echo "Content is being synced — please wait a moment." >> Home.md
-            git add Home.md
-            git commit -m "wiki: initialize"
-            git remote add origin "$WIKI_URL"
-            git push -u origin master
-            echo "WIKI_EXISTED=false" >> "$GITHUB_ENV"
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "ℹ️  Wiki not yet initialized."
+            echo "   One-time setup: https://github.com/${{ github.repository }}/wiki"
+            echo "   Click 'Create the first page', save once, then re-run this workflow."
           fi
 
+      - name: Clone wiki repository
+        if: steps.wiki-check.outputs.exists == 'true'
+        run: |
+          git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git" wiki-repo
+
       - name: Copy wiki source files
+        if: steps.wiki-check.outputs.exists == 'true'
         run: |
           cp .github/wiki/*.md wiki-repo/
 
       - name: Inject auto-update timestamp into Home.md
+        if: steps.wiki-check.outputs.exists == 'true'
         run: |
           TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
           COMMIT_SHA="${{ github.sha }}"
@@ -61,6 +60,7 @@ jobs:
           fi
 
       - name: Commit and push to wiki
+        if: steps.wiki-check.outputs.exists == 'true'
         run: |
           cd wiki-repo
           git config user.name "github-actions[bot]"
@@ -70,7 +70,6 @@ jobs:
             echo "No wiki changes to push."
           else
             git commit -m "wiki: auto-sync from ${{ github.repository }}@${{ github.sha }}"
-            # Push to whichever branch GitHub created (master or main)
             BRANCH=$(git rev-parse --abbrev-ref HEAD)
             git push origin "$BRANCH"
           fi
