@@ -709,6 +709,36 @@ function runTenantMigrations(db) {
     last_error    TEXT
   )`);
 
+  // Grok-Chat-Tabellen
+  db.exec(`CREATE TABLE IF NOT EXISTS grok_chats (
+    id          TEXT PRIMARY KEY,
+    vehicle_id  INTEGER REFERENCES vehicles(id) ON DELETE SET NULL,
+    user_id     INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    title       TEXT NOT NULL DEFAULT 'Neuer Chat',
+    created_at  INTEGER NOT NULL DEFAULT (unixepoch()),
+    updated_at  INTEGER NOT NULL DEFAULT (unixepoch())
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS grok_messages (
+    id          TEXT PRIMARY KEY,
+    chat_id     TEXT NOT NULL REFERENCES grok_chats(id) ON DELETE CASCADE,
+    role        TEXT NOT NULL,
+    content     TEXT NOT NULL,
+    tokens_in   INTEGER DEFAULT 0,
+    tokens_out  INTEGER DEFAULT 0,
+    created_at  INTEGER NOT NULL DEFAULT (unixepoch())
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS xai_usage (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    date        TEXT NOT NULL,
+    tokens_in   INTEGER NOT NULL DEFAULT 0,
+    tokens_out  INTEGER NOT NULL DEFAULT 0,
+    cost_ct     REAL NOT NULL DEFAULT 0,
+    created_at  INTEGER NOT NULL DEFAULT (unixepoch())
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_grok_chats_vehicle  ON grok_chats(vehicle_id, updated_at DESC)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_grok_messages_chat  ON grok_messages(chat_id, created_at)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_xai_usage_date      ON xai_usage(date)');
+
   // Indexes
   db.exec('CREATE INDEX IF NOT EXISTS idx_trips_vehicle      ON trips(vehicle_id, start_time DESC)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_charging_vehicle   ON charging_sessions(vehicle_id, start_time DESC)');
