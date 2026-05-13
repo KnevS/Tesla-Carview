@@ -440,6 +440,20 @@ Unter **System** sieht der Admin oben eine farbige Ampel-Karte mit fünf Checks:
 
 Die Karte ist grün (alles ok), gelb (Aufmerksamkeit, z.B. Token läuft bald ab) oder rot (Aktion nötig, z.B. Token abgelaufen) — auf einen Blick erkennbar, ob die Selbsthosting-Instanz gesund ist.
 
+## 💬 Grok Chat {#grok}
+
+Der **Grok Chat** bringt xAI-gestützte Konversation direkt in Tesla Carview. Du kannst in natürlicher Sprache Fragen zu deinen Fahrten, Ladedaten und Fahrzeugstatistiken stellen.
+
+**Kontext**: Wenn der Fahrzeugdaten-Toggle (Tachometer-Symbol) aktiv ist, sendet der Chat letzten Trip, letzte Ladung und Kilometerstand als Kontext mit. Deaktiviere ihn für allgemeine Fragen.
+
+**Neuer Chat**: Klicke auf **+ Neuer Chat** in der Sidebar. Gib deine Frage ein und drücke Enter oder Senden. Der Text erscheint gestreamt — der Cursor zeigt an, dass Grok noch tippt.
+
+**Tesla-Browser**: Im Tesla-Browser (< 768 px) klappt die Sidebar oben ein. Spracheingabe nutzt die Web Speech API (Tesla-Browser V12+).
+
+**Tagesbudget**: Standardmäßig **100 Cent/Tag**. Die aktuelle Nutzung wird oben in der Sidebar angezeigt. Bei Überschreitung ist der Chat bis Mitternacht gesperrt.
+
+**Datenschutz**: Anfragen laufen über das Backend — nie direkt vom Browser zu xAI. Keine Klardaten (vollständige VIN, exakte Adressen).
+
 ## 🔧 Fehlerbehebung {#troubleshooting}
 
 **Das Fahrzeug gibt keine GPS-Daten zurück**

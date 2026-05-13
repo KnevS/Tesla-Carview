@@ -440,6 +440,20 @@ Under **System** admins see a coloured traffic-light card at the top with five c
 
 The card is green (all good), yellow (attention, e.g. token expiring soon) or red (action required, e.g. token expired) — at a glance you know whether the self-hosted instance is healthy.
 
+## 💬 Grok Chat {#grok}
+
+**Grok Chat** brings xAI-powered conversation directly into Tesla Carview. Ask questions in natural language about your trips, charging data and vehicle statistics.
+
+**Context**: When the vehicle-data toggle (speedometer icon) is active, the chat sends your last trip, last charge and odometer as context. Disable it for general questions without vehicle context.
+
+**New chat**: Click **+ New Chat** in the sidebar. Type your question and press Enter or Send. Text appears streamed — the cursor shows Grok is still typing.
+
+**Tesla browser**: On small screens (< 768 px) the sidebar collapses to the top. Voice input uses the Web Speech API (Tesla browser V12+).
+
+**Daily budget**: Default **100 cents/day**. Current usage is shown at the top of the sidebar. When exceeded, chat is locked until midnight.
+
+**Privacy**: Requests are routed through the backend — never directly from your browser to xAI. No raw data (full VIN, exact addresses) is transmitted.
+
 ## 🔧 Troubleshooting {#troubleshooting}
 
 **The vehicle does not return GPS data**
