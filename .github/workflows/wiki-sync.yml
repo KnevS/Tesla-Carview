@@ -1,0 +1,58 @@
+name: Sync Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/wiki/**'
+      - 'docs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-wiki:
+    name: Push wiki pages to GitHub Wiki
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Clone wiki repository
+        run: |
+          git clone "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git" wiki-repo
+
+      - name: Copy wiki source files
+        run: |
+          # Copy all hand-authored wiki pages
+          cp .github/wiki/*.md wiki-repo/
+
+      - name: Inject auto-update timestamp into Home.md
+        run: |
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+          COMMIT_SHA="${{ github.sha }}"
+          SHORT_SHA="${COMMIT_SHA:0:7}"
+
+          # Append or update the auto-generated footer line
+          if grep -q "<!-- wiki-autosync -->" wiki-repo/Home.md; then
+            sed -i "s|<!-- wiki-autosync -->.*|<!-- wiki-autosync --> *Auto-synced from commit [\`${SHORT_SHA}\`](https://github.com/${{ github.repository }}/commit/${COMMIT_SHA}) on ${TIMESTAMP}*|" wiki-repo/Home.md
+          else
+            echo "" >> wiki-repo/Home.md
+            echo "---" >> wiki-repo/Home.md
+            echo "<!-- wiki-autosync --> *Auto-synced from commit [\`${SHORT_SHA}\`](https://github.com/${{ github.repository }}/commit/${COMMIT_SHA}) on ${TIMESTAMP}*" >> wiki-repo/Home.md
+          fi
+
+      - name: Commit and push to wiki
+        run: |
+          cd wiki-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No wiki changes to push."
+          else
+            git commit -m "wiki: auto-sync from ${{ github.repository }}@${{ github.sha }}"
+            git push
+          fi
