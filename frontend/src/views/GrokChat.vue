@@ -82,7 +82,20 @@
             </div>
           </div>
 
-          <div v-if="errorMsg" class="msg-error">{{ errorMsg }}</div>
+          <div v-if="errorMsg && errorType !== 'xai_billing'" class="msg-error">{{ errorMsg }}</div>
+
+          <div v-if="errorType === 'xai_billing'" class="msg-billing-error">
+            <div class="billing-error-icon">
+              <AppIcon name="alert" :size="22" />
+            </div>
+            <div class="billing-error-body">
+              <strong class="billing-error-title">{{ $t('grok.errorBillingTitle') }}</strong>
+              <p class="billing-error-text">{{ $t('grok.errorBillingBody') }}</p>
+              <a :href="errorBillingUrl" target="_blank" rel="noopener noreferrer" class="billing-error-btn">
+                {{ $t('grok.errorBillingBtn') }}
+              </a>
+            </div>
+          </div>
         </div>
 
         <!-- Budget-Warnung -->
@@ -156,6 +169,8 @@ const inputText = ref('');
 const streaming = ref(false);
 const streamingText = ref('');
 const errorMsg = ref('');
+const errorType = ref('');
+const errorBillingUrl = ref('');
 const creating = ref(false);
 const sidebarOpen = ref(false);
 const includeContext = ref(true);
@@ -215,6 +230,8 @@ async function selectChat(id) {
   sidebarOpen.value = false;
   msgsLoading.value = true;
   errorMsg.value = '';
+  errorType.value = '';
+  errorBillingUrl.value = '';
   try {
     const { data } = await api.get(`/grok/chats/${id}/messages`);
     messages.value = data.messages;
@@ -252,6 +269,8 @@ async function send() {
   inputText.value = '';
   autoResize();
   errorMsg.value = '';
+  errorType.value = '';
+  errorBillingUrl.value = '';
 
   // User-Nachricht optimistisch anzeigen
   const tempId = 'tmp-' + Date.now();
@@ -301,7 +320,14 @@ async function send() {
             await loadUsage();
           }
           if (ev.error) {
-            errorMsg.value = ev.error;
+            if (ev.type === 'xai_billing') {
+              errorType.value = 'xai_billing';
+              errorBillingUrl.value = ev.billingUrl || 'https://console.x.ai';
+              errorMsg.value = 'billing';
+            } else {
+              errorType.value = '';
+              errorMsg.value = ev.error;
+            }
           }
         } catch { /* ignoriere */ }
       }
@@ -316,6 +342,8 @@ async function send() {
     if (idx !== -1) chats.value[idx] = updated;
 
   } catch (err) {
+    errorType.value = '';
+    errorBillingUrl.value = '';
     errorMsg.value = err.message;
     // Temporäre User-Nachricht entfernen bei Fehler
     messages.value = messages.value.filter(m => m.id !== tempId);
@@ -602,6 +630,63 @@ watch(vehicleId, () => { loadChats(); });
 }
 
 .msg-loading { font-size: 0.85rem; padding: 1rem; }
+
+.msg-billing-error {
+  display: flex;
+  gap: 0.9rem;
+  align-items: flex-start;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 0.75rem;
+  padding: 1rem 1.1rem;
+  color: #fde68a;
+}
+
+.billing-error-icon {
+  flex-shrink: 0;
+  color: #f59e0b;
+  margin-top: 0.1rem;
+}
+
+.billing-error-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.billing-error-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fef3c7;
+}
+
+.billing-error-text {
+  margin: 0;
+  color: #fde68a;
+  opacity: 0.9;
+}
+
+.billing-error-btn {
+  display: inline-block;
+  margin-top: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  border-radius: 0.45rem;
+  color: #fde68a;
+  text-decoration: none;
+  font-size: 0.83rem;
+  font-weight: 500;
+  transition: background 0.15s;
+  align-self: flex-start;
+}
+
+.billing-error-btn:hover {
+  background: rgba(245, 158, 11, 0.32);
+  color: #fef3c7;
+}
 
 /* Budget exceeded */
 .budget-exceeded {

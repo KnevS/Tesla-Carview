@@ -1543,6 +1543,9 @@
     "startListening": "Start voice input",
     "stopListening": "Stop voice input",
     "sendTooltip": "Send message (or press Enter)",
-    "budgetTooltip": "Cost today / daily budget in cents. Resets at midnight."
+    "budgetTooltip": "Cost today / daily budget in cents. Resets at midnight.",
+    "errorBillingTitle": "No xAI credits available",
+    "errorBillingBody": "Your xAI team has no credits or licence yet. Add at least $5 to your xAI account – Grok Chat will work immediately afterwards.",
+    "errorBillingBtn": "Top up at console.x.ai →"
   }
 }

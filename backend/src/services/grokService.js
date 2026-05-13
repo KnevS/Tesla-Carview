@@ -127,7 +127,25 @@ export async function streamChat(db, chatId, msgId, messages, res, onDone) {
 
   if (!upstream.ok) {
     const body = await upstream.text();
-    res.write(`data: ${JSON.stringify({ error: `xAI Fehler ${upstream.status}: ${body}` })}\n\n`);
+    let errorPayload;
+    if (upstream.status === 403) {
+      try {
+        const parsed = JSON.parse(body);
+        const msg = parsed.error || parsed.message || '';
+        if (msg.includes('credits') || msg.includes('licenses')) {
+          const urlMatch = msg.match(/https:\/\/console\.x\.ai\/[^\s"]+/);
+          errorPayload = {
+            error: 'xai_billing',
+            type: 'xai_billing',
+            billingUrl: urlMatch ? urlMatch[0].replace(/\.$/, '') : 'https://console.x.ai',
+          };
+        }
+      } catch { /* ignore parse errors */ }
+    }
+    if (!errorPayload) {
+      errorPayload = { error: `xAI Fehler ${upstream.status}: ${body}` };
+    }
+    res.write(`data: ${JSON.stringify(errorPayload)}\n\n`);
     res.end();
     return;
   }

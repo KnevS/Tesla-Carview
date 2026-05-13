@@ -1543,6 +1543,9 @@
     "startListening": "Iniciar entrada de voz",
     "stopListening": "Detener entrada de voz",
     "sendTooltip": "Enviar mensaje (o pulsar Enter)",
-    "budgetTooltip": "Coste hoy / presupuesto diario en céntimos. Se reinicia a medianoche."
+    "budgetTooltip": "Coste hoy / presupuesto diario en céntimos. Se reinicia a medianoche.",
+    "errorBillingTitle": "Sin crédito xAI disponible",
+    "errorBillingBody": "Tu equipo de xAI aún no tiene créditos ni licencia. Recarga al menos 5 $ en tu cuenta xAI – el chat Grok funcionará de inmediato.",
+    "errorBillingBtn": "Recargar en console.x.ai →"
   }
 }

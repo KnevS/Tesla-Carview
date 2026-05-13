@@ -1543,6 +1543,9 @@
     "startListening": "Spracheingabe starten",
     "stopListening": "Spracheingabe stoppen",
     "sendTooltip": "Nachricht senden (oder Enter drücken)",
-    "budgetTooltip": "Kosten heute / Tagesbudget in Cent. Wird täglich um Mitternacht zurückgesetzt."
+    "budgetTooltip": "Kosten heute / Tagesbudget in Cent. Wird täglich um Mitternacht zurückgesetzt.",
+    "errorBillingTitle": "xAI-Guthaben nicht vorhanden",
+    "errorBillingBody": "Dein xAI-Team hat noch kein Guthaben oder keine Lizenz. Lade mindestens 5 $ auf dein xAI-Konto auf – danach funktioniert der Grok-Chat sofort.",
+    "errorBillingBtn": "Jetzt auf console.x.ai aufladen →"
   }
 }
