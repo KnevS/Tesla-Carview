@@ -38,40 +38,37 @@
           <div>
             <label class="block text-sm text-gray-400 mb-1">{{ $t('auth.username') }}</label>
             <input v-model="form.username" type="text" autocomplete="username" required
-              class="w-full bg-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-tesla-red" />
+              class="w-full bg-gray-700 rounded-lg px-4 py-3 text-white text-base focus:outline-none focus:ring-2 focus:ring-tesla-red" />
           </div>
 
           <div>
             <label class="block text-sm text-gray-400 mb-1">{{ $t('auth.password') }}</label>
             <input v-model="form.password" type="password" autocomplete="current-password" required
-              class="w-full bg-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-tesla-red" />
+              class="w-full bg-gray-700 rounded-lg px-4 py-3 text-white text-base focus:outline-none focus:ring-2 focus:ring-tesla-red" />
           </div>
+
+          <!-- Eingeloggt bleiben: setzt 90-Tage statt 7-Tage Session -->
+          <label class="flex items-center gap-3 cursor-pointer select-none">
+            <input v-model="form.rememberMe" type="checkbox"
+              class="w-5 h-5 rounded accent-tesla-red cursor-pointer" />
+            <span class="text-sm text-gray-300">{{ $t('auth.rememberMe') }}</span>
+          </label>
 
           <div v-if="error" class="bg-red-900/40 border border-red-700 rounded-lg px-3 py-2 text-sm text-red-300">
             {{ error }}
           </div>
 
-          <button type="submit" :disabled="loading" class="btn-primary w-full py-2.5">
+          <button type="submit" :disabled="loading" class="btn-primary w-full py-3 text-base">
             {{ loading ? $t('auth.loggingIn') : $t('auth.loginBtn') }}
           </button>
 
           <!-- Passkey-Login: nur anzeigen wenn Platform-Authenticator vorhanden -->
           <button v-if="hasPasskey" type="button" @click="loginPasskey" :disabled="passkeyLoading"
-            class="w-full py-2.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm text-gray-200 flex items-center justify-center gap-2 transition">
+            class="w-full py-3 rounded-lg bg-gray-700 hover:bg-gray-600 text-sm text-gray-200 flex items-center justify-center gap-2 transition">
             <AppIcon name="lock" :size="16" />
             {{ passkeyLoading ? $t('auth.passkeyAuthenticating') : $t('auth.passkeyBtn') }}
           </button>
         </form>
-
-        <!-- QR-Pair-Hinweis fuer Tesla-Browser: erscheint nur wenn kein
-             Platform-Authenticator vorhanden (= kein Fingerabdruck/Face-ID,
-             typisch fuer Tesla-Display oder Kiosk-Browser). -->
-        <div v-if="!hasPasskey" class="card text-sm text-center space-y-2 py-3">
-          <p class="text-gray-400">{{ $t('auth.teslaHint') }}</p>
-          <a href="/handbook#virtual-key" class="text-tesla-red hover:underline text-xs">
-            {{ $t('auth.teslaHintLink') }} →
-          </a>
-        </div>
 
         <div class="text-center space-y-2">
           <RouterLink to="/register" class="text-sm text-tesla-red hover:underline block">
@@ -134,7 +131,7 @@ const router = useRouter();
 const route  = useRoute();
 const { t }  = useI18n();
 
-const form           = ref({ username: '', password: '', tenantSlug: auth.tenantSlug || '' });
+const form           = ref({ username: '', password: '', tenantSlug: auth.tenantSlug || '', rememberMe: false });
 const loading        = ref(false);
 const passkeyLoading = ref(false);
 const error          = ref('');
@@ -169,7 +166,7 @@ async function submit() {
   error.value   = '';
   loading.value = true;
   try {
-    const result = await auth.login(form.value.username, form.value.password, form.value.tenantSlug || undefined);
+    const result = await auth.login(form.value.username, form.value.password, form.value.tenantSlug || undefined, form.value.rememberMe);
     if (result.requiresMfa) {
       router.push('/login/mfa');
     } else {

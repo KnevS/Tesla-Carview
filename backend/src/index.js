@@ -35,7 +35,6 @@ import geofenceRoutes         from './routes/geofences.js';
 import billingRoutes          from './routes/billing.js';
 import setupRoutes            from './routes/setup.js';
 import passkeyRoutes          from './routes/passkey.js';
-import pairRoutes             from './routes/pair.js';
 import passwordResetRoutes    from './routes/password-reset.js';
 import dataManagementRoutes   from './routes/data-management.js';
 import inviteRoutes            from './routes/invites.js';
@@ -83,7 +82,6 @@ const APP_VERSION = (() => {
 // Öffentliche Routen
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', version: APP_VERSION }));
 app.use('/api/setup',          setupRoutes);
-app.use('/api/auth/pair',      pairRoutes);            // /create requireAuth, /consume public (rate-limited)
 app.use('/api/auth',           authRoutes);
 app.use('/api/register',       registerRoutes);
 app.use('/api/passkey',        passkeyRoutes);        // login-options + login-verify sind öffentlich

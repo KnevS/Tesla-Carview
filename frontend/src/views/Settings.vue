@@ -420,46 +420,8 @@
           v-tooltip="$t('settings.passkeyAddTooltip')">
           {{ passkeyRegistering ? $t('settings.passkeyAdding') : $t('settings.passkeyAdd') }}
         </button>
-
-        <!-- QR-Pair-Login: erzeugt einen 60s-Token, mit dem ein Zweit-
-             geraet (Tesla-Browser, iPhone) per QR-Code-Scan einen Login
-             uebernimmt — ohne dort Passkey-Setup zu brauchen. -->
-        <button @click="openPairQr" :disabled="pairLoading"
-          class="btn-secondary text-sm"
-          v-tooltip="$t('settings.pairQrTooltip')">
-          {{ pairLoading ? $t('settings.passkeyAdding') : $t('settings.pairQrBtn') }}
-        </button>
       </div>
     </div>
-
-    <!-- QR-Pair-Modal: zeigt den frisch generierten QR-Code + Countdown.
-         Teleport-to-body, damit der Modal-Hintergrund nicht von der
-         umgebenden .card-backdrop-filter halbtransparent durchscheint. -->
-    <Teleport to="body">
-      <div v-if="pairQr"
-           class="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-4"
-           @click.self="closePairQr">
-        <div class="card max-w-sm space-y-3 text-center">
-          <h3 class="font-semibold text-lg">{{ $t('settings.pairQrTitle') }}</h3>
-          <p class="text-sm text-gray-400">{{ $t('settings.pairQrDesc') }}</p>
-          <img :src="pairQr.qrDataUrl" :alt="$t('settings.pairQrTitle')"
-               class="mx-auto rounded-lg bg-white p-2" />
-          <p class="text-xs text-gray-500 font-mono break-all">{{ pairQr.url }}</p>
-          <p class="text-sm" :class="pairCountdown <= 10 ? 'text-red-400' : 'text-gray-300'">
-            {{ $t('settings.pairQrExpiresIn', { seconds: pairCountdown }) }}
-          </p>
-          <div class="flex gap-2">
-            <button @click="closePairQr" class="btn-secondary flex-1">
-              {{ $t('settings.pseudonymCancel') }}
-            </button>
-            <button @click="openPairQr" :disabled="pairLoading" class="btn-primary flex-1">
-              {{ $t('settings.pairQrNew') }}
-            </button>
-          </div>
-          <p v-if="pairError" class="text-red-400 text-sm">{{ pairError }}</p>
-        </div>
-      </div>
-    </Teleport>
 
     <!-- Geofences fuer Auto-Klassifikation Privat / Arbeitsweg / Dienst -->
     <div v-if="appStore.selectedVehicle" class="card space-y-3">
@@ -1239,15 +1201,6 @@ const passkeyRegistering = ref(false);
 const passkeyError      = ref('');
 const passkeySuccess    = ref('');
 
-// QR-Pair: enthaelt nach openPairQr() { url, qrDataUrl, expiresAt }.
-// pairCountdown ist abgeleitet (Sekunden bis expires), wird per
-// setInterval aktualisiert.
-const pairQr        = ref(null);
-const pairLoading   = ref(false);
-const pairError     = ref('');
-const pairCountdown = ref(0);
-let   pairTimer     = null;
-
 async function loadPasskeys() {
   try {
     const { data } = await api.get('/passkey/credentials');
@@ -1286,39 +1239,6 @@ async function removePasskey(id) {
   } catch (err) {
     passkeyError.value = err.response?.data?.error ?? 'Fehler beim Entfernen';
   }
-}
-
-/**
- * Erzeugt einen frischen Pair-Token (60s TTL) und blendet das QR-Modal
- * ein. Wird auch zur Re-Generation in „Neuer Code" wiederverwendet.
- */
-async function openPairQr() {
-  pairError.value = '';
-  pairLoading.value = true;
-  try {
-    const { data } = await api.post('/auth/pair/create');
-    pairQr.value = data;
-    // Countdown vom Server-Wert ableiten (kein Client-Drift moeglich,
-    // weil expiresAt ein Server-Unixstamp ist).
-    pairCountdown.value = Math.max(0, data.expiresAt - Math.floor(Date.now() / 1000));
-    if (pairTimer) clearInterval(pairTimer);
-    pairTimer = setInterval(() => {
-      pairCountdown.value = Math.max(0, data.expiresAt - Math.floor(Date.now() / 1000));
-      if (pairCountdown.value === 0) {
-        clearInterval(pairTimer);
-        pairTimer = null;
-      }
-    }, 500);
-  } catch (err) {
-    pairError.value = err.response?.data?.error ?? err.message ?? 'Fehler';
-  } finally {
-    pairLoading.value = false;
-  }
-}
-
-function closePairQr() {
-  pairQr.value = null;
-  if (pairTimer) { clearInterval(pairTimer); pairTimer = null; }
 }
 
 const fmtDate = ts => new Date(ts * 1000).toLocaleString('de-DE');

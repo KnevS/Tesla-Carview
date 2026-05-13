@@ -768,19 +768,14 @@
     "passkeyTooltip": "Les passkeys permettent une connexion sans mot de passe via Touch ID, Face ID ou clé de sécurité.",
     "passkeyDevice": "Appareil",
     "passkeyAddTooltip": "Le navigateur s'ouvre — confirmez avec empreinte, reconnaissance faciale ou clé de sécurité",
-    "pairQrBtn": "📱 QR pour le navigateur Tesla",
-    "pairQrTooltip": "Crée un code de 60 secondes qui permet à un autre appareil (navigateur Tesla, iPhone) de se connecter sans mot de passe.",
-    "pairQrTitle": "Code QR pour la connexion d'appareil",
-    "pairQrDesc": "Scannez ce code avec le navigateur Tesla ou un autre appareil. Le code est valable 60 secondes et ne peut être utilisé qu'une seule fois.",
-    "pairQrExpiresIn": "Expire dans {seconds} secondes",
-    "pairQrNew": "Nouveau code"
   },
   "auth": {
     "loginTitle": "Veuillez vous connecter",
     "tenant": "Locataire",
     "tenantPlaceholder": "— Veuillez sélectionner —",
-    "username": "Nom d'utilisateur",
+    "username": "Nom d’utilisateur",
     "password": "Mot de passe",
+    "rememberMe": "Rester connecté (90 jours)",
     "loginBtn": "Se connecter",
     "passkeyBtn": "Se connecter avec passkey",
     "registerLink": "Créer un nouveau locataire",
@@ -793,13 +788,7 @@
     "passkeyFailed": "Échec de la connexion par passkey",
     "tenantHint": "Votre nom de locataire (attribué après l’inscription)",
     "selfHostHint": "Open source · Hébergez votre propre instance pour un usage privé — {link}",
-    "selfHostLink": "sur GitHub",
-    "pairTitle": "Connexion d'appareil",
-    "pairWaiting": "Vérification du code…",
-    "pairSuccess": "Connexion réussie — redirection…",
-    "pairError": "Code invalide ou expiré — veuillez en générer un nouveau dans les paramètres.",
-    "teslaHint": "Vous utilisez le navigateur Tesla ? Utilisez le QR code du menu Système sur votre smartphone pour vous connecter sans mot de passe.",
-    "teslaHintLink": "Instructions dans le manuel"
+    "selfHostLink": "sur GitHub"
   },
   "register": {
     "title": "Créer un nouveau locataire",
