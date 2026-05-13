@@ -1543,6 +1543,9 @@
     "startListening": "Ses girişini başlat",
     "stopListening": "Ses girişini durdur",
     "sendTooltip": "Mesaj gönder (veya Enter'a bas)",
-    "budgetTooltip": "Bugünkü maliyet / günlük bütçe (sent cinsinden). Gece yarısı sıfırlanır."
+    "budgetTooltip": "Bugünkü maliyet / günlük bütçe (sent cinsinden). Gece yarısı sıfırlanır.",
+    "errorBillingTitle": "xAI kredisi mevcut değil",
+    "errorBillingBody": "xAI ekibinizde henüz kredi veya lisans bulunmuyor. xAI hesabınıza en az 5 $ yükleyin – ardından Grok Chat hemen çalışacaktır.",
+    "errorBillingBtn": "console.x.ai'de yükle →"
   }
 }
