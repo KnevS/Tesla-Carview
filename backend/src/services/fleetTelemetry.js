@@ -2,6 +2,7 @@ import { WebSocketServer } from 'ws';
 import protobuf from 'protobufjs';
 import { getDb, getTenantByVin } from '../db/database.js';
 import { recordCall } from './teslaUsage.js';
+import { buildTlmFromPoint, sendToAbrp } from './abrpService.js';
 
 const PROTO = `
 syntax = "proto3";
@@ -202,6 +203,12 @@ function storePoint(vin, ts, point) {
     point.speed_kmh ?? null, point.gear ?? null, powerKw,
     point.soc ? Math.round(point.soc) : null, point.odometer_km ?? null,
   );
+
+  // ABRP Live-Telemetrie (best-effort)
+  if (vehicle.abrp_token) {
+    const enrichedPoint = { ...point, voltage: point.voltage, current: point.current };
+    sendToAbrp(vehicle, buildTlmFromPoint(enrichedPoint, ts)).catch(() => {});
+  }
 }
 
 function haversine(lat1, lon1, lat2, lon2) {

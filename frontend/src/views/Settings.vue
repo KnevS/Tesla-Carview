@@ -196,6 +196,28 @@
             </select>
           </div>
         </div>
+        <!-- ABRP-Integration -->
+        <div class="col-span-2 border-t border-gray-700 pt-3 space-y-3">
+          <p class="text-sm font-medium text-gray-300 flex items-center gap-2">
+            <AppIcon name="map" :size="16" class="text-tesla-red" />
+            A Better Route Planner (ABRP)
+            <InfoTip :text="$t('settings.abrp.sectionTip')" />
+          </p>
+          <div class="grid grid-cols-1 gap-3">
+            <div>
+              <label class="label">{{ $t('settings.abrp.tokenLabel') }}</label>
+              <input v-model="vProfile.abrp_token" type="password" class="input"
+                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                v-tooltip="$t('settings.abrp.tokenTooltip')" />
+              <p class="text-xs text-gray-500 mt-1">{{ $t('settings.abrp.tokenHint') }}</p>
+            </div>
+            <div v-if="vProfile.abrp_token" class="text-xs text-green-400 flex items-center gap-1.5">
+              <AppIcon name="check" :size="13" />
+              {{ $t('settings.abrp.activeHint') }}
+            </div>
+          </div>
+        </div>
+
         <!-- Monta-Konfiguration (nur Dienstwagen) -->
         <div v-if="vProfile.category === 'company'" class="col-span-2 border-t border-gray-700 pt-3 space-y-3">
           <p class="text-sm font-medium text-gray-300">Heimladen / Monta-Konfiguration</p>
@@ -1069,7 +1091,7 @@ async function syncVehicles() {
 }
 
 // Vehicle profile
-const vProfile = ref({ license_plate: '', model: 'm3', image_color: 'PPSW', category: 'private', company_name: '', electricity_rate_kwh: 0.30, monta_client_id: '', monta_api_key: '', monta_charge_point_id: '' });
+const vProfile = ref({ license_plate: '', model: 'm3', image_color: 'PPSW', category: 'private', company_name: '', electricity_rate_kwh: 0.30, monta_client_id: '', monta_api_key: '', monta_charge_point_id: '', abrp_token: '' });
 const vMsg = ref('');
 const vOk  = ref(false);
 
@@ -1329,6 +1351,7 @@ onMounted(async () => {
       monta_client_id:       v.monta_client_id       ?? '',
       monta_api_key:         v.monta_api_key         ?? '',
       monta_charge_point_id: v.monta_charge_point_id ?? '',
+      abrp_token:            v.abrp_token            ?? '',
     };
   }
 });

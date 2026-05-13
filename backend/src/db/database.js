@@ -423,6 +423,9 @@ function runTenantMigrations(db) {
   if (!vCols.includes('monta_client_id')) {
     db.exec('ALTER TABLE vehicles ADD COLUMN monta_client_id TEXT');
   }
+  if (!vCols.includes('abrp_token')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN abrp_token TEXT');
+  }
   // state_updated_at + odometer_km direkt auf vehicles — der Poller
   // pflegt beides bei jedem Tesla-API-Call. odometer_km wird zusaetzlich
   // im JOIN von service-intervals (Faelligkeit nach km) gebraucht; ohne

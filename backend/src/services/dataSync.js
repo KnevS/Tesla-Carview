@@ -2,6 +2,7 @@ import { sendChargingCompleteNotification } from './notifications.js';
 import { maybeAutoClassify } from './geofenceClassifier.js';
 import { maybeFuzz } from './gpsFuzzing.js';
 import { dispatch as dispatchWebhook } from './webhookDispatcher.js';
+import { buildTlmFromState, sendToAbrp } from './abrpService.js';
 
 const BATTERY_SNAPSHOT_INTERVAL = 15 * 60;
 const MODEL_Y_USABLE_KWH = 75;
@@ -114,6 +115,12 @@ export async function syncVehicleState(db, vehicle, state) {
     handleCharging(db, vehicle, charge, drive, now);
   } else {
     finishActiveCharging(db, vehicle, charge, now);
+  }
+
+  // ABRP Live-Telemetrie (best-effort, blockiert nicht)
+  if (vehicle.abrp_token) {
+    const freshVehicle = db.prepare('SELECT * FROM vehicles WHERE id=?').get(vehicle.id);
+    sendToAbrp(freshVehicle, buildTlmFromState(state, now)).catch(() => {});
   }
 }
 
