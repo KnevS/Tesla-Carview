@@ -17,6 +17,7 @@ This documentation is aimed at **self-hosters, administrators and developers**. 
 | [01-quickstart.en.md](01-quickstart.en.md) | Quickstart: clone the repo, run backend + frontend locally |
 | [02-deployment.en.md](02-deployment.en.md) | Production deployment on a Linux server / Raspberry Pi with Docker + nginx + Let's Encrypt |
 | [14-network-access.en.md](14-network-access.en.md) | **Accessible from anywhere** without a static IP — DynDNS, FritzBox, Cloudflare Tunnel, VPS, own domain |
+| [15-raspberry-pi-storage.en.md](15-raspberry-pi-storage.en.md) | **Raspberry Pi storage** — replace SD card with USB SSD, NVMe HAT+, PXE network boot |
 | [07-setup-wizard.en.md](07-setup-wizard.en.md) | Interactive configuration assistant (`deploy/setup-wizard.sh`) |
 | [08-dokploy.en.md](08-dokploy.en.md) | Alternative: deployment via Dokploy |
 
