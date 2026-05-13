@@ -113,9 +113,12 @@ const FLEET_TIMEOUT_MS = 20_000;
 export async function apiGet(db, path) {
   return trackedCall(db, 'GET', path, async () => {
     const token = await getAccessToken(db);
-    const res   = await axios.get(`${getFleetApiUrl()}${path}`, {
+    const res = await axios.get(`${getFleetApiUrl()}${path}`, {
       headers: { Authorization: `Bearer ${token}` },
       timeout: FLEET_TIMEOUT_MS,
+    }).catch(err => {
+      if (err.response) console.error(`[TeslaAPI] ${path} → HTTP ${err.response.status}:`, JSON.stringify(err.response.data));
+      throw err;
     });
     return res.data;
   });
