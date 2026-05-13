@@ -260,11 +260,10 @@ async function send() {
   streamingText.value = '';
 
   try {
-    const token = authStore.token;
     const resp = await fetch(`/api/grok/chats/${activeChatId.value}/stream`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Bearer ${authStore.accessToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ content: text, includeContext: includeContext.value }),
