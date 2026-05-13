@@ -759,7 +759,16 @@
     "gpsFuzzingEnable": "Ενεργοποίηση GPS-fuzzing για νέες διαδρομές",
     "gpsFuzzingRadius": "Ακτίνα (μέτρα)",
     "gpsFuzzingRadiusHint": "50 m = γειτονιά · 200 m = τετράγωνο · 1000 m = συνοικία",
-    "gpsFuzzingSave": "Αποθήκευση"
+    "gpsFuzzingSave": "Αποθήκευση",
+    "passkeyTooltip": "Τα passkeys επιτρέπουν είσοδο χωρίς κωδικό με Touch ID, Face ID ή κλειδί ασφαλείας.",
+    "passkeyDevice": "Συσκευή",
+    "passkeyAddTooltip": "Θα ανοίξει διάλογος — επιβεβαιώστε με δαχτυλικό αποτύπωμα, αναγνώριση προσώπου ή κλειδί ασφαλείας",
+    "pairQrBtn": "📱 QR για το Tesla browser",
+    "pairQrTooltip": "Δημιουργεί κωδικό 60 δευτερολέπτων ώστε άλλη συσκευή (Tesla browser, iPhone) να συνδεθεί χωρίς κωδικό.",
+    "pairQrTitle": "Κωδικός QR για σύνδεση συσκευής",
+    "pairQrDesc": "Σαρώστε αυτόν τον κωδικό με το Tesla browser ή άλλη συσκευή. Ο κωδικός ισχύει 60 δευτερόλεπτα και μπορεί να χρησιμοποιηθεί μόνο μία φορά.",
+    "pairQrExpiresIn": "Λήγει σε {seconds} δευτερόλεπτα",
+    "pairQrNew": "Νέος κωδικός"
   },
   "auth": {
     "loginTitle": "Παρακαλώ συνδεθείτε",
@@ -779,7 +788,11 @@
     "passkeyFailed": "Αποτυχία σύνδεσης με passkey",
     "tenantHint": "Το όνομα του ενοικιαστή σας (εκχωρείται μετά την εγγραφή)",
     "selfHostHint": "Ανοιχτός κώδικας · Φιλοξενήστε τη δική σας υλοποίηση για ιδιωτική χρήση — {link}",
-    "selfHostLink": "στο GitHub"
+    "selfHostLink": "στο GitHub",
+    "pairTitle": "Σύνδεση συσκευής",
+    "pairWaiting": "Έλεγχος κωδικού…",
+    "pairSuccess": "Επιτυχής σύνδεση — ανακατεύθυνση…",
+    "pairError": "Μη έγκυρος ή ληγμένος κωδικός — δημιουργήστε νέο από τις ρυθμίσεις."
   },
   "register": {
     "title": "Εγγραφή νέου μισθωτή",

@@ -104,6 +104,7 @@ Typical use case: charging at the workplace, paid by the employer, that should n
 ## 🔐 Security {#security}
 
 - 🔑 **Passkey / WebAuthn** — Passwordless login with fingerprint, Face ID or hardware key
+- 📱 **QR code login for the car** — One-time token (60 s) created in settings, scannable with the Tesla browser or a second device — no password typing required in the car
 - 📱 **TOTP MFA** — Two-factor authentication with an authenticator app
 - 🛡️ **Account lockout** — Account is locked for 15 min after 5 failed attempts
 - 🍪 **Refresh token** — httpOnly cookie, valid for 7 days, automatic rotation

@@ -85,6 +85,22 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    /**
+     * Login per QR-Pair-Token. Wird von /pair/:token aus aufgerufen,
+     * wenn ein anderes Geraet (Settings → „QR fuer Tesla-Browser")
+     * einen 60s-Token erzeugt hat. Setzt den Auth-State identisch
+     * zu loginWithPasskey().
+     */
+    async loginWithPairToken(token) {
+      const { data } = await api.post('/auth/pair/consume', { token });
+      this.accessToken = data.accessToken;
+      this.user        = data.user;
+      if (data.user?.tenantSlug) {
+        this.tenantSlug = data.user.tenantSlug;
+        localStorage.setItem(TENANT_SLUG_KEY, data.user.tenantSlug);
+      }
+    },
+
     async tryRestoreSession() {
       try {
         const token    = await this.refresh();
