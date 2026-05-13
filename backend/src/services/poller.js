@@ -9,58 +9,91 @@ import {
 } from './teslaCircuitBreaker.js';
 
 /**
- * Hybrid-Polling-Strategie.
+ * Hybrid-Polling-Strategie mit Quota-Schonung.
  *
- * Wir gewichten Fleet Telemetry (push) als PRIMAERE Datenquelle —
- * dort wo das Auto live streamt, brauchen wir keinen Polling-Call mehr
- * fuer Position/SOC/Speed. Wenn Telemetry fuer eine VIN aktiv ist
- * (letztes Signal < TELEMETRY_FRESH_S), fallen wir auf den Heartbeat-
- * Intervall zurueck — nur noch ein vehicle_data-Call pro Stunde, um
- * vehicle_config + option_codes + Stammdaten aktuell zu halten.
+ * Drei Betriebsmodi (ohne Telemetry):
+ *   DRIVING  — shift_state D/R/N → 30s  (Auto faehrt aktiv)
+ *   PARKED   — online aber steht → 5min (laedt, wartet, klimatisiert)
+ *   IDLE     — offline           → 15min
  *
- * Wenn Telemetry NICHT aktiv ist (kein Approval / nicht konfiguriert /
- * Auto schweigt): kompletter Polling-Pfad wie frueher — alle 30s wenn
- * online, alle 5min im Idle.
+ * Mit Fleet Telemetry:
+ *   HEARTBEAT — 1 Call/Stunde zur Stammdaten-Aktualisierung
  *
- * Das spart bei Telemetry-aktiven Mandanten >95% des API-Budgets und
- * entlastet Tesla's Fleet API — was wiederum die Kalibrierung des
- * Daily-Limits angenehm macht.
+ * Tages-Cap: max. DAILY_CAP Calls pro Fahrzeug. Bei Erreichen 30min
+ * Zwangspause — schützt gegen unerwartete Endlos-Online-Phasen.
  */
-const POLL_INTERVAL_ACTIVE     = 30_000;     // 30s — Auto online + kein Streaming
-const POLL_INTERVAL_IDLE       = 300_000;    // 5min — Auto offline + kein Streaming
-const POLL_INTERVAL_HEARTBEAT  = 3_600_000;  // 1h — Auto streamt via Telemetry
-const TELEMETRY_FRESH_S        = 15 * 60;    // 15min: Stream gilt als "aktiv"
+const POLL_INTERVAL_DRIVING   = 30_000;      // 30s  — faehrt (shift D/R/N)
+const POLL_INTERVAL_PARKED    = 300_000;     // 5min — online, steht
+const POLL_INTERVAL_IDLE      = 900_000;     // 15min — offline (war 5min)
+const POLL_INTERVAL_HEARTBEAT = 3_600_000;   // 1h   — Telemetry aktiv
+const TELEMETRY_FRESH_S       = 15 * 60;     // 15min: Telemetry-Signal gilt als frisch
+
+const DAILY_CAP     = 100;           // max. vehicle_data-Calls pro Fahrzeug & Tag
+const CAP_PAUSE_MS  = 30 * 60_000;  // 30min Pause nach Cap
+
+// In-memory Tageszaehler — Key: vehicle.id (DB-ID, nicht tesla_id)
+const dailyCalls = new Map();
+
+function todayKey() { return new Date().toISOString().slice(0, 10); }
+
+function getCapRecord(vehicleId) {
+  const today = todayKey();
+  let r = dailyCalls.get(vehicleId);
+  if (!r || r.date !== today) {
+    r = { date: today, count: 0, pausedAt: null };
+    dailyCalls.set(vehicleId, r);
+  }
+  return r;
+}
+
+function isCapPaused(vehicleId) {
+  const r = dailyCalls.get(vehicleId);
+  if (!r?.pausedAt) return false;
+  if (Date.now() - r.pausedAt > CAP_PAUSE_MS) { r.pausedAt = null; return false; }
+  return true;
+}
+
+function incrementCap(vehicleId, displayName) {
+  const r = getCapRecord(vehicleId);
+  r.count++;
+  if (r.count >= DAILY_CAP && !r.pausedAt) {
+    r.pausedAt = Date.now();
+    console.warn(`[Poller] ${displayName}: Tages-Cap (${DAILY_CAP} Calls) erreicht → 30min Pause`);
+  }
+}
+
+/** Auto faehrt aktiv wenn shift_state D, R oder N gesetzt ist. */
+function isDriving(state) {
+  const s = state?.drive_state?.shift_state;
+  return s === 'D' || s === 'R' || s === 'N';
+}
+
+function isCoveredByTelemetry(vehicle, nowS) {
+  return vehicle.telemetry_last_signal_at != null
+    && (nowS - vehicle.telemetry_last_signal_at) <= TELEMETRY_FRESH_S;
+}
 
 export async function startPoller() {
   console.log('[Poller] Starte Tesla Hybrid-Service (Telemetry-first, Polling als Fallback)...');
   poll();
 }
 
-/** Ein Vehicle gilt als "via Telemetry abgedeckt", wenn das letzte
- *  Streaming-Signal innerhalb der Frische-Schwelle eingetroffen ist. */
-function isCoveredByTelemetry(vehicle, nowS) {
-  return vehicle.telemetry_last_signal_at != null
-    && (nowS - vehicle.telemetry_last_signal_at) <= TELEMETRY_FRESH_S;
-}
-
 async function poll() {
-  let anyActivePolling = false;
+  let anyDriving     = false; // → POLL_INTERVAL_DRIVING (30s)
+  let anyParked      = false; // → POLL_INTERVAL_PARKED  (5min)
   const nowS = Math.floor(Date.now() / 1000);
 
   try {
     const tenants = getAllTenants();
     for (const tenant of tenants) {
       if (tenant.status === 'suspended') continue;
-      // Demo-Mandanten haben keine Tesla-Verbindung.
       if (tenant.is_demo) continue;
-      // Circuit Breaker: bei N+ aufeinanderfolgenden 403ern pausiert
-      // der Poller diesen Mandanten 1h lang. Saves Budget + verhindert
-      // weitere Schaden-Calls, falls Tesla das Konto wegen
-      // Billing-Limit gesperrt hat.
       if (isCircuitOpen(tenant.id)) continue;
+
       try {
         const db = getDb(tenant.id);
-        // Erstlauf: Fahrzeugliste vom Tesla-Account ziehen.
+
+        // Erstlauf: Fahrzeugliste holen
         if (!db.prepare('SELECT 1 FROM vehicles LIMIT 1').get()) {
           try {
             const data = await getVehicles(db);
@@ -70,52 +103,44 @@ async function poll() {
               insert.run(String(v.id), v.vin, v.display_name, v.model_name);
               if (v.vin) registerVin(v.vin, tenant.id);
             }
-            if (list.length) console.log(`[Poller] ${list.length} Fahrzeug(e) für Mandant "${tenant.slug}" synchronisiert`);
+            if (list.length) console.log(`[Poller] ${list.length} Fahrzeug(e) fuer Mandant "${tenant.slug}" synchronisiert`);
             recordSuccess(tenant.id, tenant.slug);
           } catch (err) {
-            // kein Token / API nicht erreichbar — aber 403 zaehlt fuer den Breaker.
-            if (err.response?.status === 403) {
-              record403(tenant.id, tenant.slug);
-              continue; // weiter zum naechsten Mandanten
-            }
+            if (err.response?.status === 403) { record403(tenant.id, tenant.slug); continue; }
             if (err.message && err.response?.status !== 401) recordOtherFailure(tenant.id);
           }
         }
+
         const vehicles = db.prepare('SELECT * FROM vehicles').all();
-        // Wenn der erste Call fuer diesen Mandanten 403 liefert, ist
-        // jeder weitere Call fuer dieselbe VIN ebenfalls 403 — Konto-
-        // weit gilt dieselbe Sperre. Wir brechen die innere Schleife
-        // also nach dem ersten 403 ab, statt den Counter pro Fahrzeug
-        // hochzudrehen.
         let tenant403 = false;
+
         for (const vehicle of vehicles) {
           if (tenant403) break;
-          // Hybrid-Entscheidung pro Fahrzeug:
-          // - via Telemetry abgedeckt UND letzter Polling-Call < 1h:
-          //   ueberspringen. Streaming liefert die Live-Daten frisch.
-          // - via Telemetry abgedeckt UND >= 1h kein Poll:
-          //   einen Heartbeat-Poll machen (vehicle_config-Refresh).
-          // - nicht via Telemetry abgedeckt:
-          //   normal pollen wie frueher.
-          const covered = isCoveredByTelemetry(vehicle, nowS);
+
+          // Telemetry-Heartbeat-Logik (unveraendert)
+          const covered  = isCoveredByTelemetry(vehicle, nowS);
           const lastPoll = vehicle.state_updated_at ?? 0;
-          if (covered && (nowS - lastPoll) < POLL_INTERVAL_HEARTBEAT / 1000) {
-            continue; // Streaming reicht — kein API-Call.
-          }
+          if (covered && (nowS - lastPoll) < POLL_INTERVAL_HEARTBEAT / 1000) continue;
+
+          // Tages-Cap: Pause wenn Limit erreicht
+          if (isCapPaused(vehicle.id)) continue;
 
           try {
             const data  = await getVehicleData(db, vehicle.tesla_id);
             const state = data?.response;
             if (!state) continue;
-            if (state.state === 'online' && !covered) anyActivePolling = true;
+
+            incrementCap(vehicle.id, vehicle.display_name);
+
+            if (!covered) {
+              if (isDriving(state))          anyDriving = true;
+              else if (state.state === 'online') anyParked = true;
+            }
+
             await syncVehicleState(db, vehicle, state);
             recordSuccess(tenant.id, tenant.slug);
           } catch (err) {
             if (err.response?.status === 403) {
-              // Konto-weite Sperre — Breaker triggern und naechsten
-              // Mandanten anfahren. 403 ist bei Tesla Fleet API immer
-              // ein Account-Level-Signal (EXCEEDED_LIMIT / disabled),
-              // niemals ein vehicle-spezifischer Permission-Issue.
               record403(tenant.id, tenant.slug);
               tenant403 = true;
               break;
@@ -134,8 +159,9 @@ async function poll() {
     console.error('[Poller] Allgemeiner Fehler:', err.message);
   }
 
-  // Loop-Intervall: aktiv-pollende Mandanten brauchen 30s-Cycle,
-  // sonst reicht 5min — auch wenn einzelne Autos im Heartbeat-Modus
-  // sind, kostet das ja nichts.
-  setTimeout(poll, anyActivePolling ? POLL_INTERVAL_ACTIVE : POLL_INTERVAL_IDLE);
+  // Naechster Lauf: schnellster Modus der gerade aktiv ist gewinnt
+  const next = anyDriving  ? POLL_INTERVAL_DRIVING
+             : anyParked   ? POLL_INTERVAL_PARKED
+             :               POLL_INTERVAL_IDLE;
+  setTimeout(poll, next);
 }
