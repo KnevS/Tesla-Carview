@@ -41,9 +41,9 @@ export const useAuthStore = defineStore('auth', {
       } catch { /* ignorieren */ }
     },
 
-    async login(username, password, tenantSlug) {
+    async login(username, password, tenantSlug, rememberMe = false) {
       const slug = tenantSlug || this.tenantSlug || undefined;
-      const { data } = await api.post('/auth/login', { username, password, tenantSlug: slug });
+      const { data } = await api.post('/auth/login', { username, password, tenantSlug: slug, rememberMe });
       if (data.requiresMfa) {
         this.mfaTempToken = data.tempToken;
         return { requiresMfa: true };
@@ -77,22 +77,6 @@ export const useAuthStore = defineStore('auth', {
         tenantId:    opts.tenantId,
         response,
       });
-      this.accessToken = data.accessToken;
-      this.user        = data.user;
-      if (data.user?.tenantSlug) {
-        this.tenantSlug = data.user.tenantSlug;
-        localStorage.setItem(TENANT_SLUG_KEY, data.user.tenantSlug);
-      }
-    },
-
-    /**
-     * Login per QR-Pair-Token. Wird von /pair/:token aus aufgerufen,
-     * wenn ein anderes Geraet (Settings → „QR fuer Tesla-Browser")
-     * einen 60s-Token erzeugt hat. Setzt den Auth-State identisch
-     * zu loginWithPasskey().
-     */
-    async loginWithPairToken(token) {
-      const { data } = await api.post('/auth/pair/consume', { token });
       this.accessToken = data.accessToken;
       this.user        = data.user;
       if (data.user?.tenantSlug) {

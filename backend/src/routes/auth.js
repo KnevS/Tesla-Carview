@@ -16,8 +16,9 @@ import { getMasterDb, getDb, getTenantBySlug, getTenantByPseudonym, getAllTenant
 
 const router = Router();
 
-const ACCESS_TTL  = '15m';
-const REFRESH_TTL = 7 * 24 * 60 * 60;
+const ACCESS_TTL    = '15m';
+const REFRESH_TTL   = 7  * 24 * 60 * 60;
+const REMEMBER_TTL  = 90 * 24 * 60 * 60;
 
 function issueAccessToken(user, tenantId) {
   return jwt.sign(
@@ -27,22 +28,22 @@ function issueAccessToken(user, tenantId) {
   );
 }
 
-function issueRefreshToken(userId, tenantId, req) {
+function issueRefreshToken(userId, tenantId, req, ttl = REFRESH_TTL) {
   const raw  = randomBytes(48).toString('hex');
   const hash = createHash('sha256').update(raw).digest('hex');
   getMasterDb().prepare(
     `INSERT INTO refresh_tokens (tenant_id, user_id, token_hash, expires_at, ip_address, user_agent)
      VALUES (?, ?, ?, ?, ?, ?)`
   ).run(tenantId, userId, hash,
-    Math.floor(Date.now() / 1000) + REFRESH_TTL,
+    Math.floor(Date.now() / 1000) + ttl,
     req.ip, req.headers['user-agent']?.slice(0, 255));
   return raw;
 }
 
-function setRefreshCookie(res, token) {
+function setRefreshCookie(res, token, ttl = REFRESH_TTL) {
   res.cookie('refresh_token', token, {
     httpOnly: true, secure: true, sameSite: 'Lax',
-    maxAge: REFRESH_TTL * 1000, path: '/api/auth',
+    maxAge: ttl * 1000, path: '/api/auth',
   });
 }
 
@@ -63,8 +64,9 @@ router.post('/login', loginRateLimit, validate(z.object({
   username:    z.string().min(1).max(64),
   password:    z.string().min(1).max(256),
   tenantSlug:  z.string().min(1).max(64).optional(),
+  rememberMe:  z.boolean().optional(),
 })), async (req, res) => {
-  const { username, password, tenantSlug } = req.body;
+  const { username, password, tenantSlug, rememberMe } = req.body;
 
   const tenant = resolveTenant(tenantSlug);
   if (!tenant) {
@@ -108,9 +110,10 @@ router.post('/login', loginRateLimit, validate(z.object({
   }
 
   resetFailedLogins(db, user.id);
+  const ttl          = rememberMe ? REMEMBER_TTL : REFRESH_TTL;
   const accessToken  = issueAccessToken(user, tenant.id);
-  const refreshToken = issueRefreshToken(user.id, tenant.id, req);
-  setRefreshCookie(res, refreshToken);
+  const refreshToken = issueRefreshToken(user.id, tenant.id, req, ttl);
+  setRefreshCookie(res, refreshToken, ttl);
   auditLog(db, user.id, 'login_success', req);
   res.json({
     accessToken,
