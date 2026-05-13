@@ -429,6 +429,20 @@ Tesla Carview bir PWA'dır — App Store olmadan yerel uygulama gibi kurulabilir
 
 Yeşil (her şey yolunda), sarı (dikkat, örn. token yakında dolacak) veya kırmızı (eylem gerekli).
 
+## 💬 Grok Chat {#grok}
+
+**Grok Chat**, xAI destekli konuşmayı doğrudan Tesla Carview'a getirir. Seyahatleriniz, şarj verileriniz ve araç istatistikleriniz hakkında doğal dilde sorular sorabilirsiniz.
+
+**Bağlam**: Araç verileri düğmesi (gösterge simgesi) etkinken, sohbet son seyahat, son şarj ve kilometre sayacı bilgisini bağlam olarak gönderir. Genel sorular için kapatın.
+
+**Yeni sohbet**: Kenar çubuğunda **+ Yeni Sohbet** düğmesine tıklayın. Sorunuzu yazın ve Enter'a veya Gönder'e basın. Metin akışlı olarak görünür.
+
+**Tesla tarayıcısı**: Küçük ekranda (< 768 px) kenar çubuğu yukarı katlanır. Ses girişi Web Speech API kullanır (Tesla tarayıcısı V12+).
+
+**Günlük bütçe**: Varsayılan **100 sent/gün**. Mevcut kullanım kenar çubuğunun üstünde gösterilir.
+
+**Gizlilik**: İstekler backend üzerinden yönlendirilir — tarayıcınızdan xAI'ye hiçbir zaman doğrudan değil.
+
 ## 🔧 Sorun giderme {#troubleshooting}
 
 **Araç GPS verisi döndürmüyor**

@@ -48,6 +48,12 @@ export const NAV_GROUPS = [
     ],
   },
   {
+    id: 'ai', adminOnly: false,
+    items: [
+      { key: 'grok', to: '/grok', icon: 'sparkles', emojiFallback: '💬', label: 'Grok', tooltip: 'Chat mit Grok KI — stelle Fragen zu deinen Fahrten, Ladedaten und deinem Tesla' },
+    ],
+  },
+  {
     id: 'admin', adminOnly: true,
     items: [
       { key: 'users',  to: '/admin/users', icon: 'users',    emojiFallback: '👥', label: 'Benutzer',    tooltip: 'Benutzerverwaltung – Konten anlegen, Fahrzeuge zuweisen, Reset-Links generieren' },

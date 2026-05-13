@@ -429,6 +429,20 @@ Bajo **System**, los administradores ven una tarjeta tipo semáforo con cinco co
 
 Verde (todo bien), amarillo (atención, p. ej. token a punto de caducar) o rojo (acción requerida).
 
+## 💬 Grok Chat {#grok}
+
+**Grok Chat** integra la conversación xAI directamente en Tesla Carview. Haz preguntas en lenguaje natural sobre tus viajes, datos de carga y estadísticas del vehículo.
+
+**Contexto**: Cuando el botón de datos del vehículo (icono velocímetro) está activo, el chat envía tu último viaje, última carga y odómetro como contexto. Desactívalo para preguntas generales.
+
+**Nuevo chat**: Haz clic en **+ Nuevo chat** en la barra lateral. Escribe tu pregunta y pulsa Enter o Enviar. El texto aparece en streaming.
+
+**Navegador Tesla**: En pantalla pequeña (< 768 px), la barra lateral se colapsa arriba. Entrada de voz mediante Web Speech API (navegador Tesla V12+).
+
+**Presupuesto diario**: Por defecto **100 céntimos/día**. El uso actual se muestra arriba en la barra lateral.
+
+**Privacidad**: Las solicitudes se enrutan a través del backend — nunca directamente desde tu navegador a xAI.
+
 ## 🔧 Solución de problemas {#troubleshooting}
 
 **El vehículo no devuelve datos GPS**

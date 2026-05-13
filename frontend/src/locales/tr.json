@@ -89,9 +89,14 @@
       "label": "Sistem",
       "tooltip": "Sürüm bilgileri, CPU/RAM kullanımı ve veritabanı istatistikleri"
     },
+    "grok": {
+      "label": "Grok",
+      "tooltip": "Grok yapay zeka ile sohbet edin — seyahatleriniz, şarj verileriniz ve Tesla'nız hakkında soru sorun"
+    },
     "group_overview": "Genel Bakış",
     "group_analytics": "Analiz",
-    "group_admin": "Yönetim"
+    "group_admin": "Yönetim",
+    "group_ai": "Yapay Zeka"
   },
   "dashboard": {
     "title": "Gösterge paneli",
@@ -1530,5 +1535,21 @@
     "doneText": "Merhaba {username} — {tenant} altındaki hesabınız oluşturuldu. Şimdi giriş yapabilirsiniz.",
     "roleAdmin": "Yönetici",
     "roleUser": "Kullanıcı"
+  },
+  "grok": {
+    "title": "Grok Sohbet",
+    "newChat": "Yeni Sohbet",
+    "placeholder": "Grok'a seyahatleriniz, şarj verileriniz veya Tesla'nız hakkında bir şeyler sorun …",
+    "send": "Gönder",
+    "budgetLabel": "bugün",
+    "budgetExceeded": "Günlük bütçe doldu — yarın tekrar kullanılabilir.",
+    "contextToggle": "Araç verilerini dahil et",
+    "emptyState": "Henüz sohbet yok — yeni bir tane başlatın.",
+    "welcomeHint": "Yeni bir sohbet başlatın ve Tesla verileriniz hakkında Grok'a sorun.",
+    "deleteChat": "Sohbeti sil",
+    "loading": "Yükleniyor …",
+    "error": "Gönderilemedi.",
+    "startListening": "Ses girişini başlat",
+    "stopListening": "Ses girişini durdur"
   }
 }
