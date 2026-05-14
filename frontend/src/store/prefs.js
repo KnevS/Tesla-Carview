@@ -52,13 +52,24 @@ const DEFAULTS = {
   wizard_completed: false,
 };
 
+const LS_KEY = 'tcv-prefs';
+
+function lsLoad() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || 'null') ?? {}; } catch { return {}; }
+}
+function lsSave(data) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(data)); } catch { /* quota */ }
+}
+
 let _saveTimer = null;
 let _pendingDelta = {};
 
 export const usePrefsStore = defineStore('prefs', {
   state: () => ({
     loaded: false,
-    data: { ...DEFAULTS },
+    // localStorage als sofortiger Fallback, damit Theme/Sprache schon vor dem
+    // API-Aufruf stimmt; Server-Daten überschreiben beim load().
+    data: { ...DEFAULTS, ...lsLoad() },
   }),
 
   getters: {
@@ -85,10 +96,13 @@ export const usePrefsStore = defineStore('prefs', {
       try {
         const { data } = await api.get('/users/me/preferences');
         this.data = { ...DEFAULTS, ...data };
+        lsSave(this.data);
         this.loaded = true;
         this._applyToStores();
       } catch {
+        // Server nicht erreichbar — localStorage-Fallback bereits im State
         this.loaded = true;
+        this._applyToStores();
       }
     },
 
@@ -101,6 +115,7 @@ export const usePrefsStore = defineStore('prefs', {
         Object.assign(this.data, keyOrDelta);
         Object.assign(_pendingDelta, keyOrDelta);
       }
+      lsSave(this.data);
       clearTimeout(_saveTimer);
       _saveTimer = setTimeout(() => this._flush(), 800);
     },
@@ -108,9 +123,10 @@ export const usePrefsStore = defineStore('prefs', {
     /** Batch-Save (z.B. nach Wizard-Confirm) */
     async save(delta) {
       Object.assign(this.data, delta);
+      lsSave(this.data);
       try {
         await api.patch('/users/me/preferences', delta);
-      } catch { /* offline — lokale Änderung bleibt */ }
+      } catch { /* offline — localStorage-Kopie reicht */ }
       this._applyToStores();
     },
 
@@ -118,7 +134,12 @@ export const usePrefsStore = defineStore('prefs', {
       if (!Object.keys(_pendingDelta).length) return;
       const delta = { ..._pendingDelta };
       _pendingDelta = {};
-      try { await api.patch('/users/me/preferences', delta); } catch { /* silent */ }
+      try {
+        await api.patch('/users/me/preferences', delta);
+      } catch {
+        // Beim nächsten _flush erneut versuchen
+        Object.assign(_pendingDelta, delta);
+      }
     },
 
     _applyToStores() {

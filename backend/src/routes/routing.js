@@ -264,19 +264,24 @@ router.post('/plan', async (req, res) => {
   let batKwh  = typeof battery_kwh === 'number' ? battery_kwh : null;
 
   if (soc == null || kwh100 == null) {
-    const bat = req.db.prepare(
-      'SELECT soc, rated_range_km FROM battery_history WHERE vehicle_id=? ORDER BY timestamp DESC LIMIT 1'
-    ).get(vehicleId);
-    const cons = req.db.prepare(`
-      SELECT AVG(energy_used_kwh / distance_km * 100.0) AS avg
-      FROM (SELECT energy_used_kwh, distance_km FROM trips
-            WHERE vehicle_id=? AND distance_km>2 AND energy_used_kwh>0 LIMIT 100)
-    `).get(vehicleId);
-    soc    ??= bat?.soc ?? 80;
-    kwh100 ??= cons?.avg ?? 18;
-    if (batKwh == null && bat?.rated_range_km && soc > 0) {
-      const range100 = bat.rated_range_km / (soc / 100);
-      batKwh = range100 * (kwh100 / 100);
+    try {
+      const bat = req.db.prepare(
+        'SELECT soc, rated_range_km FROM battery_snapshots WHERE vehicle_id=? ORDER BY timestamp DESC LIMIT 1'
+      ).get(vehicleId);
+      const cons = req.db.prepare(`
+        SELECT AVG(energy_used_kwh / distance_km * 100.0) AS avg
+        FROM (SELECT energy_used_kwh, distance_km FROM trips
+              WHERE vehicle_id=? AND distance_km>2 AND energy_used_kwh>0 LIMIT 100)
+      `).get(vehicleId);
+      soc    ??= bat?.soc ?? 80;
+      kwh100 ??= cons?.avg ?? 18;
+      if (batKwh == null && bat?.rated_range_km && soc > 0) {
+        const range100 = bat.rated_range_km / (soc / 100);
+        batKwh = range100 * (kwh100 / 100);
+      }
+    } catch {
+      soc    ??= 80;
+      kwh100 ??= 18;
     }
   }
   batKwh ??= 75; // Fallback 75 kWh
