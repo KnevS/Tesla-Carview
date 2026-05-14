@@ -83,4 +83,51 @@ router.get('/chargers', async (req, res) => {
   }
 });
 
+// GET /api/routing/geocode?q=&lang=
+// Proxy zu Nominatim — umgeht Browser-CSP-Einschränkungen
+router.get('/geocode', async (req, res) => {
+  const q    = (req.query.q ?? '').trim();
+  const lang = (req.query.lang ?? 'de').slice(0, 10);
+  if (!q || q.length < 2) return res.json([]);
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&addressdetails=0`;
+    const r   = await fetch(url, {
+      headers: {
+        'Accept-Language': lang,
+        'User-Agent': 'TeslaCarview/2.2 (https://github.com/KnevS/Tesla-Carview)',
+      },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!r.ok) return res.json([]);
+    res.json(await r.json());
+  } catch {
+    res.json([]);
+  }
+});
+
+// GET /api/routing/reverse?lat=&lon=&lang=
+// Proxy für Reverse-Geocoding (Koordinaten → Adresse)
+router.get('/reverse', async (req, res) => {
+  const lat  = parseFloat(req.query.lat);
+  const lon  = parseFloat(req.query.lon);
+  const lang = (req.query.lang ?? 'de').slice(0, 10);
+  if (isNaN(lat) || isNaN(lon)) return res.status(400).json({ error: 'lat und lon erforderlich' });
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+    const r   = await fetch(url, {
+      headers: {
+        'Accept-Language': lang,
+        'User-Agent': 'TeslaCarview/2.2 (https://github.com/KnevS/Tesla-Carview)',
+      },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!r.ok) return res.json({ display_name: `${lat.toFixed(5)}, ${lon.toFixed(5)}` });
+    res.json(await r.json());
+  } catch {
+    res.json({ display_name: `${lat.toFixed(5)}, ${lon.toFixed(5)}` });
+  }
+});
+
 export default router;

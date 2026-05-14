@@ -49,6 +49,7 @@ import webhookRoutes from './routes/webhooks.js';
 import grokRoutes from './routes/grok.js';
 import savedRoutesRoutes from './routes/savedRoutes.js';
 import routingRoutes from './routes/routing.js';
+import pairRoutes from './routes/pair.js';
 
 const app    = express();
 const PORT   = process.env.PORT || 3000;
@@ -93,6 +94,7 @@ app.use('/api/tesla-usage', teslaUsageWebhookRouter);   // /webhook/email — he
 app.use('/api/legal',       legalPublicRoutes);          // GET /legal/{scope}/{locale} — Imprint/Privacy/Terms public
 app.use('/api/user-invites', userInviteRoutes);            // /:token/validate (GET) + /:token/accept (POST) — public
 app.use('/api/demo',        demoRoutes);                    // signup + status — public, only active when DEMO_ENABLED=true
+app.use('/api/pair',       pairRoutes);                     // QR-Pair-Login: init + poll + info + confirm — public
 
 // Alle weiteren Routen benötigen einen gültigen JWT + Mandanten-DB (req.db)
 app.use(requireAuth);

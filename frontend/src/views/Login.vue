@@ -68,7 +68,46 @@
             <AppIcon name="lock" :size="16" />
             {{ passkeyLoading ? $t('auth.passkeyAuthenticating') : $t('auth.passkeyBtn') }}
           </button>
+
+          <!-- QR-Pair-Login: immer anzeigen — funktioniert auch im Tesla-Browser -->
+          <button type="button" @click="openQrModal"
+            class="w-full py-3 rounded-lg bg-gray-800 hover:bg-gray-700 border border-gray-600 text-sm text-gray-300 flex items-center justify-center gap-2 transition">
+            <AppIcon name="qr-code" :size="16" />
+            {{ $t('auth.qrLoginBtn') }}
+          </button>
         </form>
+
+        <!-- QR-Modal -->
+        <Teleport to="body">
+          <div v-if="showQr" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            @click.self="closeQrModal">
+            <div class="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-xs mx-4 space-y-4 text-center">
+              <h2 class="text-lg font-semibold">{{ $t('auth.qrModalTitle') }}</h2>
+
+              <div v-if="qrLoading" class="flex justify-center py-4">
+                <div class="animate-spin w-10 h-10 border-4 border-tesla-red border-t-transparent rounded-full"></div>
+              </div>
+
+              <div v-else-if="qrExpired" class="space-y-3 py-2">
+                <AppIcon name="warning" :size="40" class="text-yellow-400 mx-auto" />
+                <p class="text-yellow-300 text-sm">{{ $t('auth.qrExpired') }}</p>
+                <button @click="refreshQr" class="btn-primary text-sm px-4 py-2">{{ $t('auth.qrRefresh') }}</button>
+              </div>
+
+              <template v-else>
+                <p class="text-gray-400 text-sm">{{ $t('auth.qrHint') }}</p>
+                <img v-if="qrDataUrl" :src="qrDataUrl" alt="QR Code"
+                  class="mx-auto rounded-xl w-52 h-52 object-contain" />
+                <p class="text-xs text-gray-500">{{ $t('auth.qrExpires') }}: {{ qrExpiresIn }}</p>
+                <p class="text-xs text-gray-600">{{ $t('auth.qrWaiting') }}</p>
+              </template>
+
+              <button @click="closeQrModal" class="w-full py-2 rounded-lg text-sm text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 transition">
+                {{ $t('common.cancel') }}
+              </button>
+            </div>
+          </div>
+        </Teleport>
 
         <div class="text-center space-y-2">
           <RouterLink to="/register" class="text-sm text-tesla-red hover:underline block">
@@ -117,11 +156,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../store/auth.js';
 import { useAppStore }  from '../store/index.js';
+import api              from '../api.js';
 import LangSwitcher     from '../components/LangSwitcher.vue';
 import AppIcon          from '../components/AppIcon.vue';
 
@@ -137,6 +177,24 @@ const passkeyLoading = ref(false);
 const error          = ref('');
 const tenants        = ref([]);
 const hasPasskey     = ref(false);
+
+// QR-Pair-Login
+const showQr      = ref(false);
+const qrLoading   = ref(false);
+const qrDataUrl   = ref('');
+const qrToken     = ref('');
+const qrExpiresAt = ref(0);
+const qrExpired   = ref(false);
+let qrPollTimer   = null;
+let qrExpiryTimer = null;
+
+const qrExpiresIn = computed(() => {
+  const diff = qrExpiresAt.value - Math.floor(Date.now() / 1000);
+  if (diff <= 0) return t('auth.qrExpiredLabel');
+  const m = Math.floor(diff / 60);
+  const s = diff % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+});
 
 // Demo-Sandbox: nur noch der Schalter „aktiviert ja/nein" wird hier
 // gebraucht, damit ggf. ein Link auf /demo eingeblendet wird. Die
@@ -197,6 +255,73 @@ async function loginPasskey() {
     passkeyLoading.value = false;
   }
 }
+
+async function openQrModal() {
+  showQr.value   = true;
+  qrExpired.value = false;
+  await fetchQr();
+}
+
+async function fetchQr() {
+  qrLoading.value = true;
+  qrDataUrl.value = '';
+  qrToken.value   = '';
+  qrExpired.value  = false;
+  clearInterval(qrPollTimer);
+  clearInterval(qrExpiryTimer);
+  try {
+    const slug = form.value.tenantSlug || undefined;
+    const params = slug ? `?tenantSlug=${encodeURIComponent(slug)}` : '';
+    const { data } = await api.get(`/pair/init${params}`);
+    qrDataUrl.value   = data.qrDataUrl;
+    qrToken.value     = data.token;
+    qrExpiresAt.value = data.expiresAt;
+
+    // Alle 2s auf Bestätigung prüfen
+    qrPollTimer = setInterval(async () => {
+      try {
+        const { data: poll } = await api.get(`/pair/poll/${qrToken.value}`);
+        if (poll.status === 'confirmed') {
+          clearInterval(qrPollTimer);
+          clearInterval(qrExpiryTimer);
+          auth.accessToken = poll.accessToken;
+          auth.user        = poll.user;
+          showQr.value = false;
+          await app.loadVehicles().catch(() => {});
+          router.push(route.query.redirect || '/');
+        } else if (poll.status === 'expired') {
+          clearInterval(qrPollTimer);
+          qrExpired.value = true;
+        }
+      } catch { /* weiter versuchen */ }
+    }, 2000);
+
+    // Nach Ablauf QR als abgelaufen markieren
+    qrExpiryTimer = setTimeout(() => {
+      qrExpired.value = true;
+      clearInterval(qrPollTimer);
+    }, (data.expiresAt - Math.floor(Date.now() / 1000)) * 1000);
+  } catch (err) {
+    qrExpired.value = true;
+  } finally {
+    qrLoading.value = false;
+  }
+}
+
+function refreshQr() {
+  fetchQr();
+}
+
+function closeQrModal() {
+  showQr.value = false;
+  clearInterval(qrPollTimer);
+  clearInterval(qrExpiryTimer);
+}
+
+onUnmounted(() => {
+  clearInterval(qrPollTimer);
+  clearInterval(qrExpiryTimer);
+});
 </script>
 
 <style scoped>

@@ -136,10 +136,13 @@ router.post('/register-verify', requireAuth, async (req, res) => {
 
 // POST /api/passkey/login-options
 router.post('/login-options', async (req, res) => {
-  const { tenantSlug } = req.body ?? {};
+  const { tenantSlug, tenantId } = req.body ?? {};
   let tenant;
   if (tenantSlug) {
     tenant = getTenantBySlug(tenantSlug);
+  } else if (tenantId) {
+    const all = getAllTenants();
+    tenant = all.find(t => t.id === tenantId) ?? null;
   } else {
     const tenants = getAllTenants();
     if (tenants.length === 1) tenant = tenants[0];

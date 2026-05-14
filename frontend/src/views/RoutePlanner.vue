@@ -16,10 +16,67 @@
       <!-- ─── Linke Spalte ─── -->
       <div class="space-y-4">
 
+        <!-- Startort -->
+        <div class="card space-y-3">
+          <h2 class="font-semibold text-base flex items-center gap-2">
+            <AppIcon name="pin" :size="16" class="text-green-400" />
+            {{ $t('routes.startTitle') }}
+          </h2>
+
+          <!-- Startort-Optionen -->
+          <div class="flex gap-2 flex-wrap">
+            <button @click="setStartVehicle"
+              :class="startMode === 'vehicle' ? 'bg-green-700 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition"
+              v-tooltip="$t('routes.startVehicleTip')">
+              🚗 {{ $t('routes.startVehicle') }}
+            </button>
+            <button @click="setStartBrowser"
+              :class="startMode === 'browser' ? 'bg-green-700 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition"
+              v-tooltip="$t('routes.startBrowserTip')">
+              📍 {{ $t('routes.startBrowser') }}
+            </button>
+            <button @click="startMode = 'manual'"
+              :class="startMode === 'manual' ? 'bg-green-700 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition">
+              ✏️ {{ $t('routes.startManual') }}
+            </button>
+          </div>
+
+          <!-- Manuelle Starteingabe -->
+          <div v-if="startMode === 'manual'" class="relative">
+            <input v-model="startQuery" type="text" :placeholder="$t('routes.startPlaceholder')"
+              class="input w-full pr-8 text-sm"
+              @input="onStartInput"
+              @keyup.escape="startResults = []" />
+            <button v-if="startQuery" @click="startQuery = ''; startResults = []"
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white text-lg leading-none">×</button>
+            <ul v-if="startResults.length" class="absolute z-10 top-full left-0 right-0 mt-1 bg-gray-800 border border-gray-700 rounded-xl overflow-hidden divide-y divide-gray-700 shadow-xl">
+              <li v-for="r in startResults" :key="r.place_id"
+                @click="pickStartResult(r)"
+                class="px-3 py-2 text-sm cursor-pointer hover:bg-gray-700 transition">
+                <p class="text-white truncate">{{ r.display_name.split(',')[0] }}</p>
+                <p class="text-gray-400 text-xs truncate">{{ r.display_name.split(',').slice(1,3).join(',').trim() }}</p>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Aktueller Startort -->
+          <div v-if="startLocation" class="bg-gray-800/60 rounded-xl px-3 py-2 flex items-center gap-2">
+            <span class="text-green-400 text-base">🟢</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs text-gray-300 truncate font-medium">{{ startLocation.name }}</p>
+              <p class="text-xs text-gray-500">{{ startLocation.lat.toFixed(4) }}, {{ startLocation.lon.toFixed(4) }}</p>
+            </div>
+          </div>
+          <p v-else class="text-xs text-gray-500 italic">{{ $t('routes.startNoLocation') }}</p>
+        </div>
+
         <!-- Zielsuche -->
         <div class="card space-y-3">
           <h2 class="font-semibold text-base flex items-center gap-2">
-            <AppIcon name="location" :size="16" class="text-tesla-red" />
+            <AppIcon name="pin" :size="16" class="text-tesla-red" />
             {{ $t('routes.destination') }}
           </h2>
 
@@ -30,6 +87,7 @@
               :placeholder="$t('routes.searchPlaceholder')"
               class="input w-full pr-8"
               @input="onSearchInput"
+              @keyup.enter="onSearchEnter"
               @keyup.escape="searchResults = []"
             />
             <button v-if="searchQuery" @click="clearSearch"
@@ -37,14 +95,15 @@
           </div>
 
           <ul v-if="searchResults.length" class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden divide-y divide-gray-700">
-            <li v-for="r in searchResults" :key="r.place_id"
+            <li v-for="r in searchResults" :key="r.place_id ?? r.lat"
               @click="pickResult(r)"
               class="px-3 py-2.5 text-sm cursor-pointer hover:bg-gray-700 transition">
               <p class="text-white truncate">{{ r.display_name.split(',')[0] }}</p>
-              <p class="text-gray-400 text-xs truncate">{{ r.display_name.split(',').slice(1).join(',').trim() }}</p>
+              <p class="text-gray-400 text-xs truncate">{{ r.display_name.split(',').slice(1,3).join(',').trim() }}</p>
             </li>
           </ul>
-          <p v-if="searching" class="text-xs text-gray-500">{{ $t('common.loading') }}</p>
+          <p v-if="searching" class="text-xs text-gray-500 animate-pulse">{{ $t('routes.geocoding') }}</p>
+          <p v-else-if="searchNoResults" class="text-xs text-yellow-500">{{ $t('routes.noResults') }}</p>
 
           <div v-if="destination" class="bg-gray-800 rounded-xl px-3 py-2.5 flex items-center gap-2">
             <span class="text-tesla-red text-lg">📍</span>
@@ -52,7 +111,7 @@
               <p class="text-sm text-white font-medium truncate">{{ destination.name }}</p>
               <p class="text-xs text-gray-400">{{ destination.lat.toFixed(5) }}, {{ destination.lon.toFixed(5) }}</p>
             </div>
-            <button @click="clearDestination" class="text-gray-500 hover:text-white">×</button>
+            <button @click="clearDestination" class="text-gray-500 hover:text-white text-xl leading-none">×</button>
           </div>
           <p v-else class="text-xs text-gray-500">{{ $t('routes.clickMapHint') }}</p>
         </div>
@@ -292,14 +351,22 @@ let wpMarkers  = [];
 let routeLayer = null;
 let chargerMarkers = [];
 
+// ── Startort ──
+const startMode     = ref('vehicle'); // 'vehicle' | 'browser' | 'manual'
+const startLocation = ref(null);
+const startQuery    = ref('');
+const startResults  = ref([]);
+let startTimer      = null;
+
 // ── Suche ──
-const searchQuery   = ref('');
-const searchResults = ref([]);
-const searching     = ref(false);
-let searchTimer     = null;
-const wpQuery       = ref('');
-const wpResults     = ref([]);
-let wpTimer         = null;
+const searchQuery    = ref('');
+const searchResults  = ref([]);
+const searching      = ref(false);
+const searchNoResults = ref(false);
+let searchTimer      = null;
+const wpQuery        = ref('');
+const wpResults      = ref([]);
+let wpTimer          = null;
 
 // ── Route ──
 const destination = ref(null);
@@ -372,41 +439,115 @@ function formatDuration(min) {
   return h > 0 ? `${h}h ${m}min` : `${m}min`;
 }
 
-// ── Geocoding (Nominatim) ──
+// ── Geocoding — via Backend-Proxy (umgeht CSP/CORS-Probleme) ──
 
-async function nominatim(q) {
-  const r = await fetch(
-    `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=5&addressdetails=0`,
-    { headers: { 'Accept-Language': locale.value } }
-  );
-  return r.json();
+async function geocode(q) {
+  const { data } = await api.get('/routing/geocode', { params: { q, lang: locale.value } });
+  return Array.isArray(data) ? data : [];
 }
 
 async function reverseGeocode(lat, lon) {
-  const r = await fetch(
-    `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
-    { headers: { 'Accept-Language': locale.value } }
-  );
-  const d = await r.json();
-  return d.display_name || `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+  try {
+    const { data } = await api.get('/routing/reverse', { params: { lat, lon, lang: locale.value } });
+    return data.display_name || `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+  } catch {
+    return `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+  }
 }
 
 function onSearchInput() {
   clearTimeout(searchTimer);
-  if (searchQuery.value.length < 3) { searchResults.value = []; return; }
+  searchNoResults.value = false;
+  if (searchQuery.value.length < 2) { searchResults.value = []; return; }
   searching.value = true;
   searchTimer = setTimeout(async () => {
-    try { searchResults.value = await nominatim(searchQuery.value); }
+    try {
+      searchResults.value = await geocode(searchQuery.value);
+      searchNoResults.value = searchResults.value.length === 0;
+    } catch { searchResults.value = []; }
     finally { searching.value = false; }
-  }, 400);
+  }, 350);
+}
+
+async function onSearchEnter() {
+  if (searchQuery.value.length < 2) return;
+  searching.value = true;
+  searchNoResults.value = false;
+  try {
+    searchResults.value = await geocode(searchQuery.value);
+    searchNoResults.value = searchResults.value.length === 0;
+    if (searchResults.value.length === 1) pickResult(searchResults.value[0]);
+  } finally { searching.value = false; }
 }
 
 function onWpInput() {
   clearTimeout(wpTimer);
-  if (wpQuery.value.length < 3) { wpResults.value = []; return; }
+  if (wpQuery.value.length < 2) { wpResults.value = []; return; }
   wpTimer = setTimeout(async () => {
-    wpResults.value = await nominatim(wpQuery.value);
-  }, 400);
+    wpResults.value = await geocode(wpQuery.value);
+  }, 350);
+}
+
+// ── Startort-Logik ──
+
+async function setStartVehicle() {
+  startMode.value = 'vehicle';
+  if (vehicle.value?.last_lat && vehicle.value?.last_lon) {
+    const name = await reverseGeocode(vehicle.value.last_lat, vehicle.value.last_lon)
+      .catch(() => t('routes.startVehicleLabel'));
+    startLocation.value = {
+      name: name.split(',')[0] || t('routes.startVehicleLabel'),
+      lat: vehicle.value.last_lat,
+      lon: vehicle.value.last_lon,
+    };
+  } else {
+    startLocation.value = null;
+  }
+  if (destination.value) calculateRoute();
+}
+
+async function setStartBrowser() {
+  startMode.value = 'browser';
+  if (!navigator.geolocation) {
+    showToast(t('routes.startBrowserUnavailable'), false);
+    startMode.value = 'vehicle';
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    async pos => {
+      const { latitude: lat, longitude: lon } = pos.coords;
+      const name = await reverseGeocode(lat, lon).catch(() => t('routes.startBrowserLabel'));
+      startLocation.value = { name: name.split(',')[0] || t('routes.startBrowserLabel'), lat, lon };
+      if (destination.value) calculateRoute();
+    },
+    () => {
+      showToast(t('routes.startBrowserDenied'), false);
+      startMode.value = 'vehicle';
+    },
+    { timeout: 8000 },
+  );
+}
+
+function onStartInput() {
+  clearTimeout(startTimer);
+  if (startQuery.value.length < 2) { startResults.value = []; return; }
+  startTimer = setTimeout(async () => {
+    startResults.value = await geocode(startQuery.value);
+  }, 350);
+}
+
+function pickStartResult(r) {
+  startLocation.value = {
+    name: r.display_name.split(',')[0],
+    lat: parseFloat(r.lat),
+    lon: parseFloat(r.lon),
+  };
+  startQuery.value   = '';
+  startResults.value = [];
+  if (leafletMap && L) {
+    leafletMap.setView([startLocation.value.lat, startLocation.value.lon], Math.max(leafletMap.getZoom(), 10));
+  }
+  if (destination.value) calculateRoute();
 }
 
 function pickResult(r) {
@@ -514,9 +655,9 @@ async function _doCalculateRoute() {
   routeLoading.value = true;
   clearRouteLayer();
 
-  // Startpunkt: Fahrzeugposition oder Deutschland-Mitte
-  const startLat = vehicle.value?.last_lat ?? 51.1657;
-  const startLon = vehicle.value?.last_lon ?? 10.4515;
+  // Startpunkt: gewählter Startort, Fahrzeug oder Deutschland-Mitte
+  const startLat = startLocation.value?.lat ?? vehicle.value?.last_lat ?? 51.1657;
+  const startLon = startLocation.value?.lon ?? vehicle.value?.last_lon ?? 10.4515;
 
   // Koordinaten für OSRM: lon,lat Reihenfolge
   const coords = [
@@ -784,6 +925,8 @@ onMounted(async () => {
   await loadRoutingStats();
   await nextTick();
   await initMap();
+  // Startort initialisieren: Fahrzeugposition bevorzugen
+  await setStartVehicle();
 });
 
 onBeforeUnmount(() => {

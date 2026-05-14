@@ -68,6 +68,53 @@ curl -X POST https://your-domain.com/api/users \
   -d '{"username": "karin", "password": "strongPassword123!", "role": "user"}'
 ```
 
+## Passkeys (passwordless)
+
+Tesla Carview supports WebAuthn/FIDO2 passkeys as an alternative to passwords:
+
+1. Open **Settings → Passkeys**
+2. Click **"+ Add passkey"** — the browser dialog opens
+3. Confirm with Face ID, Touch ID, or a security key
+4. From now on: choose **"Sign in with passkey"** on the login page
+
+Passkeys are phishing-resistant and require no password.
+
+## QR SSO login (for Tesla display browser)
+
+The built-in browser on Tesla displays does not support WebAuthn/Face ID.
+With the QR pair flow, you can still sign in using Passkey/Face ID:
+
+```
+[Tesla browser]              [Smartphone]
+  open login page
+  "Sign in with smartphone"
+  show QR code  ───────────── scan
+  (poll every 2 s)             open /pair/{token}
+                               tap "Confirm with passkey"
+                               Face ID / Touch ID ✓
+                               POST /api/pair/confirm/{token}
+  session confirmed ◄─────────
+  receive JWT
+  open dashboard
+```
+
+**Step by step:**
+
+1. In the Tesla browser, tap **"Sign in with smartphone"**
+2. A QR code appears (valid for 5 minutes)
+3. Scan the QR code with your smartphone camera
+4. `https://your-domain.com/pair/{token}` opens on the phone
+5. Tap **"Confirm with passkey"** → Face ID / Touch ID
+6. The Tesla browser logs in automatically
+
+**Security properties:**
+- Token: 256-bit random value, unguessable
+- TTL: 5 minutes, single-use
+- Tenant-scoped: token is valid only for your own tenant
+- Passkey on the smartphone verifies identity server-side
+
+**Requirement:** At least one passkey must be registered on the smartphone beforehand (Settings → Passkeys).
+
 ## Password requirements
 
 - At least **12 characters**
