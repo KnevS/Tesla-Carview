@@ -48,7 +48,8 @@ import tariffRoutes from './routes/tariff.js';
 import webhookRoutes from './routes/webhooks.js';
 import grokRoutes from './routes/grok.js';
 import savedRoutesRoutes from './routes/savedRoutes.js';
-import routingRoutes from './routes/routing.js';
+import routingRoutes, { tileRouter } from './routes/routing.js';
+import { startRouteScheduler } from './services/routeScheduler.js';
 import pairRoutes from './routes/pair.js';
 
 const app    = express();
@@ -84,6 +85,7 @@ const APP_VERSION = (() => {
 
 // Öffentliche Routen
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', version: APP_VERSION }));
+app.use('/api/tiles', tileRouter); // OSM-Tile-Proxy (keine Auth, nur öffentliche Kartendaten)
 app.use('/api/setup',          setupRoutes);
 app.use('/api/auth',           authRoutes);
 app.use('/api/register',       registerRoutes);
@@ -169,6 +171,7 @@ server.listen(PORT, async () => {
     startPoller().catch(err => console.error('[Poller] Start fehlgeschlagen:', err.message));
   }
   startServiceReminderScheduler();
+  startRouteScheduler();
   // Naechtliche Hygiene (~03:30 Europe/Berlin) — sichere App-interne
   // Wartung. Auto-Update aus Git ist opt-in via AUTO_UPDATE_ENABLED=true.
   startNightlyMaintenance();

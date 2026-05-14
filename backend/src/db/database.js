@@ -758,6 +758,19 @@ function runTenantMigrations(db) {
   )`);
   db.exec('CREATE INDEX IF NOT EXISTS idx_saved_routes_vehicle ON saved_routes(vehicle_id, created_at DESC)');
 
+  // Migration: neue Spalten für Routenplanung (ALTER TABLE ist idempotent über try-catch)
+  for (const sql of [
+    "ALTER TABLE saved_routes ADD COLUMN scheduled_date TEXT",
+    "ALTER TABLE saved_routes ADD COLUMN departure_time TEXT",
+    "ALTER TABLE saved_routes ADD COLUMN auto_send      INTEGER NOT NULL DEFAULT 0",
+    "ALTER TABLE saved_routes ADD COLUMN notes          TEXT",
+    "ALTER TABLE saved_routes ADD COLUMN start_name     TEXT",
+    "ALTER TABLE saved_routes ADD COLUMN start_lat      REAL",
+    "ALTER TABLE saved_routes ADD COLUMN start_lon      REAL",
+  ]) {
+    try { db.exec(sql); } catch { /* Spalte existiert bereits */ }
+  }
+
   // Indexes
   db.exec('CREATE INDEX IF NOT EXISTS idx_trips_vehicle      ON trips(vehicle_id, start_time DESC)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_charging_vehicle   ON charging_sessions(vehicle_id, start_time DESC)');
