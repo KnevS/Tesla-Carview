@@ -7,6 +7,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v2.3.0] — 2026-05-14
+
+### Added
+- **SoC-aware charging plan** — Route Planner plans intelligent charging stops with time estimates; departure SoC auto-filled from live vehicle data (ad-hoc) or manually entered (scheduled departure); configurable target SoC at destination and charge-to SoC per stop
+- **Route Planner layout** — left column scrollable+sticky so map stays visible; section order optimised
+- **Collapsible Settings** — all 17 Settings sections collapsible\/expandable via SortableSection
+- **Demo company vehicle** — demo tenants get a 2nd vehicle (category=company, Model 3) with business trips for billing demo
+- **Fahrzeugtechnik demo data** — DEMO vehicles return plausible fake telemetry without Tesla API calls
+- **Location heatmaps fixed** — Leaflet tiles now routed through backend tile proxy (no more CSP block)
+- **Sections expanded by default** — all sections initially expanded for new users
+
+### Improved
+- **i18n** — SoC UI keys in all 6 languages (de\/en\/fr\/es\/tr\/el)
+- **SortableSection** — sortable prop hides drag handle when not reorderable
+
+---
+
 ## [v2.2.0] — 2026-05-14
 
 ### Added
