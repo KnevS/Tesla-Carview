@@ -185,7 +185,9 @@
     "wltpDelta": "({sign}{value} % vs. WLTP)",
     "typePrivate": "Privado",
     "typeBusiness": "Laboral",
-    "typeCommute": "Desplazamiento"
+    "typeCommute": "Desplazamiento",
+    "sectionStats": "Estadísticas",
+    "sectionList": "Lista de viajes"
   },
   "webhooks": {
     "intro": "Envía eventos de la app (fin de trayecto, fin de carga, mantenimiento) a tus propios endpoints HTTP. Cada POST se firma con HMAC-SHA256; verifica la cabecera {signatureHeader} contra el secreto mostrado solo una vez al crear.",
@@ -595,7 +597,9 @@
     "location": "Ubicación",
     "status": "Estado",
     "template": "Plantilla de facturación",
-    "templateTitle": "Solicitud de reembolso carga doméstica"
+    "templateTitle": "Solicitud de reembolso carga doméstica",
+    "sectionIntervals": "Intervalos de mantenimiento",
+    "sectionEntries": "Entradas"
   },
   "telemetry": {
     "title": "Técnica del vehículo",
@@ -941,6 +945,7 @@
     "title": "Gestión de usuarios",
     "add": "+ Crear usuario",
     "loading": "Cargando usuarios…",
+    "sectionTasks": "Tareas pendientes",
     "locked": "bloqueado",
     "assignVehicle": "Asignar vehículo",
     "resetLink": "Enlace de restablecimiento",

@@ -11,26 +11,35 @@
       </div>
     </div>
 
+    <template v-for="sid in layoutOrder" :key="sid">
+
     <!-- Wartungsintervalle pro Fahrzeug — gehören thematisch ins
          Betriebsbuch, weil sie eng mit den hier eingetragenen Wartungs-
          /Inspektions-Eintraegen zusammenarbeiten. -->
-    <ServiceIntervalsCard />
+    <SortableSection v-if="sid === 'intervals'" page-id="logbook" section-id="intervals"
+      :title="$t('maintenanceLog.sectionIntervals')" icon="🔧"
+      :collapsed="isCollapsed('intervals')" @toggle="toggle('intervals')" @move="(f,t,p) => moveSection(f,t,p)">
+      <ServiceIntervalsCard />
+    </SortableSection>
 
-    <div class="flex gap-2 flex-wrap">
-      <button v-for="cat in allCategories" :key="cat.value"
-        @click="filterCat = cat.value; load()"
-        v-tooltip="cat.tooltip"
-        class="px-3 py-1 rounded-lg text-sm transition"
-        :class="filterCat === cat.value ? 'bg-tesla-red text-white' : 'bg-gray-700 text-gray-300'"
-      >{{ cat.icon }} {{ cat.label }}</button>
-    </div>
-
-    <div class="space-y-3">
-      <div v-if="loading" class="text-gray-400">{{ $t('maintenanceLog.loading') }}</div>
-      <div v-else-if="entries.length === 0" class="card text-gray-400 text-center py-10">
-        {{ $t('maintenanceLog.empty') }}
+    <SortableSection v-if="sid === 'entries'" page-id="logbook" section-id="entries"
+      :title="$t('maintenanceLog.sectionEntries')" icon="📋"
+      :collapsed="isCollapsed('entries')" @toggle="toggle('entries')" @move="(f,t,p) => moveSection(f,t,p)">
+      <div class="flex gap-2 flex-wrap mb-3">
+        <button v-for="cat in allCategories" :key="cat.value"
+          @click="filterCat = cat.value; load()"
+          v-tooltip="cat.tooltip"
+          class="px-3 py-1 rounded-lg text-sm transition"
+          :class="filterCat === cat.value ? 'bg-tesla-red text-white' : 'bg-gray-700 text-gray-300'"
+        >{{ cat.icon }} {{ cat.label }}</button>
       </div>
-      <div v-for="e in entries" :key="e.id" class="card">
+
+      <div class="space-y-3">
+        <div v-if="loading" class="text-gray-400">{{ $t('maintenanceLog.loading') }}</div>
+        <div v-else-if="entries.length === 0" class="card text-gray-400 text-center py-10">
+          {{ $t('maintenanceLog.empty') }}
+        </div>
+        <div v-for="e in entries" :key="e.id" class="card">
         <div class="flex items-start justify-between">
           <div class="flex-1">
             <div class="flex items-center gap-2">
@@ -60,7 +69,10 @@
             v-tooltip="$t('maintenanceLog.deleteTooltip')">✕</button>
         </div>
       </div>
-    </div>
+      </div><!-- end entries list -->
+    </SortableSection>
+
+    </template><!-- end v-for layoutOrder -->
 
     <Teleport to="body">
     <div v-if="showForm" class="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-4">
@@ -122,11 +134,16 @@ import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
 import ServiceIntervalsCard from '../components/ServiceIntervalsCard.vue';
+import SortableSection from '../components/SortableSection.vue';
 import SortToggle from '../components/SortToggle.vue';
 import { useSortDirection } from '../composables/useSortDirection.js';
+import { usePageLayout } from '../composables/usePageLayout.js';
 
 const { t, locale } = useI18n();
 const appStore = useAppStore();
+
+const LOGBOOK_SECTIONS = ['intervals', 'entries'];
+const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('logbook', LOGBOOK_SECTIONS);
 const entries = ref([]);
 const loading = ref(true);
 const showForm = ref(false);
