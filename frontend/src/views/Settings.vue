@@ -425,38 +425,37 @@
     <!-- Passkey -->
     <div class="card space-y-3">
       <button class="w-full flex items-center justify-between group"
-        @click="toggleSection('passkeys')" v-tooltip="$t('settings.passkeyTooltip')">
+        @click="togglePasskeys" v-tooltip="$t('settings.passkeyTooltip')">
         <h2 class="font-semibold flex items-center gap-2">
           {{ $t('settings.passkey') }}
           <span v-if="passkeys.length" class="text-xs text-gray-500 font-normal">({{ passkeys.length }})</span>
         </h2>
         <span class="text-gray-500 group-hover:text-white transition text-sm">{{ collapsed.passkeys ? '▸' : '▾' }}</span>
       </button>
-      <template v-if="!collapsed.passkeys">
-      <p class="text-sm text-gray-400">{{ $t('settings.passkeyDesc') }}</p>
-      <div v-if="passkeys.length" class="space-y-2">
-        <div v-for="pk in passkeys" :key="pk.id"
-          class="flex items-center justify-between bg-gray-800 rounded-lg px-3 py-2">
-          <div>
-            <p class="text-sm font-medium text-white">{{ pk.device_type || $t('settings.passkeyDevice') }}</p>
-            <p class="text-xs text-gray-500">{{ $t('settings.passkeyAdded') }} {{ fmtDate(pk.created_at) }}</p>
+      <div v-show="!collapsed.passkeys">
+        <p class="text-sm text-gray-400 mb-2">{{ $t('settings.passkeyDesc') }}</p>
+        <div v-if="passkeys.length" class="space-y-2 mb-2">
+          <div v-for="pk in passkeys" :key="pk.id"
+            class="flex items-center justify-between bg-gray-800 rounded-lg px-3 py-2">
+            <div>
+              <p class="text-sm font-medium text-white">{{ pk.device_type || $t('settings.passkeyDevice') }}</p>
+              <p class="text-xs text-gray-500">{{ $t('settings.passkeyAdded') }} {{ fmtDate(pk.created_at) }}</p>
+            </div>
+            <button @click="removePasskey(pk.id)"
+              class="text-xs text-gray-500 hover:text-red-400 transition">{{ $t('settings.passkeyRemove') }}</button>
           </div>
-          <button @click="removePasskey(pk.id)"
-            class="text-xs text-gray-500 hover:text-red-400 transition">{{ $t('settings.passkeyRemove') }}</button>
+        </div>
+        <p v-else class="text-sm text-gray-500 mb-2">{{ $t('settings.passkeyNone') }}</p>
+        <div v-if="passkeyError"   class="text-red-400 text-sm mb-1">{{ passkeyError }}</div>
+        <div v-if="passkeySuccess" class="text-green-400 text-sm mb-1">{{ passkeySuccess }}</div>
+        <div class="flex flex-wrap gap-2">
+          <button @click="addPasskey" :disabled="passkeyRegistering"
+            class="btn-secondary text-sm"
+            v-tooltip="$t('settings.passkeyAddTooltip')">
+            {{ passkeyRegistering ? $t('settings.passkeyAdding') : $t('settings.passkeyAdd') }}
+          </button>
         </div>
       </div>
-      <p v-else class="text-sm text-gray-500">{{ $t('settings.passkeyNone') }}</p>
-      <div v-if="passkeyError"   class="text-red-400 text-sm">{{ passkeyError }}</div>
-      <div v-if="passkeySuccess" class="text-green-400 text-sm">{{ passkeySuccess }}</div>
-
-      <div class="flex flex-wrap gap-2">
-        <button @click="addPasskey" :disabled="passkeyRegistering"
-          class="btn-secondary text-sm"
-          v-tooltip="$t('settings.passkeyAddTooltip')">
-          {{ passkeyRegistering ? $t('settings.passkeyAdding') : $t('settings.passkeyAdd') }}
-        </button>
-      </div>
-      </template>
     </div>
 
     <!-- Geofences fuer Auto-Klassifikation Privat / Arbeitsweg / Dienst -->
@@ -615,39 +614,34 @@
       <WebhookManager />
     </div>
 
-    <div class=”card space-y-3”>
-      <button class=”w-full flex items-center justify-between group” @click=”toggleSection('password')”>
-        <h2 class=”font-semibold flex items-center gap-2”>
-          <AppIcon name=”lock” :size=”20” class=”text-tesla-red” />
-          {{ $t('settings.passwordChangeTitle') }}
-        </h2>
-        <span class=”text-gray-500 group-hover:text-white transition text-sm”>{{ collapsed.password ? '▸' : '▾' }}</span>
-      </button>
-      <div v-show=”!collapsed.password” class=”space-y-2”>
-        <input v-model=”pw.current” type=”password” placeholder=”Aktuelles Passwort”
-          class=”w-full bg-gray-700 rounded-lg px-3 py-2 text-white”
-          v-tooltip=”'Dein bisheriges Passwort – zur Bestätigung deiner Identität'” />
-        <input v-model=”pw.next” type=”password” placeholder=”Neues Passwort (mind. 12 Zeichen)”
-          class=”w-full bg-gray-700 rounded-lg px-3 py-2 text-white”
-          v-tooltip=”'Mindestens 12 Zeichen. Empfohlen: Passphrase aus 4+ zufälligen Wörtern (z.B. „Spaten-Berg-Donau-Mozart”) – ist sicherer als kurze, komplexe Passwörter und leichter zu merken.'” />
-        <input v-model=”pw.confirm” type=”password” placeholder=”Neues Passwort wiederholen”
-          class=”w-full bg-gray-700 rounded-lg px-3 py-2 text-white”
-          v-tooltip=”'Bitte das neue Passwort zur Sicherheit erneut eingeben'” />
-        <div v-if=”pwError” class=”text-red-400 text-sm”>{{ pwError }}</div>
-        <div v-if=”pwSuccess” class=”text-green-400 text-sm”>{{ pwSuccess }}</div>
-        <button @click=”changePassword” class=”btn-primary text-sm”>Passwort ändern</button>
+    <div class="card space-y-3">
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="lock" :size="20" class="text-tesla-red" />
+        {{ $t('settings.passwordChangeTitle') }}
+      </h2>
+      <div class="space-y-2">
+        <input v-model="pw.current" type="password" placeholder="Aktuelles Passwort"
+          class="w-full bg-gray-700 rounded-lg px-3 py-2 text-white"
+          v-tooltip="'Dein bisheriges Passwort – zur Bestätigung deiner Identität'" />
+        <input v-model="pw.next" type="password" placeholder="Neues Passwort (mind. 12 Zeichen)"
+          class="w-full bg-gray-700 rounded-lg px-3 py-2 text-white"
+          v-tooltip="'Mindestens 12 Zeichen. Empfohlen: Passphrase aus 4+ zufaelligen Woertern – ist sicherer als kurze, komplexe Passwoerter.'" />
+        <input v-model="pw.confirm" type="password" placeholder="Neues Passwort wiederholen"
+          class="w-full bg-gray-700 rounded-lg px-3 py-2 text-white"
+          v-tooltip="'Bitte das neue Passwort zur Sicherheit erneut eingeben'" />
+        <div v-if="pwError" class="text-red-400 text-sm">{{ pwError }}</div>
+        <div v-if="pwSuccess" class="text-green-400 text-sm">{{ pwSuccess }}</div>
+        <button @click="changePassword" class="btn-primary text-sm">Passwort ändern</button>
       </div>
     </div>
 
     <div class="card space-y-3">
-      <button class="w-full flex items-center justify-between group"
-        @click="toggleSection('audit')"
-        v-tooltip="'Auflistung deiner letzten Sicherheits-Aktivitäten. Falls du hier verdächtige Einträge siehst (z.B. Login von unbekannten IPs), ändere sofort dein Passwort.'">
-        <h2 class="font-semibold flex items-center gap-2">
-          📝 Letzte Aktivitäten
-          <span v-if="auditLog.length" class="text-xs text-gray-500 font-normal">({{ auditLog.length }})</span>
+      <button class="w-full flex items-center justify-between" @click="toggleAudit">
+        <h2 class="font-semibold">
+          📝 Letzte Aktivitaeten
+          <span v-if="auditLog.length" class="text-xs text-gray-500 font-normal ml-1">({{ auditLog.length }})</span>
         </h2>
-        <span class="text-gray-500 group-hover:text-white transition text-sm">{{ collapsed.audit ? '▸' : '▾' }}</span>
+        <span class="text-gray-400 text-xs">{{ collapsed.audit ? '[+]' : '[-]' }}</span>
       </button>
       <div v-show="!collapsed.audit" class="space-y-1">
         <div v-for="e in auditLog" :key="e.created_at"
@@ -655,7 +649,7 @@
           <span class="font-mono text-gray-300" v-tooltip="actionTooltip(e.action)">{{ e.action }}</span>
           <span class="text-gray-500" v-tooltip="'IP-Adresse: ' + (e.ip_address || 'unbekannt')">{{ fmtDate(e.created_at) }}</span>
         </div>
-        <p v-if="!auditLog.length" class="text-gray-500 text-sm">Keine Einträge</p>
+        <p v-if="!auditLog.length" class="text-gray-500 text-sm">Keine Eintraege</p>
       </div>
     </div>
 
@@ -1237,7 +1231,9 @@ async function saveVehicle() {
 
 // Zugeklappte Sektionen — Letzte Aktivitäten standardmäßig zu
 const collapsed = ref({ audit: true, mfa: false, passkeys: false, password: false });
-function toggleSection(key) { collapsed.value[key] = !collapsed.value[key]; }
+function toggleAudit()    { collapsed.value.audit    = !collapsed.value.audit; }
+function togglePassword() { collapsed.value.password = !collapsed.value.password; }
+function togglePasskeys() { collapsed.value.passkeys = !collapsed.value.passkeys; }
 
 const mfaStatus       = ref({ mfaEnabled: false, unusedBackupCodes: 0 });
 const showDisableForm = ref(false);
