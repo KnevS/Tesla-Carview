@@ -11,6 +11,8 @@
 
 ---
 
+> ℹ️ **Dil notu:** Bu wikinin alt sayfaları **[İngilizce](Home)** ve **[Almanca](DE-Home)** olarak mevcuttur. Ana sayfa Türkçe olarak çevrilmiştir; detay sayfaları İngilizce olarak açılır.
+
 # Tesla Carview Wiki'ye Hoş Geldiniz
 
 **Tesla Carview**, Tesla araçları için kendi sunucunuzda barındırabileceğiniz bir veri kaydedici ve kontrol uygulamasıdır. Verileriniz kendi sunucunuzda kalır — bulut yok, üçüncü taraf erişimi yok.
