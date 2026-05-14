@@ -277,7 +277,7 @@ async function updateMap(lat, lon) {
   await import('leaflet/dist/leaflet.css');
   if (!leafletMap) {
     leafletMap = L.map('live-map').setView([lat, lon], 15);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('/api/tiles/{z}/{x}/{y}', {
       attribution: '&copy; OpenStreetMap contributors', maxZoom: 19,
     }).addTo(leafletMap);
     posMarker = L.circleMarker([lat, lon], {
