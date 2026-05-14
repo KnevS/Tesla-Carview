@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold flex items-center gap-2">
         <AppIcon name="gauge" :size="24" class="text-tesla-red" />
@@ -27,98 +27,102 @@
     </div>
 
     <template v-else-if="data">
+      <template v-for="sid in layoutOrder" :key="sid">
+
       <!-- Hero stats -->
-      <div class="card relative overflow-hidden">
-        <div class="absolute inset-0 opacity-5 bg-gradient-to-br from-tesla-red to-transparent"></div>
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 relative z-10">
-          <div class="space-y-1" v-tooltip="'Ladezustand der Hochvoltbatterie in Prozent'">
-            <div class="text-xs text-gray-400 uppercase tracking-wide">SOC</div>
-            <div class="text-4xl font-bold" :class="socColor">{{ data.charge.level_pct ?? '—' }}%</div>
-            <div class="text-sm text-gray-400">{{ data.charge.range_km ?? '—' }} km Reichweite</div>
-          </div>
-          <div class="space-y-1" v-tooltip="'Aktuelle Geschwindigkeit in km/h'">
-            <div class="text-xs text-gray-400 uppercase tracking-wide">Geschwindigkeit</div>
-            <div class="text-4xl font-bold text-white">{{ data.drive.speed_kph ?? 0 }}</div>
-            <div class="text-sm text-gray-400">km/h · Gang: {{ data.drive.gear ?? 'P' }}</div>
-          </div>
-          <div class="space-y-1" v-tooltip="'Momentane Motorleistung. Positiv = Antrieb, Negativ = Rekuperation (Energie zurückgewinnen beim Bremsen)'">
-            <div class="text-xs text-gray-400 uppercase tracking-wide">Leistung</div>
-            <div class="text-4xl font-bold" :class="data.drive.power_kw < 0 ? 'text-green-400' : 'text-white'">
-              {{ data.drive.power_kw ?? '—' }}
+      <SortableSection v-if="sid === 'hero'" page-id="telemetry" section-id="hero"
+        title="Live-Daten" icon="⚡"
+        :collapsed="isCollapsed('hero')" @toggle="toggle('hero')" @move="(f,t,p) => moveSection(f,t,p)">
+        <div class="relative overflow-hidden">
+          <div class="absolute inset-0 opacity-5 bg-gradient-to-br from-tesla-red to-transparent"></div>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6 relative z-10">
+            <div class="space-y-1" v-tooltip="'Ladezustand der Hochvoltbatterie in Prozent'">
+              <div class="text-xs text-gray-400 uppercase tracking-wide">SOC</div>
+              <div class="text-4xl font-bold" :class="socColor">{{ data.charge.level_pct ?? '—' }}%</div>
+              <div class="text-sm text-gray-400">{{ data.charge.range_km ?? '—' }} km Reichweite</div>
             </div>
-            <div class="text-sm text-gray-400">kW</div>
-          </div>
-          <div class="space-y-1" v-tooltip="'Gesamtkilometerstand des Fahrzeugs'">
-            <div class="text-xs text-gray-400 uppercase tracking-wide">Kilometerstand</div>
-            <div class="text-4xl font-bold text-white">{{ fmt(data.vehicle.odometer_km) }}</div>
-            <div class="text-sm text-gray-400">km</div>
+            <div class="space-y-1" v-tooltip="'Aktuelle Geschwindigkeit in km/h'">
+              <div class="text-xs text-gray-400 uppercase tracking-wide">Geschwindigkeit</div>
+              <div class="text-4xl font-bold text-white">{{ data.drive.speed_kph ?? 0 }}</div>
+              <div class="text-sm text-gray-400">km/h · Gang: {{ data.drive.gear ?? 'P' }}</div>
+            </div>
+            <div class="space-y-1" v-tooltip="'Momentane Motorleistung. Positiv = Antrieb, Negativ = Rekuperation (Energie zurückgewinnen beim Bremsen)'">
+              <div class="text-xs text-gray-400 uppercase tracking-wide">Leistung</div>
+              <div class="text-4xl font-bold" :class="data.drive.power_kw < 0 ? 'text-green-400' : 'text-white'">
+                {{ data.drive.power_kw ?? '—' }}
+              </div>
+              <div class="text-sm text-gray-400">kW</div>
+            </div>
+            <div class="space-y-1" v-tooltip="'Gesamtkilometerstand des Fahrzeugs'">
+              <div class="text-xs text-gray-400 uppercase tracking-wide">Kilometerstand</div>
+              <div class="text-4xl font-bold text-white">{{ fmt(data.vehicle.odometer_km) }}</div>
+              <div class="text-sm text-gray-400">km</div>
+            </div>
           </div>
         </div>
-      </div>
+      </SortableSection>
 
       <!-- Live GPS Position -->
-      <div class="card space-y-3" v-if="data.drive?.lat && data.drive?.lon">
-        <h2 class="font-semibold flex items-center gap-2">
-          <AppIcon name="pin" :size="20" class="text-tesla-red" />
-          Live-Position
-        </h2>
+      <SortableSection v-if="sid === 'map' && data.drive?.lat && data.drive?.lon"
+        page-id="telemetry" section-id="map"
+        title="Live-Position" icon="📍"
+        :collapsed="isCollapsed('map')" @toggle="toggle('map')" @move="(f,t,p) => moveSection(f,t,p)">
         <div id="live-map" style="height: 280px; border-radius: 10px;"></div>
-      </div>
+      </SortableSection>
 
-      <!-- Power flow bar -->
-      <div class="card space-y-2">
-        <div class="flex justify-between text-xs text-gray-400 mb-1">
-          <span v-tooltip="'Energie wird durch Bremsen zurückgewonnen (Rekuperation)'">← Rekuperation</span>
-          <span class="font-medium text-white">{{ data.drive.power_kw != null ? data.drive.power_kw + ' kW' : '—' }}</span>
-          <span v-tooltip="'Energie wird für den Antrieb verbraucht'">Antrieb →</span>
-        </div>
-        <div class="relative h-5 bg-gray-800 rounded-full overflow-hidden flex">
-          <!-- Regen: right half growing left -->
-          <div class="w-1/2 flex justify-end overflow-hidden">
-            <div class="bg-green-500 h-full transition-all duration-300 rounded-l"
-              :style="{ width: regenPct + '%' }"></div>
+      <!-- Power flow + TPMS + Climate -->
+      <SortableSection v-if="sid === 'power'" page-id="telemetry" section-id="power"
+        title="Leistungsfluss" icon="⚡"
+        :collapsed="isCollapsed('power')" @toggle="toggle('power')" @move="(f,t,p) => moveSection(f,t,p)">
+        <div class="space-y-2">
+          <div class="flex justify-between text-xs text-gray-400 mb-1">
+            <span v-tooltip="'Energie wird durch Bremsen zurückgewonnen (Rekuperation)'">← Rekuperation</span>
+            <span class="font-medium text-white">{{ data.drive.power_kw != null ? data.drive.power_kw + ' kW' : '—' }}</span>
+            <span v-tooltip="'Energie wird für den Antrieb verbraucht'">Antrieb →</span>
           </div>
-          <div class="w-px bg-gray-600"></div>
-          <!-- Drive: left half growing right -->
-          <div class="w-1/2 overflow-hidden">
-            <div class="bg-tesla-red h-full transition-all duration-300 rounded-r"
-              :style="{ width: drivePct + '%' }"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- TPMS + Climate grid -->
-      <div class="grid md:grid-cols-2 gap-4">
-        <!-- Tire pressure Track-Mode style -->
-        <div class="card space-y-4">
-          <h2 class="font-semibold flex items-center gap-2" v-tooltip="'Reifenluftdruck aller vier Räder in bar. Grün = ok, Gelb = grenzwertig, Rot = zu niedrig/hoch'">
-            <AppIcon name="gauge" :size="20" class="text-tesla-red" />
-            Reifendruck (TPMS)
-          </h2>
-          <div class="relative mx-auto w-52 h-36">
-            <!-- Car silhouette -->
-            <svg viewBox="0 0 208 144" class="absolute inset-0 w-full h-full">
-              <rect x="44" y="32" width="120" height="80" rx="16" fill="none" stroke="#374151" stroke-width="2"/>
-              <rect x="64" y="16" width="80" height="40" rx="10" fill="none" stroke="#374151" stroke-width="2"/>
-            </svg>
-            <div class="absolute top-0 left-0" v-tooltip="'Vorderreifen links – optimaler Druck: 2.4–2.9 bar'">
-              <TireBadge :value="data.vehicle.tpms.fl" label="VL" />
+          <div class="relative h-5 bg-gray-800 rounded-full overflow-hidden flex">
+            <div class="w-1/2 flex justify-end overflow-hidden">
+              <div class="bg-green-500 h-full transition-all duration-300 rounded-l"
+                :style="{ width: regenPct + '%' }"></div>
             </div>
-            <div class="absolute top-0 right-0" v-tooltip="'Vorderreifen rechts – optimaler Druck: 2.4–2.9 bar'">
-              <TireBadge :value="data.vehicle.tpms.fr" label="VR" />
-            </div>
-            <div class="absolute bottom-0 left-0" v-tooltip="'Hinterreifen links – optimaler Druck: 2.4–2.9 bar'">
-              <TireBadge :value="data.vehicle.tpms.rl" label="HL" />
-            </div>
-            <div class="absolute bottom-0 right-0" v-tooltip="'Hinterreifen rechts – optimaler Druck: 2.4–2.9 bar'">
-              <TireBadge :value="data.vehicle.tpms.rr" label="HR" />
+            <div class="w-px bg-gray-600"></div>
+            <div class="w-1/2 overflow-hidden">
+              <div class="bg-tesla-red h-full transition-all duration-300 rounded-r"
+                :style="{ width: drivePct + '%' }"></div>
             </div>
           </div>
         </div>
+      </SortableSection>
 
-        <!-- Climate -->
-        <div class="card space-y-3">
-          <h2 class="font-semibold" v-tooltip="'Klimaanlage und Temperaturen'">🌡 Klima</h2>
+      <!-- TPMS -->
+      <SortableSection v-if="sid === 'tpms'" page-id="telemetry" section-id="tpms"
+        title="Reifendruck (TPMS)" icon="🛞"
+        :collapsed="isCollapsed('tpms')" @toggle="toggle('tpms')" @move="(f,t,p) => moveSection(f,t,p)">
+        <div class="relative mx-auto w-52 h-36">
+          <svg viewBox="0 0 208 144" class="absolute inset-0 w-full h-full">
+            <rect x="44" y="32" width="120" height="80" rx="16" fill="none" stroke="#374151" stroke-width="2"/>
+            <rect x="64" y="16" width="80" height="40" rx="10" fill="none" stroke="#374151" stroke-width="2"/>
+          </svg>
+          <div class="absolute top-0 left-0" v-tooltip="'Vorderreifen links – optimaler Druck: 2.4–2.9 bar'">
+            <TireBadge :value="data.vehicle.tpms.fl" label="VL" />
+          </div>
+          <div class="absolute top-0 right-0" v-tooltip="'Vorderreifen rechts – optimaler Druck: 2.4–2.9 bar'">
+            <TireBadge :value="data.vehicle.tpms.fr" label="VR" />
+          </div>
+          <div class="absolute bottom-0 left-0" v-tooltip="'Hinterreifen links – optimaler Druck: 2.4–2.9 bar'">
+            <TireBadge :value="data.vehicle.tpms.rl" label="HL" />
+          </div>
+          <div class="absolute bottom-0 right-0" v-tooltip="'Hinterreifen rechts – optimaler Druck: 2.4–2.9 bar'">
+            <TireBadge :value="data.vehicle.tpms.rr" label="HR" />
+          </div>
+        </div>
+      </SortableSection>
+
+      <!-- Climate -->
+      <SortableSection v-if="sid === 'climate'" page-id="telemetry" section-id="climate"
+        title="Klima" icon="🌡️"
+        :collapsed="isCollapsed('climate')" @toggle="toggle('climate')" @move="(f,t,p) => moveSection(f,t,p)">
+        <div class="space-y-2">
           <DataRow label="Innentemperatur"     :value="fmtT(data.climate.inside_temp_c)"        tooltip="Aktuelle Temperatur im Fahrzeuginnenraum" />
           <DataRow label="Außentemperatur"     :value="fmtT(data.climate.outside_temp_c)"       tooltip="Außentemperatur am Fahrzeugstandort" />
           <DataRow label="Solltemperatur"      :value="fmtT(data.climate.driver_temp_setting)"  tooltip="Eingestellte Wunschtemperatur des Fahrers" />
@@ -126,34 +130,35 @@
           <DataRow label="Frontscheibenheiz."  :value="data.climate.is_front_defroster_on ? '✅ Ein' : '⭕ Aus'" tooltip="Frontscheibenheizung aktiv?" />
           <DataRow label="Heckscheibenheiz."   :value="data.climate.is_rear_defroster_on  ? '✅ Ein' : '⭕ Aus'" tooltip="Heckscheibenheizung aktiv?" />
         </div>
-      </div>
+      </SortableSection>
 
-      <!-- Charging + Vehicle -->
-      <div class="grid md:grid-cols-2 gap-4">
-        <div class="card space-y-3">
-          <h2 class="font-semibold flex items-center gap-2" v-tooltip="'Aktueller Ladestatus und Ladedetails'">
-            <AppIcon name="bolt" :size="20" class="text-tesla-red" />
-            Laden
-          </h2>
+      <!-- Charging -->
+      <SortableSection v-if="sid === 'charging'" page-id="telemetry" section-id="charging"
+        title="Laden" icon="🔌"
+        :collapsed="isCollapsed('charging')" @toggle="toggle('charging')" @move="(f,t,p) => moveSection(f,t,p)">
+        <div class="space-y-2">
           <DataRow label="Status"          :value="data.charge.charging_state ?? '—'"                              tooltip="Charging = aktiv, Disconnected = nicht angesteckt, Complete = voll" />
           <DataRow label="Ladeleistung"    :value="data.charge.charger_power_kw ? data.charge.charger_power_kw + ' kW' : '—'" tooltip="Aktuelle Ladeleistung in kW" />
           <DataRow label="Ladegeschwind."  :value="data.charge.charge_rate_kph ? data.charge.charge_rate_kph + ' km/h' : '—'" tooltip="Mit welcher Reichweite pro Stunde wird geladen" />
           <DataRow label="Ladelimit"       :value="data.charge.charge_limit_pct ? data.charge.charge_limit_pct + '%' : '—'"   tooltip="Maximaler SOC den das Fahrzeug laden wird" />
           <DataRow label="Zeit bis voll"   :value="fmtH(data.charge.time_to_full_charge_h)"                        tooltip="Voraussichtliche Restzeit bis zum Ladelimit" />
         </div>
+      </SortableSection>
 
-        <div class="card space-y-3">
-          <h2 class="font-semibold flex items-center gap-2" v-tooltip="'Allgemeiner Fahrzeugzustand'">
-            <AppIcon name="steering" :size="20" class="text-tesla-red" />
-            Fahrzeug
-          </h2>
+      <!-- Vehicle -->
+      <SortableSection v-if="sid === 'vehicle'" page-id="telemetry" section-id="vehicle"
+        title="Fahrzeug" icon="🚗"
+        :collapsed="isCollapsed('vehicle')" @toggle="toggle('vehicle')" @move="(f,t,p) => moveSection(f,t,p)">
+        <div class="space-y-2">
           <DataRow label="Zustand"     :value="data.state"                                            tooltip="Online, Asleep, Driving, Charging" />
           <DataRow label="Verriegelt"  :value="data.vehicle.locked ? '🔒 Ja' : '🔓 Nein'"           tooltip="Ob das Fahrzeug gerade verriegelt ist" />
           <DataRow label="Sentry"      :value="data.vehicle.sentry_mode ? '👁 Aktiv' : 'Inaktiv'"   tooltip="Sentry-Mode überwacht das Fahrzeug mit Kameras bei Einbruchversuchen" />
           <DataRow label="Software"    :value="data.vehicle.software_version ?? '—'"                  tooltip="Aktuelle Fahrzeugsoftwareversion" />
           <DataRow label="Richtung"    :value="data.drive.heading != null ? data.drive.heading + '°' : '—'" tooltip="Kompasskurs in Grad (0° = Norden, 90° = Osten)" />
         </div>
-      </div>
+      </SortableSection>
+
+      </template><!-- end v-for layoutOrder -->
     </template>
 
     <!-- Kein Fahrzeug ausgewählt -->

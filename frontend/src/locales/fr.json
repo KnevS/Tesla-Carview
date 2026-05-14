@@ -135,7 +135,10 @@
     "serviceOverdueKm": "{n} km en retard",
     "serviceKmLeft": "encore {n} km",
     "serviceNoDone": "aucun « fait » enregistré",
-    "monthlyChartLabel": "km"
+    "monthlyChartLabel": "km",
+    "stats": "Statistiques",
+    "tariff": "Tarif électrique",
+    "teslaUsage": "Connexion Tesla"
   },
   "trips": {
     "title": "Trajets",
@@ -331,7 +334,9 @@
     "chargerTypeTesla": "Tesla Supercharger – V2 jusqu'à 150 kW, V3 jusqu'à 250 kW. Souvent moins cher que les autres DC rapides.",
     "chargerTypeCombo": "CCS Combo – standard européen DC rapide. Jusqu'à 350 kW.",
     "chargerTypeUnknown": "Technologie de recharge non identifiée",
-    "chargerTypeNotReported": "non transmis par la station"
+    "chargerTypeNotReported": "non transmis par la station",
+    "sectionStats": "Statistiques",
+    "sectionSessions": "Sessions de recharge"
   },
   "battery": {
     "title": "Batterie & Dégradation",
@@ -1644,7 +1649,32 @@
       "returnTripTitle": "Planifier le retour",
       "returnDeparture": "Date de départ retour",
       "addReturn": "Enregistrer le retour",
-      "returnAdded": "Trajet retour enregistré"
+      "returnAdded": "Trajet retour enregistré",
+      "timingSection": "Planification horaire",
+      "modeDepart": "Départ",
+      "modeArrive": "Arrivée",
+      "modeDepartTip": "Définir l'heure de départ – l'arrivée est calculée",
+      "modeArriveTip": "Définir l'heure d'arrivée souhaitée – le départ nécessaire est calculé",
+      "planDate": "Date",
+      "arrivalTime": "Heure d'arrivée",
+      "neededDeparture": "Départ nécessaire",
+      "weatherTitle": "Météo & Trafic",
+      "weatherLoading": "Chargement des données météo …",
+      "weatherHint": "La météo est chargée après le calcul de l'itinéraire.",
+      "weatherAtStart": "Départ",
+      "weatherAtDest": "Destination",
+      "windLabel": "Vent",
+      "trafficLabel": "Trafic",
+      "trafficFree": "Route libre",
+      "trafficNoKey": "Trafic en temps réel non configuré.",
+      "trafficSetup": "Configurer →",
+      "showCameras": "Radars",
+      "hideCameras": "Radars",
+      "camerasTooltip": "Afficher les avertissements radar depuis OpenStreetMap (gratuit, incomplet)",
+      "camerasLegal": "Avis légal",
+      "camerasLegalText": "En France, avertir d'un contrôle de vitesse est interdit. Dans d'autres pays, la réglementation varie. Utilisation à vos risques.",
+      "camerasLegend": "radars",
+      "actionsTitle": "Actions"
   },
   "wizard": {
     "title": "Assistant de configuration",

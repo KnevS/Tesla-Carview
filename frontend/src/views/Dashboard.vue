@@ -16,34 +16,26 @@
     </div>
 
     <template v-else>
-      <template v-for="cardKey in cardOrder" :key="cardKey">
+      <template v-for="sid in layoutOrder" :key="sid">
 
         <!-- stats -->
-        <div v-if="cardKey === 'stats' && show.stats" class="grid grid-cols-2 md:grid-cols-4 gap-4 stagger">
-          <StatCard :label="$t('dashboard.totalKm')"
-            :value="fmt(stats.total_km, 0) + ' km'"
-            icon="map" to="/trips" :tooltip="$t('dashboard.totalKmTooltip')" />
-          <StatCard :label="$t('dashboard.trips')"
-            :value="stats.total_trips"
-            icon="pin" to="/trips" :tooltip="$t('dashboard.tripsTooltip')" />
-          <StatCard :label="$t('dashboard.charged')"
-            :value="fmt(chargingStats.total_energy_kwh, 1) + ' kWh'"
-            icon="bolt" to="/charging" :tooltip="$t('dashboard.chargedTooltip')" />
-          <StatCard :label="$t('dashboard.chargingCost')"
-            :value="fmt(chargingStats.total_cost, 2) + ' €'"
-            icon="wallet" to="/charging" :tooltip="$t('dashboard.chargingCostTooltip')" />
-        </div>
+        <SortableSection v-if="sid === 'stats' && show.stats" page-id="dashboard" section-id="stats"
+          :title="$t('dashboard.stats')" icon="📊"
+          :collapsed="isCollapsed('stats')" @toggle="toggle('stats')" @move="(f,t,p) => moveSection(f,t,p)">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <StatCard :label="$t('dashboard.totalKm')"   :value="fmt(stats.total_km, 0) + ' km'"              icon="map"    to="/trips"    :tooltip="$t('dashboard.totalKmTooltip')" />
+            <StatCard :label="$t('dashboard.trips')"      :value="stats.total_trips"                            icon="pin"    to="/trips"    :tooltip="$t('dashboard.tripsTooltip')" />
+            <StatCard :label="$t('dashboard.charged')"    :value="fmt(chargingStats.total_energy_kwh, 1) + ' kWh'" icon="bolt" to="/charging" :tooltip="$t('dashboard.chargedTooltip')" />
+            <StatCard :label="$t('dashboard.chargingCost')" :value="fmt(chargingStats.total_cost, 2) + ' €'"   icon="wallet" to="/charging" :tooltip="$t('dashboard.chargingCostTooltip')" />
+          </div>
+        </SortableSection>
 
         <!-- service -->
-        <RouterLink v-if="cardKey === 'service' && show.service && dueServices.length"
-                    to="/logbook#service-intervals"
-                    class="card card-interactive group block no-underline border border-yellow-700/40 bg-yellow-900/10">
-          <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-            {{ $t('dashboard.serviceTitle') }}
-            <span class="text-xs text-gray-400 font-normal">({{ dueServices.length }})</span>
-            <span class="ml-auto text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition">{{ $t('dashboard.openLink') }}</span>
-          </h2>
-          <div class="space-y-2">
+        <SortableSection v-if="sid === 'service' && show.service && dueServices.length" page-id="dashboard" section-id="service"
+          :title="$t('dashboard.serviceTitle')" icon="🔧"
+          :collapsed="isCollapsed('service')" @toggle="toggle('service')" @move="(f,t,p) => moveSection(f,t,p)">
+          <template #badge><span class="text-xs text-yellow-400">({{ dueServices.length }})</span></template>
+          <RouterLink to="/logbook#service-intervals" class="block no-underline space-y-2">
             <div v-for="s in dueServices" :key="s.id" class="flex items-center justify-between gap-3 text-sm">
               <div class="flex-1 min-w-0">
                 <p class="font-medium truncate" :class="s.status === 'overdue' ? 'text-red-300' : 'text-yellow-200'">{{ s.label }}</p>
@@ -54,56 +46,48 @@
                   <span v-if="s.km_until_due != null" class="ml-2">
                     · {{ s.km_until_due < 0 ? $t('dashboard.serviceOverdueKm', { n: -s.km_until_due }) : $t('dashboard.serviceKmLeft', { n: s.km_until_due }) }}
                   </span>
-                  <span v-if="s.days_until_due == null && s.km_until_due == null" class="italic">{{ $t('dashboard.serviceNoDone') }}</span>
                 </p>
               </div>
             </div>
-          </div>
-        </RouterLink>
+          </RouterLink>
+        </SortableSection>
 
         <!-- last_trip -->
-        <RouterLink v-if="cardKey === 'last_trip' && show.last_trip && lastTrip" :to="`/trips/${lastTrip.id}`"
-                    class="card card-interactive group block no-underline" v-reveal>
-          <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-            {{ $t('dashboard.lastTrip') }}
-            <span class="ml-auto text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition">{{ $t('dashboard.openLink') }}</span>
-          </h2>
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-            <div v-tooltip="$t('dashboard.fromTooltip')">
-              <p class="text-gray-400">{{ $t('dashboard.from') }}</p>
-              <p>{{ lastTrip.start_address || $t('dashboard.unknownPlace') }}</p>
+        <SortableSection v-if="sid === 'last_trip' && show.last_trip && lastTrip" page-id="dashboard" section-id="last_trip"
+          :title="$t('dashboard.lastTrip')" icon="🗺️"
+          :collapsed="isCollapsed('last_trip')" @toggle="toggle('last_trip')" @move="(f,t,p) => moveSection(f,t,p)">
+          <RouterLink :to="`/trips/${lastTrip.id}`" class="block no-underline">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+              <div v-tooltip="$t('dashboard.fromTooltip')"><p class="text-gray-400">{{ $t('dashboard.from') }}</p><p>{{ lastTrip.start_address || $t('dashboard.unknownPlace') }}</p></div>
+              <div v-tooltip="$t('dashboard.toTooltip')"><p class="text-gray-400">{{ $t('dashboard.toLabel') }}</p><p>{{ lastTrip.end_address || $t('dashboard.unknownPlace') }}</p></div>
+              <div v-tooltip="$t('dashboard.distanceTooltip')"><p class="text-gray-400">{{ $t('dashboard.distance') }}</p><p>{{ fmt(lastTrip.distance_km, 1) }} km</p></div>
+              <div v-tooltip="$t('dashboard.consumptionTooltip')"><p class="text-gray-400">{{ $t('dashboard.consumption') }}</p><p>{{ lastTrip.distance_km ? fmt(lastTrip.energy_used_kwh / lastTrip.distance_km * 100, 1) : '–' }} kWh/100km</p></div>
             </div>
-            <div v-tooltip="$t('dashboard.toTooltip')">
-              <p class="text-gray-400">{{ $t('dashboard.toLabel') }}</p>
-              <p>{{ lastTrip.end_address || $t('dashboard.unknownPlace') }}</p>
-            </div>
-            <div v-tooltip="$t('dashboard.distanceTooltip')">
-              <p class="text-gray-400">{{ $t('dashboard.distance') }}</p>
-              <p>{{ fmt(lastTrip.distance_km, 1) }} km</p>
-            </div>
-            <div v-tooltip="$t('dashboard.consumptionTooltip')">
-              <p class="text-gray-400">{{ $t('dashboard.consumption') }}</p>
-              <p>{{ lastTrip.distance_km ? fmt(lastTrip.energy_used_kwh / lastTrip.distance_km * 100, 1) : '–' }} kWh/100km</p>
-            </div>
-          </div>
-        </RouterLink>
+          </RouterLink>
+        </SortableSection>
 
         <!-- monthly_chart -->
-        <RouterLink v-if="cardKey === 'monthly_chart' && show.monthly_chart" to="/trips" class="card card-interactive group block no-underline">
-          <h2 class="text-lg font-semibold mb-4 flex items-center gap-2" v-tooltip="$t('dashboard.monthlyKmTooltip')">
-            {{ $t('dashboard.monthlyKm') }}
-            <span class="ml-auto text-xs text-gray-400 opacity-0 group-hover:opacity-100 transition">{{ $t('dashboard.openLink') }}</span>
-          </h2>
+        <SortableSection v-if="sid === 'monthly_chart' && show.monthly_chart" page-id="dashboard" section-id="monthly_chart"
+          :title="$t('dashboard.monthlyKm')" icon="📈"
+          :collapsed="isCollapsed('monthly_chart')" @toggle="toggle('monthly_chart')" @move="(f,t,p) => moveSection(f,t,p)">
           <div style="height: 200px">
             <Bar v-if="chartData" :data="chartData" :options="chartOptions" />
           </div>
-        </RouterLink>
+        </SortableSection>
 
         <!-- tariff -->
-        <TariffWidget v-if="cardKey === 'tariff' && show.tariff" />
+        <SortableSection v-if="sid === 'tariff' && show.tariff" page-id="dashboard" section-id="tariff"
+          :title="$t('dashboard.tariff')" icon="⚡"
+          :collapsed="isCollapsed('tariff')" @toggle="toggle('tariff')" @move="(f,t,p) => moveSection(f,t,p)">
+          <TariffWidget />
+        </SortableSection>
 
         <!-- tesla_usage -->
-        <TeslaUsageWidget v-if="cardKey === 'tesla_usage' && show.tesla_usage" />
+        <SortableSection v-if="sid === 'tesla_usage' && show.tesla_usage" page-id="dashboard" section-id="tesla_usage"
+          :title="$t('dashboard.teslaUsage')" icon="🔌"
+          :collapsed="isCollapsed('tesla_usage')" @toggle="toggle('tesla_usage')" @move="(f,t,p) => moveSection(f,t,p)">
+          <TeslaUsageWidget />
+        </SortableSection>
 
       </template>
     </template>
@@ -121,6 +105,8 @@ import StatCard from '../components/StatCard.vue';
 import TeslaUsageWidget from '../components/TeslaUsageWidget.vue';
 import TariffWidget     from '../components/TariffWidget.vue';
 import AppIcon          from '../components/AppIcon.vue';
+import SortableSection  from '../components/SortableSection.vue';
+import { usePageLayout } from '../composables/usePageLayout.js';
 import api from '../api.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
@@ -128,6 +114,9 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 const { t } = useI18n();
 const appStore = useAppStore();
 const prefs    = usePrefsStore();
+
+const DASH_SECTIONS = ['stats', 'service', 'last_trip', 'monthly_chart', 'tariff', 'tesla_usage'];
+const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('dashboard', DASH_SECTIONS);
 
 const show = computed(() => ({
   stats:         prefs.isDashboardCardVisible('stats'),

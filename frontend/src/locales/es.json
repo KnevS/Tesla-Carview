@@ -135,7 +135,10 @@
     "serviceOverdueKm": "{n} km vencidos",
     "serviceKmLeft": "{n} km restantes",
     "serviceNoDone": "sin entrada «hecho»",
-    "monthlyChartLabel": "km"
+    "monthlyChartLabel": "km",
+    "stats": "Estadísticas",
+    "tariff": "Tarifa eléctrica",
+    "teslaUsage": "Conexión Tesla"
   },
   "trips": {
     "title": "Viajes",
@@ -331,7 +334,9 @@
     "chargerTypeTesla": "Tesla Supercharger – V2 hasta 150 kW, V3 hasta 250 kW. Suele ser más barato que otros DC rápidos.",
     "chargerTypeCombo": "CCS Combo – estándar europeo de carga rápida DC. Hasta 350 kW.",
     "chargerTypeUnknown": "Tecnología de carga no identificada",
-    "chargerTypeNotReported": "no transmitido por la estación"
+    "chargerTypeNotReported": "no transmitido por la estación",
+    "sectionStats": "Estadísticas",
+    "sectionSessions": "Sesiones de carga"
   },
   "battery": {
     "title": "Batería y Degradación",
@@ -1644,7 +1649,32 @@
       "returnTripTitle": "Planificar regreso",
       "returnDeparture": "Fecha de salida regreso",
       "addReturn": "Guardar regreso",
-      "returnAdded": "Viaje de regreso guardado"
+      "returnAdded": "Viaje de regreso guardado",
+      "timingSection": "Planificación horaria",
+      "modeDepart": "Salida",
+      "modeArrive": "Llegada",
+      "modeDepartTip": "Establecer hora de salida – la llegada se calcula",
+      "modeArriveTip": "Establecer hora de llegada deseada – la salida necesaria se calcula",
+      "planDate": "Fecha",
+      "arrivalTime": "Hora de llegada",
+      "neededDeparture": "Salida necesaria",
+      "weatherTitle": "Clima y Tráfico",
+      "weatherLoading": "Cargando datos del clima …",
+      "weatherHint": "El clima se carga tras calcular la ruta.",
+      "weatherAtStart": "Salida",
+      "weatherAtDest": "Destino",
+      "windLabel": "Viento",
+      "trafficLabel": "Tráfico",
+      "trafficFree": "Vía libre",
+      "trafficNoKey": "Tráfico en tiempo real no configurado.",
+      "trafficSetup": "Configurar →",
+      "showCameras": "Radares",
+      "hideCameras": "Radares",
+      "camerasTooltip": "Mostrar avisos de radares desde OpenStreetMap (gratuito, incompleto)",
+      "camerasLegal": "Aviso legal",
+      "camerasLegalText": "El uso de avisadores de radar puede ser ilegal en algunos países. Consulte la normativa local. Uso bajo su propia responsabilidad.",
+      "camerasLegend": "radares",
+      "actionsTitle": "Acciones"
   },
   "wizard": {
     "title": "Asistente de configuración",

@@ -1,26 +1,30 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4">
     <div class="flex items-center justify-between flex-wrap gap-3">
       <h1 class="text-2xl font-bold">{{ $t('charging.title') }}</h1>
       <SortToggle v-model:direction="sortDir" />
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <StatCard :label="$t('charging.sessions')" :value="stats.total_sessions" icon="plus"
-        :tooltip="$t('charging.sessionsTooltip')" />
-      <StatCard :label="$t('charging.totalCharged')" :value="fmt(stats.total_energy_kwh, 1) + ' kWh'" icon="bolt"
-        :tooltip="$t('charging.totalChargedTooltip')" />
-      <StatCard :label="$t('charging.totalCost')" :value="fmt(stats.total_cost, 2) + ' €'" icon="wallet"
-        :tooltip="$t('charging.totalCostTooltip')" />
-      <StatCard :label="$t('charging.maxPower')" :value="fmt(stats.peak_power, 0) + ' kW'" icon="pulse"
-        :tooltip="$t('charging.maxPowerTooltip')" />
-    </div>
+    <template v-for="sid in layoutOrder" :key="sid">
 
-    <div v-if="stats.byType?.length" class="card">
-      <h2 class="text-lg font-semibold mb-4"
-        v-tooltip="$t('charging.byTypeTooltip')">
-        {{ $t('charging.byType') }}
-      </h2>
+    <SortableSection v-if="sid === 'stats'" page-id="charging" section-id="stats"
+      :title="$t('charging.sectionStats')" icon="📊"
+      :collapsed="isCollapsed('stats')" @toggle="toggle('stats')" @move="(f,t,p) => moveSection(f,t,p)">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard :label="$t('charging.sessions')" :value="stats.total_sessions" icon="plus"
+          :tooltip="$t('charging.sessionsTooltip')" />
+        <StatCard :label="$t('charging.totalCharged')" :value="fmt(stats.total_energy_kwh, 1) + ' kWh'" icon="bolt"
+          :tooltip="$t('charging.totalChargedTooltip')" />
+        <StatCard :label="$t('charging.totalCost')" :value="fmt(stats.total_cost, 2) + ' €'" icon="wallet"
+          :tooltip="$t('charging.totalCostTooltip')" />
+        <StatCard :label="$t('charging.maxPower')" :value="fmt(stats.peak_power, 0) + ' kW'" icon="pulse"
+          :tooltip="$t('charging.maxPowerTooltip')" />
+      </div>
+    </SortableSection>
+
+    <SortableSection v-if="sid === 'bytype' && stats.byType?.length" page-id="charging" section-id="bytype"
+      :title="$t('charging.byType')" icon="⚡"
+      :collapsed="isCollapsed('bytype')" @toggle="toggle('bytype')" @move="(f,t,p) => moveSection(f,t,p)">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div v-for="t in stats.byType" :key="t.charger_type"
           v-tooltip="chargerTypeTooltip(t.charger_type)"
@@ -30,19 +34,18 @@
           <p class="text-sm text-gray-400">{{ fmt(t.energy, 1) }} kWh</p>
         </div>
       </div>
-    </div>
+    </SortableSection>
 
-    <!-- Lade-Heatmap: wann (Wochentag × Stunde) ladet du typischerweise,
-         und wo gab's die hoechsten Leistungen. -->
-    <div class="card">
-      <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-        <AppIcon name="calendar" :size="20" class="text-tesla-red" />
-        {{ $t('charging.heatmapTitle') }}
-      </h2>
+    <SortableSection v-if="sid === 'heatmap'" page-id="charging" section-id="heatmap"
+      :title="$t('charging.heatmapTitle')" icon="📅"
+      :collapsed="isCollapsed('heatmap')" @toggle="toggle('heatmap')" @move="(f,t,p) => moveSection(f,t,p)">
       <ChargingHeatmap />
-    </div>
+    </SortableSection>
 
-    <div class="space-y-3">
+    <SortableSection v-if="sid === 'sessions'" page-id="charging" section-id="sessions"
+      :title="$t('charging.sectionSessions')" icon="🔌"
+      :collapsed="isCollapsed('sessions')" @toggle="toggle('sessions')" @move="(f,t,p) => moveSection(f,t,p)">
+      <div class="space-y-3">
       <div v-if="loading" class="text-gray-400">{{ $t('charging.loading') }}</div>
       <div v-for="s in sessions" :key="s.id"
         class="card"
@@ -171,7 +174,10 @@
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </SortableSection>
+
+    </template><!-- end v-for layoutOrder -->
   </div>
 </template>
 
@@ -183,11 +189,17 @@ import StatCard from '../components/StatCard.vue';
 import AppIcon from '../components/AppIcon.vue';
 import ChargingHeatmap from '../components/ChargingHeatmap.vue';
 import SortToggle from '../components/SortToggle.vue';
+import SortableSection from '../components/SortableSection.vue';
+import { usePageLayout } from '../composables/usePageLayout.js';
 import { useSortDirection } from '../composables/useSortDirection.js';
 import api from '../api.js';
 
 const { t, locale } = useI18n();
 const appStore = useAppStore();
+
+const CHARGING_SECTIONS = ['stats', 'bytype', 'heatmap', 'sessions'];
+const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('charging', CHARGING_SECTIONS);
+
 const sessions = ref([]);
 const stats = ref({ byType: [] });
 const loading = ref(true);

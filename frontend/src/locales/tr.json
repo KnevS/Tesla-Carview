@@ -135,7 +135,10 @@
     "serviceOverdueKm": "{n} km gecikti",
     "serviceKmLeft": "{n} km kaldı",
     "serviceNoDone": "henüz „yapıldı\" kaydı yok",
-    "monthlyChartLabel": "km"
+    "monthlyChartLabel": "km",
+    "stats": "İstatistikler",
+    "tariff": "Elektrik Tarifesi",
+    "teslaUsage": "Tesla Bağlantısı"
   },
   "trips": {
     "title": "Seyahatler",
@@ -331,7 +334,9 @@
     "chargerTypeTesla": "Tesla Supercharger – V2 150 kW'a kadar, V3 250 kW'a kadar. Diğer DC hızlı şarjlardan genellikle daha ucuz.",
     "chargerTypeCombo": "CCS Combo – Avrupa DC hızlı şarj standardı. 350 kW'a kadar.",
     "chargerTypeUnknown": "Şarj teknolojisi belirlenemedi",
-    "chargerTypeNotReported": "istasyon tarafından iletilmedi"
+    "chargerTypeNotReported": "istasyon tarafından iletilmedi",
+    "sectionStats": "İstatistikler",
+    "sectionSessions": "Şarj Oturumları"
   },
   "battery": {
     "title": "Batarya & Bozulma",
@@ -1644,7 +1649,32 @@
       "returnTripTitle": "Dönüş yolculuğu planla",
       "returnDeparture": "Dönüş kalkış tarihi",
       "addReturn": "Dönüşü kaydet",
-      "returnAdded": "Dönüş yolculuğu kaydedildi"
+      "returnAdded": "Dönüş yolculuğu kaydedildi",
+      "timingSection": "Zaman Planlaması",
+      "modeDepart": "Kalkış",
+      "modeArrive": "Varış",
+      "modeDepartTip": "Kalkış saatini belirle – varış hesaplanır",
+      "modeArriveTip": "İstenen varış saatini belirle – gerekli kalkış hesaplanır",
+      "planDate": "Tarih",
+      "arrivalTime": "Varış saati",
+      "neededDeparture": "Gerekli kalkış",
+      "weatherTitle": "Hava & Trafik",
+      "weatherLoading": "Hava durumu yükleniyor …",
+      "weatherHint": "Hava durumu rota hesaplandıktan sonra yüklenir.",
+      "weatherAtStart": "Başlangıç",
+      "weatherAtDest": "Hedef",
+      "windLabel": "Rüzgar",
+      "trafficLabel": "Trafik",
+      "trafficFree": "Yol açık",
+      "trafficNoKey": "Gerçek zamanlı trafik yapılandırılmamış.",
+      "trafficSetup": "Yapılandır →",
+      "showCameras": "Radar kameraları",
+      "hideCameras": "Radar kameraları",
+      "camerasTooltip": "OpenStreetMap'ten radar uyarılarını göster (ücretsiz, eksik)",
+      "camerasLegal": "Yasal uyarı",
+      "camerasLegalText": "Radar uyarı uygulamaları bazı ülkelerde sürüş sırasında yasadışı olabilir. Yerel mevzuatı kontrol edin. Kullanım riski kullanıcıya aittir.",
+      "camerasLegend": "radar",
+      "actionsTitle": "Eylemler"
   },
   "wizard": {
     "title": "Ayar Sihirbazı",

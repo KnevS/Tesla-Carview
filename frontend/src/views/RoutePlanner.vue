@@ -14,14 +14,14 @@
     <div v-else class="grid lg:grid-cols-[400px_1fr] gap-4 items-start">
 
       <!-- ─── Linke Spalte ─────────────────────────────────────────────────── -->
-      <div class="space-y-4">
+      <div class="space-y-2">
+        <template v-for="sid in orderedSections" :key="sid">
 
         <!-- Startort -->
-        <div class="card space-y-3">
-          <h2 class="font-semibold text-base flex items-center gap-2">
-            <AppIcon name="pin" :size="16" class="text-green-400" />
-            {{ $t('routes.startTitle') }}
-          </h2>
+        <SortableSection v-if="sid === 'start'" page-id="routePlanner" section-id="start"
+          :title="$t('routes.startTitle')" icon="🟢"
+          :collapsed="isCollapsed('start')" @toggle="toggle('start')" @move="(f,t,p) => moveSection(f,t,p)">
+          <div class="space-y-3">
           <div class="flex gap-2 flex-wrap">
             <button @click="setStartVehicle"
               :class="startMode === 'vehicle' ? 'bg-green-700 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'"
@@ -62,14 +62,14 @@
             </div>
           </div>
           <p v-else class="text-xs text-gray-500 italic">{{ $t('routes.startNoLocation') }}</p>
-        </div>
+          </div>
+        </SortableSection>
 
         <!-- Zielsuche -->
-        <div class="card space-y-3">
-          <h2 class="font-semibold text-base flex items-center gap-2">
-            <AppIcon name="pin" :size="16" class="text-tesla-red" />
-            {{ $t('routes.destination') }}
-          </h2>
+        <SortableSection v-if="sid === 'destination'" page-id="routePlanner" section-id="destination"
+          :title="$t('routes.destination')" icon="📍"
+          :collapsed="isCollapsed('destination')" @toggle="toggle('destination')" @move="(f,t,p) => moveSection(f,t,p)">
+          <div class="space-y-3">
           <div class="relative">
             <input v-model="searchQuery" type="text" :placeholder="$t('routes.searchPlaceholder')"
               class="input w-full pr-8" @input="onSearchInput" @keyup.enter="onSearchEnter" @keyup.escape="searchResults = []" />
@@ -94,15 +94,15 @@
             <button @click="clearDestination" class="text-gray-500 hover:text-white text-xl leading-none">×</button>
           </div>
           <p v-else class="text-xs text-gray-500">{{ $t('routes.clickMapHint') }}</p>
-        </div>
+          </div>
+        </SortableSection>
 
         <!-- Zwischenstopps -->
-        <div class="card space-y-3">
-          <h2 class="font-semibold text-base flex items-center gap-2">
-            <AppIcon name="location" :size="16" class="text-gray-400" />
-            {{ $t('routes.waypoints') }}
-            <span class="ml-auto text-xs text-gray-500">{{ waypoints.length }}/5</span>
-          </h2>
+        <SortableSection v-if="sid === 'waypoints'" page-id="routePlanner" section-id="waypoints"
+          :title="$t('routes.waypoints')" icon="📌"
+          :collapsed="isCollapsed('waypoints')" @toggle="toggle('waypoints')" @move="(f,t,p) => moveSection(f,t,p)">
+          <template #badge><span class="text-xs text-gray-500">{{ waypoints.length }}/5</span></template>
+          <div class="space-y-3">
           <ul v-if="waypoints.length" class="space-y-2">
             <li v-for="(wp, i) in waypoints" :key="i" class="flex items-center gap-2 bg-gray-800 rounded-xl px-3 py-2">
               <span class="text-gray-400 text-xs font-mono w-4">{{ i+1 }}</span>
@@ -121,42 +121,64 @@
               {{ r.display_name.split(',').slice(0,2).join(', ') }}
             </li>
           </ul>
-        </div>
+          </div>
+        </SortableSection>
 
-        <!-- Abfahrtsplanung -->
-        <div class="card space-y-3">
-          <h2 class="font-semibold text-base flex items-center gap-2">
-            <span class="text-blue-400">🕐</span>
-            {{ $t('routes.departureSection') }}
-          </h2>
-          <div class="grid grid-cols-2 gap-2">
-            <div>
-              <label class="label text-xs">{{ $t('routes.departureDate') }}</label>
-              <input v-model="planDate" type="date" class="input w-full text-sm" :min="todayStr" />
+        <!-- Zeitplanung: Abfahrt oder Ankunft -->
+        <SortableSection v-if="sid === 'timing'" page-id="routePlanner" section-id="timing"
+          :title="$t('routes.timingSection')" icon="🕐"
+          :collapsed="isCollapsed('timing')" @toggle="toggle('timing')" @move="(f,t,p) => moveSection(f,t,p)">
+          <div class="space-y-3">
+            <!-- Modus-Auswahl -->
+            <div class="flex rounded-xl overflow-hidden border border-gray-700">
+              <button @click="planMode = 'depart'"
+                class="flex-1 py-2 text-xs font-medium transition"
+                :class="planMode === 'depart' ? 'bg-blue-700 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'"
+                v-tooltip="$t('routes.modeDepartTip')">
+                🛫 {{ $t('routes.modeDepart') }}
+              </button>
+              <button @click="planMode = 'arrive'"
+                class="flex-1 py-2 text-xs font-medium transition"
+                :class="planMode === 'arrive' ? 'bg-purple-700 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'"
+                v-tooltip="$t('routes.modeArriveTip')">
+                🏁 {{ $t('routes.modeArrive') }}
+              </button>
             </div>
-            <div>
-              <label class="label text-xs">{{ $t('routes.departureTime') }}</label>
-              <div class="flex gap-1">
-                <input v-model="planTime" type="time" class="input flex-1 text-sm" />
-                <button @click="setDepartNow" class="px-2 py-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-xs text-gray-300 transition"
-                  v-tooltip="$t('routes.departNow')">↺</button>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="label text-xs">{{ $t('routes.planDate') }}</label>
+                <input v-model="planDate" type="date" class="input w-full text-sm" :min="todayStr" />
+              </div>
+              <div>
+                <label class="label text-xs">
+                  {{ planMode === 'depart' ? $t('routes.departureTime') : $t('routes.arrivalTime') }}
+                </label>
+                <div class="flex gap-1">
+                  <input v-model="planTime" type="time" class="input flex-1 text-sm" />
+                  <button @click="setDepartNow" class="px-2 py-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-xs text-gray-300 transition"
+                    v-tooltip="$t('routes.departNow')">↺</button>
+                </div>
               </div>
             </div>
+            <div v-if="timingResult" class="bg-gray-800/60 rounded-xl px-3 py-2 text-xs flex items-center gap-2">
+              <span :class="planMode === 'depart' ? 'text-blue-400' : 'text-purple-400'">
+                {{ planMode === 'depart' ? '🏁' : '🛫' }}
+              </span>
+              <span class="text-gray-400">
+                {{ planMode === 'depart' ? $t('routes.expectedArrival') : $t('routes.neededDeparture') }}:
+              </span>
+              <span class="text-white font-medium">{{ timingResult }}</span>
+              <span v-if="totalChargeMins > 0" class="text-yellow-400 ml-auto">+{{ totalChargeMins }} min ⚡</span>
+            </div>
           </div>
-          <div v-if="expectedArrival" class="bg-gray-800/60 rounded-xl px-3 py-2 text-xs flex items-center gap-2">
-            <span class="text-blue-400">🏁</span>
-            <span class="text-gray-400">{{ $t('routes.expectedArrival') }}:</span>
-            <span class="text-white font-medium">{{ expectedArrival }}</span>
-            <span v-if="totalChargeMins > 0" class="text-yellow-400 ml-auto">+{{ totalChargeMins }} min ⚡</span>
-          </div>
-        </div>
+        </SortableSection>
 
         <!-- Routeninfo -->
-        <div v-if="routeData || routeLoading" class="card space-y-3">
-          <h2 class="font-semibold text-base flex items-center gap-2">
-            <AppIcon name="speed" :size="16" class="text-blue-400" />
-            {{ $t('routes.routeInfo') }}
-          </h2>
+        <SortableSection v-if="sid === 'routeinfo' && (routeData || routeLoading)"
+          page-id="routePlanner" section-id="routeinfo"
+          :title="$t('routes.routeInfo')" icon="📏"
+          :collapsed="isCollapsed('routeinfo')" @toggle="toggle('routeinfo')" @move="(f,t,p) => moveSection(f,t,p)">
+          <div class="space-y-3">
           <div v-if="routeLoading" class="text-xs text-gray-400 animate-pulse">{{ $t('routes.calculating') }}</div>
           <template v-else-if="routeData">
             <div class="grid grid-cols-2 gap-3">
@@ -195,19 +217,22 @@
             </div>
             <p v-else class="text-xs text-gray-500">{{ $t('routes.noSocData') }}</p>
           </template>
-        </div>
+          </div>
+        </SortableSection>
 
         <!-- ⚡ Ladeplan -->
-        <div v-if="routeData" class="card space-y-3">
-          <h2 class="font-semibold text-base flex items-center gap-2">
-            <span class="text-yellow-400">⚡</span>
-            {{ $t('routes.chargingPlanTitle') }}
-            <button @click="calcChargingPlan" :disabled="planLoading || !routeData"
-              class="ml-auto px-3 py-1 rounded-lg text-xs font-medium transition"
+        <SortableSection v-if="sid === 'charging' && routeData"
+          page-id="routePlanner" section-id="charging"
+          title="⚡ Ladeplan" icon=""
+          :collapsed="isCollapsed('charging')" @toggle="toggle('charging')" @move="(f,t,p) => moveSection(f,t,p)">
+          <template #badge>
+            <button @click.stop="calcChargingPlan" :disabled="planLoading || !routeData"
+              class="px-3 py-1 rounded-lg text-xs font-medium transition"
               :class="planLoading ? 'bg-gray-700 text-gray-400' : 'bg-yellow-700 hover:bg-yellow-600 text-white'">
               {{ planLoading ? '…' : $t('routes.planChargingBtn') }}
             </button>
-          </h2>
+          </template>
+          <div class="space-y-3">
 
           <!-- Plan noch nicht berechnet -->
           <p v-if="!chargingPlan && !planLoading" class="text-xs text-gray-500">
@@ -260,10 +285,72 @@
               {{ chargingPlan.arrival_soc }}%
             </span>
           </div>
-        </div>
+          </div>
+        </SortableSection>
+
+        <!-- Wetter & Verkehr -->
+        <SortableSection v-if="sid === 'weather' && (routeData || weatherData)"
+          page-id="routePlanner" section-id="weather"
+          :title="$t('routes.weatherTitle')" icon="🌤"
+          :collapsed="isCollapsed('weather')" @toggle="toggle('weather')" @move="(f,t,p) => moveSection(f,t,p)">
+          <div class="space-y-2">
+            <div v-if="weatherLoading" class="text-xs text-gray-400 animate-pulse">{{ $t('routes.weatherLoading') }}</div>
+            <template v-else-if="weatherData">
+              <!-- Start-Wetter -->
+              <div v-if="weatherData.start" class="bg-gray-800/60 rounded-xl px-3 py-2 flex items-center gap-2">
+                <span class="text-2xl">{{ weatherEmoji(weatherData.start.current?.weather_code) }}</span>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs text-gray-400">{{ $t('routes.weatherAtStart') }}</p>
+                  <p class="text-sm font-medium text-white">
+                    {{ weatherData.start.current?.temperature_2m?.toFixed(1) }}°C
+                    <span class="text-gray-400 text-xs ml-1">💨 {{ weatherData.start.current?.wind_speed_10m }} km/h</span>
+                  </p>
+                </div>
+                <div v-if="(weatherData.start.current?.precipitation ?? 0) > 0" class="text-blue-400 text-xs">
+                  🌧 {{ weatherData.start.current.precipitation }} mm
+                </div>
+              </div>
+              <!-- Ziel-Wetter -->
+              <div v-if="weatherData.dest" class="bg-gray-800/60 rounded-xl px-3 py-2 flex items-center gap-2">
+                <span class="text-2xl">{{ weatherEmoji(weatherData.dest.hourly?.weather_code ?? weatherData.dest.current?.weather_code) }}</span>
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs text-gray-400">{{ $t('routes.weatherAtDest') }} ({{ $t('routes.expectedArrival') }})</p>
+                  <p class="text-sm font-medium text-white">
+                    {{ (weatherData.dest.hourly?.temperature_2m ?? weatherData.dest.current?.temperature_2m)?.toFixed(1) }}°C
+                    <span class="text-gray-400 text-xs ml-1">💨 {{ weatherData.dest.hourly?.wind_speed_10m ?? weatherData.dest.current?.wind_speed_10m }} km/h</span>
+                  </p>
+                </div>
+                <div v-if="(weatherData.dest.hourly?.precipitation_probability ?? 0) > 40" class="text-blue-400 text-xs">
+                  🌧 {{ weatherData.dest.hourly.precipitation_probability }}%
+                </div>
+              </div>
+            </template>
+            <p v-else class="text-xs text-gray-500">{{ $t('routes.weatherHint') }}</p>
+
+            <!-- Verkehr -->
+            <div v-if="trafficData?.available" class="bg-gray-800/60 rounded-xl px-3 py-2 text-xs flex items-center gap-2">
+              <span>🚗</span>
+              <span class="text-gray-400">{{ $t('routes.trafficLabel') }}:</span>
+              <span class="text-white">{{ trafficData.duration_min }} min</span>
+              <span v-if="trafficData.delay_min > 5" class="text-red-400 ml-auto">+{{ trafficData.delay_min }} min Stau</span>
+              <span v-else-if="trafficData.delay_min > 0" class="text-yellow-400 ml-auto">+{{ trafficData.delay_min }} min</span>
+              <span v-else class="text-green-400 ml-auto">{{ $t('routes.trafficFree') }}</span>
+            </div>
+            <div v-else-if="trafficData?.available === false && trafficData?.reason === 'no_key'"
+              class="text-xs text-gray-500 flex items-center gap-1">
+              <span>ℹ️</span>
+              <span>{{ $t('routes.trafficNoKey') }}</span>
+              <RouterLink to="/settings" class="text-blue-400 hover:underline ml-1">{{ $t('routes.trafficSetup') }}</RouterLink>
+            </div>
+          </div>
+        </SortableSection>
 
         <!-- Aktionen -->
-        <div class="card space-y-3">
+        <SortableSection v-if="sid === 'actions'"
+          page-id="routePlanner" section-id="actions"
+          :title="$t('routes.actionsTitle')" icon="🎮"
+          :collapsed="isCollapsed('actions')" @toggle="toggle('actions')" @move="(f,t,p) => moveSection(f,t,p)">
+          <div class="space-y-3">
           <button @click="sendToTesla" :disabled="!destination || busy"
             class="w-full py-2.5 rounded-xl bg-tesla-red hover:bg-red-700 text-white font-medium text-sm transition disabled:opacity-40 flex items-center justify-center gap-2"
             v-tooltip="$t('routes.sendTooltip')">
@@ -271,13 +358,20 @@
             {{ $t('routes.sendToTesla') }}
           </button>
 
-          <button @click="toggleChargers" :disabled="!routeData"
-            class="w-full py-2.5 rounded-xl text-white font-medium text-sm transition disabled:opacity-40 flex items-center justify-center gap-2"
-            :class="showChargers ? 'bg-blue-700 hover:bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'"
-            v-tooltip="$t('routes.chargerTooltip')">
-            <span>⚡</span>
-            {{ showChargers ? $t('routes.hideChargers') : $t('routes.showChargers') }}
-          </button>
+          <div class="grid grid-cols-2 gap-2">
+            <button @click="toggleChargers" :disabled="!routeData"
+              class="py-2 rounded-xl text-white text-sm transition disabled:opacity-40 flex items-center justify-center gap-1"
+              :class="showChargers ? 'bg-blue-700 hover:bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'"
+              v-tooltip="$t('routes.chargerTooltip')">
+              ⚡ {{ showChargers ? $t('routes.hideChargers') : $t('routes.showChargers') }}
+            </button>
+            <button @click="toggleCameras" :disabled="!routeData"
+              class="py-2 rounded-xl text-white text-sm transition disabled:opacity-40 flex items-center justify-center gap-1"
+              :class="showCameras ? 'bg-orange-700 hover:bg-orange-600' : 'bg-gray-700 hover:bg-gray-600'"
+              v-tooltip="$t('routes.camerasTooltip')">
+              📷 {{ showCameras ? `${cameras.length}` : $t('routes.showCameras') }}
+            </button>
+          </div>
 
           <div class="flex gap-2">
             <button @click="showSaveDialog = true" :disabled="!destination"
@@ -292,20 +386,27 @@
             </button>
           </div>
 
+          <!-- Blitzer-Rechtslage Hinweis -->
+          <div v-if="showCameras" class="rounded-xl border border-orange-800/40 bg-orange-900/10 px-3 py-2 text-xs text-orange-200 space-y-1">
+            <p class="font-semibold">⚖️ {{ $t('routes.camerasLegal') }}</p>
+            <p class="text-orange-300/80">{{ $t('routes.camerasLegalText') }}</p>
+          </div>
+
           <button @click="openAbrp"
             class="w-full py-2 text-xs text-gray-500 hover:text-gray-300 transition flex items-center justify-center gap-1">
             <AppIcon name="map" :size="12" />
             {{ $t('routes.abrpFallback') }}
           </button>
-        </div>
+          </div>
+        </SortableSection>
 
         <!-- Gespeicherte Routen -->
-        <div class="card space-y-3">
-          <h2 class="font-semibold text-base flex items-center gap-2">
-            <AppIcon name="logbook" :size="16" class="text-tesla-red" />
-            {{ $t('routes.saved') }}
-            <span class="ml-auto text-xs text-gray-500">{{ savedRoutes.length }}</span>
-          </h2>
+        <SortableSection v-if="sid === 'saved'"
+          page-id="routePlanner" section-id="saved"
+          :title="$t('routes.saved')" icon="💾"
+          :collapsed="isCollapsed('saved')" @toggle="toggle('saved')" @move="(f,t,p) => moveSection(f,t,p)">
+          <template #badge><span class="text-xs text-gray-500">{{ savedRoutes.length }}</span></template>
+          <div class="space-y-3">
           <p v-if="!savedRoutes.length" class="text-xs text-gray-500">{{ $t('routes.noSaved') }}</p>
           <ul class="space-y-2">
             <li v-for="route in savedRoutes" :key="route.id" class="bg-gray-800 rounded-xl px-3 py-2.5 space-y-1.5">
@@ -343,17 +444,22 @@
               </div>
             </li>
           </ul>
-        </div>
+          </div>
+        </SortableSection>
+
+        </template><!-- end v-for orderedSections -->
       </div>
 
       <!-- ─── Karte ──────────────────────────────────────────────────────────── -->
       <div class="card p-0 overflow-hidden rounded-2xl sticky top-4" style="height: 75vh; min-height: 420px;">
         <div id="route-map" class="w-full h-full"></div>
-        <div v-if="showChargers && chargers.length" class="absolute bottom-3 left-3 bg-gray-900/90 backdrop-blur rounded-xl px-3 py-2 text-xs text-gray-300 space-y-1 pointer-events-none">
-          <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> {{ $t('routes.chargerLegend') }}</div>
-        </div>
-        <div v-if="showChargers && !chargers.length && !chargerLoading" class="absolute bottom-3 left-3 bg-gray-900/90 backdrop-blur rounded-xl px-3 py-2 text-xs text-gray-400 pointer-events-none">
-          {{ $t('routes.noChargers') }}
+        <div class="absolute bottom-3 left-3 flex flex-col gap-1 pointer-events-none">
+          <div v-if="showChargers && chargers.length" class="bg-gray-900/90 backdrop-blur rounded-xl px-3 py-1.5 text-xs text-gray-300 flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> {{ $t('routes.chargerLegend') }}
+          </div>
+          <div v-if="showCameras && cameras.length" class="bg-gray-900/90 backdrop-blur rounded-xl px-3 py-1.5 text-xs text-orange-300 flex items-center gap-2">
+            📷 {{ cameras.length }} {{ $t('routes.camerasLegend') }}
+          </div>
         </div>
         <div v-if="chargingPlan?.stops?.length" class="absolute top-3 right-3 bg-gray-900/90 backdrop-blur rounded-xl px-3 py-2 text-xs text-yellow-300 pointer-events-none">
           ⚡ {{ chargingPlan.stops.length }} {{ $t('routes.chargingStopShort') }}
@@ -459,11 +565,17 @@ import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
 import AppIcon from '../components/AppIcon.vue';
+import SortableSection from '../components/SortableSection.vue';
+import { usePageLayout } from '../composables/usePageLayout.js';
 import api from '../api.js';
 
 const { t, locale } = useI18n();
 const appStore = useAppStore();
 const vehicle  = computed(() => appStore.selectedVehicle);
+
+// ── Layout ──
+const ROUTE_SECTIONS = ['start', 'destination', 'waypoints', 'timing', 'routeinfo', 'charging', 'weather', 'actions', 'saved'];
+const { orderedSections, isCollapsed, toggle, moveSection } = usePageLayout('routePlanner', ROUTE_SECTIONS);
 
 // ── Leaflet ──
 let L              = null;
@@ -473,6 +585,7 @@ let wpMarkers      = [];
 let routeLayer     = null;
 let chargerMarkers = [];
 let planMarkers    = [];  // Ladestopps aus dem Ladeplan
+let cameraMarkers  = [];  // Blitzerkameras
 
 // ── Startort ──
 const startMode     = ref('vehicle');
@@ -509,9 +622,20 @@ const chargers      = ref([]);
 const chargerLoading = ref(false);
 const showChargers   = ref(false);
 
-// ── Abfahrtsplanung ──
+// ── Timing-Modus ──
+const planMode = ref('depart'); // 'depart' | 'arrive'
 const planDate = ref('');
 const planTime = ref('');
+
+// ── Wetter ──
+const weatherData    = ref(null);
+const weatherLoading = ref(false);
+const trafficData    = ref(null);
+
+// ── Blitzer ──
+const showCameras   = ref(false);
+const cameras       = ref([]);
+const cameraLoading = ref(false);
 
 // ── Heute als Mindestdatum ──
 const todayStr = new Date().toISOString().slice(0, 10);
@@ -560,21 +684,85 @@ const totalChargeMins = computed(() =>
   (chargingPlan.value?.stops ?? []).reduce((s, st) => s + st.charge_minutes, 0)
 );
 
-// ── Erwartete Ankunftszeit ──
-const expectedArrival = computed(() => {
+// ── Timing-Ergebnis (Ankunft oder benötigte Abfahrt) ──
+const timingResult = computed(() => {
   if (!planDate.value || !planTime.value || !routeData.value) return null;
   const [hh, mm] = planTime.value.split(':').map(Number);
-  const dep = new Date(planDate.value);
-  dep.setHours(hh, mm, 0, 0);
   const totalMin = routeData.value.duration_min + totalChargeMins.value;
-  dep.setMinutes(dep.getMinutes() + totalMin);
-  const rh = String(dep.getHours()).padStart(2, '0');
-  const rm = String(dep.getMinutes()).padStart(2, '0');
-  const sameDayStr = planDate.value;
-  const arrDayStr  = dep.toISOString().slice(0, 10);
-  if (sameDayStr === arrDayStr) return `${rh}:${rm}`;
-  return `${arrDayStr} ${rh}:${rm}`;
+  if (planMode.value === 'depart') {
+    const dep = new Date(planDate.value);
+    dep.setHours(hh, mm, 0, 0);
+    dep.setMinutes(dep.getMinutes() + totalMin);
+    const rh = String(dep.getHours()).padStart(2, '0');
+    const rm = String(dep.getMinutes()).padStart(2, '0');
+    const arrDay = dep.toISOString().slice(0, 10);
+    return planDate.value === arrDay ? `${rh}:${rm}` : `${arrDay} ${rh}:${rm}`;
+  } else {
+    // Ankunft gewünscht → Abfahrt berechnen
+    const arr = new Date(planDate.value);
+    arr.setHours(hh, mm, 0, 0);
+    arr.setMinutes(arr.getMinutes() - totalMin);
+    const rh = String(arr.getHours()).padStart(2, '0');
+    const rm = String(arr.getMinutes()).padStart(2, '0');
+    const depDay = arr.toISOString().slice(0, 10);
+    return depDay === planDate.value ? `${rh}:${rm}` : `${depDay} ${rh}:${rm}`;
+  }
 });
+// Alias für Abwärtskompatibilität mit dem Save-Dialog
+const expectedArrival = computed(() => planMode.value === 'depart' ? timingResult.value : null);
+
+// ── Wetter-Emoji ──
+function weatherEmoji(code) {
+  if (code == null) return '🌡';
+  if (code === 0) return '☀️';
+  if (code <= 2) return '🌤';
+  if (code <= 48) return '☁️';
+  if (code <= 67) return '🌧';
+  if (code <= 77) return '❄️';
+  if (code <= 82) return '🌦';
+  return '⛈';
+}
+
+async function loadWeather() {
+  if (!routeData.value) return;
+  const geo = routeData.value.geometry;
+  const startPt = startLocation.value ?? vehicle.value;
+  if (!startPt) return;
+  const startLat = startPt.lat ?? startPt.last_lat;
+  const startLon = startPt.lon ?? startPt.last_lon;
+  const destPt   = destination.value;
+  if (!startLat || !destPt) return;
+
+  weatherLoading.value = true;
+  try {
+    const depTime = planDate.value && planTime.value
+      ? `${planDate.value}T${planTime.value}`
+      : new Date().toISOString().slice(0, 16);
+    const arrMs = new Date(depTime).getTime() + routeData.value.duration_min * 60000;
+    const arrTime = new Date(arrMs).toISOString().slice(0, 16);
+
+    const [wStart, wDest] = await Promise.all([
+      api.get('/routing/weather', { params: { lat: startLat, lon: startLon, time: depTime } }).then(r => r.data).catch(() => null),
+      api.get('/routing/weather', { params: { lat: destPt.lat, lon: destPt.lon, time: arrTime } }).then(r => r.data).catch(() => null),
+    ]);
+    weatherData.value = { start: wStart, dest: wDest };
+  } catch { /* silent */ }
+  finally { weatherLoading.value = false; }
+}
+
+async function loadTraffic() {
+  if (!routeData.value || !destination.value) return;
+  const startPt = startLocation.value ?? vehicle.value;
+  if (!startPt) return;
+  const oLat = startPt.lat ?? startPt.last_lat;
+  const oLon = startPt.lon ?? startPt.last_lon;
+  try {
+    const { data } = await api.get('/routing/traffic', {
+      params: { origin_lat: oLat, origin_lon: oLon, dest_lat: destination.value.lat, dest_lon: destination.value.lon },
+    });
+    trafficData.value = data;
+  } catch { trafficData.value = null; }
+}
 
 // ── Reichweite ──
 const arrivalSoc = computed(() => {
@@ -724,9 +912,10 @@ function clearSearch() { searchQuery.value = ''; searchResults.value = []; }
 
 function clearDestination() {
   destination.value = null; routeData.value = null; chargingPlan.value = null;
-  chargers.value = [];
+  chargers.value = []; cameras.value = [];
+  weatherData.value = null; trafficData.value = null;
   if (destMarker) { destMarker.remove(); destMarker = null; }
-  clearRouteLayer(); clearChargerMarkers(); clearPlanMarkers();
+  clearRouteLayer(); clearChargerMarkers(); clearPlanMarkers(); clearCameraMarkers();
 }
 
 // ── Karte ──
@@ -829,6 +1018,10 @@ async function _doCalculateRoute() {
     }
 
     if (showChargers.value) await _loadChargers();
+    if (showCameras.value) await _loadCameras();
+    // Wetter + Verkehr asynchron nachladen
+    loadWeather();
+    loadTraffic();
 
   } catch (err) {
     console.warn('[Routing]', err.message);
@@ -934,6 +1127,52 @@ function updateChargerMarkers() {
     const popup = `<b>${s.name}</b>${label ? `<br>${label}` : ''}${s.operator ? `<br><small>${s.operator}</small>` : ''}`;
     chargerMarkers.push(L.marker([s.lat, s.lon], { icon: chargerIcon(kw) }).addTo(leafletMap).bindPopup(popup));
   }
+}
+
+// ── Blitzer ──
+function cameraIcon() {
+  return L.divIcon({
+    className: '',
+    html: `<div style="width:22px;height:22px;background:#f97316;border:2px solid white;border-radius:4px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.5);font-size:11px">📷</div>`,
+    iconSize: [22, 22], iconAnchor: [11, 11],
+  });
+}
+
+function clearCameraMarkers() { cameraMarkers.forEach(m => m.remove()); cameraMarkers = []; }
+
+async function toggleCameras() {
+  showCameras.value = !showCameras.value;
+  if (showCameras.value && routeData.value) await _loadCameras();
+  else { clearCameraMarkers(); cameras.value = []; }
+}
+
+async function _loadCameras() {
+  if (!routeData.value || !L || !leafletMap) return;
+  cameraLoading.value = true;
+  clearCameraMarkers(); cameras.value = [];
+  // Bounding Box der Route berechnen
+  const geo = routeData.value.geometry;
+  let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+  for (const [lon, lat] of geo) {
+    if (lat < minLat) minLat = lat; if (lat > maxLat) maxLat = lat;
+    if (lon < minLon) minLon = lon; if (lon > maxLon) maxLon = lon;
+  }
+  // 5km Puffer
+  const pad = 0.05;
+  try {
+    const { data } = await api.get('/routing/cameras', {
+      params: { south: (minLat - pad).toFixed(5), west: (minLon - pad).toFixed(5),
+                north: (maxLat + pad).toFixed(5), east: (maxLon + pad).toFixed(5) },
+    });
+    cameras.value = data.cameras ?? [];
+    if (L && leafletMap) {
+      for (const cam of cameras.value) {
+        const popup = `📷 Blitzer${cam.maxspeed ? ` · ${cam.maxspeed} km/h` : ''}${cam.direction ? ` · Richtung: ${cam.direction}` : ''}`;
+        cameraMarkers.push(L.marker([cam.lat, cam.lon], { icon: cameraIcon() }).addTo(leafletMap).bindPopup(popup));
+      }
+    }
+  } catch (err) { console.warn('[Cameras]', err.message); }
+  finally { cameraLoading.value = false; }
 }
 
 // ── Fahrzeugstats ──
