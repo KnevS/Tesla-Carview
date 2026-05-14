@@ -1,191 +1,167 @@
-🌐 **Dil:** [EN](Features) · [DE](DE-Features) · [FR](FR-Features) · [ES](ES-Features) · **TR** · [EL](EL-Features)
+# Özellikler Genel Bakışı
+
+🌐 **Language / Sprache**
+
+| | |
+|---|---|
+| 🇬🇧 **[English](Features)** | English version |
+| 🇩🇪 **[Deutsch](DE-Features)** | Deutsche Version |
+| 🇫🇷 **[Français](FR-Features)** | Version française |
+| 🇪🇸 **[Español](ES-Features)** | Versión en español |
+| 🇹🇷 **[Türkçe](TR-Features)** | Buradasınız |
+| 🇬🇷 **[Ελληνικά](EL-Features)** | Ελληνική έκδοση |
 
 ---
 
-# Özellik Genel Bakışı
-
-Tesla Carview, Tesla'nın tüm yaşam döngüsünü kapsar — her seyahati kaydetmekten arabayı kontrol etmeye ve şarj maliyetlerini yönetmeye kadar.
+Tesla Carview, Tesla'nızın tüm yaşam döngüsünü kapsar — her sürüşün takibinden araç kontrolüne, rota planlamasına ve şarj maliyeti yönetimine kadar. Her şey kendi sunucunuzda çalışır.
 
 ---
 
-## 📊 Panel
+## Tesla Carview ne sunar?
 
-Panel, merkezi genel bakışındır ve şunları gösterir:
+| Modül | Özet |
+|---|---|
+| 📊 Gösterge Paneli | Canlı durum, istatistikler, tarife widget'ı, sistem sağlığı |
+| 🚗 Seyahat Günlüğü | Otomatik kaydedilen sürüşler, uyumlu PDF dışa aktarma |
+| ⚡ Şarj | Oturumlar, konumlar, Monta senkronizasyonu, maliyet faturaları |
+| 🔋 Batarya | Sağlık, bozulma, menzil geçmişi |
+| 🗺️ Rota Planlayıcı | OSRM yönlendirme, şarjör katmanı, Tesla'ya gönder |
+| 🎮 Araç Kontrolü | İklim, kilitler, şarj, OTA, programlı şarj |
+| 📝 Bakım Defteri | Kayıtlar, aralıklar, push hatırlatıcılar |
+| 💬 Grok Chat | Araç bağlamıyla xAI destekli yapay zeka asistanı |
+| 📤 Dışa Aktarma | CSV, JSON, PDF faturaları, tam yedek |
+| 🔐 Güvenlik | Passkey'ler, MFA (TOTP), Tesla tarayıcısı için QR-SSO |
+| 🌍 Çok Dilli | DE · EN · FR · ES · TR · EL |
+| 📱 PWA | Ana ekrana kurulabilir, çevrimdışı kabuk |
+
+---
+
+## 📊 Gösterge Paneli
+
 - **Canlı araç durumu** — batarya seviyesi, menzil, konum, şarj durumu
-- **Son seyahatler** — mesafe ve tüketimle birlikte son 5 seyahat
-- **Aylık istatistikler** — mesafe, kullanılan enerji, şarj maliyeti
-- **Dinamik tarife widget'ı** — mevcut elektrik fiyatı (aWATTar DE/AT, Tibber)
-- **Servis aralıkları** — yaklaşan bakım hatırlatıcıları (muayene, yağ, fren hidroliği vb.)
-- **Sistem sağlığı** — Tesla API bağlantı durumu, Fleet Telemetry, veritabanı boyutu
+- **Son sürüşler** — mesafe ve tüketimle son 5 sürüş
+- **Aylık istatistikler** — kilometre, enerji, şarj maliyetleri
+- **Dinamik tarife widget'ı** — güncel fiyat (aWATTar DE/AT, Tibber), 24 saatlik grafik, otomatik şarj penceresi
+- **Bakım aralıkları** — muayene, yağ, fren sıvısı vb. hatırlatıcılar
+- **Sistem sağlığı** — Tesla API durumu, Fleet Telemetry, veritabanı boyutu
 
-Panel sekmesi açıkken her 60 saniyede bir otomatik olarak yenilenir.
+**Ayarlar → Sihirbazı Başlat** üzerinden tamamen özelleştirilebilir.
 
 ---
 
-## 🚗 Seyahatler (Seyahat Defteri)
+## 🚗 Sürüşler (Seyahat Günlüğü)
 
 Her sürüş otomatik olarak kaydedilir:
-- Başlangıç ve bitiş konumu (adres + GPS koordinatları)
-- Mesafe, süre, ortalama hız
+- Başlangıç ve bitiş konumu, mesafe, süre, ortalama hız
 - Enerji tüketimi (kWh ve kWh/100 km)
-- Başlangıç/bitişte batarya seviyesi
-- Seyahat türü sınıflandırması (özel / işe gidiş / iş)
+- Başlangıç/bitiş batarya seviyesi
+- Seyahat tipi (özel / işe gidiş / iş)
 
-### Seyahat defteri
-Seyahat defteri yasal gereksinimleri karşılar:
+### BMF uyumlu seyahat günlüğü
 - İş ortağı ve seyahat amacı alanları
-- Sıralı seyahat numaralandırması
-- Defteri sonlandırmak için "Kilitle" işlevi
-- Tüm yasal olarak gerekli alanlarla A4 yatay formatta **PDF dışa aktarma**
-- Çok duraklı yolculuklar için seyahat birleştirme ve bölme
-- Unutulan girişler için manuel seyahat oluşturma
-
-### GPS konumunu düzenleme
-Bir seyahatin eksik veya yanlış adresi varsa doğrudan düzenleyebilirsin:
-- Herhangi bir seyahate tıkla → Konumu düzenle
-- Adresi manuel gir veya bir harita pimi sürükle
+- Sıralı numaralandırma ve kilit işlevi
+- **PDF dışa aktarma** — A4 yatay format, tüm zorunlu alanlar
+- Sürüş birleştirme, bölme ve manuel giriş
 
 ---
 
 ## ⚡ Şarj
 
-Tüm şarj oturumları otomatik olarak kaydedilir:
-- Konum (kayıtlı şarj konumlarıyla GPS eşleştirmesi)
-- Eklenen enerji (kWh) ve tahmini maliyet
-- Şarj hızı ve süresi
-- Monta entegrasyonu aracılığıyla ev şarj bayrağı (🏠)
+Tüm şarj oturumları otomatik kayıt:
+- Konum, enerji (kWh), maliyet, hız ve süre
+- Ev şarjı göstergesi (🏠) Monta entegrasyonu ile
 
-### Şarj konumları
-Evini ve düzenli şarj noktalarını tanımla:
-- **Ayarlar → Şarj Konumları** → Adres + GPS + yarıçapla ekle
-- O konumdaki oturumlar otomatik olarak etiketlenir
-- Maliyet hesaplama için konum başına kWh başına oran ayarla
-
-### Monta entegrasyonu
-Ev şarjı için Monta kullanıyorsan:
-- Ayarlara Monta API anahtarını gir
-- Monta oturumları doğru kWh ve maliyet verileriyle otomatik senkronize edilir
-- Ev şarj bayrağı otomatik olarak ayarlanır
-
-### Maliyet hesaplama ve PDF fatura
-Geri ödeme için PDF fatura oluştur (ör. işveren için):
-- **Faturalandırma → Fatura Oluştur**
-- Tarih aralığı seç ve belirli oturumları dahil/hariç tut
-- Antetli, tablolu, toplamlar ve imza alanı içeren PDF
-- Tamamen istemci tarafında oluşturulur — sunucundan hiçbir veri çıkmaz
+**Ayarlar → Şarj Konumları** altında sık kullanılan noktalar tanımlanabilir.  
+Monta API anahtarıyla oturumlar otomatik senkronize edilir.  
+Geri ödeme için PDF fatura (**Faturalama → Fatura Oluştur**) — tamamen istemci tarafında.
 
 ---
 
-## 🔋 Batarya
+## 🗺️ Rota Planlayıcı
 
-Batarya sağlığını zaman içinde takip et:
-- Bozulma eğrisi (tahmini menzile karşı nominal menzil)
-- Şarj döngüsü sayacı
-- Geçmiş şarj seviyesi verileri
-- Farklı sıcaklıklarda menzil (kış ile yaz karşılaştırması)
+Sürüşlerinizi önceden planlayın ve doğrudan Tesla navigasyonuna gönderin:
+- **Başlangıç noktası** — araç GPS'i, tarayıcı GPS'i veya manuel giriş
+- **Hedef arama** — backend proxy aracılığıyla Nominatim coğrafi kodlama
+- **5'e kadar ara nokta**
+- **OSRM yönlendirme** — hesap gerektirmeyen açık kaynak motor
+- **Tahmini varış SoC** — gerçek tüketiminize dayalı
+- **Şarjör katmanı** — hızlı şarj istasyonları (CCS, CHAdeMO, Tesla) OpenChargeMap üzerinden
+- **Tesla'ya gönder** — bir dokunuşla araç navigasyonuna gönder
+- **Rota kaydetme** — sık kullanılan rotalar için hızlı erişim
+- **ABRP yedeği** — A Better Route Planner'a isteğe bağlı bağlantı
 
 ---
 
 ## 🎮 Araç Kontrolü
 
-Tesla'nı doğrudan uygulamadan kontrol et:
-- 🌡️ **İklim** — başlat/durdur, sıcaklık ayarla, koltuk ısıtma, direksiyon ısıtma
-- 🔓 **Kilitler** — kapıları kilitle/kilidi aç
-- 💡 **Işıklar** — flaş yak, korna
-- 🚪 **Bagaj/frunk** — bagaj ve frunk'ı aç
-- 🔌 **Şarj** — şarj portunu aç/kapat, amper ayarla, başlat/durdur
-- 🔄 **Yazılım güncellemeleri** — OTA güncellemelerini tetikle ve izle
-- ⏰ **Planlanmış şarj** — düşük tarife şarj pencerelerini ayarla
-- 🎵 **Uzaktan boombox** — boombox seslerini tetikle (desteklendiği yerde)
-- 🌬️ **İklim modu** — kamp/köpek/tutma modunu ayarla
-- 🪟 **Camlar** — camları aç/kapat
-
-> Komutlar **Virtual Key**'in eşleştirilmesini gerektirir. Bkz. [Tesla API Kurulumu](TR-Tesla-API-Setup#adım-3-virtual-keyi-kur-komutlar-için).
+- 🌡️ İklim, sıcaklık, koltuk/direksiyon ısıtma, Camp/Dog/Keep modları
+- 🔓 Kilitler, 💡 Işıklar, 🚪 Bagaj/frunk, 🪟 Camlar
+- 🔌 Şarj kapağı, amper, başlat/durdur
+- ⏰ Programlı şarj, 🔄 OTA güncellemeleri, 🎵 Boombox
 
 ---
 
-## 📝 Servis Defteri
+## 📝 Bakım Defteri
 
-Tüm bakım olaylarını kaydet:
-- Tarih, kategori (bakım / onarım / lastik / muayene / not)
-- Maliyet, kilometre
-- Açıklama ve ekler
-- Kimin yaptığı (atölye adı)
+Tüm bakım olaylarını belgeleyin: tarih, kategori, maliyet, kilometre, servis adı.
 
-### Servis aralıkları ve hatırlatıcılar
-Tekrarlayan bakım hatırlatıcıları kur:
-- **Ayarlar → Servis Aralıkları** → Aralık ekle (ör. "2 yıl içinde muayene", "Her 2 yılda fren hidroliği")
-- Her aralıktan 30 gün önce ve 1000 km önce anlık bildirimler
-- Panel yaklaşan servisleri önizleme kartı olarak gösterir
+**Ayarlar → Bakım Aralıkları** altında tekrarlayan aralıklar yapılandırın. Her vadeden 30 gün ve 1 000 km önce push bildirimleri gönderilir.
 
 ---
 
-## 📤 Dışa Aktarma
+## 💬 Grok Chat (Yapay Zeka Asistanı)
 
-Tüm verilerini dışa aktar:
-- **Seyahatler** — CSV veya JSON
-- **Şarj oturumları** — CSV veya JSON
-- **Servis defteri** — CSV
-- **Tam yedekleme** — JSON (tüm tablolar), geri yükleme için içe aktarılabilir
+xAI Grok ile doğal dilde Tesla verileriniz hakkında soru sorun:
+- Son sürüşler, şarj oturumları ve araç verileri bağlamsal olarak görülür
+- Yanıtlar kelime kelime akış şeklinde görünür
+- Sohbet geçmişi kaydedilir ve aranabilir
+- Günlük token bütçesi yapılandırılabilir
+- İstekler backend üzerinden — tarayıcıdan xAI'ye doğrudan hiçbir zaman değil
 
----
-
-## 🔔 Anlık Bildirimler
-
-Şu durumlarda tarayıcında bildirim al:
-- Şarj tamamlandı
-- Servis aralığı yaklaşıyor
-- Yazılım güncellemesi mevcut
-
-Bildirimler masaüstü (Chrome, Firefox, Edge) ve mobilde (Android Chrome, iOS Safari ana ekran kısayoluyla) çalışır.
-
-**Kurulum:** Ayarlar → Anlık Bildirimler → Bildirimleri etkinleştir
+> `XAI_API_KEY` ortam değişkeni gereklidir. [console.x.ai](https://console.x.ai) adresinden edinin.
 
 ---
 
-## 📱 PWA (Progresif Web Uygulaması)
+## 🔐 Güvenlik & Kimlik Doğrulama
 
-Tesla Carview PWA olarak çalışır — ana ekranına yükleyebilirsin:
+### Passkey'ler (WebAuthn)
+Face ID, Touch ID veya donanım anahtarıyla giriş yapın.
 
-- **Android/Masaüstü Chrome:** Adres çubuğundaki yükleme simgesine dokun
-- **iOS Safari:** Paylaş → "Ana Ekrana Ekle"
-- **Tesla tarayıcısı:** Menü → "Ana ekrana ekle"
+### MFA (TOTP)
+Herhangi bir doğrulayıcı uygulamayla iki faktörlü kimlik doğrulama.
 
-Yüklü PWA önbellekteki sayfalar için çevrimdışı çalışır ve yerel bir uygulama gibi bildirim alır.
+### Tesla tarayıcısı için QR-SSO
+1. Tesla tarayıcısı QR kod gösterir (5 dakika geçerli)
+2. Telefonunuzla tarayın
+3. Telefon passkey/Face ID ile kimlik doğrulaması yapın
+4. Tesla tarayıcı oturumu otomatik açılır
+
+---
+
+## 🧙 Kurulum Sihirbazı
+
+**Ayarlar → Sihirbazı Başlat** üzerinden yeniden başlatılabilir:
+dil · tasarım stili · vurgu rengi · birimler · gösterge kartları · sekmeler · push bildirimleri · onay
 
 ---
 
 ## 🌡️ Dinamik Tarife (aWATTar / Tibber)
 
-Dinamik elektrik tarifen varsa:
-- aWATTar'ı bağla (DE/AT, API anahtarı gerekmez) veya Tibber (Ayarlarda API anahtarı)
-- Panel mevcut fiyatı ve 24 saatlik fiyat grafiğini gösterir
-- **Şarj penceresini otomatik ayarla** — tek tıkla planlanmış şarjı sonraki 24 saatteki en ucuz 4 saatlik pencereye ayarlar
+- Güncel fiyat ve 24 saatlik grafik gösterge panelinde
+- **Otomatik şarj penceresi** — bir tıkla en ucuz 4 saatlik dilime programlı şarj ayarlanır
 
 ---
 
-## 🌍 Çok Dilli
+## 📱 PWA
 
-Uygulama tamamen şu dillere çevrilmiştir:
-🇩🇪 Almanca · 🇬🇧 İngilizce · 🇫🇷 Fransızca · 🇪🇸 İspanyolca · 🇹🇷 Türkçe · 🇬🇷 Yunanca
-
-Dil şöyle belirlenir:
-1. Kullanıcı profil ayarın (her şeyin önünde gelir)
-2. Kiracının varsayılan dili
-3. Tarayıcı dilin
+Ana ekranınıza yükleyin:
+- **Android/Chrome:** adres çubuğundaki kurulum simgesi
+- **iOS Safari:** Paylaş → "Ana Ekrana Ekle"
+- **Tesla tarayıcısı:** Menü → "Ana Ekrana Ekle"
 
 ---
 
-## 🧪 Demo Modu
+## 📤 Dışa Aktarma & Yedekleme
 
-Başkalarının gerçek bir Tesla olmadan uygulamayı denemesi için isteğe bağlı olarak demo modu etkinleştir:
-- `.env`'de `DEMO_ENABLED=true`
-- Sahte seyahatler ve şarj geçmişi otomatik olarak oluşturulur
-- Demo hesapları 14 gün sonra sona erer
-- IP tabanlı hız sınırlama kötüye kullanımı önler
-
----
-
-## 🌙 Bakım Modu
-
-Uygulama, backend erişilemez olduğunda (güncellemelerden sonra yeniden başlarken) otomatik olarak bir "bakım" bindirmesi gösterir. Almanca/İngilizce Tesla alıntıları, geri sayım sayacı gösterir ve her 3 saniyede bir backend'i sorgular — geri döndüğünde kaybolur.
+- Sürüşler, şarj oturumları, bakım defteri — CSV veya JSON
+- **Tam yedek** — JSON, **Admin → Veri Yönetimi** üzerinden geri yüklenebilir

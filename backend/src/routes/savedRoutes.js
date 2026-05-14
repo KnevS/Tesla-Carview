@@ -1,17 +1,12 @@
 import { Router } from 'express';
+import { assertVehicleAccess, guardAccess } from '../middleware/vehicleAccess.js';
 
 const router = Router();
-
-function getVehicle(db, vehicleId, userId) {
-  return db.prepare(
-    'SELECT v.* FROM vehicles v JOIN vehicle_users vu ON vu.vehicle_id=v.id WHERE v.id=? AND vu.user_id=?'
-  ).get(vehicleId, userId);
-}
 
 router.get('/', (req, res) => {
   const { vehicleId } = req.query;
   if (!vehicleId) return res.status(400).json({ error: 'vehicleId erforderlich' });
-  if (!getVehicle(req.db, vehicleId, req.user.id)) return res.status(403).json({ error: 'Kein Zugriff' });
+  if (guardAccess(res, () => assertVehicleAccess(req.db, vehicleId, req.user))) return;
   const rows = req.db.prepare(
     'SELECT * FROM saved_routes WHERE vehicle_id=? ORDER BY created_at DESC'
   ).all(vehicleId);
@@ -23,7 +18,7 @@ router.post('/', (req, res) => {
   if (!vehicle_id || !name || !destination_name || destination_lat == null || destination_lon == null) {
     return res.status(400).json({ error: 'Pflichtfelder: vehicle_id, name, destination_name, destination_lat, destination_lon' });
   }
-  if (!getVehicle(req.db, vehicle_id, req.user.id)) return res.status(403).json({ error: 'Kein Zugriff' });
+  if (guardAccess(res, () => assertVehicleAccess(req.db, vehicle_id, req.user))) return;
   const { lastInsertRowid } = req.db.prepare(
     `INSERT INTO saved_routes (vehicle_id, name, destination_name, destination_lat, destination_lon, waypoints)
      VALUES (?, ?, ?, ?, ?, ?)`
@@ -35,7 +30,7 @@ router.post('/', (req, res) => {
 router.put('/:id', (req, res) => {
   const route = req.db.prepare('SELECT * FROM saved_routes WHERE id=?').get(req.params.id);
   if (!route) return res.status(404).json({ error: 'Route nicht gefunden' });
-  if (!getVehicle(req.db, route.vehicle_id, req.user.id)) return res.status(403).json({ error: 'Kein Zugriff' });
+  if (guardAccess(res, () => assertVehicleAccess(req.db, route.vehicle_id, req.user))) return;
   const { name, destination_name, destination_lat, destination_lon, waypoints } = req.body;
   req.db.prepare(
     `UPDATE saved_routes SET
@@ -61,7 +56,7 @@ router.put('/:id', (req, res) => {
 router.delete('/:id', (req, res) => {
   const route = req.db.prepare('SELECT * FROM saved_routes WHERE id=?').get(req.params.id);
   if (!route) return res.status(404).json({ error: 'Route nicht gefunden' });
-  if (!getVehicle(req.db, route.vehicle_id, req.user.id)) return res.status(403).json({ error: 'Kein Zugriff' });
+  if (guardAccess(res, () => assertVehicleAccess(req.db, route.vehicle_id, req.user))) return;
   req.db.prepare('DELETE FROM saved_routes WHERE id=?').run(req.params.id);
   res.json({ ok: true });
 });

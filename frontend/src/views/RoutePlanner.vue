@@ -586,10 +586,11 @@ function clearDestination() {
 
 function setDestination(name, lat, lon) {
   destination.value = { name, lat, lon };
-  if (!L || !leafletMap) return;
-  if (destMarker) destMarker.remove();
-  destMarker = L.marker([lat, lon], { icon: redIcon() }).addTo(leafletMap).bindPopup(name).openPopup();
-  leafletMap.setView([lat, lon], Math.max(leafletMap.getZoom(), 12));
+  if (L && leafletMap) {
+    if (destMarker) destMarker.remove();
+    destMarker = L.marker([lat, lon], { icon: redIcon() }).addTo(leafletMap).bindPopup(name).openPopup();
+    leafletMap.setView([lat, lon], Math.max(leafletMap.getZoom(), 12));
+  }
   calculateRoute();
 }
 
@@ -651,7 +652,7 @@ function calculateRoute() {
 }
 
 async function _doCalculateRoute() {
-  if (!destination.value || !L || !leafletMap) return;
+  if (!destination.value) return;
   routeLoading.value = true;
   clearRouteLayer();
 
@@ -659,19 +660,16 @@ async function _doCalculateRoute() {
   const startLat = startLocation.value?.lat ?? vehicle.value?.last_lat ?? 51.1657;
   const startLon = startLocation.value?.lon ?? vehicle.value?.last_lon ?? 10.4515;
 
-  // Koordinaten für OSRM: lon,lat Reihenfolge
-  const coords = [
-    `${startLon.toFixed(6)},${startLat.toFixed(6)}`,
-    ...waypoints.value.map(wp => `${wp.lon.toFixed(6)},${wp.lat.toFixed(6)}`),
-    `${destination.value.lon.toFixed(6)},${destination.value.lat.toFixed(6)}`,
-  ].join(';');
+  // Koordinaten für OSRM: [lon, lat] Reihenfolge
+  const coordinates = [
+    [parseFloat(startLon.toFixed(6)), parseFloat(startLat.toFixed(6))],
+    ...waypoints.value.map(wp => [parseFloat(wp.lon.toFixed(6)), parseFloat(wp.lat.toFixed(6))]),
+    [parseFloat(destination.value.lon.toFixed(6)), parseFloat(destination.value.lat.toFixed(6))],
+  ];
 
   try {
-    const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
-    const r   = await fetch(url, { signal: AbortSignal.timeout(10000) });
-    if (!r.ok) throw new Error(`OSRM ${r.status}`);
-    const data  = await r.json();
-    const route = data.routes?.[0];
+    const { data: osrmData } = await api.post('/routing/route', { coordinates });
+    const route = osrmData.routes?.[0];
     if (!route) throw new Error('Keine Route gefunden');
 
     routeData.value = {
@@ -680,15 +678,17 @@ async function _doCalculateRoute() {
       geometry:     route.geometry.coordinates,
     };
 
-    // Route als Polyline auf Karte zeichnen
-    const latlngs = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
-    routeLayer = L.polyline(latlngs, {
-      color: '#e2231a',
-      weight: 4,
-      opacity: 0.8,
-      dashArray: null,
-    }).addTo(leafletMap);
-    leafletMap.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
+    // Route als Polyline auf Karte zeichnen (nur wenn Karte bereit)
+    if (L && leafletMap) {
+      const latlngs = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+      routeLayer = L.polyline(latlngs, {
+        color: '#e2231a',
+        weight: 4,
+        opacity: 0.8,
+        dashArray: null,
+      }).addTo(leafletMap);
+      leafletMap.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
+    }
 
     // Wenn Ladestationen aktiv: neu laden
     if (showChargers.value) await _loadChargers();
@@ -778,6 +778,10 @@ async function loadRoutingStats() {
 // ── Karte initialisieren ──
 
 async function initMap() {
+  if (leafletMap) return; // already initialized
+  const el = document.getElementById('route-map');
+  if (!el) return; // container not in DOM yet (vehicle not loaded)
+
   L = (await import('leaflet')).default;
 
   leafletMap = L.map('route-map').setView(
@@ -791,6 +795,9 @@ async function initMap() {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 19,
   }).addTo(leafletMap);
+
+  // Force layout recalc so tiles fill the container correctly
+  setTimeout(() => leafletMap?.invalidateSize(), 250);
 
   leafletMap.on('click', async (e) => {
     const { lat, lng } = e.latlng;
@@ -915,18 +922,31 @@ watch(showSaveDialog, async (v) => {
   if (v) { await nextTick(); saveInput.value?.focus(); }
 });
 
-watch(() => vehicle.value?.id, async () => {
-  await loadSavedRoutes();
-  await loadRoutingStats();
+// Fahrzeug wechselt → Routen + Stats neu laden
+watch(() => vehicle.value?.id, async (id, oldId) => {
+  if (id && id !== oldId) {
+    await loadSavedRoutes();
+    await loadRoutingStats();
+  }
 });
+
+// Fahrzeug wird erstmals verfügbar → Karte initialisieren
+watch(vehicle, async (v) => {
+  if (v && !leafletMap) {
+    await nextTick();
+    await initMap();
+    await setStartVehicle();
+  }
+}, { immediate: false });
 
 onMounted(async () => {
   await loadSavedRoutes();
   await loadRoutingStats();
-  await nextTick();
-  await initMap();
-  // Startort initialisieren: Fahrzeugposition bevorzugen
-  await setStartVehicle();
+  if (vehicle.value) {
+    await nextTick();
+    await initMap();
+    await setStartVehicle();
+  }
 });
 
 onBeforeUnmount(() => {
