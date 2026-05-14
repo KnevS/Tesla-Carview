@@ -10,3 +10,5 @@ coverage/
 data/
 *.key
 *.pem
+CLAUDE.md
+*.bak

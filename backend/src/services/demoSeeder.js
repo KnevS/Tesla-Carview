@@ -151,7 +151,7 @@ export function seedNewDemoUser(db, userId, username) {
   }
 
   const vin2 = 'DEMO' + randomBytes(7).toString('hex').slice(0, 13).toUpperCase();
-  const r2 = db.prepare("INSERT INTO vehicles (tesla_id, vin, display_name, model, color, license_plate, image_color, category, electricity_rate_kwh, company_name, state_updated_at) VALUES (?, ?, ?, 'm3', 'black', 'S-TC 2024', 'PMNG', 'company', 0.00, 'Demo Company GmbH', ?)").run('demo-' + randomBytes(4).toString('hex'), vin2, 'Dienstwagen', now);
+  const r2 = db.prepare("INSERT INTO vehicles (tesla_id, vin, display_name, model, color, license_plate, image_color, category, electricity_rate_kwh, company_name, state_updated_at) VALUES (?, ?, ?, 'm3', 'black', 'S-TC 2024', 'PMNG', 'company', 0.00, 'Musterwerk GmbH', ?)").run('demo-' + randomBytes(4).toString('hex'), vin2, 'Dienstwagen', now);
   const vehicleId2 = r2.lastInsertRowid;
   db.prepare('INSERT INTO vehicle_users (vehicle_id, user_id) VALUES (?, ?)').run(vehicleId2, userId);
   db.prepare("INSERT INTO charging_locations (vehicle_id, name, address, type, rate_kwh, is_default, lat, lon, radius_m) VALUES (?, 'Buero', 'Buerostrasse 1, Stuttgart', 'work', 0.00, 1, ?, ?, 200)").run(vehicleId2, 48.7774, 9.1800);
