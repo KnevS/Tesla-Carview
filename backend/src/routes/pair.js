@@ -38,7 +38,20 @@ router.get('/init', loginRateLimit, async (req, res) => {
       tenant = getTenantBySlug(tenantSlug);
     } else {
       const tenants = getAllTenants();
-      if (tenants.length === 1) tenant = tenants[0];
+      if (tenants.length === 1) {
+        tenant = tenants[0];
+      } else {
+        // Bei mehreren Mandanten: ersten nicht-Demo-Mandanten mit aktiven Nutzern nehmen
+        const active = tenants.filter(t => t.status !== 'suspended' && !t.is_demo);
+        if (active.length === 1) {
+          tenant = active[0];
+        } else {
+          // Fallback-Priorität: 'default' > erster aktiver > null
+          tenant = active.find(t => t.slug === 'default')
+            ?? active.find(t => t.slug && !t.slug.startsWith('demo'))
+            ?? null;
+        }
+      }
     }
     if (!tenant) return res.status(400).json({ error: 'Mandant nicht gefunden' });
 
