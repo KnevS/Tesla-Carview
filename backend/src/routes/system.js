@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import { auditLog } from '../services/auditService.js';
+import geoip from 'geoip-lite';
 import {
   getAllTenants, getDb, getTenantById,
   setTenantStatus, renameTenant, dropTenant,
@@ -42,6 +43,29 @@ function getGitInfo() {
     return { hash, branch, date };
   } catch { return { hash: 'unknown', branch: 'unknown', date: null }; }
 }
+
+// Country → language mapping (one dominant language per country).
+// Used by the frontend as last-resort fallback when navigator.language
+// doesn't match a supported locale.
+const COUNTRY_LOCALE = {
+  DE: 'de', AT: 'de', CH: 'de', LI: 'de', LU: 'de',
+  FR: 'fr', BE: 'fr', MC: 'fr', SN: 'fr', CI: 'fr', MA: 'fr', DZ: 'fr', TN: 'fr',
+  ES: 'es', MX: 'es', AR: 'es', CO: 'es', CL: 'es', PE: 'es', VE: 'es',
+         UY: 'es', EC: 'es', BO: 'es', PY: 'es', CR: 'es', PA: 'es', GT: 'es',
+         HN: 'es', SV: 'es', NI: 'es', DO: 'es', CU: 'es',
+  TR: 'tr',
+  GR: 'el', CY: 'el',
+};
+const SUPPORTED = new Set(['de', 'en', 'fr', 'es', 'tr', 'el']);
+
+// Public — no auth, called before login to detect locale from client IP.
+router.get('/geolocale', (req, res) => {
+  const forwarded = req.headers['x-forwarded-for'];
+  const ip = (forwarded ? forwarded.split(',')[0] : req.socket.remoteAddress || '').trim();
+  const geo = geoip.lookup(ip);
+  const locale = (geo?.country && COUNTRY_LOCALE[geo.country]) || 'de';
+  res.json({ locale, country: geo?.country ?? null });
+});
 
 // Public version endpoint (anyone authenticated can see version).
 // Liefert auch die Copyright-/Lizenz-Attribution mit — nuetzlich fuer

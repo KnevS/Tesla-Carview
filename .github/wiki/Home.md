@@ -1,8 +1,19 @@
+🌐 **Language / Sprache / Langue / Idioma / Dil / Γλώσσα**
+
+| | |
+|---|---|
+| 🇬🇧 **[English](Home)** | You are here |
+| 🇩🇪 **[Deutsch](DE-Home)** | Deutsche Version |
+| 🇫🇷 **[Français](FR-Home)** | Version française |
+| 🇪🇸 **[Español](ES-Home)** | Versión en español |
+| 🇹🇷 **[Türkçe](TR-Home)** | Türkçe sürüm |
+| 🇬🇷 **[Ελληνικά](EL-Home)** | Ελληνική έκδοση |
+
+---
+
 # Welcome to Tesla Carview Wiki
 
 **Tesla Carview** is a self-hosted data logger and control app for Tesla vehicles. Your data stays on your own server — no cloud, no third-party access.
-
-> 🇩🇪 **Deutschsprachige Nutzer:** Die technische Dokumentation ist auch auf Deutsch verfügbar. Alle `docs/*.md`-Dateien im [Repository](https://github.com/KnevS/Tesla-Carview/tree/main/docs) existieren als deutsche und englische Version.
 
 ---
 
