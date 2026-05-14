@@ -25,7 +25,7 @@ Tesla Carview deckt den gesamten Lebenszyklus deines Tesla ab — vom Tracking j
 | 🚗 Fahrtenbuch | Automatisch aufgezeichnete Fahrten, BMF-konformer PDF-Export |
 | ⚡ Laden | Ladesitzungen, Orte, Monta-Sync, Kostenabrechnung |
 | 🔋 Akku | Gesundheitsanalyse, Degradation, Reichweite-Historie |
-| 🗺️ Routenplaner | OSRM-Routing, Ladestation-Overlay, an Tesla senden |
+| 🗺️ Routenplaner | OSRM-Routing, intelligente Ladeplanung, SoC-aware, Wetter/Verkehr/Blitzer, Tile-Proxy |
 | 🎮 Fahrzeugsteuerung | Klima, Schlösser, Laden, OTA, geplantes Laden |
 | 📝 Wartungsbuch | Wartungseinträge, Intervalle, Push-Erinnerungen |
 | 💬 Grok Chat | xAI-gestützter KI-Assistent mit Fahrzeugkontext |
@@ -115,6 +115,14 @@ Routen im Voraus planen und direkt an die Tesla-Navigation senden:
 - **An Tesla senden** — ein Tipp übermittelt das Ziel an die Fahrzeugnavigation
 - **Routen speichern & laden** — Lieblingsrouten für schnellen Zugriff speichern
 - **ABRP-Fallback** — optionaler Link zu A Better Route Planner mit vorausgefülltem Ziel
+- **Intelligente Ladeplanung** — fügt automatisch Ladestopps ein wenn die Strecke den Akku überschreitet; jeder Stopp zeigt geschätzte Ladezeit, Ladertyp und SoC bei An-/Abfahrt
+- **Abfahrts-SoC** — auto-befüllt aus Live-Fahrzeugdaten (Ad-hoc) oder manuell eingebar (geplante Abfahrt mit geschätztem Ladestand)
+- **Ziel-SoC** — konfigurierbarer Mindest-Ladestand am Zielort (Standard 20%)
+- **Lade-Ziel je Stopp** — wie voll aufladen an jedem Ladestopp (Standard 80%)
+- **Wetter entlang der Route** — Temperatur, Niederschlag, Wind (Open-Meteo, kostenlos)
+- **Verkehrshinweise** — Staumeldungen via HERE Maps (optionaler API-Key)
+- **Blitzer-Overlay** — Radar-/Kamera-Warnungen aus OpenStreetMap (Rechtshinweis wird angezeigt)
+- **Tile-Proxy** — alle Kartenkacheln über Backend-Proxy (kein CSP-Block, kein Rate-Limit)
 
 ---
 

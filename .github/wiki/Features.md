@@ -25,7 +25,7 @@ Tesla Carview covers the full lifecycle of your Tesla — from tracking every tr
 | 🚗 Trip Logbook | Auto-recorded drives, BMF-compliant PDF export |
 | ⚡ Charging | Sessions, locations, Monta sync, cost invoices |
 | 🔋 Battery | Health tracking, degradation, range history |
-| 🗺️ Route Planner | OSRM routing, charger overlay, send to Tesla |
+| 🗺️ Route Planner | OSRM routing, intelligent charging stops, SoC-aware planning, weather/traffic/speed-cameras, tile proxy |
 | 🎮 Vehicle Control | Climate, locks, charging, OTA, scheduled charging |
 | 📝 Service Logbook | Maintenance records, intervals, push reminders |
 | 💬 Grok Chat | xAI-powered AI assistant with vehicle context |
@@ -115,6 +115,14 @@ Plan routes before you drive and send them directly to your Tesla's navigation:
 - **Send to Tesla** — one tap sends the destination to the car's navigation
 - **Save & reload routes** — store favourite routes for quick access
 - **ABRP fallback** — optional link to A Better Route Planner with pre-filled destination
+- **Intelligent charging stop planning** — automatically inserts charging stops when the route exceeds your battery range; each stop shows estimated charging time, charger type, and SoC at arrival/departure
+- **Departure SoC** — auto-filled from live vehicle data (ad-hoc trips) or enter manually (scheduled departure with estimated SoC at that time)
+- **Target arrival SoC** — configure the minimum SoC at your destination (default 20%)
+- **Charge-to SoC per stop** — set how full to charge at each stop (default 80%) to balance speed vs. range
+- **Weather along route** — temperature, precipitation, wind (Open-Meteo, free)
+- **Traffic alerts** — congestion warnings via HERE Maps (optional API key)
+- **Speed camera overlay** — radar/camera warnings from OpenStreetMap (legal note shown)
+- **Tile proxy** — all map tiles served through backend proxy (no CSP blocks, no rate limits)
 
 ---
 
