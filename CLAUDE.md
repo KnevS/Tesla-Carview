@@ -23,8 +23,6 @@ gecrawlt / im Web-Archive landen. **Was einmal drin ist, ist drin.**
 ### Identifizierende Personendaten
 - Echte VINs (17-stellig, beginnt mit `5YJ` / `7SA`)
   → Doku/Tests immer mit Demo-VIN `5YJ3E1EA1NF000000` arbeiten
-- Operator-Mailadresse `sven.krische@indasys.de` außerhalb von
-  README / NOTICE / AUTHORS (dort als Attribution gewollt)
 - Konkrete Lat/Lon-Koordinaten mit > 4 Nachkommastellen aus
   Live-Fahrten (Demo-Seeder rundet bewusst auf 4)
 - Reale Klar-IP-Adressen aus Logs / Tests

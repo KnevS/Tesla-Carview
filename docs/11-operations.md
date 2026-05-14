@@ -2,7 +2,7 @@
 
 > 🇬🇧 [Read in English](11-operations.en.md) · 👤 [Benutzer-Handbuch](../frontend/src/handbook/handbook.de.md) · 🏠 [Doku-Übersicht](.)
 
-Was Self-Hoster im Tagesgeschäft brauchen: Backup, Restore, Wartung, Demo-Modus, Update. Alle Aktionen sind **Admin-only** und audit-geloggt.
+Was Self-Hoster im Tagesgeschäft brauchen: Backup, Restore, Wartung, Update. Alle Aktionen sind **Admin-only** und audit-geloggt.
 
 ---
 
@@ -119,42 +119,6 @@ docker compose -f docker-compose.prod.yml up -d --build backend
 cd /opt/tesla-carview
 bash deploy/update.sh
 ```
-
----
-
-## 🧪 Demo-Modus aktivieren
-
-Für **Tester ohne Tesla**. Wer es nur bei sich selbst spielen will, lässt es aus.
-
-### Aktivieren
-
-```bash
-# backend/.env
-DEMO_ENABLED=true
-```
-
-Backend neustarten. Beim ersten Start wird automatisch ein zusätzlicher Mandant mit slug `demo` und der DB-Datei `data/tenants/<uuid>.db` angelegt.
-
-### Hard-Limits (encoded in `routes/demo.js`)
-
-| Konstante | Wert | Bedeutung |
-|---|---|---|
-| `MAX_ACTIVE_DEMO_USERS` | `10` | Gleichzeitig aktive Tester. HTTP 503 wenn voll. |
-| `DEMO_SIGNUPS_PER_IP` | `1` / 24 h | Pro IP nur 1 Signup pro 24h-Fenster |
-| `DEMO_LIFETIME_DAYS` | `14` | Account inkl. aller Daten wird nach 14 d rückstandslos gelöscht |
-
-### Was die Tester sehen
-
-- Login-Seite zeigt eine blaue Karte „🧪 Tesla Carview ausprobieren — ohne Tesla" mit freien Slots
-- Klick → User `tester-<hex>` wird erzeugt, eingeloggt, Fake-Fahrzeug + 3 Wochen Historie geseedet
-- Banner oben in der App: „Demo-Modus — Konto und Daten werden am DD.MM.YYYY automatisch gelöscht (X Tage übrig)"
-- Privacy- und Terms-Seiten zeigen automatisch einen **Tester-Zusatz** (kein Anspruch auf Verfügbarkeit, kein SLA, Fake-Daten, 14-Tage-Löschung, etc.)
-- Alle 30 min: eine neue Fake-Fahrt pro Demo-Fahrzeug — damit die Demo „lebendig" wirkt
-
-### Cleanup
-
-- Alle 6 h läuft der Demo-Lifecycle: User mit `expires_at < now` werden in einer Transaktion komplett gelöscht (User-Row + alle abhängigen Tabellen: Fahrzeuge, Trips, GPS-Punkte, Charging, Battery, Telemetrie, Logbuch, MFA-Codes, Audit-Logs, Charging-Locations, Service-Intervalle)
-- Der Demo-Mandant selbst bleibt persistent — nur die Tester-Daten werden gelöscht
 
 ---
 

@@ -47,7 +47,7 @@
               </li>
               <li class="flex gap-2">
                 <span class="text-tesla-red flex-shrink-0">●</span>
-                <span><strong>14 Tage gültig</strong> — danach werden Account und Daten rückstandlos gelöscht.</span>
+                <span><strong>{{ demoStatus.lifetime_days ?? 2 }} Tage gültig</strong> — danach werden Account und Daten rückstandlos gelöscht.</span>
               </li>
               <li class="flex gap-2">
                 <span class="text-tesla-red flex-shrink-0">●</span>

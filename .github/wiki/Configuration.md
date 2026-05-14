@@ -42,16 +42,6 @@ docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d --build backe
 
 ---
 
-## Demo mode
-
-| Variable | Default | Description |
-|---|---|---|
-| `DEMO_ENABLED` | `false` | Enable public demo tenant with fake data |
-| `DEMO_MAX_CONCURRENT` | `10` | Max simultaneous demo users |
-| `DEMO_LIFETIME_DAYS` | `14` | How long demo accounts last |
-
----
-
 ## Advanced / Fleet Telemetry
 
 | Variable | Description |

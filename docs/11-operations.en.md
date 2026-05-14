@@ -2,7 +2,7 @@
 
 > 🇩🇪 [Auf Deutsch lesen](11-operations.md) · 👤 [User handbook](../frontend/src/handbook/handbook.en.md) · 🏠 [Docs index](.)
 
-Day-to-day operations for self-hosters: backup, restore, maintenance, demo mode, update. Every action is **admin-only** and audit-logged.
+Day-to-day operations for self-hosters: backup, restore, maintenance, update. Every action is **admin-only** and audit-logged.
 
 ---
 
@@ -119,42 +119,6 @@ docker compose -f docker-compose.prod.yml up -d --build backend
 cd /opt/tesla-carview
 bash deploy/update.sh
 ```
-
----
-
-## 🧪 Demo mode
-
-For **testers without a Tesla**. If you only run this for yourself, leave it off.
-
-### Enable
-
-```bash
-# backend/.env
-DEMO_ENABLED=true
-```
-
-Restart backend. An additional tenant with slug `demo` and DB file `data/tenants/<uuid>.db` is created on first boot.
-
-### Hard limits (encoded in `routes/demo.js`)
-
-| Constant | Value | Meaning |
-|---|---|---|
-| `MAX_ACTIVE_DEMO_USERS` | `10` | Concurrent testers. HTTP 503 when full. |
-| `DEMO_SIGNUPS_PER_IP` | `1` / 24 h | Per IP only 1 signup per 24h window |
-| `DEMO_LIFETIME_DAYS` | `14` | Account + all its data deleted after 14 d, no remnants |
-
-### What testers see
-
-- Login page shows a blue "🧪 Tesla Carview ausprobieren — ohne Tesla" card with free slots
-- One click → user `tester-<hex>` is created, logged in, fake vehicle + 3 weeks history seeded
-- Banner at the top of the app: "Demo-Modus — Konto und Daten werden am DD.MM.YYYY automatisch gelöscht (X Tage übrig)"
-- Privacy and terms pages automatically show a **tester addendum** (no SLA, no support, fake data, 14-day deletion, etc.)
-- Every 30 min: a new fake trip per demo vehicle — so the demo feels alive
-
-### Cleanup
-
-- Every 6 h the demo lifecycle runs: users with `expires_at < now` are deleted in one transaction, together with every dependent table (vehicles, trips, GPS points, charging, battery, telemetry, logbook, MFA codes, audit logs, charging locations, service intervals)
-- The demo tenant itself stays — only the tester data is wiped
 
 ---
 

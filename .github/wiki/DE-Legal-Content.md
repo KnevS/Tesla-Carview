@@ -24,9 +24,6 @@ Wenn Tesla Carview öffentlich zugänglich ist (nicht nur im lokalen Netzwerk), 
 **Ich nutze Tesla Carview mit Familie oder Freunden (nicht-kommerziell):**
 → Impressum und Datenschutzerklärung sollten konfiguriert werden.
 
-**Ich betreibe eine öffentliche Demo oder offene Registrierung:**
-→ Impressum, Datenschutzerklärung und Nutzungsbedingungen sind in Deutschland/EU Pflicht.
-
 ---
 
 ## Wo werden rechtliche Inhalte konfiguriert?
@@ -85,17 +82,7 @@ Wenn du in der EU bist, muss deine Datenschutzerklärung folgendes angeben:
 
 Die Tesla Carview-Vorlage deckt all das ab. Einfach die Kontaktdaten ausfüllen.
 
----
 
-## Demo-Modus: Automatischer Tester-Zusatz
-
-Wenn der Demo-Modus aktiv ist (`DEMO_ENABLED=true`), zeigen Datenschutz- und Nutzungsbedingungsseiten automatisch einen **Tester-Zusatz**:
-- Kein Anspruch auf Verfügbarkeit, kein SLA
-- Fake-Daten
-- 14-Tage-Löschung
-- Rückstandslose Datenlöschung nach Account-Ablauf dokumentiert
-
-Dieser Zusatz erscheint automatisch — keine manuelle Konfiguration nötig.
 
 ---
 

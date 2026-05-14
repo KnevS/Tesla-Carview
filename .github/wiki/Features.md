@@ -172,16 +172,6 @@ Language is determined by:
 
 ---
 
-## 🧪 Demo Mode
-
-Optionally enable a demo mode so others can try the app without a real Tesla:
-- `DEMO_ENABLED=true` in `.env`
-- Fake trips and charging history are generated automatically
-- Demo accounts expire after 14 days
-- IP-based rate limiting prevents abuse
-
----
-
 ## 🌙 Maintenance Mode
 
 The app shows a "maintenance" overlay automatically when the backend is unreachable (restarting after updates). It shows Tesla quotes in German/English, a countdown timer, and polls every 3 seconds until the backend is back — then disappears.

@@ -45,16 +45,6 @@ VAPID keys are required for "charging finished" and maintenance reminder pushes.
 
 ---
 
-## 🧪 Demo sandbox
-
-| Variable | Default | Description |
-|---|---|---|
-| `DEMO_ENABLED` | `false` | When `true`: a separate demo tenant with slug `demo` is created on boot. The login page shows a "🚀 Demo starten" button. Hard limits: 1 signup per IP per 24 h, max. 10 concurrent testers, every account lives 14 days. |
-
-Operation + security details: [11-operations.en.md → Demo mode](11-operations.en.md#demo-mode). Testers automatically see an addendum to the privacy / terms pages documenting the unconditional deletion after 14 days.
-
----
-
 ## ⬆️ Auto-update
 
 | Variable | Default | Description |
@@ -108,8 +98,6 @@ VAPID_PUBLIC_KEY=$(npx web-push generate-vapid-keys | grep Public | awk '{print 
 VAPID_PRIVATE_KEY=…
 VAPID_CONTACT=mailto:you@example.com
 
-# Demo only when you want to invite testers
-# DEMO_ENABLED=true
 
 # Auto-update only after you've understood the update flow
 # AUTO_UPDATE_ENABLED=true
@@ -123,4 +111,4 @@ After saving: `docker compose -f docker-compose.prod.yml up -d --build backend` 
 
 - [02-deployment.en.md](02-deployment.en.md) — first deployment + nginx + Let's Encrypt
 - [07-setup-wizard.en.md](07-setup-wizard.en.md) — interactive configuration assistant
-- [11-operations.en.md](11-operations.en.md) — day-to-day: backup, restore, maintenance, demo
+- [11-operations.en.md](11-operations.en.md) — day-to-day: backup, restore, maintenance, update

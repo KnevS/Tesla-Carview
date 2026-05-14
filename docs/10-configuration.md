@@ -45,16 +45,6 @@ VAPID-Keys werden für „Laden abgeschlossen"- und Wartungs-Push-Notifications 
 
 ---
 
-## 🧪 Demo-Sandbox
-
-| Variable | Default | Beschreibung |
-|---|---|---|
-| `DEMO_ENABLED` | `false` | Wenn `true`: ein separater Demo-Mandant mit slug `demo` wird beim Start angelegt. Login-Seite zeigt einen „🚀 Demo starten"-Button. Pro IP max. 1 Signup/24h, max. 10 aktive Tester gleichzeitig, jeder Account lebt 14 Tage. |
-
-Bedienung + Sicherheits-Aspekte: [11-operations.md → Demo-Modus](11-operations.md#demo-modus). Tester sehen automatisch einen Datenschutz-/Nutzungsbedingungen-Zusatz, der die rückstandslose Löschung dokumentiert (siehe `frontend/src/views/legal/LegalDoc.vue`).
-
----
-
 ## ⬆️ Auto-Update
 
 | Variable | Default | Beschreibung |
@@ -108,8 +98,6 @@ VAPID_PUBLIC_KEY=$(npx web-push generate-vapid-keys | grep Public | awk '{print 
 VAPID_PRIVATE_KEY=…
 VAPID_CONTACT=mailto:du@example.com
 
-# Demo nur, wenn du Tester einladen willst
-# DEMO_ENABLED=true
 
 # Auto-Update nur wenn du den Update-Loop verstanden hast
 # AUTO_UPDATE_ENABLED=true
@@ -123,4 +111,4 @@ Nach dem Speichern: `docker compose -f docker-compose.prod.yml up -d --build bac
 
 - [02-deployment.md](02-deployment.md) — Erstmaliges Deployment + nginx + Let's Encrypt
 - [07-setup-wizard.md](07-setup-wizard.md) — Interaktiver Konfigurations-Assistent
-- [11-operations.md](11-operations.md) — Tagesgeschäft: Backup, Restore, Wartung, Demo aktivieren
+- [11-operations.md](11-operations.md) — Tagesgeschäft: Backup, Restore, Wartung, Update

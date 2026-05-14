@@ -74,16 +74,6 @@ VAPID-Keys werden für Push-Benachrichtigungen benötigt (z.B. „Laden abgeschl
 
 ---
 
-## Demo-Modus
-
-| Variable | Standard | Beschreibung |
-|---|---|---|
-| `DEMO_ENABLED` | `false` | Demo-Mandant mit Fake-Daten aktivieren — zeigt „Demo starten"-Button auf der Login-Seite |
-| `DEMO_MAX_CONCURRENT` | `10` | Maximale gleichzeitig aktive Demo-Nutzer |
-| `DEMO_LIFETIME_DAYS` | `14` | Wie lange Demo-Accounts existieren |
-
----
-
 ## Erweitert / Fleet Telemetry
 
 | Variable | Beschreibung |

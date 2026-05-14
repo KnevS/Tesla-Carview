@@ -191,16 +191,6 @@ Die Sprache wird bestimmt durch:
 
 ---
 
-## Demo-Modus
-
-Optional einen Demo-Modus aktivieren, damit andere die App ohne echten Tesla ausprobieren können:
-- `DEMO_ENABLED=true` in `.env`
-- Fake-Fahrten und Ladehistorie werden automatisch generiert
-- Demo-Konten laufen nach 14 Tagen ab
-- IP-basiertes Rate-Limiting verhindert Missbrauch
-
----
-
 ## Wartungs-Overlay
 
 Die App zeigt automatisch ein „Wartungs"-Overlay wenn das Backend nicht erreichbar ist (z.B. beim Neustart nach Updates). Es zeigt Tesla-Zitate auf Deutsch/Englisch, einen Countdown-Timer und fragt alle 3 Sekunden nach bis das Backend zurück ist — dann verschwindet es.

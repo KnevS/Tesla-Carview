@@ -15,9 +15,6 @@ If Tesla Carview is publicly accessible (not just on your local network), you ma
 **I use Tesla Carview with family or friends (non-commercial):**
 → You should configure imprint and privacy policy to be safe.
 
-**I run a public demo or open registration:**
-→ Imprint, privacy policy, and terms are required in Germany/EU.
-
 ---
 
 ## Where to configure legal content

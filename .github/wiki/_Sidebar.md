@@ -1,5 +1,7 @@
 ## 🏠 [Home](Home)
 
+🇩🇪 [DE](DE-Home) · 🇫🇷 [FR](FR-Home) · 🇪🇸 [ES](ES-Home) · 🇹🇷 [TR](TR-Home) · 🇬🇷 [EL](EL-Home)
+
 ---
 
 ## 🚀 Getting Started
