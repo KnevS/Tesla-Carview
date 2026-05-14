@@ -12,7 +12,7 @@ export const securityHeaders = helmet({
       scriptSrc:  ["'self'"],
       styleSrc:   ["'self'", "'unsafe-inline'"],
       imgSrc:     ["'self'", 'data:', 'https://*.tile.openstreetmap.org'],
-      connectSrc: ["'self'"],
+      connectSrc: ["'self'", 'https://nominatim.openstreetmap.org', 'https://router.project-osrm.org'],
       fontSrc:    ["'self'"],
       objectSrc:  ["'none'"],
       frameSrc:   ["'none'"],

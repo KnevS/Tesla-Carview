@@ -48,6 +48,7 @@ import tariffRoutes from './routes/tariff.js';
 import webhookRoutes from './routes/webhooks.js';
 import grokRoutes from './routes/grok.js';
 import savedRoutesRoutes from './routes/savedRoutes.js';
+import routingRoutes from './routes/routing.js';
 
 const app    = express();
 const PORT   = process.env.PORT || 3000;
@@ -122,6 +123,7 @@ app.use('/api/tariff',             tariffRoutes);
 app.use('/api/webhooks',           webhookRoutes);
 app.use('/api/grok',               grokRoutes);
 app.use('/api/saved-routes',       savedRoutesRoutes);
+app.use('/api/routing',            routingRoutes);
 
 // Globaler Error-Handler — fängt alle ungehandelten Throws/Rejects der Routes
 app.use((err, _req, res, _next) => {

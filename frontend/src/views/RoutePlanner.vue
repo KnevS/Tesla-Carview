@@ -13,10 +13,10 @@
 
     <div v-else class="grid lg:grid-cols-[380px_1fr] gap-4 items-start">
 
-      <!-- ─── Left panel ─── -->
+      <!-- ─── Linke Spalte ─── -->
       <div class="space-y-4">
 
-        <!-- Destination search -->
+        <!-- Zielsuche -->
         <div class="card space-y-3">
           <h2 class="font-semibold text-base flex items-center gap-2">
             <AppIcon name="location" :size="16" class="text-tesla-red" />
@@ -36,7 +36,6 @@
               class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white text-lg leading-none">×</button>
           </div>
 
-          <!-- Autocomplete -->
           <ul v-if="searchResults.length" class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden divide-y divide-gray-700">
             <li v-for="r in searchResults" :key="r.place_id"
               @click="pickResult(r)"
@@ -47,7 +46,6 @@
           </ul>
           <p v-if="searching" class="text-xs text-gray-500">{{ $t('common.loading') }}</p>
 
-          <!-- Chosen destination -->
           <div v-if="destination" class="bg-gray-800 rounded-xl px-3 py-2.5 flex items-center gap-2">
             <span class="text-tesla-red text-lg">📍</span>
             <div class="flex-1 min-w-0">
@@ -59,7 +57,7 @@
           <p v-else class="text-xs text-gray-500">{{ $t('routes.clickMapHint') }}</p>
         </div>
 
-        <!-- Waypoints -->
+        <!-- Zwischenstopps -->
         <div class="card space-y-3">
           <h2 class="font-semibold text-base flex items-center gap-2">
             <AppIcon name="location" :size="16" class="text-gray-400" />
@@ -72,7 +70,7 @@
               class="flex items-center gap-2 bg-gray-800 rounded-xl px-3 py-2">
               <span class="text-gray-400 text-xs font-mono w-4">{{ i+1 }}</span>
               <p class="flex-1 text-sm truncate text-white">{{ wp.name }}</p>
-              <button @click="waypoints.splice(i,1)" class="text-gray-500 hover:text-red-400 text-lg leading-none">×</button>
+              <button @click="removeWaypoint(i)" class="text-gray-500 hover:text-red-400 text-lg leading-none">×</button>
             </li>
           </ul>
           <p v-else class="text-xs text-gray-500">{{ $t('routes.noWaypoints') }}</p>
@@ -93,7 +91,63 @@
           </ul>
         </div>
 
-        <!-- Actions -->
+        <!-- Routeninfo -->
+        <div v-if="routeData || routeLoading" class="card space-y-3">
+          <h2 class="font-semibold text-base flex items-center gap-2">
+            <AppIcon name="speed" :size="16" class="text-blue-400" />
+            {{ $t('routes.routeInfo') }}
+          </h2>
+
+          <div v-if="routeLoading" class="text-xs text-gray-400">{{ $t('routes.calculating') }}</div>
+
+          <template v-else-if="routeData">
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-gray-800 rounded-xl px-3 py-2.5 text-center">
+                <p class="text-xs text-gray-400">{{ $t('routes.distance') }}</p>
+                <p class="text-white font-semibold text-sm">{{ formatDistance(routeData.distance_km) }}</p>
+              </div>
+              <div class="bg-gray-800 rounded-xl px-3 py-2.5 text-center">
+                <p class="text-xs text-gray-400">{{ $t('routes.duration') }}</p>
+                <p class="text-white font-semibold text-sm">{{ formatDuration(routeData.duration_min) }}</p>
+              </div>
+            </div>
+
+            <!-- Reichweitencheck -->
+            <div v-if="routeStats.soc != null" class="space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-gray-400">{{ $t('routes.currentSoc') }}</span>
+                <span class="text-white font-medium">{{ routeStats.soc }}%</span>
+              </div>
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-gray-400">{{ $t('routes.arrivalSoc') }}</span>
+                <span :class="arrivalSocClass" class="font-semibold">{{ arrivalSoc != null ? arrivalSoc + '%' : '—' }}</span>
+              </div>
+
+              <!-- SoC-Balken -->
+              <div class="h-2 rounded-full bg-gray-700 overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-500"
+                  :class="arrivalSocBarClass"
+                  :style="{ width: Math.max(0, arrivalSoc ?? 0) + '%' }">
+                </div>
+              </div>
+
+              <!-- Warnung wenn Reichweite knapp -->
+              <div v-if="arrivalSoc != null && arrivalSoc < 10"
+                class="rounded-xl bg-red-900/60 border border-red-700 px-3 py-2 text-xs text-red-200 flex items-start gap-2">
+                <span class="mt-0.5">⚠️</span>
+                <span>{{ $t('routes.rangeInsufficient') }}</span>
+              </div>
+              <div v-else-if="arrivalSoc != null && arrivalSoc < 20"
+                class="rounded-xl bg-yellow-900/50 border border-yellow-700 px-3 py-2 text-xs text-yellow-200 flex items-start gap-2">
+                <span class="mt-0.5">⚡</span>
+                <span>{{ $t('routes.rangeLow') }}</span>
+              </div>
+            </div>
+            <p v-else class="text-xs text-gray-500">{{ $t('routes.noSocData') }}</p>
+          </template>
+        </div>
+
+        <!-- Aktionen -->
         <div class="card space-y-3">
           <button @click="sendToTesla" :disabled="!destination || busy"
             class="w-full py-2.5 rounded-xl bg-tesla-red hover:bg-red-700 text-white font-medium text-sm transition disabled:opacity-40 flex items-center justify-center gap-2"
@@ -102,11 +156,12 @@
             {{ $t('routes.sendToTesla') }}
           </button>
 
-          <button @click="openAbrp"
-            class="w-full py-2.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-white font-medium text-sm transition flex items-center justify-center gap-2"
-            v-tooltip="$t('routes.abrpTooltip')">
-            <AppIcon name="map" :size="16" />
-            {{ $t('routes.openAbrp') }}
+          <button @click="toggleChargers" :disabled="!routeData"
+            class="w-full py-2.5 rounded-xl text-white font-medium text-sm transition disabled:opacity-40 flex items-center justify-center gap-2"
+            :class="showChargers ? 'bg-blue-700 hover:bg-blue-600' : 'bg-gray-700 hover:bg-gray-600'"
+            v-tooltip="$t('routes.chargerTooltip')">
+            <span>⚡</span>
+            {{ showChargers ? $t('routes.hideChargers') : $t('routes.showChargers') }}
           </button>
 
           <button @click="showSaveDialog = true" :disabled="!destination"
@@ -114,9 +169,17 @@
             <AppIcon name="export" :size="16" />
             {{ $t('routes.saveRoute') }}
           </button>
+
+          <!-- ABRP als dezente Rückfalloption -->
+          <button @click="openAbrp"
+            class="w-full py-2 text-xs text-gray-500 hover:text-gray-300 transition flex items-center justify-center gap-1"
+            v-tooltip="$t('routes.abrpTooltip')">
+            <AppIcon name="map" :size="12" />
+            {{ $t('routes.abrpFallback') }}
+          </button>
         </div>
 
-        <!-- Saved routes -->
+        <!-- Gespeicherte Routen -->
         <div class="card space-y-3">
           <h2 class="font-semibold text-base flex items-center gap-2">
             <AppIcon name="logbook" :size="16" class="text-tesla-red" />
@@ -163,13 +226,20 @@
         </div>
       </div>
 
-      <!-- ─── Map ─── -->
-      <div class="card p-0 overflow-hidden rounded-2xl" style="height: 70vh; min-height: 400px;">
+      <!-- ─── Karte ─── -->
+      <div class="card p-0 overflow-hidden rounded-2xl sticky top-4" style="height: 75vh; min-height: 420px;">
         <div id="route-map" class="w-full h-full"></div>
+        <!-- Ladestation-Legende -->
+        <div v-if="showChargers && chargers.length" class="absolute bottom-3 left-3 bg-gray-900/90 backdrop-blur rounded-xl px-3 py-2 text-xs text-gray-300 space-y-1 pointer-events-none">
+          <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> {{ $t('routes.chargerLegend') }}</div>
+        </div>
+        <div v-if="showChargers && !chargers.length && !chargerLoading" class="absolute bottom-3 left-3 bg-gray-900/90 backdrop-blur rounded-xl px-3 py-2 text-xs text-gray-400 pointer-events-none">
+          {{ $t('routes.noChargers') }}
+        </div>
       </div>
     </div>
 
-    <!-- Save dialog -->
+    <!-- Speichern-Dialog -->
     <Teleport to="body">
       <div v-if="showSaveDialog"
         class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
@@ -214,42 +284,92 @@ const { t, locale } = useI18n();
 const appStore = useAppStore();
 const vehicle  = computed(() => appStore.selectedVehicle);
 
-// Map
+// ── Leaflet ──
+let L          = null;
 let leafletMap = null;
 let destMarker = null;
 let wpMarkers  = [];
-let L = null;
+let routeLayer = null;
+let chargerMarkers = [];
 
-// Search
-const searchQuery  = ref('');
+// ── Suche ──
+const searchQuery   = ref('');
 const searchResults = ref([]);
-const searching    = ref(false);
-let searchTimer    = null;
+const searching     = ref(false);
+let searchTimer     = null;
+const wpQuery       = ref('');
+const wpResults     = ref([]);
+let wpTimer         = null;
 
-const wpQuery   = ref('');
-const wpResults = ref([]);
-let wpTimer     = null;
-
-// Route
+// ── Route ──
 const destination = ref(null);
 const waypoints   = ref([]);
 
-// Saved routes
-const savedRoutes  = ref([]);
-const showSaveDialog = ref(false);
-const saveName     = ref('');
-const saving       = ref(false);
-const saveInput    = ref(null);
-const editingId    = ref(null);
-const editName     = ref('');
+// ── Routenberechnung ──
+const routeData    = ref(null);
+const routeLoading = ref(false);
+const routeStats   = ref({ soc: null, rated_range_km: null, avg_kwh_per_100km: null });
 
-// UI
+// ── Ladestationen ──
+const chargers      = ref([]);
+const chargerLoading = ref(false);
+const showChargers   = ref(false);
+
+// ── Gespeicherte Routen ──
+const savedRoutes    = ref([]);
+const showSaveDialog = ref(false);
+const saveName       = ref('');
+const saving         = ref(false);
+const saveInput      = ref(null);
+const editingId      = ref(null);
+const editName       = ref('');
+
+// ── UI ──
 const busy  = ref(false);
 const toast = ref(null);
 
 function showToast(msg, ok = true) {
   toast.value = { msg, ok };
   setTimeout(() => { toast.value = null; }, 3500);
+}
+
+// ── Reichweite ──
+
+const arrivalSoc = computed(() => {
+  if (!routeData.value || routeStats.value.soc == null || !routeStats.value.rated_range_km) return null;
+  const { distance_km } = routeData.value;
+  const { soc, rated_range_km } = routeStats.value;
+  if (rated_range_km <= 0) return null;
+  const val = Math.round((rated_range_km - distance_km) * soc / rated_range_km);
+  return Math.max(-99, val);
+});
+
+const arrivalSocClass = computed(() => {
+  if (arrivalSoc.value == null) return 'text-gray-400';
+  if (arrivalSoc.value < 10) return 'text-red-400';
+  if (arrivalSoc.value < 20) return 'text-yellow-400';
+  return 'text-green-400';
+});
+
+const arrivalSocBarClass = computed(() => {
+  if (arrivalSoc.value == null || arrivalSoc.value < 0) return 'bg-red-500';
+  if (arrivalSoc.value < 10) return 'bg-red-500';
+  if (arrivalSoc.value < 20) return 'bg-yellow-500';
+  return 'bg-green-500';
+});
+
+// ── Formatierung ──
+
+function formatDistance(km) {
+  if (km == null) return '—';
+  return km >= 10 ? `${Math.round(km)} km` : `${km.toFixed(1)} km`;
+}
+
+function formatDuration(min) {
+  if (min == null) return '—';
+  const h = Math.floor(min / 60);
+  const m = Math.round(min % 60);
+  return h > 0 ? `${h}h ${m}min` : `${m}min`;
 }
 
 // ── Geocoding (Nominatim) ──
@@ -301,16 +421,27 @@ function addWaypoint(r) {
   wpResults.value = [];
   wpQuery.value   = '';
   updateWpMarkers();
+  calculateRoute();
+}
+
+function removeWaypoint(i) {
+  waypoints.value.splice(i, 1);
+  updateWpMarkers();
+  calculateRoute();
 }
 
 function clearSearch() { searchQuery.value = ''; searchResults.value = []; }
 
 function clearDestination() {
   destination.value = null;
+  routeData.value   = null;
+  chargers.value    = [];
   if (destMarker) { destMarker.remove(); destMarker = null; }
+  clearRouteLayer();
+  clearChargerMarkers();
 }
 
-// ── Map ──
+// ── Karte ──
 
 function setDestination(name, lat, lon) {
   destination.value = { name, lat, lon };
@@ -318,6 +449,7 @@ function setDestination(name, lat, lon) {
   if (destMarker) destMarker.remove();
   destMarker = L.marker([lat, lon], { icon: redIcon() }).addTo(leafletMap).bindPopup(name).openPopup();
   leafletMap.setView([lat, lon], Math.max(leafletMap.getZoom(), 12));
+  calculateRoute();
 }
 
 function redIcon() {
@@ -336,6 +468,15 @@ function grayIcon() {
   });
 }
 
+function chargerIcon(kw) {
+  const color = kw >= 100 ? '#3b82f6' : kw >= 50 ? '#60a5fa' : '#93c5fd';
+  return L.divIcon({
+    className: '',
+    html: `<div style="width:20px;height:20px;background:${color};border:2px solid white;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.5);font-size:10px;color:white;font-weight:bold">⚡</div>`,
+    iconSize: [20, 20], iconAnchor: [10, 10],
+  });
+}
+
 function updateWpMarkers() {
   wpMarkers.forEach(m => m.remove());
   wpMarkers = [];
@@ -349,9 +490,154 @@ function updateWpMarkers() {
   });
 }
 
+function clearRouteLayer() {
+  if (routeLayer) { routeLayer.remove(); routeLayer = null; }
+}
+
+function clearChargerMarkers() {
+  chargerMarkers.forEach(m => m.remove());
+  chargerMarkers = [];
+}
+
+// ── OSRM-Routing ──
+
+let routeCalcTimer = null;
+
+function calculateRoute() {
+  clearTimeout(routeCalcTimer);
+  if (!destination.value) return;
+  routeCalcTimer = setTimeout(_doCalculateRoute, 300);
+}
+
+async function _doCalculateRoute() {
+  if (!destination.value || !L || !leafletMap) return;
+  routeLoading.value = true;
+  clearRouteLayer();
+
+  // Startpunkt: Fahrzeugposition oder Deutschland-Mitte
+  const startLat = vehicle.value?.last_lat ?? 51.1657;
+  const startLon = vehicle.value?.last_lon ?? 10.4515;
+
+  // Koordinaten für OSRM: lon,lat Reihenfolge
+  const coords = [
+    `${startLon.toFixed(6)},${startLat.toFixed(6)}`,
+    ...waypoints.value.map(wp => `${wp.lon.toFixed(6)},${wp.lat.toFixed(6)}`),
+    `${destination.value.lon.toFixed(6)},${destination.value.lat.toFixed(6)}`,
+  ].join(';');
+
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${coords}?overview=full&geometries=geojson`;
+    const r   = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    if (!r.ok) throw new Error(`OSRM ${r.status}`);
+    const data  = await r.json();
+    const route = data.routes?.[0];
+    if (!route) throw new Error('Keine Route gefunden');
+
+    routeData.value = {
+      distance_km:  route.distance / 1000,
+      duration_min: route.duration / 60,
+      geometry:     route.geometry.coordinates,
+    };
+
+    // Route als Polyline auf Karte zeichnen
+    const latlngs = route.geometry.coordinates.map(([lon, lat]) => [lat, lon]);
+    routeLayer = L.polyline(latlngs, {
+      color: '#e2231a',
+      weight: 4,
+      opacity: 0.8,
+      dashArray: null,
+    }).addTo(leafletMap);
+    leafletMap.fitBounds(routeLayer.getBounds(), { padding: [30, 30] });
+
+    // Wenn Ladestationen aktiv: neu laden
+    if (showChargers.value) await _loadChargers();
+
+  } catch (err) {
+    console.warn('[Routing]', err.message);
+    showToast(t('routes.routeError'), false);
+    routeData.value = null;
+  } finally {
+    routeLoading.value = false;
+  }
+}
+
+// ── Ladestationen ──
+
+async function toggleChargers() {
+  showChargers.value = !showChargers.value;
+  if (showChargers.value && routeData.value) {
+    await _loadChargers();
+  } else {
+    clearChargerMarkers();
+    chargers.value = [];
+  }
+}
+
+async function _loadChargers() {
+  if (!routeData.value || !L || !leafletMap) return;
+  chargerLoading.value = true;
+
+  // Abfragepunkte: Routenmittelpunkt + ggf. weitere Segmente bei langer Strecke
+  const geo = routeData.value.geometry;
+  const queryPoints = [geo[Math.floor(geo.length / 2)]];
+  if (routeData.value.distance_km > 200) {
+    queryPoints.push(geo[Math.floor(geo.length * 0.25)]);
+    queryPoints.push(geo[Math.floor(geo.length * 0.75)]);
+  }
+
+  clearChargerMarkers();
+  chargers.value = [];
+  const seen = new Set();
+
+  try {
+    await Promise.all(queryPoints.map(async ([lon, lat]) => {
+      const radius = Math.min(50, routeData.value.distance_km * 0.3);
+      const { data } = await api.get('/routing/chargers', { params: { lat, lon, radius_km: radius } });
+      for (const s of data) {
+        if (!seen.has(s.id)) {
+          seen.add(s.id);
+          chargers.value.push(s);
+        }
+      }
+    }));
+
+    updateChargerMarkers();
+  } catch (err) {
+    console.warn('[Chargers]', err.message);
+  } finally {
+    chargerLoading.value = false;
+  }
+}
+
+function updateChargerMarkers() {
+  clearChargerMarkers();
+  if (!L || !leafletMap) return;
+  for (const s of chargers.value) {
+    const kw     = s.max_kw ?? 0;
+    const label  = s.max_kw ? `${s.max_kw} kW` : '';
+    const popup  = `<b>${s.name}</b>${label ? `<br>${label}` : ''}${s.operator ? `<br><small>${s.operator}</small>` : ''}`;
+    chargerMarkers.push(
+      L.marker([s.lat, s.lon], { icon: chargerIcon(kw) })
+        .addTo(leafletMap)
+        .bindPopup(popup)
+    );
+  }
+}
+
+// ── Fahrzeugstats laden ──
+
+async function loadRoutingStats() {
+  if (!vehicle.value) return;
+  try {
+    const { data } = await api.get('/routing/stats', { params: { vehicleId: vehicle.value.id } });
+    routeStats.value = data;
+  } catch { /* silent */ }
+}
+
+// ── Karte initialisieren ──
+
 async function initMap() {
   L = (await import('leaflet')).default;
-  await import('leaflet/dist/leaflet.css');
 
   leafletMap = L.map('route-map').setView(
     vehicle.value?.last_lat && vehicle.value?.last_lon
@@ -361,7 +647,7 @@ async function initMap() {
   );
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap',
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 19,
   }).addTo(leafletMap);
 
@@ -376,7 +662,7 @@ async function initMap() {
   });
 }
 
-// ── Saved routes ──
+// ── Gespeicherte Routen ──
 
 async function loadSavedRoutes() {
   if (!vehicle.value) return;
@@ -396,6 +682,7 @@ function loadRoute(route) {
     leafletMap.setView([route.destination_lat, route.destination_lon], 12);
     updateWpMarkers();
   }
+  calculateRoute();
 }
 
 async function loadAndSend(route) {
@@ -442,7 +729,7 @@ async function deleteRoute(id) {
   } catch { showToast(t('routes.saveError'), false); }
 }
 
-// ── Tesla navigation ──
+// ── Tesla-Navigation ──
 
 const LOCALE_TAG = { de:'de-DE', en:'en-US', fr:'fr-FR', es:'es-ES', tr:'tr-TR', el:'el-GR' };
 
@@ -464,7 +751,7 @@ async function sendToTesla() {
   } finally { busy.value = false; }
 }
 
-// ── ABRP ──
+// ── ABRP (optionale Rückfalloption) ──
 
 function openAbrp() {
   const abrpToken = vehicle.value?.abrp_token;
@@ -487,10 +774,14 @@ watch(showSaveDialog, async (v) => {
   if (v) { await nextTick(); saveInput.value?.focus(); }
 });
 
-watch(() => vehicle.value?.id, async () => { await loadSavedRoutes(); });
+watch(() => vehicle.value?.id, async () => {
+  await loadSavedRoutes();
+  await loadRoutingStats();
+});
 
 onMounted(async () => {
   await loadSavedRoutes();
+  await loadRoutingStats();
   await nextTick();
   await initMap();
 });
