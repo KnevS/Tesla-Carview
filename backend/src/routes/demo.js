@@ -24,9 +24,14 @@ import { seedNewDemoUser } from '../services/demoSeeder.js';
 
 const router = Router();
 
-const MAX_ACTIVE_DEMO_USERS = 10;
-const DEMO_LIFETIME_DAYS    = 14;
-const DEMO_SIGNUPS_PER_IP   = 1;        // pro 24h
+// Alle Demo-Parameter per ENV konfigurierbar — Defaults fuer einen
+// oeffentlichen Showcase-Server:
+//   MAX_ACTIVE_DEMO_USERS  Gleichzeitig aktive Tester (Default 200)
+//   DEMO_LIFETIME_DAYS     Lebenszeit pro Account in Tagen (Default 2)
+//   DEMO_SIGNUPS_PER_IP    Anmeldungen pro IP & 24 h (Default 2)
+const MAX_ACTIVE_DEMO_USERS = parseInt(process.env.MAX_ACTIVE_DEMO_USERS ?? '200', 10);
+const DEMO_LIFETIME_DAYS    = parseInt(process.env.DEMO_LIFETIME_DAYS    ?? '2',   10);
+const DEMO_SIGNUPS_PER_IP   = parseInt(process.env.DEMO_SIGNUPS_PER_IP   ?? '2',   10);
 /** Cleanup laeuft alle 6h (siehe demoLifecycle.js). Zwischen Account-
  *  Ablauf und tatsaechlicher Loeschung kann also bis zu 6h Slack
  *  liegen. Wir addieren das auf next-free, damit die UI ehrlich ist. */
@@ -36,13 +41,13 @@ const ACCESS_TTL  = '15m';
 const REFRESH_TTL = 7 * 24 * 60 * 60;
 
 // IP-Rate-Limit fuer den Signup-Endpoint — der teuerste Endpoint im
-// System (legt User + ganze Historie an). 1 Request pro IP pro 24h.
+// System (legt User + ganze Historie an).
 const signupRateLimit = rateLimit({
   windowMs: 24 * 60 * 60 * 1000,
   max: DEMO_SIGNUPS_PER_IP,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: `Pro IP nur ${DEMO_SIGNUPS_PER_IP} Demo-Account in 24 Stunden.` },
+  message: { error: `Pro IP nur ${DEMO_SIGNUPS_PER_IP} Demo-Account(s) in 24 Stunden.` },
 });
 
 function makeTesterName() {
@@ -159,7 +164,7 @@ router.post('/signup', signupRateLimit, async (req, res) => {
       demo: {
         expires_at: expires,
         days_left:  DEMO_LIFETIME_DAYS,
-        note: 'Demo-Account — alle Daten sind frei erfunden. Wird nach 14 Tagen automatisch geloescht.',
+        note: `Demo-Account — alle Daten sind frei erfunden. Wird nach ${DEMO_LIFETIME_DAYS} Tag(en) automatisch geloescht.`,
       },
     });
   } catch (err) {
