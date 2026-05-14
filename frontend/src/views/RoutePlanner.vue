@@ -286,7 +286,7 @@
       </div>
 
       <!-- ─── Karte ─── -->
-      <div class="card p-0 overflow-hidden rounded-2xl sticky top-4" style="height: 75vh; min-height: 420px;">
+      <div class="card p-0 overflow-hidden rounded-2xl sticky top-4 route-map-card">
         <div id="route-map" class="w-full h-full"></div>
         <!-- Ladestation-Legende -->
         <div v-if="showChargers && chargers.length" class="absolute bottom-3 left-3 bg-gray-900/90 backdrop-blur rounded-xl px-3 py-2 text-xs text-gray-300 space-y-1 pointer-events-none">
@@ -344,12 +344,13 @@ const appStore = useAppStore();
 const vehicle  = computed(() => appStore.selectedVehicle);
 
 // ── Leaflet ──
-let L          = null;
-let leafletMap = null;
-let destMarker = null;
-let wpMarkers  = [];
-let routeLayer = null;
-let chargerMarkers = [];
+let L                 = null;
+let leafletMap        = null;
+let destMarker        = null;
+let wpMarkers         = [];
+let routeLayer        = null;
+let chargerMarkers    = [];
+let mapResizeObserver = null;
 
 // ── Startort ──
 const startMode     = ref('vehicle'); // 'vehicle' | 'browser' | 'manual'
@@ -792,6 +793,16 @@ async function initMap() {
     maxZoom: 19,
   }).addTo(leafletMap);
 
+  // iOS Safari rendert das Layout in mehreren Passes – der Container hat
+  // beim ersten onMounted noch nicht seine finale Größe. invalidateSize()
+  // zwingt Leaflet, die Kacheln neu zu berechnen.
+  setTimeout(() => leafletMap?.invalidateSize(), 250);
+  const mapEl = document.getElementById('route-map');
+  if (mapEl) {
+    mapResizeObserver = new ResizeObserver(() => leafletMap?.invalidateSize());
+    mapResizeObserver.observe(mapEl);
+  }
+
   leafletMap.on('click', async (e) => {
     const { lat, lng } = e.latlng;
     try {
@@ -930,6 +941,7 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+  mapResizeObserver?.disconnect();
   if (leafletMap) { leafletMap.remove(); leafletMap = null; }
 });
 </script>
@@ -937,4 +949,13 @@ onBeforeUnmount(() => {
 <style scoped>
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
+
+.route-map-card {
+  height: 75vh;
+  min-height: 420px;
+}
+/* dvh = Dynamic Viewport Height: passt sich der iOS-Adressleiste an */
+@supports (height: 1dvh) {
+  .route-map-card { height: 75dvh; }
+}
 </style>
