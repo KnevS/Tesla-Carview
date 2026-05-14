@@ -1555,4 +1555,29 @@
     "errorBillingBody": "Votre équipe xAI n'a pas encore de crédits ni de licence. Rechargez votre compte xAI d'au moins 5 $ – le chat Grok fonctionnera immédiatement.",
     "errorBillingBtn": "Recharger sur console.x.ai →"
   }
+,
+  "routes": {
+      "title": "Planificateur d'itinéraire",
+      "destination": "Destination",
+      "searchPlaceholder": "Rechercher une adresse …",
+      "clickMapHint": "Ou cliquez sur la carte pour définir une destination.",
+      "waypoints": "Étapes",
+      "noWaypoints": "Pas d'étapes. Ajoutez-les via le champ de recherche.",
+      "addWaypoint": "Ajouter une étape …",
+      "stops": "étapes",
+      "sendToTesla": "Envoyer au Tesla",
+      "sendTooltip": "Envoie l'adresse de destination directement au système de navigation du véhicule.",
+      "openAbrp": "Planifier dans ABRP",
+      "abrpTooltip": "Ouvre A Better Route Planner avec la télémétrie en direct active.",
+      "saveRoute": "Enregistrer l'itinéraire",
+      "saved": "Itinéraires enregistrés",
+      "noSaved": "Aucun itinéraire enregistré.",
+      "load": "Charger",
+      "loadAndSend": "Charger & Envoyer",
+      "routeName": "Nom de l'itinéraire",
+      "sentToTesla": "Navigation envoyée au Tesla !",
+      "sendError": "Erreur lors de l'envoi au Tesla.",
+      "asleep": "Le véhicule est en veille — réveillez-le d'abord.",
+      "saveError": "Erreur lors de l'enregistrement."
+  }
 }

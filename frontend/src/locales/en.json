@@ -1555,4 +1555,29 @@
     "errorBillingBody": "Your xAI team has no credits or licence yet. Add at least $5 to your xAI account – Grok Chat will work immediately afterwards.",
     "errorBillingBtn": "Top up at console.x.ai →"
   }
+,
+  "routes": {
+      "title": "Route Planner",
+      "destination": "Destination",
+      "searchPlaceholder": "Search address …",
+      "clickMapHint": "Or click on the map to set a destination.",
+      "waypoints": "Waypoints",
+      "noWaypoints": "No waypoints. Add them via the search field.",
+      "addWaypoint": "Add stop …",
+      "stops": "stops",
+      "sendToTesla": "Send to Tesla",
+      "sendTooltip": "Sends the destination address directly to the vehicle navigation system.",
+      "openAbrp": "Plan in ABRP",
+      "abrpTooltip": "Opens A Better Route Planner with active live telemetry. Optimal charging stops are calculated automatically.",
+      "saveRoute": "Save Route",
+      "saved": "Saved Routes",
+      "noSaved": "No saved routes yet.",
+      "load": "Load",
+      "loadAndSend": "Load & Send",
+      "routeName": "Route name",
+      "sentToTesla": "Navigation sent to Tesla!",
+      "sendError": "Error sending to Tesla.",
+      "asleep": "Vehicle is asleep — please wake it up first.",
+      "saveError": "Error saving route."
+  }
 }

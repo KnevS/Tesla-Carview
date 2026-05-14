@@ -1555,4 +1555,29 @@
     "errorBillingBody": "Dein xAI-Team hat noch kein Guthaben oder keine Lizenz. Lade mindestens 5 $ auf dein xAI-Konto auf – danach funktioniert der Grok-Chat sofort.",
     "errorBillingBtn": "Jetzt auf console.x.ai aufladen →"
   }
+,
+  "routes": {
+      "title": "Routenplaner",
+      "destination": "Ziel",
+      "searchPlaceholder": "Adresse suchen …",
+      "clickMapHint": "Oder auf die Karte klicken, um ein Ziel zu setzen.",
+      "waypoints": "Zwischenstopps",
+      "noWaypoints": "Keine Zwischenstopps. Über das Suchfeld hinzufügen.",
+      "addWaypoint": "Stopp hinzufügen …",
+      "stops": "Stopps",
+      "sendToTesla": "An Tesla senden",
+      "sendTooltip": "Sendet die Zieladresse direkt ans Fahrzeug-Navigationssystem.",
+      "openAbrp": "In ABRP planen",
+      "abrpTooltip": "Öffnet A Better Route Planner mit aktiver Live-Telemetrie. Optimale Ladestopps werden automatisch berechnet.",
+      "saveRoute": "Route speichern",
+      "saved": "Gespeicherte Routen",
+      "noSaved": "Noch keine gespeicherten Routen.",
+      "load": "Laden",
+      "loadAndSend": "Laden & Senden",
+      "routeName": "Routenname",
+      "sentToTesla": "Navigation an Tesla gesendet!",
+      "sendError": "Fehler beim Senden an Tesla.",
+      "asleep": "Fahrzeug schläft – bitte zuerst aufwecken.",
+      "saveError": "Fehler beim Speichern."
+  }
 }

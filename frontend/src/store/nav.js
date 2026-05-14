@@ -33,6 +33,7 @@ export const NAV_GROUPS = [
       { key: 'dashboard', to: '/',          icon: 'home',     emojiFallback: '🏠', label: 'Dashboard',    tooltip: 'Übersicht mit Kennzahlen, letzter Fahrt und Monatsstatistik' },
       { key: 'telemetry', to: '/telemetry', icon: 'gauge',    emojiFallback: '🏎',  label: 'Technik',      tooltip: 'Live-Fahrzeugdaten: Reifendruck, Klima, Leistung, SOC – wie der Track-Mode' },
       { key: 'control',   to: '/control',   icon: 'steering', emojiFallback: '🎮', label: 'Steuerung',    tooltip: 'Fahrzeug steuern: Klima, Türen, Laden, Navigation' },
+      { key: 'routes',    to: '/routes',    icon: 'map',      emojiFallback: '🗺️', label: 'Routenplaner', tooltip: 'Routen planen, an Tesla senden, in ABRP öffnen und Lieblingsrouten speichern' },
       { key: 'battery',   to: '/battery',   icon: 'battery',  emojiFallback: '📊', label: 'Batterie',     tooltip: 'Reichweiten-Verlauf und Degradations-Analyse über Zeit' },
     ],
   },

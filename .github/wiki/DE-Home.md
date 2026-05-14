@@ -31,7 +31,7 @@ Du darfst **nicht**:
 - ❌ Es kommerziell nutzen (Kundenprojekte, SaaS, Flottenmanagement gegen Entgelt)
 - ❌ Copyright-Hinweise oder Quellenangaben entfernen
 
-Vollständige Lizenzdetails: [Lizenz & Nutzungsrechte](License-and-Usage)
+Vollständige Lizenzdetails: [Lizenz & Nutzungsrechte](DE-License-and-Usage)
 
 ---
 
@@ -39,31 +39,31 @@ Vollständige Lizenzdetails: [Lizenz & Nutzungsrechte](License-and-Usage)
 
 ### Ich bin neu — wo fange ich an?
 
-→ **[Installationsanleitung](Installation)** — Schritt-für-Schritt-Einrichtung in 30 Minuten
+→ **[Installationsanleitung](DE-Installation)** — Schritt-für-Schritt-Einrichtung in 30 Minuten
 
 ### Tesla Carview läuft, aber ich kann es von außen nicht erreichen
 
-→ **[Netzwerkzugang](Network-Access)** — DynDNS, Cloudflare Tunnel, FritzBox, VPS
+→ **[Netzwerkzugang](DE-Network-Access)** — DynDNS, Cloudflare Tunnel, FritzBox, VPS
 
 ### Meine Raspberry Pi SD-Karte stirbt immer wieder
 
-→ **[Raspberry Pi Speicher](Raspberry-Pi-Storage)** — USB-SSD, NVMe, PXE-Boot
+→ **[Raspberry Pi Speicher](DE-Raspberry-Pi-Storage)** — USB-SSD, NVMe, PXE-Boot
 
 ### Ich möchte mein Tesla-Konto verbinden
 
-→ **[Tesla API Einrichtung](Tesla-API-Setup)** — Developer-Account, Tokens, Virtual Key
+→ **[Tesla API Einrichtung](DE-Tesla-API-Setup)** — Developer-Account, Tokens, Virtual Key
 
 ### Ich möchte alle Funktionen verstehen
 
-→ **[Funktionsübersicht](Features)** — Dashboard, Fahrten, Laden, Steuerung und mehr
+→ **[Funktionsübersicht](DE-Features)** — Dashboard, Fahrten, Laden, Steuerung und mehr
 
 ### Ich habe mehrere Benutzer oder möchte es für die Familie einrichten
 
-→ **[Multi-Tenant & Benutzer](Multi-Tenant)** — Mandanten, Benutzer-Einladungen, Berechtigungen
+→ **[Multi-Tenant & Benutzer](DE-Multi-Tenant)** — Mandanten, Benutzer-Einladungen, Berechtigungen
 
 ### Etwas funktioniert nicht
 
-→ **[Fehlerbehebung](Troubleshooting)** — Häufige Probleme und Lösungen
+→ **[Fehlerbehebung](DE-Troubleshooting)** — Häufige Probleme und Lösungen
 
 ---
 
