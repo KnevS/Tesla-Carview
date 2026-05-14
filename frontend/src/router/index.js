@@ -69,7 +69,11 @@ const routes = [
   { path: '/control',       component: Control,       meta: { title: 'Steuerung' } },
   { path: '/routes',        component: RoutePlanner,  meta: { title: 'Routenplaner' } },
   { path: '/system',        component: System,        meta: { title: 'System' } },
-  { path: '/grok',          component: () => import('../views/GrokChat.vue'), meta: { title: 'Grok Chat' } },
+  { path: '/grok',          component: () => import('../views/GrokChat.vue'),    meta: { title: 'Grok Chat' } },
+  { path: '/sleep',         component: () => import('../views/SleepMonitor.vue'), meta: { title: 'Schlaf-Monitor' } },
+  { path: '/energy',        component: () => import('../views/EnergyReport.vue'), meta: { title: 'Energiebericht' } },
+  { path: '/automations',   component: () => import('../views/Automations.vue'),  meta: { title: 'Automatisierungen' } },
+  { path: '/chargers',      component: () => import('../views/ChargerFinder.vue'),meta: { title: 'Ladestationen' } },
   // Admin
   { path: '/admin/users',   component: UserManagement, meta: { title: 'Benutzerverwaltung', admin: true } },
   { path: '/admin/data',    component: DataManagement, meta: { title: 'Datenverwaltung',    admin: true } },

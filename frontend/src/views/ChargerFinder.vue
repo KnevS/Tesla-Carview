@@ -1,0 +1,174 @@
+<template>
+  <div class="space-y-4">
+    <div>
+      <h1 class="text-2xl font-bold">{{ $t('chargers.title') }}</h1>
+      <p class="text-gray-400 text-sm mt-0.5">{{ $t('chargers.subtitle') }}</p>
+    </div>
+
+    <!-- Search bar -->
+    <div class="flex flex-wrap gap-2 items-end">
+      <div class="flex-1 min-w-48">
+        <input v-model="searchQuery" @keydown.enter="searchAddress"
+          :placeholder="$t('chargers.searchPlaceholder')"
+          class="w-full bg-gray-800 text-white rounded-lg px-3 py-2 text-sm border border-gray-700 focus:border-tesla-red focus:outline-none" />
+      </div>
+      <button @click="searchAddress"
+        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm transition">
+        {{ $t('chargers.searchBtn') }}
+      </button>
+      <button @click="useMyLocation"
+        class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-sm transition">
+        📍 {{ $t('chargers.myLocation') }}
+      </button>
+
+      <div class="flex items-center gap-2">
+        <label class="text-xs text-gray-400" v-tooltip="$t('chargers.tooltipRadius')">{{ $t('chargers.radius') }}</label>
+        <select v-model="radius" @change="search" class="bg-gray-800 text-white rounded-lg px-2 py-2 text-sm border border-gray-700">
+          <option value="5000">{{ $t('chargers.km5') }}</option>
+          <option value="10000">{{ $t('chargers.km10') }}</option>
+          <option value="25000">{{ $t('chargers.km25') }}</option>
+          <option value="50000">{{ $t('chargers.km50') }}</option>
+        </select>
+      </div>
+
+      <label class="flex items-center gap-2 text-sm text-gray-300 cursor-pointer" v-tooltip="$t('chargers.tooltipDcOnly')">
+        <input type="checkbox" v-model="dcOnly" @change="search" class="accent-tesla-red" />
+        {{ $t('chargers.dcOnly') }}
+      </label>
+    </div>
+
+    <!-- Result count -->
+    <p v-if="stations.length" class="text-sm text-gray-400">
+      {{ $t('chargers.stationCount', { n: stations.length }) }}
+    </p>
+
+    <!-- Loading -->
+    <div v-if="loading" class="text-gray-400 text-sm">{{ $t('chargers.loading') }}</div>
+
+    <!-- No results -->
+    <div v-else-if="searched && !stations.length && !loading" class="text-gray-400 text-sm">
+      {{ $t('chargers.noResults') }}
+    </div>
+
+    <!-- Station list -->
+    <div v-if="stations.length" class="space-y-3">
+      <div v-for="s in stations" :key="s.ID"
+        class="p-4 bg-gray-800 rounded-xl border border-gray-700 hover:border-gray-600 transition">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold truncate">{{ s.AddressInfo?.Title ?? '—' }}</p>
+            <p class="text-sm text-gray-400 truncate mt-0.5">{{ formatAddress(s) }}</p>
+            <div class="flex flex-wrap gap-3 mt-2 text-xs text-gray-400">
+              <span v-if="operatorName(s)" class="flex items-center gap-1">
+                🏢 {{ operatorName(s) }}
+              </span>
+              <span v-if="maxPower(s)" class="flex items-center gap-1 text-green-400">
+                ⚡ {{ $t('chargers.power') }}: {{ maxPower(s) }} kW
+              </span>
+              <span class="flex items-center gap-1">
+                🔌 {{ $t('chargers.connections') }}: {{ connCount(s) }}
+              </span>
+            </div>
+            <div class="flex flex-wrap gap-1 mt-2">
+              <span v-for="conn in connTypes(s)" :key="conn"
+                class="px-2 py-0.5 bg-gray-700 rounded-full text-xs text-gray-300">
+                {{ conn }}
+              </span>
+            </div>
+          </div>
+          <a v-if="s.AddressInfo?.Latitude"
+            :href="`https://maps.google.com/?q=${s.AddressInfo.Latitude},${s.AddressInfo.Longitude}`"
+            target="_blank" rel="noopener"
+            class="shrink-0 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-xs transition">
+            {{ $t('chargers.openInMaps') }}
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue';
+import api from '../api.js';
+
+const searchQuery = ref('');
+const radius      = ref('10000');
+const dcOnly      = ref(false);
+const stations    = ref([]);
+const loading     = ref(false);
+const searched    = ref(false);
+const currentLat  = ref(null);
+const currentLon  = ref(null);
+
+async function searchAddress() {
+  if (!searchQuery.value.trim()) return;
+  try {
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery.value)}&limit=1`,
+      { headers: { 'Accept-Language': navigator.language } }
+    );
+    const data = await r.json();
+    if (data[0]) {
+      currentLat.value = parseFloat(data[0].lat);
+      currentLon.value = parseFloat(data[0].lon);
+      search();
+    }
+  } catch { /* ignore */ }
+}
+
+async function useMyLocation() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos => {
+    currentLat.value = pos.coords.latitude;
+    currentLon.value = pos.coords.longitude;
+    search();
+  });
+}
+
+async function search() {
+  if (currentLat.value == null || currentLon.value == null) return;
+  loading.value = true;
+  searched.value = true;
+  try {
+    const params = new URLSearchParams({
+      lat:    currentLat.value,
+      lon:    currentLon.value,
+      radius: radius.value,
+    });
+    if (dcOnly.value) params.set('level', '3');
+    const { data } = await api.get(`/routing/chargers?${params}`);
+    stations.value = data ?? [];
+  } catch {
+    stations.value = [];
+  } finally {
+    loading.value = false;
+  }
+}
+
+function formatAddress(s) {
+  const a = s.AddressInfo;
+  if (!a) return '';
+  return [a.AddressLine1, a.Town, a.StateOrProvince, a.Postcode].filter(Boolean).join(', ');
+}
+
+function operatorName(s) {
+  return s.OperatorInfo?.Title ?? null;
+}
+
+function maxPower(s) {
+  if (!s.Connections?.length) return null;
+  const powers = s.Connections.map(c => c.PowerKW).filter(Boolean);
+  return powers.length ? Math.max(...powers) : null;
+}
+
+function connCount(s) {
+  return s.Connections?.length ?? 0;
+}
+
+function connTypes(s) {
+  if (!s.Connections?.length) return [];
+  const types = [...new Set(s.Connections.map(c => c.ConnectionType?.Title).filter(Boolean))];
+  return types.slice(0, 4);
+}
+</script>

@@ -40,12 +40,16 @@ export const NAV_GROUPS = [
   {
     id: 'analytics', adminOnly: false,
     items: [
-      { key: 'trips',       to: '/trips',            icon: 'map',     emojiFallback: '🗺️', label: 'Fahrten',      tooltip: 'Liste aller aufgezeichneten Fahrten mit GPS-Track auf einer Karte' },
-      { key: 'fahrtenbuch', to: '/fahrtenbuch',      icon: 'logbook', emojiFallback: '📋', label: 'Fahrtenbuch',  tooltip: 'Fahrten klassifizieren und Auswertung nach Privat/Dienst/Arbeitsweg' },
-      { key: 'charging',    to: '/charging',         icon: 'bolt',    emojiFallback: '🔋', label: 'Laden',        tooltip: 'Alle Ladevorgänge mit Ladekurven, Kosten und Aufschlüsselung nach Ladertyp' },
-      { key: 'logbook',     to: '/logbook',          icon: 'tool',    emojiFallback: '📓', label: 'Betriebsbuch', tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },
-      { key: 'abrechnung',  to: '/kostenabrechnung', icon: 'cash',    emojiFallback: '💶', label: 'Abrechnung',   tooltip: 'Kostenabrechnung Heimladen für Dienstwagen' },
-      { key: 'export',      to: '/export',           icon: 'export',  emojiFallback: '💾', label: 'Export',       tooltip: 'Daten als CSV/JSON exportieren, Vollbackup erstellen, Push-Benachrichtigungen' },
+      { key: 'trips',        to: '/trips',            icon: 'map',        emojiFallback: '🗺️', label: 'Fahrten',        tooltip: 'Liste aller aufgezeichneten Fahrten mit GPS-Track auf einer Karte' },
+      { key: 'fahrtenbuch',  to: '/fahrtenbuch',      icon: 'logbook',    emojiFallback: '📋', label: 'Fahrtenbuch',    tooltip: 'Fahrten klassifizieren und Auswertung nach Privat/Dienst/Arbeitsweg' },
+      { key: 'charging',     to: '/charging',         icon: 'bolt',       emojiFallback: '🔋', label: 'Laden',          tooltip: 'Alle Ladevorgänge mit Ladekurven, Kosten und Aufschlüsselung nach Ladertyp' },
+      { key: 'energy',       to: '/energy',           icon: 'sparkles',   emojiFallback: '🌿', label: 'Energiebericht', tooltip: 'Wöchentliche Effizienztrends, kWh/100 km und Eco-Score' },
+      { key: 'sleep',        to: '/sleep',            icon: 'moon',       emojiFallback: '😴', label: 'Schlaf-Monitor', tooltip: 'Wann schläft das Auto – und wie viel Energie verliert es im Stand?' },
+      { key: 'automations',  to: '/automations',      icon: 'bolt',       emojiFallback: '⚡', label: 'Automationen',   tooltip: 'Push-Alarme und automatische Aktionen bei Ladestufe, Geofence u. m.' },
+      { key: 'chargers',     to: '/chargers',         icon: 'bolt',       emojiFallback: '🗺', label: 'Ladestationen',  tooltip: 'Schnellladestationen in deiner Nähe suchen – OpenChargeMap-Daten' },
+      { key: 'logbook',      to: '/logbook',          icon: 'tool',       emojiFallback: '📓', label: 'Betriebsbuch',   tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },
+      { key: 'abrechnung',   to: '/kostenabrechnung', icon: 'cash',       emojiFallback: '💶', label: 'Abrechnung',     tooltip: 'Kostenabrechnung Heimladen für Dienstwagen' },
+      { key: 'export',       to: '/export',           icon: 'export',     emojiFallback: '💾', label: 'Export',         tooltip: 'Daten als CSV/JSON exportieren, Vollbackup erstellen, Push-Benachrichtigungen' },
     ],
   },
   {

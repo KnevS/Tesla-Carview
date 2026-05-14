@@ -8,42 +8,42 @@
       </div>
     </div>
 
-    <template v-for=”sid in layoutOrder” :key=”sid”>
+    <template v-for="sid in layoutOrder" :key="sid">
 
     <!-- Admin-Aufgaben (offene To-Dos für den Tenant-Admin):
          derzeit: aktive Nicht-Admin-Benutzer ohne Fahrzeug-Zuweisung. -->
-    <SortableSection v-if=”sid === 'tasks' && adminTasks.usersWithoutVehicle?.length”
-      page-id=”usermgmt” section-id=”tasks”
-      :title=”$t('users.sectionTasks')” icon=”⚠️”
-      :collapsed=”isCollapsed('tasks')” @toggle=”toggle('tasks')” @move=”(f,t,p) => moveSection(f,t,p)”>
-      <p class=”text-xs text-orange-200/80 mb-2”>
+    <SortableSection v-if="sid === 'tasks' && adminTasks.usersWithoutVehicle?.length"
+      page-id="usermgmt" section-id="tasks"
+      :title="$t('users.sectionTasks')" icon="⚠️"
+      :collapsed="isCollapsed('tasks')" @toggle="toggle('tasks')" @move="(f,t,p) => moveSection(f,t,p)">
+      <p class="text-xs text-orange-200/80 mb-2">
         Folgende Benutzer haben noch kein Fahrzeug zugewiesen. Weise ein Auto zu
         oder gib dem Benutzer das Recht, selbst eines anzulegen:
       </p>
-      <ul class=”space-y-1”>
-        <li v-for=”t in adminTasks.usersWithoutVehicle” :key=”t.id”
-            class=”text-sm flex items-center gap-2 flex-wrap”>
+      <ul class="space-y-1">
+        <li v-for="t in adminTasks.usersWithoutVehicle" :key="t.id"
+            class="text-sm flex items-center gap-2 flex-wrap">
           <span>👤 <strong>{{ t.username }}</strong></span>
-          <button @click=”assignFromTask(t.id)”
-                  class=”text-xs btn-secondary py-0.5 px-2”
-                  v-tooltip=”'Fahrzeug zuweisen — Auswahl scrollt zum Benutzer'”>
+          <button @click="assignFromTask(t.id)"
+                  class="text-xs btn-secondary py-0.5 px-2"
+                  v-tooltip="'Fahrzeug zuweisen — Auswahl scrollt zum Benutzer'">
             Fahrzeug zuweisen
           </button>
-          <button v-if=”!t.can_add_vehicles”
-                  @click=”grantAddVehicles(t.id)”
-                  class=”text-xs btn-secondary py-0.5 px-2”
-                  v-tooltip=”'Recht „selbst Fahrzeuge anlegen” geben — der Benutzer kann dann sync ausloesen.'”>
-            Recht „Fahrzeug anlegen” geben
+          <button v-if="!t.can_add_vehicles"
+                  @click="grantAddVehicles(t.id)"
+                  class="text-xs btn-secondary py-0.5 px-2"
+                  v-tooltip="`Recht 'selbst Fahrzeuge anlegen' geben — der Benutzer kann dann sync ausloesen.`">
+            Recht "Fahrzeug anlegen" geben
           </button>
         </li>
       </ul>
     </SortableSection>
 
     <!-- Benutzerliste -->
-    <SortableSection v-if=”sid === 'users'” page-id=”usermgmt” section-id=”users”
-      :title=”$t('users.sectionUsers')” icon=”👥”
-      :collapsed=”isCollapsed('users')” @toggle=”toggle('users')” @move=”(f,t,p) => moveSection(f,t,p)”>
-    <div class=”card divide-y divide-gray-700”>
+    <SortableSection v-if="sid === 'users'" page-id="usermgmt" section-id="users"
+      :title="$t('users.sectionUsers')" icon="👥"
+      :collapsed="isCollapsed('users')" @toggle="toggle('users')" @move="(f,t,p) => moveSection(f,t,p)">
+    <div class="card divide-y divide-gray-700">
       <div v-if="loading" class="p-4 text-center text-gray-500">Lade Benutzer…</div>
       <div v-for="user in sortedUsers" :key="user.id"
         class="p-4 flex flex-col sm:flex-row sm:items-center gap-3">

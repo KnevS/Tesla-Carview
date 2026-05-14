@@ -51,6 +51,9 @@ import savedRoutesRoutes from './routes/savedRoutes.js';
 import routingRoutes, { tileRouter } from './routes/routing.js';
 import { startRouteScheduler } from './services/routeScheduler.js';
 import pairRoutes from './routes/pair.js';
+import energyReportRoutes     from './routes/energyReport.js';
+import notificationRulesRoutes from './routes/notificationRules.js';
+import sleepRoutes             from './routes/sleep.js';
 
 const app    = express();
 const PORT   = process.env.PORT || 3000;
@@ -126,8 +129,11 @@ app.use('/api/audit',              auditRoutes);
 app.use('/api/tariff',             tariffRoutes);
 app.use('/api/webhooks',           webhookRoutes);
 app.use('/api/grok',               grokRoutes);
-app.use('/api/saved-routes',       savedRoutesRoutes);
+app.use('/api/saved-routes',        savedRoutesRoutes);
 app.use('/api/routing',            routingRoutes);
+app.use('/api/energy',             energyReportRoutes);
+app.use('/api/notification-rules', notificationRulesRoutes);
+app.use('/api/sleep',              sleepRoutes);
 
 // Globaler Error-Handler — fängt alle ungehandelten Throws/Rejects der Routes
 app.use((err, _req, res, _next) => {
