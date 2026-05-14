@@ -135,7 +135,10 @@
     "serviceOverdueKm": "{n} km σε καθυστέρηση",
     "serviceKmLeft": "{n} km απομένουν",
     "serviceNoDone": "δεν υπάρχει καταχώρηση «έγινε»",
-    "monthlyChartLabel": "km"
+    "monthlyChartLabel": "km",
+    "stats": "Στατιστικά",
+    "tariff": "Ηλεκτρικό Τιμολόγιο",
+    "teslaUsage": "Σύνδεση Tesla"
   },
   "trips": {
     "title": "Ταξίδια",
@@ -331,7 +334,9 @@
     "chargerTypeTesla": "Tesla Supercharger – V2 έως 150 kW, V3 έως 250 kW. Συνήθως φθηνότερο από άλλους DC ταχυφορτιστές.",
     "chargerTypeCombo": "CCS Combo – ευρωπαϊκό πρότυπο DC ταχείας φόρτισης. Έως 350 kW.",
     "chargerTypeUnknown": "Η τεχνολογία φόρτισης δεν αναγνωρίστηκε",
-    "chargerTypeNotReported": "δεν αναφέρθηκε από τον σταθμό"
+    "chargerTypeNotReported": "δεν αναφέρθηκε από τον σταθμό",
+    "sectionStats": "Στατιστικά",
+    "sectionSessions": "Συνεδρίες Φόρτισης"
   },
   "battery": {
     "title": "Μπαταρία & Υποβάθμιση",
@@ -1644,7 +1649,32 @@
       "returnTripTitle": "Σχεδιασμός επιστροφής",
       "returnDeparture": "Ημερομηνία αναχώρησης επιστροφής",
       "addReturn": "Αποθήκευση επιστροφής",
-      "returnAdded": "Ταξίδι επιστροφής αποθηκεύτηκε"
+      "returnAdded": "Ταξίδι επιστροφής αποθηκεύτηκε",
+      "timingSection": "Χρονοπρογραμματισμός",
+      "modeDepart": "Αναχώρηση",
+      "modeArrive": "Άφιξη",
+      "modeDepartTip": "Ορισμός ώρας αναχώρησης – η άφιξη υπολογίζεται",
+      "modeArriveTip": "Ορισμός επιθυμητής ώρας άφιξης – η απαιτούμενη αναχώρηση υπολογίζεται",
+      "planDate": "Ημερομηνία",
+      "arrivalTime": "Ώρα άφιξης",
+      "neededDeparture": "Απαιτούμενη αναχώρηση",
+      "weatherTitle": "Καιρός & Κίνηση",
+      "weatherLoading": "Φόρτωση δεδομένων καιρού …",
+      "weatherHint": "Ο καιρός φορτώνεται μετά τον υπολογισμό της διαδρομής.",
+      "weatherAtStart": "Εκκίνηση",
+      "weatherAtDest": "Προορισμός",
+      "windLabel": "Άνεμος",
+      "trafficLabel": "Κίνηση",
+      "trafficFree": "Ελεύθερος δρόμος",
+      "trafficNoKey": "Η κίνηση σε πραγματικό χρόνο δεν έχει ρυθμιστεί.",
+      "trafficSetup": "Ρύθμιση →",
+      "showCameras": "Κάμερες ταχύτητας",
+      "hideCameras": "Κάμερες ταχύτητας",
+      "camerasTooltip": "Εμφάνιση προειδοποιήσεων κάμερας από το OpenStreetMap (δωρεάν, ελλιπές)",
+      "camerasLegal": "Νομική ειδοποίηση",
+      "camerasLegalText": "Οι εφαρμογές προειδοποίησης κάμερας ταχύτητας ενδέχεται να είναι παράνομες κατά την οδήγηση σε ορισμένες χώρες. Ελέγξτε την τοπική νομοθεσία. Χρήση με δική σας ευθύνη.",
+      "camerasLegend": "κάμερες",
+      "actionsTitle": "Ενέργειες"
   },
   "wizard": {
     "title": "Οδηγός Ρυθμίσεων",

@@ -135,7 +135,10 @@
     "serviceOverdueKm": "{n} km überfällig",
     "serviceKmLeft": "noch {n} km",
     "serviceNoDone": "noch kein „erledigt\"-Eintrag",
-    "monthlyChartLabel": "km"
+    "monthlyChartLabel": "km",
+    "stats": "Statistiken",
+    "tariff": "Stromtarif",
+    "teslaUsage": "Tesla Verbindung"
   },
   "trips": {
     "title": "Fahrten",
@@ -331,7 +334,9 @@
     "chargerTypeTesla": "Tesla Supercharger – V2 bis 150 kW, V3 bis 250 kW. Kosten meist günstiger als andere DC-Schnelllader.",
     "chargerTypeCombo": "CCS Combo – europäischer DC-Schnellladestandard. Bis 350 kW möglich.",
     "chargerTypeUnknown": "Lade-Technologie wurde nicht eindeutig erkannt",
-    "chargerTypeNotReported": "von Ladestation nicht übermittelt"
+    "chargerTypeNotReported": "von Ladestation nicht übermittelt",
+    "sectionStats": "Statistiken",
+    "sectionSessions": "Ladesessions"
   },
   "battery": {
     "title": "Batterie & Degradation",
@@ -1644,7 +1649,32 @@
       "returnTripTitle": "Rückfahrt planen",
       "returnDeparture": "Abfahrtsdatum Rückfahrt",
       "addReturn": "Rückfahrt speichern",
-      "returnAdded": "Rückfahrt gespeichert"
+      "returnAdded": "Rückfahrt gespeichert",
+      "timingSection": "Zeitplanung",
+      "modeDepart": "Abfahrt",
+      "modeArrive": "Ankunft",
+      "modeDepartTip": "Abfahrtszeit festlegen – Ankunft wird berechnet",
+      "modeArriveTip": "Gewünschte Ankunftszeit festlegen – benötigte Abfahrt wird berechnet",
+      "planDate": "Datum",
+      "arrivalTime": "Ankunftszeit",
+      "neededDeparture": "Benötigte Abfahrt",
+      "weatherTitle": "Wetter & Verkehr",
+      "weatherLoading": "Wetterdaten werden geladen …",
+      "weatherHint": "Wetter wird nach Routenberechnung geladen.",
+      "weatherAtStart": "Start",
+      "weatherAtDest": "Ziel",
+      "windLabel": "Wind",
+      "trafficLabel": "Verkehr",
+      "trafficFree": "Freie Fahrt",
+      "trafficNoKey": "Echtzeit-Verkehr nicht konfiguriert.",
+      "trafficSetup": "Einrichten →",
+      "showCameras": "Blitzer",
+      "hideCameras": "Blitzer",
+      "camerasTooltip": "Blitzerwarnungen aus OpenStreetMap anzeigen (kostenlos, unvollständig)",
+      "camerasLegal": "Rechtliche Hinweise",
+      "camerasLegalText": "In Deutschland ist die Nutzung von Blitzerwarner-Apps während der Fahrt verboten (§23 StVO). In anderen Ländern gelten abweichende Regelungen. Nutzung auf eigene Verantwortung.",
+      "camerasLegend": "Blitzer",
+      "actionsTitle": "Aktionen"
   },
   "wizard": {
     "title": "Einstellungs-Assistent",

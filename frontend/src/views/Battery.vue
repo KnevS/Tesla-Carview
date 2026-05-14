@@ -1,12 +1,12 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4">
     <h1 class="text-2xl font-bold">{{ $t('battery.title') }}</h1>
 
-    <div class="card">
-      <h2 class="text-lg font-semibold mb-4"
-        v-tooltip="$t('battery.tooltipRangeHistory')">
-        {{ $t('battery.rangeHistoryDays', { days }) }}
-      </h2>
+    <template v-for="sid in layoutOrder" :key="sid">
+
+    <SortableSection v-if="sid === 'range'" page-id="battery" section-id="range"
+      :title="$t('battery.rangeHistoryDays', { days })" icon="📈"
+      :collapsed="isCollapsed('range')" @toggle="toggle('range')" @move="(f,t,p) => moveSection(f,t,p)">
       <div class="flex gap-2 mb-4">
         <button v-for="d in dayRanges" :key="d.value"
           @click="days = d.value; load()"
@@ -18,10 +18,11 @@
       <div style="height: 250px">
         <Line v-if="chartData" :data="chartData" :options="chartOpts" />
       </div>
-    </div>
+    </SortableSection>
 
-    <div class="card">
-      <h2 class="text-lg font-semibold mb-3">{{ $t('battery.degradationOverview') }}</h2>
+    <SortableSection v-if="sid === 'degradation'" page-id="battery" section-id="degradation"
+      :title="$t('battery.degradationOverview')" icon="🔋"
+      :collapsed="isCollapsed('degradation')" @toggle="toggle('degradation')" @move="(f,t,p) => moveSection(f,t,p)">
       <div v-if="degradation.length > 1" class="grid grid-cols-3 gap-4 text-center">
         <div v-tooltip="$t('battery.tooltipFirst')">
           <p class="text-gray-400 text-sm">{{ $t('battery.firstMeasurement') }}</p>
@@ -41,7 +42,9 @@
         </div>
       </div>
       <p v-else class="text-gray-400">{{ $t('battery.noDataLong') }}</p>
-    </div>
+    </SortableSection>
+
+    </template><!-- end v-for layoutOrder -->
   </div>
 </template>
 
@@ -51,12 +54,18 @@ import { useI18n } from 'vue-i18n';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler } from 'chart.js';
 import { useAppStore } from '../store/index.js';
+import SortableSection from '../components/SortableSection.vue';
+import { usePageLayout } from '../composables/usePageLayout.js';
 import api from '../api.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler);
 
 const { t } = useI18n();
 const appStore = useAppStore();
+
+const BATTERY_SECTIONS = ['range', 'degradation'];
+const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('battery', BATTERY_SECTIONS);
+
 const days = ref(90);
 const degradation = ref([]);
 const chartData = ref(null);

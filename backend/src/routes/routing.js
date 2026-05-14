@@ -397,4 +397,137 @@ router.get('/reverse', async (req, res) => {
   }
 });
 
+// GET /api/routing/weather?lat=&lon=&time= (ISO datetime)
+// Proxy zu Open-Meteo (kostenlos, kein API-Key)
+router.get('/weather', async (req, res) => {
+  const lat = parseFloat(req.query.lat);
+  const lon = parseFloat(req.query.lon);
+  if (isNaN(lat) || isNaN(lon)) return res.status(400).json({ error: 'lat/lon erforderlich' });
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
+      + `&current=temperature_2m,wind_speed_10m,weather_code,precipitation,apparent_temperature`
+      + `&hourly=temperature_2m,precipitation_probability,weather_code,wind_speed_10m`
+      + `&forecast_days=3&timezone=auto&wind_speed_unit=kmh`;
+    const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return res.status(r.status).json({ error: 'OpenMeteo-Fehler' });
+    const data = await r.json();
+
+    // Wenn time angegeben: nächste Stunde im hourly-Array finden
+    const targetTime = req.query.time ? new Date(req.query.time) : null;
+    let hourly = null;
+    if (targetTime && data.hourly?.time) {
+      const idx = data.hourly.time.findIndex(t => new Date(t) >= targetTime);
+      const i = idx >= 0 ? idx : 0;
+      hourly = {
+        time:                     data.hourly.time[i],
+        temperature_2m:           data.hourly.temperature_2m?.[i],
+        precipitation_probability: data.hourly.precipitation_probability?.[i],
+        weather_code:             data.hourly.weather_code?.[i],
+        wind_speed_10m:           data.hourly.wind_speed_10m?.[i],
+      };
+    }
+    res.json({ current: data.current, hourly });
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
+// GET /api/routing/cameras?south=&west=&north=&east=
+// Blitzerdaten aus OpenStreetMap Overpass API
+router.get('/cameras', async (req, res) => {
+  const { south, west, north, east } = req.query;
+  if (!south || !west || !north || !east) {
+    return res.status(400).json({ error: 'Bounding-Box (south,west,north,east) erforderlich' });
+  }
+  const bbox = `${south},${west},${north},${east}`;
+  const query = `[out:json][timeout:15];(node["highway"="speed_camera"](${bbox});node["enforcement"="maxspeed"](${bbox}););out body;`;
+  try {
+    const r = await fetch('https://overpass-api.de/api/interpreter', {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    query,
+      signal:  AbortSignal.timeout(18000),
+    });
+    if (!r.ok) return res.status(r.status).json({ error: 'Overpass-Fehler' });
+    const data = await r.json();
+    const cameras = (data.elements ?? []).map(el => ({
+      id:  el.id,
+      lat: el.lat,
+      lon: el.lon,
+      maxspeed: el.tags?.maxspeed,
+      direction: el.tags?.direction,
+    }));
+    res.json({ cameras });
+  } catch (err) {
+    res.status(502).json({ error: err.message });
+  }
+});
+
+// GET /api/routing/traffic?origin_lat=&origin_lon=&dest_lat=&dest_lon=
+// HERE Maps Routing v8 (benötigt HERE_API_KEY in Tenant-Einstellungen)
+router.get('/traffic', async (req, res) => {
+  const hereKey = req.db.prepare(
+    "SELECT value FROM tenant_settings WHERE key='here_api_key'"
+  ).get()?.value;
+
+  if (!hereKey) {
+    return res.json({ available: false, reason: 'no_key' });
+  }
+
+  const { origin_lat, origin_lon, dest_lat, dest_lon } = req.query;
+  if (!origin_lat || !origin_lon || !dest_lat || !dest_lon) {
+    return res.status(400).json({ error: 'Koordinaten erforderlich' });
+  }
+  try {
+    const url = `https://router.hereapi.com/v8/routes`
+      + `?transportMode=car&origin=${origin_lat},${origin_lon}&destination=${dest_lat},${dest_lon}`
+      + `&return=summary,travelSummary&departure=now&apiKey=${hereKey}`;
+    const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    if (!r.ok) {
+      const body = await r.text();
+      return res.status(r.status).json({ available: false, reason: body.slice(0, 200) });
+    }
+    const data = await r.json();
+    const route = data.routes?.[0]?.sections?.[0]?.travelSummary;
+    res.json({
+      available:        true,
+      duration_min:     route ? Math.round(route.duration / 60) : null,
+      duration_traffic: route ? Math.round((route.duration + (route.typicalDuration ? 0 : 0)) / 60) : null,
+      base_duration_min: route ? Math.round(route.baseDuration / 60) : null,
+      delay_min:        route ? Math.max(0, Math.round((route.duration - (route.baseDuration ?? route.duration)) / 60)) : 0,
+    });
+  } catch (err) {
+    res.status(502).json({ available: false, reason: err.message });
+  }
+});
+
+// GET /api/routing/traffic-config — HERE API Key Status (maskiert)
+router.get('/traffic-config', (req, res) => {
+  const row = req.db.prepare("SELECT value FROM tenant_settings WHERE key='here_api_key'").get();
+  if (!row?.value) return res.json({ configured: false });
+  // Nur die ersten 8 und letzten 4 Zeichen zurückgeben
+  const k = row.value;
+  res.json({ configured: true, masked: k.slice(0, 8) + '…' + k.slice(-4) });
+});
+
+// PUT /api/routing/traffic-config — HERE API Key speichern (Admin)
+router.put('/traffic-config', (req, res) => {
+  if (!['admin', 'superadmin'].includes(req.user?.role)) {
+    return res.status(403).json({ error: 'Nur Admins können den HERE-Key konfigurieren' });
+  }
+  const { here_api_key } = req.body;
+  if (here_api_key === '' || here_api_key == null) {
+    req.db.prepare("DELETE FROM tenant_settings WHERE key='here_api_key'").run();
+    return res.json({ configured: false });
+  }
+  if (typeof here_api_key !== 'string' || here_api_key.length < 10) {
+    return res.status(400).json({ error: 'Ungültiger API-Key' });
+  }
+  req.db.prepare(
+    "INSERT INTO tenant_settings (key,value) VALUES ('here_api_key',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+  ).run(here_api_key);
+  const k = here_api_key;
+  res.json({ configured: true, masked: k.slice(0, 8) + '…' + k.slice(-4) });
+});
+
 export default router;
