@@ -16,9 +16,8 @@ import { getMasterDb, getDb, getTenantBySlug, getTenantByPseudonym, getAllTenant
 
 const router = Router();
 
-const ACCESS_TTL    = '15m';
-const REFRESH_TTL   = 7  * 24 * 60 * 60;
-const REMEMBER_TTL  = 90 * 24 * 60 * 60;
+const ACCESS_TTL  = '15m';
+const REFRESH_TTL = 7 * 24 * 60 * 60;
 
 function issueAccessToken(user, tenantId) {
   return jwt.sign(
@@ -28,34 +27,40 @@ function issueAccessToken(user, tenantId) {
   );
 }
 
-function issueRefreshToken(userId, tenantId, req, ttl = REFRESH_TTL) {
+function issueRefreshToken(userId, tenantId, req) {
   const raw  = randomBytes(48).toString('hex');
   const hash = createHash('sha256').update(raw).digest('hex');
   getMasterDb().prepare(
     `INSERT INTO refresh_tokens (tenant_id, user_id, token_hash, expires_at, ip_address, user_agent)
      VALUES (?, ?, ?, ?, ?, ?)`
   ).run(tenantId, userId, hash,
-    Math.floor(Date.now() / 1000) + ttl,
+    Math.floor(Date.now() / 1000) + REFRESH_TTL,
     req.ip, req.headers['user-agent']?.slice(0, 255));
   return raw;
 }
 
-function setRefreshCookie(res, token, ttl = REFRESH_TTL) {
+function setRefreshCookie(res, token) {
   res.cookie('refresh_token', token, {
     httpOnly: true, secure: true, sameSite: 'Lax',
-    maxAge: ttl * 1000, path: '/api/auth',
+    maxAge: REFRESH_TTL * 1000, path: '/api/auth',
   });
 }
 
 /** Akzeptiert sowohl den internen slug als auch den nach aussen
  *  sichtbaren Pseudonym (Login-Seite uebergibt heute den slug aus dem
- *  Dropdown-Wert; getippt kann aber auch der Pseudonym kommen). */
+ *  Dropdown-Wert; getippt kann aber auch der Pseudonym kommen).
+ *  Kein tenantIdent + mehrere Mandanten: auto-select, wenn es
+ *  genau einen nicht-Demo-, nicht-suspendierten Mandanten gibt — z.B.
+ *  wenn DEMO_ENABLED=true einen zweiten Mandanten anlegt und der Nutzer
+ *  keinen Mandanten im Dropdown ausgewaehlt hat. */
 function resolveTenant(tenantIdent) {
   if (tenantIdent) {
     return getTenantBySlug(tenantIdent) ?? getTenantByPseudonym(tenantIdent);
   }
   const tenants = getAllTenants();
   if (tenants.length === 1) return tenants[0];
+  const active = tenants.filter(t => !t.is_demo && t.status !== 'suspended');
+  if (active.length === 1) return active[0];
   return null;
 }
 
@@ -64,9 +69,8 @@ router.post('/login', loginRateLimit, validate(z.object({
   username:    z.string().min(1).max(64),
   password:    z.string().min(1).max(256),
   tenantSlug:  z.string().min(1).max(64).optional(),
-  rememberMe:  z.boolean().optional(),
 })), async (req, res) => {
-  const { username, password, tenantSlug, rememberMe } = req.body;
+  const { username, password, tenantSlug } = req.body;
 
   const tenant = resolveTenant(tenantSlug);
   if (!tenant) {
@@ -110,10 +114,9 @@ router.post('/login', loginRateLimit, validate(z.object({
   }
 
   resetFailedLogins(db, user.id);
-  const ttl          = rememberMe ? REMEMBER_TTL : REFRESH_TTL;
   const accessToken  = issueAccessToken(user, tenant.id);
-  const refreshToken = issueRefreshToken(user.id, tenant.id, req, ttl);
-  setRefreshCookie(res, refreshToken, ttl);
+  const refreshToken = issueRefreshToken(user.id, tenant.id, req);
+  setRefreshCookie(res, refreshToken);
   auditLog(db, user.id, 'login_success', req);
   res.json({
     accessToken,
