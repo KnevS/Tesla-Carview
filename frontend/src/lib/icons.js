@@ -69,6 +69,11 @@ export const ICONS = {
   // zuerst (Default), arrow-up = aelteste zuerst.
   'arrow-up':   '<line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/>',
   'arrow-down': '<line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>',
+
+  // Auth / QR-Pair-Login
+  'qr-code':   '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="2" height="2"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/><rect x="18" y="18" width="2" height="3"/>',
+  warning:     '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  fingerprint: '<path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4M5 19.5C5.5 18 6 15 6 12c0-1.7.7-3.2 1.8-4.3M10.1 20C10 19 10 18 10 17c0-2.8 2.2-5 5-5s5 2.2 5 5v1M16 18v1"/><path d="M12 12c0 3-1 6.5-3.5 8.5"/>',
 };
 
 /** Mapping der im Handbuch verwendeten Unicode-Emojis auf den

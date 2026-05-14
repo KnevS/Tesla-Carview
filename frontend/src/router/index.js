@@ -31,6 +31,7 @@ import Terms          from '../views/legal/Terms.vue';
 import InviteAccept   from '../views/InviteAccept.vue';
 const LegalAdmin     = () => import('../views/admin/LegalAdmin.vue');
 const AuditLog       = () => import('../views/admin/AuditLog.vue');
+const PairLogin      = () => import('../views/PairLogin.vue');
 
 const routes = [
   // Setup-Wizard (erster Start)
@@ -50,6 +51,8 @@ const routes = [
   { path: '/legal/terms',   component: Terms,         meta: { public: true,  title: 'Nutzungsbedingungen' } },
   // Selbst-Registrierung per Einladungslink
   { path: '/invite/:token', component: InviteAccept,  meta: { public: true,  title: 'Einladung annehmen' } },
+  // QR-Pair-Login: Smartphone-Bestätigungsseite
+  { path: '/pair/:token',   component: PairLogin,     meta: { public: true,  title: 'QR-Anmeldung' } },
   // Geschuetzt
   { path: '/',              component: Dashboard,     meta: { title: 'Dashboard' } },
   { path: '/trips',         component: Trips,         meta: { title: 'Fahrten' } },

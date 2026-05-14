@@ -795,7 +795,15 @@
     "passkeyFailed": "Échec de la connexion par passkey",
     "tenantHint": "Votre nom de locataire (attribué après l’inscription)",
     "selfHostHint": "Open source · Hébergez votre propre instance pour un usage privé — {link}",
-    "selfHostLink": "sur GitHub"
+    "selfHostLink": "sur GitHub",
+    "qrLoginBtn": "Se connecter avec un smartphone",
+    "qrModalTitle": "Se connecter avec un smartphone",
+    "qrHint": "Scannez le QR code avec votre smartphone et confirmez avec Passkey ou Face ID.",
+    "qrExpires": "Valide encore",
+    "qrExpiredLabel": "Expiré",
+    "qrExpired": "Le QR code a expiré.",
+    "qrRefresh": "Générer un nouveau code",
+    "qrWaiting": "En attente de confirmation du smartphone…"
   },
   "register": {
     "title": "Créer un nouveau locataire",
@@ -1595,7 +1603,21 @@
       "chargerLegend": "Borne rapide",
       "noChargers": "Aucune borne de recharge rapide trouvée.",
       "calculating": "Calcul de l'itinéraire …",
-      "routeError": "Impossible de calculer l'itinéraire."
+      "routeError": "Impossible de calculer l'itinéraire.",
+      "geocoding": "Recherche en cours …",
+      "noResults": "Aucun résultat. Essayez une requête plus précise.",
+      "startTitle": "Point de départ",
+      "startVehicle": "Véhicule",
+      "startVehicleTip": "Utiliser la position actuelle du véhicule",
+      "startVehicleLabel": "Position du véhicule",
+      "startBrowser": "Ma position",
+      "startBrowserTip": "Utiliser le GPS de l'appareil",
+      "startBrowserLabel": "Ma position",
+      "startBrowserUnavailable": "GPS non disponible",
+      "startBrowserDenied": "Accès GPS refusé",
+      "startManual": "Manuel",
+      "startPlaceholder": "Rechercher un point de départ …",
+      "startNoLocation": "Aucun départ défini — position du véhicule inconnue."
   },
   "wizard": {
     "title": "Assistant de configuration",
@@ -1623,5 +1645,26 @@
     "s6": { "title": "Navigation", "question": "Quels éléments de menu afficher ?", "hint": "Activer/masquer et réordonner.", "changed": "personnalisé" },
     "s7": { "title": "Notifications", "question": "Quand souhaitez-vous une notification ?", "charging": "Charge terminée", "service": "Maintenance due", "battery": "Batterie faible", "batteryThreshold": "Seuil : {n}%" },
     "s8": { "title": "Résumé", "question": "Vérifiez vos modifications et confirmez.", "noChanges": "Aucun paramètre modifié — toutes les valeurs restent inchangées." }
+  },
+  "pair": {
+    "title": "Connecter un appareil par QR code",
+    "loading": "Chargement de la session…",
+    "invalid": "Ce QR code est invalide ou a expiré.",
+    "invalidHint": "Veuillez générer un nouveau QR code dans le formulaire de connexion.",
+    "alreadyConfirmed": "Cette session a déjà été confirmée.",
+    "noPasskey": "Aucun passkey disponible",
+    "noPasskeyHint": "Cet appareil ne prend pas en charge l'authentification par passkey. Ouvrez sur un appareil avec Face ID ou capteur d'empreinte.",
+    "readyTitle": "Confirmer la connexion",
+    "readyHint": "Appuyez sur le bouton et confirmez avec Face ID, Touch ID ou votre clé de sécurité.",
+    "expires": "Valide encore",
+    "expired": "Expiré",
+    "authBtn": "Confirmer avec le passkey",
+    "authenticating": "Authentification en cours…",
+    "cancelled": "Authentification par passkey annulée.",
+    "success": "Connexion réussie !",
+    "successHint": "L'autre appareil sera connecté automatiquement.",
+    "failed": "Échec de l'authentification",
+    "failedGeneric": "Erreur inconnue. Veuillez réessayer.",
+    "retry": "Réessayer"
   }
 }

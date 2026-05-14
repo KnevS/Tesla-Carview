@@ -795,7 +795,15 @@
     "passkeyFailed": "Passkey-Anmeldung fehlgeschlagen",
     "tenantHint": "Dein Mandantenname (nach Registrierung vergeben)",
     "selfHostHint": "Open Source · Eigene Instanz für private Nutzung selbst betreiben — {link}",
-    "selfHostLink": "auf GitHub"
+    "selfHostLink": "auf GitHub",
+    "qrLoginBtn": "Mit Smartphone anmelden",
+    "qrModalTitle": "Mit Smartphone anmelden",
+    "qrHint": "Scanne den QR-Code mit deinem Smartphone und bestätige dort per Passkey oder Face ID.",
+    "qrExpires": "Gültig noch",
+    "qrExpiredLabel": "Abgelaufen",
+    "qrExpired": "Der QR-Code ist abgelaufen.",
+    "qrRefresh": "Neuen Code erzeugen",
+    "qrWaiting": "Warte auf Smartphone-Bestätigung…"
   },
   "register": {
     "title": "Neuen Mandanten registrieren",
@@ -1595,7 +1603,21 @@
       "chargerLegend": "Schnellladestation",
       "noChargers": "Keine Schnellladestationen gefunden.",
       "calculating": "Route wird berechnet …",
-      "routeError": "Route konnte nicht berechnet werden."
+      "routeError": "Route konnte nicht berechnet werden.",
+      "geocoding": "Suche läuft …",
+      "noResults": "Keine Treffer gefunden. Präzisere Eingabe versuchen.",
+      "startTitle": "Startort",
+      "startVehicle": "Fahrzeug",
+      "startVehicleTip": "Aktuelle Fahrzeugposition als Startpunkt verwenden",
+      "startVehicleLabel": "Fahrzeugposition",
+      "startBrowser": "Mein Standort",
+      "startBrowserTip": "GPS deines Geräts als Startpunkt verwenden",
+      "startBrowserLabel": "Mein Standort",
+      "startBrowserUnavailable": "GPS nicht verfügbar",
+      "startBrowserDenied": "GPS-Zugriff verweigert",
+      "startManual": "Manuell",
+      "startPlaceholder": "Startort suchen …",
+      "startNoLocation": "Kein Startort gewählt – Fahrzeugposition unbekannt."
   },
   "wizard": {
     "title": "Einstellungs-Assistent",
@@ -1658,5 +1680,26 @@
       "question": "Prüfe deine Änderungen und bestätige.",
       "noChanges": "Du hast keine Einstellungen geändert — alle Werte bleiben wie bisher."
     }
+  },
+  "pair": {
+    "title": "Gerät per QR-Code anmelden",
+    "loading": "Session wird geladen…",
+    "invalid": "Dieser QR-Code ist ungültig oder abgelaufen.",
+    "invalidHint": "Bitte erzeuge im Anmeldeformular einen neuen QR-Code.",
+    "alreadyConfirmed": "Diese Session wurde bereits bestätigt.",
+    "noPasskey": "Kein Passkey verfügbar",
+    "noPasskeyHint": "Dieses Gerät unterstützt keine Passkey-Authentifizierung. Bitte auf einem Gerät mit Face ID oder Fingerabdrucksensor öffnen.",
+    "readyTitle": "Anmeldung bestätigen",
+    "readyHint": "Tippe auf den Button und bestätige mit Face ID, Touch ID oder deinem Sicherheitsschlüssel.",
+    "expires": "Gültig noch",
+    "expired": "Abgelaufen",
+    "authBtn": "Jetzt mit Passkey bestätigen",
+    "authenticating": "Authentifizierung läuft…",
+    "cancelled": "Passkey-Authentifizierung abgebrochen.",
+    "success": "Anmeldung erfolgreich!",
+    "successHint": "Das andere Gerät wird automatisch eingeloggt.",
+    "failed": "Authentifizierung fehlgeschlagen",
+    "failedGeneric": "Unbekannter Fehler. Bitte erneut versuchen.",
+    "retry": "Erneut versuchen"
   }
 }

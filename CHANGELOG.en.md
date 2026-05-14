@@ -7,6 +7,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v2.2.0] — 2026-05-14
+
+### Added
+- **QR SSO login for Tesla browser** — Tesla display browser shows a QR code; user scans with smartphone, authenticates via Passkey/Face ID → session is automatically transferred to the Tesla browser. No WebAuthn required in the Tesla browser.
+- **Route Planner** — map rendering fixed (Leaflet CSS now statically imported), OSRM road routing (real streets, free), charging station overlay via OpenChargeMap, arrival SoC estimation from own trip data, ABRP demoted to optional link
+- **Settings Wizard** — 8-step wizard (language, design, color, units, dashboard cards, navigation, notifications, summary), re-launchable from Settings, draft mode until final confirmation
+- **Dynamic Dashboard** — card visibility and order from user preferences; stored server-side for cross-device sync
+- **Preferences API** — `GET/PATCH /api/users/me/preferences` (partial merge), `users.preferences` JSON column per tenant, 800ms debounce sync in store
+
+### Improved
+- **Passkey login** — `/api/passkey/login-options` now accepts both `tenantSlug` and `tenantId`
+- **New icons** — `qr-code`, `warning`, `fingerprint` added to AppIcon library
+
+---
+
 ## [v2.1.0] — 2026-05-14
 
 ### Added

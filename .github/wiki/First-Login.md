@@ -66,7 +66,7 @@ The Tesla touchscreen has a built-in browser. You can use Tesla Carview directly
 3. Log in with your username and password (check "Stay signed in" for 90 days)
 4. Bookmark or add to home screen for quick access
 
-> 💡 **Tip:** The Tesla browser does not support passkeys (fingerprint/face login). Use username + password and check "Stay signed in" so you only have to log in once.
+> 💡 **QR SSO login tip:** Tap **"Sign in with smartphone"** on the login page. A QR code appears — scan it with your smartphone, confirm with Face ID or Touch ID → the Tesla browser logs in automatically, without typing a password or passkey directly in the car.
 
 ---
 

@@ -795,7 +795,15 @@
     "passkeyFailed": "Passkey sign-in failed",
     "tenantHint": "Your tenant name (assigned after registration)",
     "selfHostHint": "Open source · Run your own instance for private use — {link}",
-    "selfHostLink": "on GitHub"
+    "selfHostLink": "on GitHub",
+    "qrLoginBtn": "Sign in with smartphone",
+    "qrModalTitle": "Sign in with smartphone",
+    "qrHint": "Scan the QR code with your smartphone and confirm with Passkey or Face ID.",
+    "qrExpires": "Valid for",
+    "qrExpiredLabel": "Expired",
+    "qrExpired": "The QR code has expired.",
+    "qrRefresh": "Generate new code",
+    "qrWaiting": "Waiting for smartphone confirmation…"
   },
   "register": {
     "title": "Register new tenant",
@@ -1595,7 +1603,21 @@
       "chargerLegend": "Fast charging station",
       "noChargers": "No fast-charging stations found.",
       "calculating": "Calculating route …",
-      "routeError": "Could not calculate route."
+      "routeError": "Could not calculate route.",
+      "geocoding": "Searching …",
+      "noResults": "No results found. Try a more specific query.",
+      "startTitle": "Starting point",
+      "startVehicle": "Vehicle",
+      "startVehicleTip": "Use current vehicle location as starting point",
+      "startVehicleLabel": "Vehicle location",
+      "startBrowser": "My location",
+      "startBrowserTip": "Use device GPS as starting point",
+      "startBrowserLabel": "My location",
+      "startBrowserUnavailable": "GPS not available",
+      "startBrowserDenied": "GPS access denied",
+      "startManual": "Manual",
+      "startPlaceholder": "Search starting point …",
+      "startNoLocation": "No start location set — vehicle position unknown."
   },
   "wizard": {
     "title": "Settings Wizard",
@@ -1636,5 +1658,26 @@
     "s6": { "title": "Navigation", "question": "Which menu items do you want to see?", "hint": "Toggle visibility and reorder.", "changed": "customized" },
     "s7": { "title": "Notifications", "question": "When do you want a push notification?", "charging": "Charging complete", "service": "Maintenance due", "battery": "Low battery", "batteryThreshold": "Threshold: {n}%" },
     "s8": { "title": "Summary", "question": "Review your changes and confirm.", "noChanges": "No settings were changed — all values remain as before." }
+  },
+  "pair": {
+    "title": "Sign in device via QR code",
+    "loading": "Loading session…",
+    "invalid": "This QR code is invalid or has expired.",
+    "invalidHint": "Please generate a new QR code in the login form.",
+    "alreadyConfirmed": "This session has already been confirmed.",
+    "noPasskey": "No passkey available",
+    "noPasskeyHint": "This device does not support passkey authentication. Please open on a device with Face ID or fingerprint sensor.",
+    "readyTitle": "Confirm sign-in",
+    "readyHint": "Tap the button and confirm with Face ID, Touch ID or your security key.",
+    "expires": "Valid for",
+    "expired": "Expired",
+    "authBtn": "Confirm with passkey",
+    "authenticating": "Authenticating…",
+    "cancelled": "Passkey authentication cancelled.",
+    "success": "Sign-in successful!",
+    "successHint": "The other device will be logged in automatically.",
+    "failed": "Authentication failed",
+    "failedGeneric": "Unknown error. Please try again.",
+    "retry": "Try again"
   }
 }
