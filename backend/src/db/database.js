@@ -355,6 +355,9 @@ function runTenantMigrations(db) {
   if (!uCols.includes('lang')) {
     db.exec("ALTER TABLE users ADD COLUMN lang TEXT DEFAULT 'de'");
   }
+  if (!uCols.includes('preferences')) {
+    db.exec('ALTER TABLE users ADD COLUMN preferences TEXT DEFAULT NULL');
+  }
 
   // trips
   const tCols = col('trips');

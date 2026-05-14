@@ -1596,5 +1596,32 @@
       "noChargers": "No se encontraron cargadores rápidos.",
       "calculating": "Calculando ruta …",
       "routeError": "No se pudo calcular la ruta."
+  },
+  "wizard": {
+    "title": "Asistente de configuración",
+    "launch": "Iniciar asistente",
+    "launchHint": "Recorre todas las opciones de personalización",
+    "welcome": "Bienvenido al asistente de configuración",
+    "intro": "Personaliza la app en unos pocos pasos sencillos.",
+    "featureSkip": "Cada pregunta puede omitirse",
+    "featureDraft": "Los cambios solo se guardan al final",
+    "featureBack": "Vuelve atrás y corrige en cualquier momento",
+    "featureRelaunch": "El asistente puede relanzarse desde Ajustes",
+    "step": "Paso {n} de {total}",
+    "skip": "Omitir",
+    "next": "Siguiente →",
+    "back": "← Atrás",
+    "confirm": "✓ Guardar y aplicar",
+    "discard": "Descartar",
+    "start": "¡Empezar! →",
+    "done": "¡Listo!",
+    "s1": { "title": "Idioma", "question": "¿Qué idioma prefieres?" },
+    "s2": { "title": "Estilo de diseño", "question": "¿Qué estilo visual debe usar la app?" },
+    "s3": { "title": "Color de énfasis", "question": "¿Qué color de énfasis prefieres?" },
+    "s4": { "title": "Unidades", "question": "¿Qué unidades mostrar?", "distance": "Distancia", "temp": "Temperatura", "efficiency": "Consumo" },
+    "s5": { "title": "Panel principal", "question": "¿Qué tarjetas mostrar en el panel y en qué orden?", "hint": "Activa/desactiva y reordena con ▲ ▼.", "changed": "personalizado", "cards": { "stats": "Mosaicos estadísticos", "service": "Vista previa mantenimiento", "last_trip": "Último viaje", "monthly_chart": "Gráfico mensual", "tariff": "Widget de tarifa eléctrica", "tesla_usage": "Uso API Tesla" } },
+    "s6": { "title": "Navegación", "question": "¿Qué elementos de menú quieres ver?", "hint": "Activa/oculta y reordena.", "changed": "personalizado" },
+    "s7": { "title": "Notificaciones", "question": "¿Cuándo deseas recibir notificaciones?", "charging": "Carga completada", "service": "Mantenimiento pendiente", "battery": "Batería baja", "batteryThreshold": "Umbral: {n}%" },
+    "s8": { "title": "Resumen", "question": "Revisa tus cambios y confirma.", "noChanges": "No se cambió ningún ajuste — todos los valores permanecen igual." }
   }
 }

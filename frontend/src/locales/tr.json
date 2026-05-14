@@ -1596,5 +1596,32 @@
       "noChargers": "Hızlı şarj istasyonu bulunamadı.",
       "calculating": "Rota hesaplanıyor …",
       "routeError": "Rota hesaplanamadı."
+  },
+  "wizard": {
+    "title": "Ayar Sihirbazı",
+    "launch": "Sihirbazı Başlat",
+    "launchHint": "Tüm kişiselleştirme seçeneklerini inceleyin",
+    "welcome": "Ayar Sihirbazına Hoş Geldiniz",
+    "intro": "Uygulamayı birkaç basit adımda kişiselleştirin.",
+    "featureSkip": "Her soru atlanabilir",
+    "featureDraft": "Değişiklikler yalnızca sonda kaydedilir",
+    "featureBack": "İstediğiniz zaman geri dönüp düzeltin",
+    "featureRelaunch": "Sihirbaz Ayarlar'dan yeniden başlatılabilir",
+    "step": "{total} adımdan {n}. adım",
+    "skip": "Atla",
+    "next": "İleri →",
+    "back": "← Geri",
+    "confirm": "✓ Kaydet ve Uygula",
+    "discard": "Vazgeç",
+    "start": "Başlayalım →",
+    "done": "Tamamlandı!",
+    "s1": { "title": "Dil", "question": "Hangi dili tercih edersiniz?" },
+    "s2": { "title": "Tasarım Stili", "question": "Uygulama hangi görsel stili kullanmalı?" },
+    "s3": { "title": "Vurgu Rengi", "question": "Hangi vurgu rengini tercih edersiniz?" },
+    "s4": { "title": "Birimler", "question": "Hangi birimler görüntülenmeli?", "distance": "Mesafe", "temp": "Sıcaklık", "efficiency": "Tüketim" },
+    "s5": { "title": "Gösterge Paneli", "question": "Gösterge panelinde hangi kartlar hangi sırayla görünsün?", "hint": "▲ ▼ ile etkinleştirin/devre dışı bırakın ve sıralayın.", "changed": "özelleştirildi", "cards": { "stats": "İstatistik kutucukları", "service": "Bakım önizlemesi", "last_trip": "Son sürüş", "monthly_chart": "Aylık grafik", "tariff": "Elektrik tarifesi widget'ı", "tesla_usage": "Tesla API kullanımı" } },
+    "s6": { "title": "Navigasyon", "question": "Hangi menü öğelerini görmek istersiniz?", "hint": "Görünürlüğü ve sırayı ayarlayın.", "changed": "özelleştirildi" },
+    "s7": { "title": "Bildirimler", "question": "Ne zaman bildirim almak istersiniz?", "charging": "Şarj tamamlandı", "service": "Bakım zamanı geldi", "battery": "Düşük batarya", "batteryThreshold": "Eşik: %{n}" },
+    "s8": { "title": "Özet", "question": "Değişikliklerinizi inceleyin ve onaylayın.", "noChanges": "Hiçbir ayar değiştirilmedi — tüm değerler aynı kaldı." }
   }
 }

@@ -1,6 +1,14 @@
 <template>
   <div class="max-w-2xl space-y-6">
-    <h1 class="text-2xl font-bold">{{ $t('settings.title') }}</h1>
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+      <h1 class="text-2xl font-bold">{{ $t('settings.title') }}</h1>
+      <button @click="launchWizard"
+        class="flex items-center gap-2 px-4 py-2 rounded-xl bg-tesla-red/10 hover:bg-tesla-red/20 border border-tesla-red/30 text-tesla-red text-sm font-medium transition"
+        v-tooltip="$t('wizard.launchHint')">
+        <span>⚙️</span>
+        {{ $t('wizard.launch') }}
+      </button>
+    </div>
 
     <!-- Sprache (User-Preference) -->
     <div class="card space-y-3">
@@ -826,6 +834,10 @@ import { useLangStore, LANGS } from '../store/lang.js';
 const auth     = useAuthStore();
 const appStore = useAppStore();
 const navStore = useNavStore();
+
+function launchWizard() {
+  if (typeof window.__launchWizard === 'function') window.__launchWizard();
+}
 const { t }    = useI18n();
 
 // Group-Labels + farbige Markierung im Customization-UI — gleiche
