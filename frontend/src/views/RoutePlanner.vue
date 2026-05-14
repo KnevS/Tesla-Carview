@@ -356,7 +356,7 @@ async function initMap() {
   leafletMap = L.map('route-map').setView(
     vehicle.value?.last_lat && vehicle.value?.last_lon
       ? [vehicle.value.last_lat, vehicle.value.last_lon]
-      : [51.165691, 10.451526],
+      : [51.1657, 10.4515],
     vehicle.value?.last_lat ? 12 : 6
   );
 
