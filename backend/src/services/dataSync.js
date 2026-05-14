@@ -1,4 +1,4 @@
-import { sendChargingCompleteNotification } from './notifications.js';
+import { sendChargingCompleteNotification, sendPush } from './notifications.js';
 import { maybeAutoClassify } from './geofenceClassifier.js';
 import { maybeFuzz } from './gpsFuzzing.js';
 import { dispatch as dispatchWebhook } from './webhookDispatcher.js';
@@ -122,6 +122,10 @@ export async function syncVehicleState(db, vehicle, state) {
     const freshVehicle = db.prepare('SELECT * FROM vehicles WHERE id=?').get(vehicle.id);
     sendToAbrp(freshVehicle, buildTlmFromState(state, now)).catch(() => {});
   }
+
+  // Notification-Rules + Sleep-Monitoring (best-effort, darf Sync nie crashen)
+  evaluateRules(db, vehicle.id, charge, drive).catch(() => {});
+  trackSleepEvents(db, vehicle.id, vs?.state || 'unknown', charge?.battery_level);
 }
 
 // ---- Odometer Trip Helpers ------------------------------------------------
@@ -398,4 +402,112 @@ function haversineM(lat1, lon1, lat2, lon2) {
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a    = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// ── Notification Rules ────────────────────────────────────────────────────────
+
+const lastGeofenceState = new Map(); // key: `${vehicleId}_${geofenceId}` → boolean (inGeofence)
+
+export async function evaluateRules(db, vehicleId, chargeState, driveState) {
+  try {
+    const rules = db.prepare(
+      'SELECT * FROM notification_rules WHERE vehicle_id=? AND enabled=1'
+    ).all(vehicleId);
+    if (!rules.length) return;
+
+    const now = Math.floor(Date.now() / 1000);
+
+    for (const rule of rules) {
+      if (rule.last_triggered_at && (now - rule.last_triggered_at) < rule.cooldown_minutes * 60) continue;
+
+      let triggered = false;
+      const soc = chargeState?.battery_level;
+
+      if (rule.rule_type === 'soc_above' && soc != null)
+        triggered = soc >= rule.threshold;
+      else if (rule.rule_type === 'soc_below' && soc != null)
+        triggered = soc <= rule.threshold;
+      else if (rule.rule_type === 'charging_complete')
+        triggered = chargeState?.charging_state === 'Complete';
+      else if ((rule.rule_type === 'geofence_enter' || rule.rule_type === 'geofence_exit') && driveState?.lat && rule.geofence_id) {
+        const gf = db.prepare('SELECT * FROM geofences WHERE id=?').get(rule.geofence_id);
+        if (gf) {
+          const dist     = haversineM(driveState.lat, driveState.lon, gf.lat, gf.lon);
+          const inNow    = dist <= gf.radius_m;
+          const stateKey = `${vehicleId}_${rule.geofence_id}`;
+          const wasIn    = lastGeofenceState.get(stateKey);
+          if (wasIn !== undefined) {
+            if (rule.rule_type === 'geofence_enter' && !wasIn && inNow) triggered = true;
+            if (rule.rule_type === 'geofence_exit'  && wasIn  && !inNow) triggered = true;
+          }
+          lastGeofenceState.set(stateKey, inNow);
+        }
+      }
+
+      if (!triggered) continue;
+
+      const param = rule.action_param ? JSON.parse(rule.action_param) : {};
+      if (rule.action_type === 'push_notify') {
+        const msg = param.message || 'Tesla-Alarm ausgelöst';
+        await sendPush(db, vehicleId, 'Tesla Carview', msg);
+      }
+      // climate actions: fire-and-forget via teslaApi (imported lazily to avoid circular)
+      if (['climate_on', 'climate_off', 'climate_set_temp'].includes(rule.action_type)) {
+        try {
+          const { apiProxyPost } = await import('./teslaApi.js');
+          const v = db.prepare('SELECT * FROM vehicles WHERE id=?').get(vehicleId);
+          if (v) {
+            if (rule.action_type === 'climate_on')       await apiProxyPost(db, v, 'auto_conditioning_start', {});
+            if (rule.action_type === 'climate_off')      await apiProxyPost(db, v, 'auto_conditioning_stop', {});
+            if (rule.action_type === 'climate_set_temp') await apiProxyPost(db, v, 'set_temps', { driver_temp: param.temp_c ?? 21, passenger_temp: param.temp_c ?? 21 });
+          }
+        } catch (e) {
+          console.error('[NotificationRules] Climate-Action fehlgeschlagen:', e.message);
+        }
+      }
+
+      db.prepare('UPDATE notification_rules SET last_triggered_at=? WHERE id=?').run(now, rule.id);
+    }
+  } catch (err) {
+    console.error('[NotificationRules] Fehler:', err.message);
+  }
+}
+
+// ── Sleep Monitoring ──────────────────────────────────────────────────────────
+
+const lastVehicleState = new Map(); // vehicleId → { state, soc, timestamp }
+
+export function trackSleepEvents(db, vehicleId, currentState, currentSoc) {
+  try {
+    const prev = lastVehicleState.get(vehicleId);
+    const now  = Math.floor(Date.now() / 1000);
+
+    if (prev) {
+      const wasAwake  = prev.state !== 'asleep';
+      const isAsleep  = currentState === 'asleep';
+      const wasAsleep = prev.state === 'asleep';
+      const isAwake   = currentState !== 'asleep';
+
+      if (wasAwake && isAsleep) {
+        db.prepare(
+          'INSERT INTO vehicle_sleep_events (vehicle_id, sleep_at, soc_at_sleep) VALUES (?, ?, ?)'
+        ).run(vehicleId, now, prev.soc ?? currentSoc);
+      } else if (wasAsleep && isAwake) {
+        const open = db.prepare(
+          'SELECT * FROM vehicle_sleep_events WHERE vehicle_id=? AND wake_at IS NULL ORDER BY sleep_at DESC LIMIT 1'
+        ).get(vehicleId);
+        if (open) {
+          const durationMin = Math.round((now - open.sleep_at) / 60);
+          const drainPct    = open.soc_at_sleep != null && currentSoc != null ? open.soc_at_sleep - currentSoc : null;
+          db.prepare(
+            'UPDATE vehicle_sleep_events SET wake_at=?, soc_at_wake=?, drain_pct=?, duration_min=? WHERE id=?'
+          ).run(now, currentSoc, drainPct, durationMin, open.id);
+        }
+      }
+    }
+
+    lastVehicleState.set(vehicleId, { state: currentState, soc: currentSoc, timestamp: now });
+  } catch (err) {
+    console.error('[SleepMonitor] Fehler:', err.message);
+  }
 }

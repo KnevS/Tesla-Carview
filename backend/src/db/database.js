@@ -801,6 +801,37 @@ function runTenantMigrations(db) {
     }
   }
 
+  // Notification Rules (Push-Alarme + Geo-Aktionen)
+  db.exec(`CREATE TABLE IF NOT EXISTS notification_rules (
+    id               INTEGER PRIMARY KEY,
+    user_id          INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    vehicle_id       INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+    rule_type        TEXT NOT NULL CHECK(rule_type IN ('soc_above','soc_below','geofence_enter','geofence_exit','charging_complete')),
+    geofence_id      INTEGER REFERENCES geofences(id) ON DELETE CASCADE,
+    threshold        INTEGER,
+    action_type      TEXT NOT NULL CHECK(action_type IN ('push_notify','climate_on','climate_off','climate_set_temp')),
+    action_param     TEXT,
+    enabled          INTEGER NOT NULL DEFAULT 1,
+    last_triggered_at INTEGER,
+    cooldown_minutes INTEGER NOT NULL DEFAULT 30,
+    created_at       INTEGER DEFAULT (unixepoch())
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_notification_rules_vehicle ON notification_rules(vehicle_id, enabled)');
+
+  // Sleep-Monitoring
+  db.exec(`CREATE TABLE IF NOT EXISTS vehicle_sleep_events (
+    id             INTEGER PRIMARY KEY,
+    vehicle_id     INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+    sleep_at       INTEGER NOT NULL,
+    wake_at        INTEGER,
+    soc_at_sleep   INTEGER,
+    soc_at_wake    INTEGER,
+    drain_pct      INTEGER,
+    duration_min   INTEGER,
+    created_at     INTEGER DEFAULT (unixepoch())
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_sleep_events_vehicle ON vehicle_sleep_events(vehicle_id, sleep_at DESC)');
+
   // Indexes
   db.exec('CREATE INDEX IF NOT EXISTS idx_trips_vehicle      ON trips(vehicle_id, start_time DESC)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_charging_vehicle   ON charging_sessions(vehicle_id, start_time DESC)');

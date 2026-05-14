@@ -20,7 +20,7 @@ const STARTUP_DELAY_MS     = 90_000;            // 90 s nach Start
  *  Daten — Fahrzeuge, deren einziger Owner er war; Fahrten, Lade-
  *  sessions, Battery, Telemetry, Logbuch, MFA-Codes, Audit-Eintraege.
  *  Inneres ist transaktional. */
-function deleteDemoUser(db, userId) {
+export function deleteDemoUser(db, userId) {
   db.transaction(() => {
     db.exec('PRAGMA foreign_keys = OFF');
     try {

@@ -21,6 +21,8 @@ import { getMasterDb, getDb, ensureDemoTenant } from '../db/database.js';
 import { createUser } from '../services/userService.js';
 import { auditLog } from '../services/auditService.js';
 import { seedNewDemoUser } from '../services/demoSeeder.js';
+import { requireAuth, requireAdmin } from '../middleware/auth.js';
+import { deleteDemoUser } from '../services/demoLifecycle.js';
 
 const router = Router();
 
@@ -217,6 +219,62 @@ router.get('/status', (_req, res) => {
     });
   } catch (e) {
     res.json({ enabled: false, error: e.message });
+  }
+});
+
+// ── Admin-Routen (erfordern Auth + Admin-Rolle) ───────────────────────────────
+
+/** GET /api/demo/admin/users — Liste aller Demo-Tester mit Ablaufdatum */
+router.get('/admin/users', requireAuth, requireAdmin, (req, res) => {
+  if (process.env.DEMO_ENABLED !== 'true') return res.json({ users: [] });
+  try {
+    const tenantId = ensureDemoTenant();
+    const db       = getDb(tenantId);
+    const now      = Math.floor(Date.now() / 1000);
+    const users    = db.prepare(`
+      SELECT u.id, u.username, u.created_at, u.expires_at, u.is_active,
+             (u.expires_at IS NOT NULL AND u.expires_at <= ?) AS is_expired,
+             (SELECT COUNT(*) FROM vehicle_users vu WHERE vu.user_id = u.id) AS vehicle_count
+      FROM users u
+      WHERE u.expires_at IS NOT NULL
+      ORDER BY u.created_at DESC
+    `).all(now);
+    res.json({ users, tenant_id: tenantId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/** DELETE /api/demo/admin/users/:id — einzelnen Demo-Tester löschen */
+router.delete('/admin/users/:id', requireAuth, requireAdmin, (req, res) => {
+  if (process.env.DEMO_ENABLED !== 'true') return res.status(400).json({ error: 'Demo nicht aktiviert' });
+  try {
+    const tenantId = ensureDemoTenant();
+    const db       = getDb(tenantId);
+    const user     = db.prepare('SELECT id, username FROM users WHERE id=? AND expires_at IS NOT NULL').get(req.params.id);
+    if (!user) return res.status(404).json({ error: 'Demo-User nicht gefunden' });
+    deleteDemoUser(db, user.id);
+    res.json({ ok: true, deleted: user.username });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/** POST /api/demo/admin/cleanup — alle abgelaufenen Tester sofort löschen */
+router.post('/admin/cleanup', requireAuth, requireAdmin, (req, res) => {
+  if (process.env.DEMO_ENABLED !== 'true') return res.json({ deleted: 0 });
+  try {
+    const tenantId = ensureDemoTenant();
+    const db       = getDb(tenantId);
+    const now      = Math.floor(Date.now() / 1000);
+    const expired  = db.prepare('SELECT id, username FROM users WHERE expires_at IS NOT NULL AND expires_at <= ?').all(now);
+    let deleted    = 0;
+    for (const u of expired) {
+      try { deleteDemoUser(db, u.id); deleted++; } catch { /* ignore single-user errors */ }
+    }
+    res.json({ deleted, message: `${deleted} abgelaufene Demo-User gelöscht` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
