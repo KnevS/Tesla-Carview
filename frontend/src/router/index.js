@@ -14,6 +14,7 @@ import MfaSetup    from '../views/MfaSetup.vue';
 import Settings    from '../views/Settings.vue';
 import Telemetry    from '../views/Telemetry.vue';
 import Control      from '../views/Control.vue';
+import RoutePlanner from '../views/RoutePlanner.vue';
 import Fahrtenbuch      from '../views/Fahrtenbuch.vue';
 import Kostenabrechnung from '../views/Kostenabrechnung.vue';
 import System      from '../views/System.vue';
@@ -63,6 +64,7 @@ const routes = [
   { path: '/settings',      component: Settings,      meta: { title: 'Einstellungen' } },
   { path: '/telemetry',     component: Telemetry,     meta: { title: 'Fahrzeugtechnik' } },
   { path: '/control',       component: Control,       meta: { title: 'Steuerung' } },
+  { path: '/routes',        component: RoutePlanner,  meta: { title: 'Routenplaner' } },
   { path: '/system',        component: System,        meta: { title: 'System' } },
   { path: '/grok',          component: () => import('../views/GrokChat.vue'), meta: { title: 'Grok Chat' } },
   // Admin

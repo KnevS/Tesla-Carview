@@ -11,6 +11,8 @@
 
 ---
 
+> ℹ️ **Note de langue :** Les sous-pages de ce wiki sont disponibles en **[anglais](Home)** et en **[allemand](DE-Home)**. La page d'accueil est entièrement traduite en français ; les pages de détail s'ouvrent en anglais.
+
 # Bienvenue sur le Wiki Tesla Carview
 
 **Tesla Carview** est une application de journalisation de données et de contrôle à hébergement autonome pour les véhicules Tesla. Vos données restent sur votre propre serveur — pas de cloud, pas d'accès tiers.

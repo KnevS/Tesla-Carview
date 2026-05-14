@@ -1555,4 +1555,29 @@
     "errorBillingBody": "xAI ekibinizde henüz kredi veya lisans bulunmuyor. xAI hesabınıza en az 5 $ yükleyin – ardından Grok Chat hemen çalışacaktır.",
     "errorBillingBtn": "console.x.ai'de yükle →"
   }
+,
+  "routes": {
+      "title": "Rota Planlayıcı",
+      "destination": "Hedef",
+      "searchPlaceholder": "Adres ara …",
+      "clickMapHint": "Veya hedef belirlemek için haritaya tıklayın.",
+      "waypoints": "Ara Duraklar",
+      "noWaypoints": "Ara durak yok. Arama alanından ekleyin.",
+      "addWaypoint": "Durak ekle …",
+      "stops": "durak",
+      "sendToTesla": "Tesla'ya Gönder",
+      "sendTooltip": "Hedef adresini doğrudan araç navigasyon sistemine gönderir.",
+      "openAbrp": "ABRP'de Planla",
+      "abrpTooltip": "Aktif canlı telemetri ile A Better Route Planner'ı açar.",
+      "saveRoute": "Rotayı Kaydet",
+      "saved": "Kayıtlı Rotalar",
+      "noSaved": "Henüz kayıtlı rota yok.",
+      "load": "Yükle",
+      "loadAndSend": "Yükle ve Gönder",
+      "routeName": "Rota adı",
+      "sentToTesla": "Navigasyon Tesla'ya gönderildi!",
+      "sendError": "Tesla'ya gönderilirken hata oluştu.",
+      "asleep": "Araç uyku modunda — önce uyandırın.",
+      "saveError": "Rota kaydedilirken hata oluştu."
+  }
 }

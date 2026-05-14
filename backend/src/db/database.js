@@ -742,6 +742,19 @@ function runTenantMigrations(db) {
   db.exec('CREATE INDEX IF NOT EXISTS idx_grok_messages_chat  ON grok_messages(chat_id, created_at)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_xai_usage_date      ON xai_usage(date)');
 
+  db.exec(`CREATE TABLE IF NOT EXISTS saved_routes (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    vehicle_id       INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+    name             TEXT NOT NULL,
+    destination_name TEXT NOT NULL,
+    destination_lat  REAL NOT NULL,
+    destination_lon  REAL NOT NULL,
+    waypoints        TEXT NOT NULL DEFAULT '[]',
+    created_at       INTEGER NOT NULL DEFAULT (unixepoch()),
+    updated_at       INTEGER NOT NULL DEFAULT (unixepoch())
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_saved_routes_vehicle ON saved_routes(vehicle_id, created_at DESC)');
+
   // Indexes
   db.exec('CREATE INDEX IF NOT EXISTS idx_trips_vehicle      ON trips(vehicle_id, start_time DESC)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_charging_vehicle   ON charging_sessions(vehicle_id, start_time DESC)');
