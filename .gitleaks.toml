@@ -60,6 +60,13 @@ tags        = ["personal-data", "location"]
 
 [allowlist]
 description = "Doku-Platzhalter und Beispiel-Daten"
+# Falsch-Positive: Deutschland-Mitte-Fallback-Koordinaten im Routenplaner
+# (51.165691, 10.451526) — kein echter GPS-Track, nur Karten-Default.
+# Fingerprints beziehen sich auf den Einführungs-Commit und den Squash-Commit.
+commits = [
+  "e19a0b9dc54f6196bb973524f58c20e4d1dc0934",
+  "88099a3197c14bb2b2b1be34ed3edb2fa323e9c2",
+]
 paths = [
   '''.*\.example$''',
   '''docs/.*''',
