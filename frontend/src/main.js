@@ -7,6 +7,7 @@ import { revealDirective }  from './directives/reveal.js';
 import InfoTip from './components/InfoTip.vue';
 import { i18n } from './plugins/i18n.js';
 import './style.css';
+import 'leaflet/dist/leaflet.css';
 import { useAuthStore }  from './store/auth.js';
 import { useAppStore }   from './store/index.js';
 import { useThemeStore } from './store/theme.js';

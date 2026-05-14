@@ -1568,7 +1568,8 @@
       "sendToTesla": "Envoyer au Tesla",
       "sendTooltip": "Envoie l'adresse de destination directement au système de navigation du véhicule.",
       "openAbrp": "Planifier dans ABRP",
-      "abrpTooltip": "Ouvre A Better Route Planner avec la télémétrie en direct active.",
+      "abrpTooltip": "Ouvre A Better Route Planner avec télémétrie en direct. Peut nécessiter un abonnement.",
+      "abrpFallback": "Alternative externe : ABRP",
       "saveRoute": "Enregistrer l'itinéraire",
       "saved": "Itinéraires enregistrés",
       "noSaved": "Aucun itinéraire enregistré.",
@@ -1578,6 +1579,22 @@
       "sentToTesla": "Navigation envoyée au Tesla !",
       "sendError": "Erreur lors de l'envoi au Tesla.",
       "asleep": "Le véhicule est en veille — réveillez-le d'abord.",
-      "saveError": "Erreur lors de l'enregistrement."
+      "saveError": "Erreur lors de l'enregistrement.",
+      "routeInfo": "Infos itinéraire",
+      "distance": "Distance",
+      "duration": "Durée",
+      "arrivalSoc": "SoC à l'arrivée",
+      "currentSoc": "SoC actuel",
+      "rangeOk": "Autonomie suffisante",
+      "rangeLow": "Arrêt de recharge recommandé (< 20 %)",
+      "rangeInsufficient": "Autonomie insuffisante — arrêt de recharge nécessaire",
+      "noSocData": "Niveau de batterie non disponible",
+      "showChargers": "Afficher les bornes",
+      "hideChargers": "Masquer les bornes",
+      "chargerTooltip": "Affiche les bornes de recharge rapide (DC) le long du trajet — gratuit via OpenChargeMap.",
+      "chargerLegend": "Borne rapide",
+      "noChargers": "Aucune borne de recharge rapide trouvée.",
+      "calculating": "Calcul de l'itinéraire …",
+      "routeError": "Impossible de calculer l'itinéraire."
   }
 }

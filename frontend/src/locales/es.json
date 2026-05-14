@@ -1568,7 +1568,8 @@
       "sendToTesla": "Enviar al Tesla",
       "sendTooltip": "Envía la dirección de destino directamente al sistema de navegación del vehículo.",
       "openAbrp": "Planificar en ABRP",
-      "abrpTooltip": "Abre A Better Route Planner con telemetría en vivo activa.",
+      "abrpTooltip": "Abre A Better Route Planner con telemetría en vivo. Puede requerir suscripción.",
+      "abrpFallback": "Alternativa externa: ABRP",
       "saveRoute": "Guardar ruta",
       "saved": "Rutas guardadas",
       "noSaved": "Aún no hay rutas guardadas.",
@@ -1578,6 +1579,22 @@
       "sentToTesla": "¡Navegación enviada al Tesla!",
       "sendError": "Error al enviar al Tesla.",
       "asleep": "El vehículo está dormido — despiértalo primero.",
-      "saveError": "Error al guardar la ruta."
+      "saveError": "Error al guardar la ruta.",
+      "routeInfo": "Información de ruta",
+      "distance": "Distancia",
+      "duration": "Tiempo de conducción",
+      "arrivalSoc": "SoC a la llegada",
+      "currentSoc": "SoC actual",
+      "rangeOk": "Autonomía suficiente",
+      "rangeLow": "Se recomienda parada de carga (< 20 %)",
+      "rangeInsufficient": "Autonomía insuficiente — se requiere parada de carga",
+      "noSocData": "Nivel de batería no disponible",
+      "showChargers": "Mostrar cargadores",
+      "hideChargers": "Ocultar cargadores",
+      "chargerTooltip": "Muestra cargadores rápidos (DC) a lo largo de la ruta — gratis vía OpenChargeMap.",
+      "chargerLegend": "Cargador rápido",
+      "noChargers": "No se encontraron cargadores rápidos.",
+      "calculating": "Calculando ruta …",
+      "routeError": "No se pudo calcular la ruta."
   }
 }

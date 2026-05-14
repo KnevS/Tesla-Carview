@@ -1568,7 +1568,8 @@
       "sendToTesla": "Tesla'ya Gönder",
       "sendTooltip": "Hedef adresini doğrudan araç navigasyon sistemine gönderir.",
       "openAbrp": "ABRP'de Planla",
-      "abrpTooltip": "Aktif canlı telemetri ile A Better Route Planner'ı açar.",
+      "abrpTooltip": "Canlı telemetri ile A Better Route Planner'ı açar. Abonelik gerektirebilir.",
+      "abrpFallback": "Harici alternatif: ABRP",
       "saveRoute": "Rotayı Kaydet",
       "saved": "Kayıtlı Rotalar",
       "noSaved": "Henüz kayıtlı rota yok.",
@@ -1578,6 +1579,22 @@
       "sentToTesla": "Navigasyon Tesla'ya gönderildi!",
       "sendError": "Tesla'ya gönderilirken hata oluştu.",
       "asleep": "Araç uyku modunda — önce uyandırın.",
-      "saveError": "Rota kaydedilirken hata oluştu."
+      "saveError": "Rota kaydedilirken hata oluştu.",
+      "routeInfo": "Rota Bilgisi",
+      "distance": "Mesafe",
+      "duration": "Sürüş süresi",
+      "arrivalSoc": "Varış SoC",
+      "currentSoc": "Mevcut SoC",
+      "rangeOk": "Menzil yeterli",
+      "rangeLow": "Şarj durağı önerilir (< %20)",
+      "rangeInsufficient": "Menzil yetersiz — şarj durağı gerekli",
+      "noSocData": "Batarya düzeyi mevcut değil",
+      "showChargers": "Şarj istasyonlarını göster",
+      "hideChargers": "Şarj istasyonlarını gizle",
+      "chargerTooltip": "Rota boyunca hızlı şarj istasyonlarını (DC) gösterir — OpenChargeMap üzerinden ücretsiz.",
+      "chargerLegend": "Hızlı şarj istasyonu",
+      "noChargers": "Hızlı şarj istasyonu bulunamadı.",
+      "calculating": "Rota hesaplanıyor …",
+      "routeError": "Rota hesaplanamadı."
   }
 }

@@ -1568,7 +1568,8 @@
       "sendToTesla": "An Tesla senden",
       "sendTooltip": "Sendet die Zieladresse direkt ans Fahrzeug-Navigationssystem.",
       "openAbrp": "In ABRP planen",
-      "abrpTooltip": "Öffnet A Better Route Planner mit aktiver Live-Telemetrie. Optimale Ladestopps werden automatisch berechnet.",
+      "abrpTooltip": "Öffnet A Better Route Planner mit aktiver Live-Telemetrie. Kann ein Abo erfordern.",
+      "abrpFallback": "Externe Alternative: ABRP",
       "saveRoute": "Route speichern",
       "saved": "Gespeicherte Routen",
       "noSaved": "Noch keine gespeicherten Routen.",
@@ -1578,6 +1579,22 @@
       "sentToTesla": "Navigation an Tesla gesendet!",
       "sendError": "Fehler beim Senden an Tesla.",
       "asleep": "Fahrzeug schläft – bitte zuerst aufwecken.",
-      "saveError": "Fehler beim Speichern."
+      "saveError": "Fehler beim Speichern.",
+      "routeInfo": "Routeninfo",
+      "distance": "Strecke",
+      "duration": "Fahrzeit",
+      "arrivalSoc": "Ankunft SoC",
+      "currentSoc": "Aktueller SoC",
+      "rangeOk": "Reichweite ausreichend",
+      "rangeLow": "Ladestopp empfohlen (< 20 %)",
+      "rangeInsufficient": "Reichweite nicht ausreichend – Ladestopp notwendig",
+      "noSocData": "Kein Akku-Stand verfügbar",
+      "showChargers": "Ladestationen anzeigen",
+      "hideChargers": "Ladestationen ausblenden",
+      "chargerTooltip": "Zeigt Schnellladestationen (DC) entlang der Route – kostenlos über OpenChargeMap.",
+      "chargerLegend": "Schnellladestation",
+      "noChargers": "Keine Schnellladestationen gefunden.",
+      "calculating": "Route wird berechnet …",
+      "routeError": "Route konnte nicht berechnet werden."
   }
 }

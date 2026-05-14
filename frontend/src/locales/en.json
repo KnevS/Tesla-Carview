@@ -1568,7 +1568,8 @@
       "sendToTesla": "Send to Tesla",
       "sendTooltip": "Sends the destination address directly to the vehicle navigation system.",
       "openAbrp": "Plan in ABRP",
-      "abrpTooltip": "Opens A Better Route Planner with active live telemetry. Optimal charging stops are calculated automatically.",
+      "abrpTooltip": "Opens A Better Route Planner with live telemetry. May require a subscription.",
+      "abrpFallback": "External alternative: ABRP",
       "saveRoute": "Save Route",
       "saved": "Saved Routes",
       "noSaved": "No saved routes yet.",
@@ -1578,6 +1579,22 @@
       "sentToTesla": "Navigation sent to Tesla!",
       "sendError": "Error sending to Tesla.",
       "asleep": "Vehicle is asleep — please wake it up first.",
-      "saveError": "Error saving route."
+      "saveError": "Error saving route.",
+      "routeInfo": "Route Info",
+      "distance": "Distance",
+      "duration": "Drive time",
+      "arrivalSoc": "Arrival SoC",
+      "currentSoc": "Current SoC",
+      "rangeOk": "Range sufficient",
+      "rangeLow": "Charging stop recommended (< 20 %)",
+      "rangeInsufficient": "Range insufficient — charging stop required",
+      "noSocData": "No battery level available",
+      "showChargers": "Show charging stations",
+      "hideChargers": "Hide charging stations",
+      "chargerTooltip": "Shows fast-charging stations (DC) along the route — free via OpenChargeMap.",
+      "chargerLegend": "Fast charging station",
+      "noChargers": "No fast-charging stations found.",
+      "calculating": "Calculating route …",
+      "routeError": "Could not calculate route."
   }
 }
