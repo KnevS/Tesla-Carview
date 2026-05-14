@@ -20,7 +20,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
 import L from 'leaflet';
@@ -74,12 +74,15 @@ function render() {
   if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20], maxZoom: 13 });
 }
 
-onMounted(() => {
+onMounted(async () => {
   map = L.map(mapEl.value).setView([51.16, 10.45], 5); // Default: D-Mitte
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© OpenStreetMap contributors',
     maxZoom: 18,
   }).addTo(map);
+  await nextTick();
+  map.invalidateSize();
+  setTimeout(() => map?.invalidateSize(), 250);
   load();
 });
 

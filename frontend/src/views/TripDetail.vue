@@ -325,7 +325,9 @@ async function initMap(points) {
     fillOpacity: 0.9, weight: 3,
   }).addTo(leafletMap);
 
+  leafletMap.invalidateSize();
   leafletMap.fitBounds(L.latLngBounds(latlngs), { padding: [20, 20] });
+  setTimeout(() => leafletMap?.invalidateSize(), 250);
 }
 
 async function assignDriver(driver) {

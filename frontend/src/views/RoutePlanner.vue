@@ -365,6 +365,10 @@ async function initMap() {
     maxZoom: 19,
   }).addTo(leafletMap);
 
+  await nextTick();
+  leafletMap.invalidateSize();
+  setTimeout(() => leafletMap?.invalidateSize(), 250);
+
   leafletMap.on('click', async (e) => {
     const { lat, lng } = e.latlng;
     try {
