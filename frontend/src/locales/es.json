@@ -632,6 +632,8 @@
     "heading": "Rumbo"
   },
   "settings": {
+    "manualLink": "Abrir manual oficial",
+    "manualTooltip": "Abre el manual del propietario Tesla para este modelo en tu idioma (tesla.com)",
     "title": "Ajustes",
     "vehicleProfile": "🚗 Perfil del vehículo",
     "noVehicle": "Ningún vehículo conectado.",

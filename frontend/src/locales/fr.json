@@ -632,6 +632,8 @@
     "heading": "Cap"
   },
   "settings": {
+    "manualLink": "Ouvrir le manuel officiel",
+    "manualTooltip": "Ouvre le manuel du propriétaire Tesla pour ce modèle dans votre langue (tesla.com)",
     "title": "Paramètres",
     "vehicleProfile": "🚗 Profil du véhicule",
     "noVehicle": "Aucun véhicule connecté.",

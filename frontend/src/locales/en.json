@@ -632,6 +632,8 @@
     "heading": "Heading"
   },
   "settings": {
+    "manualLink": "Open official manual",
+    "manualTooltip": "Opens Tesla's owner's manual for this model in your language (tesla.com)",
     "title": "Settings",
     "vehicleProfile": "🚗 Vehicle profile",
     "noVehicle": "No vehicle connected.",

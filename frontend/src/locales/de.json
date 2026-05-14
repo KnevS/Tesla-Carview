@@ -633,6 +633,8 @@
   },
   "settings": {
     "title": "Einstellungen",
+    "manualLink": "Offizielles Handbuch öffnen",
+    "manualTooltip": "Öffnet das Tesla-Fahrerhandbuch für dieses Modell in deiner Sprache (tesla.com)",
     "vehicleProfile": "🚗 Fahrzeugprofil",
     "noVehicle": "Kein Fahrzeug verbunden.",
     "category": "Fahrzeugkategorie",
