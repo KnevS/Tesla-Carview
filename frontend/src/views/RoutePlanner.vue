@@ -14,7 +14,7 @@
     <div v-else class="grid lg:grid-cols-[400px_1fr] gap-4 items-start">
 
       <!-- ─── Linke Spalte ─────────────────────────────────────────────────── -->
-      <div class="space-y-2">
+      <div class="space-y-2 overflow-y-auto sticky top-4 pr-1" style="max-height:calc(100vh - 2rem)">
         <template v-for="sid in orderedSections" :key="sid">
 
         <!-- Startort -->
@@ -233,6 +233,41 @@
             </button>
           </template>
           <div class="space-y-3">
+
+          <!-- SoC-Konfiguration -->
+          <div class="bg-gray-800/50 rounded-xl p-3 space-y-2.5 mb-1">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-xs text-gray-400 block mb-1">🔋 {{ $t('routes.departureSocLabel') }}</label>
+                <div v-if="!isScheduledDeparture && routeStats.soc != null"
+                  class="flex items-center gap-2 bg-gray-700 rounded-lg px-2.5 py-2">
+                  <span class="text-green-400 font-bold">{{ routeStats.soc }}%</span>
+                  <span class="text-xs text-gray-500 ml-auto">● live</span>
+                </div>
+                <div v-else class="flex items-center gap-1.5">
+                  <input v-model.number="departureSocManual" type="number" min="5" max="100" step="5"
+                    :placeholder="String(routeStats.soc ?? 80)"
+                    class="input flex-1 text-sm text-center" />
+                  <span class="text-xs text-gray-400">%</span>
+                </div>
+                <p v-if="isScheduledDeparture" class="text-xs text-gray-600 mt-0.5">{{ $t('routes.departureSocHint') }}</p>
+              </div>
+              <div>
+                <label class="text-xs text-gray-400 block mb-1">🏁 {{ $t('routes.minArrivalSocLabel') }}</label>
+                <div class="flex items-center gap-1.5">
+                  <input v-model.number="minArrivalSoc" type="number" min="5" max="80" step="5"
+                    class="input flex-1 text-sm text-center" />
+                  <span class="text-xs text-gray-400">%</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs text-gray-500 border-t border-gray-700 pt-2">
+              <span>{{ $t('routes.chargeToLabel') }}</span>
+              <input v-model.number="chargeToSoc" type="number" min="50" max="100" step="5"
+                class="input w-16 text-sm text-center py-1" />
+              <span>%</span>
+            </div>
+          </div>
 
           <!-- Plan noch nicht berechnet -->
           <p v-if="!chargingPlan && !planLoading" class="text-xs text-gray-500">
@@ -574,7 +609,7 @@ const appStore = useAppStore();
 const vehicle  = computed(() => appStore.selectedVehicle);
 
 // ── Layout ──
-const ROUTE_SECTIONS = ['start', 'destination', 'waypoints', 'timing', 'routeinfo', 'charging', 'weather', 'actions', 'saved'];
+const ROUTE_SECTIONS = ['start', 'destination', 'timing', 'charging', 'routeinfo', 'waypoints', 'weather', 'actions', 'saved'];
 const { orderedSections, isCollapsed, toggle, moveSection } = usePageLayout('routePlanner', ROUTE_SECTIONS);
 
 // ── Leaflet ──
@@ -614,8 +649,11 @@ const routeLoading = ref(false);
 const routeStats   = ref({ soc: null, rated_range_km: null, avg_kwh_per_100km: null });
 
 // ── Ladeplan ──
-const chargingPlan = ref(null);
-const planLoading  = ref(false);
+const chargingPlan       = ref(null);
+const planLoading        = ref(false);
+const departureSocManual = ref(null);
+const minArrivalSoc      = ref(20);
+const chargeToSoc        = ref(80);
 
 // ── Ladestationen (Karten-Layer) ──
 const chargers      = ref([]);
@@ -682,6 +720,10 @@ function setDepartNow() {
 // ── Gesamte Ladezeit in Minuten ──
 const totalChargeMins = computed(() =>
   (chargingPlan.value?.stops ?? []).reduce((s, st) => s + st.charge_minutes, 0)
+);
+const isScheduledDeparture  = computed(() => !!(planDate.value && planTime.value));
+const effectiveDepartureSoc = computed(() =>
+  departureSocManual.value !== null ? departureSocManual.value : (routeStats.value.soc ?? null)
 );
 
 // ── Timing-Ergebnis (Ankunft oder benötigte Abfahrt) ──
@@ -1050,9 +1092,11 @@ async function calcChargingPlan() {
     const { data } = await api.post('/routing/plan', {
       vehicleId:        vehicle.value.id,
       coordinates:      routeData.value.coordinates,
-      current_soc:      soc ?? undefined,
+      current_soc:       (departureSocManual.value !== null ? departureSocManual.value : soc) ?? undefined,
       avg_kwh_per_100km: avg_kwh_per_100km ?? undefined,
-      battery_kwh:      batKwh ?? undefined,
+      battery_kwh:       batKwh ?? undefined,
+      min_arrival_soc:   minArrivalSoc.value,
+      charge_to_soc:     chargeToSoc.value,
     });
     chargingPlan.value = data;
     if (L && leafletMap) updatePlanMarkers();

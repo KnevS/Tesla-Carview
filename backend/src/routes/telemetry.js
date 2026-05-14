@@ -8,6 +8,19 @@ router.get('/:vehicleId/live', async (req, res) => {
   const vehicle = db.prepare('SELECT * FROM vehicles WHERE id = ?').get(req.params.vehicleId);
   if (!vehicle) return res.status(404).json({ error: 'Fahrzeug nicht gefunden' });
 
+  if (vehicle.vin?.startsWith('DEMO')) {
+    const soc = Math.max(30, Math.min(90, 72 + Math.round(Math.random() * 6 - 3)));
+    return res.json({
+      state: 'online',
+      drive:   { speed_kph: 0, power_kw: 0, heading: 182, lat: 48.7758, lon: 9.1829, gear: 'P' },
+      charge:  { level_pct: soc, range_km: Math.round(soc/100*420), charging_state: 'Disconnected', charge_rate_kph: null, charger_power_kw: null, time_to_full_charge_h: null, charge_limit_pct: 80 },
+      climate: { inside_temp_c: 21.5, outside_temp_c: 17.0, driver_temp_setting: 21.0, is_climate_on: false, fan_status: 0, is_front_defroster_on: false, is_rear_defroster_on: false },
+      vehicle: { odometer_km: 14832 + Math.round(Math.random()*20), locked: true, sentry_mode: false, software_version: '2024.44.25 a1b2c3d', tpms: { fl: 2.90, fr: 2.91, rl: 2.86, rr: 2.87 } },
+      ts: Math.floor(Date.now() / 1000),
+      _demo: true,
+    });
+  }
+
   try {
     const data = await getVehicleData(db, vehicle.tesla_id);
     const resp = data.response ?? data;

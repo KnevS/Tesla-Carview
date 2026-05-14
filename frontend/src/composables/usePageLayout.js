@@ -11,7 +11,7 @@ export function usePageLayout(pageId, defaultSections) {
   const layoutData = computed(() => {
     const stored = prefs.data.layout?.[pageId];
     if (!stored) {
-      return { order: [...defaultSections], collapsed: [...defaultSections] };
+      return { order: [...defaultSections], collapsed: [] };
     }
     // Neue Sektionen, die nach dem Speichern hinzugekommen sind, ans Ende hängen
     const extra = defaultSections.filter(id => !stored.order.includes(id));

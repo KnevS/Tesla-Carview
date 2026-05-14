@@ -150,6 +150,23 @@ export function seedNewDemoUser(db, userId, username) {
     );
   }
 
+  const vin2 = 'DEMO' + randomBytes(7).toString('hex').slice(0, 13).toUpperCase();
+  const r2 = db.prepare("INSERT INTO vehicles (tesla_id, vin, display_name, model, color, license_plate, image_color, category, electricity_rate_kwh, company_name, state_updated_at) VALUES (?, ?, ?, 'm3', 'black', 'S-TC 2024', 'PMNG', 'company', 0.00, 'indasys GmbH', ?)").run('demo-' + randomBytes(4).toString('hex'), vin2, 'Dienstwagen', now);
+  const vehicleId2 = r2.lastInsertRowid;
+  db.prepare('INSERT INTO vehicle_users (vehicle_id, user_id) VALUES (?, ?)').run(vehicleId2, userId);
+  db.prepare("INSERT INTO charging_locations (vehicle_id, name, address, type, rate_kwh, is_default, lat, lon, radius_m) VALUES (?, 'Buero', 'Buerostrasse 1, Stuttgart', 'work', 0.00, 1, ?, ?, 200)").run(vehicleId2, 48.7774, 9.1800);
+
+  // Seed initial business trips for company vehicle
+  const bizTemplates = [{from:"Buerostr. 1, Stuttgart",to:"Bosch Gerlingen",km:18.2,lat1:48.7774,lon1:9.18,lat2:48.799,lon2:9.036},{from:"Buerostr. 1, Stuttgart",to:"Messe Stuttgart",km:14.8,lat1:48.7774,lon1:9.18,lat2:48.6978,lon2:9.2154},{from:"Buerostr. 1, Stuttgart",to:"Flughafen STR",km:13.5,lat1:48.7774,lon1:9.18,lat2:48.69,lon2:9.22}];
+  let bizSoc = 80, bizOdo = 8400;
+  for (let d = 14; d >= 0; d--) {
+    const tp = bizTemplates[d % bizTemplates.length], km = Math.round(tp.km * (0.9 + Math.random()*0.2) * 10)/10;
+    const dur = Math.max(300, Math.round(km/55*3600)), ts0 = startTs + (21-d)*86400 + 8*3600;
+    const used = km/100*14.5, usedSoc = Math.max(1,Math.round(used/75*100)), endSoc = Math.max(10, bizSoc - usedSoc);
+    tripStmt.run(vehicleId2, ts0, ts0+dur, tp.lat1, tp.lon1, tp.lat2, tp.lon2, tp.from, tp.to, km, Math.round(used*10)/10, bizSoc, endSoc, bizOdo, bizOdo+km, "business", "Kundentermin");
+    bizOdo += km; bizSoc = endSoc < 30 ? 85 : endSoc;
+  }
+
   return { vehicleId, vin };
 }
 
