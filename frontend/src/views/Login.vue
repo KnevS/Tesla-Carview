@@ -26,9 +26,9 @@
                welche Firmen / Personen den Self-Hoster nutzen. -->
           <div v-if="showTenantField">
             <label class="block text-sm text-gray-400 mb-1">{{ $t('auth.tenant') }}</label>
-            <select v-if="tenants.length > 0" v-model="form.tenantSlug" class="input">
+            <select v-if="realTenants.length > 0" v-model="form.tenantSlug" class="input">
               <option value="">{{ $t('auth.tenantPlaceholder') }}</option>
-              <option v-for="t in tenants" :key="t.slug" :value="t.slug">{{ t.pseudonym || t.slug }}</option>
+              <option v-for="t in realTenants" :key="t.slug" :value="t.slug">{{ t.pseudonym || t.slug }}</option>
             </select>
             <input v-else v-model="form.tenantSlug" type="text" class="input" placeholder="brave-eagle"
               autocomplete="organization" />
@@ -202,7 +202,8 @@ const qrExpiresIn = computed(() => {
 // lebt jetzt unter /demo.
 const demoStatus = ref({ enabled: false });
 
-const showTenantField = computed(() => tenants.value.length > 1);
+const realTenants = computed(() => tenants.value.filter(t => !t.is_demo));
+const showTenantField = computed(() => realTenants.value.length > 1);
 
 onMounted(async () => {
   await auth.loadTenants();
