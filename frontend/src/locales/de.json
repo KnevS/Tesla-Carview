@@ -185,7 +185,9 @@
     "wltpDelta": "({sign}{value} % vs. WLTP)",
     "typePrivate": "Privat",
     "typeBusiness": "Dienstfahrt",
-    "typeCommute": "Arbeitsweg"
+    "typeCommute": "Arbeitsweg",
+    "sectionStats": "Statistiken",
+    "sectionList": "Fahrtenliste"
   },
   "webhooks": {
     "intro": "Sende App-Events (Fahrtende, Ladeschluss, Service faellig) an deine eigenen HTTP-Endpunkte. Jeder POST wird HMAC-SHA256 signiert; verifiziere den {signatureHeader}-Header gegen das beim Anlegen einmalig angezeigte Secret.",
@@ -595,7 +597,9 @@
     "location": "Ort",
     "status": "Status",
     "template": "Abrechnungsvorlage",
-    "templateTitle": "Erstattungsantrag Ladekosten Dienstwagen"
+    "templateTitle": "Erstattungsantrag Ladekosten Dienstwagen",
+    "sectionIntervals": "Wartungsintervalle",
+    "sectionEntries": "Einträge"
   },
   "telemetry": {
     "title": "Fahrzeugtechnik",
@@ -941,6 +945,7 @@
     "title": "Benutzerverwaltung",
     "add": "+ Benutzer anlegen",
     "loading": "Lade Benutzer…",
+    "sectionTasks": "Offene Aufgaben",
     "locked": "gesperrt",
     "assignVehicle": "Fahrzeug zuweisen",
     "resetLink": "Reset-Link",

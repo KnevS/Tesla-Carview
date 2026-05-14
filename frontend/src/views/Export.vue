@@ -1,52 +1,48 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-4">
     <h1 class="text-2xl font-bold">Daten exportieren</h1>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="card space-y-4">
-        <h2 class="text-lg font-semibold flex items-center gap-2">
-          <AppIcon name="map" :size="20" class="text-tesla-red" />
-          Fahrten
-        </h2>
-        <p class="text-gray-400 text-sm">Alle Fahrtdaten mit Strecke, Verbrauch und SoC.</p>
-        <div class="flex gap-3">
-          <button @click="download('trips.csv', 'fahrten.csv', 'text/csv')" :disabled="downloading['trips.csv']"
-            class="btn-primary flex-1"
-            v-tooltip="'CSV-Format mit BOM – öffnet sich direkt in Excel und LibreOffice Calc. Trennzeichen ist Semikolon.'">
-            {{ downloading['trips.csv'] ? 'Lädt…' : 'CSV' }}
-          </button>
-          <button @click="download('trips.json', 'fahrten.json', 'application/json')" :disabled="downloading['trips.json']"
-            class="btn-secondary flex-1"
-            v-tooltip="'JSON-Format inklusive aller GPS-Punkte je Fahrt. Ideal für eigene Auswertungen, Skripte oder Datenmigration.'">
-            {{ downloading['trips.json'] ? 'Lädt…' : 'JSON' }}
-          </button>
+    <template v-for="sid in layoutOrder" :key="sid">
+
+    <SortableSection v-if="sid === 'exports'" page-id="export" section-id="exports"
+      title="Daten-Export" icon="📥"
+      :collapsed="isCollapsed('exports')" @toggle="toggle('exports')" @move="(f,t,p) => moveSection(f,t,p)">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="space-y-3">
+          <p class="font-medium flex items-center gap-2"><AppIcon name="map" :size="16" class="text-tesla-red" /> Fahrten</p>
+          <p class="text-gray-400 text-sm">Alle Fahrtdaten mit Strecke, Verbrauch und SoC.</p>
+          <div class="flex gap-3">
+            <button @click="download('trips.csv', 'fahrten.csv', 'text/csv')" :disabled="downloading['trips.csv']"
+              class="btn-primary flex-1"
+              v-tooltip="'CSV-Format mit BOM – öffnet sich direkt in Excel und LibreOffice Calc. Trennzeichen ist Semikolon.'">
+              {{ downloading['trips.csv'] ? 'Lädt…' : 'CSV' }}
+            </button>
+            <button @click="download('trips.json', 'fahrten.json', 'application/json')" :disabled="downloading['trips.json']"
+              class="btn-secondary flex-1"
+              v-tooltip="'JSON-Format inklusive aller GPS-Punkte je Fahrt. Ideal für eigene Auswertungen, Skripte oder Datenmigration.'">
+              {{ downloading['trips.json'] ? 'Lädt…' : 'JSON' }}
+            </button>
+          </div>
+        </div>
+        <div class="space-y-3">
+          <p class="font-medium flex items-center gap-2"><AppIcon name="battery" :size="16" class="text-tesla-red" /> Ladevorgänge</p>
+          <p class="text-gray-400 text-sm">Alle Ladesessions mit Energie, Kosten und Ladertyp.</p>
+          <div class="flex gap-3">
+            <button @click="download('charging.csv', 'ladevorgaenge.csv', 'text/csv')" :disabled="downloading['charging.csv']"
+              class="btn-primary flex-1"
+              v-tooltip="'CSV-Datei mit allen Ladesessions – Energie, Kosten, Ladertyp, SoC-Bereich. Excel-kompatibel.'">
+              {{ downloading['charging.csv'] ? 'Lädt…' : 'CSV' }}
+            </button>
+          </div>
         </div>
       </div>
+    </SortableSection>
 
-      <div class="card space-y-4">
-        <h2 class="text-lg font-semibold flex items-center gap-2">
-          <AppIcon name="battery" :size="20" class="text-tesla-red" />
-          Ladevorgänge
-        </h2>
-        <p class="text-gray-400 text-sm">Alle Ladesessions mit Energie, Kosten und Ladertyp.</p>
-        <div class="flex gap-3">
-          <button @click="download('charging.csv', 'ladevorgaenge.csv', 'text/csv')" :disabled="downloading['charging.csv']"
-            class="btn-primary flex-1"
-            v-tooltip="'CSV-Datei mit allen Ladesessions – Energie, Kosten, Ladertyp, SoC-Bereich. Excel-kompatibel.'">
-            {{ downloading['charging.csv'] ? 'Lädt…' : 'CSV' }}
-          </button>
-        </div>
-      </div>
-
-      <div class="card space-y-4 md:col-span-2">
-        <h2 class="text-lg font-semibold flex items-center gap-2">
-          <AppIcon name="database" :size="20" class="text-tesla-red" />
-          Vollständiges Backup
-        </h2>
-        <p class="text-gray-400 text-sm">
-          Alle Daten (Fahrten, Laden, Batterie, Betriebsbuch) als eine JSON-Datei.
-          Kann für Backups oder den Umzug auf einen anderen Server genutzt werden.
-        </p>
+    <SortableSection v-if="sid === 'backup'" page-id="export" section-id="backup"
+      title="Vollständiges Backup" icon="🗄️"
+      :collapsed="isCollapsed('backup')" @toggle="toggle('backup')" @move="(f,t,p) => moveSection(f,t,p)">
+      <div class="space-y-3">
+        <p class="text-gray-400 text-sm">Alle Daten (Fahrten, Laden, Batterie, Betriebsbuch) als eine JSON-Datei. Nutzbar für Backups oder Server-Umzug.</p>
         <button @click="download('backup.json', `tesla-carview-backup-${today}.json`, 'application/json')"
           :disabled="downloading['backup.json']"
           class="btn-primary inline-flex items-center gap-1.5"
@@ -55,29 +51,29 @@
           {{ downloading['backup.json'] ? 'Wird erstellt…' : 'Backup herunterladen' }}
         </button>
       </div>
-    </div>
+    </SortableSection>
 
-    <div class="card space-y-4">
-      <h2 class="text-lg font-semibold flex items-center gap-2">
-        <AppIcon name="alert" :size="20" class="text-tesla-red" />
-        Benachrichtigungen
-      </h2>
-      <p class="text-gray-400 text-sm">
-        Erhalte eine Browser-Benachrichtigung wenn dein Tesla fertig geladen hat.
-      </p>
-      <div v-if="notifSupported">
-        <button v-if="!subscribed" @click="subscribe" class="btn-primary"
-          v-tooltip="'Aktiviert Web-Push-Benachrichtigungen. Funktioniert auch wenn der Browser geschlossen ist (auf unterstützten Systemen). Browser fragt nach Erlaubnis.'">
-          Benachrichtigungen aktivieren
-        </button>
-        <div v-else class="flex items-center gap-3">
-          <span class="text-green-400">✓ Benachrichtigungen aktiv</span>
-          <button @click="unsubscribe" class="btn-secondary text-sm"
-            v-tooltip="'Push-Benachrichtigungen für dieses Fahrzeug abmelden'">Deaktivieren</button>
+    <SortableSection v-if="sid === 'notifications'" page-id="export" section-id="notifications"
+      title="Push-Benachrichtigungen" icon="🔔"
+      :collapsed="isCollapsed('notifications')" @toggle="toggle('notifications')" @move="(f,t,p) => moveSection(f,t,p)">
+      <div class="space-y-3">
+        <p class="text-gray-400 text-sm">Erhalte eine Browser-Benachrichtigung wenn dein Tesla fertig geladen hat.</p>
+        <div v-if="notifSupported">
+          <button v-if="!subscribed" @click="subscribe" class="btn-primary"
+            v-tooltip="'Aktiviert Web-Push-Benachrichtigungen. Funktioniert auch wenn der Browser geschlossen ist (auf unterstützten Systemen). Browser fragt nach Erlaubnis.'">
+            Benachrichtigungen aktivieren
+          </button>
+          <div v-else class="flex items-center gap-3">
+            <span class="text-green-400">✓ Benachrichtigungen aktiv</span>
+            <button @click="unsubscribe" class="btn-secondary text-sm"
+              v-tooltip="'Push-Benachrichtigungen für dieses Fahrzeug abmelden'">Deaktivieren</button>
+          </div>
         </div>
+        <p v-else class="text-gray-500 text-sm">Dein Browser unterstützt keine Web-Push-Benachrichtigungen.</p>
       </div>
-      <p v-else class="text-gray-500 text-sm">Dein Browser unterstützt keine Web-Push-Benachrichtigungen.</p>
-    </div>
+    </SortableSection>
+
+    </template><!-- end v-for layoutOrder -->
   </div>
 </template>
 
@@ -86,8 +82,14 @@ import { ref, onMounted, reactive } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
 import AppIcon from '../components/AppIcon.vue';
+import SortableSection from '../components/SortableSection.vue';
+import { usePageLayout } from '../composables/usePageLayout.js';
 
 const appStore = useAppStore();
+
+const EXPORT_SECTIONS = ['exports', 'backup', 'notifications'];
+const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('export', EXPORT_SECTIONS);
+
 const subscribed = ref(false);
 const vapidKey = ref(null);
 const notifSupported = 'serviceWorker' in navigator && 'PushManager' in window;

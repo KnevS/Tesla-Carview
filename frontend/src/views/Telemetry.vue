@@ -203,9 +203,14 @@ import { ref, computed, onMounted, onUnmounted, watch, nextTick, h, resolveDirec
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
 import AppIcon from '../components/AppIcon.vue';
+import SortableSection from '../components/SortableSection.vue';
+import { usePageLayout } from '../composables/usePageLayout.js';
 
 const appStore = useAppStore();
 const vehicle  = computed(() => appStore.selectedVehicle);
+
+const TELEMETRY_SECTIONS = ['hero', 'map', 'power', 'tpms', 'climate', 'charging', 'vehicle'];
+const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('telemetry', TELEMETRY_SECTIONS);
 
 // Inline sub-components
 const TireBadge = {

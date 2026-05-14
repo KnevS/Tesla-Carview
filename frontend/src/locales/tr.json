@@ -185,7 +185,9 @@
     "wltpDelta": "({sign}%{value} vs. WLTP)",
     "typePrivate": "Özel",
     "typeBusiness": "İş",
-    "typeCommute": "İşe gidiş"
+    "typeCommute": "İşe gidiş",
+    "sectionStats": "İstatistikler",
+    "sectionList": "Seyahat Listesi"
   },
   "webhooks": {
     "intro": "Uygulama olaylarını (yolculuk sonu, şarj sonu, servis zamanı) kendi HTTP uç noktalarına gönder. Her POST HMAC-SHA256 ile imzalanır; {signatureHeader} başlığını oluşturma anında bir kez gösterilen sırla doğrula.",
@@ -595,7 +597,9 @@
     "location": "Konum",
     "status": "Durum",
     "template": "Fatura şablonu",
-    "templateTitle": "Ev şarjı geri ödeme talebi"
+    "templateTitle": "Ev şarjı geri ödeme talebi",
+    "sectionIntervals": "Bakım Aralıkları",
+    "sectionEntries": "Kayıtlar"
   },
   "telemetry": {
     "title": "Araç tekniği",
@@ -941,6 +945,7 @@
     "title": "Kullanıcı yönetimi",
     "add": "+ Kullanıcı oluştur",
     "loading": "Kullanıcılar yükleniyor…",
+    "sectionTasks": "Bekleyen Görevler",
     "locked": "kilitli",
     "assignVehicle": "Araç ata",
     "resetLink": "Sıfırlama bağlantısı",

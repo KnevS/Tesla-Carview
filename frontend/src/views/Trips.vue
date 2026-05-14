@@ -19,17 +19,26 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <StatCard :label="$t('trips.totalKm')"        :value="fmt(stats.total_km, 0) + ' km'"          icon="map"      :tooltip="$t('trips.totalKmTooltip')" />
-      <StatCard :label="$t('trips.avgConsumption')" :value="fmt(stats.avg_consumption, 1) + ' kWh/100km'" icon="pulse" :tooltip="$t('trips.avgConsumptionTooltip')" />
-      <StatCard :label="$t('trips.privateKm')"      :value="fmt(stats.private_km, 0) + ' km'"         icon="home"     :tooltip="$t('trips.privateKmTooltip')" />
-      <StatCard :label="$t('trips.businessKm')"     :value="fmt(stats.business_km + stats.commute_km, 0) + ' km'" icon="wallet" :tooltip="$t('trips.businessKmTooltip')" />
-    </div>
+    <template v-for="sid in layoutOrder" :key="sid">
 
-    <div class="space-y-2">
-      <div v-if="loading" class="text-gray-400">{{ $t('trips.loading') }}</div>
+    <SortableSection v-if="sid === 'stats'" page-id="trips" section-id="stats"
+      :title="$t('trips.sectionStats')" icon="📊"
+      :collapsed="isCollapsed('stats')" @toggle="toggle('stats')" @move="(f,t,p) => moveSection(f,t,p)">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard :label="$t('trips.totalKm')"        :value="fmt(stats.total_km, 0) + ' km'"          icon="map"      :tooltip="$t('trips.totalKmTooltip')" />
+        <StatCard :label="$t('trips.avgConsumption')" :value="fmt(stats.avg_consumption, 1) + ' kWh/100km'" icon="pulse" :tooltip="$t('trips.avgConsumptionTooltip')" />
+        <StatCard :label="$t('trips.privateKm')"      :value="fmt(stats.private_km, 0) + ' km'"         icon="home"     :tooltip="$t('trips.privateKmTooltip')" />
+        <StatCard :label="$t('trips.businessKm')"     :value="fmt(stats.business_km + stats.commute_km, 0) + ' km'" icon="wallet" :tooltip="$t('trips.businessKmTooltip')" />
+      </div>
+    </SortableSection>
 
-      <div v-for="trip in trips" :key="trip.id" class="card hover:bg-gray-600 transition">
+    <SortableSection v-if="sid === 'list'" page-id="trips" section-id="list"
+      :title="$t('trips.sectionList')" icon="🗺️"
+      :collapsed="isCollapsed('list')" @toggle="toggle('list')" @move="(f,t,p) => moveSection(f,t,p)">
+      <div class="space-y-2">
+        <div v-if="loading" class="text-gray-400">{{ $t('trips.loading') }}</div>
+
+        <div v-for="trip in trips" :key="trip.id" class="card hover:bg-gray-600 transition">
         <div class="flex items-start gap-3">
           <!-- Linke Spalte: Typ + Fahrer -->
           <div class="flex flex-col gap-1.5 flex-shrink-0 w-24">
@@ -103,9 +112,12 @@
       </div>
     </div>
 
-    <button v-if="trips.length >= limit" @click="loadMore" class="btn-secondary w-full">
-      {{ $t('trips.loadMore') }}
-    </button>
+      <button v-if="trips.length >= limit" @click="loadMore" class="btn-secondary w-full mt-4">
+        {{ $t('trips.loadMore') }}
+      </button>
+    </SortableSection>
+
+    </template><!-- end v-for layoutOrder -->
 
     <!-- Fahrer-Auswahl-Menue — global einmalig, an body gerendert.
          Vorteil: keine Eltern-Klasse (backdrop-filter auf .card, overflow,
@@ -139,11 +151,16 @@ import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
 import StatCard from '../components/StatCard.vue';
 import SortToggle from '../components/SortToggle.vue';
+import SortableSection from '../components/SortableSection.vue';
 import { useSortDirection } from '../composables/useSortDirection.js';
+import { usePageLayout } from '../composables/usePageLayout.js';
 import api from '../api.js';
 
 const { t, locale } = useI18n();
 const appStore    = useAppStore();
+
+const TRIPS_SECTIONS = ['stats', 'list'];
+const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('trips', TRIPS_SECTIONS);
 const trips       = ref([]);
 const stats       = ref({});
 const drivers     = ref([]);

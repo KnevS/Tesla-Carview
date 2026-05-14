@@ -185,7 +185,9 @@
     "wltpDelta": "({sign}{value} % vs. WLTP)",
     "typePrivate": "Privé",
     "typeBusiness": "Pro",
-    "typeCommute": "Domicile-travail"
+    "typeCommute": "Domicile-travail",
+    "sectionStats": "Statistiques",
+    "sectionList": "Liste des trajets"
   },
   "webhooks": {
     "intro": "Envoie les événements de l'application (fin de trajet, fin de charge, entretien dû) vers tes propres points HTTP. Chaque POST est signé HMAC-SHA256 ; vérifie l'en-tête {signatureHeader} avec le secret affiché une seule fois à la création.",
@@ -595,7 +597,9 @@
     "location": "Lieu",
     "status": "Statut",
     "template": "Modèle de facturation",
-    "templateTitle": "Demande de remboursement recharge domicile"
+    "templateTitle": "Demande de remboursement recharge domicile",
+    "sectionIntervals": "Intervalles d'entretien",
+    "sectionEntries": "Entrées"
   },
   "telemetry": {
     "title": "Technique véhicule",
@@ -941,6 +945,7 @@
     "title": "Gestion des utilisateurs",
     "add": "+ Créer un utilisateur",
     "loading": "Chargement des utilisateurs…",
+    "sectionTasks": "Tâches en attente",
     "locked": "verrouillé",
     "assignVehicle": "Attribuer un véhicule",
     "resetLink": "Lien de réinitialisation",

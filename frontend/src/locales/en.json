@@ -185,7 +185,9 @@
     "wltpDelta": "({sign}{value} % vs. WLTP)",
     "typePrivate": "Private",
     "typeBusiness": "Business",
-    "typeCommute": "Commute"
+    "typeCommute": "Commute",
+    "sectionStats": "Statistics",
+    "sectionList": "Trip List"
   },
   "webhooks": {
     "intro": "Send app events (trip end, charging end, service due) to your own HTTP endpoints. Every POST is HMAC-SHA256 signed; verify the {signatureHeader} header against the secret shown once on creation.",
@@ -595,7 +597,9 @@
     "location": "Location",
     "status": "Status",
     "template": "Billing template",
-    "templateTitle": "Home charging reimbursement claim"
+    "templateTitle": "Home charging reimbursement claim",
+    "sectionIntervals": "Maintenance Intervals",
+    "sectionEntries": "Entries"
   },
   "telemetry": {
     "title": "Vehicle tech",
@@ -941,6 +945,7 @@
     "title": "User management",
     "add": "+ Create user",
     "loading": "Loading users…",
+    "sectionTasks": "Open Tasks",
     "locked": "locked",
     "assignVehicle": "Assign vehicle",
     "resetLink": "Reset link",

@@ -8,39 +8,42 @@
       </div>
     </div>
 
+    <template v-for=”sid in layoutOrder” :key=”sid”>
+
     <!-- Admin-Aufgaben (offene To-Dos für den Tenant-Admin):
          derzeit: aktive Nicht-Admin-Benutzer ohne Fahrzeug-Zuweisung. -->
-    <div v-if="adminTasks.usersWithoutVehicle?.length"
-         class="card border border-orange-700/60 bg-orange-900/15 space-y-2">
-      <p class="text-sm font-semibold text-orange-300 flex items-center gap-1.5">
-        <AppIcon name="alert" :size="16" />
-        Offene Aufgaben
-      </p>
-      <p class="text-xs text-orange-200/80">
+    <SortableSection v-if=”sid === 'tasks' && adminTasks.usersWithoutVehicle?.length”
+      page-id=”usermgmt” section-id=”tasks”
+      :title=”$t('users.sectionTasks')” icon=”⚠️”
+      :collapsed=”isCollapsed('tasks')” @toggle=”toggle('tasks')” @move=”(f,t,p) => moveSection(f,t,p)”>
+      <p class=”text-xs text-orange-200/80 mb-2”>
         Folgende Benutzer haben noch kein Fahrzeug zugewiesen. Weise ein Auto zu
         oder gib dem Benutzer das Recht, selbst eines anzulegen:
       </p>
-      <ul class="space-y-1">
-        <li v-for="t in adminTasks.usersWithoutVehicle" :key="t.id"
-            class="text-sm flex items-center gap-2 flex-wrap">
+      <ul class=”space-y-1”>
+        <li v-for=”t in adminTasks.usersWithoutVehicle” :key=”t.id”
+            class=”text-sm flex items-center gap-2 flex-wrap”>
           <span>👤 <strong>{{ t.username }}</strong></span>
-          <button @click="assignFromTask(t.id)"
-                  class="text-xs btn-secondary py-0.5 px-2"
-                  v-tooltip="'Fahrzeug zuweisen — Auswahl scrollt zum Benutzer'">
+          <button @click=”assignFromTask(t.id)”
+                  class=”text-xs btn-secondary py-0.5 px-2”
+                  v-tooltip=”'Fahrzeug zuweisen — Auswahl scrollt zum Benutzer'”>
             Fahrzeug zuweisen
           </button>
-          <button v-if="!t.can_add_vehicles"
-                  @click="grantAddVehicles(t.id)"
-                  class="text-xs btn-secondary py-0.5 px-2"
-                  v-tooltip="'Recht „selbst Fahrzeuge anlegen“ geben — der Benutzer kann dann sync ausloesen.'">
-            Recht „Fahrzeug anlegen“ geben
+          <button v-if=”!t.can_add_vehicles”
+                  @click=”grantAddVehicles(t.id)”
+                  class=”text-xs btn-secondary py-0.5 px-2”
+                  v-tooltip=”'Recht „selbst Fahrzeuge anlegen” geben — der Benutzer kann dann sync ausloesen.'”>
+            Recht „Fahrzeug anlegen” geben
           </button>
         </li>
       </ul>
-    </div>
+    </SortableSection>
 
     <!-- Benutzerliste -->
-    <div class="card divide-y divide-gray-700">
+    <SortableSection v-if=”sid === 'users'” page-id=”usermgmt” section-id=”users”
+      :title=”$t('users.sectionUsers')” icon=”👥”
+      :collapsed=”isCollapsed('users')” @toggle=”toggle('users')” @move=”(f,t,p) => moveSection(f,t,p)”>
+    <div class=”card divide-y divide-gray-700”>
       <div v-if="loading" class="p-4 text-center text-gray-500">Lade Benutzer…</div>
       <div v-for="user in sortedUsers" :key="user.id"
         class="p-4 flex flex-col sm:flex-row sm:items-center gap-3">
@@ -108,14 +111,20 @@
       </div>
     </div>
 
-    <!-- Reset-Link anzeigen -->
-    <div v-if="resetLink" class="card space-y-2 border border-yellow-700">
-      <h3 class="font-semibold text-yellow-400">Reset-Link generiert</h3>
-      <p class="text-xs text-gray-400">Link ist 60 Minuten gültig. Sende diesen Link sicher an den Benutzer:</p>
-      <div class="bg-gray-900 rounded p-3 font-mono text-xs break-all text-gray-300 select-all">{{ resetLink }}</div>
-      <button @click="copyReset" class="btn-secondary text-sm">Kopieren</button>
-      <button @click="resetLink = ''" class="text-xs text-gray-500 hover:text-gray-300 ml-3">Schließen</button>
-    </div>
+      <!-- Reset-Link anzeigen -->
+      <div v-if="resetLink" class="card space-y-2 border border-yellow-700">
+        <h3 class="font-semibold text-yellow-400">Reset-Link generiert</h3>
+        <p class="text-xs text-gray-400">Link ist 60 Minuten gültig. Sende diesen Link sicher an den Benutzer:</p>
+        <div class="bg-gray-900 rounded p-3 font-mono text-xs break-all text-gray-300 select-all">{{ resetLink }}</div>
+        <button @click="copyReset" class="btn-secondary text-sm">Kopieren</button>
+        <button @click="resetLink = ''" class="text-xs text-gray-500 hover:text-gray-300 ml-3">Schließen</button>
+      </div>
+    </SortableSection><!-- end users -->
+
+    <!-- Einladungen -->
+    <SortableSection v-if="sid === 'invites'" page-id="usermgmt" section-id="invites"
+      :title="$t('users.sectionInvites')" icon="🔗"
+      :collapsed="isCollapsed('invites')" @toggle="toggle('invites')" @move="(f,t,p) => moveSection(f,t,p)">
 
     <!-- Einladungslink für neue Mandanten -->
     <div class="card space-y-3">
@@ -255,6 +264,9 @@
         </div>
       </div>
     </div>
+    </SortableSection><!-- end invites -->
+
+    </template><!-- end v-for layoutOrder -->
 
     <!-- Fahrzeugzuweisung -->
     <div v-if="assignTarget" class="card space-y-3 border border-blue-700">
@@ -311,9 +323,14 @@ import api from '../api.js';
 import { useAppStore } from '../store/index.js';
 import AppIcon from '../components/AppIcon.vue';
 import SortToggle from '../components/SortToggle.vue';
+import SortableSection from '../components/SortableSection.vue';
 import { useSortDirection } from '../composables/useSortDirection.js';
+import { usePageLayout } from '../composables/usePageLayout.js';
 
 const app     = useAppStore();
+
+const USERMGMT_SECTIONS = ['tasks', 'users', 'invites'];
+const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('usermgmt', USERMGMT_SECTIONS);
 const users   = ref([]);
 // Sortierreihenfolge nach last_login pro View in localStorage.
 // Default desc (juengster Login zuerst).
