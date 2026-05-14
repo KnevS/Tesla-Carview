@@ -1596,5 +1596,67 @@
       "noChargers": "Keine Schnellladestationen gefunden.",
       "calculating": "Route wird berechnet …",
       "routeError": "Route konnte nicht berechnet werden."
+  },
+  "wizard": {
+    "title": "Einstellungs-Assistent",
+    "launch": "Assistent starten",
+    "launchHint": "Führt dich durch alle Personalisierungs-Optionen",
+    "welcome": "Willkommen beim Einstellungs-Assistenten",
+    "intro": "Passe die App in wenigen Schritten an deine Bedürfnisse an.",
+    "featureSkip": "Jede Frage kann übersprungen werden",
+    "featureDraft": "Änderungen werden erst am Ende gespeichert",
+    "featureBack": "Jederzeit zurückgehen und korrigieren",
+    "featureRelaunch": "Assistent kann jederzeit aus den Einstellungen neu gestartet werden",
+    "step": "Schritt {n} von {total}",
+    "skip": "Überspringen",
+    "next": "Weiter →",
+    "back": "← Zurück",
+    "confirm": "✓ Speichern & Anwenden",
+    "discard": "Verwerfen",
+    "start": "Los geht's →",
+    "done": "Fertig!",
+    "s1": { "title": "Sprache", "question": "Welche Sprache bevorzugst du?" },
+    "s2": { "title": "Design-Stil", "question": "Welchen visuellen Stil soll die App verwenden?" },
+    "s3": { "title": "Akzentfarbe", "question": "Welche Akzentfarbe bevorzugst du?" },
+    "s4": {
+      "title": "Einheiten",
+      "question": "Welche Maßeinheiten sollen angezeigt werden?",
+      "distance": "Distanz",
+      "temp": "Temperatur",
+      "efficiency": "Verbrauch"
+    },
+    "s5": {
+      "title": "Dashboard",
+      "question": "Welche Karten sollen auf dem Dashboard erscheinen und in welcher Reihenfolge?",
+      "hint": "Aktivieren/deaktivieren und Reihenfolge mit ▲ ▼ anpassen.",
+      "changed": "angepasst",
+      "cards": {
+        "stats": "Statistik-Kacheln (km, Fahrten, kWh, Kosten)",
+        "service": "Wartungsvorschau",
+        "last_trip": "Letzte Fahrt",
+        "monthly_chart": "Monatsdiagramm (km)",
+        "tariff": "Strompreis-Widget",
+        "tesla_usage": "Tesla API-Nutzung"
+      }
+    },
+    "s6": {
+      "title": "Navigation",
+      "question": "Welche Menüpunkte möchtest du sehen?",
+      "hint": "Sichtbarkeit und Reihenfolge anpassen.",
+      "changed": "angepasst"
+    },
+    "s7": {
+      "title": "Benachrichtigungen",
+      "question": "Wann möchtest du eine Push-Benachrichtigung erhalten?",
+      "charging": "Ladevorgang abgeschlossen",
+      "service": "Wartungsintervall fällig",
+      "battery": "Akkustand niedrig",
+      "batteryThreshold": "Schwellenwert: {n}%"
+    },
+    "s8": {
+      "title": "Zusammenfassung",
+      "question": "Prüfe deine Änderungen und bestätige.",
+      "noChanges": "Du hast keine Einstellungen geändert — alle Werte bleiben wie bisher."
+    }
   }
 }

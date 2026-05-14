@@ -1596,5 +1596,45 @@
       "noChargers": "No fast-charging stations found.",
       "calculating": "Calculating route …",
       "routeError": "Could not calculate route."
+  },
+  "wizard": {
+    "title": "Settings Wizard",
+    "launch": "Launch Wizard",
+    "launchHint": "Walk through all personalization options",
+    "welcome": "Welcome to the Settings Wizard",
+    "intro": "Personalize the app in a few simple steps.",
+    "featureSkip": "Every question can be skipped",
+    "featureDraft": "Changes are only saved at the end",
+    "featureBack": "Go back and correct at any time",
+    "featureRelaunch": "Wizard can be restarted anytime from Settings",
+    "step": "Step {n} of {total}",
+    "skip": "Skip",
+    "next": "Next →",
+    "back": "← Back",
+    "confirm": "✓ Save & Apply",
+    "discard": "Discard",
+    "start": "Let's go →",
+    "done": "Done!",
+    "s1": { "title": "Language", "question": "Which language do you prefer?" },
+    "s2": { "title": "Design Style", "question": "Which visual style should the app use?" },
+    "s3": { "title": "Accent Color", "question": "Which accent color do you prefer?" },
+    "s4": { "title": "Units", "question": "Which units should be displayed?", "distance": "Distance", "temp": "Temperature", "efficiency": "Efficiency" },
+    "s5": {
+      "title": "Dashboard",
+      "question": "Which cards should appear on the dashboard and in what order?",
+      "hint": "Toggle and reorder with ▲ ▼.",
+      "changed": "customized",
+      "cards": {
+        "stats": "Stats tiles (km, trips, kWh, cost)",
+        "service": "Maintenance preview",
+        "last_trip": "Last trip",
+        "monthly_chart": "Monthly chart (km)",
+        "tariff": "Energy price widget",
+        "tesla_usage": "Tesla API usage"
+      }
+    },
+    "s6": { "title": "Navigation", "question": "Which menu items do you want to see?", "hint": "Toggle visibility and reorder.", "changed": "customized" },
+    "s7": { "title": "Notifications", "question": "When do you want a push notification?", "charging": "Charging complete", "service": "Maintenance due", "battery": "Low battery", "batteryThreshold": "Threshold: {n}%" },
+    "s8": { "title": "Summary", "question": "Review your changes and confirm.", "noChanges": "No settings were changed — all values remain as before." }
   }
 }

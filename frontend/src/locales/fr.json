@@ -1596,5 +1596,32 @@
       "noChargers": "Aucune borne de recharge rapide trouvée.",
       "calculating": "Calcul de l'itinéraire …",
       "routeError": "Impossible de calculer l'itinéraire."
+  },
+  "wizard": {
+    "title": "Assistant de configuration",
+    "launch": "Lancer l'assistant",
+    "launchHint": "Parcourir toutes les options de personnalisation",
+    "welcome": "Bienvenue dans l'assistant de configuration",
+    "intro": "Personnalisez l'application en quelques étapes simples.",
+    "featureSkip": "Chaque question peut être ignorée",
+    "featureDraft": "Les modifications ne sont enregistrées qu'à la fin",
+    "featureBack": "Revenez en arrière et corrigez à tout moment",
+    "featureRelaunch": "L'assistant peut être relancé depuis les paramètres",
+    "step": "Étape {n} sur {total}",
+    "skip": "Ignorer",
+    "next": "Suivant →",
+    "back": "← Retour",
+    "confirm": "✓ Enregistrer & Appliquer",
+    "discard": "Annuler",
+    "start": "C'est parti →",
+    "done": "Terminé !",
+    "s1": { "title": "Langue", "question": "Quelle langue préférez-vous ?" },
+    "s2": { "title": "Style visuel", "question": "Quel style visuel l'application doit-elle utiliser ?" },
+    "s3": { "title": "Couleur d'accent", "question": "Quelle couleur d'accent préférez-vous ?" },
+    "s4": { "title": "Unités", "question": "Quelles unités afficher ?", "distance": "Distance", "temp": "Température", "efficiency": "Consommation" },
+    "s5": { "title": "Tableau de bord", "question": "Quelles cartes afficher sur le tableau de bord ?", "hint": "Activer/désactiver et réordonner avec ▲ ▼.", "changed": "personnalisé", "cards": { "stats": "Tuiles statistiques", "service": "Aperçu maintenance", "last_trip": "Dernier trajet", "monthly_chart": "Graphique mensuel", "tariff": "Widget tarif énergie", "tesla_usage": "Utilisation API Tesla" } },
+    "s6": { "title": "Navigation", "question": "Quels éléments de menu afficher ?", "hint": "Activer/masquer et réordonner.", "changed": "personnalisé" },
+    "s7": { "title": "Notifications", "question": "Quand souhaitez-vous une notification ?", "charging": "Charge terminée", "service": "Maintenance due", "battery": "Batterie faible", "batteryThreshold": "Seuil : {n}%" },
+    "s8": { "title": "Résumé", "question": "Vérifiez vos modifications et confirmez.", "noChanges": "Aucun paramètre modifié — toutes les valeurs restent inchangées." }
   }
 }

@@ -231,4 +231,29 @@ router.patch('/me/lang', (req, res) => {
   res.json({ ok: true });
 });
 
+// GET /api/users/me/preferences
+router.get('/me/preferences', (req, res) => {
+  const row = req.db.prepare('SELECT preferences FROM users WHERE id=?').get(req.user.sub);
+  let prefs = {};
+  if (row?.preferences) {
+    try { prefs = JSON.parse(row.preferences); } catch { /* corrupt → reset */ }
+  }
+  res.json(prefs);
+});
+
+// PATCH /api/users/me/preferences — partial merge
+router.patch('/me/preferences', (req, res) => {
+  if (typeof req.body !== 'object' || req.body === null) {
+    return res.status(400).json({ error: 'JSON-Objekt erwartet' });
+  }
+  const row = req.db.prepare('SELECT preferences FROM users WHERE id=?').get(req.user.sub);
+  let current = {};
+  if (row?.preferences) {
+    try { current = JSON.parse(row.preferences); } catch { /* reset */ }
+  }
+  const merged = { ...current, ...req.body };
+  req.db.prepare('UPDATE users SET preferences=? WHERE id=?').run(JSON.stringify(merged), req.user.sub);
+  res.json(merged);
+});
+
 export default router;
