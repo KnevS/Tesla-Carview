@@ -18,12 +18,12 @@
         collapsed ? '' : 'rounded-b-none border-b-transparent',
         'py-2.5 px-3'
       ]"
-      draggable="true"
+      :draggable="sortable"
       @dragstart.stop="onDragStart"
     >
       <!-- Grip-Handle -->
       <span
-        class="flex-shrink-0 flex flex-col gap-[3px] cursor-grab active:cursor-grabbing opacity-30 hover:opacity-70 transition-opacity touch-none"
+        v-if="sortable" class="flex-shrink-0 flex flex-col gap-[3px] cursor-grab active:cursor-grabbing opacity-30 hover:opacity-70 transition-opacity touch-none"
         title="Ziehen zum Umsortieren"
         @mousedown.stop
       >
@@ -76,6 +76,7 @@ const props = defineProps({
   title:     { type: String, required: true },
   icon:      { type: String, default: '' },
   collapsed: { type: Boolean, default: true },
+  sortable:  { type: Boolean, default: true },
 });
 
 const emit = defineEmits(['toggle', 'move']);
