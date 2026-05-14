@@ -144,6 +144,11 @@
           <div class="text-sm">
             <p class="font-semibold text-white text-base">{{ appStore.selectedVehicle.display_name }}</p>
             <p class="text-gray-400">{{ vProfile.license_plate || 'Kein Kennzeichen' }}</p>
+            <a v-if="teslaManualUrl" :href="teslaManualUrl" target="_blank" rel="noopener noreferrer"
+              class="inline-flex items-center gap-1 mt-1.5 text-xs text-blue-400 hover:text-blue-300 transition"
+              v-tooltip="$t('settings.manualTooltip')">
+              📖 {{ $t('settings.manualLink') }}
+            </a>
           </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
@@ -846,7 +851,19 @@ const navStore = useNavStore();
 function launchWizard() {
   if (typeof window.__launchWizard === 'function') window.__launchWizard();
 }
-const { t }    = useI18n();
+const { t, locale } = useI18n();
+
+// Tesla-Handbuch-URL basierend auf Fahrzeugmodell + Sprache
+const teslaManualUrl = computed(() => {
+  const model = appStore.selectedVehicle?.model;
+  if (!model) return null;
+  const modelMap = { m3: 'model3', my: 'modely', ms: 'models', mx: 'modelx', ct: 'cybertruck', semi: 'semi' };
+  const localeMap = { de: 'de_eu', en: 'en_eu', fr: 'fr_eu', es: 'es_eu', tr: 'tr_eu', el: 'el_eu' };
+  const urlModel  = modelMap[model];
+  if (!urlModel) return null;
+  const urlLocale = localeMap[locale.value] ?? 'en_eu';
+  return `https://www.tesla.com/ownersmanual/${urlModel}/${urlLocale}/`;
+});
 
 // Group-Labels + farbige Markierung im Customization-UI — gleiche
 // Gruppen-IDs wie die NavBar-Dropdowns ('overview', 'analytics',

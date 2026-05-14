@@ -632,6 +632,8 @@
     "heading": "Yön"
   },
   "settings": {
+    "manualLink": "Resmi kılavuzu aç",
+    "manualTooltip": "Bu model için Tesla sahip kılavuzunu dilinizde açar (tesla.com)",
     "title": "Ayarlar",
     "vehicleProfile": "🚗 Araç profili",
     "noVehicle": "Araç bağlı değil.",
