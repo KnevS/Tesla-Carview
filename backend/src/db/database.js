@@ -595,7 +595,7 @@ function runTenantMigrations(db) {
   // billing_periods
   db.exec(`CREATE TABLE IF NOT EXISTS billing_periods (
     id           INTEGER PRIMARY KEY,
-    vehicle_id   INTEGER NOT NULL REFERENCES vehicles(id),
+    vehicle_id   INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
     period_start INTEGER NOT NULL,
     period_end   INTEGER NOT NULL,
     total_kwh    REAL DEFAULT 0,
@@ -769,6 +769,36 @@ function runTenantMigrations(db) {
     "ALTER TABLE saved_routes ADD COLUMN start_lon      REAL",
   ]) {
     try { db.exec(sql); } catch { /* Spalte existiert bereits */ }
+  }
+
+  // Migration: billing_periods.vehicle_id ON DELETE CASCADE nachrüsten.
+  // SQLite unterstützt kein ALTER TABLE ADD CONSTRAINT → Tabelle neu anlegen.
+  {
+    const fkInfo = db.prepare("PRAGMA foreign_key_list(billing_periods)").all();
+    const hasCascade = fkInfo.some(fk => fk.table === 'vehicles' && fk.on_delete === 'CASCADE');
+    if (!hasCascade) {
+      db.exec(`
+        PRAGMA foreign_keys = OFF;
+        BEGIN;
+        CREATE TABLE billing_periods_new (
+          id           INTEGER PRIMARY KEY,
+          vehicle_id   INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+          period_start INTEGER NOT NULL,
+          period_end   INTEGER NOT NULL,
+          total_kwh    REAL DEFAULT 0,
+          total_amount REAL DEFAULT 0,
+          rate_kwh     REAL,
+          status       TEXT DEFAULT 'draft',
+          notes        TEXT,
+          created_at   INTEGER DEFAULT (unixepoch())
+        );
+        INSERT INTO billing_periods_new SELECT * FROM billing_periods;
+        DROP TABLE billing_periods;
+        ALTER TABLE billing_periods_new RENAME TO billing_periods;
+        COMMIT;
+        PRAGMA foreign_keys = ON;
+      `);
+    }
   }
 
   // Indexes
