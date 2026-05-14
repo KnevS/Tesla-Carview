@@ -35,15 +35,21 @@ export const useAuthStore = defineStore('auth', {
       try {
         const { data } = await api.get('/auth/tenants');
         this.availableTenants = data;
-        if (data.length === 1 && !this.tenantSlug) {
-          this.tenantSlug = data[0].slug;
+        if (!this.tenantSlug) {
+          if (data.length === 1) {
+            this.tenantSlug = data[0].slug;
+          } else {
+            // Bei mehreren Mandanten: auto-select wenn genau ein nicht-Demo-Mandant aktiv
+            const nonDemo = data.filter(t => !t.is_demo);
+            if (nonDemo.length === 1) this.tenantSlug = nonDemo[0].slug;
+          }
         }
       } catch { /* ignorieren */ }
     },
 
-    async login(username, password, tenantSlug, rememberMe = false) {
+    async login(username, password, tenantSlug) {
       const slug = tenantSlug || this.tenantSlug || undefined;
-      const { data } = await api.post('/auth/login', { username, password, tenantSlug: slug, rememberMe });
+      const { data } = await api.post('/auth/login', { username, password, tenantSlug: slug });
       if (data.requiresMfa) {
         this.mfaTempToken = data.tempToken;
         return { requiresMfa: true };
