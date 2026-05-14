@@ -615,27 +615,27 @@
       <WebhookManager />
     </div>
 
-    <div class=”card space-y-3”>
-      <button class=”w-full flex items-center justify-between group” @click=”toggleSection('password')”>
-        <h2 class=”font-semibold flex items-center gap-2”>
-          <AppIcon name=”lock” :size=”20” class=”text-tesla-red” />
+    <div class="card space-y-3">
+      <button class="w-full flex items-center justify-between group" @click="toggleSection('password')">
+        <h2 class="font-semibold flex items-center gap-2">
+          <AppIcon name="lock" :size="20" class="text-tesla-red" />
           {{ $t('settings.passwordChangeTitle') }}
         </h2>
-        <span class=”text-gray-500 group-hover:text-white transition text-sm”>{{ collapsed.password ? '▸' : '▾' }}</span>
+        <span class="text-gray-500 group-hover:text-white transition text-sm">{{ collapsed.password ? '▸' : '▾' }}</span>
       </button>
-      <div v-show=”!collapsed.password” class=”space-y-2”>
-        <input v-model=”pw.current” type=”password” placeholder=”Aktuelles Passwort”
-          class=”w-full bg-gray-700 rounded-lg px-3 py-2 text-white”
-          v-tooltip=”'Dein bisheriges Passwort – zur Bestätigung deiner Identität'” />
-        <input v-model=”pw.next” type=”password” placeholder=”Neues Passwort (mind. 12 Zeichen)”
-          class=”w-full bg-gray-700 rounded-lg px-3 py-2 text-white”
-          v-tooltip=”'Mindestens 12 Zeichen. Empfohlen: Passphrase aus 4+ zufälligen Wörtern (z.B. „Spaten-Berg-Donau-Mozart”) – ist sicherer als kurze, komplexe Passwörter und leichter zu merken.'” />
-        <input v-model=”pw.confirm” type=”password” placeholder=”Neues Passwort wiederholen”
-          class=”w-full bg-gray-700 rounded-lg px-3 py-2 text-white”
-          v-tooltip=”'Bitte das neue Passwort zur Sicherheit erneut eingeben'” />
-        <div v-if=”pwError” class=”text-red-400 text-sm”>{{ pwError }}</div>
-        <div v-if=”pwSuccess” class=”text-green-400 text-sm”>{{ pwSuccess }}</div>
-        <button @click=”changePassword” class=”btn-primary text-sm”>Passwort ändern</button>
+      <div v-show="!collapsed.password" class="space-y-2">
+        <input v-model="pw.current" type="password" placeholder="Aktuelles Passwort"
+          class="w-full bg-gray-700 rounded-lg px-3 py-2 text-white"
+          v-tooltip="'Dein bisheriges Passwort – zur Bestätigung deiner Identität'" />
+        <input v-model="pw.next" type="password" placeholder="Neues Passwort (mind. 12 Zeichen)"
+          class="w-full bg-gray-700 rounded-lg px-3 py-2 text-white"
+          v-tooltip="'Mindestens 12 Zeichen. Empfohlen: Passphrase aus 4+ zufälligen Wörtern (z.B. „Spaten-Berg-Donau-Mozart“) – ist sicherer als kurze, komplexe Passwörter und leichter zu merken.'" />
+        <input v-model="pw.confirm" type="password" placeholder="Neues Passwort wiederholen"
+          class="w-full bg-gray-700 rounded-lg px-3 py-2 text-white"
+          v-tooltip="'Bitte das neue Passwort zur Sicherheit erneut eingeben'" />
+        <div v-if="pwError" class="text-red-400 text-sm">{{ pwError }}</div>
+        <div v-if="pwSuccess" class="text-green-400 text-sm">{{ pwSuccess }}</div>
+        <button @click="changePassword" class="btn-primary text-sm">Passwort ändern</button>
       </div>
     </div>
 
