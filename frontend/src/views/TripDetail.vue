@@ -297,7 +297,7 @@ async function initMap(points) {
   if (!mapEl) return;
 
   leafletMap = L.map('trip-map');
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  L.tileLayer('/api/tiles/{z}/{x}/{y}', {
     attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 18,
   }).addTo(leafletMap);

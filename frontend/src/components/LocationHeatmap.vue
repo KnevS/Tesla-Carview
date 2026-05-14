@@ -76,7 +76,7 @@ function render() {
 
 onMounted(() => {
   map = L.map(mapEl.value).setView([51.16, 10.45], 5); // Default: D-Mitte
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  L.tileLayer('/api/tiles/{z}/{x}/{y}', {
     attribution: '© OpenStreetMap contributors',
     maxZoom: 18,
   }).addTo(map);
