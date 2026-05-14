@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v2.1.0-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v2.3.0-E31937?style=flat-square)](CHANGELOG.md)
 [![Lizenz](https://img.shields.io/badge/Lizenz-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.md)
 
@@ -31,7 +31,8 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 | **Laden** | Ladesessions mit Kosten, GPS-basierter Ladeort-Zuordnung, kostenlose Ladungen markierbar |
 | **Ladeorte** | Definierbare Standorte mit GPS-Radius, Preis/kWh, Auto-Erkennung |
 | **Batterie** | Degradations-Tracking, Reichweiten-Verlauf über Zeit |
-| **Technik** | Live-Telemetrie: TPMS, Leistungsfluss, Klimaanlage, Ladestatus |
+| **Technik** | Live-Telemetrie: TPMS, Leistungsfluss, Klimaanlage, Ladestatus; Fake-Daten für Demo-Fahrzeuge |
+| **Routenplaner** | Interaktiver Routenplaner mit SoC-aware Ladeplanung: automatische Ladestopps inkl. Ladezeit-Schätzung; Abfahrts-SoC (live oder manuell), Ziel-SoC und Ladeziel konfigurierbar; Wetter (Open-Meteo), Verkehr (HERE Maps), Blitzer (OpenStreetMap) entlang der Route; Kartendarstellung mit Tile-Proxy |
 | **Steuerung** | Fahrzeugbefehle: Klima, Climate-Keeper (Hund/Camp), Sitzheizung (5 Plätze × 4 Stufen), Lenkradheizung, Türen, Frunk/Heckklappe, Fenster, Sentry-Mode, Laden inkl. Ampere-Slider und Ladeklappe, Vorklim-Zeitplan, Boombox, Software-Update, Navigation (Virtual Key erforderlich) |
 | **Fahrtenbuch** | Finanzamt-konform nach BMF-Schreiben: Klassifikation, Geschäftspartner, Reisezweck, Kilometerstände, lückenlose Nummerierung im PDF, Lock nach Export, manuelle Nachträge, Trip-Merge/Split |
 | **Abrechnung** | Heimladen-Kostenabrechnung für Dienstwagen (Monta-Integration optional) |
@@ -44,6 +45,7 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 | **Benachrichtigungen** | Web Push bei Ladeende, plus Wartungserinnerungen |
 | **Benutzerhandbuch** | Vollständige Anleitung direkt in der App lesbar |
 | **Farbschema** | Anpassbares Farbprofil (6 Akzentfarben, lokal gespeichert) |
+| **Einstellungen** | Alle Sektionen per Klick ein-/ausklappbar (SortableSection), Reihenfolge persönlich sortierbar |
 | **Navigation** | Individuell sortierbare und ein-/ausblendbare Navigationspunkte |
 | **Mobile / Tesla** | Installierbare PWA für iPhone/iPad (Safari), Android, Tesla-Fahrzeug-Browser und Desktop. Kompakte Karten-Ansicht im Fahrtenbuch für schmale Bildschirme. |
 | **System-Status** | Ampel-Karte (Tesla-Token, Virtual Key, Fleet Telemetry, Poller, DB) — grün/gelb/rot auf einen Blick |
