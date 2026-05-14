@@ -6,205 +6,264 @@
 |---|---|
 | 🇬🇧 **[English](Features)** | English version |
 | 🇩🇪 **[Deutsch](DE-Features)** | Du bist hier |
+| 🇫🇷 **[Français](FR-Features)** | Version française |
+| 🇪🇸 **[Español](ES-Features)** | Versión en español |
+| 🇹🇷 **[Türkçe](TR-Features)** | Türkçe sürüm |
+| 🇬🇷 **[Ελληνικά](EL-Features)** | Ελληνική έκδοση |
 
 ---
 
-Tesla Carview deckt den gesamten Lebenszyklus deines Tesla ab — vom Tracking jeder Fahrt bis zur Fahrzeugsteuerung und Verwaltung der Ladekosten.
+Tesla Carview deckt den gesamten Lebenszyklus deines Tesla ab — vom Tracking jeder Fahrt über die Fahrzeugsteuerung und Routenplanung bis zur Verwaltung der Ladekosten. Alles läuft auf deinem eigenen Server.
 
 ---
 
-## Dashboard
+## Was bietet Tesla Carview?
 
-Das Dashboard ist deine zentrale Übersicht und zeigt:
+| Modul | Kurzbeschreibung |
+|---|---|
+| 📊 Dashboard | Live-Status, Statistiken, Tarif-Widget, System-Health |
+| 🚗 Fahrtenbuch | Automatisch aufgezeichnete Fahrten, BMF-konformer PDF-Export |
+| ⚡ Laden | Ladesitzungen, Orte, Monta-Sync, Kostenabrechnung |
+| 🔋 Akku | Gesundheitsanalyse, Degradation, Reichweite-Historie |
+| 🗺️ Routenplaner | OSRM-Routing, Ladestation-Overlay, an Tesla senden |
+| 🎮 Fahrzeugsteuerung | Klima, Schlösser, Laden, OTA, geplantes Laden |
+| 📝 Wartungsbuch | Wartungseinträge, Intervalle, Push-Erinnerungen |
+| 💬 Grok Chat | xAI-gestützter KI-Assistent mit Fahrzeugkontext |
+| 📤 Export | CSV, JSON, PDF-Rechnungen, vollständiges Backup |
+| 🔐 Sicherheit | Passkeys, MFA (TOTP), QR-SSO für Tesla-Browser |
+| 🌍 Mehrsprachig | DE · EN · FR · ES · TR · EL |
+| 📱 PWA | Auf Home-Screen installierbar, Offline-Shell |
+
+---
+
+## 📊 Dashboard
+
+Das Dashboard ist deine zentrale Übersicht:
 - **Live-Fahrzeugstatus** — Akkustand, Reichweite, Standort, Ladestatus
 - **Letzte Fahrten** — die letzten 5 Fahrten mit Distanz und Verbrauch
-- **Monatsstatistiken** — Gefahrene Kilometer, verbrauchte Energie, Ladekosten
-- **Dynamisches Tarif-Widget** — Aktueller Strompreis (aWATTar DE/AT, Tibber)
-- **Wartungsintervalle** — Anstehende Wartungserinnerungen (TÜV, Öl, Bremsflüssigkeit, etc.)
-- **System-Health** — Tesla API-Verbindungsstatus, Fleet Telemetry, Datenbankgröße
+- **Monatsstatistiken** — Kilometer, verbrauchte Energie, Ladekosten
+- **Dynamisches Tarif-Widget** — aktueller Strompreis (aWATTar DE/AT, Tibber) mit 24-h-Preiskurve und Auto-Set-Ladefenster
+- **Wartungsintervalle** — anstehende Erinnerungen (TÜV, Öl, Bremsflüssigkeit, etc.)
+- **System-Health** — Tesla API-Status, Fleet Telemetry, Datenbankgröße
 
-Das Dashboard aktualisiert sich automatisch alle 60 Sekunden wenn der Tab geöffnet ist.
+Das Dashboard ist vollständig anpassbar: Karten ein-/ausblenden und neu sortieren unter **Einstellungen → Wizard starten**.
 
 ---
 
-## Fahrten (Fahrtenbuch)
+## 🚗 Fahrten (Fahrtenbuch)
 
-Jede Fahrt wird automatisch aufgezeichnet mit:
+Jede Fahrt wird automatisch aufgezeichnet:
 - Start- und Endort (Adresse + GPS-Koordinaten)
 - Distanz, Dauer, Durchschnittsgeschwindigkeit
 - Energieverbrauch (kWh und kWh/100 km)
 - Akkustand bei Start/Ende
-- Fahrtentyp-Klassifizierung (privat / Pendeln / geschäftlich)
+- Fahrttyp (privat / Arbeitsweg / dienstlich)
 
-### Fahrtenbuch (BMF-konform)
-Das Fahrtenbuch erfüllt die Anforderungen des deutschen Finanzamts (BMF):
-- Felder für Geschäftspartner und Fahrtenzweck
-- Fortlaufende Fahrtnummerierung
-- „Sperren"-Funktion zum Abschließen des Fahrtenbuchs
-- **PDF-Export** im A4-Querformat mit allen gesetzlich geforderten Feldern
-- Fahrten zusammenführen und aufteilen für mehrstöpfige Reisen
-- Manuelle Fahrt-Erstellung für vergessene Einträge
+### BMF-konformes Fahrtenbuch
+Das Fahrtenbuch erfüllt die Anforderungen des deutschen Finanzamts:
+- Geschäftspartner- und Zweck-Felder
+- Fortlaufende Nummerierung
+- Sperr-Funktion zur Finalisierung
+- **PDF-Export** in A4-Querformat mit allen Pflichtfeldern
+- Fahrten zusammenführen und aufteilen
+- Manuelle Fahrteinträge für vergessene Fahrten
 
-### GPS-Standort bearbeiten
-Falls eine Fahrt eine fehlende oder falsche Adresse hat:
-- Auf Fahrt klicken → Standort bearbeiten
-- Adresse manuell eingeben oder Kartennadel ziehen
+### GPS-Ortskorrektur
+Fehlende oder falsche Adressen lassen sich direkt in der Fahrtdetailansicht bearbeiten.
 
 ---
 
-## Laden
+## ⚡ Laden
 
-Alle Ladesessions werden automatisch protokolliert:
-- Standort (GPS-Zuordnung zu gespeicherten Ladestandorten)
+Alle Ladesitzungen werden automatisch protokolliert:
+- Ort (GPS-Abgleich mit gespeicherten Ladeorten)
 - Geladene Energie (kWh) und geschätzte Kosten
 - Ladegeschwindigkeit und Dauer
-- Heimladen-Kennzeichnung (🏠) via Monta-Integration
+- Heimladungs-Flag (🏠) via Monta-Integration
 
-### Ladestandorte
-Eigene Heimlade- und regelmäßige Ladeorte definieren:
-- **Einstellungen → Ladestandorte** → Mit Adresse + GPS + Radius hinzufügen
-- Sessions an diesem Standort werden automatisch markiert
-- Einen kWh-Preis pro Standort für die Kostenberechnung festlegen
+### Ladeorte
+Definiere Heim- und Lieblingsladepunkte unter **Einstellungen → Ladeorte** — Sitzungen werden automatisch zugeordnet, und ein kWh-Tarif für die Kostenberechnung wird gesetzt.
 
 ### Monta-Integration
-Wenn du Monta für Heimladen verwendest:
-- Monta API-Key in Einstellungen eintragen
-- Monta-Sessions werden automatisch mit korrekten kWh- und Kostendaten synchronisiert
-- Heimladen-Kennzeichnung wird automatisch gesetzt
+Monta-API-Key in den Einstellungen hinterlegen. Ladesitzungen synchronisieren sich automatisch mit korrekten kWh- und Kostendaten.
 
-### Kostenberechnung & PDF-Rechnung
-PDF-Rechnungen für Erstattungen erstellen (z.B. für den Arbeitgeber):
-- **Abrechnung → Rechnung erstellen**
-- Zeitraum auswählen und einzelne Sessions ein-/ausschließen
-- PDF mit Briefkopf, Tabelle, Summen und Unterschriftsfeld
-- Vollständig clientseitig generiert — keine Daten verlassen deinen Server
+### Kostenabrechnung & PDF-Rechnung
+PDF-Rechnungen für die Erstattung (z. B. durch den Arbeitgeber) unter **Abrechnung → Rechnung erstellen** — vollständig clientseitig generiert.
 
 ---
 
-## Batterie
+## 🔋 Akku
 
-Akkugesundheit über Zeit verfolgen:
-- Degradationskurve (geschätzte vs. bewertete Reichweite)
+Akkugesundheit im Zeitverlauf:
+- Degradationskurve (geschätzte vs. Nenn-Reichweite)
 - Ladezyklus-Zähler
-- Historische Akkustanddaten
-- Reichweite bei verschiedenen Temperaturen (Winter- vs. Sommervergleich)
+- Historische Ladestandsdaten
+- Reichweitenvergleich bei verschiedenen Temperaturen
 
 ---
 
-## Fahrzeugsteuerung
+## 🗺️ Routenplaner
 
-Deinen Tesla direkt aus der App steuern:
-- 🌡️ **Klimaanlage** — starten/stoppen, Temperatur einstellen, Sitzheizung, Lenkradheizung
-- 🔓 **Schlösser** — Türen ver-/entriegeln
-- 💡 **Lichter** — Lichter blinken, Hupen
-- 🚪 **Kofferraum/Frunk** — Kofferraum und Frunk öffnen
-- 🔌 **Laden** — Ladeanschluss öffnen/schließen, Ladeampere einstellen, starten/stoppen
-- 🔄 **Software-Updates** — OTA-Updates auslösen und überwachen
-- ⏰ **Geplantes Laden** — Niedertarif-Ladefenster festlegen
-- 🎵 **Remote Boombox** — Boombox-Töne auslösen (wo unterstützt)
-- 🌬️ **Klimabewachung** — Camp-/Hunde-/Keep-Modus einstellen
-- 🪟 **Fenster** — Fenster öffnen/schließen
+Routen im Voraus planen und direkt an die Tesla-Navigation senden:
 
-> Befehle erfordern den gepairten **Virtual Key**. Siehe [Tesla API Setup](DE-Tesla-API-Setup#schritt-3-virtual-key-einrichten-für-fahrzeugbefehle).
+- **Startort** — automatisch aus Fahrzeug-GPS, Browser-GPS oder manueller Eingabe
+- **Zielsuche** — Geocoding via Nominatim (Backend-Proxy, keine CSP-Probleme)
+- **Bis zu 5 Zwischenstopps** — beliebige Zwischenpunkte hinzufügen
+- **OSRM-Routing** — Open-Source-Routenengine, kein Account erforderlich
+- **Ankunfts-SoC** — berechnet den Akkustand am Ziel basierend auf deinem echten Verbrauch
+- **Ladestation-Overlay** — zeigt Schnellladestationen (CCS, CHAdeMO, Tesla) entlang der Route via OpenChargeMap
+- **An Tesla senden** — ein Tipp übermittelt das Ziel an die Fahrzeugnavigation
+- **Routen speichern & laden** — Lieblingsrouten für schnellen Zugriff speichern
+- **ABRP-Fallback** — optionaler Link zu A Better Route Planner mit vorausgefülltem Ziel
 
 ---
 
-## Betriebsbuch (Service-Logbuch)
+## 🎮 Fahrzeugsteuerung
 
-Alle Wartungsereignisse protokollieren:
+Steuere deinen Tesla direkt aus der App:
+- 🌡️ **Klima** — starten/stoppen, Temperatur setzen, Sitzheizung, Lenkradheizung, Keeper-Modi (Camp/Dog/Keep)
+- 🔓 **Schlösser** — Türen öffnen/schließen
+- 💡 **Lichter** — Lichthupe, Hupe
+- 🚪 **Kofferraum/Frunk** — öffnen
+- 🪟 **Fenster** — öffnen/schließen
+- 🔌 **Laden** — Ladeklappe, Ladestromstärke, starten/stoppen
+- ⏰ **Geplantes Laden** — Günstig-Ladefenster setzen
+- 🔄 **Software-Updates** — OTA anstoßen und überwachen
+- 🎵 **Boombox** — Boombox-Sounds abspielen (wo unterstützt)
+
+> Befehle erfordern den gepaarten **Virtual Key**. Siehe [Tesla API Setup](DE-Tesla-API-Setup).
+
+---
+
+## 📝 Wartungsbuch (Betriebsbuch)
+
+Alle Wartungsereignisse dokumentieren:
 - Datum, Kategorie (Wartung / Reparatur / Reifen / Inspektion / Notiz)
-- Kosten, Kilometerstand
-- Beschreibung und Anhänge
-- Wer die Arbeit durchgeführt hat (Werkstattname)
+- Kosten, Kilometerstand, Werkstattname
+- Beschreibung
 
 ### Wartungsintervalle & Erinnerungen
-Wiederkehrende Wartungserinnerungen einrichten:
-- **Einstellungen → Wartungsintervalle** → Intervall hinzufügen (z.B. „TÜV in 2 Jahren", „Bremsflüssigkeit alle 2 Jahre")
-- Push-Benachrichtigungen 30 Tage vor und 1.000 km vor jedem Intervall
-- Dashboard zeigt anstehende Services als Vorschaukarte
+Intervalle unter **Einstellungen → Wartungsintervalle** konfigurieren. Web-Push-Benachrichtigungen werden 30 Tage und 1 000 km vor Fälligkeit gesendet. Das Dashboard zeigt eine Vorschaukarte mit anstehenden Terminen.
 
 ---
 
-## Datenexport
+## 💬 Grok Chat (KI-Assistent)
 
-Alle Daten exportieren:
-- **Fahrten** — CSV oder JSON
-- **Ladesessions** — CSV oder JSON
-- **Service-Logbuch** — CSV
-- **Vollständiges Backup** — JSON (alle Tabellen), importierbar für Wiederherstellung
+Stelle Fragen zu deinen Tesla-Daten in natürlicher Sprache — angetrieben von xAI Grok:
+- **Kontext-bewusst** — Grok sieht deine letzten Fahrten, Ladesitzungen und Fahrzeugdaten
+- **Streaming** — Antworten erscheinen Wort für Wort
+- **Chat-Historie** — Gespräche werden gespeichert und sind durchsuchbar
+- **Tagesbudget** — maximale Token-Ausgaben täglich begrenzen
+- **Datenschutz** — Anfragen laufen über das Backend, nie direkt vom Browser zu xAI; keine vollständigen VINs oder exakten Adressen werden übermittelt
 
----
-
-## Push-Benachrichtigungen
-
-Benachrichtigungen im Browser erhalten wenn:
-- Ladevorgang abgeschlossen
-- Wartungsintervall naht
-- Software-Update verfügbar
-
-Benachrichtigungen funktionieren auf Desktop (Chrome, Firefox, Edge) und mobil (Android Chrome, iOS Safari mit Startseiten-Verknüpfung).
-
-**Einrichten:** Einstellungen → Push-Benachrichtigungen → Benachrichtigungen aktivieren
+> Erfordert einen xAI-API-Key (`XAI_API_KEY` in `.env`). Erhältlich unter [console.x.ai](https://console.x.ai).
 
 ---
 
-## PWA (Progressive Web App)
+## 🔐 Sicherheit & Authentifizierung
 
-Tesla Carview funktioniert als PWA — du kannst es auf deiner Startseite installieren:
+### Passkeys (WebAuthn)
+Login mit Face ID, Touch ID oder Hardware-Schlüssel statt Passwort. Passkeys verwalten unter **Einstellungen → Passkeys**.
 
-- **Android/Desktop Chrome:** Installier-Symbol in der Adressleiste antippen
+### MFA (TOTP)
+Zwei-Faktor-Authentifizierung mit jeder Authenticator-App. Backup-Codes werden bei der Einrichtung generiert.
+
+### QR-SSO für den Tesla-Browser
+Der eingebaute Tesla-Browser kann kein Face ID oder Hardware-Schlüssel verwenden. Der QR-Login löst das:
+1. Tesla-Browser zeigt einen QR-Code (5 min gültig)
+2. Mit Smartphone scannen
+3. Passkey / Face ID auf dem Smartphone bestätigen
+4. Die Tesla-Browser-Session wird automatisch freigeschaltet
+
+### Passwort
+Standard-Benutzername/Passwort-Authentifizierung mit bcrypt. Admins können Reset-Links für Benutzer generieren.
+
+---
+
+## 🧙 Einrichtungs-Wizard
+
+Ein schrittweiser Wizard führt durch die Erstkonfiguration und kann jederzeit unter **Einstellungen → Wizard starten** neu gestartet werden:
+1. Oberflächensprache
+2. Design-Stil (Glass / Cyber / Minimal / Sport)
+3. Akzentfarbe
+4. Einheiten (km/mi, °C/°F, kWh/mi)
+5. Dashboard-Karten (sichtbar & Reihenfolge)
+6. Navigations-Tabs
+7. Push-Benachrichtigungen
+8. Zusammenfassung & Bestätigen
+
+---
+
+## 🌡️ Dynamischer Tarif (aWATTar / Tibber)
+
+aWATTar (DE/AT, kein API-Key nötig) oder Tibber (API-Key in Einstellungen) verbinden:
+- Dashboard zeigt aktuellen Preis und 24-h-Preiskurve
+- **Auto-Set-Ladefenster** — ein Klick setzt geplantes Laden auf das günstigste 4-h-Fenster in den nächsten 24 Stunden
+
+---
+
+## 🌍 Mehrsprachig
+
+Vollständig übersetzt in: 🇩🇪 Deutsch · 🇬🇧 Englisch · 🇫🇷 Französisch · 🇪🇸 Spanisch · 🇹🇷 Türkisch · 🇬🇷 Griechisch
+
+Sprachauflösung:
+1. Benutzerprofil-Einstellung (höchste Priorität)
+2. Mandanten-Standardsprache
+3. Browser-Sprache
+
+---
+
+## 📱 PWA (Progressive Web App)
+
+Tesla Carview auf dem Home-Screen installieren:
+- **Android/Desktop Chrome:** Installations-Icon in der Adressleiste
 - **iOS Safari:** Teilen → „Zum Home-Bildschirm"
-- **Tesla-Browser:** Menü → „Zur Startseite hinzufügen"
+- **Tesla-Browser:** Menü → „Zum Home-Bildschirm"
 
-Die installierte PWA funktioniert für gecachte Seiten auch offline und erhält Benachrichtigungen wie eine native App.
-
----
-
-## Dynamischer Stromtarif (aWATTar / Tibber)
-
-Wenn du einen dynamischen Stromtarif hast:
-- aWATTar verbinden (DE/AT, kein API-Key nötig) oder Tibber (API-Key in Einstellungen)
-- Dashboard zeigt aktuellen Preis und 24-Stunden-Preiskurve
-- **Automatisches Ladefenster setzen** — ein Klick setzt das geplante Laden auf das günstigste 4-Stunden-Fenster in den nächsten 24 Stunden
+Die installierte PWA cachet die App-Shell, funktioniert offline für gecachte Seiten und empfängt Push-Benachrichtigungen.
 
 ---
 
-## Tesla API Nutzungs-Tracker
+## 🔔 Push-Benachrichtigungen
 
-Da die Tesla Fleet API kostenpflichtig ist, zählt die App jeden ausgehenden API-Call und berechnet die voraussichtlichen Kosten:
-- Live-Anzeige im Dashboard (30s-Refresh)
-- Kategorie-Aufschlüsselung: Fahrzeugdaten / Wake / Befehle / Streaming / Sonstiges
-- Optionaler Hard-Stop: weitere API-Calls ab einer konfigurierten Schwelle blockieren
-- Admin-Panel unter Einstellungen → Tesla API Nutzung
+Benachrichtigungen werden gesendet wenn:
+- Laden abgeschlossen ist
+- Ein Wartungsintervall bald fällig wird
+- Ein Software-Update verfügbar ist
 
----
-
-## Mehrsprachigkeit
-
-Die App ist vollständig übersetzt in:
-🇩🇪 Deutsch · 🇬🇧 Englisch · 🇫🇷 Französisch · 🇪🇸 Spanisch · 🇹🇷 Türkisch · 🇬🇷 Griechisch
-
-Die Sprache wird bestimmt durch:
-1. Deine Benutzerprofil-Einstellung (überschreibt alles)
-2. Die Standardsprache des Tenants
-3. Deine Browser-Sprache
+**Einrichten:** Einstellungen → Push-Benachrichtigungen → Aktivieren.
 
 ---
 
-## Demo-Modus
+## 👥 Multi-Mandant & Benutzer
 
-Optional einen Demo-Modus aktivieren, damit andere die App ohne echten Tesla ausprobieren können:
-- `DEMO_ENABLED=true` in `.env`
+- Jeder Mandant hat eine vollständig isolierte SQLite-Datenbank
+- Admins laden Benutzer per Einmal-Link ein
+- Benutzerrechte: Fahrzeuge bearbeiten, Fahrzeuge hinzufügen, MFA-Pflicht
+- Mandanten-Standardsprache und -einstellungen
+
+Siehe [Multi-Mandant & Benutzer](DE-Multi-Tenant) für Details.
+
+---
+
+## 🧪 Demo-Modus
+
+Demo-Sandbox mit `DEMO_ENABLED=true` in `.env` aktivieren:
 - Fake-Fahrten und Ladehistorie werden automatisch generiert
-- Demo-Konten laufen nach 14 Tagen ab
+- Demo-Accounts laufen nach 14 Tagen ab
 - IP-basiertes Rate-Limiting verhindert Missbrauch
 
 ---
 
-## Wartungs-Overlay
+## 📤 Export & Backup
 
-Die App zeigt automatisch ein „Wartungs"-Overlay wenn das Backend nicht erreichbar ist (z.B. beim Neustart nach Updates). Es zeigt Tesla-Zitate auf Deutsch/Englisch, einen Countdown-Timer und fragt alle 3 Sekunden nach bis das Backend zurück ist — dann verschwindet es.
+- **Fahrten** — CSV oder JSON
+- **Ladesitzungen** — CSV oder JSON
+- **Wartungsbuch** — CSV
+- **Vollständiges Backup** — JSON (alle Tabellen), wiederherstellbar über **Admin → Datenverwaltung**
 
 ---
 
-*Dieses Wiki wird automatisch aus dem Repository generiert. Zuletzt aktualisiert: siehe [Commits](https://github.com/KnevS/Tesla-Carview/commits/main).*
+## 🌙 Wartungsmodus
+
+Wenn das Backend nach einem Update neu startet, zeigt die App einen Overlay mit Tesla-Zitaten, einem Countdown und verbindet sich automatisch wieder sobald das Backend erreichbar ist.

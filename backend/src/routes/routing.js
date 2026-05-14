@@ -1,19 +1,14 @@
 import { Router } from 'express';
+import { assertVehicleAccess, guardAccess } from '../middleware/vehicleAccess.js';
 
 const router = Router();
-
-function checkVehicleAccess(db, vehicleId, userId) {
-  return db.prepare(
-    'SELECT v.id FROM vehicles v JOIN vehicle_users vu ON vu.vehicle_id=v.id WHERE v.id=? AND vu.user_id=?'
-  ).get(vehicleId, userId);
-}
 
 // GET /api/routing/stats?vehicleId=
 // Liefert aktuellen SoC + Restreichweite + Durchschnittsverbrauch aus Fahrthistorie
 router.get('/stats', (req, res) => {
   const vehicleId = Number(req.query.vehicleId);
   if (!vehicleId) return res.status(400).json({ error: 'vehicleId erforderlich' });
-  if (!checkVehicleAccess(req.db, vehicleId, req.user.id)) return res.status(403).json({ error: 'Kein Zugriff' });
+  if (guardAccess(res, () => assertVehicleAccess(req.db, vehicleId, req.user))) return;
 
   const battery = req.db.prepare(
     'SELECT soc, rated_range_km FROM battery_history WHERE vehicle_id=? ORDER BY timestamp DESC LIMIT 1'
@@ -80,6 +75,26 @@ router.get('/chargers', async (req, res) => {
     res.json(stations);
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/routing/route — OSRM-Proxy (verhindert connect-src-CSP-Verletzungen im Browser)
+router.post('/route', async (req, res) => {
+  const { coordinates } = req.body; // [[lon,lat], [lon,lat], ...]
+  if (!Array.isArray(coordinates) || coordinates.length < 2) {
+    return res.status(400).json({ error: 'coordinates erforderlich ([lon,lat]-Paare, mind. 2)' });
+  }
+  const coordStr = coordinates.map(([lon, lat]) => `${lon},${lat}`).join(';');
+  try {
+    const url = `https://router.project-osrm.org/route/v1/driving/${coordStr}?overview=full&geometries=geojson`;
+    const r = await fetch(url, {
+      headers: { 'User-Agent': 'TeslaCarview/2.2 (https://github.com/KnevS/Tesla-Carview)' },
+      signal: AbortSignal.timeout(12000),
+    });
+    if (!r.ok) return res.status(502).json({ error: `OSRM ${r.status}` });
+    res.json(await r.json());
+  } catch (err) {
+    res.status(504).json({ error: 'OSRM nicht erreichbar: ' + err.message });
   }
 });
 
