@@ -59,7 +59,8 @@ const app    = express();
 const PORT   = process.env.PORT || 3000;
 const server = http.createServer(app);
 
-app.set('trust proxy', 1);
+// 2 Hops: Host-nginx (SSL-Termination) → Docker-nginx (interner Reverse Proxy) → Express
+app.set('trust proxy', 2);
 
 app.use(securityHeaders);
 app.use(cors({
