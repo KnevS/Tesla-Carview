@@ -113,7 +113,7 @@ router.post('/maintenance-now', requireAuth, async (req, res) => {
  *  Virtual Key, Fleet-Telemetry-Heartbeat, Poller, Datenbanken.
  *  Liefert pro Check status + Details, das Frontend zeigt eine farbige
  *  Ampel an. */
-router.get('/health', requireAuth, (req, res) => {
+router.get('/health', requireAuth, async (req, res) => {
   if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Nur für Administratoren' });
   const db = req.db;
   const now = Math.floor(Date.now() / 1000);
@@ -219,6 +219,72 @@ router.get('/health', requireAuth, (req, res) => {
       meta: { bytes: tenantSize } });
   } catch (e) {
     checks.push({ key: 'tenant_db_size', label: 'Tenant-DB', status: 'unknown', message: e.message });
+  }
+
+  // 7. OpenChargeMap — Ladestationen im Routenplaner
+  {
+    const ocmKey = (() => {
+      try {
+        const row = db?.prepare("SELECT value FROM tenant_settings WHERE key='ocm_api_key'").get();
+        if (row?.value) return row.value;
+      } catch { /* ignore */ }
+      return process.env.OPENCHARGEMAP_API_KEY || null;
+    })();
+
+    if (!ocmKey) {
+      checks.push({ key: 'ocm', label: 'OpenChargeMap (Ladestationen)', status: 'info',
+        message: 'Kein API-Key konfiguriert — Schnellladestationen im Routenplaner nicht verfügbar' });
+    } else {
+      try {
+        const url = `https://api.openchargemap.io/v3/poi/?maxresults=1&compact=true&verbose=false&latitude=48.137&longitude=11.576&key=${ocmKey}`;
+        const r = await fetch(url, { signal: AbortSignal.timeout(5000) });
+        if (r.status === 403) {
+          checks.push({ key: 'ocm', label: 'OpenChargeMap (Ladestationen)', status: 'error',
+            message: 'API-Key ungültig oder abgelaufen — neuen Key in Einstellungen eintragen' });
+        } else if (r.ok) {
+          const data = await r.json();
+          checks.push({ key: 'ocm', label: 'OpenChargeMap (Ladestationen)', status: 'ok',
+            message: `Verbunden — API antwortet (${Array.isArray(data) ? data.length : '?'} Treffer bei Testabfrage)` });
+        } else {
+          checks.push({ key: 'ocm', label: 'OpenChargeMap (Ladestationen)', status: 'warn',
+            message: `Unerwarteter HTTP ${r.status}` });
+        }
+      } catch (e) {
+        checks.push({ key: 'ocm', label: 'OpenChargeMap (Ladestationen)', status: 'warn',
+          message: 'Nicht erreichbar: ' + e.message });
+      }
+    }
+  }
+
+  // 8. HERE Maps — Echtzeit-Verkehr im Routenplaner
+  {
+    const hereKey = (() => {
+      try { return db?.prepare("SELECT value FROM tenant_settings WHERE key='here_api_key'").get()?.value || null; }
+      catch { return null; }
+    })();
+
+    if (!hereKey) {
+      checks.push({ key: 'here', label: 'HERE Maps (Echtzeit-Verkehr)', status: 'info',
+        message: 'Kein API-Key konfiguriert — Echtzeit-Verkehr im Routenplaner nicht verfügbar' });
+    } else {
+      try {
+        const url = `https://router.hereapi.com/v8/routes?transportMode=car&origin=48.137,11.576&destination=52.52,13.405&return=summary&apiKey=${hereKey}`;
+        const r = await fetch(url, { signal: AbortSignal.timeout(5000) });
+        if (r.status === 401 || r.status === 403) {
+          checks.push({ key: 'here', label: 'HERE Maps (Echtzeit-Verkehr)', status: 'error',
+            message: 'API-Key ungültig oder abgelaufen — in Einstellungen → Routenplaner aktualisieren' });
+        } else if (r.ok) {
+          checks.push({ key: 'here', label: 'HERE Maps (Echtzeit-Verkehr)', status: 'ok',
+            message: 'Verbunden — Echtzeit-Verkehrsdaten aktiv' });
+        } else {
+          checks.push({ key: 'here', label: 'HERE Maps (Echtzeit-Verkehr)', status: 'warn',
+            message: `Unerwarteter HTTP ${r.status}` });
+        }
+      } catch (e) {
+        checks.push({ key: 'here', label: 'HERE Maps (Echtzeit-Verkehr)', status: 'warn',
+          message: 'Nicht erreichbar: ' + e.message });
+      }
+    }
   }
 
   res.json({

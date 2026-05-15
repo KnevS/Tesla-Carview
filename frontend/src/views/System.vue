@@ -25,14 +25,21 @@
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
         <div v-for="c in health.checks" :key="c.key"
-             class="bg-gray-800 rounded-lg p-2 flex items-start gap-2">
+             class="bg-gray-800 rounded-lg p-2 flex items-start gap-2"
+             :class="c.status === 'info' ? 'opacity-60' : ''">
           <AppIcon
             :name="c.status === 'error' ? 'x' : c.status === 'warn' ? 'alert' : c.status === 'ok' ? 'check' : 'info'"
             :size="18"
-            :class="c.status === 'error' ? 'text-red-400' : c.status === 'warn' ? 'text-yellow-400' : c.status === 'ok' ? 'text-green-400' : 'text-gray-400'" />
-          <div class="min-w-0">
+            :class="c.status === 'error' ? 'text-red-400' : c.status === 'warn' ? 'text-yellow-400' : c.status === 'ok' ? 'text-green-400' : 'text-gray-500'" />
+          <div class="min-w-0 flex-1">
             <p class="font-medium">{{ c.label }}</p>
             <p class="text-xs text-gray-400">{{ c.message }}</p>
+            <a v-if="c.status === 'info' && c.key === 'ocm'"
+              href="#" @click.prevent="scrollToApiKeys"
+              class="text-xs text-blue-400 hover:underline">Einrichten →</a>
+            <a v-if="c.status === 'info' && c.key === 'here'"
+              href="#" @click.prevent="scrollToApiKeys"
+              class="text-xs text-blue-400 hover:underline">Einrichten →</a>
           </div>
         </div>
       </div>
@@ -155,7 +162,7 @@
     </div>
 
     <!-- Externe API-Schlüssel (admin only) -->
-    <div v-if="isAdmin" class="card space-y-4">
+    <div v-if="isAdmin" id="api-keys-section" class="card space-y-4">
       <h2 class="font-semibold flex items-center gap-2">
         <AppIcon name="key" :size="20" class="text-tesla-red" />
         Externe API-Schlüssel
@@ -194,6 +201,40 @@
           </button>
         </div>
         <p v-if="ocmMsg" :class="ocmMsgOk ? 'text-green-400' : 'text-red-400'" class="text-xs">{{ ocmMsg }}</p>
+      </div>
+
+      <div class="border-t border-gray-700/50 pt-4 space-y-3">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <span :class="hereCfg.configured ? 'text-green-400' : 'text-red-400'" class="text-lg">●</span>
+            <div>
+              <p class="text-sm font-medium">HERE Maps API-Key</p>
+              <p class="text-xs text-gray-500">
+                Echtzeit-Verkehr im Routenplaner ·
+                <a href="https://developer.here.com/sign-up" target="_blank"
+                  class="text-blue-400 hover:underline">Kostenlos registrieren →</a>
+              </p>
+            </div>
+          </div>
+          <span v-if="hereCfg.configured" class="text-xs text-gray-500 font-mono">{{ hereCfg.masked }}</span>
+        </div>
+
+        <div class="flex gap-2">
+          <input v-model="hereKeyInput" type="password"
+            :placeholder="hereCfg.configured ? '••••••••  (neuen Key eingeben zum Ändern)' : 'API-Key einfügen …'"
+            class="input flex-1 text-sm font-mono"
+            @keyup.enter="saveHereKey" />
+          <button @click="saveHereKey" :disabled="hereSaving || !hereKeyInput.trim()"
+            class="px-3 py-1.5 rounded-lg text-sm font-medium transition bg-tesla-red text-white hover:bg-red-600 disabled:opacity-40">
+            {{ hereSaving ? '…' : 'Speichern' }}
+          </button>
+          <button v-if="hereCfg.configured" @click="deleteHereKey" :disabled="hereSaving"
+            class="px-3 py-1.5 rounded-lg text-sm font-medium transition bg-gray-700 text-gray-300 hover:bg-red-900 hover:text-red-200 disabled:opacity-40"
+            v-tooltip="'API-Key löschen'">
+            ✕
+          </button>
+        </div>
+        <p v-if="hereMsg" :class="hereMsgOk ? 'text-green-400' : 'text-red-400'" class="text-xs">{{ hereMsg }}</p>
       </div>
     </div>
 
@@ -522,6 +563,58 @@ async function saveOcmKey() {
   }
 }
 
+// ─── HERE Maps API-Key ────────────────────────────────────────────
+const hereCfg      = ref({ configured: false, masked: '' });
+const hereKeyInput = ref('');
+const hereSaving   = ref(false);
+const hereMsg      = ref('');
+const hereMsgOk    = ref(true);
+
+async function loadHereConfig() {
+  try {
+    const { data } = await api.get('/routing/traffic-config');
+    hereCfg.value = data;
+  } catch { /* ignore */ }
+}
+
+async function saveHereKey() {
+  if (!hereKeyInput.value.trim()) return;
+  hereSaving.value = true; hereMsg.value = '';
+  try {
+    const { data } = await api.put('/routing/traffic-config', { here_api_key: hereKeyInput.value.trim() });
+    hereCfg.value = data;
+    hereKeyInput.value = '';
+    hereMsg.value = '✓ Key gespeichert';
+    hereMsgOk.value = true;
+  } catch (e) {
+    hereMsg.value = e.response?.data?.error ?? 'Fehler beim Speichern';
+    hereMsgOk.value = false;
+  } finally {
+    hereSaving.value = false;
+    setTimeout(() => { hereMsg.value = ''; }, 4000);
+  }
+}
+
+async function deleteHereKey() {
+  hereSaving.value = true; hereMsg.value = '';
+  try {
+    const { data } = await api.put('/routing/traffic-config', { here_api_key: '' });
+    hereCfg.value = data;
+    hereMsg.value = 'Key gelöscht';
+    hereMsgOk.value = true;
+  } catch (e) {
+    hereMsg.value = e.response?.data?.error ?? 'Fehler';
+    hereMsgOk.value = false;
+  } finally {
+    hereSaving.value = false;
+    setTimeout(() => { hereMsg.value = ''; }, 3000);
+  }
+}
+
+function scrollToApiKeys() {
+  document.getElementById('api-keys-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 async function deleteOcmKey() {
   ocmSaving.value = true; ocmMsg.value = '';
   try {
@@ -729,6 +822,7 @@ onMounted(async () => {
     loadHealth();
     loadMaintenanceLog();
     loadOcmConfig();
+    loadHereConfig();
   }
 });
 </script>
