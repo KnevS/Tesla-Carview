@@ -45,7 +45,12 @@ echo "    GIT_HASH=$GIT_HASH  GIT_BRANCH=$GIT_BRANCH  BUILD_DATE=$BUILD_DATE"
 
 echo ""
 echo "==> Docker Images bauen und Container neu starten"
-docker compose -f docker-compose.prod.yml up -d --build
+# Gestoppte Containers aufräumen (verhindert Namen-Konflikt beim Neustart)
+docker container prune -f --filter "until=1m" >/dev/null 2>&1 || true
+docker compose -f docker-compose.prod.yml up -d --build --remove-orphans || {
+  echo "==> Fallback: Container ohne Build neu starten …"
+  docker compose -f docker-compose.prod.yml up -d --remove-orphans || true
+}
 
 echo ""
 echo "==> Alte Images aufräumen"
