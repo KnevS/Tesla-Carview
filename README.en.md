@@ -6,7 +6,7 @@
 
 > 🇩🇪 [Auf Deutsch lesen](README.md) · 📋 [Changelog](CHANGELOG.md) · 📚 [Documentation](docs/README.en.md)
 
-> **© 2024–2026 Sven Krische** · Licensed under [PolyForm Noncommercial 1.0.0](LICENSE) · [AUTHORS](AUTHORS) · [NOTICE](NOTICE.md)
+> **© 2026 Sven Krische** · Licensed under [PolyForm Noncommercial 1.0.0](LICENSE) · [AUTHORS](AUTHORS) · [NOTICE](NOTICE.md)
 > Original design, architecture and implementation by Sven Krische ([@KnevS](https://github.com/KnevS)).
 
 **Car Usability Management** — self-hosted, no cloud, no third parties.

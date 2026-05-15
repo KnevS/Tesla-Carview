@@ -1,7 +1,7 @@
 # NOTICE
 
 Tesla Carview
-Copyright (c) 2024–2026 Sven Krische
+Copyright (c) 2026 Sven Krische
 https://github.com/KnevS
 
 This product is licensed under the PolyForm Noncommercial License 1.0.0
@@ -14,11 +14,11 @@ canonical version).
 Per the PolyForm Noncommercial license, the following notice must be
 preserved in all copies and derivative works:
 
-> Required Notice: Copyright (c) 2024–2026 Sven Krische (https://krische.com)
+> Required Notice: Copyright (c) 2026 Sven Krische (https://krische.com)
 
 ## Provenance
 
-Tesla Carview is the original work of Sven Krische, started in 2024
+Tesla Carview is the original work of Sven Krische, started in 2026
 as a privately self-hosted Tesla data-logger application. The
 multi-tenant v2.0 rewrite, Tesla Fleet API + Virtual Key signing
 integration, Monta billing pipeline, in-app handbook, and
