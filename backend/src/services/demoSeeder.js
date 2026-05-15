@@ -23,10 +23,10 @@ const TRIP_TEMPLATES = [
   { from: 'Mercedesstraße 120, Stuttgart',    to: 'Hauptstraße 1, Esslingen',         km: 17.3, lat1: 48.7758, lon1: 9.1829, lat2: 48.7404, lon2: 9.3097 },
   { from: 'Königstraße, Stuttgart',           to: 'Markt 1, Ludwigsburg',             km: 22.8, lat1: 48.7780, lon1: 9.1730, lat2: 48.8973, lon2: 9.1916 },
   { from: 'Stuttgarter Str. 33, Waiblingen',  to: 'Marktplatz, Backnang',             km: 14.4, lat1: 48.8326, lon1: 9.3175, lat2: 48.9469, lon2: 9.4283 },
-  { from: 'Heimstraße 12, Stuttgart',         to: 'Tesla Center Sindelfingen',        km: 24.6, lat1: 48.7758, lon1: 9.1829, lat2: 48.7100, lon2: 9.0083 },
-  { from: 'Flughafen Stuttgart (STR)',        to: 'Heimstraße 12, Stuttgart',         km: 13.2, lat1: 48.6900, lon1: 9.2200, lat2: 48.7758, lon2: 9.1829 },
+  { from: 'Musterstraße 1, Stuttgart',         to: 'Tesla Center Sindelfingen',        km: 24.6, lat1: 48.7800, lon1: 9.1750, lat2: 48.7100, lon2: 9.0083 },
+  { from: 'Flughafen Stuttgart (STR)',        to: 'Musterstraße 1, Stuttgart',         km: 13.2, lat1: 48.6900, lon1: 9.2200, lat2: 48.7800, lon2: 9.1750 },
   { from: 'Schloßplatz, Stuttgart',           to: 'Mercedes-Benz Museum',             km:  4.5, lat1: 48.7780, lon1: 9.1800, lat2: 48.7888, lon2: 9.2342 },
-  { from: 'Heimstraße 12, Stuttgart',         to: 'IKEA Sindelfingen',                km: 23.1, lat1: 48.7758, lon1: 9.1829, lat2: 48.7280, lon2: 9.0030 },
+  { from: 'Musterstraße 1, Stuttgart',         to: 'IKEA Sindelfingen',                km: 23.1, lat1: 48.7800, lon1: 9.1750, lat2: 48.7280, lon2: 9.0030 },
 ];
 const CHARGER_TYPES = ['AC', 'AC', 'AC', 'AC', 'Tesla', 'DC']; // Heim-AC dominiert
 const TRIP_PURPOSES = [
@@ -68,8 +68,8 @@ export function seedNewDemoUser(db, userId, username) {
   const homeLoc = db.prepare(
     `INSERT INTO charging_locations
        (vehicle_id, name, address, type, rate_kwh, is_default, lat, lon, radius_m)
-     VALUES (?, 'Zuhause', 'Heimstraße 12, Stuttgart', 'home', 0.30, 1, ?, ?, 200)`
-  ).run(vehicleId, 48.7758, 9.1829);
+     VALUES (?, 'Zuhause', 'Musterstraße 1, Stuttgart', 'home', 0.30, 1, ?, ?, 200)`
+  ).run(vehicleId, 48.7800, 9.1750);
   const homeLocId = homeLoc.lastInsertRowid;
 
   // Tagweise vergangene Fahrten generieren — 1–3 pro Tag, zufaellig
@@ -134,7 +134,7 @@ export function seedNewDemoUser(db, userId, username) {
         const durSec = Math.round(addedKwh / 7.4 * 3600); // ~7,4 kW AC
         chargeStmt.run(
           vehicleId, chargeStart, chargeStart + durSec,
-          'Zuhause', homeLocId, 48.7758, 9.1829,
+          'Zuhause', homeLocId, 48.7800, 9.1750,
           pick(CHARGER_TYPES), soc, targetSoc,
           Math.round(addedKwh * 100) / 100, 7.4, 0.30, 'pending', 1,
         );
