@@ -568,7 +568,9 @@
     "cat_accident": "Kaza",
     "cat_accident_tooltip": "Kaza hasarı ve buna bağlı onarımlar",
     "cat_other": "Diğer",
-    "cat_other_tooltip": "Hiçbir kategoriye uymayan diğer olaylar"
+    "cat_other_tooltip": "Hiçbir kategoriye uymayan diğer olaylar",
+    "sectionIntervals": "Bakım Aralıkları",
+    "sectionEntries": "Kayıtlar"
   },
   "billing": {
     "title": "Ev şarjı faturalaması",
@@ -969,7 +971,9 @@
     "email": "E-posta (isteğe bağlı)",
     "allRequired": "Tüm zorunlu alanları doldurun",
     "pwTooShort": "Şifre en az 12 karakter olmalıdır",
-    "creating": "Oluşturuluyor…"
+    "creating": "Oluşturuluyor…",
+    "sectionUsers": "Kullanıcılar",
+    "sectionInvites": "Davetler"
   },
   "data": {
     "title": "Veri yönetimi",

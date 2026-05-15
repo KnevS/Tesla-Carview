@@ -568,7 +568,9 @@
     "cat_accident": "Unfall",
     "cat_accident_tooltip": "Unfallschäden und damit verbundene Reparaturen",
     "cat_other": "Sonstiges",
-    "cat_other_tooltip": "Andere Ereignisse, die in keine der Kategorien passen"
+    "cat_other_tooltip": "Andere Ereignisse, die in keine der Kategorien passen",
+    "sectionIntervals": "Wartungsintervalle",
+    "sectionEntries": "Betriebsbuch"
   },
   "billing": {
     "title": "Kostenabrechnung Heimladen",
@@ -969,7 +971,9 @@
     "email": "E-Mail (optional)",
     "allRequired": "Alle Pflichtfelder ausfüllen",
     "pwTooShort": "Passwort muss mindestens 12 Zeichen lang sein",
-    "creating": "Wird erstellt…"
+    "creating": "Wird erstellt…",
+    "sectionUsers": "Benutzer",
+    "sectionInvites": "Einladungen"
   },
   "data": {
     "title": "Datenverwaltung",

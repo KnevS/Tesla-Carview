@@ -568,7 +568,9 @@
     "cat_accident": "Accident",
     "cat_accident_tooltip": "Accident damage and the associated repairs",
     "cat_other": "Other",
-    "cat_other_tooltip": "Other events that don't fit any of the categories"
+    "cat_other_tooltip": "Other events that don't fit any of the categories",
+    "sectionIntervals": "Maintenance Intervals",
+    "sectionEntries": "Logbook Entries"
   },
   "billing": {
     "title": "Home charging billing",
@@ -969,7 +971,9 @@
     "email": "Email (optional)",
     "allRequired": "Fill in all required fields",
     "pwTooShort": "Password must be at least 12 characters",
-    "creating": "Creating…"
+    "creating": "Creating…",
+    "sectionUsers": "Users",
+    "sectionInvites": "Invitations"
   },
   "data": {
     "title": "Data management",
