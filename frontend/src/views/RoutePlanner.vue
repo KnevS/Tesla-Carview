@@ -1062,10 +1062,13 @@ async function _doCalculateRoute() {
     if (showChargers.value) await _loadChargers();
     if (showCameras.value) await _loadCameras();
 
-    // Reichweite reicht nicht → Ladestationen automatisch einblenden und Plan berechnen
-    if (!showChargers.value && arrivalSoc.value != null && arrivalSoc.value < 10) {
-      showChargers.value = true;
-      await _loadChargers();
+    // Reichweite reicht nicht → Ladestationen einblenden + Ladeplan-Sektion öffnen + Plan berechnen
+    if (arrivalSoc.value != null && arrivalSoc.value < 10) {
+      if (!showChargers.value) {
+        showChargers.value = true;
+        await _loadChargers();
+      }
+      if (isCollapsed('charging')) toggle('charging');
       calcChargingPlan();
     }
 
