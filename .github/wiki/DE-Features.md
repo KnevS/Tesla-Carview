@@ -1,15 +1,6 @@
 # Funktionsübersicht
 
-🌐 **Language / Sprache**
-
-| | |
-|---|---|
-| 🇬🇧 **[English](Features)** | English version |
-| 🇩🇪 **[Deutsch](DE-Features)** | Du bist hier |
-| 🇫🇷 **[Français](FR-Features)** | Version française |
-| 🇪🇸 **[Español](ES-Features)** | Versión en español |
-| 🇹🇷 **[Türkçe](TR-Features)** | Türkçe sürüm |
-| 🇬🇷 **[Ελληνικά](EL-Features)** | Ελληνική έκδοση |
+🌐 **Sprache / Language:** [EN](Features) · [FR](FR-Features) · [ES](ES-Features) · [TR](TR-Features) · [EL](EL-Features) · **DE**
 
 ---
 

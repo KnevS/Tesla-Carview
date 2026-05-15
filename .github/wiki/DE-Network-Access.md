@@ -1,11 +1,6 @@
 # Netzwerkzugang — Ohne statische IP
 
-🌐 **Language / Sprache**
-
-| | |
-|---|---|
-| 🇬🇧 **[English](Network-Access)** | English version |
-| 🇩🇪 **[Deutsch](DE-Network-Access)** | Du bist hier |
+🌐 **Sprache / Language:** [EN](Network-Access) · [FR](FR-Network-Access) · [ES](ES-Network-Access) · [TR](TR-Network-Access) · [EL](EL-Home) · **DE**
 
 ---
 

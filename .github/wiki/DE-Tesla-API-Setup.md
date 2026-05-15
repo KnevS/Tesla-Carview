@@ -1,11 +1,6 @@
 # Tesla API Setup
 
-🌐 **Language / Sprache**
-
-| | |
-|---|---|
-| 🇬🇧 **[English](Tesla-API-Setup)** | English version |
-| 🇩🇪 **[Deutsch](DE-Tesla-API-Setup)** | Du bist hier |
+🌐 **Sprache / Language:** [EN](Tesla-API-Setup) · [FR](FR-Tesla-API-Setup) · [ES](ES-Tesla-API-Setup) · [TR](TR-Tesla-API-Setup) · [EL](EL-Home) · **DE**
 
 ---
 

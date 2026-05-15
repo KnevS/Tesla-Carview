@@ -1,5 +1,7 @@
 # Raspberry Pi Storage — No More SD Card Death
 
+🌐 **Language:** **EN** · [DE](DE-Raspberry-Pi-Storage) · [FR](FR-Raspberry-Pi-Storage) · [ES](ES-Raspberry-Pi-Storage) · [TR](TR-Raspberry-Pi-Storage) · [EL](EL-Home)
+
 SD cards and 24/7 server operation are a bad combination. This page explains why, and guides you to the right alternative for your setup — step by step.
 
 ---

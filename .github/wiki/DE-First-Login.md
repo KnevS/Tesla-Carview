@@ -1,11 +1,6 @@
 # Erster Login & Tenant-Einrichtung
 
-🌐 **Language / Sprache**
-
-| | |
-|---|---|
-| 🇬🇧 **[English](First-Login)** | English version |
-| 🇩🇪 **[Deutsch](DE-First-Login)** | Du bist hier |
+🌐 **Sprache / Language:** [EN](First-Login) · [FR](FR-First-Login) · [ES](ES-First-Login) · [TR](TR-First-Login) · [EL](EL-Home) · **DE**
 
 ---
 

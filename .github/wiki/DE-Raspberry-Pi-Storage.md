@@ -1,11 +1,6 @@
 # Raspberry Pi Speicher — Kein SD-Karten-Tod mehr
 
-🌐 **Language / Sprache**
-
-| | |
-|---|---|
-| 🇬🇧 **[English](Raspberry-Pi-Storage)** | English version |
-| 🇩🇪 **[Deutsch](DE-Raspberry-Pi-Storage)** | Du bist hier |
+🌐 **Sprache / Language:** [EN](Raspberry-Pi-Storage) · [FR](FR-Raspberry-Pi-Storage) · [ES](ES-Raspberry-Pi-Storage) · [TR](TR-Raspberry-Pi-Storage) · [EL](EL-Home) · **DE**
 
 ---
 

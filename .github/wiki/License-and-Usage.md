@@ -1,5 +1,7 @@
 # License & Usage Rights
 
+🌐 **Language:** **EN** · [DE](DE-License-and-Usage) · [FR](FR-License-and-Usage) · [ES](ES-License-and-Usage) · [TR](TR-License-and-Usage) · [EL](EL-Home)
+
 Tesla Carview is open source — but with important restrictions on how it may be used.
 
 ---

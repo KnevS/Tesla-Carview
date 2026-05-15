@@ -1,5 +1,7 @@
 # Troubleshooting
 
+🌐 **Language:** **EN** · [DE](DE-Troubleshooting) · [FR](FR-Troubleshooting) · [ES](ES-Troubleshooting) · [TR](TR-Troubleshooting) · [EL](EL-Home)
+
 Solutions to the most common problems. Start with the most likely cause and work your way down.
 
 ---

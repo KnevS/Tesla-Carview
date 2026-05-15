@@ -1,11 +1,6 @@
 # Fehlerbehebung
 
-🌐 **Language / Sprache**
-
-| | |
-|---|---|
-| 🇬🇧 **[English](Troubleshooting)** | English version |
-| 🇩🇪 **[Deutsch](DE-Troubleshooting)** | Du bist hier |
+🌐 **Sprache / Language:** [EN](Troubleshooting) · [FR](FR-Troubleshooting) · [ES](ES-Troubleshooting) · [TR](TR-Troubleshooting) · [EL](EL-Home) · **DE**
 
 ---
 

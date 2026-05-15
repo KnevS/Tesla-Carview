@@ -1,11 +1,6 @@
 # Sicherheit — Authentifizierung, MFA & Best Practices
 
-🌐 **Language / Sprache**
-
-| | |
-|---|---|
-| 🇬🇧 **[English](Security)** | English version |
-| 🇩🇪 **[Deutsch](DE-Security)** | Du bist hier |
+🌐 **Sprache / Language:** [EN](Security) · [FR](FR-Security) · [ES](ES-Security) · [TR](TR-Security) · [EL](EL-Home) · **DE**
 
 ---
 
