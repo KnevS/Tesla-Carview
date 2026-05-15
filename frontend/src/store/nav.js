@@ -112,20 +112,34 @@ export const useNavStore = defineStore('nav', {
         .filter(l => !l.adminOnly || auth.isAdmin);
     },
     /** Gruppen-Struktur fuer die Desktop-Dropdowns. Pro Gruppe nur die
-     *  user-sichtbaren Items, in der eigenen Reihenfolge. */
+     *  user-sichtbaren Items, in der eigenen Reihenfolge.
+     *
+     *  Admin-Gruppen werden fuer Admins IMMER vollstaendig gerendert —
+     *  unabhaengig von order[] / hidden[], weil ein falscher localStorage-
+     *  Eintrag sonst das System-Menu dauerhaft verstecken kann. */
     visibleGroups() {
       const auth = useAuthStore();
       const visibleByKey = new Set(this.visibleLinks.map(l => l.key));
       return NAV_GROUPS
         .filter(g => !g.adminOnly || auth.isAdmin)
-        .map(g => ({
-          ...g,
-          items: g.items
-            // user-Reihenfolge auch innerhalb der Gruppe respektieren
-            .slice()
-            .sort((a, b) => this.order.indexOf(a.key) - this.order.indexOf(b.key))
-            .filter(i => visibleByKey.has(i.key)),
-        }))
+        .map(g => {
+          if (g.adminOnly && auth.isAdmin) {
+            // Admin-Gruppe: alle Items zeigen, nur Reihenfolge aus order[]
+            return {
+              ...g,
+              items: g.items
+                .slice()
+                .sort((a, b) => this.order.indexOf(a.key) - this.order.indexOf(b.key)),
+            };
+          }
+          return {
+            ...g,
+            items: g.items
+              .slice()
+              .sort((a, b) => this.order.indexOf(a.key) - this.order.indexOf(b.key))
+              .filter(i => visibleByKey.has(i.key)),
+          };
+        })
         .filter(g => g.items.length > 0);
     },
     /** Alle Items, die fuer den aktuellen User relevant sind — egal ob
