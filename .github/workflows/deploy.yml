@@ -66,10 +66,10 @@ jobs:
             # Drei einzelne echo-tee statt printf — printf '\n' wurde durch
             # appleboy/ssh-action irgendwo verstuemmelt, sodass alles in
             # einer Zeile landete und docker die Werte nicht parsen konnte.
-            # WICHTIG: /etc/sudoers.d/sven-deploy erlaubt NOPASSWD nur fuer
-            # docker und git — `sudo tee/cat/rm` wuerden ein Passwort
-            # verlangen und im SSH-Skript ohne TTY silent haengen. Daher:
-            # Env-File in /tmp (sven hat dort schreibrecht ohne sudo) und
+            # WICHTIG: sudoers erlaubt NOPASSWD nur fuer docker und git —
+            # `sudo tee/cat/rm` wuerden ein Passwort verlangen und im
+            # SSH-Skript ohne TTY silent haengen. Daher:
+            # Env-File in /tmp (Deploy-User hat dort Schreibrecht ohne sudo) und
             # via `--env-file` an docker compose mitgeben (laeuft mit sudo).
             ENV_TMP=$(mktemp /tmp/tcv-deploy-env.XXXXXX)
             {
