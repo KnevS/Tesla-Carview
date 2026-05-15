@@ -434,17 +434,37 @@ Tesla Carview bir PWA'dır — App Store olmadan yerel uygulama gibi kurulabilir
 
 **Tesla ekranı:** arabada tarayıcıyı aç, Carview URL'sini gir. Düzen Tesla ekran boyutuna uyum sağlar; dar görünümde yolculuk defteri büyük dokunma hedefleri olan kart düzenine geçer. **„◫ Karten"** butonu bu görünümü zorlar.
 
+## 🗺️ Rota planlayıcı {#route-planner}
+
+Rota planlayıcı, sürüş güzergahları hesaplar ve yol boyunca hızlı şarj istasyonlarını gösterir.
+
+**Kaçınma seçenekleri** — Hedef alanının yanında üç geçiş düğmesi:
+- **Otoyollar** — güzergah karayolları ve şehirlerarası yollar üzerinden geçer
+- **Ücretli yollar** — ücretli bölümler atlanır
+- **Feribotlar** — güzergahta feribot bağlantısı yer almaz
+
+Seçenekler tarayıcıda kaydedilir. Yönlendirme Valhalla (openstreetmap.de) kullanır; erişilemezse otomatik olarak OSRM'ye geçilir ve toast bildirimi gösterilir.
+
+**Hızlı şarj istasyonları** — Güzergah boyunca Supercharger'lar ve CCS. Admin → System → Harici API anahtarları altında ücretsiz bir OpenChargeMap API anahtarı gerektirir.
+
+**Gerçek zamanlı trafik** — HERE Maps API anahtarı yapılandırıldığında, güncel trafik akışı seyahat süresi tahminine dahil edilir.
+
 ## 🟢 Sistem durumu (yönetici) {#system-health}
 
-**System** altında yöneticiler beş kontrolle renkli trafik ışığı kartı görür:
+**System** altında yöneticiler sekiz kontrolle renkli trafik ışığı kartı görür:
 
 - **Tesla OAuth token** — bağlı mı? ne zaman sona eriyor?
 - **Virtual Key** — oluşturuldu mu? (imzalı komutlar için gerekli)
 - **Fleet Telemetry** — son veri noktası ne zaman geldi?
 - **Tesla poller** — uygulama aracı en son ne zaman sorguladı?
 - **Kiracı DB** — veritabanı boyutu
+- **Gece bakımı** — son otomatik bakım çalışmasının zaman damgası
+- **OpenChargeMap** — canlı HTTP yoklaması (anahtar yapılandırılmamışsa soluk)
+- **HERE Maps** — canlı HTTP yoklaması (anahtar yapılandırılmamışsa soluk)
 
-Yeşil (her şey yolunda), sarı (dikkat, örn. token yakında dolacak) veya kırmızı (eylem gerekli).
+Yeşil (her şey yolunda), sarı (dikkat) veya kırmızı (eylem gerekli). İsteğe bağlı hizmetler (OCM, HERE) yalnızca anahtar yapılandırılmış ancak uç nokta yanıt vermiyorsa hata sayılır.
+
+**İzleme & Öz-iyileştirme** — Altta: öz-iyileştirme geçiş düğmesi (her 15 dakikada bir cron, düşen konteynerleri yeniden başlatır) ve uyarı e-posta alanı. Heal ve güvenlik kontrol günlükleri doğrudan yönetici kartında görüntülenebilir.
 
 ## 💬 Grok Chat {#grok}
 

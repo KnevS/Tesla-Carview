@@ -448,17 +448,45 @@ Tesla Carview ist eine **PWA** (Progressive Web App) — du kannst sie wie eine 
 
 **Empfehlung:** Lass dir Carview auf dem Tesla-Display als Lesezeichen ablegen — Tesla zeigt eingestellte Lesezeichen direkt im Browser-Schnellzugriff. Für das Eintragen von Fahrt-Notizen während einer kurzen Pause ist das schneller als die URL jedes Mal zu tippen.
 
+## 🗺️ Routenplaner {#route-planner}
+
+Der Routenplaner unter **Routenplaner** berechnet Fahrrouten und zeigt Schnellladestationen entlang der Strecke an.
+
+**Route berechnen** — Gib Start- und Zieladresse ein. Über „+ Zwischenstopp" lassen sich beliebig viele Wegpunkte einfügen und per Drag-and-drop umsortieren.
+
+**Vermeiden-Optionen** — Drei Toggle-Chips direkt am Zielfeld:
+- **Autobahnen** — Strecke meidet Schnellstraßen, wird über Bundes- und Landstraßen geführt
+- **Mautstraßen** — mautpflichtige Streckenabschnitte werden umgangen
+- **Fähren** — keine Fährverbindungen in der Route
+
+Die gewählten Optionen werden im Browser gespeichert und gelten für alle folgenden Routenberechnungen bis zur nächsten Änderung. Das Routing nutzt intern die Valhalla-Engine (openstreetmap.de); bei kurzfristiger Nichterreichbarkeit wird automatisch auf OSRM umgestellt (Hinweis erscheint als Toast).
+
+**Schnellladestationen** — Die Karte zeigt Supercharger und CCS-Schnelllader entlang der Route. Voraussetzung: ein kostenloser OpenChargeMap-API-Key muss in **Admin → System → Externe API-Schlüssel** hinterlegt sein. Fehlt der Key, erscheint ein Toast mit Direkt-Link zu den Einstellungen.
+
+**Echtzeit-Verkehr** — Wenn ein HERE Maps API-Key konfiguriert ist (ebenfalls unter Admin → System), wird der aktuelle Verkehrsfluss berücksichtigt und in der Reisezeit-Schätzung abgebildet.
+
+**Ladeplanung** — Bei aktivierter SoC-Planung (Akkustand eingeben) berechnet der Planer intelligente Ladestopps mit Zeitschätzung und prüft, ob die Reichweite für jeden Abschnitt ausreicht.
+
 ## 🟢 System-Status (Admin) {#system-health}
 
-Unter **System** sieht der Admin oben eine farbige Ampel-Karte mit fünf Checks:
+Unter **System** sieht der Admin oben eine farbige Ampel-Karte mit acht Checks:
 
 - **Tesla OAuth-Token** — verbunden? Wann läuft er ab?
 - **Virtual Key** — erzeugt? (Pflicht für Fahrzeugbefehle)
 - **Fleet Telemetry** — wann kam zuletzt ein Datenpunkt an?
 - **Tesla-Poller** — wann hat die App zuletzt Fahrzeugdaten abgefragt?
 - **Tenant-DB** — Größe der Datenbank
+- **Nachtwarung** — Zeitpunkt des letzten automatischen Wartungslaufs
+- **OpenChargeMap** — Live-Probe des OCM-API-Endpunkts (gedimmt/info wenn kein Key konfiguriert)
+- **HERE Maps** — Live-Probe der HERE-Routing-API (gedimmt/info wenn kein Key konfiguriert)
 
-Die Karte ist grün (alles ok), gelb (Aufmerksamkeit, z.B. Token läuft bald ab) oder rot (Aktion nötig, z.B. Token abgelaufen) — auf einen Blick erkennbar, ob die Selbsthosting-Instanz gesund ist.
+Die Karte ist grün (alles ok), gelb (Aufmerksamkeit, z.B. Token läuft bald ab) oder rot (Aktion nötig, z.B. Token abgelaufen) — auf einen Blick erkennbar, ob die Selbsthosting-Instanz gesund ist. Optionale Services (OCM, HERE) werden nur als Fehler gewertet, wenn ein Key konfiguriert ist, die Gegenstelle aber nicht antwortet.
+
+**Monitoring & Selbstheilung** — Darunter erscheint die Monitoring-Karte mit zwei Einstellungen:
+- **Selbstheilung an/aus** — Ein automatischer Cron-Job prüft alle 15 Minuten, ob alle Container laufen und `/api/health` antwortet. Ausgefallene Services werden automatisch neu gestartet.
+- **Alert-E-Mail** — Wird nach einem Neustart eine E-Mail-Adresse gefunden, erhält sie eine Benachrichtigung mit Zeitstempel und Anzahl der neu gestarteten Services.
+
+Heal-Log und Security-Check-Log der letzten 50 Einträge sind direkt in dieser Karte einsehbar und per „Log aktualisieren" jederzeit frisch abrufbar.
 
 ## 💬 Grok Chat {#grok}
 

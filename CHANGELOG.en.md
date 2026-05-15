@@ -7,6 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v2.4.0] — 2026-05-15
+
+### Added
+- **Route avoidance** — Route Planner can now avoid motorways, toll roads and ferries; routing via Valhalla public API (OSRM does not support this); setting is persisted in the browser; automatic fallback to OSRM with a warning toast if Valhalla is unreachable
+- **OpenChargeMap API key management** — OCM key can be entered, viewed (masked) and deleted directly in Admin → System, no SSH access required; missing-key toast includes a direct link to settings; registration links shown in the UI
+- **Monitoring & self-healing** — Cron job `heal.sh` checks container status and `/api/health` every 15 min; restarts services automatically on failure; optional email alert; heal toggle and alert address configurable in Admin → System; heal and security logs viewable in admin UI
+
+### Improved
+- **System health** — 8 checks instead of 5; live HTTP probes for OCM and HERE Maps; optional services appear as `info` entries (dimmed, not counted as error when not configured), with "Set up →" link to the API key section
+- **update.sh** — more robust deploy flow: explicit stop → prune → up instead of plain `up --build` (prevents container name conflicts on quick redeploys)
+
+---
+
 ## [v2.3.0] — 2026-05-14
 
 ### Added

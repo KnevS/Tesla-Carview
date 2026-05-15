@@ -448,17 +448,45 @@ Tesla Carview is a **PWA** (Progressive Web App) — you can install it like a n
 
 **Recommended:** bookmark Carview on the Tesla display — Tesla shows saved bookmarks in the browser quick access. For jotting down a trip purpose during a short stop that's much faster than typing the URL again.
 
+## 🗺️ Route Planner {#route-planner}
+
+The Route Planner calculates driving routes and shows fast-charging stations along the way.
+
+**Calculate a route** — Enter start and destination. Use "+ Add stop" to insert as many waypoints as you like; drag to reorder them.
+
+**Avoidance options** — Three toggle chips next to the destination field:
+- **Motorways** — route avoids motorways and uses A/B roads instead
+- **Toll roads** — toll sections are bypassed
+- **Ferries** — no ferry crossings in the route
+
+The selected options are saved in the browser and apply to all subsequent calculations until changed. Routing uses the Valhalla engine (openstreetmap.de); if Valhalla is temporarily unavailable the app falls back to OSRM and shows a toast.
+
+**Fast-charging stations** — The map shows Superchargers and CCS fast-chargers along the route. Requires a free OpenChargeMap API key set in **Admin → System → External API keys**. If the key is missing a toast appears with a direct link to settings.
+
+**Live traffic** — When a HERE Maps API key is configured (also under Admin → System), current traffic flow is factored into the travel-time estimate.
+
+**Charge planning** — With SoC planning enabled (enter current battery level) the planner calculates smart charging stops with time estimates and verifies whether range is sufficient for each leg.
+
 ## 🟢 System status (admin) {#system-health}
 
-Under **System** admins see a coloured traffic-light card at the top with five checks:
+Under **System** admins see a coloured traffic-light card at the top with eight checks:
 
 - **Tesla OAuth token** — connected? when does it expire?
 - **Virtual Key** — created? (required for signed commands)
 - **Fleet Telemetry** — when did the last data point arrive?
 - **Tesla poller** — when did the app last poll vehicle data?
 - **Tenant DB** — database size
+- **Nightly maintenance** — timestamp of the last automatic maintenance run
+- **OpenChargeMap** — live probe of the OCM API endpoint (dimmed/info when no key is configured)
+- **HERE Maps** — live probe of the HERE Routing API (dimmed/info when no key is configured)
 
-The card is green (all good), yellow (attention, e.g. token expiring soon) or red (action required, e.g. token expired) — at a glance you know whether the self-hosted instance is healthy.
+The card is green (all good), yellow (attention, e.g. token expiring soon) or red (action required, e.g. token expired). Optional services (OCM, HERE) are only counted as errors when a key is configured but the endpoint does not respond.
+
+**Monitoring & self-healing** — Below the health card sits the Monitoring card with two settings:
+- **Self-healing on/off** — A cron job checks every 15 minutes whether all containers are running and `/api/health` responds. Services that have gone down are restarted automatically.
+- **Alert email** — After an automatic restart, a notification email is sent to the configured address with a timestamp and the number of restarted services.
+
+The last 50 entries from the heal log and security-check log are shown directly in this card and can be refreshed at any time with the "Refresh log" button.
 
 ## 💬 Grok Chat {#grok}
 

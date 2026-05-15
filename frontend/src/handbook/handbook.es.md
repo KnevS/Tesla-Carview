@@ -434,17 +434,37 @@ Tesla Carview es una PWA — instalable como app nativa sin la App Store.
 
 **Pantalla Tesla:** abre el navegador del coche e introduce la URL de Carview. La interfaz se adapta; el libro de viajes pasa a tarjetas con grandes objetivos táctiles en pantallas estrechas. El botón **"◫ Karten"** fuerza esa vista.
 
+## 🗺️ Planificador de ruta {#route-planner}
+
+El planificador calcula rutas de conducción y muestra estaciones de carga rápida en el camino.
+
+**Opciones de evitación** — Tres botones de alternancia junto al campo de destino:
+- **Autopistas** — la ruta utiliza carreteras nacionales y locales
+- **Peajes** — se evitan los tramos de peaje
+- **Ferrys** — sin travesías en ferry en el itinerario
+
+Las opciones se guardan en el navegador. El enrutamiento usa Valhalla (openstreetmap.de); si no está disponible, hay respaldo automático a OSRM con aviso toast.
+
+**Estaciones de carga** — Supercargadores y CCS a lo largo del trayecto. Requiere una clave API gratuita de OpenChargeMap en Admin → System → Claves API externas.
+
+**Tráfico en tiempo real** — Con una clave HERE Maps configurada, el tráfico actual se integra en la estimación del tiempo de viaje.
+
 ## 🟢 Estado del sistema (admin) {#system-health}
 
-Bajo **System**, los administradores ven una tarjeta tipo semáforo con cinco comprobaciones:
+Bajo **System**, los administradores ven una tarjeta tipo semáforo con ocho comprobaciones:
 
 - **Token OAuth Tesla** — ¿conectado? ¿cuándo caduca?
 - **Virtual Key** — ¿creada? (necesaria para comandos firmados)
 - **Fleet Telemetry** — ¿cuándo llegó el último punto de datos?
 - **Poller Tesla** — ¿cuándo consultó la app por última vez el vehículo?
 - **DB del inquilino** — tamaño de la base
+- **Mantenimiento nocturno** — marca de tiempo del último pase automático
+- **OpenChargeMap** — sonda HTTP en vivo (atenuado si no hay clave configurada)
+- **HERE Maps** — sonda HTTP en vivo (atenuado si no hay clave configurada)
 
-Verde (todo bien), amarillo (atención, p. ej. token a punto de caducar) o rojo (acción requerida).
+Verde (todo bien), amarillo (atención) o rojo (acción requerida). Los servicios opcionales (OCM, HERE) solo cuentan como error si hay una clave configurada pero el endpoint no responde.
+
+**Monitorización y auto-reparación** — Debajo: interruptor de auto-reparación (cron cada 15 min, reinicia contenedores caídos) y campo de e-mail de alerta. Los logs heal y security-check son visibles directamente en la tarjeta de admin.
 
 ## 💬 Grok Chat {#grok}
 

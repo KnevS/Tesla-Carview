@@ -158,17 +158,56 @@ Restart backend. An additional tenant with slug `demo` and DB file `data/tenants
 
 ---
 
+## 🛡️ Monitoring & self-healing
+
+A cron job (`/opt/monitoring/bin/heal.sh`) runs every 15 minutes and watches the core services:
+
+1. **Container status** — inspects `docker inspect` for `tesla-carview-backend`, `-frontend` and `-nginx`; if a container is not in `running` state it is restarted via `docker compose up -d <service>`.
+2. **Health endpoint** — when all containers are running, it checks `GET /api/health`; if the response is not `{"status":"ok"}` the backend container is restarted.
+3. **Email alert** — after each automatic restart a notification email is sent to the configured address (if set).
+4. **Log rotation** — `/var/log/tcv-heal.log` is automatically trimmed to the last 500 lines when it exceeds 1 MB.
+
+**Configuration** (Admin → System → Monitoring & self-healing):
+
+| Setting | Description |
+|---|---|
+| Self-healing on/off | DB key `monitoring.heal_enabled`; set to `false` and the cron job exits immediately |
+| Alert email | DB key `monitoring.alert_email`; empty = no alert |
+
+**API endpoints** (admin-only):
+- `GET /api/system/monitoring-config` — reads current configuration
+- `PUT /api/system/monitoring-config` — saves configuration
+- `GET /api/system/monitoring-log?lines=50` — returns the last N lines from the heal and security logs
+
+**Manually inspect logs:**
+```bash
+tail -50 /var/log/tcv-heal.log
+tail -50 /var/log/security-check.log
+```
+
+**Cron entry** (`/etc/cron.d/tesla-carview-monitoring`):
+```
+*/15 * * * * root /opt/monitoring/bin/heal.sh >/dev/null 2>&1
+```
+
+---
+
 ## 📊 System health at a glance
 
 UI: **Admin → System** → admin sees a coloured traffic-light card at the top. Backend endpoint: `GET /api/system/health` (admin-only). Checks:
 
-| Check | Green | Yellow | Red |
-|---|---|---|---|
-| Tesla OAuth token | valid, > 7d remaining | < 7d left | expired or missing |
-| Virtual Key | created | — | not created |
-| Fleet Telemetry | last data point < 24 h | < 7 d | nothing or > 7 d |
-| Tesla poller | last poll < 60 min | < 1 d | — |
-| Tenant DB | informational — size in MB | — | — |
+| Check | Green | Yellow | Red | Info (dimmed) |
+|---|---|---|---|---|
+| Tesla OAuth token | valid, > 7d remaining | < 7d left | expired or missing | — |
+| Virtual Key | created | — | not created | — |
+| Fleet Telemetry | last data point < 24 h | < 7 d | nothing or > 7 d | — |
+| Tesla poller | last poll < 60 min | < 1 d | — | — |
+| Tenant DB | informational — size in MB | — | — | — |
+| Nightly maintenance | last run < 25 h | — | — | — |
+| OpenChargeMap | live probe OK | — | probe failed (key set) | no key configured |
+| HERE Maps | live probe OK | — | probe failed (key set) | no key configured |
+
+Optional services (OCM, HERE) are only counted as errors when a key is configured but the endpoint does not respond. Without a key: `info` status, dimmed, no effect on the overall traffic-light colour.
 
 ---
 
