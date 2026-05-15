@@ -40,7 +40,7 @@ const daysLeft = computed(() => {
 });
 
 function fmtDate(ts) {
-  if (!ts) return 'in 14 Tagen';
+  if (!ts) return 'bald';
   return new Date(ts * 1000).toLocaleDateString('de-DE',
     { day: '2-digit', month: '2-digit', year: 'numeric' });
 }

@@ -40,7 +40,7 @@
         <li>Es werden <strong>keine echten Fahrzeugdaten</strong> verarbeitet — alle in der Demo angezeigten Inhalte sind <strong>frei erfunden</strong> und werden vom System dynamisch generiert.</li>
         <li>Wir speichern nur das, was zur Funktion nötig ist: einen anonymisierten Tester-Benutzernamen (z.B. <code>tester-abc123</code>), Sitzungs-Token, IP-Adresse und User-Agent des Login-Vorgangs sowie ein Audit-Log über sicherheitsrelevante Aktionen.</li>
         <li>Eine <strong>E-Mail-Adresse oder anderweitige personenbezogene Daten werden nicht abgefragt</strong>.</li>
-        <li>Nach Ablauf von <strong>14 Tagen</strong> ab Account-Erzeugung wird der Tester-Account inklusive aller damit verknüpften Daten <strong>vollständig und unwiderruflich</strong> gelöscht.</li>
+        <li>Nach Ablauf von <strong>2 Tagen</strong> ab Account-Erzeugung wird der Tester-Account inklusive aller damit verknüpften Daten <strong>vollständig und unwiderruflich</strong> gelöscht.</li>
         <li>Die Daten werden nicht an Dritte weitergegeben und nicht für Werbung oder Analyse genutzt.</li>
       </ul>
       <p v-if="scope === 'terms'">
@@ -48,7 +48,7 @@
       </p>
       <ul v-if="scope === 'terms'">
         <li>Die Demo ist <strong>ausschließlich zum unverbindlichen Ausprobieren</strong> der Anwendung gedacht. Es besteht <strong>kein Anspruch auf Verfügbarkeit, Funktion oder Datenerhalt</strong>.</li>
-        <li>Der Account ist <strong>14 Tage gültig</strong> und wird danach automatisch gelöscht. Eine Verlängerung ist nicht vorgesehen.</li>
+        <li>Der Account ist <strong>2 Tage gültig</strong> und wird danach automatisch gelöscht. Eine Verlängerung ist nicht vorgesehen.</li>
         <li>Es werden Fake-Daten angezeigt; diese stellen keine realen Fahrten, Ladungen oder Fahrzeuge dar. Eine Verwendung dieser Daten für Buchführung, Steuer (Fahrtenbuch) oder Versicherungsangelegenheiten ist <strong>ausgeschlossen</strong>.</li>
         <li>Missbrauch (z.B. automatisierte Mehrfach-Signups, Last-Tests, Penetration-Versuche) führt zur sofortigen Sperrung und Löschung.</li>
         <li>Der Betreiber behält sich vor, Tester-Accounts <strong>jederzeit und ohne Vorankündigung zu löschen</strong>, wenn Ressourcen knapp werden oder der Betrieb es erfordert.</li>
@@ -56,7 +56,7 @@
       </ul>
       <p class="text-xs text-blue-200/80 mt-2">
         Diese Zusätze entsprechen einem reduzierten Funktions- und Datenumfang;
-        sobald du dich abmeldest oder die 14 Tage abgelaufen sind, verlierst du den Zugang.
+        sobald du dich abmeldest oder die 2 Tage abgelaufen sind, verlierst du den Zugang.
       </p>
     </section>
 
