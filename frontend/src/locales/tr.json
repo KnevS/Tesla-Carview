@@ -1684,6 +1684,13 @@
     "camerasLegalText": "Radar uyarı uygulamaları bazı ülkelerde sürüş sırasında yasadışı olabilir. Yerel mevzuatı kontrol edin. Kullanım riski kullanıcıya aittir.",
     "camerasLegend": "radar",
     "noCameras": "Bu bölgede radar bulunamadı.",
+    "avoidTitle": "Kaçın:",
+    "avoidMotorways": "Otoyollar",
+    "avoidMotorwaysTip": "Otoyollardan kaçın – devlet ve il yollarından rota",
+    "avoidTolls": "Ücretli yollar",
+    "avoidTollsTip": "Ücretli yollardan kaçın",
+    "avoidFerry": "Feribotlar",
+    "avoidFerryTip": "Feribot bağlantılarından kaçın",
     "actionsTitle": "Eylemler"
   },
   "wizard": {

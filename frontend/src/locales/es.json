@@ -1684,6 +1684,13 @@
     "camerasLegalText": "El uso de avisadores de radar puede ser ilegal en algunos países. Consulte la normativa local. Uso bajo su propia responsabilidad.",
     "camerasLegend": "radares",
     "noCameras": "No se encontraron radares en esta zona.",
+    "avoidTitle": "Evitar:",
+    "avoidMotorways": "Autopistas",
+    "avoidMotorwaysTip": "Evitar autopistas – ruta por carreteras nacionales",
+    "avoidTolls": "Peajes",
+    "avoidTollsTip": "Evitar carreteras de peaje",
+    "avoidFerry": "Ferrys",
+    "avoidFerryTip": "Evitar conexiones de ferry",
     "actionsTitle": "Acciones"
   },
   "wizard": {

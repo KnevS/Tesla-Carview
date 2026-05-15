@@ -1684,6 +1684,13 @@
     "camerasLegalText": "En France, avertir d'un contrôle de vitesse est interdit. Dans d'autres pays, la réglementation varie. Utilisation à vos risques.",
     "camerasLegend": "radars",
     "noCameras": "Aucun radar trouvé dans cette zone.",
+    "avoidTitle": "Éviter :",
+    "avoidMotorways": "Autoroutes",
+    "avoidMotorwaysTip": "Éviter les autoroutes – itinéraire par routes nationales",
+    "avoidTolls": "Péages",
+    "avoidTollsTip": "Éviter les routes à péage",
+    "avoidFerry": "Ferries",
+    "avoidFerryTip": "Éviter les traversées en ferry",
     "actionsTitle": "Actions"
   },
   "wizard": {
