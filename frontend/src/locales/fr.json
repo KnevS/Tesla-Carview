@@ -1683,6 +1683,7 @@
     "camerasLegal": "Avis légal",
     "camerasLegalText": "En France, avertir d'un contrôle de vitesse est interdit. Dans d'autres pays, la réglementation varie. Utilisation à vos risques.",
     "camerasLegend": "radars",
+    "noCameras": "Aucun radar trouvé dans cette zone.",
     "actionsTitle": "Actions"
   },
   "wizard": {

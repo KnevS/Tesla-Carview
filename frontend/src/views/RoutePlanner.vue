@@ -1061,6 +1061,14 @@ async function _doCalculateRoute() {
 
     if (showChargers.value) await _loadChargers();
     if (showCameras.value) await _loadCameras();
+
+    // Reichweite reicht nicht → Ladestationen automatisch einblenden und Plan berechnen
+    if (!showChargers.value && arrivalSoc.value != null && arrivalSoc.value < 10) {
+      showChargers.value = true;
+      await _loadChargers();
+      calcChargingPlan();
+    }
+
     // Wetter + Verkehr asynchron nachladen
     loadWeather();
     loadTraffic();
@@ -1158,7 +1166,8 @@ async function _loadChargers() {
       }
     }));
     updateChargerMarkers();
-  } catch (err) { console.warn('[Chargers]', err.message); }
+    if (chargers.value.length === 0) showToast(t('routes.noChargers'), false);
+  } catch (err) { console.warn('[Chargers]', err.message); showToast(t('routes.noChargers'), false); }
   finally { chargerLoading.value = false; }
 }
 
@@ -1215,7 +1224,8 @@ async function _loadCameras() {
         cameraMarkers.push(L.marker([cam.lat, cam.lon], { icon: cameraIcon() }).addTo(leafletMap).bindPopup(popup));
       }
     }
-  } catch (err) { console.warn('[Cameras]', err.message); }
+    if (cameras.value.length === 0) showToast(t('routes.noCameras'), false);
+  } catch (err) { console.warn('[Cameras]', err.message); showToast(t('routes.noCameras'), false); }
   finally { cameraLoading.value = false; }
 }
 

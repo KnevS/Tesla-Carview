@@ -1683,6 +1683,7 @@
     "camerasLegal": "Legal notice",
     "camerasLegalText": "Speed camera warning apps may be illegal while driving in some countries. Please check local regulations. Use at your own risk.",
     "camerasLegend": "cameras",
+    "noCameras": "No speed cameras found in this area.",
     "actionsTitle": "Actions"
   },
   "wizard": {

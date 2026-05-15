@@ -1683,6 +1683,7 @@
     "camerasLegal": "Yasal uyarı",
     "camerasLegalText": "Radar uyarı uygulamaları bazı ülkelerde sürüş sırasında yasadışı olabilir. Yerel mevzuatı kontrol edin. Kullanım riski kullanıcıya aittir.",
     "camerasLegend": "radar",
+    "noCameras": "Bu bölgede radar bulunamadı.",
     "actionsTitle": "Eylemler"
   },
   "wizard": {
