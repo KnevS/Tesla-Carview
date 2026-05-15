@@ -1,6 +1,8 @@
 <template>
-  <div class="space-y-4">
-    <div class="flex items-center justify-between">
+  <!-- Desktop: feste Höhe = Viewport minus Navbar (4rem) + py-6 (3rem).
+       Mobile: natürliche Höhe, Seite scrollt normal. -->
+  <div class="flex flex-col gap-4 lg:h-[calc(100dvh-7rem)]">
+    <div class="flex items-center justify-between flex-shrink-0">
       <h1 class="text-2xl font-bold flex items-center gap-2">
         <AppIcon name="map" :size="24" class="text-tesla-red" />
         {{ $t('routes.title') }}
@@ -11,10 +13,10 @@
       {{ $t('common.noVehicle') }}
     </div>
 
-    <div v-else class="grid lg:grid-cols-[400px_1fr] gap-4 items-start">
+    <div v-else class="grid lg:grid-cols-[400px_1fr] gap-4 lg:flex-1 lg:min-h-0">
 
       <!-- ─── Linke Spalte ─────────────────────────────────────────────────── -->
-      <div class="space-y-2 overflow-y-auto sticky top-4 pr-1" style="max-height:calc(100vh - 2rem)">
+      <div class="space-y-2 overflow-y-auto pr-1">
         <template v-for="sid in orderedSections" :key="sid">
 
         <!-- Startort -->
@@ -511,7 +513,8 @@
       </div>
 
       <!-- ─── Karte ──────────────────────────────────────────────────────────── -->
-      <div class="card p-0 overflow-hidden rounded-2xl sticky top-4" style="height: 75vh; min-height: 420px;">
+      <!-- Höhe: auf Desktop durch Grid-Zelle (flex-1), auf Mobile min 420px. -->
+      <div class="card p-0 overflow-hidden rounded-2xl min-h-[420px] lg:min-h-0">
         <div id="route-map" class="w-full h-full"></div>
 
         <!-- Karten-Layer-Schalter (immer sichtbar, direkt auf der Karte) -->
@@ -1324,6 +1327,11 @@ async function initMap() {
   }).addTo(leafletMap);
 
   setTimeout(() => leafletMap?.invalidateSize(), 250);
+
+  // Leaflet neu vermessen wenn der Container seine Größe ändert
+  // (z.B. beim Laden der Seite, Fenster-Resize oder Layout-Shift)
+  const ro = new ResizeObserver(() => leafletMap?.invalidateSize());
+  ro.observe(el);
 
   leafletMap.on('click', async (e) => {
     const { lat, lng } = e.latlng;
