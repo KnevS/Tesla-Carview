@@ -15,7 +15,7 @@
 // (s. unten) loest das normalerweise — aber wenn ein User noch eine alte
 // SW-Version installiert hat, sorgt der Bump dafuer dass das alte Set
 // von Chunk-Referenzen sicher invalidiert wird.
-const CACHE = 'tcv-v2';
+const CACHE = 'tcv-v3';
 // Icons und Manifest sind selten geaendert + hash-los; safe vorzucachen.
 // index.html ('/') BEWUSST NICHT mehr im SHELL — die wird ueber den
 // network-first-Pfad unten frisch geholt, sonst zeigt das SW bei jedem
