@@ -29,7 +29,7 @@
           @click="selectChat(chat.id)"
         >
           <span class="chat-item-title">{{ chat.title }}</span>
-          <button class="chat-delete icon-btn-danger" @click.stop="deleteChat(chat.id)" :title="$t('grok.deleteChat')">
+          <button class="chat-delete icon-btn-danger" @click.stop="deleteChat(chat.id)" :title="$t('grok.deleteChat')" :aria-label="$t('grok.deleteChat')">
             <AppIcon name="trash" :size="13" />
           </button>
         </button>
@@ -40,11 +40,11 @@
     <main class="grok-main">
       <!-- Mobile: Sidebar-Toggle + Neuer Chat -->
       <div class="mobile-bar">
-        <button class="icon-btn" @click="sidebarOpen = !sidebarOpen">
+        <button class="icon-btn" @click="sidebarOpen = !sidebarOpen" :aria-label="$t('grok.title')">
           <AppIcon name="logbook" :size="18" />
         </button>
         <span class="mobile-title">{{ activeChat?.title || $t('grok.title') }}</span>
-        <button class="btn-primary btn-sm" @click="createChat" :disabled="creating">
+        <button class="btn-primary btn-sm" @click="createChat" :disabled="creating" :aria-label="$t('grok.newChat')">
           <AppIcon name="plus" :size="14" />
         </button>
       </div>
@@ -112,6 +112,7 @@
             :class="{ active: includeContext }"
             @click="includeContext = !includeContext"
             :title="$t('grok.contextToggle')"
+            :aria-label="$t('grok.contextToggle')"
           >
             <AppIcon name="gauge" :size="16" />
           </button>
@@ -134,13 +135,15 @@
             :class="{ 'text-tesla-red': listening }"
             @click="toggleSpeech"
             :title="listening ? $t('grok.stopListening') : $t('grok.startListening')"
+            :aria-label="listening ? $t('grok.stopListening') : $t('grok.startListening')"
           >
             <AppIcon name="mic" :size="18" />
           </button>
 
           <button class="btn-primary send-btn" @click="send"
             :disabled="!inputText.trim() || streaming || budgetExceeded"
-            v-tooltip="$t('grok.sendTooltip')">
+            v-tooltip="$t('grok.sendTooltip')"
+            :aria-label="$t('grok.send')">
             <AppIcon name="send" :size="16" />
           </button>
         </div>
