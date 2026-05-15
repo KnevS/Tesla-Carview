@@ -1,11 +1,6 @@
 # Backup & Wiederherstellung
 
-🌐 **Language / Sprache**
-
-| | |
-|---|---|
-| 🇬🇧 **[English](Backup-and-Restore)** | English version |
-| 🇩🇪 **[Deutsch](DE-Backup-and-Restore)** | Du bist hier |
+🌐 **Sprache / Language:** [EN](Backup-and-Restore) · [FR](FR-Backup-and-Restore) · [ES](ES-Backup-and-Restore) · [TR](TR-Backup-and-Restore) · [EL](EL-Home) · **DE**
 
 ---
 

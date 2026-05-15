@@ -1,5 +1,7 @@
 # Network Access — Without a Static IP
 
+🌐 **Language:** **EN** · [DE](DE-Network-Access) · [FR](FR-Network-Access) · [ES](ES-Network-Access) · [TR](TR-Network-Access) · [EL](EL-Home)
+
 Tesla Carview runs on your own server — but for it to be reachable from the internet (including from your Tesla), you need a stable, publicly accessible address. This page walks you through every option, step by step.
 
 > **Not an IT expert?** Follow this page from top to bottom. Every option includes precise instructions with no assumed knowledge.

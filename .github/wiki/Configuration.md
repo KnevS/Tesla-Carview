@@ -1,5 +1,7 @@
 # Configuration — Environment Variables
 
+🌐 **Language:** **EN** · [DE](DE-Configuration) · [FR](FR-Configuration) · [ES](ES-Configuration) · [TR](TR-Configuration) · [EL](EL-Home)
+
 All Tesla Carview settings are configured via the `.env` file at `/opt/tesla-carview/backend/.env`.
 
 After any change to `.env`, restart the backend:

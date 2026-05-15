@@ -1,6 +1,6 @@
 # Features Overview
 
-🌐 **Language / Sprache**
+🌐 **Language:** **EN** · [DE](DE-Features) · [FR](FR-Features) · [ES](ES-Features) · [TR](TR-Features) · [EL](EL-Features)
 
 | | |
 |---|---|

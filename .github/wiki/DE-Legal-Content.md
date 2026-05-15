@@ -1,11 +1,6 @@
 # Rechtliche Inhalte (Impressum, Datenschutz, Nutzungsbedingungen)
 
-🌐 **Language / Sprache**
-
-| | |
-|---|---|
-| 🇬🇧 **[English](Legal-Content)** | English version |
-| 🇩🇪 **[Deutsch](DE-Legal-Content)** | Du bist hier |
+🌐 **Sprache / Language:** [EN](Legal-Content) · [FR](FR-Legal-Content) · [ES](ES-Legal-Content) · [TR](TR-Legal-Content) · [EL](EL-Home) · **DE**
 
 ---
 

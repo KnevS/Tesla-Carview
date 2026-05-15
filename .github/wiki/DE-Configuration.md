@@ -1,11 +1,6 @@
 # Konfiguration — Umgebungsvariablen
 
-🌐 **Language / Sprache**
-
-| | |
-|---|---|
-| 🇬🇧 **[English](Configuration)** | English version |
-| 🇩🇪 **[Deutsch](DE-Configuration)** | Du bist hier |
+🌐 **Sprache / Language:** [EN](Configuration) · [FR](FR-Configuration) · [ES](ES-Configuration) · [TR](TR-Configuration) · [EL](EL-Home) · **DE**
 
 ---
 

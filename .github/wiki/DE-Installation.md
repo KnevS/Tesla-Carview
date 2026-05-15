@@ -1,11 +1,6 @@
 # Installationsanleitung
 
-🌐 **Language / Sprache**
-
-| | |
-|---|---|
-| 🇬🇧 **[English](Installation)** | English version |
-| 🇩🇪 **[Deutsch](DE-Installation)** | Du bist hier |
+🌐 **Sprache / Language:** [EN](Installation) · [FR](FR-Installation) · [ES](ES-Installation) · [TR](TR-Installation) · [EL](EL-Home) · **DE**
 
 ---
 

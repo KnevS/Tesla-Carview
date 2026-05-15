@@ -1,11 +1,6 @@
 # Lizenz & Nutzungsrechte
 
-🌐 **Language / Sprache**
-
-| | |
-|---|---|
-| 🇬🇧 **[English](License-and-Usage)** | English version |
-| 🇩🇪 **[Deutsch](DE-License-and-Usage)** | Du bist hier |
+🌐 **Sprache / Language:** [EN](License-and-Usage) · [FR](FR-License-and-Usage) · [ES](ES-License-and-Usage) · [TR](TR-License-and-Usage) · [EL](EL-Home) · **DE**
 
 ---
 

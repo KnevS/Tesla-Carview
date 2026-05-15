@@ -1,5 +1,7 @@
 # Tesla API Setup
 
+🌐 **Language:** **EN** · [DE](DE-Tesla-API-Setup) · [FR](FR-Tesla-API-Setup) · [ES](ES-Tesla-API-Setup) · [TR](TR-Tesla-API-Setup) · [EL](EL-Home)
+
 Connecting Tesla Carview to your Tesla account requires a **Tesla Developer account** and an **OAuth application**. This process takes about 20–30 minutes and only needs to be done once.
 
 ---

@@ -1,11 +1,6 @@
 # Multi-Tenant & Benutzerverwaltung
 
-🌐 **Language / Sprache**
-
-| | |
-|---|---|
-| 🇬🇧 **[English](Multi-Tenant)** | English version |
-| 🇩🇪 **[Deutsch](DE-Multi-Tenant)** | Du bist hier |
+🌐 **Sprache / Language:** [EN](Multi-Tenant) · [FR](FR-Multi-Tenant) · [ES](ES-Multi-Tenant) · [TR](TR-Multi-Tenant) · [EL](EL-Home) · **DE**
 
 ---
 

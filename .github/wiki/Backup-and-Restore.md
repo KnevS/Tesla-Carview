@@ -1,5 +1,7 @@
 # Backup & Restore
 
+🌐 **Language:** **EN** · [DE](DE-Backup-and-Restore) · [FR](FR-Backup-and-Restore) · [ES](ES-Backup-and-Restore) · [TR](TR-Backup-and-Restore) · [EL](EL-Home)
+
 Your data (trips, charging history, logbook, settings) lives in SQLite databases on your server. Regular backups protect against hardware failure, accidental deletion, or migration to a new server.
 
 ---

@@ -1,5 +1,7 @@
 # Installation Guide
 
+🌐 **Language:** **EN** · [DE](DE-Installation) · [FR](FR-Installation) · [ES](ES-Installation) · [TR](TR-Installation) · [EL](EL-Home)
+
 > **Time needed:** ~30 minutes | **Difficulty:** Beginner-friendly
 
 This guide walks you through a complete Tesla Carview installation from scratch.

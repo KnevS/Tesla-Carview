@@ -1,5 +1,7 @@
 # Legal Content (Imprint, Privacy, Terms)
 
+🌐 **Language:** **EN** · [DE](DE-Legal-Content) · [FR](FR-Legal-Content) · [ES](ES-Legal-Content) · [TR](TR-Legal-Content) · [EL](EL-Home)
+
 If Tesla Carview is publicly accessible (not just on your local network), you may be legally required to provide an imprint (Impressum), privacy policy, and terms of use — especially under German/EU law (DSGVO/GDPR).
 
 ---
