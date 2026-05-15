@@ -400,7 +400,7 @@
               class="text-xs text-gray-500 flex items-center gap-1">
               <span>ℹ️</span>
               <span>{{ $t('routes.trafficNoKey') }}</span>
-              <RouterLink to="/settings" class="text-blue-400 hover:underline ml-1">{{ $t('routes.trafficSetup') }}</RouterLink>
+              <RouterLink to="/system#api-keys-section" class="text-blue-400 hover:underline ml-1">{{ $t('routes.trafficSetup') }}</RouterLink>
             </div>
           </div>
         </SortableSection>
