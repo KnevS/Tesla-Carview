@@ -7,7 +7,7 @@ Sven Krische <it-passion@krische.com>
 https://github.com/KnevS
 
 Tesla Carview was conceived, designed and primarily implemented by
-Sven Krische between 2024 and 2026. The architecture, multi-tenant
+Sven Krische in 2026. The architecture, multi-tenant
 data model, Tesla Fleet API integration, virtual-key signing flow,
 billing/charging-location logic, in-app handbook and the legal stack
 are his original work.

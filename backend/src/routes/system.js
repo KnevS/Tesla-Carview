@@ -77,7 +77,7 @@ router.get('/version', requireAuth, (_req, res) => {
     git:         getGitInfo(),
     nodeVersion: process.version,
     uptime:      process.uptime(),
-    copyright:   '© 2024–2026 Sven Krische',
+    copyright:   '© 2026 Sven Krische',
     license:     'PolyForm Noncommercial 1.0.0',
     licenseUrl:  'https://polyformproject.org/licenses/noncommercial/1.0.0/',
     repository:  'https://github.com/KnevS/Tesla-Carview',
