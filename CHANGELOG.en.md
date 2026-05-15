@@ -7,6 +7,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.0.0] — 2026-05-15
+
+### Major Milestone — Car Usability Management
+
+With v3.0, Tesla Carview becomes a full **Car Usability Management** platform:
+far more than a data logger — a holistic system for vehicle usage, operations, cost management and trip planning.
+
+### New in v3.0
+- **Platform rebrand** — Tesla Carview becomes a Car Usability Management System; new description across all documents and languages
+- **Demo sandbox** — public test environment with real UI and synthetic vehicle data; 2-day test account; accessible at `demo.teslaview.krische.com`
+- **User management** — self-delete guard (own account cannot be deleted), delete button clearly styled as a destructive action
+- **Deploy pipeline** — private overlay files are restored before `git pull` and re-applied afterwards; no manual intervention needed
+
+### Complete: all features from v2.0–v2.4
+Multi-tenancy, route planner with SoC-aware charging stops, route avoidance (Valhalla), Passkey/WebAuthn + QR-SSO for Tesla browser, settings wizard, dynamic dashboard, legal layer (imprint/privacy/terms with acceptance tracking), 6 languages (DE/EN/FR/ES/TR/EL), monitoring & self-healing, OCM charger overlay, HERE Maps traffic, sleep monitor, energy report, automations, maintenance log, logbook (tax-compliant), billing, web push, encryption at rest.
+
+---
+
 ## [v2.4.0] — 2026-05-15
 
 ### Added

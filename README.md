@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v2.4.0-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.0.0-E31937?style=flat-square)](CHANGELOG.md)
 [![Lizenz](https://img.shields.io/badge/Lizenz-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.md)
 
@@ -9,8 +9,9 @@
 > **© 2024–2026 Sven Krische** · Lizenz: [PolyForm Noncommercial 1.0.0](LICENSE) · [AUTHORS](AUTHORS) · [NOTICE](NOTICE.md)
 > Original-Entwurf, Architektur und Implementierung von Sven Krische ([@KnevS](https://github.com/KnevS)).
 
-Eine **selbst gehostete** Tesla-Datenlogger-Applikation.
-Keine Cloud, keine Datenweitergabe an Dritte – alle Fahrzeugdaten bleiben auf deinem eigenen Server.
+**Car Usability Management** — selbst gehostet, keine Cloud, keine Drittparteien.
+Von GPS-Track und Fahrtenbuch über Routenplanung mit Ladeplanung bis zur Betriebsbuchführung:
+alle Fahrzeugdaten bleiben auf deinem eigenen Server.
 
 Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lokale Entwicklung.
 
@@ -276,6 +277,12 @@ Technische Dokumentation im [`docs/`](docs/README.md)-Ordner:
 ```bash
 bash deploy/update.sh
 ```
+
+---
+
+## Mitmachen
+
+Beiträge sind willkommen! Lies zuerst die [Contribution Guidelines](CONTRIBUTING.de.md), dann such dir ein [good first issue](https://github.com/KnevS/Tesla-Carview/labels/good%20first%20issue) aus oder öffne direkt einen Pull Request.
 
 ---
 
