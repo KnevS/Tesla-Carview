@@ -104,7 +104,10 @@
             :class="user.is_active ? 'hover:bg-yellow-900' : 'hover:bg-green-900'">
             {{ user.is_active ? 'Sperren' : 'Aktivieren' }}
           </button>
-          <button @click="deleteUser(user)" class="text-xs py-1 px-3 rounded bg-gray-700 hover:bg-red-900 text-gray-300">
+          <button v-if="user.id !== auth.user?.id"
+            @click="deleteUser(user)"
+            class="text-xs py-1 px-3 rounded border border-red-900/50 bg-gray-800 hover:bg-red-900 text-red-400 hover:text-red-200"
+            v-tooltip="'Benutzer dauerhaft löschen'">
             Löschen
           </button>
         </div>
@@ -321,6 +324,7 @@
 import { ref, computed, onMounted } from 'vue';
 import api from '../api.js';
 import { useAppStore } from '../store/index.js';
+import { useAuthStore } from '../store/auth.js';
 import AppIcon from '../components/AppIcon.vue';
 import SortToggle from '../components/SortToggle.vue';
 import SortableSection from '../components/SortableSection.vue';
@@ -328,6 +332,7 @@ import { useSortDirection } from '../composables/useSortDirection.js';
 import { usePageLayout } from '../composables/usePageLayout.js';
 
 const app     = useAppStore();
+const auth    = useAuthStore();
 
 const USERMGMT_SECTIONS = ['tasks', 'users', 'invites'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('usermgmt', USERMGMT_SECTIONS);
