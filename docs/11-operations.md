@@ -158,17 +158,56 @@ Backend neustarten. Beim ersten Start wird automatisch ein zusätzlicher Mandant
 
 ---
 
+## 🛡️ Monitoring & Selbstheilung
+
+Ein Cron-Job (`/opt/monitoring/bin/heal.sh`) läuft alle 15 Minuten und überwacht die Kernservices:
+
+1. **Container-Status** — prüft `docker inspect` für `tesla-carview-backend`, `-frontend` und `-nginx`; ist ein Container nicht im Zustand `running`, wird er per `docker compose up -d <service>` neu gestartet.
+2. **Health-Endpoint** — wenn alle Container laufen, prüft er `GET /api/health`; antwortet der Endpunkt nicht mit `{"status":"ok"}`, wird der Backend-Container neu gestartet.
+3. **E-Mail-Alert** — nach jedem automatischen Neustart wird (wenn konfiguriert) eine Benachrichtigungsmail verschickt.
+4. **Log-Rotation** — Das Log `/var/log/tcv-heal.log` wird bei > 1 MB automatisch auf die letzten 500 Zeilen gekürzt.
+
+**Konfiguration** (Admin → System → Monitoring & Selbstheilung):
+
+| Einstellung | Beschreibung |
+|---|---|
+| Selbstheilung an/aus | DB-Schlüssel `monitoring.heal_enabled`; auf `false` = Cron-Job beendet sich sofort |
+| Alert-E-Mail | DB-Schlüssel `monitoring.alert_email`; leer = kein Alert |
+
+**API-Endpunkte** (admin-only):
+- `GET /api/system/monitoring-config` — liest aktuelle Konfiguration
+- `PUT /api/system/monitoring-config` — speichert Konfiguration
+- `GET /api/system/monitoring-log?lines=50` — liefert letzte N Zeilen aus Heal- und Security-Log
+
+**Logs manuell prüfen:**
+```bash
+tail -50 /var/log/tcv-heal.log
+tail -50 /var/log/security-check.log
+```
+
+**Cron-Eintrag** (`/etc/cron.d/tesla-carview-monitoring`):
+```
+*/15 * * * * root /opt/monitoring/bin/heal.sh >/dev/null 2>&1
+```
+
+---
+
 ## 📊 System-Health auf einen Blick
 
 UI: **Admin → System** → oben sieht der Admin eine farbige Ampel-Karte. Backend-Endpoint: `GET /api/system/health` (admin-only). Checks:
 
-| Check | Grün | Gelb | Rot |
-|---|---|---|---|
-| Tesla OAuth-Token | gültig, > 7d Restlaufzeit | < 7d Rest | abgelaufen oder fehlt |
-| Virtual Key | erzeugt | — | nicht erzeugt |
-| Fleet Telemetry | letzter Datenpunkt < 24 h | < 7 d | nichts oder > 7 d |
-| Tesla-Poller | letzter Lauf < 60 min | < 1 d | — |
-| Tenant-DB | informativ — Größe in MB | — | — |
+| Check | Grün | Gelb | Rot | Info (gedimmt) |
+|---|---|---|---|---|
+| Tesla OAuth-Token | gültig, > 7d Restlaufzeit | < 7d Rest | abgelaufen oder fehlt | — |
+| Virtual Key | erzeugt | — | nicht erzeugt | — |
+| Fleet Telemetry | letzter Datenpunkt < 24 h | < 7 d | nichts oder > 7 d | — |
+| Tesla-Poller | letzter Lauf < 60 min | < 1 d | — | — |
+| Tenant-DB | informativ — Größe in MB | — | — | — |
+| Nachtwarung | letzter Lauf < 25 h | — | — | — |
+| OpenChargeMap | Live-Probe OK | — | Probe fehlgeschlagen (Key gesetzt) | Kein Key konfiguriert |
+| HERE Maps | Live-Probe OK | — | Probe fehlgeschlagen (Key gesetzt) | Kein Key konfiguriert |
+
+Optionale Services (OCM, HERE) werden nur als Fehler gewertet, wenn ein Key gesetzt ist, die Gegenstelle aber nicht antwortet. Ohne Key: `info`-Status, gedimmt, kein Einfluss auf die Gesamtampel.
 
 ---
 

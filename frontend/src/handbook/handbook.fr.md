@@ -434,17 +434,37 @@ Tesla Carview est une PWA — installable comme une app native sans passer par l
 
 **Écran Tesla :** ouvrez le navigateur de la voiture, entrez l'URL Carview. La mise en page s'adapte ; le carnet de bord bascule en cartes avec de grandes cibles tactiles sur petit écran. Le bouton **« ◫ Karten »** force cette vue.
 
+## 🗺️ Planificateur de route {#route-planner}
+
+Le planificateur calcule des itinéraires de conduite et affiche les bornes de recharge rapide en chemin.
+
+**Options d'évitement** — Trois boutons bascule près du champ destination :
+- **Autoroutes** — l'itinéraire emprunte les routes nationales et départementales
+- **Voies à péage** — les sections à péage sont contournées
+- **Ferries** — aucune traversée en ferry dans l'itinéraire
+
+Les options sont sauvegardées dans le navigateur. Le routage utilise Valhalla (openstreetmap.de) ; en cas d'indisponibilité, repli automatique sur OSRM avec notification toast.
+
+**Bornes de recharge** — Superchargeurs et CCS le long du trajet. Nécessite une clé API OpenChargeMap gratuite dans Admin → System → Clés API externes.
+
+**Trafic en temps réel** — Avec une clé HERE Maps configurée, le trafic actuel est intégré à l'estimation du temps de trajet.
+
 ## 🟢 État du système (admin) {#system-health}
 
-Sous **System**, les administrateurs voient une carte en feux tricolores avec cinq contrôles :
+Sous **System**, les administrateurs voient une carte en feux tricolores avec huit contrôles :
 
 - **Token OAuth Tesla** — connecté ? quand expire-t-il ?
 - **Virtual Key** — créée ? (requise pour les commandes signées)
 - **Fleet Telemetry** — quand est arrivé le dernier point ?
 - **Poller Tesla** — quand l'app a-t-elle interrogé le véhicule pour la dernière fois ?
 - **DB du locataire** — taille de la base
+- **Maintenance nocturne** — horodatage du dernier passage automatique
+- **OpenChargeMap** — sonde HTTP live (grisé si pas de clé configurée)
+- **HERE Maps** — sonde HTTP live (grisé si pas de clé configurée)
 
-Vert (tout va bien), jaune (attention, ex. token bientôt expiré) ou rouge (action requise).
+Vert (tout va bien), jaune (attention, ex. token bientôt expiré) ou rouge (action requise). Les services optionnels (OCM, HERE) ne comptent comme erreur que si une clé est configurée mais l'endpoint ne répond pas.
+
+**Monitoring & auto-réparation** — En dessous : toggle auto-réparation (cron toutes les 15 min, redémarre les containers défaillants) et champ e-mail d'alerte. Logs heal et security-check visibles directement dans la carte admin.
 
 ## 💬 Grok Chat {#grok}
 
