@@ -339,6 +339,7 @@
     <!-- Wartungsintervalle ist in das Betriebsbuch umgezogen — passt
          thematisch besser dort hin (Bezug zu Wartungs-Eintraegen). -->
     <SortableSection
+      v-if="auth.isAdmin"
       :sortable="false"
       page-id="settings"
       section-id="serviceIntervals"
@@ -545,8 +546,9 @@
       </div>
     </SortableSection>
 
-    <!-- Tesla Verbindung -->
+    <!-- Tesla Verbindung (Admin) -->
     <SortableSection
+      v-if="auth.isAdmin"
       :sortable="false"
       page-id="settings"
       section-id="tesla"
