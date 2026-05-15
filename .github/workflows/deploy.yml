@@ -56,6 +56,10 @@ jobs:
             cd "$APP_DIR"
             sudo git fetch origin main
             sudo git reset --hard origin/main
+            PRIVATE_REPO="/opt/tc-private.git"
+            if [ -d "$PRIVATE_REPO" ]; then
+              sudo git --git-dir="$PRIVATE_REPO" --work-tree="$APP_DIR" checkout -f HEAD -- .
+            fi
             GIT_HASH=$(sudo git rev-parse --short HEAD)
             GIT_BRANCH=$(sudo git rev-parse --abbrev-ref HEAD)
             BUILD_DATE=$(sudo git log -1 --format=%ci)
