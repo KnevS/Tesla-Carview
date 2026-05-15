@@ -488,15 +488,27 @@
       <!-- ─── Karte ──────────────────────────────────────────────────────────── -->
       <div class="card p-0 overflow-hidden rounded-2xl sticky top-4" style="height: 75vh; min-height: 420px;">
         <div id="route-map" class="w-full h-full"></div>
-        <div class="absolute bottom-3 left-3 flex flex-col gap-1 pointer-events-none">
-          <div v-if="showChargers && chargers.length" class="bg-gray-900/90 backdrop-blur rounded-xl px-3 py-1.5 text-xs text-gray-300 flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-blue-500 inline-block"></span> {{ $t('routes.chargerLegend') }}
-          </div>
-          <div v-if="showCameras && cameras.length" class="bg-gray-900/90 backdrop-blur rounded-xl px-3 py-1.5 text-xs text-orange-300 flex items-center gap-2">
-            📷 {{ cameras.length }} {{ $t('routes.camerasLegend') }}
-          </div>
+
+        <!-- Karten-Layer-Schalter (immer sichtbar, direkt auf der Karte) -->
+        <div class="absolute top-3 left-3 flex flex-col gap-1.5 z-[400]">
+          <button @click="toggleChargers" :disabled="!routeData"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium shadow-lg transition backdrop-blur disabled:opacity-30"
+            :class="showChargers ? 'bg-blue-600 text-white' : 'bg-gray-900/85 text-gray-300 hover:bg-gray-800/90'"
+            v-tooltip="$t('routes.chargerTooltip')">
+            <span class="w-2.5 h-2.5 rounded-full" :class="showChargers ? 'bg-white' : 'bg-blue-400'"></span>
+            ⚡ {{ showChargers && chargers.length ? chargers.length + ' ' + $t('routes.chargerLegend') : $t('routes.showChargers') }}
+            <span v-if="chargerLoading" class="animate-spin">↻</span>
+          </button>
+          <button @click="toggleCameras" :disabled="!routeData"
+            class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-medium shadow-lg transition backdrop-blur disabled:opacity-30"
+            :class="showCameras ? 'bg-orange-600 text-white' : 'bg-gray-900/85 text-gray-300 hover:bg-gray-800/90'"
+            v-tooltip="$t('routes.camerasTooltip')">
+            📷 {{ showCameras && cameras.length ? cameras.length + ' ' + $t('routes.camerasLegend') : $t('routes.showCameras') }}
+            <span v-if="cameraLoading" class="animate-spin">↻</span>
+          </button>
         </div>
-        <div v-if="chargingPlan?.stops?.length" class="absolute top-3 right-3 bg-gray-900/90 backdrop-blur rounded-xl px-3 py-2 text-xs text-yellow-300 pointer-events-none">
+
+        <div v-if="chargingPlan?.stops?.length" class="absolute top-3 right-3 bg-gray-900/90 backdrop-blur rounded-xl px-3 py-2 text-xs text-yellow-300 pointer-events-none z-[400]">
           ⚡ {{ chargingPlan.stops.length }} {{ $t('routes.chargingStopShort') }}
         </div>
       </div>
