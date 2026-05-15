@@ -568,7 +568,9 @@
     "cat_accident": "Accident",
     "cat_accident_tooltip": "Dommages d'accident et réparations associées",
     "cat_other": "Autre",
-    "cat_other_tooltip": "Autres événements qui ne rentrent dans aucune catégorie"
+    "cat_other_tooltip": "Autres événements qui ne rentrent dans aucune catégorie",
+    "sectionIntervals": "Intervalles de maintenance",
+    "sectionEntries": "Journal d’entretien"
   },
   "billing": {
     "title": "Remboursement recharge domicile",
@@ -969,7 +971,9 @@
     "email": "E-mail (optionnel)",
     "allRequired": "Remplir tous les champs obligatoires",
     "pwTooShort": "Le mot de passe doit comporter au moins 12 caractères",
-    "creating": "Création…"
+    "creating": "Création…",
+    "sectionUsers": "Utilisateurs",
+    "sectionInvites": "Invitations"
   },
   "data": {
     "title": "Gestion des données",

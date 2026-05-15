@@ -568,7 +568,9 @@
     "cat_accident": "Accidente",
     "cat_accident_tooltip": "Daños por accidente y reparaciones asociadas",
     "cat_other": "Otros",
-    "cat_other_tooltip": "Otros eventos que no encajan en ninguna categoría"
+    "cat_other_tooltip": "Otros eventos que no encajan en ninguna categoría",
+    "sectionIntervals": "Intervalos de mantenimiento",
+    "sectionEntries": "Libro de registro"
   },
   "billing": {
     "title": "Facturación carga doméstica",
@@ -969,7 +971,9 @@
     "email": "Correo electrónico (opcional)",
     "allRequired": "Completar todos los campos obligatorios",
     "pwTooShort": "La contraseña debe tener al menos 12 caracteres",
-    "creating": "Creando…"
+    "creating": "Creando…",
+    "sectionUsers": "Usuarios",
+    "sectionInvites": "Invitaciones"
   },
   "data": {
     "title": "Gestión de datos",
