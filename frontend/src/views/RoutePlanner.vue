@@ -1094,6 +1094,7 @@ async function _doCalculateRoute() {
       avoid_tolls:     avoidTolls.value     || undefined,
       avoid_ferry:     avoidFerry.value      || undefined,
     });
+    if (osrmData._valhalla_fallback) showToast(t('routes.valhallaFallback'), false);
     const route = osrmData.routes?.[0];
     if (!route) throw new Error('Keine Route gefunden');
 

@@ -44,12 +44,19 @@ export BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 echo "    GIT_HASH=$GIT_HASH  GIT_BRANCH=$GIT_BRANCH  BUILD_DATE=$BUILD_DATE"
 
 echo ""
-echo "==> Docker Images bauen und Container neu starten"
-# Gestoppte Containers aufräumen (verhindert Namen-Konflikt beim Neustart)
-docker container prune -f --filter "until=1m" >/dev/null 2>&1 || true
-docker compose -f docker-compose.prod.yml up -d --build --remove-orphans || {
-  echo "==> Fallback: Container ohne Build neu starten …"
-  docker compose -f docker-compose.prod.yml up -d --remove-orphans || true
+echo "==> Docker Images bauen"
+docker compose -f docker-compose.prod.yml build
+
+echo ""
+echo "==> Laufende Container stoppen + bereinigen"
+docker compose -f docker-compose.prod.yml stop backend frontend 2>/dev/null || true
+docker container prune -f >/dev/null 2>&1 || true
+
+echo ""
+echo "==> Container neu starten"
+docker compose -f docker-compose.prod.yml up -d --remove-orphans || {
+  echo "==> Fallback: direkt starten …"
+  docker compose -f docker-compose.prod.yml up -d || true
 }
 
 echo ""

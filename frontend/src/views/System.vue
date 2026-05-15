@@ -161,6 +161,69 @@
       </details>
     </div>
 
+    <!-- Monitoring & Selbstheilung (admin only) -->
+    <div v-if="isAdmin" class="card space-y-4">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <h2 class="font-semibold flex items-center gap-2">
+          <AppIcon name="shield" :size="20" class="text-tesla-red" />
+          Monitoring &amp; Selbstheilung
+        </h2>
+        <button @click="loadMonitoringLog" :disabled="monLogLoading"
+          class="btn-secondary text-xs px-3 py-1">
+          {{ monLogLoading ? '…' : 'Log aktualisieren' }}
+        </button>
+      </div>
+
+      <!-- Konfiguration -->
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div class="space-y-2">
+          <label class="text-xs text-gray-400 block">Alert-E-Mail bei Selbstheilung</label>
+          <div class="flex gap-2">
+            <input v-model="monCfg.alert_email" type="email"
+              placeholder="admin@example.com"
+              class="input flex-1 text-sm" @keyup.enter="saveMonitoringConfig" />
+            <button @click="saveMonitoringConfig" :disabled="monSaving"
+              class="px-3 py-1.5 rounded-lg text-sm bg-tesla-red text-white hover:bg-red-600 disabled:opacity-40">
+              {{ monSaving ? '…' : 'Speichern' }}
+            </button>
+          </div>
+          <p class="text-xs text-gray-500">Leer lassen = kein E-Mail-Alert.</p>
+        </div>
+        <div class="flex items-start gap-3 pt-1">
+          <button @click="toggleHeal" :disabled="monSaving"
+            class="relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+            :class="monCfg.heal_enabled ? 'bg-green-600' : 'bg-gray-600'"
+            v-tooltip="monCfg.heal_enabled ? 'Selbstheilung aktiv – alle 15 min' : 'Selbstheilung deaktiviert'">
+            <span class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition-transform duration-200"
+              :class="monCfg.heal_enabled ? 'translate-x-5' : 'translate-x-0'"></span>
+          </button>
+          <div>
+            <p class="text-sm font-medium">Selbstheilung</p>
+            <p class="text-xs text-gray-500">Alle 15 min: Container-Status + /api/health. Bei Ausfall automatischer Neustart.</p>
+          </div>
+        </div>
+      </div>
+
+      <p v-if="monMsg" :class="monMsgOk ? 'text-green-400' : 'text-red-400'" class="text-xs">{{ monMsg }}</p>
+
+      <!-- Heal-Log -->
+      <div v-if="monLog.heal?.length || monLog.security?.length" class="space-y-3">
+        <details v-if="monLog.heal?.length">
+          <summary class="cursor-pointer text-xs text-gray-400 hover:text-white select-none">
+            Heal-Log (letzte {{ monLog.heal.length }} Einträge)
+          </summary>
+          <pre class="mt-2 bg-gray-900 rounded p-2 text-[10px] overflow-x-auto max-h-48 text-gray-300">{{ monLog.heal.join('\n') }}</pre>
+        </details>
+        <details v-if="monLog.security?.length">
+          <summary class="cursor-pointer text-xs text-gray-400 hover:text-white select-none">
+            Security-Check (letzte {{ monLog.security.length }} Einträge)
+          </summary>
+          <pre class="mt-2 bg-gray-900 rounded p-2 text-[10px] overflow-x-auto max-h-48 text-gray-300">{{ monLog.security.join('\n') }}</pre>
+        </details>
+      </div>
+      <p v-else class="text-xs text-gray-500">Noch keine Heal-Ereignisse protokolliert.</p>
+    </div>
+
     <!-- Externe API-Schlüssel (admin only) -->
     <div v-if="isAdmin" id="api-keys-section" class="card space-y-4">
       <h2 class="font-semibold flex items-center gap-2">
@@ -615,6 +678,51 @@ function scrollToApiKeys() {
   document.getElementById('api-keys-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+// ─── Monitoring & Selbstheilung ───────────────────────────────────
+const monCfg        = ref({ alert_email: '', heal_enabled: true });
+const monSaving     = ref(false);
+const monMsg        = ref('');
+const monMsgOk      = ref(true);
+const monLog        = ref({ heal: [], security: [] });
+const monLogLoading = ref(false);
+
+async function loadMonitoringConfig() {
+  try {
+    const { data } = await api.get('/system/monitoring-config');
+    monCfg.value = data;
+  } catch { /* ignore */ }
+}
+
+async function saveMonitoringConfig() {
+  monSaving.value = true; monMsg.value = '';
+  try {
+    await api.put('/system/monitoring-config', monCfg.value);
+    monMsg.value = '✓ Gespeichert';
+    monMsgOk.value = true;
+  } catch (e) {
+    monMsg.value = e.response?.data?.error ?? 'Fehler beim Speichern';
+    monMsgOk.value = false;
+  } finally {
+    monSaving.value = false;
+    setTimeout(() => { monMsg.value = ''; }, 4000);
+  }
+}
+
+async function toggleHeal() {
+  monCfg.value.heal_enabled = !monCfg.value.heal_enabled;
+  await saveMonitoringConfig();
+}
+
+async function loadMonitoringLog() {
+  monLogLoading.value = true;
+  try {
+    const { data } = await api.get('/system/monitoring-log?lines=50');
+    monLog.value = data;
+  } catch { /* ignore */ } finally {
+    monLogLoading.value = false;
+  }
+}
+
 async function deleteOcmKey() {
   ocmSaving.value = true; ocmMsg.value = '';
   try {
@@ -823,6 +931,8 @@ onMounted(async () => {
     loadMaintenanceLog();
     loadOcmConfig();
     loadHereConfig();
+    loadMonitoringConfig();
+    loadMonitoringLog();
   }
 });
 </script>

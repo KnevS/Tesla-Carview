@@ -1616,6 +1616,7 @@
     "noChargersApiKey": "OpenChargeMap API anahtarı eksik – şarj istasyonu yok.",
     "noChargersApiKeyLink": "Ayarlarda yapılandır",
     "calculating": "Rota hesaplanıyor …",
+    "valhallaFallback": "Kaçınma sunucusuna ulaşılamıyor – rota kaçınma seçenekleri olmadan hesaplandı.",
     "routeError": "Rota hesaplanamadı.",
     "geocoding": "Aranıyor …",
     "noResults": "Sonuç bulunamadı. Daha spesifik bir arama deneyin.",

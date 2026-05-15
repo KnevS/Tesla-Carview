@@ -617,4 +617,49 @@ router.get('/update-check', requireAuth, async (req, res) => {
   }
 });
 
+// ── Monitoring-Konfiguration ─────────────────────────────────────────────────
+
+const MONITORING_KEYS = ['monitoring.alert_email', 'monitoring.heal_enabled'];
+
+router.get('/monitoring-config', requireAuth, requireAdmin, (req, res) => {
+  const rows = req.db.prepare(
+    `SELECT key, value FROM tenant_settings WHERE key IN (${MONITORING_KEYS.map(() => '?').join(',')})`
+  ).all(...MONITORING_KEYS);
+  const cfg = Object.fromEntries(rows.map(r => [r.key.replace('monitoring.', ''), r.value]));
+  res.json({
+    alert_email:   cfg.alert_email   ?? '',
+    heal_enabled:  cfg.heal_enabled  !== 'false',  // default: true
+  });
+});
+
+router.put('/monitoring-config', requireAuth, requireAdmin, (req, res) => {
+  const { alert_email, heal_enabled } = req.body;
+  const upsert = req.db.prepare(
+    "INSERT INTO tenant_settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+  );
+  if (alert_email !== undefined) {
+    if (typeof alert_email !== 'string' || (alert_email && !/^[^@]+@[^@]+\.[^@]+$/.test(alert_email))) {
+      return res.status(400).json({ error: 'Ungültige E-Mail-Adresse' });
+    }
+    upsert.run('monitoring.alert_email', alert_email);
+  }
+  if (heal_enabled !== undefined) upsert.run('monitoring.heal_enabled', String(heal_enabled));
+  res.json({ ok: true });
+});
+
+// Letzte N Zeilen aus Heal-Log und Security-Check-Log
+router.get('/monitoring-log', requireAuth, requireAdmin, (req, res) => {
+  const n = Math.min(parseInt(req.query.lines) || 50, 200);
+  const tail = (path) => {
+    try {
+      return execSync(`tail -${n} ${path} 2>/dev/null || true`, { encoding: 'utf8' })
+        .split('\n').filter(Boolean);
+    } catch { return []; }
+  };
+  res.json({
+    heal:     tail('/var/log/tcv-heal.log'),
+    security: tail('/var/log/security-check.log'),
+  });
+});
+
 export default router;
