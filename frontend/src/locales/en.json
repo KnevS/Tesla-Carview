@@ -1616,6 +1616,7 @@
     "noChargersApiKey": "OpenChargeMap API key missing – no charging stations available.",
     "noChargersApiKeyLink": "Configure in settings now",
     "calculating": "Calculating route …",
+    "valhallaFallback": "Avoid-routing server unreachable – route calculated without avoid options.",
     "routeError": "Could not calculate route.",
     "geocoding": "Searching …",
     "noResults": "No results found. Try a more specific query.",

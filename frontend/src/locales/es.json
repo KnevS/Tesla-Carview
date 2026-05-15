@@ -1616,6 +1616,7 @@
     "noChargersApiKey": "Falta la clave API de OpenChargeMap – no hay cargadores disponibles.",
     "noChargersApiKeyLink": "Configurar en ajustes",
     "calculating": "Calculando ruta …",
+    "valhallaFallback": "Servidor de evitación no disponible – ruta calculada sin opciones de evitación.",
     "routeError": "No se pudo calcular la ruta.",
     "geocoding": "Buscando …",
     "noResults": "Sin resultados. Intenta una búsqueda más específica.",

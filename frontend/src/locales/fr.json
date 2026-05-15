@@ -1616,6 +1616,7 @@
     "noChargersApiKey": "Clé API OpenChargeMap manquante – aucune borne disponible.",
     "noChargersApiKeyLink": "Configurer dans les paramètres",
     "calculating": "Calcul de l'itinéraire …",
+    "valhallaFallback": "Serveur d'évitement inaccessible – itinéraire calculé sans options d'évitement.",
     "routeError": "Impossible de calculer l'itinéraire.",
     "geocoding": "Recherche en cours …",
     "noResults": "Aucun résultat. Essayez une requête plus précise.",

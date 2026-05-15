@@ -289,12 +289,26 @@ router.post('/route', async (req, res) => {
 
   try {
     if (useValhalla) {
-      const data = await fetchValhalla(coordinates, {
-        avoidMotorways: avoid_motorways,
-        avoidTolls:     avoid_tolls,
-        avoidFerry:     avoid_ferry,
-      });
-      return res.json(data);
+      try {
+        const data = await fetchValhalla(coordinates, {
+          avoidMotorways: avoid_motorways,
+          avoidTolls:     avoid_tolls,
+          avoidFerry:     avoid_ferry,
+        });
+        return res.json(data);
+      } catch (valhallaErr) {
+        // Valhalla nicht erreichbar → OSRM-Fallback ohne Umgehungsoptionen
+        console.warn('[Routing] Valhalla nicht erreichbar, Fallback zu OSRM:', valhallaErr.message);
+        const coordStr = coordinates.map(([lon, lat]) => `${lon},${lat}`).join(';');
+        const r = await fetch(
+          `https://router.project-osrm.org/route/v1/driving/${coordStr}?overview=full&geometries=geojson`,
+          { headers: { 'User-Agent': 'TeslaCarview/2.2' }, signal: AbortSignal.timeout(12000) }
+        );
+        if (!r.ok) return res.status(502).json({ error: `OSRM ${r.status}` });
+        const osrmData = await r.json();
+        osrmData._valhalla_fallback = true;
+        return res.json(osrmData);
+      }
     }
 
     const coordStr = coordinates.map(([lon, lat]) => `${lon},${lat}`).join(';');

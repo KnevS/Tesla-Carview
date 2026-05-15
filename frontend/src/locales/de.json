@@ -1616,6 +1616,7 @@
     "noChargersApiKey": "OpenChargeMap API-Key fehlt – keine Ladestationen verfügbar.",
     "noChargersApiKeyLink": "Jetzt in Einstellungen eintragen",
     "calculating": "Route wird berechnet …",
+    "valhallaFallback": "Umgehungsserver nicht erreichbar – Route ohne Vermeiden-Optionen berechnet.",
     "routeError": "Route konnte nicht berechnet werden.",
     "geocoding": "Suche läuft …",
     "noResults": "Keine Treffer gefunden. Präzisere Eingabe versuchen.",
