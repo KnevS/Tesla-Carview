@@ -402,7 +402,7 @@ watch(vehicleId, () => { loadChats(); });
 <style scoped>
 .grok-layout {
   display: flex;
-  height: calc(100vh - 64px);
+  height: calc(100dvh - 5.5rem);
   gap: 0;
   overflow: hidden;
 }

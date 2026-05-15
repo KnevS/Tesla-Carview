@@ -24,7 +24,7 @@
 
         <div v-if="hasPoints">
           <!-- Karte -->
-          <div id="trip-map" style="height: 380px; border-radius: 12px;"></div>
+          <div id="trip-map" style="height: clamp(260px, 45vh, 520px); border-radius: 12px;"></div>
 
           <!-- Datenpanel am Slider-Punkt -->
           <div class="grid grid-cols-4 gap-3 mt-3 text-center text-sm">
@@ -301,6 +301,7 @@ async function initMap(points) {
     attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 18,
   }).addTo(leafletMap);
+  new ResizeObserver(() => leafletMap?.invalidateSize()).observe(mapEl);
 
   const latlngs = points.map(p => [p.lat, p.lon]);
 

@@ -15,7 +15,7 @@
           :class="days === d.value ? 'bg-tesla-red text-white' : 'bg-gray-700 text-gray-300'"
         >{{ d.value }}{{ $t('battery.daySuffix') }}</button>
       </div>
-      <div style="height: 250px">
+      <div style="height: clamp(180px, 28vh, 340px)">
         <Line v-if="chartData" :data="chartData" :options="chartOpts" />
       </div>
     </SortableSection>

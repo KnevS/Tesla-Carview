@@ -70,7 +70,7 @@
         <SortableSection v-if="sid === 'monthly_chart' && show.monthly_chart" page-id="dashboard" section-id="monthly_chart"
           :title="$t('dashboard.monthlyKm')" icon="📈"
           :collapsed="isCollapsed('monthly_chart')" @toggle="toggle('monthly_chart')" @move="(f,t,p) => moveSection(f,t,p)">
-          <div style="height: 200px">
+          <div style="height: clamp(160px, 24vh, 280px)">
             <Bar v-if="chartData" :data="chartData" :options="chartOptions" />
           </div>
         </SortableSection>
