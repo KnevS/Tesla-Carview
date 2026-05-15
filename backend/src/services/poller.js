@@ -22,25 +22,35 @@ import {
  * Tages-Cap: max. DAILY_CAP Calls pro Fahrzeug. Bei Erreichen 30min
  * Zwangspause — schützt gegen unerwartete Endlos-Online-Phasen.
  */
-const POLL_INTERVAL_DRIVING   = 30_000;      // 30s  — faehrt (shift D/R/N)
-const POLL_INTERVAL_PARKED    = 300_000;     // 5min — online, steht
-const POLL_INTERVAL_IDLE      = 900_000;     // 15min — offline (war 5min)
-const POLL_INTERVAL_HEARTBEAT = 3_600_000;   // 1h   — Telemetry aktiv
-const TELEMETRY_FRESH_S       = 15 * 60;     // 15min: Telemetry-Signal gilt als frisch
+const POLL_INTERVAL_DRIVING   = 30_000;       // 30s  — faehrt (shift D/R/N)
+const POLL_INTERVAL_PARKED    = 600_000;      // 10min — online, steht (war 5min)
+const POLL_INTERVAL_IDLE      = 2_700_000;    // 45min — offline (war 15min)
+const POLL_INTERVAL_HEARTBEAT = 3_600_000;    // 1h   — Telemetry aktiv
+const TELEMETRY_FRESH_S       = 15 * 60;      // 15min: Telemetry-Signal gilt als frisch
 
-const DAILY_CAP     = 100;           // max. vehicle_data-Calls pro Fahrzeug & Tag
-const CAP_PAUSE_MS  = 30 * 60_000;  // 30min Pause nach Cap
+const DAILY_CAP = 80; // max. vehicle_data-Calls pro Fahrzeug & Tag
 
-// In-memory Tageszaehler — Key: vehicle.id (DB-ID, nicht tesla_id)
+// In-memory Tageszaehler — Key: vehicle.id (DB-ID, nicht tesla_id).
+// Resets beim Container-Neustart; das ist vertretbar, weil wir beim
+// naechsten Start eines neuen Tages sowieso frisch beginnen wollen.
+// Wichtiger als persistence ist das harte Tages-Ende: nach DAILY_CAP
+// Calls wird erst am naechsten UTC-Tag weiter gepollt (keine 30min-
+// Schleife mehr, die nach Restarts wieder neu beginnt).
 const dailyCalls = new Map();
 
 function todayKey() { return new Date().toISOString().slice(0, 10); }
+
+function endOfTodayMs() {
+  const d = new Date();
+  d.setUTCHours(23, 59, 59, 999);
+  return d.getTime();
+}
 
 function getCapRecord(vehicleId) {
   const today = todayKey();
   let r = dailyCalls.get(vehicleId);
   if (!r || r.date !== today) {
-    r = { date: today, count: 0, pausedAt: null };
+    r = { date: today, count: 0, pausedUntilMs: 0 };
     dailyCalls.set(vehicleId, r);
   }
   return r;
@@ -48,17 +58,21 @@ function getCapRecord(vehicleId) {
 
 function isCapPaused(vehicleId) {
   const r = dailyCalls.get(vehicleId);
-  if (!r?.pausedAt) return false;
-  if (Date.now() - r.pausedAt > CAP_PAUSE_MS) { r.pausedAt = null; return false; }
-  return true;
+  if (!r) return false;
+  if (r.pausedUntilMs && r.pausedUntilMs > Date.now()) return true;
+  if (r.pausedUntilMs && r.pausedUntilMs <= Date.now()) r.pausedUntilMs = 0;
+  return false;
 }
 
 function incrementCap(vehicleId, displayName) {
   const r = getCapRecord(vehicleId);
   r.count++;
-  if (r.count >= DAILY_CAP && !r.pausedAt) {
-    r.pausedAt = Date.now();
-    console.warn(`[Poller] ${displayName}: Tages-Cap (${DAILY_CAP} Calls) erreicht → 30min Pause`);
+  if (r.count >= DAILY_CAP && !r.pausedUntilMs) {
+    r.pausedUntilMs = endOfTodayMs();
+    console.warn(
+      `[Poller] ${displayName}: Tages-Cap (${DAILY_CAP} Calls) erreicht` +
+      ` → Pause bis Tagesende (${new Date(r.pausedUntilMs).toISOString()})`
+    );
   }
 }
 
