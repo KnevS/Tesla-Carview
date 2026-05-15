@@ -20,6 +20,13 @@ echo "==> Aktueller Stand"
 git log -1 --format="    Commit: %h  |  %s  |  %ci"
 
 echo ""
+echo "==> Private-Overlay-Dateien zurücksetzen (vor git pull)"
+PRIVATE_REPO="/opt/tc-private.git"
+if [ -d "$PRIVATE_REPO" ]; then
+  git --git-dir="$PRIVATE_REPO" ls-files | xargs git checkout -- 2>/dev/null || true
+fi
+
+echo ""
 echo "==> Git Pull"
 git pull origin main
 
