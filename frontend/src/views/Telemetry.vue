@@ -67,7 +67,7 @@
         page-id="telemetry" section-id="map"
         title="Live-Position" icon="📍"
         :collapsed="isCollapsed('map')" @toggle="toggle('map')" @move="(f,t,p) => moveSection(f,t,p)">
-        <div id="live-map" style="height: 280px; border-radius: 10px;"></div>
+        <div id="live-map" style="height: clamp(200px, 35vh, 420px); border-radius: 10px;"></div>
       </SortableSection>
 
       <!-- Power flow + TPMS + Climate -->
@@ -285,6 +285,7 @@ async function updateMap(lat, lon) {
     L.tileLayer('/api/tiles/{z}/{x}/{y}', {
       attribution: '&copy; OpenStreetMap contributors', maxZoom: 19,
     }).addTo(leafletMap);
+    new ResizeObserver(() => leafletMap?.invalidateSize()).observe(mapEl);
     posMarker = L.circleMarker([lat, lon], {
       radius: 10, color: '#E31937', fillColor: '#E31937', fillOpacity: 0.9, weight: 3,
     }).bindPopup('Fahrzeugposition').addTo(leafletMap);
