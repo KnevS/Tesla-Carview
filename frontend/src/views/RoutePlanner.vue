@@ -94,6 +94,31 @@
             <button @click="clearDestination" class="text-gray-500 hover:text-white text-xl leading-none">×</button>
           </div>
           <p v-else class="text-xs text-gray-500">{{ $t('routes.clickMapHint') }}</p>
+
+          <!-- Routenoptionen: Vermeiden -->
+          <div class="pt-1">
+            <p class="text-xs text-gray-500 mb-1.5">{{ $t('routes.avoidTitle') }}</p>
+            <div class="flex flex-wrap gap-1.5">
+              <button @click="avoidMotorways = !avoidMotorways"
+                class="px-2.5 py-1 rounded-lg text-xs font-medium transition border"
+                :class="avoidMotorways ? 'bg-orange-700/70 border-orange-500 text-white' : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-300'"
+                v-tooltip="$t('routes.avoidMotorwaysTip')">
+                🛣️ {{ $t('routes.avoidMotorways') }}
+              </button>
+              <button @click="avoidTolls = !avoidTolls"
+                class="px-2.5 py-1 rounded-lg text-xs font-medium transition border"
+                :class="avoidTolls ? 'bg-orange-700/70 border-orange-500 text-white' : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-300'"
+                v-tooltip="$t('routes.avoidTollsTip')">
+                💳 {{ $t('routes.avoidTolls') }}
+              </button>
+              <button @click="avoidFerry = !avoidFerry"
+                class="px-2.5 py-1 rounded-lg text-xs font-medium transition border"
+                :class="avoidFerry ? 'bg-orange-700/70 border-orange-500 text-white' : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-300'"
+                v-tooltip="$t('routes.avoidFerryTip')">
+                ⛴️ {{ $t('routes.avoidFerry') }}
+              </button>
+            </div>
+          </div>
           </div>
         </SortableSection>
 
@@ -687,6 +712,11 @@ const showCameras   = ref(false);
 const cameras       = ref([]);
 const cameraLoading = ref(false);
 
+// ── Routenoptionen: Vermeiden ──
+const avoidMotorways = ref(localStorage.getItem('route_avoid_motorways') === 'true');
+const avoidTolls     = ref(localStorage.getItem('route_avoid_tolls')     === 'true');
+const avoidFerry     = ref(localStorage.getItem('route_avoid_ferry')     === 'true');
+
 // ── Heute als Mindestdatum ──
 const todayStr = new Date().toISOString().slice(0, 10);
 
@@ -1054,7 +1084,12 @@ async function _doCalculateRoute() {
   ];
 
   try {
-    const { data: osrmData } = await api.post('/routing/route', { coordinates });
+    const { data: osrmData } = await api.post('/routing/route', {
+      coordinates,
+      avoid_motorways: avoidMotorways.value || undefined,
+      avoid_tolls:     avoidTolls.value     || undefined,
+      avoid_ferry:     avoidFerry.value      || undefined,
+    });
     const route = osrmData.routes?.[0];
     if (!route) throw new Error('Keine Route gefunden');
 
@@ -1120,6 +1155,9 @@ async function calcChargingPlan() {
       battery_kwh:       batKwh ?? undefined,
       min_arrival_soc:   minArrivalSoc.value,
       charge_to_soc:     chargeToSoc.value,
+      avoid_motorways:   avoidMotorways.value || undefined,
+      avoid_tolls:       avoidTolls.value     || undefined,
+      avoid_ferry:       avoidFerry.value      || undefined,
     });
     chargingPlan.value = data;
     if (L && leafletMap) updatePlanMarkers();
@@ -1182,7 +1220,13 @@ async function _loadChargers() {
     }));
     updateChargerMarkers();
     if (chargers.value.length === 0) showToast(t('routes.noChargers'), false);
-  } catch (err) { console.warn('[Chargers]', err.message); showToast(t('routes.noChargers'), false); }
+  } catch (err) {
+    console.warn('[Chargers]', err.message);
+    const msg = err.response?.data?.code === 'NO_API_KEY'
+      ? t('routes.noChargersApiKey')
+      : t('routes.noChargers');
+    showToast(msg, false);
+  }
   finally { chargerLoading.value = false; }
 }
 
@@ -1425,6 +1469,11 @@ function openAbrp() {
   if (qs) url += '?' + qs;
   window.open(url, '_blank', 'noopener');
 }
+
+// Avoid-Optionen in localStorage persistieren und Route neu berechnen
+watch(avoidMotorways, v => { localStorage.setItem('route_avoid_motorways', v); calculateRoute(); });
+watch(avoidTolls,     v => { localStorage.setItem('route_avoid_tolls',     v); calculateRoute(); });
+watch(avoidFerry,     v => { localStorage.setItem('route_avoid_ferry',     v); calculateRoute(); });
 
 // ── Lifecycle ──
 watch(showSaveDialog, async (v) => {

@@ -1613,6 +1613,7 @@
     "chargerTooltip": "Zeigt Schnellladestationen (DC) entlang der Route – kostenlos über OpenChargeMap.",
     "chargerLegend": "Schnellladestation",
     "noChargers": "Keine Schnellladestationen gefunden.",
+    "noChargersApiKey": "OpenChargeMap API-Key fehlt. Kostenlos registrieren unter openchargemap.org → OPENCHARGEMAP_API_KEY in backend/.env eintragen.",
     "calculating": "Route wird berechnet …",
     "routeError": "Route konnte nicht berechnet werden.",
     "geocoding": "Suche läuft …",
@@ -1683,6 +1684,13 @@
     "camerasLegalText": "In Deutschland ist die Nutzung von Blitzerwarner-Apps während der Fahrt verboten (§23 StVO). In anderen Ländern gelten abweichende Regelungen. Nutzung auf eigene Verantwortung.",
     "camerasLegend": "Blitzer",
     "noCameras": "Keine Blitzer in diesem Bereich gefunden.",
+    "avoidTitle": "Vermeiden:",
+    "avoidMotorways": "Autobahnen",
+    "avoidMotorwaysTip": "Autobahnen meiden – Route über Bundes- und Landstraßen",
+    "avoidTolls": "Mautstraßen",
+    "avoidTollsTip": "Mautpflichtige Straßen meiden",
+    "avoidFerry": "Fähren",
+    "avoidFerryTip": "Fährverbindungen meiden",
     "actionsTitle": "Aktionen"
   },
   "wizard": {

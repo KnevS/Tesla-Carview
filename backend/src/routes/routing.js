@@ -107,6 +107,45 @@ function planChargingStops({ chargers, totalKm, initSoc, kwhPerKm, batteryKwh, m
   return { stops, arrival_soc: null, feasible: false };
 }
 
+// ── Valhalla-Routing (Umgehungsoptionen) ─────────────────────────────────────
+
+async function fetchValhalla(coordinates, { avoidMotorways, avoidTolls, avoidFerry } = {}) {
+  const costingOpts = {};
+  if (avoidMotorways) costingOpts.use_highways = 0;
+  if (avoidTolls)     costingOpts.use_tolls    = 0;
+  if (avoidFerry)     costingOpts.use_ferry     = 0;
+
+  const body = {
+    locations:       coordinates.map(([lon, lat]) => ({ lon, lat })),
+    costing:         'auto',
+    costing_options: { auto: costingOpts },
+    shape_format:    'geojson',
+  };
+
+  const r = await fetch('https://valhalla1.openstreetmap.de/route', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', 'User-Agent': 'TeslaCarview/2.2' },
+    body:    JSON.stringify(body),
+    signal:  AbortSignal.timeout(15000),
+  });
+  if (!r.ok) throw new Error(`Valhalla ${r.status}`);
+  const data = await r.json();
+
+  // Legs zu einer Geometrie zusammenfügen
+  const allCoords = [];
+  for (const leg of (data.trip?.legs ?? [])) {
+    allCoords.push(...(leg.shape?.coordinates ?? []));
+  }
+
+  return {
+    routes: [{
+      distance: (data.trip?.summary?.length ?? 0) * 1000,  // km → m
+      duration: data.trip?.summary?.time ?? 0,             // Sekunden
+      geometry: { type: 'LineString', coordinates: allCoords },
+    }],
+  };
+}
+
 // ── Öffentlicher Tile-Proxy ───────────────────────────────────────────────────
 // Wird in index.js VOR requireAuth registriert: app.use('/api/tiles', tileRouter)
 
@@ -184,6 +223,7 @@ router.get('/chargers', async (req, res) => {
     const r = await fetch(`https://api.openchargemap.io/v3/poi/?${params}`, {
       signal: AbortSignal.timeout(8000),
     });
+    if (r.status === 403) return res.status(403).json({ error: 'OpenChargeMap API-Key fehlt', code: 'NO_API_KEY' });
     if (!r.ok) return res.status(502).json({ error: 'OpenChargeMap nicht erreichbar' });
     const data = await r.json();
     const stations = (Array.isArray(data) ? data : []).map(s => ({
@@ -202,14 +242,26 @@ router.get('/chargers', async (req, res) => {
   }
 });
 
-// POST /api/routing/route — OSRM-Proxy
+// POST /api/routing/route — OSRM-Proxy (oder Valhalla bei Umgehungsoptionen)
 router.post('/route', async (req, res) => {
-  const { coordinates } = req.body;
+  const { coordinates, avoid_motorways, avoid_tolls, avoid_ferry } = req.body;
   if (!Array.isArray(coordinates) || coordinates.length < 2) {
     return res.status(400).json({ error: 'coordinates erforderlich ([lon,lat]-Paare, mind. 2)' });
   }
-  const coordStr = coordinates.map(([lon, lat]) => `${lon},${lat}`).join(';');
+
+  const useValhalla = avoid_motorways || avoid_tolls || avoid_ferry;
+
   try {
+    if (useValhalla) {
+      const data = await fetchValhalla(coordinates, {
+        avoidMotorways: avoid_motorways,
+        avoidTolls:     avoid_tolls,
+        avoidFerry:     avoid_ferry,
+      });
+      return res.json(data);
+    }
+
+    const coordStr = coordinates.map(([lon, lat]) => `${lon},${lat}`).join(';');
     const url = `https://router.project-osrm.org/route/v1/driving/${coordStr}?overview=full&geometries=geojson`;
     const r   = await fetch(url, {
       headers: { 'User-Agent': 'TeslaCarview/2.2 (https://github.com/KnevS/Tesla-Carview)' },
@@ -218,7 +270,7 @@ router.post('/route', async (req, res) => {
     if (!r.ok) return res.status(502).json({ error: `OSRM ${r.status}` });
     res.json(await r.json());
   } catch (err) {
-    res.status(504).json({ error: 'OSRM nicht erreichbar: ' + err.message });
+    res.status(504).json({ error: 'Routing nicht erreichbar: ' + err.message });
   }
 });
 
@@ -228,6 +280,7 @@ router.post('/plan', async (req, res) => {
     vehicleId, coordinates,
     current_soc, avg_kwh_per_100km, battery_kwh,
     min_arrival_soc = 15, charge_to_soc = 80,
+    avoid_motorways, avoid_tolls, avoid_ferry,
   } = req.body;
 
   if (!vehicleId || !Array.isArray(coordinates) || coordinates.length < 2) {
@@ -235,23 +288,28 @@ router.post('/plan', async (req, res) => {
   }
   if (guardAccess(res, () => assertVehicleAccess(req.db, vehicleId, req.user))) return;
 
-  // 1. OSRM-Route holen
-  const coordStr = coordinates.map(([lon, lat]) => `${lon},${lat}`).join(';');
-  let osrmData;
+  // 1. Route holen (Valhalla bei Umgehungsoptionen, sonst OSRM)
+  let routeResult;
   try {
-    const r = await fetch(
-      `https://router.project-osrm.org/route/v1/driving/${coordStr}?overview=full&geometries=geojson`,
-      {
-        headers: { 'User-Agent': 'TeslaCarview/2.2' },
-        signal:  AbortSignal.timeout(12000),
-      }
-    );
-    osrmData = await r.json();
+    if (avoid_motorways || avoid_tolls || avoid_ferry) {
+      routeResult = await fetchValhalla(coordinates, {
+        avoidMotorways: avoid_motorways,
+        avoidTolls:     avoid_tolls,
+        avoidFerry:     avoid_ferry,
+      });
+    } else {
+      const coordStr = coordinates.map(([lon, lat]) => `${lon},${lat}`).join(';');
+      const r = await fetch(
+        `https://router.project-osrm.org/route/v1/driving/${coordStr}?overview=full&geometries=geojson`,
+        { headers: { 'User-Agent': 'TeslaCarview/2.2' }, signal: AbortSignal.timeout(12000) }
+      );
+      routeResult = await r.json();
+    }
   } catch {
-    return res.status(504).json({ error: 'OSRM nicht erreichbar' });
+    return res.status(504).json({ error: 'Routing nicht erreichbar' });
   }
 
-  const route = osrmData.routes?.[0];
+  const route = routeResult.routes?.[0];
   if (!route) return res.status(502).json({ error: 'Keine Route gefunden' });
 
   const geom     = route.geometry.coordinates; // [[lon,lat],...]
