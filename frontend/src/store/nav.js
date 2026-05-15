@@ -105,7 +105,10 @@ export const useNavStore = defineStore('nav', {
       return this.order
         .map(k => map[k])
         .filter(Boolean)
-        .filter(l => !this.hidden.includes(l.key))
+        // Admin-only Items koennen von Admins nie versteckt werden — das
+        // verhindert, dass System/Benutzer/etc. durch einen falschen
+        // localStorage-Eintrag dauerhaft verschwindet.
+        .filter(l => !this.hidden.includes(l.key) || (l.adminOnly && auth.isAdmin))
         .filter(l => !l.adminOnly || auth.isAdmin);
     },
     /** Gruppen-Struktur fuer die Desktop-Dropdowns. Pro Gruppe nur die
@@ -152,8 +155,10 @@ export const useNavStore = defineStore('nav', {
       for (const l of ALL_LINKS) {
         if (!existingInOrder.has(l.key)) this.order.push(l.key);
       }
-      // 3) hidden um abgelaufene Keys bereinigen
-      this.hidden = this.hidden.filter(k => known.has(k));
+      // 3) hidden um abgelaufene Keys und admin-only Items bereinigen
+      // (Admin-Items duerfen nie dauerhaft versteckt sein)
+      const adminKeys = new Set(ALL_LINKS.filter(l => l.adminOnly).map(l => l.key));
+      this.hidden = this.hidden.filter(k => known.has(k) && !adminKeys.has(k));
       this._persist();
     },
     moveUp(key) {
