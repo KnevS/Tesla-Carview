@@ -1613,6 +1613,8 @@
     "chargerTooltip": "Rota boyunca hızlı şarj istasyonlarını (DC) gösterir — OpenChargeMap üzerinden ücretsiz.",
     "chargerLegend": "Hızlı şarj istasyonu",
     "noChargers": "Hızlı şarj istasyonu bulunamadı.",
+    "noChargersApiKey": "OpenChargeMap API anahtarı eksik – şarj istasyonu yok.",
+    "noChargersApiKeyLink": "Ayarlarda yapılandır",
     "calculating": "Rota hesaplanıyor …",
     "routeError": "Rota hesaplanamadı.",
     "geocoding": "Aranıyor …",

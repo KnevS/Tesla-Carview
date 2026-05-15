@@ -1613,6 +1613,8 @@
     "chargerTooltip": "Affiche les bornes de recharge rapide (DC) le long du trajet — gratuit via OpenChargeMap.",
     "chargerLegend": "Borne rapide",
     "noChargers": "Aucune borne de recharge rapide trouvée.",
+    "noChargersApiKey": "Clé API OpenChargeMap manquante – aucune borne disponible.",
+    "noChargersApiKeyLink": "Configurer dans les paramètres",
     "calculating": "Calcul de l'itinéraire …",
     "routeError": "Impossible de calculer l'itinéraire.",
     "geocoding": "Recherche en cours …",
