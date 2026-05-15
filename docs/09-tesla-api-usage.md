@@ -124,6 +124,48 @@ Das Admin-Panel in `Settings.vue` zeigt:
 * fünf Tarif-Felder (USD pro Aufruf bzw. pro Streaming-Signal)
 * zwei Buttons: **Tarife speichern** und **Aktuellen Monat zurücksetzen**
 
+## Polling-Kosten verstehen und senken
+
+### Warum entstehen Kosten überhaupt?
+
+Ohne aktive Fleet-Telemetry ruft der Hintergrund-Poller periodisch `/vehicle_data` ab.
+Tesla rechnet **jeden** dieser Calls ab (0,005 USD/Aufruf = ca. 0,005 EUR).
+
+### Polling-Modi (ohne Fleet Telemetry)
+
+| Modus | Intervall | Calls/Tag | Kosten/Monat |
+|-------|-----------|-----------|--------------|
+| DRIVING — fährt (D/R/N) | 30 s | bis 2.880 | bis ~43 EUR |
+| PARKED — online, steht | 10 min | bis 144 | bis ~21 EUR |
+| IDLE — offline/schläft | 45 min | bis 32 | bis ~4,50 EUR |
+| Fleet-Telemetry-Heartbeat | 1 h | 24 | ~3,60 EUR |
+
+**Typisches Szenario** (8 h online/parked, 16 h schläft):
+8 × 6 + 16 × 1,3 ≈ **69 Calls/Tag** = ca. **1 EUR/Monat**
+
+### Tages-Cap
+
+Pro Fahrzeug und Tag gibt es einen eingebauten Tages-Cap (Standard: 80 Calls).
+Wird er erreicht, pausiert der Poller bis Mitternacht UTC.
+
+> **Wichtig:** Der Cap-Zähler liegt im Arbeitsspeicher. Bei einem Container-
+> Neustart (z. B. durch ein Deployment) startet er neu bei 0. Wer täglich
+> viele Deployments hat, sollte den Cap entsprechend niedriger setzen.
+
+### Warum kann eine Rechnung trotzdem hoch sein?
+
+- **Viele Container-Neustarts** → Cap resetet, Calls summieren sich
+- **Fahrzeug lange online** → PARKED-Intervall (10 min) greift dauerhaft
+- **Fleet Telemetry nicht aktiv** → kein Heartbeat-Modus, Poller arbeitet blind
+- **Debugging / manuelle API-Calls** zählen ebenfalls in die monatliche Abrechnung
+
+### Empfehlungen
+
+1. **Fleet Telemetry einrichten** — reduziert auf ~24 Heartbeat-Calls/Tag (~3,60 EUR/Monat)
+2. **Hard-Stop aktivieren** in Einstellungen → Tesla-API → Monatslimit festlegen
+3. **Deployments bündeln** statt viele kleine Rollouts pro Tag
+4. **ENABLE_POLLER=false** setzen, wenn kein eigener Tesla verbunden ist
+
 ## Unsicherheiten / TODOs
 
 * Die Default-Tarife (0,005 USD/Call, 0,000005 USD/Streaming-Signal) sind grobe Annahmen –

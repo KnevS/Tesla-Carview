@@ -267,6 +267,21 @@ Thank you
 
 ⚠ Client ID ve VIN'i kendi değerlerinle değiştir. Tesla genellikle birkaç gün içinde yanıt verir.
 
+### API maliyetlerini anlamak
+
+Tesla her `/vehicle_data` çağrısını faturalandırır (≈ 0,005 €/çağrı). Fleet Telemetry olmadan uygulama arka planda sorgular:
+
+| Durum | Aralık | Çağrı/gün |
+|-------|--------|-----------|
+| Sürüş yapıyor | 30 sn | 2.880'e kadar |
+| Çevrimiçi, park | 10 dak | 144'e kadar |
+| Çevrimdışı / uyku | 45 dak | 32'ye kadar |
+| Fleet Telemetry ile | 1 saatlik sinyal | 24 |
+
+**Günlük sınır:** Varsayılan olarak günde 80 çağrı/araç, ardından gece yarısına kadar duraklama.
+
+**Maliyeti düşürmek:** Fleet Telemetry kur (→ ~3,60 €/ay), Ayarlar → Tesla bağlantısı'nda aylık sınır belirle.
+
 ## 🔌 Monta entegrasyonu (faturalandırma) {#monta}
 
 Şirket aracı sürücüleri için: Tesla Carview, **Monta wallbox**'tan şarj verilerini doğrudan çekip işverenin için aylık masraf hesabı oluşturabilir.

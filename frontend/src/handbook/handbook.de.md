@@ -267,6 +267,24 @@ Thank you
 
 ⚠ Client ID und VIN durch eigene Werte ersetzen. Tesla antwortet erfahrungsgemäß innerhalb weniger Tage.
 
+### API-Kosten verstehen
+
+Tesla rechnet jeden `/vehicle_data`-Call ab (≈ 0,005 €/Aufruf). Ohne Fleet Telemetry pollt die App im Hintergrund:
+
+| Zustand | Intervall | Calls/Tag |
+|---------|-----------|-----------|
+| Fährt aktiv | 30 s | bis 2.880 |
+| Online, steht | 10 min | bis 144 |
+| Offline/schläft | 45 min | bis 32 |
+| Mit Fleet Telemetry | 1 h Heartbeat | 24 |
+
+**Tages-Cap:** Standardmäßig max. 80 Calls/Fahrzeug/Tag, danach Pause bis Mitternacht.
+
+**Kosten senken:**
+- Fleet Telemetry einrichten → reduziert auf ~24 Calls/Tag (~3,60 €/Monat)
+- In Einstellungen → Tesla-Verbindung: Monatslimit + Hard-Stop aktivieren
+- Deployments bündeln (jeder Neustart setzt den In-Memory-Cap zurück)
+
 ## 🔌 Monta-Integration (Abrechnung) {#monta}
 
 Für Dienstwagen-Fahrer: Tesla Carview kann Ladedaten direkt aus deiner **Monta-Wallbox** abrufen und daraus eine monatliche Kostenabrechnung für deinen Arbeitgeber erstellen.

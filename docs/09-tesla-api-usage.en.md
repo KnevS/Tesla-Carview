@@ -123,6 +123,48 @@ The admin panel in `Settings.vue` shows:
 * five tariff fields (USD per call resp. per streaming signal)
 * two buttons: **Save tariffs** and **Reset current month**
 
+## Understanding and reducing polling costs
+
+### Why do costs occur at all?
+
+Without active Fleet Telemetry the background poller periodically calls `/vehicle_data`.
+Tesla bills **every** such call (0.005 USD/call ≈ 0.005 EUR).
+
+### Polling modes (without Fleet Telemetry)
+
+| Mode | Interval | Calls/day | Cost/month |
+|------|----------|-----------|------------|
+| DRIVING — actively driving (D/R/N) | 30 s | up to 2,880 | up to ~€43 |
+| PARKED — online but stationary | 10 min | up to 144 | up to ~€21 |
+| IDLE — offline / sleeping | 45 min | up to 32 | up to ~€4.50 |
+| Fleet Telemetry heartbeat | 1 h | 24 | ~€3.60 |
+
+**Typical scenario** (8 h online/parked, 16 h sleeping):
+8 × 6 + 16 × 1.3 ≈ **69 calls/day** = roughly **€1/month**
+
+### Daily cap
+
+There is a built-in daily cap per vehicle per day (default: 80 calls).
+Once reached the poller pauses until UTC midnight.
+
+> **Important:** The cap counter is in-memory only. On a container restart
+> (e.g. triggered by a deployment) it resets to 0. If you deploy frequently,
+> consider setting a lower cap to compensate.
+
+### Why can a bill still be high?
+
+- **Many container restarts** — cap resets, calls accumulate
+- **Vehicle online for a long time** — PARKED interval (10 min) fires continuously
+- **Fleet Telemetry not active** — no heartbeat mode, poller works blind
+- **Debugging / manual API calls** also count towards the monthly bill
+
+### Recommendations
+
+1. **Set up Fleet Telemetry** — reduces to ~24 heartbeat calls/day (~€3.60/month)
+2. **Enable hard stop** in Settings → Tesla API → set a monthly limit
+3. **Bundle deployments** rather than many small rollouts per day
+4. **Set ENABLE_POLLER=false** when no real Tesla is connected (e.g. demo-only instance)
+
 ## Uncertainties / TODOs
 
 * The default tariffs (0.005 USD/call, 0.000005 USD/streaming signal) are rough assumptions —
