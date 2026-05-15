@@ -154,6 +154,49 @@
       </details>
     </div>
 
+    <!-- Externe API-Schlüssel (admin only) -->
+    <div v-if="isAdmin" class="card space-y-4">
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="key" :size="20" class="text-tesla-red" />
+        Externe API-Schlüssel
+      </h2>
+
+      <!-- OpenChargeMap -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <span :class="ocmCfg.configured ? 'text-green-400' : 'text-red-400'" class="text-lg">●</span>
+            <div>
+              <p class="text-sm font-medium">OpenChargeMap API-Key</p>
+              <p class="text-xs text-gray-500">
+                Schnellladestationen im Routenplaner ·
+                <a href="https://openchargemap.org/site/develop/api" target="_blank"
+                  class="text-blue-400 hover:underline">Kostenlos registrieren →</a>
+              </p>
+            </div>
+          </div>
+          <span v-if="ocmCfg.configured" class="text-xs text-gray-500 font-mono">{{ ocmCfg.masked }}</span>
+        </div>
+
+        <div class="flex gap-2">
+          <input v-model="ocmKeyInput" type="password"
+            :placeholder="ocmCfg.configured ? '••••••••  (neuen Key eingeben zum Ändern)' : 'API-Key einfügen …'"
+            class="input flex-1 text-sm font-mono"
+            @keyup.enter="saveOcmKey" />
+          <button @click="saveOcmKey" :disabled="ocmSaving || !ocmKeyInput.trim()"
+            class="px-3 py-1.5 rounded-lg text-sm font-medium transition bg-tesla-red text-white hover:bg-red-600 disabled:opacity-40">
+            {{ ocmSaving ? '…' : 'Speichern' }}
+          </button>
+          <button v-if="ocmCfg.configured" @click="deleteOcmKey" :disabled="ocmSaving"
+            class="px-3 py-1.5 rounded-lg text-sm font-medium transition bg-gray-700 text-gray-300 hover:bg-red-900 hover:text-red-200 disabled:opacity-40"
+            v-tooltip="'API-Key löschen'">
+            ✕
+          </button>
+        </div>
+        <p v-if="ocmMsg" :class="ocmMsgOk ? 'text-green-400' : 'text-red-400'" class="text-xs">{{ ocmMsg }}</p>
+      </div>
+    </div>
+
     <!-- System stats (admin only) -->
     <template v-if="stats">
       <div class="grid md:grid-cols-2 gap-4">
@@ -447,6 +490,54 @@ const tt = (key) => t('system.tenants.' + key);
 const ver   = ref({});
 const stats = ref(null);
 
+// ─── OpenChargeMap API-Key ─────────────────────────────────────────
+const ocmCfg      = ref({ configured: false, masked: '' });
+const ocmKeyInput = ref('');
+const ocmSaving   = ref(false);
+const ocmMsg      = ref('');
+const ocmMsgOk    = ref(true);
+
+async function loadOcmConfig() {
+  try {
+    const { data } = await api.get('/routing/ocm-config');
+    ocmCfg.value = data;
+  } catch { /* ignore */ }
+}
+
+async function saveOcmKey() {
+  if (!ocmKeyInput.value.trim()) return;
+  ocmSaving.value = true; ocmMsg.value = '';
+  try {
+    const { data } = await api.put('/routing/ocm-config', { ocm_api_key: ocmKeyInput.value.trim() });
+    ocmCfg.value = data;
+    ocmKeyInput.value = '';
+    ocmMsg.value = '✓ Key gespeichert';
+    ocmMsgOk.value = true;
+  } catch (e) {
+    ocmMsg.value = e.response?.data?.error ?? 'Fehler beim Speichern';
+    ocmMsgOk.value = false;
+  } finally {
+    ocmSaving.value = false;
+    setTimeout(() => { ocmMsg.value = ''; }, 4000);
+  }
+}
+
+async function deleteOcmKey() {
+  ocmSaving.value = true; ocmMsg.value = '';
+  try {
+    const { data } = await api.put('/routing/ocm-config', { ocm_api_key: '' });
+    ocmCfg.value = data;
+    ocmMsg.value = 'Key gelöscht';
+    ocmMsgOk.value = true;
+  } catch (e) {
+    ocmMsg.value = e.response?.data?.error ?? 'Fehler';
+    ocmMsgOk.value = false;
+  } finally {
+    ocmSaving.value = false;
+    setTimeout(() => { ocmMsg.value = ''; }, 3000);
+  }
+}
+
 const updateInfo     = ref(null);
 const updateChecking = ref(false);
 const updateError    = ref('');
@@ -637,6 +728,7 @@ onMounted(async () => {
     await reloadStats();
     loadHealth();
     loadMaintenanceLog();
+    loadOcmConfig();
   }
 });
 </script>

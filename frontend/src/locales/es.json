@@ -1613,6 +1613,8 @@
     "chargerTooltip": "Muestra cargadores rápidos (DC) a lo largo de la ruta — gratis vía OpenChargeMap.",
     "chargerLegend": "Cargador rápido",
     "noChargers": "No se encontraron cargadores rápidos.",
+    "noChargersApiKey": "Falta la clave API de OpenChargeMap – no hay cargadores disponibles.",
+    "noChargersApiKeyLink": "Configurar en ajustes",
     "calculating": "Calculando ruta …",
     "routeError": "No se pudo calcular la ruta.",
     "geocoding": "Buscando …",

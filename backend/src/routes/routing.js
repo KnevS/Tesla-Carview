@@ -205,6 +205,41 @@ router.get('/stats', (req, res) => {
   });
 });
 
+// ── OCM-Key: DB hat Vorrang vor .env ─────────────────────────────────────────
+function getOcmKey(db) {
+  try {
+    const row = db?.prepare("SELECT value FROM tenant_settings WHERE key='ocm_api_key'").get();
+    if (row?.value) return row.value;
+  } catch { /* ignore */ }
+  return process.env.OPENCHARGEMAP_API_KEY || null;
+}
+
+// GET /api/routing/ocm-config — OCM API-Key Status (maskiert)
+router.get('/ocm-config', (req, res) => {
+  const key = getOcmKey(req.db);
+  if (!key) return res.json({ configured: false });
+  res.json({ configured: true, masked: key.slice(0, 8) + '…' + key.slice(-4) });
+});
+
+// PUT /api/routing/ocm-config — OCM API-Key speichern (Admin)
+router.put('/ocm-config', (req, res) => {
+  if (!['admin', 'superadmin'].includes(req.user?.role)) {
+    return res.status(403).json({ error: 'Nur Admins können den OCM-Key konfigurieren' });
+  }
+  const { ocm_api_key } = req.body;
+  if (ocm_api_key === '' || ocm_api_key == null) {
+    req.db.prepare("DELETE FROM tenant_settings WHERE key='ocm_api_key'").run();
+    return res.json({ configured: false });
+  }
+  if (typeof ocm_api_key !== 'string' || ocm_api_key.length < 8) {
+    return res.status(400).json({ error: 'Ungültiger API-Key' });
+  }
+  req.db.prepare(
+    "INSERT INTO tenant_settings (key,value) VALUES ('ocm_api_key',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+  ).run(ocm_api_key);
+  res.json({ configured: true, masked: ocm_api_key.slice(0, 8) + '…' + ocm_api_key.slice(-4) });
+});
+
 // GET /api/routing/chargers?lat=&lon=&radius_km=
 router.get('/chargers', async (req, res) => {
   const lat    = parseFloat(req.query.lat);
@@ -217,7 +252,8 @@ router.get('/chargers', async (req, res) => {
     latitude: lat, longitude: lon, distance: radius, distanceunit: 'KM',
     levelid: '3',   // DC Fast only (>40 kW)
   });
-  if (process.env.OPENCHARGEMAP_API_KEY) params.set('key', process.env.OPENCHARGEMAP_API_KEY);
+  const ocmKey = getOcmKey(req.db);
+  if (ocmKey) params.set('key', ocmKey);
 
   try {
     const r = await fetch(`https://api.openchargemap.io/v3/poi/?${params}`, {
@@ -366,7 +402,8 @@ router.post('/plan', async (req, res) => {
       latitude: lat, longitude: lon, distance: 20, distanceunit: 'KM',
       levelid: '3',
     });
-    if (process.env.OPENCHARGEMAP_API_KEY) params.set('key', process.env.OPENCHARGEMAP_API_KEY);
+    const ocmKeyPlan = getOcmKey(req.db);
+    if (ocmKeyPlan) params.set('key', ocmKeyPlan);
     try {
       const r   = await fetch(`https://api.openchargemap.io/v3/poi/?${params}`, {
         signal: AbortSignal.timeout(6000),

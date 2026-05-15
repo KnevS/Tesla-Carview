@@ -623,9 +623,13 @@
     <!-- ─── Toast ────────────────────────────────────────────────────────── -->
     <Teleport to="body">
       <transition name="fade">
-        <div v-if="toast" class="fixed top-20 right-4 z-[1000] px-4 py-3 rounded-xl shadow-xl text-sm font-medium"
+        <div v-if="toast" class="fixed top-20 right-4 z-[1000] px-4 py-3 rounded-xl shadow-xl text-sm font-medium max-w-xs"
           :class="toast.ok ? 'bg-green-800 text-green-100' : 'bg-red-900 text-red-200'">
-          {{ toast.msg }}
+          <span>{{ toast.msg }}</span>
+          <RouterLink v-if="toast.link" :to="toast.link.to"
+            class="ml-2 underline opacity-80 hover:opacity-100 whitespace-nowrap">
+            {{ toast.link.label }} →
+          </RouterLink>
         </div>
       </transition>
     </Teleport>
@@ -745,9 +749,9 @@ const returnAutoSend   = ref(false);
 const busy  = ref(false);
 const toast = ref(null);
 
-function showToast(msg, ok = true) {
-  toast.value = { msg, ok };
-  setTimeout(() => { toast.value = null; }, 3500);
+function showToast(msg, ok = true, link = null) {
+  toast.value = { msg, ok, link };
+  setTimeout(() => { toast.value = null; }, ok ? 3500 : 6000);
 }
 
 // ── Abfahrtszeit jetzt setzen ──
@@ -1222,10 +1226,10 @@ async function _loadChargers() {
     if (chargers.value.length === 0) showToast(t('routes.noChargers'), false);
   } catch (err) {
     console.warn('[Chargers]', err.message);
-    const msg = err.response?.data?.code === 'NO_API_KEY'
-      ? t('routes.noChargersApiKey')
-      : t('routes.noChargers');
-    showToast(msg, false);
+    const noKey = err.response?.data?.code === 'NO_API_KEY';
+    const msg   = noKey ? t('routes.noChargersApiKey') : t('routes.noChargers');
+    const link  = noKey ? { to: '/system', label: t('routes.noChargersApiKeyLink') } : null;
+    showToast(msg, false, link);
   }
   finally { chargerLoading.value = false; }
 }
