@@ -21,13 +21,13 @@
       :collapsed="isCollapsed('overall')" @toggle="toggle('overall')" @move="(f,t,p) => moveSection(f,t,p)">
       <div v-if="overall" class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard :label="$t('energy.avgKwh100')"
-          :value="overall.avg_kwh_100km != null ? overall.avg_kwh_100km.toFixed(1) + ' ' + $t('energy.kwh100Unit') : '—'"
+          :value="overall.avg_kwh_100km != null ? fmtEfficiency(overall.avg_kwh_100km) : '—'"
           icon="pulse" />
         <StatCard :label="$t('energy.totalKwh')"
           :value="overall.total_kwh != null ? overall.total_kwh.toFixed(1) + ' kWh' : '—'"
           icon="bolt" />
         <StatCard :label="$t('energy.totalKm')"
-          :value="overall.total_km != null ? overall.total_km.toFixed(0) + ' km' : '—'"
+          :value="overall.total_km != null ? fmtDistance(overall.total_km, 0) : '—'"
           icon="map" />
         <StatCard :label="$t('energy.tripsCount')"
           :value="String(overall.trips_count ?? 0)"
@@ -61,7 +61,7 @@
               {{ scoreLabel(overall.eco_score) }}
             </p>
             <p class="text-sm text-gray-400 mt-1" v-tooltip="$t('energy.ecoScoreTooltip')">
-              {{ $t('energy.wltpRef') }}: {{ overall.wltp_ref ? overall.wltp_ref.toFixed(1) + ' kWh/100 km' : '—' }}
+              {{ $t('energy.wltpRef') }}: {{ overall.wltp_ref ? fmtEfficiency(overall.wltp_ref) : '—' }}
             </p>
             <p class="text-sm mt-2"
               :class="scoreTrendClass">
@@ -92,7 +92,7 @@
               </span>
             </div>
             <div class="text-xs text-gray-500">
-              {{ w.avg_kwh_100km != null ? w.avg_kwh_100km.toFixed(1) + ' kWh/100 km' : '' }}
+              {{ w.avg_kwh_100km != null ? fmtEfficiency(w.avg_kwh_100km) : '' }}
               <span v-if="w.trips_count"> · {{ w.trips_count }} {{ $t('energy.tripsCount').toLowerCase() }}</span>
             </div>
           </div>
@@ -109,12 +109,14 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
+import { useUnits } from '../store/prefs.js';
 import SortableSection from '../components/SortableSection.vue';
 import StatCard        from '../components/StatCard.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
 import api from '../api.js';
 
 const { t } = useI18n();
+const { fmtDistance, fmtEfficiency } = useUnits();
 const ENERGY_SECTIONS = ['overall', 'score', 'trend'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('energy', ENERGY_SECTIONS);
 

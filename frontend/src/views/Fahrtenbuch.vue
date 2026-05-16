@@ -194,7 +194,7 @@
                 </p>
               </RouterLink>
             </div>
-            <p class="text-right font-bold whitespace-nowrap">{{ fmt(trip.distance_km, 1) }} km</p>
+            <p class="text-right font-bold whitespace-nowrap">{{ fmtDistance(trip.distance_km) }}</p>
           </div>
 
           <!-- Zweck + Geschaeftspartner immer sichtbar; je nach Typ verschiedene
@@ -384,6 +384,7 @@
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAppStore } from '../store/index.js';
+import { useUnits } from '../store/prefs.js';
 import api from '../api.js';
 import TripsHeatmap from '../components/TripsHeatmap.vue';
 import AppIcon from '../components/AppIcon.vue';
@@ -393,6 +394,7 @@ import SortToggle from '../components/SortToggle.vue';
 import { useSortDirection } from '../composables/useSortDirection.js';
 
 const appStore  = useAppStore();
+const { fmtDistance } = useUnits();
 const trips     = ref([]);
 const months    = ref([]);
 const loading   = ref(false);

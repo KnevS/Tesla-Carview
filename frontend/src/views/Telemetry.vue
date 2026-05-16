@@ -39,7 +39,7 @@
             <div class="space-y-1" v-tooltip="'Ladezustand der Hochvoltbatterie in Prozent'">
               <div class="text-xs text-gray-400 uppercase tracking-wide">SOC</div>
               <div class="text-4xl font-bold" :class="socColor">{{ data.charge.level_pct ?? '—' }}%</div>
-              <div class="text-sm text-gray-400">{{ data.charge.range_km ?? '—' }} km Reichweite</div>
+              <div class="text-sm text-gray-400">{{ data.charge.range_km != null ? fmtDistance(data.charge.range_km) : '—' }} Reichweite</div>
             </div>
             <div class="space-y-1" v-tooltip="'Aktuelle Geschwindigkeit in km/h'">
               <div class="text-xs text-gray-400 uppercase tracking-wide">Geschwindigkeit</div>
@@ -55,8 +55,7 @@
             </div>
             <div class="space-y-1" v-tooltip="'Gesamtkilometerstand des Fahrzeugs'">
               <div class="text-xs text-gray-400 uppercase tracking-wide">Kilometerstand</div>
-              <div class="text-4xl font-bold text-white">{{ fmt(data.vehicle.odometer_km) }}</div>
-              <div class="text-sm text-gray-400">km</div>
+              <div class="text-4xl font-bold text-white">{{ data.vehicle.odometer_km != null ? fmtDistance(data.vehicle.odometer_km, 0) : '—' }}</div>
             </div>
           </div>
         </div>
@@ -123,9 +122,9 @@
         title="Klima" icon="🌡️"
         :collapsed="isCollapsed('climate')" @toggle="toggle('climate')" @move="(f,t,p) => moveSection(f,t,p)">
         <div class="space-y-2">
-          <DataRow label="Innentemperatur"     :value="fmtT(data.climate.inside_temp_c)"        tooltip="Aktuelle Temperatur im Fahrzeuginnenraum" />
-          <DataRow label="Außentemperatur"     :value="fmtT(data.climate.outside_temp_c)"       tooltip="Außentemperatur am Fahrzeugstandort" />
-          <DataRow label="Solltemperatur"      :value="fmtT(data.climate.driver_temp_setting)"  tooltip="Eingestellte Wunschtemperatur des Fahrers" />
+          <DataRow label="Innentemperatur"     :value="data.climate.inside_temp_c != null ? fmtTemp(data.climate.inside_temp_c) : '—'"        tooltip="Aktuelle Temperatur im Fahrzeuginnenraum" />
+          <DataRow label="Außentemperatur"     :value="data.climate.outside_temp_c != null ? fmtTemp(data.climate.outside_temp_c) : '—'"       tooltip="Außentemperatur am Fahrzeugstandort" />
+          <DataRow label="Solltemperatur"      :value="data.climate.driver_temp_setting != null ? fmtTemp(data.climate.driver_temp_setting) : '—'"  tooltip="Eingestellte Wunschtemperatur des Fahrers" />
           <DataRow label="Klimaanlage"         :value="data.climate.is_climate_on ? '✅ Ein' : '⭕ Aus'" tooltip="Ob die Klimaanlage gerade aktiv ist" />
           <DataRow label="Frontscheibenheiz."  :value="data.climate.is_front_defroster_on ? '✅ Ein' : '⭕ Aus'" tooltip="Frontscheibenheizung aktiv?" />
           <DataRow label="Heckscheibenheiz."   :value="data.climate.is_rear_defroster_on  ? '✅ Ein' : '⭕ Aus'" tooltip="Heckscheibenheizung aktiv?" />
@@ -201,6 +200,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick, h, resolveDirective, withDirectives } from 'vue';
 import { useAppStore } from '../store/index.js';
+import { useUnits } from '../store/prefs.js';
 import api from '../api.js';
 import AppIcon from '../components/AppIcon.vue';
 import SortableSection from '../components/SortableSection.vue';
@@ -208,6 +208,7 @@ import { usePageLayout } from '../composables/usePageLayout.js';
 
 const appStore = useAppStore();
 const vehicle  = computed(() => appStore.selectedVehicle);
+const { fmtDistance, fmtTemp } = useUnits();
 
 const TELEMETRY_SECTIONS = ['hero', 'map', 'power', 'tpms', 'climate', 'charging', 'vehicle'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('telemetry', TELEMETRY_SECTIONS);
@@ -267,7 +268,6 @@ const socColor = computed(() => {
 });
 
 function fmt(n)  { return n != null ? Number(n).toLocaleString('de-DE', { maximumFractionDigits: 0 }) : '—'; }
-function fmtT(t) { return t != null ? t.toFixed(1) + ' °C' : '—'; }
 function fmtH(h) {
   if (h == null) return '—';
   const hrs = Math.floor(h), mins = Math.round((h - hrs) * 60);

@@ -364,7 +364,7 @@
                 <div class="flex-1 min-w-0">
                   <p class="text-xs text-gray-400">{{ $t('routes.weatherAtStart') }}</p>
                   <p class="text-sm font-medium text-white">
-                    {{ weatherData.start.current?.temperature_2m?.toFixed(1) }}°C
+                    {{ weatherData.start.current?.temperature_2m != null ? fmtTemp(weatherData.start.current.temperature_2m) : '—' }}
                     <span class="text-gray-400 text-xs ml-1">💨 {{ weatherData.start.current?.wind_speed_10m }} km/h</span>
                   </p>
                 </div>
@@ -378,7 +378,7 @@
                 <div class="flex-1 min-w-0">
                   <p class="text-xs text-gray-400">{{ $t('routes.weatherAtDest') }} ({{ $t('routes.expectedArrival') }})</p>
                   <p class="text-sm font-medium text-white">
-                    {{ (weatherData.dest.hourly?.temperature_2m ?? weatherData.dest.current?.temperature_2m)?.toFixed(1) }}°C
+                    {{ (weatherData.dest.hourly?.temperature_2m ?? weatherData.dest.current?.temperature_2m) != null ? fmtTemp(weatherData.dest.hourly?.temperature_2m ?? weatherData.dest.current?.temperature_2m) : '—' }}
                     <span class="text-gray-400 text-xs ml-1">💨 {{ weatherData.dest.hourly?.wind_speed_10m ?? weatherData.dest.current?.wind_speed_10m }} km/h</span>
                   </p>
                 </div>
@@ -643,6 +643,7 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
+import { useUnits } from '../store/prefs.js';
 import AppIcon from '../components/AppIcon.vue';
 import SortableSection from '../components/SortableSection.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
@@ -651,6 +652,7 @@ import api from '../api.js';
 const { t, locale } = useI18n();
 const appStore = useAppStore();
 const vehicle  = computed(() => appStore.selectedVehicle);
+const { fmtDistance, fmtTemp } = useUnits();
 
 // ── Layout ──
 const ROUTE_SECTIONS = ['start', 'destination', 'timing', 'charging', 'routeinfo', 'waypoints', 'weather', 'actions', 'saved'];
@@ -882,7 +884,7 @@ const arrivalSocBarClass = computed(() => {
 // ── Formatierung ──
 function formatDistance(km) {
   if (km == null) return '—';
-  return km >= 10 ? `${Math.round(km)} km` : `${km.toFixed(1)} km`;
+  return fmtDistance(km, km >= 10 ? 0 : 1);
 }
 
 function formatDuration(min) {
