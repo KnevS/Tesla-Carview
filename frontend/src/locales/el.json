@@ -1791,7 +1791,7 @@
       "healEnabled": "Αυτο-επούλωση ενεργή",
       "healEnabledHint": "Cron κάθε 15 λεπτά: οι αποτυχημένοι containers επανεκκινούνται αυτόματα.",
       "alertEmail": "E-mail ειδοποίησης",
-      "alertEmailPlaceholder": "admin@example.gr",
+      "alertEmailPlaceholder": "admin{'@'}example.gr",
       "alertEmailHint": "Λαμβάνει e-mail αν οι υπηρεσίες παραμένουν εκτός λειτουργίας μετά την επανεκκίνηση.",
       "emailStatus": "Κατάσταση e-mail",
       "emailInstalled": "msmtp εγκατεστημένο και διαμορφωμένο",

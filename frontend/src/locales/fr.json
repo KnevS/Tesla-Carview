@@ -1791,7 +1791,7 @@
       "healEnabled": "Auto-réparation activée",
       "healEnabledHint": "Cron toutes les 15 min : les containers défaillants sont redémarrés automatiquement.",
       "alertEmail": "E-mail de notification",
-      "alertEmailPlaceholder": "admin@exemple.fr",
+      "alertEmailPlaceholder": "admin{'@'}exemple.fr",
       "alertEmailHint": "Reçoit un e-mail si les services continuent à échouer après redémarrage.",
       "emailStatus": "État de l'envoi d'e-mails",
       "emailInstalled": "msmtp installé et configuré",

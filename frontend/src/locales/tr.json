@@ -1791,7 +1791,7 @@
       "healEnabled": "Otomatik Onarım Aktif",
       "healEnabledHint": "Her 15 dakikada bir cron görevi: başarısız konteynerler otomatik olarak yeniden başlatılır.",
       "alertEmail": "Bildirim E-postası",
-      "alertEmailPlaceholder": "admin@ornek.com",
+      "alertEmailPlaceholder": "admin{'@'}ornek.com",
       "alertEmailHint": "Servisler yeniden başlatmadan sonra da başarısız olursa e-posta alır.",
       "emailStatus": "E-posta Sunucu Durumu",
       "emailInstalled": "msmtp kurulu ve yapılandırılmış",

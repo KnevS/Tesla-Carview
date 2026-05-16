@@ -1790,7 +1790,7 @@
       "healEnabled": "Selbstheilung aktiviert",
       "healEnabledHint": "Cron-Job alle 15 Minuten: ausgefallene Container werden automatisch neu gestartet.",
       "alertEmail": "Benachrichtigungs-E-Mail",
-      "alertEmailPlaceholder": "admin@beispiel.de",
+      "alertEmailPlaceholder": "admin{'@'}beispiel.de",
       "alertEmailHint": "Erhält eine E-Mail, wenn Dienste nach dem Neustart weiterhin ausfallen.",
       "emailStatus": "E-Mail-Host-Status",
       "emailInstalled": "msmtp installiert und konfiguriert",
