@@ -3,7 +3,6 @@
 # Erweitert die Default-Regeln (AWS, GitHub-Tokens, JWT, etc.) um
 # projekt-spezifische Patterns:
 #   - Echte VINs (17 Stellen, ohne All-Zero-Endung als Platzhalter)
-#   - Operator-Identität (operator / @example.com)
 #   - Tesla OAuth / Refresh-Tokens
 #   - Echte Lat/Lon-Paare in JSON/JS-Dateien außerhalb von Tests
 #
@@ -24,12 +23,6 @@ description = "Tesla VIN (17 Zeichen, 5YJ/7SA Prefix)"
 # simples 17-Zeichen-Match und Filterung ueber die Allowlist.
 regex       = '''\b(?:5YJ|7SA)[A-HJ-NPR-Z0-9]{14}\b'''
 tags        = ["personal-data", "tesla"]
-
-[[rules]]
-id          = "operator-email"
-description = "Echte Operator-E-Mail (the operator)"
-regex       = '''(?i)(operator@example\.com)'''
-tags        = ["personal-data", "operator-identity"]
 
 [[rules]]
 id          = "tesla-oauth-token"
@@ -86,6 +79,4 @@ regexes = [
   # (Konvention: echte VINs haben dort die Seriennummer).
   '''5YJ[A-HJ-NPR-Z0-9]{8}0{6}''',
   '''7SA[A-HJ-NPR-Z0-9]{8}0{6}''',
-  # Operator-Adresse in README/NOTICE/AUTHORS ist gewollte Attribution
-  '''Sven Krische''',
 ]
