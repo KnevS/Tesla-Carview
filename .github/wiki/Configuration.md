@@ -54,7 +54,34 @@ docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d --build backe
 
 ---
 
+## Web Push (notifications)
+
+VAPID keys are required for push notifications ("Charging complete", "Service interval due"). Without them, pushes don't work — the rest of the app runs normally.
+
+| Variable | Default | Description |
+|---|---|---|
+| `VAPID_PUBLIC_KEY` | — | Public key — generate with `npx web-push generate-vapid-keys` |
+| `VAPID_PRIVATE_KEY` | — | Private key (generated at the same time) |
+| `VAPID_CONTACT` | `mailto:noreply@example.com` | Contact URI for the push service — ideally your own email |
+
+Generate both keys with one command:
+```bash
+npx web-push generate-vapid-keys
+```
+
+---
+
 ## Advanced / Fleet Telemetry
+
+Fleet Telemetry provides **real-time GPS and telemetry** pushed directly from the car to your server — instead of polling the Tesla API every minute. It is optional for most installations, but recommended (or required) for newer Tesla models.
+
+**When Fleet Telemetry matters:**
+- Newer models (e.g. Model Y Juniper, VINs starting with XP7) no longer return GPS data via the standard polling API — Fleet Telemetry is then the only way to get live location data.
+- For older models, it's an optional upgrade: lower API load, faster data, and real-time position updates.
+
+**Prerequisites:**
+1. The Virtual Key must be paired first (see [Tesla API Setup](Tesla-API-Setup#step-3-set-up-the-virtual-key-for-commands))
+2. Fleet Telemetry must be **approved for your Client-ID** in the [Tesla Developer Portal](https://developer.tesla.com) — this is a separate approval step beyond basic API access. Request it under your app settings.
 
 | Variable | Description |
 |---|---|
@@ -93,10 +120,10 @@ Some settings do not require `.env` changes — they are configured directly in 
 | Setting | Location | Notes |
 |---|---|---|
 | SMTP / e-mail delivery | Admin → System → E-Mail | Host, port, user, password, sender — includes a send-test button |
-| OpenChargeMap API key | Admin → System → External APIs | Charging station overlay on route planner |
-| HERE Maps API key | Admin → System → External APIs | Real-time traffic on route planner |
-| Monta API key | Admin → System → External APIs | Home charging sync |
-| xAI API key | Admin → System → External APIs | Grok Chat AI assistant |
+| OpenChargeMap API key | Admin → System → External APIs | Charging station overlay on route planner — free, register at [openchargemap.io/site/develop](https://openchargemap.io/site/develop#api) |
+| HERE Maps API key | Admin → System → External APIs | Real-time traffic on route planner — free tier (250 k req/month), register at [developer.here.com](https://developer.here.com) |
+| Monta API key | Admin → System → External APIs | Home charging sync — requires a Monta account, key in [Monta Partner Portal](https://monta.com) |
+| xAI API key | Admin → System → External APIs | Grok Chat AI assistant — get at [console.x.ai](https://console.x.ai) |
 | Anthropic API key | Admin → System → Monitoring | AI-powered autofix (Claude Haiku) — see below |
 | Self-healing toggle | Admin → System → Monitoring | Enable/disable automatic container restart |
 | Alert e-mail address | Admin → System → Monitoring | Where monitoring alerts are sent |

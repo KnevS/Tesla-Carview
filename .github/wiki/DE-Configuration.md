@@ -81,6 +81,16 @@ VAPID-Keys werden für Push-Benachrichtigungen benötigt (z.B. „Laden abgeschl
 
 ## Erweitert / Fleet Telemetry
 
+Fleet Telemetry liefert **Echtzeit-GPS und Telemetriedaten**, die direkt vom Auto an den Server gesendet werden — statt die Tesla API jede Minute abzufragen. Für die meisten Installationen optional, bei neueren Tesla-Modellen empfohlen oder erforderlich.
+
+**Wann Fleet Telemetry wichtig wird:**
+- Neuere Modelle (z.B. Model Y Juniper, VINs mit XP7-Prefix) geben über die normale Polling-API keine GPS-Daten mehr zurück — Fleet Telemetry ist dann der einzige Weg, Live-Standortdaten zu erhalten.
+- Bei älteren Modellen ist es ein optionales Upgrade: weniger API-Last, schnellere Daten, Echtzeit-Positionsaktualisierungen.
+
+**Voraussetzungen:**
+1. Der Virtual Key muss zuerst gepairt sein (siehe [Tesla API Setup](DE-Tesla-API-Setup#schritt-3-virtual-key-für-befehle-einrichten))
+2. Fleet Telemetry muss **für deine Client-ID im [Tesla Developer Portal](https://developer.tesla.com) genehmigt** werden — das ist ein eigener Genehmigungsschritt zusätzlich zum normalen API-Zugang. Antrag unter deinen App-Einstellungen stellen.
+
 | Variable | Beschreibung |
 |---|---|
 | `FLEET_TELEMETRY_ENABLED` | `true`/`false` — Echtzeit-GPS via Fleet Telemetry aktivieren |
@@ -149,9 +159,9 @@ Einige Einstellungen erfordern keine `.env`-Änderungen — sie werden direkt in
 | Einstellung | Ort | Hinweis |
 |---|---|---|
 | SMTP / E-Mail-Versand | Admin → System → E-Mail | Host, Port, Benutzer, Passwort, Absender — inkl. Test-Mail-Button |
-| OpenChargeMap API-Key | Admin → System → Externe APIs | Ladestation-Overlay im Routenplaner |
-| HERE Maps API-Key | Admin → System → Externe APIs | Echtzeit-Verkehr im Routenplaner |
-| Monta API-Key | Admin → System → Externe APIs | Home-Ladungs-Sync |
+| OpenChargeMap API-Key | Admin → System → Externe APIs | Ladestation-Overlay im Routenplaner — kostenlos, Registrierung unter [openchargemap.io/site/develop](https://openchargemap.io/site/develop#api) |
+| HERE Maps API-Key | Admin → System → Externe APIs | Echtzeit-Verkehr im Routenplaner — kostenloses Kontingent (250 k Req/Monat), Registrierung unter [developer.here.com](https://developer.here.com) |
+| Monta API-Key | Admin → System → Externe APIs | Home-Ladungs-Sync — erfordert Monta-Account, Key im [Monta Partner Portal](https://monta.com) |
 | xAI API-Key | Admin → System → Externe APIs | Grok Chat KI-Assistent |
 | Anthropic API-Key | Admin → System → Monitoring | KI-gestützter Autofix (Claude Haiku) — siehe unten |
 | Selbstheilung (Heal) | Admin → System → Monitoring | Automatischen Container-Neustart aktivieren/deaktivieren |
