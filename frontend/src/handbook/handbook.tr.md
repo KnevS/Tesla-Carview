@@ -426,17 +426,30 @@ Veri kaynağı: BMF yolculuk defteriyle aynı yolculuklar — ısı haritası sa
 
 ## 📱 Akıllı telefon ve Tesla içinde kullanım (PWA kurulumu) {#mobile-tesla-install}
 
-Tesla Carview bir PWA'dır — App Store olmadan yerel uygulama gibi kurulabilir.
+Tesla Carview bir **PWA**'dır (Progressive Web App) — App Store veya Google Play olmadan yerel uygulama gibi kurulabilir. iPhone, iPad, Android, Tesla araç tarayıcısı ve tüm Chromium masaüstü tarayıcılarında çalışır.
 
-**Android / Tesla / Chrome / Edge:** altta „Carview als App installieren" şeridi belirir → **Installieren** dokun. Simge ana ekrana iner.
+**Android Akıllı Telefon / Tesla / Chrome / Edge:**
+1. Uygulamayı tarayıcıda aç ve giriş yap.
+2. Altta „Carview als App installieren" şeridi belirir → **Installieren** düğmesine dokun.
+3. Simge ana ekrana iner. Dokunulduğunda uygulama tarayıcı çubuğu olmadan tam ekran açılır.
 
-**iPhone / iPad (Safari):** **Paylaş** → **„Ana Ekrana Ekle"**.
+**iPhone / iPad (Safari):**
+1. Uygulamayı Safari'de aç ve giriş yap.
+2. **Paylaş** düğmesi → **„Ana Ekrana Ekle"** → Ekle.
+3. Simge, yerel uygulamalar gibi ana ekranda görünür.
 
-**Tesla ekranı:** arabada tarayıcıyı aç, Carview URL'sini gir. Düzen Tesla ekran boyutuna uyum sağlar; dar görünümde yolculuk defteri büyük dokunma hedefleri olan kart düzenine geçer. **„◫ Karten"** butonu bu görünümü zorlar.
+**Tesla Ekranında:**
+- Araçta: tarayıcıyı aç, Carview URL'sini gir.
+- Uygulama Tesla ekran boyutuna uyum sağlar. Dar görünümde yolculuk defteri otomatik olarak büyük dokunma hedefleri olan kart görünümüne geçer.
+- İpucu: **„◫ Karten"** butonu büyük ekranlarda da kompakt görünümü zorlar.
+
+**Öneri:** Carview'i Tesla tarayıcısında yer imi olarak kaydet — Tesla, kaydedilen yer imlerini doğrudan tarayıcı hızlı erişiminde gösterir. Kısa bir durakta seyahat notu girmek, her seferinde URL yazmaktan çok daha hızlıdır.
 
 ## 🗺️ Rota planlayıcı {#route-planner}
 
 Rota planlayıcı, sürüş güzergahları hesaplar ve yol boyunca hızlı şarj istasyonlarını gösterir.
+
+**Rota hesapla** — Başlangıç ve varış adreslerini gir. « + Ara durak » ile istediğin kadar waypoint ekleyebilir ve sürükle-bırak ile sıralayabilirsin.
 
 **Kaçınma seçenekleri** — Hedef alanının yanında üç geçiş düğmesi:
 - **Otoyollar** — güzergah karayolları ve şehirlerarası yollar üzerinden geçer
@@ -448,6 +461,8 @@ Seçenekler tarayıcıda kaydedilir. Yönlendirme Valhalla (openstreetmap.de) ku
 **Hızlı şarj istasyonları** — Güzergah boyunca Supercharger'lar ve CCS. Admin → System → Harici API anahtarları altında ücretsiz bir OpenChargeMap API anahtarı gerektirir.
 
 **Gerçek zamanlı trafik** — HERE Maps API anahtarı yapılandırıldığında, güncel trafik akışı seyahat süresi tahminine dahil edilir.
+
+**Şarj planlaması** — SoC planlaması etkinleştirildiğinde (pil seviyesini gir), planlayıcı zaman tahminiyle akıllı şarj durakları hesaplar ve her bölüm için menzil yeterli mi diye kontrol eder.
 
 ## 🟢 Sistem durumu (yönetici) {#system-health}
 
@@ -464,7 +479,11 @@ Seçenekler tarayıcıda kaydedilir. Yönlendirme Valhalla (openstreetmap.de) ku
 
 Yeşil (her şey yolunda), sarı (dikkat) veya kırmızı (eylem gerekli). İsteğe bağlı hizmetler (OCM, HERE) yalnızca anahtar yapılandırılmış ancak uç nokta yanıt vermiyorsa hata sayılır.
 
-**İzleme & Öz-iyileştirme** — Altta: öz-iyileştirme geçiş düğmesi (her 15 dakikada bir cron, düşen konteynerleri yeniden başlatır) ve uyarı e-posta alanı. Heal ve güvenlik kontrol günlükleri doğrudan yönetici kartında görüntülenebilir.
+**İzleme & Öz-iyileştirme** — Altta iki ayarlı İzleme kartı:
+- **Öz-iyileştirme açık/kapalı** — Otomatik bir cron her 15 dakikada tüm konteynerlerin çalışıp çalışmadığını ve `/api/health` yanıt verip vermediğini kontrol eder. Çöken servisler otomatik olarak yeniden başlatılır.
+- **Uyarı e-postası** — Bir e-posta adresi yapılandırılmışsa, her yeniden başlatmadan sonra zaman damgası ve yeniden başlatılan servis sayısıyla bildirim gönderilir.
+
+Heal günlüğü ve security-check günlüğünün son 50 girişi doğrudan bu kartta görüntülenebilir ve « Günlüğü güncelle » ile her zaman yenilenebilir.
 
 ## 💬 Grok Chat {#grok}
 

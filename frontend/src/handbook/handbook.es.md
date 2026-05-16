@@ -426,17 +426,30 @@ Origen de los datos: los mismos viajes que usa el cuaderno BMF — el mapa es so
 
 ## 📱 Uso en smartphone y en el Tesla (instalación PWA) {#mobile-tesla-install}
 
-Tesla Carview es una PWA — instalable como app nativa sin la App Store.
+Tesla Carview es una **PWA** (Progressive Web App) — instalable como app nativa sin App Store ni Google Play. Funciona en iPhone, iPad, Android, en el navegador del vehículo Tesla y en cualquier Chromium de escritorio.
 
-**Android / Tesla / Chrome / Edge:** aparece una franja "Carview als App installieren" → toca **Installieren**. El icono va a la pantalla de inicio.
+**Smartphone Android / Tesla / Chrome / Edge:**
+1. Abre la app en el navegador e inicia sesión.
+2. Aparece un banner "Carview als App installieren" → toca **Installieren**.
+3. El icono aparece en la pantalla de inicio. Tocarlo abre la app a pantalla completa, sin barra de navegador.
 
-**iPhone / iPad (Safari):** **Compartir** → **"Añadir a pantalla de inicio"**.
+**iPhone / iPad (Safari):**
+1. Abre la app en Safari e inicia sesión.
+2. Botón **Compartir** → **"Añadir a pantalla de inicio"** → Añadir.
+3. El icono aparece en la pantalla de inicio como una app nativa.
 
-**Pantalla Tesla:** abre el navegador del coche e introduce la URL de Carview. La interfaz se adapta; el libro de viajes pasa a tarjetas con grandes objetivos táctiles en pantallas estrechas. El botón **"◫ Karten"** fuerza esa vista.
+**En la pantalla Tesla:**
+- En el coche: abre el navegador, introduce tu URL de Carview.
+- La app se adapta al tamaño de la pantalla Tesla. En vista estrecha, el libro de viajes cambia automáticamente a vista de tarjetas con grandes zonas táctiles.
+- Consejo: el botón **"◫ Karten"** fuerza la vista compacta también en pantallas grandes.
+
+**Recomendación:** Guarda Carview como favorito en el navegador Tesla — Tesla muestra los favoritos guardados directamente en el acceso rápido del navegador. Para anotar notas de viaje en una pausa corta es más rápido que escribir la URL cada vez.
 
 ## 🗺️ Planificador de ruta {#route-planner}
 
 El planificador calcula rutas de conducción y muestra estaciones de carga rápida en el camino.
+
+**Calcular una ruta** — Introduce las direcciones de origen y destino. Con « + Parada intermedia » puedes añadir tantos puntos de paso como quieras y reordenarlos arrastrando.
 
 **Opciones de evitación** — Tres botones de alternancia junto al campo de destino:
 - **Autopistas** — la ruta utiliza carreteras nacionales y locales
@@ -448,6 +461,8 @@ Las opciones se guardan en el navegador. El enrutamiento usa Valhalla (openstree
 **Estaciones de carga** — Supercargadores y CCS a lo largo del trayecto. Requiere una clave API gratuita de OpenChargeMap en Admin → System → Claves API externas.
 
 **Tráfico en tiempo real** — Con una clave HERE Maps configurada, el tráfico actual se integra en la estimación del tiempo de viaje.
+
+**Planificación de carga** — Al activar la planificación SoC (introduce el nivel de batería), el planificador calcula paradas de carga óptimas con estimación de tiempo y comprueba si la autonomía es suficiente para cada tramo.
 
 ## 🟢 Estado del sistema (admin) {#system-health}
 
@@ -464,7 +479,11 @@ Bajo **System**, los administradores ven una tarjeta tipo semáforo con ocho com
 
 Verde (todo bien), amarillo (atención) o rojo (acción requerida). Los servicios opcionales (OCM, HERE) solo cuentan como error si hay una clave configurada pero el endpoint no responde.
 
-**Monitorización y auto-reparación** — Debajo: interruptor de auto-reparación (cron cada 15 min, reinicia contenedores caídos) y campo de e-mail de alerta. Los logs heal y security-check son visibles directamente en la tarjeta de admin.
+**Monitorización y auto-reparación** — Debajo la tarjeta de Monitorización con dos ajustes:
+- **Auto-reparación activada/desactivada** — Un cron automático comprueba cada 15 minutos si todos los contenedores están en marcha y si `/api/health` responde. Los servicios caídos se reinician automáticamente.
+- **E-mail de alerta** — Si hay una dirección de e-mail configurada, se envía una notificación tras cada reinicio con marca de tiempo y número de servicios reiniciados.
+
+El log heal y el log security-check (últimas 50 entradas) son consultables directamente en esta tarjeta y actualizables en cualquier momento con «Actualizar log».
 
 ## 💬 Grok Chat {#grok}
 

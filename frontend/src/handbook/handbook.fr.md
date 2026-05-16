@@ -426,17 +426,30 @@ Source de données : les mêmes trajets que le carnet de bord BMF — la heatmap
 
 ## 📱 Utilisation sur smartphone et dans la Tesla (installation PWA) {#mobile-tesla-install}
 
-Tesla Carview est une PWA — installable comme une app native sans passer par l'App Store.
+Tesla Carview est une **PWA** (Progressive Web App) — installable comme une application native, sans App Store ni Google Play. Fonctionne sur iPhone, iPad, Android, dans le navigateur du véhicule Tesla et sur tout Chromium de bureau.
 
-**Android / Tesla / Chrome / Edge :** un bandeau « Carview als App installieren » apparaît → tapotez **Installieren**. L'icône arrive sur l'écran d'accueil.
+**Smartphone Android / Tesla / Chrome / Edge :**
+1. Ouvrez l'app dans le navigateur, connectez-vous.
+2. Une bannière « Carview als App installieren » apparaît en bas → tapotez **Installieren**.
+3. L'icône apparaît sur l'écran d'accueil. Un tapotement ouvre l'app en plein écran, sans barre de navigateur.
 
-**iPhone / iPad (Safari) :** **Partager** → **« Ajouter à l'écran d'accueil »**.
+**iPhone / iPad (Safari) :**
+1. Ouvrez l'app dans Safari, connectez-vous.
+2. Bouton **Partager** → **« Sur l'écran d'accueil »** → Ajouter.
+3. L'icône apparaît sur l'écran d'accueil comme une app native.
 
-**Écran Tesla :** ouvrez le navigateur de la voiture, entrez l'URL Carview. La mise en page s'adapte ; le carnet de bord bascule en cartes avec de grandes cibles tactiles sur petit écran. Le bouton **« ◫ Karten »** force cette vue.
+**Dans l'écran Tesla :**
+- Dans le véhicule : ouvrez le navigateur, entrez votre URL Carview.
+- L'app s'adapte à la taille de l'écran Tesla. En affichage étroit, le carnet de bord bascule automatiquement en vue cartes avec de grandes zones tactiles.
+- Astuce : le bouton **« ◫ Karten »** force la vue compacte même sur les grands écrans.
+
+**Recommandation :** Ajoutez Carview en favori dans le navigateur Tesla — Tesla affiche les favoris directement dans l'accès rapide du navigateur. Pour saisir des notes de voyage lors d'une courte pause, c'est plus rapide que de retaper l'URL à chaque fois.
 
 ## 🗺️ Planificateur de route {#route-planner}
 
 Le planificateur calcule des itinéraires de conduite et affiche les bornes de recharge rapide en chemin.
+
+**Calculer un itinéraire** — Entrez les adresses de départ et d'arrivée. Via « + Arrêt intermédiaire », vous pouvez ajouter autant d'étapes que vous le souhaitez et les réorganiser par glisser-déposer.
 
 **Options d'évitement** — Trois boutons bascule près du champ destination :
 - **Autoroutes** — l'itinéraire emprunte les routes nationales et départementales
@@ -448,6 +461,8 @@ Les options sont sauvegardées dans le navigateur. Le routage utilise Valhalla (
 **Bornes de recharge** — Superchargeurs et CCS le long du trajet. Nécessite une clé API OpenChargeMap gratuite dans Admin → System → Clés API externes.
 
 **Trafic en temps réel** — Avec une clé HERE Maps configurée, le trafic actuel est intégré à l'estimation du temps de trajet.
+
+**Planification de la recharge** — En activant la planification SoC (entrez le niveau de batterie), le planificateur calcule des arrêts de recharge optimaux avec estimation du temps et vérifie si l'autonomie est suffisante pour chaque tronçon.
 
 ## 🟢 État du système (admin) {#system-health}
 
@@ -464,7 +479,11 @@ Sous **System**, les administrateurs voient une carte en feux tricolores avec hu
 
 Vert (tout va bien), jaune (attention, ex. token bientôt expiré) ou rouge (action requise). Les services optionnels (OCM, HERE) ne comptent comme erreur que si une clé est configurée mais l'endpoint ne répond pas.
 
-**Monitoring & auto-réparation** — En dessous : toggle auto-réparation (cron toutes les 15 min, redémarre les containers défaillants) et champ e-mail d'alerte. Logs heal et security-check visibles directement dans la carte admin.
+**Monitoring & auto-réparation** — En dessous la carte Monitoring avec deux paramètres :
+- **Auto-réparation activée/désactivée** — Un cron automatique vérifie toutes les 15 minutes si tous les containers tournent et si `/api/health` répond. Les services défaillants sont automatiquement redémarrés.
+- **E-mail d'alerte** — Si une adresse e-mail est configurée, une notification est envoyée après chaque redémarrage avec horodatage et nombre de services redémarrés.
+
+Le journal heal et le journal security-check (50 dernières entrées) sont directement consultables dans cette carte et actualisables à tout moment via « Actualiser les logs ».
 
 ## 💬 Grok Chat {#grok}
 
