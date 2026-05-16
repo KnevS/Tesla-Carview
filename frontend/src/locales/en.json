@@ -1791,7 +1791,7 @@
       "healEnabled": "Self-healing enabled",
       "healEnabledHint": "Cron job every 15 min: failed containers are automatically restarted.",
       "alertEmail": "Notification Email",
-      "alertEmailPlaceholder": "admin@example.com",
+      "alertEmailPlaceholder": "admin{'@'}example.com",
       "alertEmailHint": "Receives an email if services continue to fail after restart.",
       "emailStatus": "Email Host Status",
       "emailInstalled": "msmtp installed and configured",

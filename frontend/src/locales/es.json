@@ -1791,7 +1791,7 @@
       "healEnabled": "Auto-reparación activada",
       "healEnabledHint": "Cron cada 15 min: los contenedores fallidos se reinician automáticamente.",
       "alertEmail": "Correo de notificación",
-      "alertEmailPlaceholder": "admin@ejemplo.es",
+      "alertEmailPlaceholder": "admin{'@'}ejemplo.es",
       "alertEmailHint": "Recibe un correo si los servicios siguen fallando tras el reinicio.",
       "emailStatus": "Estado del correo",
       "emailInstalled": "msmtp instalado y configurado",
