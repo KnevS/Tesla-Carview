@@ -97,12 +97,23 @@ Some settings do not require `.env` changes — they are configured directly in 
 | HERE Maps API key | Admin → System → External APIs | Real-time traffic on route planner |
 | Monta API key | Admin → System → External APIs | Home charging sync |
 | xAI API key | Admin → System → External APIs | Grok Chat AI assistant |
-| Anthropic API key | Admin → System → Monitoring | AI-powered autofix (Claude Haiku) |
+| Anthropic API key | Admin → System → Monitoring | AI-powered autofix (Claude Haiku) — see below |
 | Self-healing toggle | Admin → System → Monitoring | Enable/disable automatic container restart |
 | Alert e-mail address | Admin → System → Monitoring | Where monitoring alerts are sent |
 | Electricity price per kWh | Admin → System or setup wizard | Per-vehicle energy cost for charging calculations |
 
 All of the above can also be configured during the **setup wizard** — no direct server access required.
+
+### What is the Anthropic API key for?
+
+Tesla Carview includes a two-tier self-healing monitoring system that runs automatically on the server:
+
+- **Tier 1 — Rule-based autofix** (runs every 20 minutes): Handles known, deterministic problems — restarting stopped containers, clearing full disks, fixing file permissions. No AI required, always active.
+- **Tier 2 — AI autofix** (triggered when Tier 1 cannot fix a problem): Sends the error log to Claude Haiku (Anthropic) and asks it to suggest and optionally apply a fix. This is the optional, more powerful fallback for unusual problems.
+
+The Anthropic key is **optional** — Tier 1 works without it. You only need the key if you want Tier 2 AI-assisted diagnosis for edge cases.
+
+Get a key at [console.anthropic.com](https://console.anthropic.com) (pay-per-use, Claude Haiku is very cheap — typically a few cents per month for occasional autofix calls).
 
 ---
 
