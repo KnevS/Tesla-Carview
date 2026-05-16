@@ -2,6 +2,40 @@
 
 > 🇩🇪 [Auf Deutsch lesen](07-setup-wizard.md)
 
+Tesla Carview provides two paths for the **initial installation** and an in-app assistant for **ongoing configuration**.
+
+---
+
+## In-app settings wizard {#settings-wizard}
+
+After the first login, the **settings assistant** appears automatically (17 steps for admins, 9 steps for regular users). It can be re-launched at any time via **Settings → Launch assistant**.
+
+### Admin steps (in order)
+
+| # | Step | Description |
+|---|------|-------------|
+| 1 | **Language** | Choose app language |
+| 2 | **Tesla OAuth** | Connect Tesla account (popup → PostMessage back-channel → auto-refresh) |
+| 3 | **Vehicles** | Sync vehicles from Tesla account |
+| 4 | **Virtual Key** | Show/copy registration URL; check status |
+| 5 | **Fleet Telemetry** | Configure per VIN; status display (live/idle/pending/error) |
+| 6 | **Electricity price** | Home charging price (€/kWh) per vehicle; used for cost calculations |
+| 7 | **Legal check** | Scan for `<<placeholders>>` across all 18 scope×locale entries |
+| 8 | **External APIs** | Configure OCM, HERE and Grok/xAI keys |
+| 9 | **Monitoring** | Configure self-healing + alert email |
+| 10–15 | **Preferences** | Design, color, units, dashboard, navigation, notifications |
+| 16 | **Summary** | Review all changes and apply them together |
+
+### Key behaviours
+
+- **Draft mode**: all changes are applied only at the final step ("Save & Apply")
+- **Skip**: every step can be skipped
+- **Tesla OAuth**: opens a popup window; after login the popup closes automatically and the wizard refreshes its status via `postMessage`
+- **Electricity price**: set per vehicle, saved on confirm via `PUT /api/vehicles/:id`
+- **Legal check**: reads `/api/legal/admin/all` and searches for the pattern `/<<[^>]+>>/g`
+
+---
+
 Tesla Carview offers two paths for the initial configuration.
 
 ## Web wizard (recommended)

@@ -71,8 +71,28 @@ curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/set
 1. **Open browser** — Open `https://<your-domain>/setup` — you will be redirected automatically.
 2. **Create tenant** — Pick a tenant name (e.g. "Smith Family") and a short slug (e.g. "smith"). The slug is required at login — write it down.
 3. **Create admin account** — Set a username and password. The password must be at least 12 characters long. Recommended: a 4-word passphrase.
-4. **Connect Tesla** — After login: **Settings → Connect Tesla account**. You'll be redirected to Tesla and have to sign in there.
-5. **Import vehicles** — Go to **Settings → Tesla connection → Sync vehicles**. All vehicles of the connected Tesla account are imported automatically. If you have multiple Teslas under one account, all of them appear at once.
+4. **Settings assistant** — After first login the assistant launches automatically and guides you through all critical setup steps (see below).
+
+## 🧙 Settings assistant {#settings-wizard}
+
+After the first login the **settings assistant** opens automatically. It can be re-launched at any time via **Settings → Launch assistant**.
+
+**For admins** the assistant guides through 16 steps in the correct dependency order:
+
+| Step | What happens |
+|------|-------------|
+| **Language** | Choose app language |
+| **Tesla OAuth** | Connect Tesla account — button opens a popup that closes automatically after login |
+| **Vehicles** | Sync vehicles from the Tesla account |
+| **Virtual Key** | Display and copy the registration link for your smartphone |
+| **Fleet Telemetry** | Activate GPS tracking per vehicle |
+| **Electricity price** | Home charging price (€/kWh) per vehicle for cost calculation |
+| **Legal check** | Automatic scan for open mandatory placeholders (`<<NAME>>` etc.) in imprint/privacy/terms |
+| **External APIs** | OCM (charging stations), HERE Maps (traffic), Grok/xAI (AI chat) |
+| **Monitoring** | Self-healing + alert email |
+| **Design → Summary** | Preferences; all changes are saved only at the final step |
+
+> **Tip:** Every step can be skipped — the assistant can be re-launched at any time.
 
 ## 🔑 Setting up a Virtual Key {#virtual-key}
 

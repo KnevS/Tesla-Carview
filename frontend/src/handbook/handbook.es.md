@@ -71,8 +71,28 @@ curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/set
 1. **Abrir el navegador** — Abre `https://<tu-dominio>/setup`; se te redirigirá automáticamente.
 2. **Crear inquilino** — Elige un nombre de inquilino (p. ej. «Familia Pérez») y un identificador corto (p. ej. «perez»). El identificador es necesario al iniciar sesión: anótalo.
 3. **Crear cuenta de administrador** — Define usuario y contraseña. La contraseña debe tener al menos 12 caracteres. Recomendación: una passphrase de 4 palabras.
-4. **Conectar Tesla** — Tras iniciar sesión: **Ajustes → Conectar cuenta Tesla**. Se te redirigirá a Tesla para iniciar sesión allí.
-5. **Importar vehículos** — Ve a **Ajustes → Conexión Tesla → Sincronizar vehículos**. Todos los vehículos de la cuenta Tesla conectada se importan automáticamente. Si tienes varios Tesla en una misma cuenta, aparecerán todos a la vez.
+4. **Asistente de configuración** — Tras el primer inicio de sesión, el asistente se lanza automáticamente y te guía por todos los pasos críticos (ver abajo).
+
+## 🧙 Asistente de configuración {#settings-wizard}
+
+Tras el primer inicio de sesión, el **asistente de configuración** se abre automáticamente. Puede relanzarse en cualquier momento desde **Ajustes → Iniciar asistente**.
+
+**Para admins**, el asistente guía por 16 pasos en el orden correcto de dependencias:
+
+| Paso | Descripción |
+|------|-------------|
+| **Idioma** | Seleccionar el idioma de la app |
+| **Tesla OAuth** | Conectar cuenta Tesla — el botón abre un popup que se cierra tras el inicio de sesión |
+| **Vehículos** | Sincronizar vehículos desde la cuenta Tesla |
+| **Clave virtual** | Mostrar y copiar el enlace de registro para el smartphone |
+| **Fleet Telemetry** | Activar seguimiento GPS por vehículo |
+| **Precio electricidad** | Precio de carga en casa (€/kWh) por vehículo |
+| **Verificación legal** | Escaneo automático de marcadores de posición abiertos en textos legales |
+| **APIs externas** | OCM, HERE Maps, Grok/xAI |
+| **Monitorización** | Auto-curación + correo de alerta |
+| **Diseño → Resumen** | Preferencias; todos los cambios se guardan en el último paso |
+
+> **Consejo:** Cada paso puede omitirse — el asistente puede relanzarse en cualquier momento.
 
 ## 🔑 Configurar la Virtual Key {#virtual-key}
 

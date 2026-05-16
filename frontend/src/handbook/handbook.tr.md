@@ -71,8 +71,28 @@ curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/set
 1. **Tarayıcıyı aç** — `https://<senin-domainin>/setup` adresini aç — otomatik yönlendirilirsin.
 2. **Kiracı (tenant) oluştur** — Bir kiracı adı (örn. „Yılmaz Ailesi") ve kısa kod (örn. „yilmaz") seç. Kısa kod, girişte gereklidir — bir yere not et.
 3. **Yönetici hesabı oluştur** — Kullanıcı adı ve parola belirle. Parola en az 12 karakter olmalı. Öneri: 4 kelimelik bir parola cümlesi (passphrase).
-4. **Tesla'yı bağla** — Girişten sonra: **Ayarlar → Tesla hesabı bağla**. Tesla'ya yönlendirilir ve orada giriş yaparsın.
-5. **Araçları içe aktar** — **Ayarlar → Tesla Bağlantısı → Araçları senkronize et** menüsüne git. Bağlı Tesla hesabındaki tüm araçlar otomatik içe aktarılır. Tek bir hesapta birden fazla Tesla varsa hepsi tek seferde görünür.
+4. **Yapılandırma asistanı** — İlk girişten sonra asistan otomatik olarak başlar ve tüm kritik kurulum adımlarında seni yönlendirir (aşağıya bak).
+
+## 🧙 Yapılandırma asistanı {#settings-wizard}
+
+İlk girişten sonra **yapılandırma asistanı** otomatik olarak açılır. **Ayarlar → Asistanı başlat** menüsünden istediğin zaman yeniden açılabilir.
+
+**Adminler için** asistan, doğru bağımlılık sırasında 16 adımdan geçirir:
+
+| Adım | Açıklama |
+|------|----------|
+| **Dil** | Uygulama dilini seç |
+| **Tesla OAuth** | Tesla hesabını bağla — buton, girişten sonra otomatik kapanan bir popup açar |
+| **Araçlar** | Tesla hesabından araçları senkronize et |
+| **Sanal Anahtar** | Akıllı telefon için kayıt bağlantısını göster ve kopyala |
+| **Fleet Telemetry** | Araç başına GPS takibini etkinleştir |
+| **Elektrik fiyatı** | Araç başına ev şarj fiyatı (€/kWh) |
+| **Yasal kontrol** | Yasal metinlerdeki açık yer tutucuların otomatik taraması |
+| **Harici API'lar** | OCM, HERE Maps, Grok/xAI |
+| **İzleme** | Otomatik iyileştirme + uyarı e-postası |
+| **Tasarım → Özet** | Tercihler; tüm değişiklikler son adımda kaydedilir |
+
+> **İpucu:** Her adım atlanabilir — asistan istediğin zaman yeniden başlatılabilir.
 
 ## 🔑 Virtual Key kurulumu {#virtual-key}
 

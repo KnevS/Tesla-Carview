@@ -7,6 +7,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.1.0] — 2026-05-16
+
+### New
+- **Full onboarding wizard** — the in-app settings assistant has been extended from 8 preference steps to 17 complete setup steps (admins get 6 critical new steps)
+- **Tesla OAuth in wizard** — button opens Tesla login in a popup; PostMessage listener closes the window and refreshes status automatically
+- **Vehicle sync in wizard** — vehicles can be synced directly from the assistant with real-time feedback
+- **Virtual Key step** — status from `/telemetry/status`, registration URL copyable + directly openable, status refresh button
+- **Fleet Telemetry step** — per vehicle: color-coded status badges (live / idle / not_registered / approval_missing / error) + direct configure button
+- **Electricity price step** — configurable per vehicle, saved on final confirm
+- **Legal check step** — automatically scans all 18 scope×locale combinations for `<<placeholders>>`; link to editor for open items
+- **Full i18n** — all 6 languages (DE/EN/FR/ES/TR/EL) with 63 new keys each for the wizard steps
+
+### Step order (admin)
+`Language → Tesla OAuth → Vehicles → Virtual Key → Fleet Telemetry → Electricity Price → Legal → External APIs → Monitoring → Design → Color → Units → Dashboard → Navigation → Notifications → Summary`
+
+---
+
 ## [v3.0.0] — 2026-05-15
 
 ### Major Milestone — Car Usability Management

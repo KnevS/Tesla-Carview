@@ -71,8 +71,28 @@ curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/set
 1. **Browser öffnen** — Öffne `https://<deine-domain>/setup` — du wirst automatisch weitergeleitet.
 2. **Mandanten anlegen** — Wähle einen Mandantennamen (z.B. „Familie Muster") und ein Kürzel (z.B. „muster"). Das Kürzel wird beim Login benötigt – notiere es dir.
 3. **Admin-Konto erstellen** — Lege Benutzername und Passwort fest. Das Passwort muss mindestens 12 Zeichen lang sein. Empfehlung: eine Passphrase aus 4 Wörtern.
-4. **Tesla verbinden** — Nach dem Login: **Einstellungen → Tesla-Account verbinden**. Du wirst zu Tesla weitergeleitet und musst dich dort anmelden.
-5. **Fahrzeuge importieren** — Gehe zu **Einstellungen → Tesla-Verbindung → Fahrzeuge synchronisieren**. Alle Fahrzeuge des verbundenen Tesla-Accounts werden automatisch übernommen. Hast du mehrere Teslas unter einem Account, erscheinen alle auf einmal.
+4. **Einstellungs-Assistent** — Nach dem ersten Login startet der Assistent automatisch und führt dich durch alle kritischen Einrichtungsschritte (siehe unten).
+
+## 🧙 Einstellungs-Assistent {#settings-wizard}
+
+Nach dem ersten Login öffnet sich automatisch der **Einstellungs-Assistent**. Er kann jederzeit über **Einstellungen → Assistent starten** erneut geöffnet werden.
+
+**Für Admins** führt der Assistent durch 16 Schritte in der richtigen Abhängigkeits-Reihenfolge:
+
+| Schritt | Was passiert |
+|---------|-------------|
+| **Sprache** | App-Sprache wählen |
+| **Tesla OAuth** | Tesla-Konto verbinden — Button öffnet ein Popup, das sich nach dem Login automatisch schließt |
+| **Fahrzeuge** | Fahrzeuge aus dem Tesla-Konto synchronisieren |
+| **Virtual Key** | Registrierungs-Link anzeigen und für das Smartphone kopieren |
+| **Fleet Telemetry** | GPS-Tracking pro Fahrzeug aktivieren |
+| **Strompreis** | Heimlade-Preis (€/kWh) pro Fahrzeug für die Kostenberechnung |
+| **Legal-Check** | Automatische Prüfung ob noch Pflicht-Platzhalter (`<<NAME>>` etc.) in Impressum/Datenschutz/AGB offen sind |
+| **Externe APIs** | OCM (Ladestationen), HERE Maps (Verkehr), Grok/xAI (KI-Chat) |
+| **Monitoring** | Selbstheilung + Alert-E-Mail |
+| **Design → Zusammenfassung** | Präferenzen; alle Änderungen werden erst beim letzten Schritt gespeichert |
+
+> **Tipp:** Alle Schritte können übersprungen werden — der Assistent kann jederzeit erneut gestartet werden.
 
 ## 🔑 Virtual Key einrichten {#virtual-key}
 

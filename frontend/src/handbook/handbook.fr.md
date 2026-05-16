@@ -71,8 +71,28 @@ curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/set
 1. **Ouvrir le navigateur** — Ouvrez `https://<votre-domaine>/setup` — vous serez redirigé automatiquement.
 2. **Créer un locataire** — Choisissez un nom de locataire (ex. « Famille Martin ») et un identifiant court (ex. « martin »). L'identifiant court est requis lors de la connexion — notez-le.
 3. **Créer le compte administrateur** — Définissez un nom d'utilisateur et un mot de passe. Le mot de passe doit comporter au moins 12 caractères. Recommandation : une phrase de passe de 4 mots.
-4. **Connecter Tesla** — Après connexion : **Paramètres → Connecter le compte Tesla**. Vous serez redirigé vers Tesla pour vous y identifier.
-5. **Importer les véhicules** — Allez dans **Paramètres → Connexion Tesla → Synchroniser les véhicules**. Tous les véhicules du compte Tesla connecté sont importés automatiquement. Si plusieurs Tesla sont liées à un même compte, elles apparaissent toutes en une fois.
+4. **Assistant de configuration** — Après la première connexion, l'assistant démarre automatiquement et vous guide à travers toutes les étapes critiques (voir ci-dessous).
+
+## 🧙 Assistant de configuration {#settings-wizard}
+
+Après la première connexion, l'**assistant de configuration** s'ouvre automatiquement. Il peut être relancé à tout moment via **Paramètres → Lancer l'assistant**.
+
+**Pour les admins**, l'assistant guide à travers 16 étapes dans le bon ordre de dépendance :
+
+| Étape | Description |
+|-------|-------------|
+| **Langue** | Choisir la langue de l'app |
+| **Tesla OAuth** | Connecter le compte Tesla — bouton ouvre un popup qui se ferme après la connexion |
+| **Véhicules** | Synchroniser les véhicules depuis le compte Tesla |
+| **Clé virtuelle** | Afficher et copier le lien d'enregistrement pour le smartphone |
+| **Fleet Telemetry** | Activer le suivi GPS par véhicule |
+| **Prix de l'électricité** | Prix de recharge à domicile (€/kWh) par véhicule |
+| **Vérification légale** | Scan automatique des espaces réservés ouverts dans les textes juridiques |
+| **APIs externes** | OCM, HERE Maps, Grok/xAI |
+| **Monitoring** | Auto-guérison + e-mail d'alerte |
+| **Design → Résumé** | Préférences ; toutes les modifications sont enregistrées à la dernière étape |
+
+> **Conseil :** Chaque étape peut être ignorée — l'assistant peut être relancé à tout moment.
 
 ## 🔑 Configurer une Virtual Key {#virtual-key}
 
