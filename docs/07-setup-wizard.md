@@ -2,6 +2,40 @@
 
 > 🇬🇧 [Read in English](07-setup-wizard.en.md)
 
+Tesla Carview bietet zwei Wege zur **Erst-Installation** und einen In-App-Assistenten für die **laufende Einrichtung**.
+
+---
+
+## In-App-Einstellungs-Assistent {#settings-wizard}
+
+Nach dem ersten Login erscheint automatisch der **Einstellungs-Assistent** (für Admins mit 17 Schritten, für normale Nutzer mit 9 Schritten). Er kann jederzeit über **Einstellungen → Assistent starten** erneut geöffnet werden.
+
+### Admin-Schritte (in Reihenfolge)
+
+| # | Schritt | Beschreibung |
+|---|---------|-------------|
+| 1 | **Sprache** | App-Sprache auswählen |
+| 2 | **Tesla OAuth** | Tesla-Konto verbinden (Popup → PostMessage-Rückkanal → Auto-Refresh) |
+| 3 | **Fahrzeuge** | Fahrzeuge aus Tesla-Konto synchronisieren |
+| 4 | **Virtual Key** | Registrierungs-URL anzeigen/kopieren; Status prüfen |
+| 5 | **Fleet Telemetry** | Pro VIN konfigurieren; Statusanzeige (live/idle/ausstehend/Fehler) |
+| 6 | **Strompreis** | Heimlade-Preis (€/kWh) pro Fahrzeug; für Kostenberechnung |
+| 7 | **Legal-Check** | Scan auf `<<Platzhalter>>` in allen 18 Scope×Locale-Einträgen |
+| 8 | **Externe APIs** | OCM-, HERE- und Grok/xAI-Keys konfigurieren |
+| 9 | **Monitoring** | Selbstheilung + Alert-E-Mail konfigurieren |
+| 10–15 | **Präferenzen** | Design, Farbe, Einheiten, Dashboard, Navigation, Benachrichtigungen |
+| 16 | **Zusammenfassung** | Alle Änderungen prüfen und gemeinsam speichern |
+
+### Besonderheiten
+
+- **Draft-Modus**: Alle Änderungen werden erst beim letzten Schritt ("Speichern & Anwenden") übernommen
+- **Überspringen**: Jeder Schritt kann übersprungen werden
+- **Tesla OAuth**: Öffnet ein Popup-Fenster; nach erfolgreicher Anmeldung schließt sich das Popup automatisch und der Status im Wizard aktualisiert sich via `postMessage`
+- **Strompreis**: Wird pro Fahrzeug gesetzt und beim Confirm via `PUT /api/vehicles/:id` gespeichert
+- **Legal-Check**: Liest `/api/legal/admin/all` und sucht nach dem Muster `/<<[^>]+>>/g`
+
+---
+
 Tesla Carview bietet zwei Wege zur Erstkonfiguration.
 
 ## Web-Wizard (empfohlen)
