@@ -1769,6 +1769,36 @@
       "title": "Résumé",
       "question": "Vérifiez vos modifications et confirmez.",
       "noChanges": "Aucun paramètre modifié — toutes les valeurs restent inchangées."
+    },
+    "sExt": {
+      "title": "Services externes",
+      "question": "Configurer des services optionnels pour le planificateur et l'IA (ignorable).",
+      "ocm": "OpenChargeMap (bornes de recharge)",
+      "ocmHint": "Clé API gratuite sur openchargemap.org — affiche les chargeurs rapides dans le planificateur.",
+      "here": "HERE Maps (trafic en temps réel)",
+      "hereHint": "Clé API sur developer.here.com — quota gratuit disponible.",
+      "grok": "Grok / xAI (chat IA)",
+      "grokEnvHint": "Défini côté serveur : XAI_API_KEY dans le fichier .env. Non modifiable ici.",
+      "configured": "configuré",
+      "notConfigured": "non configuré",
+      "keyPlaceholder": "Coller la clé API …",
+      "keyChangePlaceholder": "Nouvelle clé (laisser vide = conserver)",
+      "keySaved": "sera enregistré"
+    },
+    "sMon": {
+      "title": "Monitoring & E-mail",
+      "question": "Configurer l'auto-réparation et l'e-mail de notification.",
+      "healEnabled": "Auto-réparation activée",
+      "healEnabledHint": "Cron toutes les 15 min : les containers défaillants sont redémarrés automatiquement.",
+      "alertEmail": "E-mail de notification",
+      "alertEmailPlaceholder": "admin@exemple.fr",
+      "alertEmailHint": "Reçoit un e-mail si les services continuent à échouer après redémarrage.",
+      "emailStatus": "État de l'envoi d'e-mails",
+      "emailInstalled": "msmtp installé et configuré",
+      "emailNotInstalled": "msmtp non installé — envoi d'e-mail impossible",
+      "emailInstallCmd": "Installation sur le serveur :",
+      "emailNotConfigured": "msmtp installé mais /etc/msmtprc manquant ou vide",
+      "emailConfigHint": "Manuel → État du système pour les instructions de configuration."
     }
   },
   "pair": {

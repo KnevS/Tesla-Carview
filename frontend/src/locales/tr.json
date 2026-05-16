@@ -1769,6 +1769,36 @@
       "title": "Özet",
       "question": "Değişikliklerinizi inceleyin ve onaylayın.",
       "noChanges": "Hiçbir ayar değiştirilmedi — tüm değerler aynı kaldı."
+    },
+    "sExt": {
+      "title": "Harici Servisler",
+      "question": "Rota planlayıcı ve yapay zeka sohbeti için isteğe bağlı servisleri yapılandır (atlanabilir).",
+      "ocm": "OpenChargeMap (Şarj İstasyonları)",
+      "ocmHint": "openchargemap.org'dan ücretsiz API anahtarı — rota planlayıcıda hızlı şarj noktaları gösterir.",
+      "here": "HERE Maps (Gerçek Zamanlı Trafik)",
+      "hereHint": "developer.here.com'dan API anahtarı — ücretsiz kota mevcut.",
+      "grok": "Grok / xAI (Yapay Zeka Sohbet)",
+      "grokEnvHint": "Sunucu tarafında ayarlanır: .env dosyasında XAI_API_KEY. Buradan değiştirilemez.",
+      "configured": "yapılandırıldı",
+      "notConfigured": "yapılandırılmadı",
+      "keyPlaceholder": "API anahtarını yapıştır …",
+      "keyChangePlaceholder": "Yeni anahtar gir (boş bırak = mevcut kalsın)",
+      "keySaved": "kaydedilecek"
+    },
+    "sMon": {
+      "title": "İzleme ve E-posta",
+      "question": "Otomatik onarım ve bildirim e-postasını yapılandır.",
+      "healEnabled": "Otomatik Onarım Aktif",
+      "healEnabledHint": "Her 15 dakikada bir cron görevi: başarısız konteynerler otomatik olarak yeniden başlatılır.",
+      "alertEmail": "Bildirim E-postası",
+      "alertEmailPlaceholder": "admin@ornek.com",
+      "alertEmailHint": "Servisler yeniden başlatmadan sonra da başarısız olursa e-posta alır.",
+      "emailStatus": "E-posta Sunucu Durumu",
+      "emailInstalled": "msmtp kurulu ve yapılandırılmış",
+      "emailNotInstalled": "msmtp kurulu değil — e-posta gönderimi mümkün değil",
+      "emailInstallCmd": "Sunucuda kurulum için:",
+      "emailNotConfigured": "msmtp kurulu ama /etc/msmtprc eksik veya boş",
+      "emailConfigHint": "El Kitabı → Sistem Durumu bölümüne bakın."
     }
   },
   "pair": {

@@ -1769,6 +1769,36 @@
       "title": "Σύνοψη",
       "question": "Ελέγξτε τις αλλαγές σας και επιβεβαιώστε.",
       "noChanges": "Δεν άλλαξαν ρυθμίσεις — όλες οι τιμές παραμένουν ως έχουν."
+    },
+    "sExt": {
+      "title": "Εξωτερικές υπηρεσίες",
+      "question": "Ρύθμιση προαιρετικών υπηρεσιών για τον σχεδιαστή και το AI chat (παραλείψιμο).",
+      "ocm": "OpenChargeMap (Σταθμοί φόρτισης)",
+      "ocmHint": "Δωρεάν κλειδί API από openchargemap.org — εμφανίζει σταθμούς φόρτισης στον σχεδιαστή.",
+      "here": "HERE Maps (Κυκλοφορία σε πραγματικό χρόνο)",
+      "hereHint": "Κλειδί API από developer.here.com — διαθέσιμο δωρεάν πακέτο.",
+      "grok": "Grok / xAI (AI Chat)",
+      "grokEnvHint": "Ορίζεται στον διακομιστή: XAI_API_KEY στο αρχείο .env. Δεν μπορεί να αλλαχτεί εδώ.",
+      "configured": "διαμορφωμένο",
+      "notConfigured": "μη διαμορφωμένο",
+      "keyPlaceholder": "Επικόλλησε κλειδί API …",
+      "keyChangePlaceholder": "Νέο κλειδί (κενό = διατήρηση τρέχοντος)",
+      "keySaved": "θα αποθηκευτεί"
+    },
+    "sMon": {
+      "title": "Παρακολούθηση & E-mail",
+      "question": "Ρύθμιση αυτο-επούλωσης και e-mail ειδοποίησης.",
+      "healEnabled": "Αυτο-επούλωση ενεργή",
+      "healEnabledHint": "Cron κάθε 15 λεπτά: οι αποτυχημένοι containers επανεκκινούνται αυτόματα.",
+      "alertEmail": "E-mail ειδοποίησης",
+      "alertEmailPlaceholder": "admin@example.gr",
+      "alertEmailHint": "Λαμβάνει e-mail αν οι υπηρεσίες παραμένουν εκτός λειτουργίας μετά την επανεκκίνηση.",
+      "emailStatus": "Κατάσταση e-mail",
+      "emailInstalled": "msmtp εγκατεστημένο και διαμορφωμένο",
+      "emailNotInstalled": "msmtp δεν είναι εγκατεστημένο — αποστολή e-mail αδύνατη",
+      "emailInstallCmd": "Εγκατάσταση στον διακομιστή:",
+      "emailNotConfigured": "msmtp εγκατεστημένο αλλά /etc/msmtprc λείπει ή είναι κενό",
+      "emailConfigHint": "Εγχειρίδιο → Κατάσταση συστήματος για οδηγίες εγκατάστασης."
     }
   },
   "pair": {

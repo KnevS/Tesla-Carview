@@ -647,6 +647,15 @@ router.put('/monitoring-config', requireAuth, requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+// E-Mail-Host-Status: prüft ob msmtp auf dem Host installiert und konfiguriert ist
+router.get('/email-status', requireAuth, requireAdmin, (_req, res) => {
+  const installed = ['/usr/bin/msmtp', '/usr/local/bin/msmtp'].some(p => existsSync(p));
+  const configured = ['/etc/msmtprc', '/root/.msmtprc'].some(p => {
+    try { return existsSync(p) && statSync(p).size > 20; } catch { return false; }
+  });
+  res.json({ installed, configured });
+});
+
 // Letzte N Zeilen aus Heal-Log und Security-Check-Log
 router.get('/monitoring-log', requireAuth, requireAdmin, (req, res) => {
   const n = Math.min(parseInt(req.query.lines) || 50, 200);

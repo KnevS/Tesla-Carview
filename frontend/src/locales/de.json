@@ -1768,6 +1768,36 @@
       "title": "Zusammenfassung",
       "question": "Prüfe deine Änderungen und bestätige.",
       "noChanges": "Du hast keine Einstellungen geändert — alle Werte bleiben wie bisher."
+    },
+    "sExt": {
+      "title": "Externe Dienste",
+      "question": "Optionale Dienste für Routenplaner und KI-Chat konfigurieren (überspringbar).",
+      "ocm": "OpenChargeMap (Ladestationen)",
+      "ocmHint": "Kostenloser API-Key von openchargemap.org — zeigt Schnellladestationen im Routenplaner.",
+      "here": "HERE Maps (Echtzeit-Verkehr)",
+      "hereHint": "API-Key von developer.here.com — kostenloses Kontingent vorhanden.",
+      "grok": "Grok / xAI (KI-Chat)",
+      "grokEnvHint": "Wird server-seitig gesetzt: XAI_API_KEY in der .env-Datei. Kann hier nicht geändert werden.",
+      "configured": "konfiguriert",
+      "notConfigured": "nicht konfiguriert",
+      "keyPlaceholder": "API-Key einfügen …",
+      "keyChangePlaceholder": "Neuen Key eingeben (leer lassen = behalten)",
+      "keySaved": "wird gespeichert"
+    },
+    "sMon": {
+      "title": "Monitoring & E-Mail",
+      "question": "Selbstheilung und Benachrichtigungs-E-Mail konfigurieren.",
+      "healEnabled": "Selbstheilung aktiviert",
+      "healEnabledHint": "Cron-Job alle 15 Minuten: ausgefallene Container werden automatisch neu gestartet.",
+      "alertEmail": "Benachrichtigungs-E-Mail",
+      "alertEmailPlaceholder": "admin@beispiel.de",
+      "alertEmailHint": "Erhält eine E-Mail, wenn Dienste nach dem Neustart weiterhin ausfallen.",
+      "emailStatus": "E-Mail-Host-Status",
+      "emailInstalled": "msmtp installiert und konfiguriert",
+      "emailNotInstalled": "msmtp nicht installiert — E-Mail-Versand nicht möglich",
+      "emailInstallCmd": "Installation auf dem Server:",
+      "emailNotConfigured": "msmtp installiert, /etc/msmtprc fehlt oder ist leer",
+      "emailConfigHint": "Handbuch → System-Status für Einrichtungshinweise."
     }
   },
   "pair": {

@@ -198,7 +198,102 @@
             </div>
           </template>
 
-          <!-- STEP 8 (LAST): Zusammenfassung -->
+          <!-- STEP 8 (Admin): Externe Dienste -->
+          <template v-else-if="step === 8 && auth.isAdmin">
+            <WizardStep :title="$t('wizard.sExt.title')" :question="$t('wizard.sExt.question')" />
+            <div class="space-y-4">
+
+              <!-- OpenChargeMap -->
+              <div class="card space-y-2">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-white">⚡ {{ $t('wizard.sExt.ocm') }}</p>
+                  <span v-if="adminStatus.ocm?.configured" class="text-xs text-green-400">✓ {{ $t('wizard.sExt.configured') }}</span>
+                  <span v-else class="text-xs text-gray-500">{{ $t('wizard.sExt.notConfigured') }}</span>
+                </div>
+                <p class="text-xs text-gray-400">{{ $t('wizard.sExt.ocmHint') }}</p>
+                <input v-model="draftAdmin.ocm_key" type="password"
+                  :placeholder="adminStatus.ocm?.configured ? $t('wizard.sExt.keyChangePlaceholder') : $t('wizard.sExt.keyPlaceholder')"
+                  class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+              </div>
+
+              <!-- HERE Maps -->
+              <div class="card space-y-2">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-white">🗺️ {{ $t('wizard.sExt.here') }}</p>
+                  <span v-if="adminStatus.here?.configured" class="text-xs text-green-400">✓ {{ $t('wizard.sExt.configured') }}</span>
+                  <span v-else class="text-xs text-gray-500">{{ $t('wizard.sExt.notConfigured') }}</span>
+                </div>
+                <p class="text-xs text-gray-400">{{ $t('wizard.sExt.hereHint') }}</p>
+                <input v-model="draftAdmin.here_key" type="password"
+                  :placeholder="adminStatus.here?.configured ? $t('wizard.sExt.keyChangePlaceholder') : $t('wizard.sExt.keyPlaceholder')"
+                  class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+              </div>
+
+              <!-- Grok / xAI (read-only, env var) -->
+              <div class="card space-y-2">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-white">🤖 {{ $t('wizard.sExt.grok') }}</p>
+                  <span v-if="adminStatus.grok?.configured" class="text-xs text-green-400">✓ {{ $t('wizard.sExt.configured') }}</span>
+                  <span v-else class="text-xs text-amber-400">{{ $t('wizard.sExt.notConfigured') }}</span>
+                </div>
+                <p class="text-xs text-gray-400">{{ $t('wizard.sExt.grokEnvHint') }}</p>
+                <code v-if="!adminStatus.grok?.configured" class="block bg-gray-950 rounded px-3 py-2 text-xs text-amber-300 font-mono select-all">XAI_API_KEY=sk-…</code>
+              </div>
+
+            </div>
+          </template>
+
+          <!-- STEP 9 (Admin): Monitoring & E-Mail -->
+          <template v-else-if="step === 9 && auth.isAdmin">
+            <WizardStep :title="$t('wizard.sMon.title')" :question="$t('wizard.sMon.question')" />
+            <div class="space-y-4">
+
+              <!-- Selbstheilung + Alert-E-Mail -->
+              <div class="card space-y-3">
+                <div class="flex items-center gap-3">
+                  <span class="flex-1 text-sm text-white">🔄 {{ $t('wizard.sMon.healEnabled') }}</span>
+                  <button @click="draftAdmin.heal_enabled = !draftAdmin.heal_enabled"
+                    class="w-10 h-5 rounded-full transition relative shrink-0"
+                    :class="draftAdmin.heal_enabled ? 'bg-tesla-red' : 'bg-gray-600'">
+                    <span class="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform"
+                      :class="draftAdmin.heal_enabled ? 'translate-x-5' : 'translate-x-0.5'"></span>
+                  </button>
+                </div>
+                <p class="text-xs text-gray-400">{{ $t('wizard.sMon.healEnabledHint') }}</p>
+              </div>
+
+              <div class="card space-y-2">
+                <p class="text-sm font-medium text-white">📧 {{ $t('wizard.sMon.alertEmail') }}</p>
+                <p class="text-xs text-gray-400">{{ $t('wizard.sMon.alertEmailHint') }}</p>
+                <input v-model="draftAdmin.alert_email" type="email"
+                  :placeholder="$t('wizard.sMon.alertEmailPlaceholder')"
+                  class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+              </div>
+
+              <!-- E-Mail-Host-Status -->
+              <div class="card space-y-2">
+                <p class="text-sm font-medium text-white">🖥️ {{ $t('wizard.sMon.emailStatus') }}</p>
+                <div v-if="adminStatus.loading" class="text-xs text-gray-400">…</div>
+                <div v-else-if="adminStatus.email?.installed && adminStatus.email?.configured"
+                  class="flex items-center gap-2 text-green-400 text-sm">
+                  <span>✅</span><span>{{ $t('wizard.sMon.emailInstalled') }}</span>
+                </div>
+                <div v-else-if="adminStatus.email?.installed && !adminStatus.email?.configured"
+                  class="space-y-2">
+                  <p class="text-sm text-amber-400">⚠️ {{ $t('wizard.sMon.emailNotConfigured') }}</p>
+                  <p class="text-xs text-gray-400">{{ $t('wizard.sMon.emailConfigHint') }}</p>
+                </div>
+                <div v-else class="space-y-2">
+                  <p class="text-sm text-amber-400">⚠️ {{ $t('wizard.sMon.emailNotInstalled') }}</p>
+                  <p class="text-xs text-gray-400">{{ $t('wizard.sMon.emailInstallCmd') }}</p>
+                  <code class="block bg-gray-950 rounded px-3 py-2 text-xs text-amber-300 font-mono select-all">sudo apt install msmtp msmtp-mta</code>
+                </div>
+              </div>
+
+            </div>
+          </template>
+
+          <!-- STEP 10 (LAST): Zusammenfassung -->
           <template v-else-if="step === LAST_STEP">
             <WizardStep :title="$t('wizard.s8.title')" :question="$t('wizard.s8.question')" />
             <div v-if="summaryRows.length" class="space-y-2">
@@ -250,18 +345,21 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePrefsStore, DASHBOARD_CARD_DEFS, PREF_KEYS } from '../store/prefs.js';
 import { LANGS } from '../store/lang.js';
 import { THEMES, DESIGNS } from '../store/theme.js';
 import { ALL_LINKS } from '../store/nav.js';
+import { useAuthStore } from '../store/auth.js';
+import api from '../api.js';
 
 const emit = defineEmits(['close', 'done']);
 const { t } = useI18n();
 const prefs = usePrefsStore();
+const auth  = useAuthStore();
 
-const LAST_STEP = 8;
+const LAST_STEP = computed(() => auth.isAdmin ? 10 : 8);
 const step = ref(0);
 const saving = ref(false);
 
@@ -316,6 +414,27 @@ const draftNotif = ref({
   batteryThreshold: prefs.data[PREF_KEYS.NOTIF_BATTERY_T] ?? 20,
 });
 
+// ─── Admin-only Draft (Schritt 8+9) ────────────────────────────────────────
+const adminStatus = ref({ ocm: null, here: null, grok: null, email: null, loading: false });
+const draftAdmin  = ref({ ocm_key: '', here_key: '', alert_email: '', heal_enabled: true });
+
+onMounted(async () => {
+  if (!auth.isAdmin) return;
+  adminStatus.value.loading = true;
+  try {
+    const [ocm, here, grok, emailSt, monCfg] = await Promise.all([
+      api.get('/routing/ocm-config').then(r => r.data).catch(() => null),
+      api.get('/routing/traffic-config').then(r => r.data).catch(() => null),
+      api.get('/grok/config').then(r => r.data).catch(() => null),
+      api.get('/system/email-status').then(r => r.data).catch(() => null),
+      api.get('/system/monitoring-config').then(r => r.data).catch(() => null),
+    ]);
+    adminStatus.value = { ocm, here, grok, email: emailSt, loading: false };
+    draftAdmin.value.alert_email  = monCfg?.alert_email  ?? '';
+    draftAdmin.value.heal_enabled = monCfg?.heal_enabled ?? true;
+  } catch { adminStatus.value.loading = false; }
+});
+
 // ─── Dashboard-Karten-Aktionen ─────────────────────────────────────────────
 
 function moveCard(i, dir) {
@@ -348,7 +467,7 @@ function toggleNav(key) {
 
 // ─── Navigation im Wizard ──────────────────────────────────────────────────
 
-function next() { step.value = Math.min(step.value + 1, LAST_STEP); }
+function next() { step.value = Math.min(step.value + 1, LAST_STEP.value); }
 function back() { step.value = Math.max(step.value - 1, 0); }
 function skip() { next(); }
 
@@ -397,6 +516,15 @@ const summaryRows = computed(() => {
     rows.push({ key: 'notif_charge', icon: '🔔', label: t('wizard.s7.charging'), from: prefs.data[PREF_KEYS.NOTIF_CHARGE] ? '✓' : '✗', to: draftNotif.value.charge ? '✓' : '✗' });
   }
 
+  if (auth.isAdmin) {
+    if (draftAdmin.value.ocm_key.trim())
+      rows.push({ key: 'ocm_key', icon: '⚡', label: t('wizard.sExt.ocm'), from: '—', to: t('wizard.sExt.keySaved') });
+    if (draftAdmin.value.here_key.trim())
+      rows.push({ key: 'here_key', icon: '🗺️', label: t('wizard.sExt.here'), from: '—', to: t('wizard.sExt.keySaved') });
+    if (draftAdmin.value.alert_email)
+      rows.push({ key: 'alert_email', icon: '📧', label: t('wizard.sMon.alertEmail'), from: '—', to: draftAdmin.value.alert_email });
+  }
+
   return rows;
 });
 
@@ -418,6 +546,20 @@ async function confirm() {
       wizard_completed: true,
     };
     await prefs.save(delta);
+
+    if (auth.isAdmin) {
+      const adminCalls = [];
+      if (draftAdmin.value.ocm_key.trim())
+        adminCalls.push(api.put('/routing/ocm-config',  { ocm_api_key:  draftAdmin.value.ocm_key.trim() }));
+      if (draftAdmin.value.here_key.trim())
+        adminCalls.push(api.put('/routing/traffic-config', { here_api_key: draftAdmin.value.here_key.trim() }));
+      adminCalls.push(api.put('/system/monitoring-config', {
+        alert_email:  draftAdmin.value.alert_email,
+        heal_enabled: draftAdmin.value.heal_enabled,
+      }));
+      await Promise.all(adminCalls);
+    }
+
     emit('done');
     emit('close');
   } finally {
