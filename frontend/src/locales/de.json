@@ -1797,7 +1797,9 @@
       "emailNotInstalled": "msmtp nicht installiert — E-Mail-Versand nicht möglich",
       "emailInstallCmd": "Installation auf dem Server:",
       "emailNotConfigured": "msmtp installiert, /etc/msmtprc fehlt oder ist leer",
-      "emailConfigHint": "Handbuch → System-Status für Einrichtungshinweise."
+      "emailConfigHint": "Handbuch → System-Status für Einrichtungshinweise.",
+      "anthropicKey": "KI-Autofix-Schlüssel",
+      "anthropicKeyHint": "Anthropic API-Key für KI-gestützte Eskalation (Claude Haiku). Leer lassen = nur E-Mail bei Eskalation."
     },
     "sOauth": {
       "title": "Tesla-Verbindung",

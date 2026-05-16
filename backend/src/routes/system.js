@@ -619,7 +619,7 @@ router.get('/update-check', requireAuth, async (req, res) => {
 
 // ── Monitoring-Konfiguration ─────────────────────────────────────────────────
 
-const MONITORING_KEYS = ['monitoring.alert_email', 'monitoring.heal_enabled'];
+const MONITORING_KEYS = ['monitoring.alert_email', 'monitoring.heal_enabled', 'monitoring.anthropic_key'];
 
 router.get('/monitoring-config', requireAuth, requireAdmin, (req, res) => {
   const rows = req.db.prepare(
@@ -627,13 +627,14 @@ router.get('/monitoring-config', requireAuth, requireAdmin, (req, res) => {
   ).all(...MONITORING_KEYS);
   const cfg = Object.fromEntries(rows.map(r => [r.key.replace('monitoring.', ''), r.value]));
   res.json({
-    alert_email:   cfg.alert_email   ?? '',
-    heal_enabled:  cfg.heal_enabled  !== 'false',  // default: true
+    alert_email:          cfg.alert_email   ?? '',
+    heal_enabled:         cfg.heal_enabled  !== 'false',  // default: true
+    anthropic_configured: !!(cfg.anthropic_key),
   });
 });
 
 router.put('/monitoring-config', requireAuth, requireAdmin, (req, res) => {
-  const { alert_email, heal_enabled } = req.body;
+  const { alert_email, heal_enabled, anthropic_key } = req.body;
   const upsert = req.db.prepare(
     "INSERT INTO tenant_settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
   );
@@ -644,6 +645,8 @@ router.put('/monitoring-config', requireAuth, requireAdmin, (req, res) => {
     upsert.run('monitoring.alert_email', alert_email);
   }
   if (heal_enabled !== undefined) upsert.run('monitoring.heal_enabled', String(heal_enabled));
+  if (anthropic_key && typeof anthropic_key === 'string' && anthropic_key.trim())
+    upsert.run('monitoring.anthropic_key', anthropic_key.trim());
   res.json({ ok: true });
 });
 

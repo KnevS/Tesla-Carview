@@ -204,6 +204,24 @@
         </div>
       </div>
 
+      <!-- KI-Autofix-Schlüssel -->
+      <div class="space-y-1">
+        <label class="text-xs text-gray-400 flex items-center gap-2">
+          🤖 KI-Autofix-Schlüssel
+          <span v-if="monCfg.anthropic_configured" class="text-green-400">✓ konfiguriert</span>
+        </label>
+        <div class="flex gap-2">
+          <input v-model="monCfg.anthropic_key" type="password"
+            :placeholder="monCfg.anthropic_configured ? 'Neuen Key eingeben zum Überschreiben' : 'sk-ant-…'"
+            class="input flex-1 text-sm" @keyup.enter="saveMonitoringConfig" />
+          <button @click="saveMonitoringConfig" :disabled="monSaving || !monCfg.anthropic_key"
+            class="px-3 py-1.5 rounded-lg text-sm bg-tesla-red text-white hover:bg-red-600 disabled:opacity-40">
+            {{ monSaving ? '…' : 'Speichern' }}
+          </button>
+        </div>
+        <p class="text-xs text-gray-500">Anthropic API-Key für KI-Eskalation (Claude Haiku). Leer lassen = nur E-Mail.</p>
+      </div>
+
       <p v-if="monMsg" :class="monMsgOk ? 'text-green-400' : 'text-red-400'" class="text-xs">{{ monMsg }}</p>
 
       <!-- Heal-Log -->
@@ -679,7 +697,7 @@ function scrollToApiKeys() {
 }
 
 // ─── Monitoring & Selbstheilung ───────────────────────────────────
-const monCfg        = ref({ alert_email: '', heal_enabled: true });
+const monCfg        = ref({ alert_email: '', heal_enabled: true, anthropic_key: '', anthropic_configured: false });
 const monSaving     = ref(false);
 const monMsg        = ref('');
 const monMsgOk      = ref(true);
@@ -689,14 +707,20 @@ const monLogLoading = ref(false);
 async function loadMonitoringConfig() {
   try {
     const { data } = await api.get('/system/monitoring-config');
-    monCfg.value = data;
+    monCfg.value = { ...monCfg.value, ...data, anthropic_key: '' };
   } catch { /* ignore */ }
 }
 
 async function saveMonitoringConfig() {
   monSaving.value = true; monMsg.value = '';
   try {
-    await api.put('/system/monitoring-config', monCfg.value);
+    const payload = { alert_email: monCfg.value.alert_email, heal_enabled: monCfg.value.heal_enabled };
+    if (monCfg.value.anthropic_key?.trim()) payload.anthropic_key = monCfg.value.anthropic_key.trim();
+    await api.put('/system/monitoring-config', payload);
+    if (monCfg.value.anthropic_key?.trim()) {
+      monCfg.value.anthropic_configured = true;
+      monCfg.value.anthropic_key = '';
+    }
     monMsg.value = '✓ Gespeichert';
     monMsgOk.value = true;
   } catch (e) {

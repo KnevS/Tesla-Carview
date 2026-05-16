@@ -1798,7 +1798,9 @@
       "emailNotInstalled": "msmtp non installé — envoi d'e-mail impossible",
       "emailInstallCmd": "Installation sur le serveur :",
       "emailNotConfigured": "msmtp installé mais /etc/msmtprc manquant ou vide",
-      "emailConfigHint": "Manuel → État du système pour les instructions de configuration."
+      "emailConfigHint": "Manuel → État du système pour les instructions de configuration.",
+      "anthropicKey": "Clé Autofix IA",
+      "anthropicKeyHint": "Clé API Anthropic pour l'escalade assistée par IA (Claude Haiku). Laisser vide = e-mail uniquement en cas d'escalade."
     },
     "sOauth": {
       "title": "Connexion Tesla",

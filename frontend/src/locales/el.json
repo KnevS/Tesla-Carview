@@ -1798,7 +1798,9 @@
       "emailNotInstalled": "msmtp δεν είναι εγκατεστημένο — αποστολή e-mail αδύνατη",
       "emailInstallCmd": "Εγκατάσταση στον διακομιστή:",
       "emailNotConfigured": "msmtp εγκατεστημένο αλλά /etc/msmtprc λείπει ή είναι κενό",
-      "emailConfigHint": "Εγχειρίδιο → Κατάσταση συστήματος για οδηγίες εγκατάστασης."
+      "emailConfigHint": "Εγχειρίδιο → Κατάσταση συστήματος για οδηγίες εγκατάστασης.",
+      "anthropicKey": "Κλειδί AI Αυτόματης Διόρθωσης",
+      "anthropicKeyHint": "Κλειδί API Anthropic για κλιμάκωση με τεχνητή νοημοσύνη (Claude Haiku). Αφήστε κενό = μόνο email κατά την κλιμάκωση."
     },
     "sOauth": {
       "title": "Σύνδεση Tesla",

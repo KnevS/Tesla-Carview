@@ -324,6 +324,17 @@
                   class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
               </div>
               <div class="card space-y-2">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-white">🤖 {{ $t('wizard.sMon.anthropicKey') }}</p>
+                  <span v-if="adminStatus.anthropic?.configured" class="text-xs text-green-400">✓ {{ $t('wizard.sExt.configured') }}</span>
+                  <span v-else class="text-xs text-gray-500">{{ $t('wizard.sExt.notConfigured') }}</span>
+                </div>
+                <p class="text-xs text-gray-400">{{ $t('wizard.sMon.anthropicKeyHint') }}</p>
+                <input v-model="draftAdmin.anthropic_key" type="password"
+                  :placeholder="adminStatus.anthropic?.configured ? $t('wizard.sExt.keyChangePlaceholder') : $t('wizard.sExt.keyPlaceholder')"
+                  class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+              </div>
+              <div class="card space-y-2">
                 <p class="text-sm font-medium text-white">🖥️ {{ $t('wizard.sMon.emailStatus') }}</p>
                 <div v-if="adminStatus.loading" class="text-xs text-gray-400">…</div>
                 <div v-else-if="adminStatus.email?.installed && adminStatus.email?.configured"
@@ -601,8 +612,8 @@ const draftNotif = ref({
 
 // ─── Admin-Draft (externe Keys, Monitoring) ────────────────────────────────
 
-const adminStatus = ref({ ocm: null, here: null, grok: null, email: null, loading: false });
-const draftAdmin  = ref({ ocm_key: '', here_key: '', alert_email: '', heal_enabled: true });
+const adminStatus = ref({ ocm: null, here: null, grok: null, email: null, anthropic: null, loading: false });
+const draftAdmin  = ref({ ocm_key: '', here_key: '', alert_email: '', heal_enabled: true, anthropic_key: '' });
 
 // ─── OAuth-State ───────────────────────────────────────────────────────────
 
@@ -747,7 +758,7 @@ onMounted(async () => {
     api.get('/system/email-status').then(r => r.data).catch(() => null),
     api.get('/system/monitoring-config').then(r => r.data).catch(() => null),
   ]);
-  adminStatus.value = { ocm, here, grok, email: emailSt, loading: false };
+  adminStatus.value = { ocm, here, grok, email: emailSt, anthropic: { configured: monCfg?.anthropic_configured ?? false }, loading: false };
   draftAdmin.value.alert_email  = monCfg?.alert_email  ?? '';
   draftAdmin.value.heal_enabled = monCfg?.heal_enabled ?? true;
 
@@ -855,6 +866,8 @@ const summaryRows = computed(() => {
       rows.push({ key: 'here_key', icon: '🗺️', label: t('wizard.sExt.here'), from: '—', to: t('wizard.sExt.keySaved') });
     if (draftAdmin.value.alert_email)
       rows.push({ key: 'alert_email', icon: '📧', label: t('wizard.sMon.alertEmail'), from: '—', to: draftAdmin.value.alert_email });
+    if (draftAdmin.value.anthropic_key.trim())
+      rows.push({ key: 'anthropic_key', icon: '🤖', label: t('wizard.sMon.anthropicKey'), from: '—', to: t('wizard.sExt.keySaved') });
   }
 
   return rows;
@@ -895,10 +908,13 @@ async function confirm() {
       if (draftAdmin.value.here_key.trim())
         adminCalls.push(api.put('/routing/traffic-config',  { here_api_key: draftAdmin.value.here_key.trim() }));
 
-      adminCalls.push(api.put('/system/monitoring-config', {
+      const monPayload = {
         alert_email:  draftAdmin.value.alert_email,
         heal_enabled: draftAdmin.value.heal_enabled,
-      }));
+      };
+      if (draftAdmin.value.anthropic_key.trim())
+        monPayload.anthropic_key = draftAdmin.value.anthropic_key.trim();
+      adminCalls.push(api.put('/system/monitoring-config', monPayload));
 
       await Promise.all(adminCalls);
     }
