@@ -1799,6 +1799,69 @@
       "emailInstallCmd": "Installation sur le serveur :",
       "emailNotConfigured": "msmtp installé mais /etc/msmtprc manquant ou vide",
       "emailConfigHint": "Manuel → État du système pour les instructions de configuration."
+    },
+    "sOauth": {
+      "title": "Connexion Tesla",
+      "question": "Connectez votre compte Tesla pour que l'application puisse accéder aux données du véhicule.",
+      "connected": "Compte Tesla connecté",
+      "notConnected": "Pas encore connecté",
+      "hint": "Ouvre la connexion Tesla dans une nouvelle fenêtre.",
+      "connectBtn": "Connecter Tesla →",
+      "refresh": "Vérifier le statut",
+      "connectedHint": "Vous pouvez passer à l'étape suivante."
+    },
+    "sVehicles": {
+      "title": "Véhicules",
+      "question": "Synchronisez vos véhicules Tesla depuis votre compte Tesla.",
+      "empty": "Aucun véhicule trouvé.",
+      "syncBtn": "Synchroniser les véhicules",
+      "resyncBtn": "Re-synchroniser",
+      "syncing": "Synchronisation …"
+    },
+    "sVKey": {
+      "title": "Clé virtuelle",
+      "question": "La clé virtuelle permet à l'application d'envoyer des commandes au véhicule.",
+      "exists": "Clé virtuelle présente",
+      "missing": "Clé virtuelle manquante",
+      "createdAt": "Créée le",
+      "hint": "Ouvrez le lien sur votre smartphone et appuyez sur 'Ajouter une clé'.",
+      "regUrl": "Lien d'enregistrement :",
+      "openUrl": "Ouvrir",
+      "afterPair": "Après l'association, actualisez le statut ici.",
+      "checkAgain": "Actualiser le statut"
+    },
+    "sTelemetry": {
+      "title": "Fleet Telemetry",
+      "question": "Active le suivi GPS en temps réel pour les nouveaux modèles Tesla.",
+      "needsVkey": "La clé virtuelle est requise — veuillez d'abord compléter l'étape 'Clé virtuelle'.",
+      "configureBtn": "Configurer",
+      "approvalHint": "Ce véhicule attend l'approbation de Tesla (partner.tesla.com). Cela peut prendre quelques jours.",
+      "noVehicles": "Aucun véhicule trouvé. Synchronisez d'abord les véhicules.",
+      "refresh": "Actualiser le statut",
+      "status": {
+        "streaming": "Données en direct actives",
+        "registered_idle": "Configuré (inactif)",
+        "not_registered": "Non configuré",
+        "approval_missing": "Approbation en attente",
+        "error": "Erreur"
+      }
+    },
+    "sElec": {
+      "title": "Prix de l'électricité",
+      "question": "Saisissez le prix de recharge à domicile par véhicule.",
+      "currentRate": "Actuel",
+      "notSet": "non défini",
+      "placeholder": "ex. 0.29",
+      "hint": "Les modifications sont appliquées lors de la sauvegarde.",
+      "noVehicles": "Aucun véhicule trouvé. Synchronisez d'abord les véhicules."
+    },
+    "sLegal": {
+      "title": "Textes juridiques",
+      "question": "Vérifiez que tous les espaces réservés obligatoires sont remplis.",
+      "allDone": "Tous les textes juridiques sont complets.",
+      "hasPlaceholders": "Les textes suivants contiennent encore des espaces réservés :",
+      "editBtn": "Modifier les textes juridiques →",
+      "hint": "Les espaces réservés comme <<NOM>> doivent être remplis avant la mise en ligne."
     }
   },
   "pair": {

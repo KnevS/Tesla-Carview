@@ -1799,6 +1799,69 @@
       "emailInstallCmd": "Sunucuda kurulum için:",
       "emailNotConfigured": "msmtp kurulu ama /etc/msmtprc eksik veya boş",
       "emailConfigHint": "El Kitabı → Sistem Durumu bölümüne bakın."
+    },
+    "sOauth": {
+      "title": "Tesla Bağlantısı",
+      "question": "Uygulamanın araç verilerine erişebilmesi için Tesla hesabınızı bağlayın.",
+      "connected": "Tesla hesabı bağlandı",
+      "notConnected": "Henüz bağlanmadı",
+      "hint": "Tesla girişini yeni bir pencerede açar.",
+      "connectBtn": "Tesla'yı bağla →",
+      "refresh": "Durumu kontrol et",
+      "connectedHint": "Bir sonraki adıma geçebilirsiniz."
+    },
+    "sVehicles": {
+      "title": "Araçlar",
+      "question": "Tesla hesabınızdan araçlarınızı senkronize edin.",
+      "empty": "Henüz araç bulunamadı.",
+      "syncBtn": "Araçları senkronize et",
+      "resyncBtn": "Yeniden senkronize et",
+      "syncing": "Senkronize ediliyor …"
+    },
+    "sVKey": {
+      "title": "Sanal Anahtar",
+      "question": "Sanal anahtar, uygulamanın araç komutları göndermesini sağlar.",
+      "exists": "Sanal anahtar mevcut",
+      "missing": "Sanal anahtar eksik",
+      "createdAt": "Oluşturulma tarihi",
+      "hint": "Bağlantıyı akıllı telefonunuzda açın ve 'Anahtar Ekle'ye dokunun.",
+      "regUrl": "Kayıt bağlantısı:",
+      "openUrl": "Aç",
+      "afterPair": "Eşleştirmeden sonra durumu burada yenileyin.",
+      "checkAgain": "Durumu yenile"
+    },
+    "sTelemetry": {
+      "title": "Fleet Telemetry",
+      "question": "Yeni Tesla modelleri için gerçek zamanlı GPS takibini etkinleştirir.",
+      "needsVkey": "Fleet Telemetry için Sanal Anahtar gereklidir — önce 'Sanal Anahtar' adımını tamamlayın.",
+      "configureBtn": "Yapılandır",
+      "approvalHint": "Bu araç Tesla onayı bekliyor (partner.tesla.com). Bu birkaç gün sürebilir.",
+      "noVehicles": "Araç bulunamadı. Önce araçları senkronize edin.",
+      "refresh": "Durumu yenile",
+      "status": {
+        "streaming": "Canlı veri aktif",
+        "registered_idle": "Yapılandırıldı (boşta)",
+        "not_registered": "Yapılandırılmadı",
+        "approval_missing": "Onay bekleniyor",
+        "error": "Hata"
+      }
+    },
+    "sElec": {
+      "title": "Elektrik Fiyatı",
+      "question": "Maliyet hesaplaması için araç başına ev şarj fiyatını girin.",
+      "currentRate": "Mevcut",
+      "notSet": "ayarlanmadı",
+      "placeholder": "ör. 0.29",
+      "hint": "Değişiklikler asistan kaydedildiğinde uygulanır.",
+      "noVehicles": "Araç bulunamadı. Önce araçları senkronize edin."
+    },
+    "sLegal": {
+      "title": "Yasal Metinler",
+      "question": "Tüm zorunlu yer tutucuların doldurulup doldurulmadığını kontrol edin.",
+      "allDone": "Tüm yasal metinler tamamlandı.",
+      "hasPlaceholders": "Aşağıdaki metinler hâlâ yer tutucu içeriyor:",
+      "editBtn": "Yasal metinleri düzenle →",
+      "hint": "<<AD>> gibi yer tutucular yayına geçmeden önce doldurulmalıdır."
     }
   },
   "pair": {

@@ -1799,6 +1799,69 @@
       "emailInstallCmd": "Install on the server:",
       "emailNotConfigured": "msmtp installed but /etc/msmtprc missing or empty",
       "emailConfigHint": "Handbook → System Status for setup instructions."
+    },
+    "sOauth": {
+      "title": "Tesla Connection",
+      "question": "Connect your Tesla account so the app can access vehicle data.",
+      "connected": "Tesla account connected",
+      "notConnected": "Not yet connected",
+      "hint": "Opens Tesla login in a new window.",
+      "connectBtn": "Connect Tesla →",
+      "refresh": "Check status",
+      "connectedHint": "You can proceed to the next step."
+    },
+    "sVehicles": {
+      "title": "Vehicles",
+      "question": "Sync your Tesla vehicles from your Tesla account.",
+      "empty": "No vehicles found yet.",
+      "syncBtn": "Sync vehicles",
+      "resyncBtn": "Sync again",
+      "syncing": "Syncing …"
+    },
+    "sVKey": {
+      "title": "Virtual Key",
+      "question": "The Virtual Key allows the app to send vehicle commands (e.g. climate, charging).",
+      "exists": "Virtual Key present",
+      "missing": "Virtual Key missing",
+      "createdAt": "Created on",
+      "hint": "Open the link on your smartphone and tap 'Add Key'.",
+      "regUrl": "Registration link:",
+      "openUrl": "Open",
+      "afterPair": "After pairing on your smartphone, refresh the status here.",
+      "checkAgain": "Refresh status"
+    },
+    "sTelemetry": {
+      "title": "Fleet Telemetry",
+      "question": "Enables real-time GPS tracking for newer Tesla models (XP7 / Juniper).",
+      "needsVkey": "Virtual Key is required for Fleet Telemetry — please complete the 'Virtual Key' step first.",
+      "configureBtn": "Configure",
+      "approvalHint": "This vehicle is waiting for Tesla approval (partner.tesla.com). This may take a few days.",
+      "noVehicles": "No vehicles found. Please sync vehicles first.",
+      "refresh": "Refresh status",
+      "status": {
+        "streaming": "Live data active",
+        "registered_idle": "Configured (idle)",
+        "not_registered": "Not configured",
+        "approval_missing": "Approval pending",
+        "error": "Error"
+      }
+    },
+    "sElec": {
+      "title": "Electricity Price",
+      "question": "Enter the home charging electricity price per vehicle — used for cost calculations.",
+      "currentRate": "Current",
+      "notSet": "not set",
+      "placeholder": "e.g. 0.29",
+      "hint": "Changes are applied when you save the wizard.",
+      "noVehicles": "No vehicles found. Please sync vehicles first."
+    },
+    "sLegal": {
+      "title": "Legal Texts",
+      "question": "Check whether all mandatory placeholders in Imprint, Privacy Policy and Terms are filled in.",
+      "allDone": "All legal texts are complete.",
+      "hasPlaceholders": "The following texts still contain placeholders:",
+      "editBtn": "Edit legal texts →",
+      "hint": "Placeholders like <<NAME>> or <<ADDRESS>> must be filled in before going live."
     }
   },
   "pair": {

@@ -8,24 +8,25 @@
         <div class="flex items-center justify-between px-6 py-4 border-b border-gray-800 shrink-0">
           <div>
             <h2 class="font-bold text-lg">{{ $t('wizard.title') }}</h2>
-            <p v-if="step > 0 && step < LAST_STEP" class="text-xs text-gray-400 mt-0.5">
-              {{ $t('wizard.step', { n: step, total: LAST_STEP - 1 }) }}
+            <p v-if="step > 0 && !isLast" class="text-xs text-gray-400 mt-0.5">
+              {{ $t('wizard.step', { n: step, total: STEPS.length - 2 }) }}
             </p>
           </div>
-          <button @click="$emit('close')" class="text-gray-500 hover:text-white text-2xl leading-none transition" v-tooltip="$t('common.cancel')">×</button>
+          <button @click="$emit('close')" class="text-gray-500 hover:text-white text-2xl leading-none transition"
+                  v-tooltip="$t('common.cancel')">×</button>
         </div>
 
         <!-- Fortschrittsbalken -->
-        <div v-if="step > 0 && step < LAST_STEP" class="h-1 bg-gray-800 shrink-0">
+        <div v-if="step > 0 && !isLast" class="h-1 bg-gray-800 shrink-0">
           <div class="h-full bg-tesla-red transition-all duration-300"
-               :style="{ width: ((step / (LAST_STEP - 1)) * 100) + '%' }"></div>
+               :style="{ width: (step / (STEPS.length - 2) * 100) + '%' }"></div>
         </div>
 
         <!-- Inhalt -->
         <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
-          <!-- STEP 0: Willkommen -->
-          <template v-if="step === 0">
+          <!-- STEP: welcome -->
+          <template v-if="currentId === 'welcome'">
             <div class="text-center space-y-4 py-4">
               <div class="text-5xl">⚙️</div>
               <h3 class="text-xl font-bold">{{ $t('wizard.welcome') }}</h3>
@@ -39,8 +40,8 @@
             </div>
           </template>
 
-          <!-- STEP 1: Sprache -->
-          <template v-else-if="step === 1">
+          <!-- STEP: lang -->
+          <template v-else-if="currentId === 'lang'">
             <WizardStep :title="$t('wizard.s1.title')" :question="$t('wizard.s1.question')"
               :current-label="langLabel(draft.lang ?? prefs.data.lang)" />
             <div class="grid grid-cols-2 gap-2">
@@ -57,8 +58,294 @@
             </div>
           </template>
 
-          <!-- STEP 2: Design-Stil -->
-          <template v-else-if="step === 2">
+          <!-- STEP: oauth (Admin) -->
+          <template v-else-if="currentId === 'oauth'">
+            <WizardStep :title="$t('wizard.sOauth.title')" :question="$t('wizard.sOauth.question')" />
+            <div class="card space-y-4">
+              <div class="flex items-center gap-3">
+                <span v-if="oauthStatus === 'connected'" class="text-2xl">✅</span>
+                <span v-else-if="oauthStatus === 'checking'" class="text-2xl animate-pulse">🔄</span>
+                <span v-else class="text-2xl">❌</span>
+                <div>
+                  <p class="text-sm font-semibold text-white">
+                    {{ oauthStatus === 'connected' ? $t('wizard.sOauth.connected') : $t('wizard.sOauth.notConnected') }}
+                  </p>
+                  <p class="text-xs text-gray-400">{{ $t('wizard.sOauth.hint') }}</p>
+                </div>
+              </div>
+              <div v-if="oauthStatus !== 'connected'" class="flex gap-2">
+                <button @click="openOauth" :disabled="oauthOpening"
+                  class="flex-1 btn-primary text-sm">
+                  {{ oauthOpening ? $t('common.loading') + ' …' : $t('wizard.sOauth.connectBtn') }}
+                </button>
+                <button @click="checkOauthStatus" class="btn-secondary text-sm px-4">
+                  {{ $t('wizard.sOauth.refresh') }}
+                </button>
+              </div>
+              <p v-if="oauthStatus === 'connected'" class="text-xs text-green-400">
+                {{ $t('wizard.sOauth.connectedHint') }}
+              </p>
+            </div>
+          </template>
+
+          <!-- STEP: vehicles (Admin) -->
+          <template v-else-if="currentId === 'vehicles'">
+            <WizardStep :title="$t('wizard.sVehicles.title')" :question="$t('wizard.sVehicles.question')" />
+            <div class="card space-y-3">
+              <div v-if="vehicles.length === 0" class="text-center py-4 space-y-3">
+                <p class="text-sm text-gray-400">{{ $t('wizard.sVehicles.empty') }}</p>
+                <button @click="syncVehicles" :disabled="vehicleSyncing"
+                  class="btn-primary text-sm">
+                  {{ vehicleSyncing ? $t('wizard.sVehicles.syncing') : $t('wizard.sVehicles.syncBtn') }}
+                </button>
+              </div>
+              <div v-else class="space-y-2">
+                <div v-for="v in vehicles" :key="v.id"
+                  class="flex items-center gap-3 bg-gray-800 rounded-xl px-4 py-3">
+                  <span class="text-xl">🚗</span>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold text-white">{{ v.display_name || v.vin }}</p>
+                    <p class="text-xs text-gray-400 font-mono">{{ v.vin }}</p>
+                  </div>
+                  <span class="text-xs text-green-400">✓</span>
+                </div>
+                <button @click="syncVehicles" :disabled="vehicleSyncing"
+                  class="w-full btn-secondary text-sm py-2">
+                  {{ vehicleSyncing ? $t('wizard.sVehicles.syncing') : $t('wizard.sVehicles.resyncBtn') }}
+                </button>
+              </div>
+              <p v-if="vehicleSyncError" class="text-xs text-red-400">{{ vehicleSyncError }}</p>
+            </div>
+          </template>
+
+          <!-- STEP: virtualkey (Admin) -->
+          <template v-else-if="currentId === 'virtualkey'">
+            <WizardStep :title="$t('wizard.sVKey.title')" :question="$t('wizard.sVKey.question')" />
+            <div class="card space-y-4">
+              <div v-if="telemetryStatus === null" class="text-sm text-gray-400">{{ $t('common.loading') }} …</div>
+              <template v-else>
+                <div class="flex items-center gap-3">
+                  <span class="text-2xl">{{ telemetryStatus.virtual_key_exists ? '✅' : '⚠️' }}</span>
+                  <div>
+                    <p class="text-sm font-semibold text-white">
+                      {{ telemetryStatus.virtual_key_exists
+                          ? $t('wizard.sVKey.exists')
+                          : $t('wizard.sVKey.missing') }}
+                    </p>
+                    <p v-if="telemetryStatus.virtual_key_exists && telemetryStatus.virtual_key_created_at"
+                      class="text-xs text-gray-400">
+                      {{ $t('wizard.sVKey.createdAt') }}: {{ new Date(telemetryStatus.virtual_key_created_at * 1000).toLocaleDateString() }}
+                    </p>
+                  </div>
+                </div>
+                <div v-if="!telemetryStatus.virtual_key_exists" class="space-y-3">
+                  <p class="text-xs text-gray-400">{{ $t('wizard.sVKey.hint') }}</p>
+                  <div class="bg-gray-950 rounded-lg p-3 space-y-2">
+                    <p class="text-xs text-gray-500">{{ $t('wizard.sVKey.regUrl') }}</p>
+                    <p class="text-xs font-mono text-amber-300 break-all select-all">{{ telemetryStatus.registration_url }}</p>
+                  </div>
+                  <div class="flex gap-2">
+                    <button @click="copyVkUrl" class="flex-1 btn-secondary text-sm">
+                      {{ vkCopied ? $t('common.copied') + ' ✓' : $t('common.copy') }}
+                    </button>
+                    <a :href="telemetryStatus.registration_url" target="_blank" rel="noopener"
+                      class="btn-primary text-sm px-4 no-underline">↗ {{ $t('wizard.sVKey.openUrl') }}</a>
+                  </div>
+                  <p class="text-xs text-gray-500">{{ $t('wizard.sVKey.afterPair') }}</p>
+                  <button @click="loadTelemetryStatus" class="btn-secondary text-sm w-full">
+                    {{ $t('wizard.sVKey.checkAgain') }}
+                  </button>
+                </div>
+              </template>
+            </div>
+          </template>
+
+          <!-- STEP: telemetry (Admin) -->
+          <template v-else-if="currentId === 'telemetry'">
+            <WizardStep :title="$t('wizard.sTelemetry.title')" :question="$t('wizard.sTelemetry.question')" />
+            <div v-if="telemetryStatus === null" class="text-sm text-gray-400">{{ $t('common.loading') }} …</div>
+            <div v-else class="space-y-3">
+              <div v-if="!telemetryStatus.virtual_key_exists"
+                class="card bg-amber-900/20 border border-amber-700/40 text-sm text-amber-300">
+                ⚠️ {{ $t('wizard.sTelemetry.needsVkey') }}
+              </div>
+              <div v-for="v in telemetryStatus.vehicles ?? []" :key="v.id"
+                class="card space-y-2">
+                <div class="flex items-center gap-3">
+                  <span class="text-lg">🚗</span>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold text-white">{{ v.display_name || v.vin }}</p>
+                    <p class="text-xs text-gray-400 font-mono">{{ v.vin }}</p>
+                  </div>
+                  <span :class="telemetryBadgeClass(v.status)" class="text-xs px-2 py-0.5 rounded-full font-medium">
+                    {{ $t('wizard.sTelemetry.status.' + v.status) }}
+                  </span>
+                </div>
+                <div v-if="v.last_error && v.status === 'error'" class="text-xs text-red-400 font-mono truncate">{{ v.last_error }}</div>
+                <button v-if="v.status === 'not_registered' || v.status === 'error'"
+                  @click="configureTelemetry(v.vin)"
+                  :disabled="telemetryConfiguring[v.vin]"
+                  class="btn-primary text-xs w-full py-1.5">
+                  {{ telemetryConfiguring[v.vin] ? $t('common.loading') + ' …' : $t('wizard.sTelemetry.configureBtn') }}
+                </button>
+                <p v-if="v.status === 'approval_missing'" class="text-xs text-amber-400">
+                  {{ $t('wizard.sTelemetry.approvalHint') }}
+                </p>
+              </div>
+              <div v-if="!telemetryStatus.vehicles?.length" class="text-sm text-gray-400 text-center py-4">
+                {{ $t('wizard.sTelemetry.noVehicles') }}
+              </div>
+              <button @click="loadTelemetryStatus" class="btn-secondary text-sm w-full">
+                {{ $t('wizard.sTelemetry.refresh') }}
+              </button>
+            </div>
+          </template>
+
+          <!-- STEP: electricity (Admin) -->
+          <template v-else-if="currentId === 'electricity'">
+            <WizardStep :title="$t('wizard.sElec.title')" :question="$t('wizard.sElec.question')" />
+            <div class="space-y-3">
+              <div v-if="vehicles.length === 0" class="text-sm text-gray-400 text-center py-4">
+                {{ $t('wizard.sElec.noVehicles') }}
+              </div>
+              <div v-for="v in vehicles" :key="v.id" class="card space-y-2">
+                <div class="flex items-center gap-3">
+                  <span class="text-lg">🚗</span>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold text-white">{{ v.display_name || v.vin }}</p>
+                    <p class="text-xs text-gray-400">{{ $t('wizard.sElec.currentRate') }}:
+                      <span class="text-gray-200">{{ v.electricity_rate_kwh != null ? v.electricity_rate_kwh + ' €/kWh' : $t('wizard.sElec.notSet') }}</span>
+                    </p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <input type="number" step="0.001" min="0" max="5"
+                    :value="draftElectricity[v.id] ?? v.electricity_rate_kwh ?? ''"
+                    @input="draftElectricity[v.id] = parseFloat($event.target.value)"
+                    :placeholder="$t('wizard.sElec.placeholder')"
+                    class="flex-1 bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+                  <span class="text-sm text-gray-400">€/kWh</span>
+                </div>
+              </div>
+              <p class="text-xs text-gray-500">{{ $t('wizard.sElec.hint') }}</p>
+            </div>
+          </template>
+
+          <!-- STEP: legal (Admin) -->
+          <template v-else-if="currentId === 'legal'">
+            <WizardStep :title="$t('wizard.sLegal.title')" :question="$t('wizard.sLegal.question')" />
+            <div v-if="legalStatus === null" class="text-sm text-gray-400">{{ $t('common.loading') }} …</div>
+            <div v-else class="space-y-3">
+              <div v-if="legalIncomplete.length === 0"
+                class="card bg-green-900/20 border border-green-700/40 text-sm text-green-300 flex items-center gap-3">
+                <span class="text-xl">✅</span>
+                <span>{{ $t('wizard.sLegal.allDone') }}</span>
+              </div>
+              <div v-else class="space-y-2">
+                <div class="card bg-amber-900/20 border border-amber-700/40 space-y-2">
+                  <p class="text-sm text-amber-300">⚠️ {{ $t('wizard.sLegal.hasPlaceholders') }}</p>
+                  <ul class="space-y-1">
+                    <li v-for="item in legalIncomplete" :key="item.scope + item.locale"
+                      class="text-xs text-gray-300 flex items-center gap-2">
+                      <span class="font-mono text-gray-500 w-16 shrink-0">{{ item.scope }}</span>
+                      <span class="text-gray-400">{{ item.locale }}</span>
+                      <span class="text-amber-400 font-mono text-xs">{{ item.placeholders.join(', ') }}</span>
+                    </li>
+                  </ul>
+                </div>
+                <router-link to="/admin/legal" @click="$emit('close')"
+                  class="block btn-primary text-sm text-center">
+                  {{ $t('wizard.sLegal.editBtn') }}
+                </router-link>
+              </div>
+              <p class="text-xs text-gray-500">{{ $t('wizard.sLegal.hint') }}</p>
+            </div>
+          </template>
+
+          <!-- STEP: external (Admin) -->
+          <template v-else-if="currentId === 'external'">
+            <WizardStep :title="$t('wizard.sExt.title')" :question="$t('wizard.sExt.question')" />
+            <div class="space-y-4">
+              <div class="card space-y-2">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-white">⚡ {{ $t('wizard.sExt.ocm') }}</p>
+                  <span v-if="adminStatus.ocm?.configured" class="text-xs text-green-400">✓ {{ $t('wizard.sExt.configured') }}</span>
+                  <span v-else class="text-xs text-gray-500">{{ $t('wizard.sExt.notConfigured') }}</span>
+                </div>
+                <p class="text-xs text-gray-400">{{ $t('wizard.sExt.ocmHint') }}</p>
+                <input v-model="draftAdmin.ocm_key" type="password"
+                  :placeholder="adminStatus.ocm?.configured ? $t('wizard.sExt.keyChangePlaceholder') : $t('wizard.sExt.keyPlaceholder')"
+                  class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+              </div>
+              <div class="card space-y-2">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-white">🗺️ {{ $t('wizard.sExt.here') }}</p>
+                  <span v-if="adminStatus.here?.configured" class="text-xs text-green-400">✓ {{ $t('wizard.sExt.configured') }}</span>
+                  <span v-else class="text-xs text-gray-500">{{ $t('wizard.sExt.notConfigured') }}</span>
+                </div>
+                <p class="text-xs text-gray-400">{{ $t('wizard.sExt.hereHint') }}</p>
+                <input v-model="draftAdmin.here_key" type="password"
+                  :placeholder="adminStatus.here?.configured ? $t('wizard.sExt.keyChangePlaceholder') : $t('wizard.sExt.keyPlaceholder')"
+                  class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+              </div>
+              <div class="card space-y-2">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-white">🤖 {{ $t('wizard.sExt.grok') }}</p>
+                  <span v-if="adminStatus.grok?.configured" class="text-xs text-green-400">✓ {{ $t('wizard.sExt.configured') }}</span>
+                  <span v-else class="text-xs text-amber-400">{{ $t('wizard.sExt.notConfigured') }}</span>
+                </div>
+                <p class="text-xs text-gray-400">{{ $t('wizard.sExt.grokEnvHint') }}</p>
+                <code v-if="!adminStatus.grok?.configured" class="block bg-gray-950 rounded px-3 py-2 text-xs text-amber-300 font-mono select-all">XAI_API_KEY=sk-…</code>
+              </div>
+            </div>
+          </template>
+
+          <!-- STEP: monitoring (Admin) -->
+          <template v-else-if="currentId === 'monitoring'">
+            <WizardStep :title="$t('wizard.sMon.title')" :question="$t('wizard.sMon.question')" />
+            <div class="space-y-4">
+              <div class="card space-y-3">
+                <div class="flex items-center gap-3">
+                  <span class="flex-1 text-sm text-white">🔄 {{ $t('wizard.sMon.healEnabled') }}</span>
+                  <button @click="draftAdmin.heal_enabled = !draftAdmin.heal_enabled"
+                    class="w-10 h-5 rounded-full transition relative shrink-0"
+                    :class="draftAdmin.heal_enabled ? 'bg-tesla-red' : 'bg-gray-600'">
+                    <span class="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform"
+                      :class="draftAdmin.heal_enabled ? 'translate-x-5' : 'translate-x-0.5'"></span>
+                  </button>
+                </div>
+                <p class="text-xs text-gray-400">{{ $t('wizard.sMon.healEnabledHint') }}</p>
+              </div>
+              <div class="card space-y-2">
+                <p class="text-sm font-medium text-white">📧 {{ $t('wizard.sMon.alertEmail') }}</p>
+                <p class="text-xs text-gray-400">{{ $t('wizard.sMon.alertEmailHint') }}</p>
+                <input v-model="draftAdmin.alert_email" type="email"
+                  :placeholder="$t('wizard.sMon.alertEmailPlaceholder')"
+                  class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+              </div>
+              <div class="card space-y-2">
+                <p class="text-sm font-medium text-white">🖥️ {{ $t('wizard.sMon.emailStatus') }}</p>
+                <div v-if="adminStatus.loading" class="text-xs text-gray-400">…</div>
+                <div v-else-if="adminStatus.email?.installed && adminStatus.email?.configured"
+                  class="flex items-center gap-2 text-green-400 text-sm">
+                  <span>✅</span><span>{{ $t('wizard.sMon.emailInstalled') }}</span>
+                </div>
+                <div v-else-if="adminStatus.email?.installed && !adminStatus.email?.configured"
+                  class="space-y-2">
+                  <p class="text-sm text-amber-400">⚠️ {{ $t('wizard.sMon.emailNotConfigured') }}</p>
+                  <p class="text-xs text-gray-400">{{ $t('wizard.sMon.emailConfigHint') }}</p>
+                </div>
+                <div v-else class="space-y-2">
+                  <p class="text-sm text-amber-400">⚠️ {{ $t('wizard.sMon.emailNotInstalled') }}</p>
+                  <p class="text-xs text-gray-400">{{ $t('wizard.sMon.emailInstallCmd') }}</p>
+                  <code class="block bg-gray-950 rounded px-3 py-2 text-xs text-amber-300 font-mono select-all">sudo apt install msmtp msmtp-mta</code>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <!-- STEP: design -->
+          <template v-else-if="currentId === 'design'">
             <WizardStep :title="$t('wizard.s2.title')" :question="$t('wizard.s2.question')"
               :current-label="designLabel(draft.theme_design ?? prefs.data.theme_design)" />
             <div class="grid grid-cols-2 gap-3">
@@ -78,8 +365,8 @@
             </div>
           </template>
 
-          <!-- STEP 3: Akzentfarbe -->
-          <template v-else-if="step === 3">
+          <!-- STEP: color -->
+          <template v-else-if="currentId === 'color'">
             <WizardStep :title="$t('wizard.s3.title')" :question="$t('wizard.s3.question')"
               :current-label="themeLabel(draft.theme_color ?? prefs.data.theme_color)" />
             <div class="grid grid-cols-3 gap-3">
@@ -97,11 +384,10 @@
             </div>
           </template>
 
-          <!-- STEP 4: Einheiten -->
-          <template v-else-if="step === 4">
+          <!-- STEP: units -->
+          <template v-else-if="currentId === 'units'">
             <WizardStep :title="$t('wizard.s4.title')" :question="$t('wizard.s4.question')" />
             <div class="space-y-4">
-              <!-- Distanz -->
               <div class="card space-y-2">
                 <p class="text-sm font-medium text-gray-300">{{ $t('wizard.s4.distance') }}</p>
                 <div class="flex gap-2">
@@ -110,7 +396,6 @@
                     @click="draft.unit_distance = o.key">{{ o.label }}</ToggleChip>
                 </div>
               </div>
-              <!-- Temperatur -->
               <div class="card space-y-2">
                 <p class="text-sm font-medium text-gray-300">{{ $t('wizard.s4.temp') }}</p>
                 <div class="flex gap-2">
@@ -119,7 +404,6 @@
                     @click="draft.unit_temp = o.key">{{ o.label }}</ToggleChip>
                 </div>
               </div>
-              <!-- Verbrauch -->
               <div class="card space-y-2">
                 <p class="text-sm font-medium text-gray-300">{{ $t('wizard.s4.efficiency') }}</p>
                 <div class="flex flex-wrap gap-2">
@@ -131,8 +415,8 @@
             </div>
           </template>
 
-          <!-- STEP 5: Dashboard-Karten -->
-          <template v-else-if="step === 5">
+          <!-- STEP: dashboard -->
+          <template v-else-if="currentId === 'dashboard'">
             <WizardStep :title="$t('wizard.s5.title')" :question="$t('wizard.s5.question')" />
             <p class="text-xs text-gray-400">{{ $t('wizard.s5.hint') }}</p>
             <ul class="space-y-2">
@@ -140,12 +424,10 @@
                 class="flex items-center gap-3 bg-gray-800 rounded-xl px-3 py-2.5">
                 <span class="text-lg w-6 text-center">{{ DASHBOARD_CARD_DEFS.find(d => d.key === card)?.icon }}</span>
                 <span class="flex-1 text-sm text-white">{{ $t('wizard.s5.cards.' + card) }}</span>
-                <!-- Reihenfolge -->
                 <button @click="moveCard(i, -1)" :disabled="i === 0"
                   class="text-gray-500 hover:text-white disabled:opacity-20 text-xs px-1">▲</button>
                 <button @click="moveCard(i, 1)" :disabled="i === draftCardOrder.length - 1"
                   class="text-gray-500 hover:text-white disabled:opacity-20 text-xs px-1">▼</button>
-                <!-- Sichtbarkeit -->
                 <button @click="toggleCard(card)"
                   class="w-10 h-5 rounded-full transition relative"
                   :class="draftCardVisible[card] !== false ? 'bg-tesla-red' : 'bg-gray-600'">
@@ -156,8 +438,8 @@
             </ul>
           </template>
 
-          <!-- STEP 6: Navigation -->
-          <template v-else-if="step === 6">
+          <!-- STEP: nav -->
+          <template v-else-if="currentId === 'nav'">
             <WizardStep :title="$t('wizard.s6.title')" :question="$t('wizard.s6.question')" />
             <p class="text-xs text-gray-400">{{ $t('wizard.s6.hint') }}</p>
             <ul class="space-y-2">
@@ -179,8 +461,8 @@
             </ul>
           </template>
 
-          <!-- STEP 7: Benachrichtigungen -->
-          <template v-else-if="step === 7">
+          <!-- STEP: notifications -->
+          <template v-else-if="currentId === 'notifications'">
             <WizardStep :title="$t('wizard.s7.title')" :question="$t('wizard.s7.question')" />
             <div class="space-y-3">
               <NotifRow v-model="draftNotif.charge" :label="$t('wizard.s7.charging')" icon="⚡" />
@@ -198,103 +480,8 @@
             </div>
           </template>
 
-          <!-- STEP 8 (Admin): Externe Dienste -->
-          <template v-else-if="step === 8 && auth.isAdmin">
-            <WizardStep :title="$t('wizard.sExt.title')" :question="$t('wizard.sExt.question')" />
-            <div class="space-y-4">
-
-              <!-- OpenChargeMap -->
-              <div class="card space-y-2">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-medium text-white">⚡ {{ $t('wizard.sExt.ocm') }}</p>
-                  <span v-if="adminStatus.ocm?.configured" class="text-xs text-green-400">✓ {{ $t('wizard.sExt.configured') }}</span>
-                  <span v-else class="text-xs text-gray-500">{{ $t('wizard.sExt.notConfigured') }}</span>
-                </div>
-                <p class="text-xs text-gray-400">{{ $t('wizard.sExt.ocmHint') }}</p>
-                <input v-model="draftAdmin.ocm_key" type="password"
-                  :placeholder="adminStatus.ocm?.configured ? $t('wizard.sExt.keyChangePlaceholder') : $t('wizard.sExt.keyPlaceholder')"
-                  class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
-              </div>
-
-              <!-- HERE Maps -->
-              <div class="card space-y-2">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-medium text-white">🗺️ {{ $t('wizard.sExt.here') }}</p>
-                  <span v-if="adminStatus.here?.configured" class="text-xs text-green-400">✓ {{ $t('wizard.sExt.configured') }}</span>
-                  <span v-else class="text-xs text-gray-500">{{ $t('wizard.sExt.notConfigured') }}</span>
-                </div>
-                <p class="text-xs text-gray-400">{{ $t('wizard.sExt.hereHint') }}</p>
-                <input v-model="draftAdmin.here_key" type="password"
-                  :placeholder="adminStatus.here?.configured ? $t('wizard.sExt.keyChangePlaceholder') : $t('wizard.sExt.keyPlaceholder')"
-                  class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
-              </div>
-
-              <!-- Grok / xAI (read-only, env var) -->
-              <div class="card space-y-2">
-                <div class="flex items-center justify-between">
-                  <p class="text-sm font-medium text-white">🤖 {{ $t('wizard.sExt.grok') }}</p>
-                  <span v-if="adminStatus.grok?.configured" class="text-xs text-green-400">✓ {{ $t('wizard.sExt.configured') }}</span>
-                  <span v-else class="text-xs text-amber-400">{{ $t('wizard.sExt.notConfigured') }}</span>
-                </div>
-                <p class="text-xs text-gray-400">{{ $t('wizard.sExt.grokEnvHint') }}</p>
-                <code v-if="!adminStatus.grok?.configured" class="block bg-gray-950 rounded px-3 py-2 text-xs text-amber-300 font-mono select-all">XAI_API_KEY=sk-…</code>
-              </div>
-
-            </div>
-          </template>
-
-          <!-- STEP 9 (Admin): Monitoring & E-Mail -->
-          <template v-else-if="step === 9 && auth.isAdmin">
-            <WizardStep :title="$t('wizard.sMon.title')" :question="$t('wizard.sMon.question')" />
-            <div class="space-y-4">
-
-              <!-- Selbstheilung + Alert-E-Mail -->
-              <div class="card space-y-3">
-                <div class="flex items-center gap-3">
-                  <span class="flex-1 text-sm text-white">🔄 {{ $t('wizard.sMon.healEnabled') }}</span>
-                  <button @click="draftAdmin.heal_enabled = !draftAdmin.heal_enabled"
-                    class="w-10 h-5 rounded-full transition relative shrink-0"
-                    :class="draftAdmin.heal_enabled ? 'bg-tesla-red' : 'bg-gray-600'">
-                    <span class="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform"
-                      :class="draftAdmin.heal_enabled ? 'translate-x-5' : 'translate-x-0.5'"></span>
-                  </button>
-                </div>
-                <p class="text-xs text-gray-400">{{ $t('wizard.sMon.healEnabledHint') }}</p>
-              </div>
-
-              <div class="card space-y-2">
-                <p class="text-sm font-medium text-white">📧 {{ $t('wizard.sMon.alertEmail') }}</p>
-                <p class="text-xs text-gray-400">{{ $t('wizard.sMon.alertEmailHint') }}</p>
-                <input v-model="draftAdmin.alert_email" type="email"
-                  :placeholder="$t('wizard.sMon.alertEmailPlaceholder')"
-                  class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
-              </div>
-
-              <!-- E-Mail-Host-Status -->
-              <div class="card space-y-2">
-                <p class="text-sm font-medium text-white">🖥️ {{ $t('wizard.sMon.emailStatus') }}</p>
-                <div v-if="adminStatus.loading" class="text-xs text-gray-400">…</div>
-                <div v-else-if="adminStatus.email?.installed && adminStatus.email?.configured"
-                  class="flex items-center gap-2 text-green-400 text-sm">
-                  <span>✅</span><span>{{ $t('wizard.sMon.emailInstalled') }}</span>
-                </div>
-                <div v-else-if="adminStatus.email?.installed && !adminStatus.email?.configured"
-                  class="space-y-2">
-                  <p class="text-sm text-amber-400">⚠️ {{ $t('wizard.sMon.emailNotConfigured') }}</p>
-                  <p class="text-xs text-gray-400">{{ $t('wizard.sMon.emailConfigHint') }}</p>
-                </div>
-                <div v-else class="space-y-2">
-                  <p class="text-sm text-amber-400">⚠️ {{ $t('wizard.sMon.emailNotInstalled') }}</p>
-                  <p class="text-xs text-gray-400">{{ $t('wizard.sMon.emailInstallCmd') }}</p>
-                  <code class="block bg-gray-950 rounded px-3 py-2 text-xs text-amber-300 font-mono select-all">sudo apt install msmtp msmtp-mta</code>
-                </div>
-              </div>
-
-            </div>
-          </template>
-
-          <!-- STEP 10 (LAST): Zusammenfassung -->
-          <template v-else-if="step === LAST_STEP">
+          <!-- STEP: summary -->
+          <template v-else-if="currentId === 'summary'">
             <WizardStep :title="$t('wizard.s8.title')" :question="$t('wizard.s8.question')" />
             <div v-if="summaryRows.length" class="space-y-2">
               <div v-for="row in summaryRows" :key="row.key"
@@ -310,7 +497,6 @@
               </div>
             </div>
             <p v-else class="text-sm text-gray-400 text-center py-4">{{ $t('wizard.s8.noChanges') }}</p>
-
             <div v-if="saving" class="text-center py-3 text-sm text-gray-400">{{ $t('common.loading') }} …</div>
           </template>
 
@@ -318,34 +504,28 @@
 
         <!-- Footer Buttons -->
         <div class="px-6 py-4 border-t border-gray-800 flex items-center gap-3 shrink-0">
-
-          <!-- Schritt 0: Los geht's -->
-          <template v-if="step === 0">
+          <template v-if="currentId === 'welcome'">
             <button @click="next" class="flex-1 btn-primary">{{ $t('wizard.start') }}</button>
           </template>
-
-          <!-- Zwischenschritte 1–(LAST-1) -->
-          <template v-else-if="step < LAST_STEP">
-            <button @click="back" class="btn-secondary px-4">{{ $t('wizard.back') }}</button>
-            <button @click="skip" class="flex-1 text-sm text-gray-400 hover:text-white transition">{{ $t('wizard.skip') }}</button>
-            <button @click="next" class="btn-primary px-6">{{ $t('wizard.next') }}</button>
-          </template>
-
-          <!-- Letzter Schritt: Zusammenfassung -->
-          <template v-else>
+          <template v-else-if="isLast">
             <button @click="discard" class="btn-secondary px-4 text-red-400 hover:text-red-300">{{ $t('wizard.discard') }}</button>
             <button @click="back" class="btn-secondary px-4">{{ $t('wizard.back') }}</button>
             <button @click="confirm" :disabled="saving" class="flex-1 btn-primary">{{ $t('wizard.confirm') }}</button>
           </template>
-
+          <template v-else>
+            <button @click="back" class="btn-secondary px-4">{{ $t('wizard.back') }}</button>
+            <button @click="skip" class="flex-1 text-sm text-gray-400 hover:text-white transition">{{ $t('wizard.skip') }}</button>
+            <button @click="next" class="btn-primary px-6">{{ $t('wizard.next') }}</button>
+          </template>
         </div>
+
       </div>
     </div>
   </Teleport>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePrefsStore, DASHBOARD_CARD_DEFS, PREF_KEYS } from '../store/prefs.js';
 import { LANGS } from '../store/lang.js';
@@ -359,9 +539,19 @@ const { t } = useI18n();
 const prefs = usePrefsStore();
 const auth  = useAuthStore();
 
-const LAST_STEP = computed(() => auth.isAdmin ? 10 : 8);
-const step = ref(0);
-const saving = ref(false);
+// ─── Schritt-Liste ──────────────────────────────────────────────────────────
+
+const STEPS = computed(() => {
+  const adminSteps = auth.isAdmin
+    ? ['oauth', 'vehicles', 'virtualkey', 'telemetry', 'electricity', 'legal', 'external', 'monitoring']
+    : [];
+  return ['welcome', 'lang', ...adminSteps, 'design', 'color', 'units', 'dashboard', 'nav', 'notifications', 'summary'];
+});
+
+const step      = ref(0);
+const currentId = computed(() => STEPS.value[step.value] ?? 'summary');
+const isLast    = computed(() => step.value === STEPS.value.length - 1);
+const saving    = ref(false);
 
 // ─── Optionen ──────────────────────────────────────────────────────────────
 
@@ -379,22 +569,18 @@ const UNIT_EFF = [
   { key: 'mpkwh', label: 'mi/kWh' },
 ];
 
-// ─── Draft-Zustand ─────────────────────────────────────────────────────────
-// Jeder Schritt schreibt in dieses Objekt. Erst bei "Confirm" wird gespeichert.
+// ─── Draft-Zustand (Prefs) ─────────────────────────────────────────────────
 
 const draft = ref({});
 
-// Dashboard-Karten-Draft
 const draftCardVisible = ref({ ...(prefs.data.dashboard_cards ?? {}) });
 const draftCardOrder   = ref([...(prefs.data.dashboard_card_order ?? DASHBOARD_CARD_DEFS.map(d => d.key))]);
 
-// Sicherstellen dass alle Karten im Draft sind
 for (const d of DASHBOARD_CARD_DEFS) {
-  if (!draftCardOrder.value.includes(d.key)) draftCardOrder.value.push(d.key);
+  if (!draftCardOrder.value.includes(d.key))   draftCardOrder.value.push(d.key);
   if (draftCardVisible.value[d.key] === undefined) draftCardVisible.value[d.key] = true;
 }
 
-// Navigation-Draft
 const navItems = ALL_LINKS.filter(l => !l.adminOnly);
 const draftNavOrder  = ref((() => {
   const saved = prefs.data.nav_order;
@@ -406,36 +592,174 @@ const draftNavOrder  = ref((() => {
 })());
 const draftNavHidden = ref([...(prefs.data.nav_hidden ?? [])]);
 
-// Benachrichtigungen-Draft
 const draftNotif = ref({
-  charge:           prefs.data[PREF_KEYS.NOTIF_CHARGE]   ?? true,
-  service:          prefs.data[PREF_KEYS.NOTIF_SERVICE]  ?? true,
-  battery:          prefs.data[PREF_KEYS.NOTIF_BATTERY]  ?? false,
+  charge:           prefs.data[PREF_KEYS.NOTIF_CHARGE]    ?? true,
+  service:          prefs.data[PREF_KEYS.NOTIF_SERVICE]   ?? true,
+  battery:          prefs.data[PREF_KEYS.NOTIF_BATTERY]   ?? false,
   batteryThreshold: prefs.data[PREF_KEYS.NOTIF_BATTERY_T] ?? 20,
 });
 
-// ─── Admin-only Draft (Schritt 8+9) ────────────────────────────────────────
+// ─── Admin-Draft (externe Keys, Monitoring) ────────────────────────────────
+
 const adminStatus = ref({ ocm: null, here: null, grok: null, email: null, loading: false });
 const draftAdmin  = ref({ ocm_key: '', here_key: '', alert_email: '', heal_enabled: true });
+
+// ─── OAuth-State ───────────────────────────────────────────────────────────
+
+const oauthStatus  = ref('checking'); // 'checking' | 'connected' | 'disconnected'
+const oauthOpening = ref(false);
+
+async function checkOauthStatus() {
+  oauthStatus.value = 'checking';
+  try {
+    const { data } = await api.get('/auth/tesla/status');
+    oauthStatus.value = data.connected ? 'connected' : 'disconnected';
+  } catch {
+    oauthStatus.value = 'disconnected';
+  }
+}
+
+async function openOauth() {
+  oauthOpening.value = true;
+  try {
+    const { data } = await api.get('/auth/tesla/auth-url');
+    const popup = window.open(data.url, 'tesla_oauth', 'width=600,height=700');
+    const onMsg = async (e) => {
+      if (e.data?.type === 'tesla_connected') {
+        window.removeEventListener('message', onMsg);
+        await checkOauthStatus();
+      }
+    };
+    window.addEventListener('message', onMsg);
+    // Fallback: wenn Popup geschlossen, Status prüfen
+    const timer = setInterval(async () => {
+      if (popup?.closed) {
+        clearInterval(timer);
+        window.removeEventListener('message', onMsg);
+        await checkOauthStatus();
+      }
+    }, 1000);
+  } finally {
+    oauthOpening.value = false;
+  }
+}
+
+// ─── Fahrzeuge ─────────────────────────────────────────────────────────────
+
+const vehicles      = ref([]);
+const vehicleSyncing   = ref(false);
+const vehicleSyncError = ref('');
+
+async function loadVehicles() {
+  try {
+    const { data } = await api.get('/vehicles');
+    vehicles.value = data;
+  } catch { /* ignore */ }
+}
+
+async function syncVehicles() {
+  vehicleSyncing.value  = true;
+  vehicleSyncError.value = '';
+  try {
+    await api.post('/vehicles/sync');
+    await loadVehicles();
+  } catch (e) {
+    vehicleSyncError.value = e.response?.data?.error || e.message;
+  } finally {
+    vehicleSyncing.value = false;
+  }
+}
+
+// ─── Virtual Key + Telemetry ───────────────────────────────────────────────
+
+const telemetryStatus     = ref(null);
+const telemetryConfiguring = reactive({});
+const vkCopied = ref(false);
+
+async function loadTelemetryStatus() {
+  try {
+    const { data } = await api.get('/telemetry/status');
+    telemetryStatus.value = data;
+  } catch { /* ignore */ }
+}
+
+async function configureTelemetry(vin) {
+  telemetryConfiguring[vin] = true;
+  try {
+    await api.post(`/telemetry/configure/${vin}`);
+    await loadTelemetryStatus();
+  } catch { /* ignore */ } finally {
+    telemetryConfiguring[vin] = false;
+  }
+}
+
+function copyVkUrl() {
+  if (!telemetryStatus.value?.registration_url) return;
+  navigator.clipboard.writeText(telemetryStatus.value.registration_url);
+  vkCopied.value = true;
+  setTimeout(() => { vkCopied.value = false; }, 2000);
+}
+
+function telemetryBadgeClass(status) {
+  return {
+    streaming:        'bg-green-900/50 text-green-300',
+    registered_idle:  'bg-blue-900/50 text-blue-300',
+    not_registered:   'bg-gray-700 text-gray-400',
+    approval_missing: 'bg-amber-900/50 text-amber-300',
+    error:            'bg-red-900/50 text-red-300',
+  }[status] ?? 'bg-gray-700 text-gray-400';
+}
+
+// ─── Strompreis ────────────────────────────────────────────────────────────
+
+const draftElectricity = reactive({});
+
+// ─── Legal-Check ───────────────────────────────────────────────────────────
+
+const legalStatus = ref(null);
+
+const legalIncomplete = computed(() => {
+  if (!legalStatus.value) return [];
+  return legalStatus.value
+    .map(row => {
+      const matches = (row.body_md || '').match(/<<[^>]+>>/g) ?? [];
+      return { ...row, placeholders: [...new Set(matches)] };
+    })
+    .filter(row => row.placeholders.length > 0);
+});
+
+async function loadLegalStatus() {
+  try {
+    const { data } = await api.get('/legal/admin/all');
+    legalStatus.value = data;
+  } catch { legalStatus.value = []; }
+}
+
+// ─── onMounted ─────────────────────────────────────────────────────────────
 
 onMounted(async () => {
   if (!auth.isAdmin) return;
   adminStatus.value.loading = true;
-  try {
-    const [ocm, here, grok, emailSt, monCfg] = await Promise.all([
-      api.get('/routing/ocm-config').then(r => r.data).catch(() => null),
-      api.get('/routing/traffic-config').then(r => r.data).catch(() => null),
-      api.get('/grok/config').then(r => r.data).catch(() => null),
-      api.get('/system/email-status').then(r => r.data).catch(() => null),
-      api.get('/system/monitoring-config').then(r => r.data).catch(() => null),
-    ]);
-    adminStatus.value = { ocm, here, grok, email: emailSt, loading: false };
-    draftAdmin.value.alert_email  = monCfg?.alert_email  ?? '';
-    draftAdmin.value.heal_enabled = monCfg?.heal_enabled ?? true;
-  } catch { adminStatus.value.loading = false; }
+  const [ocm, here, grok, emailSt, monCfg] = await Promise.all([
+    api.get('/routing/ocm-config').then(r => r.data).catch(() => null),
+    api.get('/routing/traffic-config').then(r => r.data).catch(() => null),
+    api.get('/grok/config').then(r => r.data).catch(() => null),
+    api.get('/system/email-status').then(r => r.data).catch(() => null),
+    api.get('/system/monitoring-config').then(r => r.data).catch(() => null),
+  ]);
+  adminStatus.value = { ocm, here, grok, email: emailSt, loading: false };
+  draftAdmin.value.alert_email  = monCfg?.alert_email  ?? '';
+  draftAdmin.value.heal_enabled = monCfg?.heal_enabled ?? true;
+
+  await Promise.all([
+    checkOauthStatus(),
+    loadVehicles(),
+    loadTelemetryStatus(),
+    loadLegalStatus(),
+  ]);
 });
 
-// ─── Dashboard-Karten-Aktionen ─────────────────────────────────────────────
+// ─── Dashboard-Karten ──────────────────────────────────────────────────────
 
 function moveCard(i, dir) {
   const arr = [...draftCardOrder.value];
@@ -449,7 +773,7 @@ function toggleCard(key) {
   draftCardVisible.value = { ...draftCardVisible.value, [key]: draftCardVisible.value[key] === false };
 }
 
-// ─── Nav-Aktionen ──────────────────────────────────────────────────────────
+// ─── Navigation ────────────────────────────────────────────────────────────
 
 function moveNav(i, dir) {
   const arr = [...draftNavOrder.value];
@@ -465,9 +789,9 @@ function toggleNav(key) {
     : [...draftNavHidden.value, key];
 }
 
-// ─── Navigation im Wizard ──────────────────────────────────────────────────
+// ─── Wizard-Navigation ─────────────────────────────────────────────────────
 
-function next() { step.value = Math.min(step.value + 1, LAST_STEP.value); }
+function next() { step.value = Math.min(step.value + 1, STEPS.value.length - 1); }
 function back() { step.value = Math.max(step.value - 1, 0); }
 function skip() { next(); }
 
@@ -476,47 +800,55 @@ function discard() {
   emit('close');
 }
 
-// ─── Zusammenfassung ───────────────────────────────────────────────────────
+// ─── Labels ────────────────────────────────────────────────────────────────
 
-function langLabel(code) { return LANGS.find(l => l.code === code)?.label ?? code; }
-function designLabel(key) { return DESIGNS.find(d => d.key === key)?.label ?? key; }
-function themeLabel(key) { return THEMES.find(t => t.key === key)?.label ?? key; }
+function langLabel(code)   { return LANGS.find(l => l.code === code)?.label    ?? code; }
+function designLabel(key)  { return DESIGNS.find(d => d.key === key)?.label    ?? key;  }
+function themeLabel(key)   { return THEMES.find(t => t.key === key)?.label     ?? key;  }
+
+// ─── Zusammenfassung ───────────────────────────────────────────────────────
 
 const summaryRows = computed(() => {
   const rows = [];
-
   const add = (key, icon, label, from, to) => {
-    if (from !== to) rows.push({ key, icon, label, from: String(from), to: String(to) });
+    if (String(from) !== String(to)) rows.push({ key, icon, label, from: String(from), to: String(to) });
   };
 
-  if (draft.value.lang != null) add('lang', '🌐', t('wizard.s1.title'), langLabel(prefs.data.lang), langLabel(draft.value.lang));
-  if (draft.value.theme_design != null) add('theme_design', '🎨', t('wizard.s2.title'), designLabel(prefs.data.theme_design), designLabel(draft.value.theme_design));
-  if (draft.value.theme_color != null) add('theme_color', '🎨', t('wizard.s3.title'), themeLabel(prefs.data.theme_color), themeLabel(draft.value.theme_color));
-  if (draft.value.unit_distance != null) add('unit_distance', '📏', t('wizard.s4.distance'), prefs.data.unit_distance, draft.value.unit_distance);
-  if (draft.value.unit_temp != null) add('unit_temp', '🌡️', t('wizard.s4.temp'), prefs.data.unit_temp, draft.value.unit_temp);
-  if (draft.value.unit_efficiency != null) add('unit_eff', '⚡', t('wizard.s4.efficiency'), prefs.data.unit_efficiency, draft.value.unit_efficiency);
+  if (draft.value.lang != null)
+    add('lang', '🌐', t('wizard.s1.title'), langLabel(prefs.data.lang), langLabel(draft.value.lang));
+  if (draft.value.theme_design != null)
+    add('theme_design', '🎨', t('wizard.s2.title'), designLabel(prefs.data.theme_design), designLabel(draft.value.theme_design));
+  if (draft.value.theme_color != null)
+    add('theme_color', '🎨', t('wizard.s3.title'), themeLabel(prefs.data.theme_color), themeLabel(draft.value.theme_color));
+  if (draft.value.unit_distance != null)
+    add('unit_distance', '📏', t('wizard.s4.distance'), prefs.data.unit_distance, draft.value.unit_distance);
+  if (draft.value.unit_temp != null)
+    add('unit_temp', '🌡️', t('wizard.s4.temp'), prefs.data.unit_temp, draft.value.unit_temp);
+  if (draft.value.unit_efficiency != null)
+    add('unit_eff', '⚡', t('wizard.s4.efficiency'), prefs.data.unit_efficiency, draft.value.unit_efficiency);
 
-  // Dashboard cards
   const origCards = JSON.stringify(prefs.data.dashboard_cards ?? {});
   const origOrder = JSON.stringify(prefs.data.dashboard_card_order ?? []);
-  if (JSON.stringify(draftCardVisible.value) !== origCards || JSON.stringify(draftCardOrder.value) !== origOrder) {
+  if (JSON.stringify(draftCardVisible.value) !== origCards || JSON.stringify(draftCardOrder.value) !== origOrder)
     rows.push({ key: 'dashboard', icon: '📊', label: t('wizard.s5.title'), from: '—', to: t('wizard.s5.changed') });
-  }
 
-  // Nav
   const origNavOrder  = JSON.stringify(prefs.data.nav_order ?? []);
   const origNavHidden = JSON.stringify(prefs.data.nav_hidden ?? []);
   if (JSON.stringify(draftNavOrder.value.map(l => l.key)) !== origNavOrder ||
-      JSON.stringify(draftNavHidden.value) !== origNavHidden) {
+      JSON.stringify(draftNavHidden.value) !== origNavHidden)
     rows.push({ key: 'nav', icon: '🧭', label: t('wizard.s6.title'), from: '—', to: t('wizard.s6.changed') });
-  }
 
-  // Notifications
-  if (draftNotif.value.charge !== prefs.data[PREF_KEYS.NOTIF_CHARGE]) {
+  if (draftNotif.value.charge !== prefs.data[PREF_KEYS.NOTIF_CHARGE])
     rows.push({ key: 'notif_charge', icon: '🔔', label: t('wizard.s7.charging'), from: prefs.data[PREF_KEYS.NOTIF_CHARGE] ? '✓' : '✗', to: draftNotif.value.charge ? '✓' : '✗' });
-  }
 
   if (auth.isAdmin) {
+    // Strompreise
+    for (const [vid, rate] of Object.entries(draftElectricity)) {
+      if (rate == null || isNaN(rate)) continue;
+      const v = vehicles.value.find(x => String(x.id) === String(vid));
+      if (!v || String(v.electricity_rate_kwh) === String(rate)) continue;
+      rows.push({ key: 'elec_' + vid, icon: '💡', label: (v.display_name || v.vin) + ' ' + t('wizard.sElec.title'), from: (v.electricity_rate_kwh ?? '—') + ' €/kWh', to: rate + ' €/kWh' });
+    }
     if (draftAdmin.value.ocm_key.trim())
       rows.push({ key: 'ocm_key', icon: '⚡', label: t('wizard.sExt.ocm'), from: '—', to: t('wizard.sExt.keySaved') });
     if (draftAdmin.value.here_key.trim())
@@ -549,14 +881,25 @@ async function confirm() {
 
     if (auth.isAdmin) {
       const adminCalls = [];
+
+      // Strompreise pro Fahrzeug
+      for (const [vid, rate] of Object.entries(draftElectricity)) {
+        if (rate == null || isNaN(rate)) continue;
+        const v = vehicles.value.find(x => String(x.id) === String(vid));
+        if (!v || String(v.electricity_rate_kwh) === String(rate)) continue;
+        adminCalls.push(api.put(`/vehicles/${vid}`, { electricity_rate_kwh: rate }));
+      }
+
       if (draftAdmin.value.ocm_key.trim())
-        adminCalls.push(api.put('/routing/ocm-config',  { ocm_api_key:  draftAdmin.value.ocm_key.trim() }));
+        adminCalls.push(api.put('/routing/ocm-config',      { ocm_api_key:  draftAdmin.value.ocm_key.trim() }));
       if (draftAdmin.value.here_key.trim())
-        adminCalls.push(api.put('/routing/traffic-config', { here_api_key: draftAdmin.value.here_key.trim() }));
+        adminCalls.push(api.put('/routing/traffic-config',  { here_api_key: draftAdmin.value.here_key.trim() }));
+
       adminCalls.push(api.put('/system/monitoring-config', {
         alert_email:  draftAdmin.value.alert_email,
         heal_enabled: draftAdmin.value.heal_enabled,
       }));
+
       await Promise.all(adminCalls);
     }
 
