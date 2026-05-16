@@ -92,9 +92,19 @@ jobs:
             sudo docker compose --env-file "$ENV_TMP" \
               -f /opt/tesla-carview/docker-compose.prod.yml up -d --build backend frontend
             rm -f "$ENV_TMP"
-            # Nginx reads its config only at startup or on reload — a bind-mount
-            # update alone is not picked up. Reload after every deploy so that
-            # nginx-internal.conf changes (e.g. proxy header fixes) take effect.
+            # Sicherstellen dass nginx im richtigen Compose-Netzwerk laeuft.
+            # Passiert wenn nginx aus einem alten Systemstart stammt und im
+            # veralteten tesla-carview_default statt tesla-carview_tesla-net haengt.
+            # network connect statt force-recreate: kein Container-Restart,
+            # kein depends_on-Cascade auf backend/frontend.
+            COMPOSE_NET="tesla-carview_tesla-net"
+            if ! sudo docker inspect tesla-carview-nginx \
+                --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' \
+                2>/dev/null | grep -q "$COMPOSE_NET"; then
+              echo "==> nginx nicht in $COMPOSE_NET — network connect"
+              sudo docker network connect "$COMPOSE_NET" tesla-carview-nginx
+            fi
+            # Nginx-Config nach jedem Deploy neu einlesen (bind-mount bleibt)
             sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml \
               exec -T nginx nginx -s reload
             sudo docker system prune -f
