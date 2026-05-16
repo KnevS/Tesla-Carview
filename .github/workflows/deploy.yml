@@ -91,5 +91,10 @@ jobs:
             sudo docker compose --env-file "$ENV_TMP" \
               -f /opt/tesla-carview/docker-compose.prod.yml up -d --build backend frontend
             rm -f "$ENV_TMP"
+            # Nginx reads its config only at startup or on reload — a bind-mount
+            # update alone is not picked up. Reload after every deploy so that
+            # nginx-internal.conf changes (e.g. proxy header fixes) take effect.
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml \
+              exec -T nginx nginx -s reload
             sudo docker system prune -f
             echo "Deployment erfolgreich: $(date) | $GIT_HASH"
