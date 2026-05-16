@@ -7,6 +7,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.1.1] — 2026-05-16
+
+### Added
+- **Unit preferences applied to all views** — `useUnits()` now active in all 9 views (Dashboard, Trips, TripDetail, Battery, EnergyReport, Control, Telemetry, Fahrtenbuch, RoutePlanner); distance (km/mi), temperature (°C/°F) and efficiency (kWh/100km, Wh/km, mi/kWh) respect user settings. Exception: Fahrtenbuch odometer values remain in km for legal reasons (German BMF/§31a EStG).
+- **Greek wiki pages completed** — `EL-First-Login.md` created (full translation incl. 16-step wizard table, MFA, QR-SSO tip); `EL-Features.md` updated with dynamic tariff section; sidebar and home updated.
+
+### Improved
+- **Dynamic system hygiene (heal.sh + host-watch.sh)** — Self-healing now handles full automatic system maintenance: swappiness calculated proportionally to RAM size and corrected on every run; swap flush when safe (20% safety buffer); container memory limits via `docker update` (backend 30% RAM, frontend/nginx 5% RAM each); hourly: Docker cleanup (dangling images, build cache >24h, anonymous volumes), journal vacuum (2% of disk), /tmp cleanup (>7 days). All thresholds computed at runtime from host facts — no hardcoded values.
+- **Private host alerts** — Monitoring alerts now sent via email instead of public GitHub issues (prevents private server data leakage).
+
+---
+
 ## [v3.1.0] — 2026-05-16
 
 ### New
