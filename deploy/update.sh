@@ -56,7 +56,7 @@ docker compose -f docker-compose.prod.yml build
 
 echo ""
 echo "==> Laufende Container stoppen + bereinigen"
-docker compose -f docker-compose.prod.yml stop backend frontend 2>/dev/null || true
+docker compose -f docker-compose.prod.yml stop 2>/dev/null || true
 docker container prune -f >/dev/null 2>&1 || true
 
 echo ""
@@ -65,6 +65,18 @@ docker compose -f docker-compose.prod.yml up -d --remove-orphans || {
   echo "==> Fallback: direkt starten …"
   docker compose -f docker-compose.prod.yml up -d || true
 }
+
+echo ""
+echo "==> Netzwerk-Zugehörigkeit nginx prüfen"
+COMPOSE_NET="tesla-carview_tesla-net"
+NGINX_NETS=$(docker inspect tesla-carview-nginx \
+  --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' 2>/dev/null || echo "")
+if echo "$NGINX_NETS" | grep -q "$COMPOSE_NET"; then
+  echo "    nginx ist in $COMPOSE_NET — OK"
+else
+  echo "    nginx nicht in $COMPOSE_NET — network connect (kein Restart)"
+  docker network connect "$COMPOSE_NET" tesla-carview-nginx
+fi
 
 echo ""
 echo "==> Alte Images aufräumen"
