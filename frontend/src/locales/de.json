@@ -1798,6 +1798,69 @@
       "emailInstallCmd": "Installation auf dem Server:",
       "emailNotConfigured": "msmtp installiert, /etc/msmtprc fehlt oder ist leer",
       "emailConfigHint": "Handbuch → System-Status für Einrichtungshinweise."
+    },
+    "sOauth": {
+      "title": "Tesla-Verbindung",
+      "question": "Verbinde dein Tesla-Konto, damit die App auf Fahrzeugdaten zugreifen kann.",
+      "connected": "Tesla-Konto verbunden",
+      "notConnected": "Noch nicht verbunden",
+      "hint": "Öffnet Tesla-Login in einem neuen Fenster.",
+      "connectBtn": "Tesla verbinden →",
+      "refresh": "Status prüfen",
+      "connectedHint": "Du kannst zum nächsten Schritt weitergehen."
+    },
+    "sVehicles": {
+      "title": "Fahrzeuge",
+      "question": "Synchronisiere deine Tesla-Fahrzeuge aus dem Tesla-Konto.",
+      "empty": "Noch keine Fahrzeuge gefunden.",
+      "syncBtn": "Fahrzeuge synchronisieren",
+      "resyncBtn": "Erneut synchronisieren",
+      "syncing": "Synchronisiere …"
+    },
+    "sVKey": {
+      "title": "Virtual Key",
+      "question": "Der Virtual Key erlaubt der App, Fahrzeugbefehle (z. B. Klimaanlage, Laden) zu senden.",
+      "exists": "Virtual Key vorhanden",
+      "missing": "Virtual Key fehlt",
+      "createdAt": "Erstellt am",
+      "hint": "Öffne den Link auf deinem Smartphone und tippe auf 'Schlüssel hinzufügen'.",
+      "regUrl": "Registrierungs-Link:",
+      "openUrl": "Öffnen",
+      "afterPair": "Nach dem Pairing auf dem Smartphone hier den Status aktualisieren.",
+      "checkAgain": "Status aktualisieren"
+    },
+    "sTelemetry": {
+      "title": "Fleet Telemetry",
+      "question": "Aktiviert GPS-Echtzeit-Tracking für neue Tesla-Modelle (XP7 / Juniper).",
+      "needsVkey": "Virtual Key wird für Fleet Telemetry benötigt — bitte zuerst Schritt 'Virtual Key' abschließen.",
+      "configureBtn": "Konfigurieren",
+      "approvalHint": "Dieses Fahrzeug wartet auf Tesla-Genehmigung (partner.tesla.com). Dies kann einige Tage dauern.",
+      "noVehicles": "Keine Fahrzeuge gefunden. Bitte zuerst Fahrzeuge synchronisieren.",
+      "refresh": "Status aktualisieren",
+      "status": {
+        "streaming": "Live-Daten aktiv",
+        "registered_idle": "Konfiguriert (im Stand)",
+        "not_registered": "Nicht konfiguriert",
+        "approval_missing": "Genehmigung ausstehend",
+        "error": "Fehler"
+      }
+    },
+    "sElec": {
+      "title": "Strompreis",
+      "question": "Trage den Heimlade-Strompreis pro Fahrzeug ein — wird für die Kostenkalkulation verwendet.",
+      "currentRate": "Aktuell",
+      "notSet": "nicht gesetzt",
+      "placeholder": "z. B. 0.29",
+      "hint": "Änderungen werden beim Speichern des Assistenten übernommen.",
+      "noVehicles": "Keine Fahrzeuge gefunden. Bitte zuerst Fahrzeuge synchronisieren."
+    },
+    "sLegal": {
+      "title": "Rechtliche Texte",
+      "question": "Prüfe, ob alle Pflicht-Platzhalter in Impressum, Datenschutz und AGB ausgefüllt sind.",
+      "allDone": "Alle rechtlichen Texte sind vollständig ausgefüllt.",
+      "hasPlaceholders": "Folgende Texte enthalten noch Platzhalter:",
+      "editBtn": "Rechtliche Texte bearbeiten →",
+      "hint": "Platzhalter wie <<NAME>> oder <<STRASSE>> müssen vor dem Live-Betrieb ausgefüllt werden."
     }
   },
   "pair": {
