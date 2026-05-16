@@ -1800,7 +1800,17 @@
       "emailNotConfigured": "msmtp εγκατεστημένο αλλά /etc/msmtprc λείπει ή είναι κενό",
       "emailConfigHint": "Εγχειρίδιο → Κατάσταση συστήματος για οδηγίες εγκατάστασης.",
       "anthropicKey": "Κλειδί AI Αυτόματης Διόρθωσης",
-      "anthropicKeyHint": "Κλειδί API Anthropic για κλιμάκωση με τεχνητή νοημοσύνη (Claude Haiku). Αφήστε κενό = μόνο email κατά την κλιμάκωση."
+      "anthropicKeyHint": "Κλειδί API Anthropic για κλιμάκωση με τεχνητή νοημοσύνη (Claude Haiku). Αφήστε κενό = μόνο email κατά την κλιμάκωση.",
+      "smtpTitle": "Αποστολή email (SMTP)",
+      "smtpHint": "Gmail: δημιουργήστε κωδικό εφαρμογής στο myaccount.google.com → Ασφάλεια → Κωδικοί εφαρμογών. Θύρα 587 για STARTTLS, 465 για SSL.",
+      "smtpHost": "Διακομιστής SMTP",
+      "smtpPort": "Θύρα",
+      "smtpUser": "Όνομα χρήστη",
+      "smtpPassword": "Κωδικός / Κωδικός εφαρμογής",
+      "smtpFrom": "Διεύθυνση αποστολέα (προαιρετικό)",
+      "smtpTest": "Αποστολή δοκιμαστικού email",
+      "smtpTestSent": "✓ Δοκιμαστικό email εστάλη",
+      "smtpTestFailed": "Αποτυχία δοκιμής"
     },
     "sOauth": {
       "title": "Σύνδεση Tesla",

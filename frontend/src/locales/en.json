@@ -1800,7 +1800,17 @@
       "emailNotConfigured": "msmtp installed but /etc/msmtprc missing or empty",
       "emailConfigHint": "Handbook → System Status for setup instructions.",
       "anthropicKey": "AI Autofix Key",
-      "anthropicKeyHint": "Anthropic API key for AI-assisted escalation (Claude Haiku). Leave empty = email only on escalation."
+      "anthropicKeyHint": "Anthropic API key for AI-assisted escalation (Claude Haiku). Leave empty = email only on escalation.",
+      "smtpTitle": "Email Delivery (SMTP)",
+      "smtpHint": "Gmail: create an App Password at myaccount.google.com → Security → App Passwords. Use port 587 for STARTTLS, 465 for SSL.",
+      "smtpHost": "SMTP Host",
+      "smtpPort": "Port",
+      "smtpUser": "Username",
+      "smtpPassword": "Password / App Password",
+      "smtpFrom": "Sender address (optional)",
+      "smtpTest": "Send test email",
+      "smtpTestSent": "✓ Test email sent",
+      "smtpTestFailed": "Test failed"
     },
     "sOauth": {
       "title": "Tesla Connection",

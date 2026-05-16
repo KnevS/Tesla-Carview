@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { execSync } from 'child_process';
 import os from 'os';
+import { sendEmail, isSmtpConfigured } from '../utils/email.js';
 import { readFileSync, statSync, copyFileSync, unlinkSync, existsSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -672,6 +673,53 @@ router.get('/monitoring-log', requireAuth, requireAdmin, (req, res) => {
     heal:     tail('/var/log/tcv-heal.log'),
     security: tail('/var/log/security-check.log'),
   });
+});
+
+// ── SMTP-Konfiguration ───────────────────────────────────────────────────────
+
+const SMTP_KEYS = ['smtp.host', 'smtp.port', 'smtp.user', 'smtp.password', 'smtp.from'];
+
+router.get('/smtp-config', requireAuth, requireAdmin, (req, res) => {
+  const rows = req.db.prepare(
+    `SELECT key, value FROM tenant_settings WHERE key IN (${SMTP_KEYS.map(() => '?').join(',')})`
+  ).all(...SMTP_KEYS);
+  const cfg = Object.fromEntries(rows.map(r => [r.key.replace('smtp.', ''), r.value]));
+  res.json({
+    host:        cfg.host  || '',
+    port:        cfg.port  || '587',
+    user:        cfg.user  || '',
+    from:        cfg.from  || '',
+    configured:  !!(cfg.host && cfg.user && cfg.password),
+  });
+});
+
+router.put('/smtp-config', requireAuth, requireAdmin, (req, res) => {
+  const { host, port, user, password, from } = req.body;
+  const upsert = req.db.prepare(
+    "INSERT INTO tenant_settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+  );
+  if (host     !== undefined) upsert.run('smtp.host', host.trim());
+  if (port     !== undefined) upsert.run('smtp.port', String(parseInt(port) || 587));
+  if (user     !== undefined) upsert.run('smtp.user', user.trim());
+  if (password && typeof password === 'string' && password.trim())
+    upsert.run('smtp.password', password.trim());
+  if (from     !== undefined) upsert.run('smtp.from', from.trim());
+  res.json({ ok: true });
+});
+
+router.post('/smtp-test', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const to = req.body?.to || req.user?.email;
+    if (!to) return res.status(400).json({ error: 'Empfänger fehlt' });
+    await sendEmail(req.db, {
+      to,
+      subject: 'Tesla Carview — Test-E-Mail',
+      text: `Test-E-Mail von Tesla Carview.\nZeit: ${new Date().toISOString()}\nServer: ${os.hostname()}`,
+    });
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 export default router;

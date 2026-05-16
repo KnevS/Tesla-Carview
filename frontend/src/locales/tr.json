@@ -1800,7 +1800,17 @@
       "emailNotConfigured": "msmtp kurulu ama /etc/msmtprc eksik veya boş",
       "emailConfigHint": "El Kitabı → Sistem Durumu bölümüne bakın.",
       "anthropicKey": "AI Otomatik Düzeltme Anahtarı",
-      "anthropicKeyHint": "AI destekli yükseltme için Anthropic API anahtarı (Claude Haiku). Boş bırakın = yükseltmede yalnızca e-posta."
+      "anthropicKeyHint": "AI destekli yükseltme için Anthropic API anahtarı (Claude Haiku). Boş bırakın = yükseltmede yalnızca e-posta.",
+      "smtpTitle": "E-posta Gönderimi (SMTP)",
+      "smtpHint": "Gmail: myaccount.google.com → Güvenlik → Uygulama şifreleri bölümünden uygulama şifresi oluşturun. STARTTLS için 587, SSL için 465 portu.",
+      "smtpHost": "SMTP Sunucusu",
+      "smtpPort": "Port",
+      "smtpUser": "Kullanıcı adı",
+      "smtpPassword": "Şifre / Uygulama şifresi",
+      "smtpFrom": "Gönderen adresi (isteğe bağlı)",
+      "smtpTest": "Test e-postası gönder",
+      "smtpTestSent": "✓ Test e-postası gönderildi",
+      "smtpTestFailed": "Test başarısız"
     },
     "sOauth": {
       "title": "Tesla Bağlantısı",

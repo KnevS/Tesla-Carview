@@ -1800,7 +1800,17 @@
       "emailNotConfigured": "msmtp installé mais /etc/msmtprc manquant ou vide",
       "emailConfigHint": "Manuel → État du système pour les instructions de configuration.",
       "anthropicKey": "Clé Autofix IA",
-      "anthropicKeyHint": "Clé API Anthropic pour l'escalade assistée par IA (Claude Haiku). Laisser vide = e-mail uniquement en cas d'escalade."
+      "anthropicKeyHint": "Clé API Anthropic pour l'escalade assistée par IA (Claude Haiku). Laisser vide = e-mail uniquement en cas d'escalade.",
+      "smtpTitle": "Envoi d'e-mails (SMTP)",
+      "smtpHint": "Gmail : créez un mot de passe d'application sur myaccount.google.com → Sécurité → Mots de passe des applications. Port 587 pour STARTTLS, 465 pour SSL.",
+      "smtpHost": "Hôte SMTP",
+      "smtpPort": "Port",
+      "smtpUser": "Nom d'utilisateur",
+      "smtpPassword": "Mot de passe / Mot de passe d'application",
+      "smtpFrom": "Adresse d'expéditeur (optionnelle)",
+      "smtpTest": "Envoyer un e-mail de test",
+      "smtpTestSent": "✓ E-mail de test envoyé",
+      "smtpTestFailed": "Échec du test"
     },
     "sOauth": {
       "title": "Connexion Tesla",

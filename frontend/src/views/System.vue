@@ -224,6 +224,38 @@
 
       <p v-if="monMsg" :class="monMsgOk ? 'text-green-400' : 'text-red-400'" class="text-xs">{{ monMsg }}</p>
 
+      <!-- SMTP -->
+      <div class="space-y-2 pt-2 border-t border-gray-700">
+        <label class="text-xs text-gray-400 flex items-center gap-2">
+          📨 E-Mail-Versand (SMTP)
+          <span v-if="smtpCfg.configured" class="text-green-400">✓ konfiguriert</span>
+        </label>
+        <p class="text-xs text-gray-500">Gmail: App-Passwort unter myaccount.google.com → Sicherheit → App-Passwörter. Port 587 (STARTTLS) oder 465 (SSL).</p>
+        <div class="grid sm:grid-cols-3 gap-2">
+          <input v-model="smtpCfg.host" type="text" placeholder="smtp.gmail.com"
+            class="sm:col-span-2 input text-sm" />
+          <input v-model="smtpCfg.port" type="number" placeholder="587"
+            class="input text-sm" />
+        </div>
+        <input v-model="smtpCfg.user" type="email" placeholder="Benutzername"
+          class="w-full input text-sm" />
+        <input v-model="smtpCfg.password" type="password" placeholder="Passwort / App-Passwort"
+          class="w-full input text-sm" />
+        <input v-model="smtpCfg.from" type="email" placeholder="Absenderadresse (optional)"
+          class="w-full input text-sm" />
+        <div class="flex gap-2">
+          <button @click="saveSmtpConfig" :disabled="smtpSaving"
+            class="px-3 py-1.5 rounded-lg text-sm bg-tesla-red text-white hover:bg-red-600 disabled:opacity-40">
+            {{ smtpSaving ? '…' : 'Speichern' }}
+          </button>
+          <button @click="testSmtp" :disabled="smtpTesting || !smtpCfg.configured"
+            class="px-3 py-1.5 rounded-lg text-sm border border-gray-600 text-gray-300 hover:border-gray-400 disabled:opacity-40 transition">
+            {{ smtpTesting ? '…' : smtpTestMsg || 'Test-Mail senden' }}
+          </button>
+        </div>
+        <p v-if="smtpMsg" :class="smtpMsgOk ? 'text-green-400' : 'text-red-400'" class="text-xs">{{ smtpMsg }}</p>
+      </div>
+
       <!-- Heal-Log -->
       <div v-if="monLog.heal?.length || monLog.security?.length" class="space-y-3">
         <details v-if="monLog.heal?.length">
@@ -737,6 +769,54 @@ async function toggleHeal() {
   await saveMonitoringConfig();
 }
 
+// ── SMTP ─────────────────────────────────────────────────────────────────────
+const smtpCfg    = ref({ host: '', port: '587', user: '', password: '', from: '', configured: false });
+const smtpSaving = ref(false);
+const smtpMsg    = ref('');
+const smtpMsgOk  = ref(true);
+const smtpTesting = ref(false);
+const smtpTestMsg = ref('');
+
+async function loadSmtpConfig() {
+  try {
+    const { data } = await api.get('/system/smtp-config');
+    smtpCfg.value = { ...data, password: '' };
+  } catch { /* ignore */ }
+}
+
+async function saveSmtpConfig() {
+  smtpSaving.value = true; smtpMsg.value = '';
+  try {
+    const payload = { host: smtpCfg.value.host, port: smtpCfg.value.port,
+                      user: smtpCfg.value.user, from: smtpCfg.value.from };
+    if (smtpCfg.value.password?.trim()) payload.password = smtpCfg.value.password.trim();
+    await api.put('/system/smtp-config', payload);
+    if (smtpCfg.value.password?.trim()) {
+      smtpCfg.value.configured = true;
+      smtpCfg.value.password = '';
+    }
+    smtpMsg.value = '✓ Gespeichert'; smtpMsgOk.value = true;
+  } catch (e) {
+    smtpMsg.value = e.response?.data?.error ?? 'Fehler beim Speichern'; smtpMsgOk.value = false;
+  } finally {
+    smtpSaving.value = false;
+    setTimeout(() => { smtpMsg.value = ''; }, 4000);
+  }
+}
+
+async function testSmtp() {
+  smtpTesting.value = true; smtpTestMsg.value = '';
+  try {
+    await api.post('/system/smtp-test', {});
+    smtpTestMsg.value = '✓ Gesendet';
+  } catch (e) {
+    smtpTestMsg.value = '✗ ' + (e.response?.data?.error ?? 'Fehler');
+  } finally {
+    smtpTesting.value = false;
+    setTimeout(() => { smtpTestMsg.value = ''; }, 5000);
+  }
+}
+
 async function loadMonitoringLog() {
   monLogLoading.value = true;
   try {
@@ -956,6 +1036,7 @@ onMounted(async () => {
     loadOcmConfig();
     loadHereConfig();
     loadMonitoringConfig();
+    loadSmtpConfig();
     loadMonitoringLog();
   }
 });

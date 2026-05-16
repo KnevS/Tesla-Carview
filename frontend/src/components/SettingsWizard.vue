@@ -323,6 +323,32 @@
                   :placeholder="$t('wizard.sMon.alertEmailPlaceholder')"
                   class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
               </div>
+              <div class="card space-y-3">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-white">📨 {{ $t('wizard.sMon.smtpTitle') }}</p>
+                  <span v-if="adminStatus.smtp?.configured" class="text-xs text-green-400">✓ {{ $t('wizard.sExt.configured') }}</span>
+                  <span v-else class="text-xs text-gray-500">{{ $t('wizard.sExt.notConfigured') }}</span>
+                </div>
+                <p class="text-xs text-gray-400">{{ $t('wizard.sMon.smtpHint') }}</p>
+                <div class="grid grid-cols-3 gap-2">
+                  <input v-model="draftAdmin.smtp_host" type="text" :placeholder="$t('wizard.sMon.smtpHost')"
+                    class="col-span-2 w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+                  <input v-model="draftAdmin.smtp_port" type="number" :placeholder="$t('wizard.sMon.smtpPort')"
+                    class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+                </div>
+                <input v-model="draftAdmin.smtp_user" type="email" :placeholder="$t('wizard.sMon.smtpUser')"
+                  class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+                <input v-model="draftAdmin.smtp_password" type="password" :placeholder="$t('wizard.sMon.smtpPassword')"
+                  class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+                <input v-model="draftAdmin.smtp_from" type="email" :placeholder="$t('wizard.sMon.smtpFrom')"
+                  class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+                <button v-if="adminStatus.smtp?.configured || draftAdmin.smtp_host"
+                  :disabled="smtpTestState === 'sending'"
+                  @click="testSmtp"
+                  class="w-full py-1.5 rounded-lg text-sm border border-gray-600 text-gray-300 hover:border-gray-400 disabled:opacity-40 transition">
+                  {{ smtpTestState === 'sending' ? '…' : smtpTestState === 'ok' ? $t('wizard.sMon.smtpTestSent') : smtpTestState === 'fail' ? $t('wizard.sMon.smtpTestFailed') : $t('wizard.sMon.smtpTest') }}
+                </button>
+              </div>
               <div class="card space-y-2">
                 <div class="flex items-center justify-between">
                   <p class="text-sm font-medium text-white">🤖 {{ $t('wizard.sMon.anthropicKey') }}</p>
@@ -333,24 +359,6 @@
                 <input v-model="draftAdmin.anthropic_key" type="password"
                   :placeholder="adminStatus.anthropic?.configured ? $t('wizard.sExt.keyChangePlaceholder') : $t('wizard.sExt.keyPlaceholder')"
                   class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
-              </div>
-              <div class="card space-y-2">
-                <p class="text-sm font-medium text-white">🖥️ {{ $t('wizard.sMon.emailStatus') }}</p>
-                <div v-if="adminStatus.loading" class="text-xs text-gray-400">…</div>
-                <div v-else-if="adminStatus.email?.installed && adminStatus.email?.configured"
-                  class="flex items-center gap-2 text-green-400 text-sm">
-                  <span>✅</span><span>{{ $t('wizard.sMon.emailInstalled') }}</span>
-                </div>
-                <div v-else-if="adminStatus.email?.installed && !adminStatus.email?.configured"
-                  class="space-y-2">
-                  <p class="text-sm text-amber-400">⚠️ {{ $t('wizard.sMon.emailNotConfigured') }}</p>
-                  <p class="text-xs text-gray-400">{{ $t('wizard.sMon.emailConfigHint') }}</p>
-                </div>
-                <div v-else class="space-y-2">
-                  <p class="text-sm text-amber-400">⚠️ {{ $t('wizard.sMon.emailNotInstalled') }}</p>
-                  <p class="text-xs text-gray-400">{{ $t('wizard.sMon.emailInstallCmd') }}</p>
-                  <code class="block bg-gray-950 rounded px-3 py-2 text-xs text-amber-300 font-mono select-all">sudo apt install msmtp msmtp-mta</code>
-                </div>
               </div>
             </div>
           </template>
@@ -612,8 +620,10 @@ const draftNotif = ref({
 
 // ─── Admin-Draft (externe Keys, Monitoring) ────────────────────────────────
 
-const adminStatus = ref({ ocm: null, here: null, grok: null, email: null, anthropic: null, loading: false });
-const draftAdmin  = ref({ ocm_key: '', here_key: '', alert_email: '', heal_enabled: true, anthropic_key: '' });
+const adminStatus = ref({ ocm: null, here: null, grok: null, email: null, anthropic: null, smtp: null, loading: false });
+const draftAdmin  = ref({ ocm_key: '', here_key: '', alert_email: '', heal_enabled: true, anthropic_key: '',
+  smtp_host: '', smtp_port: '587', smtp_user: '', smtp_password: '', smtp_from: '' });
+const smtpTestState = ref('');  // '' | 'sending' | 'ok' | 'fail'
 
 // ─── OAuth-State ───────────────────────────────────────────────────────────
 
@@ -751,16 +761,24 @@ async function loadLegalStatus() {
 onMounted(async () => {
   if (!auth.isAdmin) return;
   adminStatus.value.loading = true;
-  const [ocm, here, grok, emailSt, monCfg] = await Promise.all([
+  const [ocm, here, grok, emailSt, monCfg, smtpCfg] = await Promise.all([
     api.get('/routing/ocm-config').then(r => r.data).catch(() => null),
     api.get('/routing/traffic-config').then(r => r.data).catch(() => null),
     api.get('/grok/config').then(r => r.data).catch(() => null),
     api.get('/system/email-status').then(r => r.data).catch(() => null),
     api.get('/system/monitoring-config').then(r => r.data).catch(() => null),
+    api.get('/system/smtp-config').then(r => r.data).catch(() => null),
   ]);
-  adminStatus.value = { ocm, here, grok, email: emailSt, anthropic: { configured: monCfg?.anthropic_configured ?? false }, loading: false };
+  adminStatus.value = { ocm, here, grok, email: emailSt,
+    anthropic: { configured: monCfg?.anthropic_configured ?? false },
+    smtp: { configured: smtpCfg?.configured ?? false },
+    loading: false };
   draftAdmin.value.alert_email  = monCfg?.alert_email  ?? '';
   draftAdmin.value.heal_enabled = monCfg?.heal_enabled ?? true;
+  draftAdmin.value.smtp_host    = smtpCfg?.host || '';
+  draftAdmin.value.smtp_port    = smtpCfg?.port || '587';
+  draftAdmin.value.smtp_user    = smtpCfg?.user || '';
+  draftAdmin.value.smtp_from    = smtpCfg?.from || '';
 
   await Promise.all([
     checkOauthStatus(),
@@ -868,12 +886,25 @@ const summaryRows = computed(() => {
       rows.push({ key: 'alert_email', icon: '📧', label: t('wizard.sMon.alertEmail'), from: '—', to: draftAdmin.value.alert_email });
     if (draftAdmin.value.anthropic_key.trim())
       rows.push({ key: 'anthropic_key', icon: '🤖', label: t('wizard.sMon.anthropicKey'), from: '—', to: t('wizard.sExt.keySaved') });
+    if (draftAdmin.value.smtp_host.trim())
+      rows.push({ key: 'smtp', icon: '📨', label: t('wizard.sMon.smtpTitle'), from: '—', to: draftAdmin.value.smtp_host });
   }
 
   return rows;
 });
 
 // ─── Confirm & Speichern ───────────────────────────────────────────────────
+
+async function testSmtp() {
+  smtpTestState.value = 'sending';
+  try {
+    await api.post('/system/smtp-test', {});
+    smtpTestState.value = 'ok';
+  } catch {
+    smtpTestState.value = 'fail';
+  }
+  setTimeout(() => { smtpTestState.value = ''; }, 4000);
+}
 
 async function confirm() {
   saving.value = true;
@@ -915,6 +946,18 @@ async function confirm() {
       if (draftAdmin.value.anthropic_key.trim())
         monPayload.anthropic_key = draftAdmin.value.anthropic_key.trim();
       adminCalls.push(api.put('/system/monitoring-config', monPayload));
+
+      if (draftAdmin.value.smtp_host.trim() || draftAdmin.value.smtp_user.trim()) {
+        const smtpPayload = {
+          host: draftAdmin.value.smtp_host,
+          port: draftAdmin.value.smtp_port,
+          user: draftAdmin.value.smtp_user,
+          from: draftAdmin.value.smtp_from,
+        };
+        if (draftAdmin.value.smtp_password.trim())
+          smtpPayload.password = draftAdmin.value.smtp_password.trim();
+        adminCalls.push(api.put('/system/smtp-config', smtpPayload));
+      }
 
       await Promise.all(adminCalls);
     }
