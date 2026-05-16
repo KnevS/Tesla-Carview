@@ -13,8 +13,9 @@ services:
       - ./data:/app/data
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    mem_limit: 512m
-    memswap_limit: 512m
+    # Memory limits are managed dynamically by /opt/monitoring/bin/heal.sh
+    # (backend: 30% RAM, frontend/nginx: 5% RAM each) and reapplied every 15 min
+    # via docker update — no hardcoded values needed here.
 
   frontend:
     build: ./frontend
@@ -24,8 +25,6 @@ services:
       - '5173:80'
     depends_on:
       - backend
-    mem_limit: 64m
-    memswap_limit: 64m
 
   nginx:
     image: nginx:alpine
@@ -38,8 +37,6 @@ services:
     depends_on:
       - backend
       - frontend
-    mem_limit: 64m
-    memswap_limit: 64m
 
 volumes:
   data:
