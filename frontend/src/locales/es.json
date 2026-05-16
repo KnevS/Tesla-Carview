@@ -1769,6 +1769,36 @@
       "title": "Resumen",
       "question": "Revisa tus cambios y confirma.",
       "noChanges": "No se cambió ningún ajuste — todos los valores permanecen igual."
+    },
+    "sExt": {
+      "title": "Servicios externos",
+      "question": "Configura servicios opcionales para el planificador y el chat IA (omitible).",
+      "ocm": "OpenChargeMap (estaciones de carga)",
+      "ocmHint": "Clave API gratuita en openchargemap.org — muestra cargadores rápidos en el planificador.",
+      "here": "HERE Maps (tráfico en tiempo real)",
+      "hereHint": "Clave API en developer.here.com — nivel gratuito disponible.",
+      "grok": "Grok / xAI (chat IA)",
+      "grokEnvHint": "Se define en el servidor: XAI_API_KEY en el archivo .env. No se puede cambiar aquí.",
+      "configured": "configurado",
+      "notConfigured": "no configurado",
+      "keyPlaceholder": "Pegar clave API …",
+      "keyChangePlaceholder": "Nueva clave (dejar vacío = conservar)",
+      "keySaved": "se guardará"
+    },
+    "sMon": {
+      "title": "Monitorización y correo",
+      "question": "Configura la auto-reparación y el correo de notificación.",
+      "healEnabled": "Auto-reparación activada",
+      "healEnabledHint": "Cron cada 15 min: los contenedores fallidos se reinician automáticamente.",
+      "alertEmail": "Correo de notificación",
+      "alertEmailPlaceholder": "admin@ejemplo.es",
+      "alertEmailHint": "Recibe un correo si los servicios siguen fallando tras el reinicio.",
+      "emailStatus": "Estado del correo",
+      "emailInstalled": "msmtp instalado y configurado",
+      "emailNotInstalled": "msmtp no instalado — envío de correo no disponible",
+      "emailInstallCmd": "Instalación en el servidor:",
+      "emailNotConfigured": "msmtp instalado pero /etc/msmtprc no existe o está vacío",
+      "emailConfigHint": "Manual → Estado del sistema para instrucciones de configuración."
     }
   },
   "pair": {

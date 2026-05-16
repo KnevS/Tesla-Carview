@@ -1769,6 +1769,36 @@
       "title": "Summary",
       "question": "Review your changes and confirm.",
       "noChanges": "No settings were changed — all values remain as before."
+    },
+    "sExt": {
+      "title": "External Services",
+      "question": "Configure optional services for the route planner and AI chat (skippable).",
+      "ocm": "OpenChargeMap (Charging Stations)",
+      "ocmHint": "Free API key from openchargemap.org — shows fast chargers in the route planner.",
+      "here": "HERE Maps (Real-time Traffic)",
+      "hereHint": "API key from developer.here.com — free tier available.",
+      "grok": "Grok / xAI (AI Chat)",
+      "grokEnvHint": "Set server-side: XAI_API_KEY in the .env file. Cannot be changed here.",
+      "configured": "configured",
+      "notConfigured": "not configured",
+      "keyPlaceholder": "Paste API key …",
+      "keyChangePlaceholder": "Enter new key (leave blank to keep current)",
+      "keySaved": "will be saved"
+    },
+    "sMon": {
+      "title": "Monitoring & Email",
+      "question": "Configure self-healing and notification email.",
+      "healEnabled": "Self-healing enabled",
+      "healEnabledHint": "Cron job every 15 min: failed containers are automatically restarted.",
+      "alertEmail": "Notification Email",
+      "alertEmailPlaceholder": "admin@example.com",
+      "alertEmailHint": "Receives an email if services continue to fail after restart.",
+      "emailStatus": "Email Host Status",
+      "emailInstalled": "msmtp installed and configured",
+      "emailNotInstalled": "msmtp not installed — email sending not possible",
+      "emailInstallCmd": "Install on the server:",
+      "emailNotConfigured": "msmtp installed but /etc/msmtprc missing or empty",
+      "emailConfigHint": "Handbook → System Status for setup instructions."
     }
   },
   "pair": {

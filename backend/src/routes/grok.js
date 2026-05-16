@@ -132,6 +132,11 @@ router.post('/chats/:id/stream', async (req, res) => {
   );
 });
 
+// GET /api/grok/config — prüft ob XAI_API_KEY konfiguriert ist (gibt Key nie zurück)
+router.get('/config', (req, res) => {
+  res.json({ configured: !!process.env.XAI_API_KEY });
+});
+
 // GET /api/grok/usage
 router.get('/usage', (req, res) => {
   const usage = getTodayUsage(req.db);
