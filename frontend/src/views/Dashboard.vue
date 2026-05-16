@@ -23,7 +23,7 @@
           :title="$t('dashboard.stats')" icon="📊"
           :collapsed="isCollapsed('stats')" @toggle="toggle('stats')" @move="(f,t,p) => moveSection(f,t,p)">
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard :label="$t('dashboard.totalKm')"   :value="fmt(stats.total_km, 0) + ' km'"              icon="map"    to="/trips"    :tooltip="$t('dashboard.totalKmTooltip')" />
+            <StatCard :label="$t('dashboard.totalKm')"   :value="fmtDistance(stats.total_km || 0, 0)"         icon="map"    to="/trips"    :tooltip="$t('dashboard.totalKmTooltip')" />
             <StatCard :label="$t('dashboard.trips')"      :value="stats.total_trips"                            icon="pin"    to="/trips"    :tooltip="$t('dashboard.tripsTooltip')" />
             <StatCard :label="$t('dashboard.charged')"    :value="fmt(chargingStats.total_energy_kwh, 1) + ' kWh'" icon="bolt" to="/charging" :tooltip="$t('dashboard.chargedTooltip')" />
             <StatCard :label="$t('dashboard.chargingCost')" :value="fmt(chargingStats.total_cost, 2) + ' €'"   icon="wallet" to="/charging" :tooltip="$t('dashboard.chargingCostTooltip')" />
@@ -60,8 +60,8 @@
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
               <div v-tooltip="$t('dashboard.fromTooltip')"><p class="text-gray-400">{{ $t('dashboard.from') }}</p><p>{{ lastTrip.start_address || $t('dashboard.unknownPlace') }}</p></div>
               <div v-tooltip="$t('dashboard.toTooltip')"><p class="text-gray-400">{{ $t('dashboard.toLabel') }}</p><p>{{ lastTrip.end_address || $t('dashboard.unknownPlace') }}</p></div>
-              <div v-tooltip="$t('dashboard.distanceTooltip')"><p class="text-gray-400">{{ $t('dashboard.distance') }}</p><p>{{ fmt(lastTrip.distance_km, 1) }} km</p></div>
-              <div v-tooltip="$t('dashboard.consumptionTooltip')"><p class="text-gray-400">{{ $t('dashboard.consumption') }}</p><p>{{ lastTrip.distance_km ? fmt(lastTrip.energy_used_kwh / lastTrip.distance_km * 100, 1) : '–' }} kWh/100km</p></div>
+              <div v-tooltip="$t('dashboard.distanceTooltip')"><p class="text-gray-400">{{ $t('dashboard.distance') }}</p><p>{{ fmtDistance(lastTrip.distance_km) }}</p></div>
+              <div v-tooltip="$t('dashboard.consumptionTooltip')"><p class="text-gray-400">{{ $t('dashboard.consumption') }}</p><p>{{ lastTrip.distance_km ? fmtEfficiency(lastTrip.energy_used_kwh / lastTrip.distance_km * 100) : '–' }}</p></div>
             </div>
           </RouterLink>
         </SortableSection>
@@ -100,7 +100,7 @@ import { useI18n } from 'vue-i18n';
 import { Bar } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Tooltip, Legend } from 'chart.js';
 import { useAppStore } from '../store/index.js';
-import { usePrefsStore } from '../store/prefs.js';
+import { usePrefsStore, useUnits } from '../store/prefs.js';
 import StatCard from '../components/StatCard.vue';
 import TeslaUsageWidget from '../components/TeslaUsageWidget.vue';
 import TariffWidget     from '../components/TariffWidget.vue';
@@ -114,6 +114,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 const { t } = useI18n();
 const appStore = useAppStore();
 const prefs    = usePrefsStore();
+const { fmtDistance, fmtEfficiency } = useUnits();
 
 const DASH_SECTIONS = ['stats', 'service', 'last_trip', 'monthly_chart', 'tariff', 'tesla_usage'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('dashboard', DASH_SECTIONS);

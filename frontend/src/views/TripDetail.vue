@@ -8,13 +8,13 @@
     <div v-if="loading" class="text-gray-400">Lade...</div>
     <template v-else-if="trip">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Strecke"    :value="fmt(trip.distance_km, 1) + ' km'" icon="map"
-          tooltip="Gesamtstrecke dieser Fahrt in Kilometern" />
+        <StatCard label="Strecke"    :value="fmtDistance(trip.distance_km)" icon="map"
+          tooltip="Gesamtstrecke dieser Fahrt" />
         <StatCard label="Dauer"      :value="duration"                          icon="clock"
           tooltip="Gesamtfahrtdauer von Start bis Ziel" />
         <StatCard label="Ø Geschw."  :value="fmt(trip.avg_speed_kmh, 0) + ' km/h'" icon="gauge"
           tooltip="Durchschnittsgeschwindigkeit — Strecke geteilt durch Fahrzeit (ohne Standzeiten)" />
-        <StatCard label="Verbrauch"  :value="consumption + ' kWh/100km'"        icon="bolt"
+        <StatCard label="Verbrauch"  :value="consumption"                        icon="bolt"
           tooltip="Energieverbrauch pro 100 km — das wichtigste Effizienzmaß für Elektrofahrzeuge" />
       </div>
 
@@ -221,6 +221,7 @@ import { useRoute } from 'vue-router';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip } from 'chart.js';
 import StatCard from '../components/StatCard.vue';
+import { useUnits } from '../store/prefs.js';
 import api from '../api.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip);
@@ -234,6 +235,7 @@ const showDriverMenu = ref(false);
 let leafletMap  = null;
 let sliderMarker = null;
 
+const { fmtDistance, fmtEfficiency } = useUnits();
 const fmt         = (v, d = 0) => (+(v || 0)).toFixed(d);
 const fmtDateTime = ts => ts ? new Date(ts * 1000).toLocaleString('de-DE') : '–';
 const fmtTime     = ts => new Date(ts * 1000).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -254,7 +256,7 @@ const duration = computed(() => {
 
 const consumption = computed(() =>
   trip.value?.distance_km
-    ? fmt(trip.value.energy_used_kwh / trip.value.distance_km * 100, 1)
+    ? fmtEfficiency(trip.value.energy_used_kwh / trip.value.distance_km * 100)
     : '–'
 );
 

@@ -51,7 +51,7 @@
             <span class="text-gray-300">{{ $t('control.temp') }}</span>
             <div class="flex items-center gap-3">
               <button @click="temp = Math.max(15, temp - 0.5)" class="w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold transition">−</button>
-              <span class="text-white font-bold text-xl w-14 text-center">{{ temp.toFixed(1) }}°C</span>
+              <span class="text-white font-bold text-xl w-14 text-center">{{ fmtTemp(temp) }}</span>
               <button @click="temp = Math.min(28, temp + 0.5)" class="w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold transition">+</button>
             </div>
           </div>
@@ -432,10 +432,12 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
+import { useUnits } from '../store/prefs.js';
 import api from '../api.js';
 
 const { t, locale } = useI18n();
 const appStore = useAppStore();
+const { fmtTemp } = useUnits();
 const vehicle  = computed(() => appStore.selectedVehicle);
 
 const busy         = ref(false);

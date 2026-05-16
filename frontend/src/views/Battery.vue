@@ -26,12 +26,12 @@
       <div v-if="degradation.length > 1" class="grid grid-cols-3 gap-4 text-center">
         <div v-tooltip="$t('battery.tooltipFirst')">
           <p class="text-gray-400 text-sm">{{ $t('battery.firstMeasurement') }}</p>
-          <p class="text-xl font-bold">{{ fmt(degradation[0]?.max_range, 0) }} km</p>
+          <p class="text-xl font-bold">{{ fmtDistance(degradation[0]?.max_range || 0, 0) }}</p>
           <p class="text-gray-400 text-xs">{{ degradation[0]?.day }}</p>
         </div>
         <div v-tooltip="$t('battery.tooltipLast')">
           <p class="text-gray-400 text-sm">{{ $t('battery.lastMeasurement') }}</p>
-          <p class="text-xl font-bold">{{ fmt(degradation.at(-1)?.max_range, 0) }} km</p>
+          <p class="text-xl font-bold">{{ fmtDistance(degradation.at(-1)?.max_range || 0, 0) }}</p>
           <p class="text-gray-400 text-xs">{{ degradation.at(-1)?.day }}</p>
         </div>
         <div v-tooltip="$t('battery.tooltipDegradation')">
@@ -54,6 +54,7 @@ import { useI18n } from 'vue-i18n';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Filler } from 'chart.js';
 import { useAppStore } from '../store/index.js';
+import { useUnits } from '../store/prefs.js';
 import SortableSection from '../components/SortableSection.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
 import api from '../api.js';
@@ -62,6 +63,7 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip,
 
 const { t } = useI18n();
 const appStore = useAppStore();
+const { fmtDistance } = useUnits();
 
 const BATTERY_SECTIONS = ['range', 'degradation'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('battery', BATTERY_SECTIONS);

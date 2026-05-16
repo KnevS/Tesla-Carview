@@ -25,10 +25,10 @@
       :title="$t('trips.sectionStats')" icon="📊"
       :collapsed="isCollapsed('stats')" @toggle="toggle('stats')" @move="(f,t,p) => moveSection(f,t,p)">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard :label="$t('trips.totalKm')"        :value="fmt(stats.total_km, 0) + ' km'"          icon="map"      :tooltip="$t('trips.totalKmTooltip')" />
-        <StatCard :label="$t('trips.avgConsumption')" :value="fmt(stats.avg_consumption, 1) + ' kWh/100km'" icon="pulse" :tooltip="$t('trips.avgConsumptionTooltip')" />
-        <StatCard :label="$t('trips.privateKm')"      :value="fmt(stats.private_km, 0) + ' km'"         icon="home"     :tooltip="$t('trips.privateKmTooltip')" />
-        <StatCard :label="$t('trips.businessKm')"     :value="fmt(stats.business_km + stats.commute_km, 0) + ' km'" icon="wallet" :tooltip="$t('trips.businessKmTooltip')" />
+        <StatCard :label="$t('trips.totalKm')"        :value="fmtDistance(stats.total_km || 0, 0)"                         icon="map"      :tooltip="$t('trips.totalKmTooltip')" />
+        <StatCard :label="$t('trips.avgConsumption')" :value="stats.avg_consumption ? fmtEfficiency(stats.avg_consumption) : '–'" icon="pulse"  :tooltip="$t('trips.avgConsumptionTooltip')" />
+        <StatCard :label="$t('trips.privateKm')"      :value="fmtDistance(stats.private_km || 0, 0)"                            icon="home"     :tooltip="$t('trips.privateKmTooltip')" />
+        <StatCard :label="$t('trips.businessKm')"     :value="fmtDistance((stats.business_km || 0) + (stats.commute_km || 0), 0)" icon="wallet" :tooltip="$t('trips.businessKmTooltip')" />
       </div>
     </SortableSection>
 
@@ -76,12 +76,12 @@
             <div class="flex gap-4 text-sm text-right ml-2 flex-shrink-0">
               <div>
                 <p class="text-gray-400">{{ $t('trips.distance') }}</p>
-                <p class="font-semibold">{{ fmt(trip.distance_km, 1) }} km</p>
+                <p class="font-semibold">{{ fmtDistance(trip.distance_km) }}</p>
               </div>
               <div class="hidden md:block">
                 <p class="text-gray-400">{{ $t('trips.consumption') }}</p>
                 <p class="font-semibold">
-                  {{ trip.distance_km ? fmt(trip.energy_used_kwh / trip.distance_km * 100, 1) : '–' }} kWh/100km
+                  {{ trip.distance_km ? fmtEfficiency(trip.energy_used_kwh / trip.distance_km * 100) : '–' }}
                   <span v-if="trip.wltp_delta_pct != null"
                         :class="trip.wltp_delta_pct > 0 ? 'text-red-300' : 'text-green-300'"
                         class="text-xs font-normal ml-1"
@@ -149,6 +149,7 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
+import { useUnits } from '../store/prefs.js';
 import StatCard from '../components/StatCard.vue';
 import SortToggle from '../components/SortToggle.vue';
 import SortableSection from '../components/SortableSection.vue';
@@ -158,6 +159,7 @@ import api from '../api.js';
 
 const { t, locale } = useI18n();
 const appStore    = useAppStore();
+const { fmtDistance, fmtEfficiency } = useUnits();
 
 const TRIPS_SECTIONS = ['stats', 'list'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('trips', TRIPS_SECTIONS);
