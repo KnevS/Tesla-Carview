@@ -158,8 +158,11 @@ Authentification à deux facteurs avec n'importe quelle application d'authentifi
 
 ## 🧙 Assistant de configuration
 
-Relançable depuis **Paramètres → Lancer l'assistant** :
-langue · design · couleur · unités · cartes du tableau de bord · onglets · notifications push · confirmation
+Relançable depuis **Paramètres → Lancer l'assistant**.
+
+**Étapes admin (première installation) :** langue → Tesla OAuth → véhicules → Virtual Key → Fleet Telemetry → prix électricité → mentions légales → APIs externes → monitoring (SMTP + Anthropic) → design → couleur → unités → tableau de bord → navigation → notifications → résumé
+
+Les utilisateurs non-admin voient uniquement les étapes design, unités, tableau de bord, navigation, notifications et résumé.
 
 ---
 

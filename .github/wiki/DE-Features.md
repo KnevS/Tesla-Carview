@@ -181,15 +181,30 @@ Standard-Benutzername/Passwort-Authentifizierung mit bcrypt. Admins können Rese
 
 ## 🧙 Einrichtungs-Wizard
 
-Ein schrittweiser Wizard führt durch die Erstkonfiguration und kann jederzeit unter **Einstellungen → Wizard starten** neu gestartet werden:
-1. Oberflächensprache
-2. Design-Stil (Glass / Cyber / Minimal / Sport)
-3. Akzentfarbe
-4. Einheiten (km/mi, °C/°F, kWh/mi)
-5. Dashboard-Karten (sichtbar & Reihenfolge)
-6. Navigations-Tabs
-7. Push-Benachrichtigungen
-8. Zusammenfassung & Bestätigen
+Ein schrittweiser Wizard führt durch die Erstkonfiguration und kann jederzeit unter **Einstellungen → Wizard starten** neu gestartet werden.
+
+**Admin-Schritte (Ersteinrichtung):**
+
+| # | Schritt | Was konfiguriert wird |
+|---|---|---|
+| 1 | Sprache | Oberflächensprache |
+| 2 | Tesla OAuth | Tesla-Konto verbinden |
+| 3 | Fahrzeuge | Fahrzeuge auswählen und synchronisieren |
+| 4 | Virtual Key | Für Fahrzeugbefehle pairen |
+| 5 | Fleet Telemetry | Echtzeit-GPS pro Fahrzeug aktivieren |
+| 6 | Strompreis | Energiekosten pro Fahrzeug |
+| 7 | Legal | Impressum, Datenschutz, AGB (prüft auf offene Platzhalter) |
+| 8 | Externe APIs | Monta · OpenChargeMap · HERE Maps · Tibber · xAI |
+| 9 | Monitoring | SMTP E-Mail-Versand · Anthropic-Key für KI-Autofix |
+| 10 | Design | Glass / Cyber / Minimal / Sport |
+| 11 | Akzentfarbe | Theme-Farbe |
+| 12 | Einheiten | km/mi · °C/°F · kWh |
+| 13 | Dashboard | Karten-Sichtbarkeit und Reihenfolge |
+| 14 | Navigation | Tab-Sichtbarkeit |
+| 15 | Benachrichtigungen | Push-Benachrichtigungs-Einstellungen |
+| 16 | Zusammenfassung | Alle Änderungen prüfen und bestätigen |
+
+Nicht-Admin-Benutzer sehen nur Schritte 10–16 (Design, Einheiten, Dashboard, Navigation, Benachrichtigungen, Zusammenfassung).
 
 ---
 

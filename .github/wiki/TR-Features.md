@@ -140,8 +140,11 @@ Herhangi bir doğrulayıcı uygulamayla iki faktörlü kimlik doğrulama.
 
 ## 🧙 Kurulum Sihirbazı
 
-**Ayarlar → Sihirbazı Başlat** üzerinden yeniden başlatılabilir:
-dil · tasarım stili · vurgu rengi · birimler · gösterge kartları · sekmeler · push bildirimleri · onay
+**Ayarlar → Sihirbazı Başlat** üzerinden yeniden başlatılabilir.
+
+**Yönetici adımları (ilk kurulum):** dil → Tesla OAuth → araçlar → Virtual Key → Fleet Telemetry → elektrik fiyatı → yasal içerik → harici API'ler → izleme (SMTP + Anthropic) → tasarım → renk → birimler → gösterge paneli → gezinme → bildirimler → özet
+
+Yönetici olmayan kullanıcılar yalnızca tasarım, birimler, gösterge paneli, gezinme, bildirimler ve özet adımlarını görür.
 
 ---
 

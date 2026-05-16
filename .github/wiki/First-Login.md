@@ -37,12 +37,16 @@ Tesla Carview supports multiple isolated accounts on one server — called **ten
 
 ## The setup wizard
 
-If this is the first time you've connected a Tesla account, a setup wizard guides you through:
+After your first login as admin, a **setup wizard** opens automatically. It covers the complete initial configuration — from connecting your Tesla account to SMTP email delivery and legal content.
 
-1. **Connect Tesla Account** → See [Tesla API Setup](Tesla-API-Setup)
-2. **Select Vehicle** → Choose which car to track
-3. **Legal content** → Configure imprint/privacy (required if publicly accessible)
-4. **Done!** → You're taken to the Dashboard
+**First run (admin) — 16 steps:**
+Tesla OAuth → vehicles → Virtual Key → Fleet Telemetry → electricity price → legal content → external API keys → monitoring (SMTP + Anthropic) → design → units → dashboard → navigation → notifications → summary
+
+**Returning users:** Launch the wizard anytime from **Settings → Launch Wizard** to adjust preferences.
+
+Non-admin users see only the preference steps (design, units, dashboard, navigation, notifications).
+
+> Full step-by-step table: [Features → Setup Wizard](Features#-setup-wizard)
 
 ---
 

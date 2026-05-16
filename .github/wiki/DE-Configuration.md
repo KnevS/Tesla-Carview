@@ -142,6 +142,26 @@ Nach dem Speichern: `docker compose -f docker-compose.prod.yml up -d --build bac
 
 ---
 
+## In-App-Konfiguration (Admin → System)
+
+Einige Einstellungen erfordern keine `.env`-Änderungen — sie werden direkt in der Admin-Oberfläche konfiguriert und in der Datenbank gespeichert. Diese Einstellungen überstehen Updates und erfordern keinen Container-Neustart.
+
+| Einstellung | Ort | Hinweis |
+|---|---|---|
+| SMTP / E-Mail-Versand | Admin → System → E-Mail | Host, Port, Benutzer, Passwort, Absender — inkl. Test-Mail-Button |
+| OpenChargeMap API-Key | Admin → System → Externe APIs | Ladestation-Overlay im Routenplaner |
+| HERE Maps API-Key | Admin → System → Externe APIs | Echtzeit-Verkehr im Routenplaner |
+| Monta API-Key | Admin → System → Externe APIs | Home-Ladungs-Sync |
+| xAI API-Key | Admin → System → Externe APIs | Grok Chat KI-Assistent |
+| Anthropic API-Key | Admin → System → Monitoring | KI-gestützter Autofix (Claude Haiku) |
+| Selbstheilung (Heal) | Admin → System → Monitoring | Automatischen Container-Neustart aktivieren/deaktivieren |
+| Alert-E-Mail-Adresse | Admin → System → Monitoring | Wohin Monitoring-Alerts gesendet werden |
+| Strompreis pro kWh | Admin → System oder Setup-Wizard | Energiekosten pro Fahrzeug für Ladekosten-Berechnung |
+
+Alle oben genannten Einstellungen können auch während des **Setup-Wizards** konfiguriert werden — kein direkter Serverzugriff nötig.
+
+---
+
 ## Vollständige Referenz
 
 Eine vollständige Liste aller Umgebungsvariablen mit detaillierten Beschreibungen findest du in der technischen Dokumentation:

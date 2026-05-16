@@ -190,15 +190,30 @@ Standard username/password authentication with bcrypt hashing. Admins can genera
 
 ## 🧙 Setup Wizard
 
-A step-by-step wizard guides you through the initial configuration and can be relaunched anytime from **Settings → Launch Wizard**:
-1. Interface language
-2. Design style (Glass / Cyber / Minimal / Sport)
-3. Accent colour
-4. Units (km/mi, °C/°F, kWh/mi)
-5. Dashboard card visibility and order
-6. Navigation tabs
-7. Push notifications
-8. Summary & confirm
+A step-by-step wizard guides you through the initial configuration and can be relaunched anytime from **Settings → Launch Wizard**.
+
+**Admin steps (first-time setup):**
+
+| # | Step | What you configure |
+|---|---|---|
+| 1 | Language | Interface language |
+| 2 | Tesla OAuth | Connect your Tesla account |
+| 3 | Vehicles | Select and sync vehicles |
+| 4 | Virtual Key | Pair for vehicle commands |
+| 5 | Fleet Telemetry | Enable real-time GPS per vehicle |
+| 6 | Electricity price | Per-vehicle energy cost |
+| 7 | Legal | Imprint, privacy, terms (scans for open placeholders) |
+| 8 | External APIs | Monta · OpenChargeMap · HERE Maps · Tibber · xAI |
+| 9 | Monitoring | SMTP e-mail delivery · Anthropic key for AI autofix |
+| 10 | Design | Glass / Cyber / Minimal / Sport |
+| 11 | Accent colour | Theme colour |
+| 12 | Units | km/mi · °C/°F · kWh |
+| 13 | Dashboard | Card visibility and order |
+| 14 | Navigation | Tab visibility |
+| 15 | Notifications | Push notification settings |
+| 16 | Summary | Review and confirm all changes |
+
+Non-admin users see only steps 10–16 (design, units, dashboard, navigation, notifications, summary).
 
 ---
 

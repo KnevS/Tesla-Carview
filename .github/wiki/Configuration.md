@@ -86,6 +86,26 @@ docker compose -f /opt/tesla-carview/docker-compose.prod.yml exec backend env | 
 
 ---
 
+## In-app configuration (Admin → System)
+
+Some settings do not require `.env` changes — they are configured directly in the admin interface and stored in the database. These settings survive updates and do not require a container restart.
+
+| Setting | Location | Notes |
+|---|---|---|
+| SMTP / e-mail delivery | Admin → System → E-Mail | Host, port, user, password, sender — includes a send-test button |
+| OpenChargeMap API key | Admin → System → External APIs | Charging station overlay on route planner |
+| HERE Maps API key | Admin → System → External APIs | Real-time traffic on route planner |
+| Monta API key | Admin → System → External APIs | Home charging sync |
+| xAI API key | Admin → System → External APIs | Grok Chat AI assistant |
+| Anthropic API key | Admin → System → Monitoring | AI-powered autofix (Claude Haiku) |
+| Self-healing toggle | Admin → System → Monitoring | Enable/disable automatic container restart |
+| Alert e-mail address | Admin → System → Monitoring | Where monitoring alerts are sent |
+| Electricity price per kWh | Admin → System or setup wizard | Per-vehicle energy cost for charging calculations |
+
+All of the above can also be configured during the **setup wizard** — no direct server access required.
+
+---
+
 ## Full reference
 
 For a complete list of every environment variable with detailed descriptions, see the technical documentation:

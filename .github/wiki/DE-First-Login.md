@@ -39,17 +39,16 @@ Tesla Carview unterstützt mehrere voneinander isolierte Konten auf einem Server
 
 ## Der Setup-Wizard
 
-Wenn du zum ersten Mal nach der Installation einloggst, öffnet die App automatisch **/setup** im Browser, sofern noch kein Administrator-Account existiert:
+Nach dem ersten Admin-Login öffnet automatisch ein **Setup-Wizard**. Er führt durch die vollständige Erstkonfiguration — von der Tesla-Konto-Verbindung bis zu SMTP-E-Mail-Versand und rechtlichen Inhalten.
 
-1. **Administrator-Konto anlegen** — Benutzername und sicheres Passwort setzen
-2. Weiterleitung zum Login
+**Erster Start (Admin) — 16 Schritte:**
+Tesla OAuth → Fahrzeuge → Virtual Key → Fleet Telemetry → Strompreis → Legal-Inhalte → Externe API-Keys → Monitoring (SMTP + Anthropic) → Design → Einheiten → Dashboard → Navigation → Benachrichtigungen → Zusammenfassung
 
-Danach beim ersten Login wird ein **Verbindungs-Wizard** geführt:
+**Jederzeit wieder:** Wizard unter **Einstellungen → Wizard starten** erneut aufrufen, um Präferenzen anzupassen.
 
-1. **Tesla-Konto verbinden** → Siehe [Tesla API Setup](DE-Tesla-API-Setup)
-2. **Fahrzeug auswählen** → Welches Auto soll getrackt werden
-3. **Rechtliche Inhalte** → Impressum/Datenschutz konfigurieren (erforderlich bei öffentlichem Zugang)
-4. **Fertig!** → Du wirst zum Dashboard weitergeleitet
+Nicht-Admin-Benutzer sehen nur die Präferenz-Schritte (Design, Einheiten, Dashboard, Navigation, Benachrichtigungen).
+
+> Vollständige Schritt-Tabelle: [Features → Einrichtungs-Wizard](DE-Features#-einrichtungs-wizard)
 
 ---
 
@@ -118,15 +117,14 @@ Weitere Details zu allen Auth-Optionen: [Sicherheit](DE-Security)
 
 ## Konfiguration nachträglich anpassen
 
+Die meisten Einstellungen sind im Browser direkt anpassbar:
+- **Wizard:** Einstellungen → Wizard starten (Präferenzen, Tesla OAuth, Legal, APIs, Monitoring)
+- **Admin-Oberfläche:** Admin → System (SMTP, API-Keys, Selbstheilung)
+
+Für Systemkonfiguration (JWT_SECRET, TESLA_CLIENT_ID etc.):
 ```bash
-# Terminal-Wizard erneut ausführen:
-bash /opt/tesla-carview/deploy/setup-wizard.sh
-
-# Oder direkt bearbeiten:
 nano /opt/tesla-carview/backend/.env
-
-# Danach Backend neu starten:
-docker compose -f docker-compose.prod.yml up -d
+docker compose -f docker-compose.prod.yml up -d --build backend
 ```
 
 ---

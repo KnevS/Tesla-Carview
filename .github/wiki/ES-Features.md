@@ -139,8 +139,11 @@ Autenticación de dos factores con cualquier aplicación autenticadora.
 
 ## 🧙 Asistente de configuración
 
-Relanzable desde **Configuración → Iniciar asistente**:
-idioma · diseño · color de acento · unidades · tarjetas del panel · pestañas · notificaciones push · confirmación
+Relanzable desde **Configuración → Iniciar asistente**.
+
+**Pasos de administrador (primera configuración):** idioma → Tesla OAuth → vehículos → Virtual Key → Fleet Telemetry → precio electricidad → contenido legal → APIs externas → monitorización (SMTP + Anthropic) → diseño → color → unidades → panel → navegación → notificaciones → resumen
+
+Los usuarios no administradores solo ven los pasos de diseño, unidades, panel, navegación, notificaciones y resumen.
 
 ---
 

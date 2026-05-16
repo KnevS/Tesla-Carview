@@ -7,6 +7,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.1.2] — 2026-05-17
+
+### Added
+- **SMTP / e-mail configuration in wizard and admin UI** — Mail delivery (Nodemailer) is configured directly in Admin → System or during the setup wizard's Monitoring step. No server-side `msmtp` installation required; all SMTP parameters (host, port, user, password, sender address) are stored in the tenant database. A test-mail button confirms delivery immediately.
+- **Anthropic API key in wizard and admin UI** — The key for AI-powered autonomous monitoring (autofix-ai / Claude Haiku) can now be entered in Admin → System → Monitoring or during the wizard's Monitoring step. Previously required direct server access.
+
+### Security
+- **Git history cleaned** — Instance-specific operator identity, company name from demo fixtures, and internal operational documentation removed from both repository histories via `git filter-repo`. All instance-specific values (domain, repo names, email addresses, Docker volume name) are now stored exclusively in the gitignored `heal.conf` — the public repo contains no personal data in any commit.
+
+---
+
 ## [v3.1.1] — 2026-05-16
 
 ### Added
