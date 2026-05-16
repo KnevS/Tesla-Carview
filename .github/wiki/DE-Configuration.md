@@ -165,9 +165,9 @@ Alle oben genannten Einstellungen können auch während des **Setup-Wizards** ko
 Tesla Carview enthält ein zweistufiges Selbstheilungs-Monitoring, das automatisch auf dem Server läuft:
 
 - **Stufe 1 — Regelbasierter Autofix** (alle 20 Minuten): Behandelt bekannte, deterministische Probleme — gestoppte Container neu starten, volle Disks leeren, Dateirechte korrigieren. Kein KI-Key nötig, immer aktiv.
-- **Stufe 2 — KI-Autofix** (greift, wenn Stufe 1 das Problem nicht lösen kann): Schickt das Fehler-Log an Claude Haiku (Anthropic) und lässt einen Fix vorschlagen oder direkt anwenden. Das ist der optionale, leistungsfähigere Fallback für unbekannte Probleme.
+- **Stufe 2 — KI-Autofix** *(optional)*: Greift, wenn Stufe 1 das Problem nicht lösen kann. Schickt das Fehler-Log an Claude Haiku (Anthropic) und lässt einen Fix vorschlagen oder direkt anwenden — als leistungsfähiger Fallback für unbekannte Probleme.
 
-Der Anthropic-Key ist **optional** — Stufe 1 funktioniert ohne ihn. Der Key wird nur gebraucht, wenn man für seltene Sonderfälle eine KI-gestützte Diagnose möchte.
+> **Stufe 2 ist vollständig optional und kann einfach weggelassen werden.** Das System heilt sich mit Stufe 1 allein zuverlässig selbst — für die meisten Installationen reicht das völlig aus. Wer keinen Anthropic-Key einträgt, erhält stattdessen bei unlösbaren Problemen eine E-Mail-Benachrichtigung.
 
 Key beantragen unter [console.anthropic.com](https://console.anthropic.com) (pay-per-use, Claude Haiku ist sehr günstig — typisch wenige Cent pro Monat für gelegentliche Autofix-Aufrufe).
 
