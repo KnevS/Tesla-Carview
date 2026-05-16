@@ -110,6 +110,18 @@ export async function syncVehicleState(db, vehicle, state) {
     `).run(vehicle.id, nowPresent, odomKm, charge?.battery_level, now);
   }
 
+  // GPS-Fahrzeuge nehmen nie den !driveValid-Pfad oben, weshalb
+  // vehicle_state_cache.updated_at nie aktualisiert wird und das
+  // Monitoring einen Stale-Cache-WARN ausloest. Immer timestamp + SoC
+  // schreiben ohne is_user_present / odometer_km zu ueberschreiben.
+  db.prepare(`
+    INSERT INTO vehicle_state_cache (vehicle_id, battery_level, updated_at)
+    VALUES (?, ?, ?)
+    ON CONFLICT(vehicle_id) DO UPDATE SET
+      battery_level = excluded.battery_level,
+      updated_at    = excluded.updated_at
+  `).run(vehicle.id, charge?.battery_level, now);
+
   // Lade-Tracking
   if (charge?.charging_state === 'Charging') {
     handleCharging(db, vehicle, charge, drive, now);
