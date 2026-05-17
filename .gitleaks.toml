@@ -59,6 +59,7 @@ description = "Doku-Platzhalter und Beispiel-Daten"
 commits = [
   "e19a0b9dc54f6196bb973524f58c20e4d1dc0934",
   "88099a3197c14bb2b2b1be34ed3edb2fa323e9c2",
+  "3f4f657edcef558d01f253fb38d1c2de319b8a07",  # RoutePlanner map-default 51.165691/10.451526
 ]
 paths = [
   '''.*\.example$''',
