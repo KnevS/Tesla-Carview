@@ -7,6 +7,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.1.3] — 2026-05-17
+
+### Added
+- **ICS calendar export in route planner** — Planned routes can be downloaded as an `.ics` file and imported into any calendar app. The export includes departure, arrival, intermediate charging stops, and a note recommending the calendar "Private" setting for shared calendars. `CLASS:PRIVATE` is set automatically.
+- **Improved tire pressure view (TireMap)** — New SVG top-down car silhouette with color-coded tires (green / yellow / red) and a glow effect based on pressure level. Legend and per-tire tooltip with full position label.
+- **Layout toggle in vehicle control** — Users can switch between tile layout and compact list view. Preference is persisted via `localStorage`.
+- **Recuperation statistics in trip detail** — Shows recovered kWh, recuperation share in %, and net consumption after recuperation. Calculated via SQLite `LEAD()` window function on `trip_points.power_kw < 0`.
+
+### Improved
+- **Touch dropdowns in Tesla in-car browser** — `e.stopPropagation()` on trigger click prevents immediate close by the document listener; `touch-action: manipulation` eliminates 300 ms tap delay in NavGroup and LangSwitcher.
+- **Setup: nginx now optional** — `deploy/setup.sh` prompts for deployment mode (Direct / Proxy) at startup. Mode 2 skips nginx/certbot installation and configuration entirely — no more conflicts with existing reverse-proxy setups (e.g. WireGuard + VPS nginx).
+- **`TESLA_AUTH_BASE` added** — Variable is now written automatically by `setup-wizard.sh` and documented in `.env.example`. `telemetryConfig.js` includes a fallback value for existing installations.
+
+### CI / Infrastructure
+- **Docker images pre-built in CI (GHCR)** — Backend and frontend images are now built as multi-arch (amd64/arm64/arm/v7) in GitHub Actions and pushed to `ghcr.io/knevs/tesla-carview`. The server only runs `docker pull + up` — no local compilation (node-gyp / better-sqlite3) anymore. Deploy time: ~3 min instead of 10–37 min.
+- **Deploy via `workflow_run`** — Deploy only starts after CI completes successfully; guarantees GHCR images exist before the server pulls them.
+- **GitHub Actions updated to Node.js 24** — `actions/checkout`, `actions/setup-node`, `actions/upload-artifact`, `docker/build-push-action` bumped to current major versions; Node.js 20 deprecation warnings eliminated.
+
+---
+
 ## [v3.1.2] — 2026-05-17
 
 ### Added
