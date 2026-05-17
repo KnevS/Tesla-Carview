@@ -68,7 +68,7 @@ router.post('/partner/register', async (req, res) => {
   const clientId     = process.env.TESLA_CLIENT_ID;
   const clientSecret = process.env.TESLA_CLIENT_SECRET;
   const audience     = process.env.TESLA_AUDIENCE;
-  const authBase     = process.env.TESLA_AUTH_BASE;
+  const authBase     = process.env.TESLA_AUTH_BASE || 'https://auth.tesla.com/oauth2/v3';
   const domain       = process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || '';
 
   if (!clientId || !clientSecret) {

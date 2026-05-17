@@ -34,9 +34,29 @@ echo "  Erkannte Architektur: ${YELLOW}${ARCH}${RESET}"
 echo "  Zielverzeichnis:      ${YELLOW}${APP_DIR}${RESET}"
 echo ""
 
+# ---- Deployment-Modus abfragen ------------------------------------
+echo -e "${BOLD}Deployment-Modus:${RESET}"
+echo "  [1] Direct  – nginx wird von diesem Skript installiert und konfiguriert"
+echo "                (empfohlen fuer dedizierte VMs ohne bestehenden Proxy)"
+echo "  [2] Proxy   – du hast bereits nginx, Caddy, Traefik o.ae. am Laufen"
+echo "                (nginx-Installation und -Konfiguration werden uebersprungen)"
+echo ""
+echo -en "${CYAN}  Auswahl [1/2, Standard 1]: ${RESET}"
+read -r DEPLOY_MODE_INPUT
+DEPLOY_MODE="${DEPLOY_MODE_INPUT:-1}"
+if [[ "$DEPLOY_MODE" != "1" && "$DEPLOY_MODE" != "2" ]]; then
+    echo -e "${RED}Ungueltige Auswahl – Abbruch.${RESET}"; exit 1
+fi
+echo ""
+
 step "[1/7] Systempakete aktualisieren"
 apt-get update -qq
-apt-get install -y -qq curl git nginx certbot python3-certbot-nginx ufw fail2ban
+if [ "$DEPLOY_MODE" = "1" ]; then
+    apt-get install -y -qq curl git nginx certbot python3-certbot-nginx ufw fail2ban
+else
+    apt-get install -y -qq curl git ufw fail2ban
+    echo -e "${YELLOW}  nginx/certbot uebersprungen (Proxy-Modus).${RESET}"
+fi
 ok "Pakete installiert"
 
 step "[2/7] Docker installieren"
@@ -100,7 +120,11 @@ if [ -f "$APP_DIR/backend/.env" ]; then
 fi
 
 step "[7/7] Nginx + SSL einrichten"
-if [ -n "$DOMAIN" ]; then
+if [ "$DEPLOY_MODE" = "2" ]; then
+    echo -e "${YELLOW}Proxy-Modus – nginx-Konfiguration uebersprungen.${RESET}"
+    echo "  Docker lauscht auf Port 8080. Bitte in deinem Proxy weiterleiten:"
+    echo "    proxy_pass http://127.0.0.1:8080;"
+elif [ -n "$DOMAIN" ]; then
     # Temporaere HTTP-Config fuer certbot-Challenge
     cat > /etc/nginx/sites-available/tesla-carview <<EOF
 server {
@@ -132,7 +156,7 @@ EOF
 else
     echo -e "${YELLOW}Kein HTTPS-Domain erkannt – Nginx nicht konfiguriert.${RESET}"
     echo "  Fuer Raspberry Pi / Heimnetz ist das korrekt."
-fi
+fi  # end DEPLOY_MODE branch
 
 step "Container starten"
 cd "$APP_DIR"
