@@ -505,7 +505,9 @@
     "toastSent": "Komut gönderildi",
     "toastRejected": "Komut reddedildi",
     "toastAsleep": "Araç uyuyor – önce uyandırın",
-    "toastSendError": "Gönderme hatası"
+    "toastSendError": "Gönderme hatası",
+    "layoutCompact": "Kompakt gorunum",
+    "layoutTiles": "Mozaik gorunum"
   },
   "exportPage": {
     "title": "Verileri dışa aktar",
@@ -1698,7 +1700,10 @@
     "avoidTollsTip": "Ücretli yollardan kaçın",
     "avoidFerry": "Feribotlar",
     "avoidFerryTip": "Feribot bağlantılarından kaçın",
-    "actionsTitle": "Eylemler"
+    "actionsTitle": "Eylemler",
+    "exportICS": "Takvim etkinligi olarak disari aktar (.ics)",
+    "icsTooltip": "Rotayi Apple Takvim, Google Takvim veya Outlook icin .ics dosyasi olarak indirin",
+    "icsPrivacyNote": "Bu takvim paylasiliyorsa: baslangic noktasi, hedef ve seyahat suresi baskalarinca gorulmesin diye etkinligi Ozel olarak isaretleyin."
   },
   "wizard": {
     "title": "Ayar Sihirbazı",

@@ -2,8 +2,22 @@
   <div class="space-y-6">
     <div class="flex items-center justify-between">
       <h1 class="text-2xl font-bold">{{ $t('control.title') }}</h1>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
         <span class="text-sm" :class="stateColor">{{ stateLabel }}</span>
+        <!-- Layout-Toggle -->
+        <button @click="toggleLayout"
+          class="icon-btn"
+          :title="compact ? $t('control.layoutTiles') : $t('control.layoutCompact')"
+          v-tooltip="compact ? $t('control.layoutTiles') : $t('control.layoutCompact')">
+          <svg v-if="compact" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+          </svg>
+          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
         <button @click="wakeUp" :disabled="busy || vehicleState === 'online'"
           class="btn-secondary text-sm" v-tooltip="$t('control.wakeTooltip')">
           {{ $t('control.wake') }}
@@ -27,9 +41,9 @@
       </transition>
     </Teleport>
 
-    <div class="grid md:grid-cols-2 gap-6">
+    <div :class="compact ? 'flex flex-col gap-3' : 'grid md:grid-cols-2 gap-6'">
       <!-- Klimaanlage -->
-      <div class="card space-y-4">
+      <div :class="compact ? 'card-compact space-y-2' : 'card space-y-4'">
         <h2 class="font-semibold text-lg">{{ $t('control.climate') }}</h2>
 
         <div class="flex items-center justify-between">
@@ -105,7 +119,7 @@
       <!-- Sitzheizung — 5 Sitze × 4 Stufen. Stufen: 0 aus, 1 niedrig,
            2 mittel, 3 hoch. Klima muss aktiv sein, sonst lehnt das
            Auto den Befehl ab. -->
-      <div class="card space-y-3">
+      <div :class="compact ? 'card-compact space-y-2' : 'card space-y-3'">
         <h2 class="font-semibold text-lg">{{ $t('control.seatHeater') }}</h2>
         <p class="text-xs text-gray-500">{{ $t('control.seatHeaterHint') }}</p>
         <div v-for="seat in SEATS" :key="seat.id" class="flex items-center gap-2">
@@ -128,7 +142,7 @@
       </div>
 
       <!-- Fahrzeug -->
-      <div class="card space-y-4">
+      <div :class="compact ? 'card-compact space-y-2' : 'card space-y-4'">
         <h2 class="font-semibold text-lg">{{ $t('control.vehicle') }}</h2>
 
         <div class="flex items-center justify-between">
@@ -207,7 +221,7 @@
       </div>
 
       <!-- Laden -->
-      <div class="card space-y-4">
+      <div :class="compact ? 'card-compact space-y-2' : 'card space-y-4'">
         <h2 class="font-semibold text-lg">{{ $t('control.charging') }}</h2>
 
         <div class="flex items-center justify-between">
@@ -276,7 +290,7 @@
       <!-- Boombox — Tesla-eigene Spielerei: spielt vorinstallierte Sounds
            ueber die externen Lautsprecher des Fahrzeugs. Funktioniert nur
            bei Modellen mit Boombox-Hardware (Model S/X Plaid, neuere Y/3). -->
-      <div class="card space-y-3">
+      <div :class="compact ? 'card-compact space-y-2' : 'card space-y-3'">
         <h2 class="font-semibold text-lg">{{ $t('control.boombox') }}</h2>
         <p class="text-xs text-gray-500">{{ $t('control.boomboxHint') }}</p>
         <div class="grid grid-cols-3 gap-2">
@@ -293,7 +307,7 @@
            Auto bereits warm ist. Tesla nennt es „Scheduled Departure".
            Der Zeitwert wird in Minuten ab Mitternacht uebertragen.
            Optional auf Wochentage beschraenken. -->
-      <div class="card space-y-3">
+      <div :class="compact ? 'card-compact space-y-2' : 'card space-y-3'">
         <h2 class="font-semibold text-lg">{{ $t('control.departure') }}</h2>
         <p class="text-xs text-gray-500">{{ $t('control.departureHint') }}</p>
         <div class="flex items-center gap-3">
@@ -336,7 +350,7 @@
            Die beiden lassen sich kombinieren — der Off-Peak-Start
            dominiert dann den Lade-Beginn, die Vorklim laeuft trotzdem
            rechtzeitig vor dem departure_time. -->
-      <div class="card space-y-3">
+      <div :class="compact ? 'card-compact space-y-2' : 'card space-y-3'">
         <h2 class="font-semibold text-lg">{{ $t('control.offPeak') }}</h2>
         <p class="text-xs text-gray-500">{{ $t('control.offPeakHint') }}</p>
         <div class="flex items-center gap-3">
@@ -361,7 +375,7 @@
 
       <!-- Software-Update — zeigt aktuellen Status (verfuegbar / im
            Download / Install in Progress) und erlaubt das Einplanen. -->
-      <div class="card space-y-3">
+      <div :class="compact ? 'card-compact space-y-2' : 'card space-y-3'">
         <h2 class="font-semibold text-lg">{{ $t('control.softwareUpdate') }}</h2>
         <div class="text-sm">
           <p v-if="!swUpdate" class="text-gray-500">{{ $t('control.swStatusLoading') }}</p>
@@ -402,7 +416,7 @@
       </div>
 
       <!-- Navigation -->
-      <div class="card space-y-4">
+      <div :class="compact ? 'card-compact space-y-2' : 'card space-y-4'">
         <h2 class="font-semibold text-lg">{{ $t('control.navigation') }}</h2>
         <p class="text-sm text-gray-400">{{ $t('control.navHint') }}</p>
 
@@ -443,6 +457,12 @@ const vehicle  = computed(() => appStore.selectedVehicle);
 const busy         = ref(false);
 const toast        = ref(null);
 const vehicleState = ref('unknown');
+const compact      = ref(localStorage.getItem('controlLayout') === 'compact');
+
+function toggleLayout() {
+  compact.value = !compact.value;
+  localStorage.setItem('controlLayout', compact.value ? 'compact' : 'tiles');
+}
 const temp         = ref(21.0);
 const chargeLimit  = ref(80);
 const chargeAmps   = ref(16);

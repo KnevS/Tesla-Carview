@@ -448,6 +448,15 @@
             </button>
           </div>
 
+          <!-- ICS-Export: nur sichtbar wenn Datum+Uhrzeit gesetzt sind -->
+          <button
+            v-if="destination && planDate && planTime && routeData"
+            @click="downloadICS"
+            class="w-full py-2.5 rounded-xl bg-indigo-800 hover:bg-indigo-700 text-white font-medium text-sm transition flex items-center justify-center gap-2"
+            v-tooltip="$t('routes.icsTooltip')">
+            📅 {{ $t('routes.exportICS') }}
+          </button>
+
           <!-- Blitzer-Rechtslage Hinweis -->
           <div v-if="showCameras" class="rounded-xl border border-orange-800/40 bg-orange-900/10 px-3 py-2 text-xs text-orange-200 space-y-1">
             <p class="font-semibold">⚖️ {{ $t('routes.camerasLegal') }}</p>
@@ -803,6 +812,73 @@ const timingResult = computed(() => {
 });
 // Alias für Abwärtskompatibilität mit dem Save-Dialog
 const expectedArrival = computed(() => planMode.value === 'depart' ? timingResult.value : null);
+
+// ── ICS-Export ──
+function downloadICS() {
+  if (!destination.value || !planDate.value || !planTime.value || !routeData.value) return;
+
+  const [hh, mm] = planTime.value.split(':').map(Number);
+  const totalMin = routeData.value.duration_min + totalChargeMins.value;
+
+  let depDate, arrDate;
+  if (planMode.value === 'depart') {
+    depDate = new Date(planDate.value); depDate.setHours(hh, mm, 0, 0);
+    arrDate = new Date(depDate.getTime() + totalMin * 60000);
+  } else {
+    arrDate = new Date(planDate.value); arrDate.setHours(hh, mm, 0, 0);
+    depDate = new Date(arrDate.getTime() - totalMin * 60000);
+  }
+
+  const fmtDt = d =>
+    d.getFullYear()
+    + String(d.getMonth() + 1).padStart(2, '0')
+    + String(d.getDate()).padStart(2, '0')
+    + 'T'
+    + String(d.getHours()).padStart(2, '0')
+    + String(d.getMinutes()).padStart(2, '0')
+    + '00';
+
+  const startName = startLocation.value?.name ?? t('routes.startBrowserLabel');
+  const destName  = destination.value.name;
+  const dist      = formatDistance(routeData.value.distance_km);
+  const dur       = formatDuration(totalMin);
+
+  const descParts = [
+    `${t('routes.distance')}: ${dist}`,
+    `${t('routes.duration')}: ${dur}`,
+    ...(totalChargeMins.value > 0 ? [`${t('routes.charging')}: +${totalChargeMins.value} min`] : []),
+    '',
+    `⚠️ ${t('routes.icsPrivacyNote')}`,
+  ];
+
+  const uid   = `${Date.now()}-route@tesla-carview`;
+  const stamp = fmtDt(new Date());
+
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Tesla Carview//Route Export//DE',
+    'CALSCALE:GREGORIAN',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTAMP:${stamp}`,
+    `DTSTART:${fmtDt(depDate)}`,
+    `DTEND:${fmtDt(arrDate)}`,
+    `SUMMARY:${startName} → ${destName}`,
+    `LOCATION:${startName} → ${destName}`,
+    'CLASS:PRIVATE',
+    `DESCRIPTION:${descParts.join('\\n')}`,
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n');
+
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `route-${planDate.value}.ics`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 
 // ── Wetter-Emoji ──
 function weatherEmoji(code) {

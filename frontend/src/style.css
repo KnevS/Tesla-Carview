@@ -38,6 +38,18 @@ body {
   background-attachment: fixed;
 }
 
+/* ─── Kompakt-Card (Control-View Compact-Modus) ─────────────────────
+ * Flachere Variante der .card — gleicher Look, weniger Padding/Radius
+ * für dichte Listenansichten wie Fahrzeugsteuerung im Compact-Modus.
+ */
+.card-compact {
+  position: relative;
+  border-radius: 0.65rem;
+  padding: 0.75rem 1rem;
+  background-color: rgba(27, 31, 37, 0.65);
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
 /* ─── Premium-Glas-Card ──────────────────────────────────────────────
  * .card wird in der gesamten App ueberall benutzt. Mit dem Glas-Look
  * bekommt jede einzelne View automatisch das neue Design — kein
