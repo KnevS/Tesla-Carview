@@ -290,3 +290,50 @@ Enable a demo sandbox with `DEMO_ENABLED=true` in `.env`:
 ## 🌙 Maintenance Mode
 
 When the backend restarts after an update, the app shows an overlay with Tesla quotes, a countdown, and auto-reconnects as soon as the backend is back.
+
+---
+
+## 📅 ICS Calendar Export
+
+Planned routes can be exported as `.ics` files and imported into any calendar application (Google Calendar, Apple Calendar, Outlook, etc.):
+
+- Exports departure time, arrival time, and total duration (including charging stops)
+- Description includes route summary, distance, and energy estimate
+- `CLASS:PRIVATE` is set automatically to protect trip data in shared calendars
+- A note reminds users to set the event to **Private** if their calendar is shared
+
+Available in the Route Planner after a route has been calculated.
+
+---
+
+## 🛞 Tire Pressure (TireMap)
+
+The Telemetry view shows tire pressure as an interactive top-down car silhouette:
+
+- **Color-coded tires**: green (2.3–2.9 bar OK), yellow (outside recommendation), red (critical < 1.8 or > 3.4 bar)
+- **Glow effect** per tire based on pressure level
+- **Tooltip** on hover/tap with full tire name and status text
+- **Legend** below the car for quick orientation
+- No signal is shown as a grey placeholder
+
+---
+
+## ♻️ Recuperation Statistics
+
+Trip detail pages now show energy recovered during braking:
+
+- **Recovered kWh** during the trip
+- **Recuperation share** (% of gross energy used)
+- **Net consumption** after subtracting recuperation (kWh/100 km)
+- Visual bar showing recuperation ratio
+- Only shown when data is available (older trips without power data stay clean)
+
+---
+
+## 🔲 Control Layout Toggle
+
+The Vehicle Control view lets users choose their preferred layout:
+
+- **Tile view** — spacious cards, ideal for tablets and large screens
+- **Compact list** — dense overview, ideal for small screens or power users
+- Toggle button in the header; preference saved in `localStorage`

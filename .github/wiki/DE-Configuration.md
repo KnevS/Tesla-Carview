@@ -20,6 +20,7 @@ docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d --build backe
 | `JWT_SECRET` | `openssl rand -hex 32` | Geheimer Schlüssel für JWT-Tokens. **Mindestens 32 Zeichen, kryptografisch zufällig.** Darf sich im laufenden Betrieb nicht ändern — sonst werden alle Sessions ungültig. |
 | `TESLA_CLIENT_ID` | `abc123...` | Aus dem [Tesla Developer Portal](https://developer.tesla.com) |
 | `TESLA_CLIENT_SECRET` | `xyz789...` | Aus dem Tesla Developer Portal |
+| `TESLA_AUTH_BASE` | `https://auth.tesla.com/oauth2/v3` | Tesla OAuth Basis-URL — wird vom Setup-Wizard automatisch gesetzt; nur ändern wenn Tesla den Auth-Endpunkt ändert |
 | `FRONTEND_URL` | `https://tesla.meinedomain.de` | Die öffentliche URL deiner Installation — wird für OAuth-Callback und Passkey-Registrierung benötigt |
 | `RP_NAME` | `Tesla Carview` | Anzeigename in Passkey-Dialogen |
 | `RP_ID` | `tesla.meinedomain.de` | Domain für WebAuthn (ohne Protokoll, muss zu `FRONTEND_URL` passen) |

@@ -100,7 +100,19 @@ Der Wizard stellt dir eine Reihe von Fragen:
 | Tenant-Name | Wie deine Installation heißen soll (z.B. „Mein Tesla") |
 | HTTPS aktivieren | Ja (immer — erforderlich für Tesla API) |
 
-Das Skript erledigt dann automatisch:
+Das Skript fragt zunächst nach dem **Deployment-Modus**:
+
+| Modus | Wann verwenden |
+|---|---|
+| **1 — Direkt** | Dedizierte VM/VPS ohne bestehenden Proxy — nginx + certbot werden automatisch installiert und konfiguriert |
+| **2 — Proxy** | nginx, Caddy, Traefik oder WireGuard+VPS bereits vorhanden — nginx-Installation wird komplett übersprungen |
+
+Im **Proxy-Modus** folgendes in die bestehende Proxy-Konfiguration eintragen:
+```nginx
+proxy_pass http://127.0.0.1:8080;
+```
+
+Das Skript erledigt dann automatisch (Modus Direkt):
 1. Docker, nginx, certbot, fail2ban installieren
 2. Let's Encrypt SSL-Zertifikat für deine Domain holen
 3. nginx mit Sicherheits-Headern konfigurieren

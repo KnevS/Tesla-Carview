@@ -100,6 +100,9 @@ Sihirbaz sana bir dizi soru sorar:
 | Kiracı adı | Kurulumuna ne diyeceğin (ör. "Benim Teslam") |
 | HTTPS'yi etkinleştir | Evet (her zaman — Tesla API için gerekli) |
 
+> **Deployment mode:** The setup script asks whether you have an existing reverse proxy (nginx, Caddy, Traefik). Choose **Proxy mode** to skip nginx installation. In that case, forward requests to `http://127.0.0.1:8080` in your existing proxy.
+
+
 Betik daha sonra otomatik olarak:
 1. Docker, nginx, certbot, fail2ban kurar
 2. Alan adın için Let's Encrypt SSL sertifikası alır

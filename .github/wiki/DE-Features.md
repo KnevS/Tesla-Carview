@@ -281,3 +281,50 @@ Demo-Sandbox mit `DEMO_ENABLED=true` in `.env` aktivieren:
 ## 🌙 Wartungsmodus
 
 Wenn das Backend nach einem Update neu startet, zeigt die App einen Overlay mit Tesla-Zitaten, einem Countdown und verbindet sich automatisch wieder sobald das Backend erreichbar ist.
+
+---
+
+## 📅 ICS-Kalenderexport
+
+Geplante Routen können als `.ics`-Datei exportiert und in beliebige Kalender-Apps importiert werden (Google Calendar, Apple Kalender, Outlook, …):
+
+- Exportiert Abfahrtszeit, Ankunftszeit und Gesamtdauer inkl. Ladestopps
+- Beschreibung enthält Routenübersicht, Distanz und Energieschätzung
+- `CLASS:PRIVATE` wird automatisch gesetzt, um Fahrtdaten in geteilten Kalendern zu schützen
+- Hinweis erinnert an die **Privat**-Einstellung bei geteilten Kalendern
+
+Verfügbar im Routenplaner nach Berechnung einer Route.
+
+---
+
+## 🛞 Reifendruck (TireMap)
+
+Die Telemetrie-Ansicht zeigt den Reifendruck als interaktive Fahrzeug-Draufsicht:
+
+- **Farbkodierte Reifen**: grün (2,3–2,9 bar OK), gelb (außerhalb Empfehlung), rot (kritisch < 1,8 oder > 3,4 bar)
+- **Glow-Effekt** je nach Drucklevel
+- **Tooltip** mit vollständiger Reifenbezeichnung und Status
+- **Legende** unterhalb des Fahrzeugs zur schnellen Orientierung
+- Kein Signal wird als grauer Platzhalter angezeigt
+
+---
+
+## ♻️ Rekuperationsstatistik
+
+Fahrtdetailseiten zeigen die beim Bremsen zurückgewonnene Energie:
+
+- **Rückgewonnene kWh** während der Fahrt
+- **Rekuperationsanteil** (% der verbrauchten Bruttoenergie)
+- **Netto-Verbrauch** nach Abzug der Rekuperation (kWh/100 km)
+- Visueller Balken zeigt das Rekuperationsverhältnis
+- Nur sichtbar wenn Daten vorhanden (ältere Fahrten ohne Power-Daten bleiben sauber)
+
+---
+
+## 🔲 Layout-Toggle in der Fahrzeugsteuerung
+
+Die Fahrzeugsteuerung bietet zwei Darstellungsmodi:
+
+- **Kachel-Layout** — großzügige Karten, ideal für Tablets und große Bildschirme
+- **Kompakte Liste** — dichte Übersicht, ideal für kleine Bildschirme oder Power-User
+- Umschalter im Header; Einstellung wird in `localStorage` gespeichert

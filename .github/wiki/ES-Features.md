@@ -167,3 +167,27 @@ Instala Tesla Carview en tu pantalla de inicio:
 
 - Viajes, sesiones de carga, libro de mantenimiento — CSV o JSON
 - **Copia de seguridad completa** — JSON restaurable via **Admin → Gestión de datos**
+
+---
+
+## 📅 ICS Calendar Export
+
+Planned routes can be exported as `.ics` files and imported into any calendar application. `CLASS:PRIVATE` is set automatically. Available in the Route Planner after a route has been calculated.
+
+---
+
+## 🛞 Tire Pressure (TireMap)
+
+Top-down car silhouette with color-coded tires: green (OK), yellow (outside recommendation), red (critical). Tooltip and legend included.
+
+---
+
+## ♻️ Recuperation Statistics
+
+Trip detail: recovered kWh, recuperation share (%), net consumption after recuperation. Only shown when data is available.
+
+---
+
+## 🔲 Control Layout Toggle
+
+Switch between tile layout and compact list view in Vehicle Control. Preference saved in `localStorage`.

@@ -98,7 +98,19 @@ The wizard asks you a series of questions:
 | Tenant name | What to call your installation (e.g. "My Tesla") |
 | Enable HTTPS | Yes (always — required for Tesla API) |
 
-The script then automatically:
+The script asks for the **deployment mode** before doing anything:
+
+| Mode | When to use |
+|---|---|
+| **1 — Direct** | Dedicated VM or VPS without an existing proxy — nginx + certbot are installed and configured automatically |
+| **2 — Proxy** | Already running nginx, Caddy, Traefik, or WireGuard+VPS setup — nginx installation is skipped entirely |
+
+In **Proxy mode**, add this to your existing proxy config:
+```nginx
+proxy_pass http://127.0.0.1:8080;
+```
+
+The script then automatically (Direct mode):
 1. Installs Docker, nginx, certbot, fail2ban
 2. Gets a Let's Encrypt SSL certificate for your domain
 3. Configures nginx with security headers

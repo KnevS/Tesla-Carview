@@ -20,6 +20,7 @@ docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d --build backe
 | `JWT_SECRET` | `some-random-64-char-string` | Clé secrète pour signer les tokens de connexion. Générez avec : `openssl rand -hex 32` |
 | `TESLA_CLIENT_ID` | `abc123...` | Depuis le Tesla Developer Portal |
 | `TESLA_CLIENT_SECRET` | `xyz789...` | Depuis le Tesla Developer Portal |
+| `TESLA_AUTH_BASE` | `https://auth.tesla.com/oauth2/v3` | URL de base OAuth Tesla — remplie automatiquement par le wizard ; à modifier uniquement si Tesla change son endpoint |
 | `FRONTEND_URL` | `https://tesla.yourdomain.com` | L'URL publique de votre installation |
 | `DATABASE_PATH` | `/app/data` | Où les bases de données sont stockées (ne pas modifier avec Docker) |
 

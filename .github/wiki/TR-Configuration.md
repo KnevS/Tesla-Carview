@@ -20,6 +20,7 @@ docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d --build backe
 | `JWT_SECRET` | `some-random-64-char-string` | Giriş token'larını imzalamak için gizli anahtar. Şununla oluştur: `openssl rand -hex 32` |
 | `TESLA_CLIENT_ID` | `abc123...` | Tesla Developer Portal'dan |
 | `TESLA_CLIENT_SECRET` | `xyz789...` | Tesla Developer Portal'dan |
+| `TESLA_AUTH_BASE` | `https://auth.tesla.com/oauth2/v3` | Tesla OAuth temel URL'si — kurulum sihirbazı tarafından otomatik doldurulur; Tesla auth uç noktasını değiştirirse güncelleyin |
 | `FRONTEND_URL` | `https://tesla.alaninadın.com` | Kurulumunun genel URL'si |
 | `DATABASE_PATH` | `/app/data` | Veritabanlarının depolandığı yer (Docker'da değiştirme) |
 

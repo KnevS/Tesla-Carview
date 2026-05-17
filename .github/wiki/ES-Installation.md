@@ -100,6 +100,9 @@ El asistente te hace una serie de preguntas:
 | Nombre del inquilino | Cómo llamar tu instalación (ej. "Mi Tesla") |
 | Activar HTTPS | Sí (siempre — necesario para la API Tesla) |
 
+> **Deployment mode:** The setup script asks whether you have an existing reverse proxy (nginx, Caddy, Traefik). Choose **Proxy mode** to skip nginx installation. In that case, forward requests to `http://127.0.0.1:8080` in your existing proxy.
+
+
 El script entonces automáticamente:
 1. Instala Docker, nginx, certbot, fail2ban
 2. Obtiene un certificado SSL de Let's Encrypt para tu dominio
