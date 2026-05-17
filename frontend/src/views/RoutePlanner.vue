@@ -457,11 +457,6 @@
             📅 {{ $t('routes.exportICS') }}
           </button>
 
-          <!-- Blitzer-Rechtslage Hinweis -->
-          <div v-if="showCameras" class="rounded-xl border border-orange-800/40 bg-orange-900/10 px-3 py-2 text-xs text-orange-200 space-y-1">
-            <p class="font-semibold">⚖️ {{ $t('routes.camerasLegal') }}</p>
-            <p class="text-orange-300/80">{{ $t('routes.camerasLegalText') }}</p>
-          </div>
 
           <button @click="openAbrp"
             class="w-full py-2 text-xs text-gray-500 hover:text-gray-300 transition flex items-center justify-center gap-1">
@@ -550,6 +545,23 @@
         </div>
       </div>
     </div>
+
+    <!-- ─── Blitzer-Rechtslage-Dialog ──────────────────────────────────── -->
+    <Teleport to="body">
+      <div v-if="showCameraLegalDialog" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 px-4"
+        @click.self="showCameraLegalDialog = false">
+        <div class="bg-gray-900 border border-orange-800/50 rounded-2xl p-6 w-full max-w-md space-y-4">
+          <h3 class="font-semibold text-lg flex items-center gap-2">⚖️ {{ $t('routes.camerasLegal') }}</h3>
+          <p class="text-sm text-gray-300">{{ $t('routes.camerasLegalText') }}</p>
+          <div class="flex gap-3 pt-1">
+            <button @click="showCameraLegalDialog = false" class="flex-1 btn-secondary">{{ $t('common.cancel') }}</button>
+            <button @click="acceptCameraLegal" class="flex-1 py-2 rounded-xl bg-orange-700 hover:bg-orange-600 text-white font-medium text-sm transition">
+              {{ $t('routes.camerasLegalAccept') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 
     <!-- ─── Speichern-Dialog ─────────────────────────────────────────────── -->
     <Teleport to="body">
@@ -726,9 +738,10 @@ const weatherLoading = ref(false);
 const trafficData    = ref(null);
 
 // ── Blitzer ──
-const showCameras   = ref(false);
-const cameras       = ref([]);
-const cameraLoading = ref(false);
+const showCameras          = ref(false);
+const cameras              = ref([]);
+const cameraLoading        = ref(false);
+const showCameraLegalDialog = ref(false);
 
 // ── Routenoptionen: Vermeiden ──
 const avoidMotorways = ref(localStorage.getItem('route_avoid_motorways') === 'true');
@@ -1339,9 +1352,22 @@ function cameraIcon() {
 function clearCameraMarkers() { cameraMarkers.forEach(m => m.remove()); cameraMarkers = []; }
 
 async function toggleCameras() {
-  showCameras.value = !showCameras.value;
-  if (showCameras.value && routeData.value) await _loadCameras();
-  else { clearCameraMarkers(); cameras.value = []; }
+  if (showCameras.value) {
+    showCameras.value = false; clearCameraMarkers(); cameras.value = []; return;
+  }
+  // Einmaliger Rechtslage-Hinweis
+  if (!localStorage.getItem('cameras_legal_ok')) {
+    showCameraLegalDialog.value = true; return;
+  }
+  showCameras.value = true;
+  if (routeData.value) await _loadCameras();
+}
+
+async function acceptCameraLegal() {
+  localStorage.setItem('cameras_legal_ok', '1');
+  showCameraLegalDialog.value = false;
+  showCameras.value = true;
+  if (routeData.value) await _loadCameras();
 }
 
 async function _loadCameras() {

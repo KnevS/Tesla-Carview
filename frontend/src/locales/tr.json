@@ -1691,6 +1691,7 @@
     "camerasTooltip": "OpenStreetMap'ten radar uyarılarını göster (ücretsiz, eksik)",
     "camerasLegal": "Yasal uyarı",
     "camerasLegalText": "Radar uyarı uygulamaları bazı ülkelerde sürüş sırasında yasadışı olabilir. Yerel mevzuatı kontrol edin. Kullanım riski kullanıcıya aittir.",
+    "camerasLegalAccept": "Anladım, yine de göster",
     "camerasLegend": "radar",
     "noCameras": "Bu bölgede radar bulunamadı.",
     "avoidTitle": "Kaçın:",

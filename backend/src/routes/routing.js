@@ -1,7 +1,18 @@
 import { Router } from 'express';
+import { mkdirSync, existsSync, readFileSync, writeFileSync, statSync } from 'fs';
+import { join } from 'path';
 import { assertVehicleAccess, guardAccess } from '../middleware/vehicleAccess.js';
 
 const router = Router();
+
+// ── Tile-Disk-Cache ───────────────────────────────────────────────────────────
+const TILE_CACHE_DIR = '/tmp/tc-tiles';
+const TILE_TTL_MS    = 7 * 24 * 60 * 60 * 1000; // 7 Tage
+try { mkdirSync(TILE_CACHE_DIR, { recursive: true }); } catch {}
+
+// ── Overpass-Memory-Cache (Blitzer) ──────────────────────────────────────────
+const cameraCache = new Map(); // key → { cameras, ts }
+const CAMERA_TTL_MS = 24 * 60 * 60 * 1000; // 24 Stunden
 
 // ── Hilfs-Mathematik ─────────────────────────────────────────────────────────
 
@@ -157,19 +168,27 @@ tileRouter.get('/:z/:x/:y', async (req, res) => {
   if (isNaN(zn) || isNaN(xn) || isNaN(yn) || zn < 0 || zn > 19 || xn < 0 || yn < 0) {
     return res.status(400).end();
   }
+
+  const cacheFile = join(TILE_CACHE_DIR, `${zn}_${xn}_${yn}.png`);
+  const headers = { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400' };
+
+  // Disk-Cache-Hit: direkt ausliefern
+  if (existsSync(cacheFile) && (Date.now() - statSync(cacheFile).mtimeMs) < TILE_TTL_MS) {
+    res.set(headers);
+    return res.send(readFileSync(cacheFile));
+  }
+
   try {
     const sub = ['a', 'b', 'c'][xn % 3];
     const r   = await fetch(`https://${sub}.tile.openstreetmap.org/${z}/${x}/${y}.png`, {
-      headers: {
-        'User-Agent': 'TeslaCarview/2.2 (personal-server)',
-        'Referer':    'https://github.com/KnevS/Tesla-Carview',
-      },
+      headers: { 'User-Agent': 'TeslaCarview/2.2 (personal-server)', 'Referer': 'https://github.com/KnevS/Tesla-Carview' },
       signal: AbortSignal.timeout(8000),
     });
     if (!r.ok) return res.status(r.status).end();
-    res.set('Content-Type', 'image/png');
-    res.set('Cache-Control', 'public, max-age=86400, stale-while-revalidate=3600');
-    res.send(Buffer.from(await r.arrayBuffer()));
+    const buf = Buffer.from(await r.arrayBuffer());
+    try { writeFileSync(cacheFile, buf); } catch {} // best-effort
+    res.set(headers);
+    res.send(buf);
   } catch {
     res.status(502).end();
   }
@@ -549,6 +568,13 @@ router.get('/cameras', async (req, res) => {
     return res.status(400).json({ error: 'Bounding-Box (south,west,north,east) erforderlich' });
   }
   const bbox = `${south},${west},${north},${east}`;
+
+  // Memory-Cache-Hit
+  const cached = cameraCache.get(bbox);
+  if (cached && (Date.now() - cached.ts) < CAMERA_TTL_MS) {
+    return res.json({ cameras: cached.cameras });
+  }
+
   const query = `[out:json][timeout:15];(node["highway"="speed_camera"](${bbox});node["enforcement"="maxspeed"](${bbox}););out body;`;
   try {
     const r = await fetch('https://overpass-api.de/api/interpreter', {
@@ -566,6 +592,7 @@ router.get('/cameras', async (req, res) => {
       maxspeed: el.tags?.maxspeed,
       direction: el.tags?.direction,
     }));
+    cameraCache.set(bbox, { cameras, ts: Date.now() });
     res.json({ cameras });
   } catch (err) {
     res.status(502).json({ error: err.message });

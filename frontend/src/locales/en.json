@@ -1691,6 +1691,7 @@
     "camerasTooltip": "Show speed camera warnings from OpenStreetMap (free, incomplete)",
     "camerasLegal": "Legal notice",
     "camerasLegalText": "Speed camera warning apps may be illegal while driving in some countries. Please check local regulations. Use at your own risk.",
+    "camerasLegalAccept": "Understood, show anyway",
     "camerasLegend": "cameras",
     "noCameras": "No speed cameras found in this area.",
     "avoidTitle": "Avoid:",

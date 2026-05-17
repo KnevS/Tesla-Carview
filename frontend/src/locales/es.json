@@ -1691,6 +1691,7 @@
     "camerasTooltip": "Mostrar avisos de radares desde OpenStreetMap (gratuito, incompleto)",
     "camerasLegal": "Aviso legal",
     "camerasLegalText": "El uso de avisadores de radar puede ser ilegal en algunos países. Consulte la normativa local. Uso bajo su propia responsabilidad.",
+    "camerasLegalAccept": "Entendido, mostrar de todas formas",
     "camerasLegend": "radares",
     "noCameras": "No se encontraron radares en esta zona.",
     "avoidTitle": "Evitar:",

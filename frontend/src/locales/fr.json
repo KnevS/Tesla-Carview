@@ -1691,6 +1691,7 @@
     "camerasTooltip": "Afficher les avertissements radar depuis OpenStreetMap (gratuit, incomplet)",
     "camerasLegal": "Avis légal",
     "camerasLegalText": "En France, avertir d'un contrôle de vitesse est interdit. Dans d'autres pays, la réglementation varie. Utilisation à vos risques.",
+    "camerasLegalAccept": "Compris, afficher quand même",
     "camerasLegend": "radars",
     "noCameras": "Aucun radar trouvé dans cette zone.",
     "avoidTitle": "Éviter :",

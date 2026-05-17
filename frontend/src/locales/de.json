@@ -1690,6 +1690,7 @@
     "camerasTooltip": "Blitzerwarnungen aus OpenStreetMap anzeigen (kostenlos, unvollständig)",
     "camerasLegal": "Rechtliche Hinweise",
     "camerasLegalText": "In Deutschland ist die Nutzung von Blitzerwarner-Apps während der Fahrt verboten (§23 StVO). In anderen Ländern gelten abweichende Regelungen. Nutzung auf eigene Verantwortung.",
+    "camerasLegalAccept": "Verstanden, trotzdem anzeigen",
     "camerasLegend": "Blitzer",
     "noCameras": "Keine Blitzer in diesem Bereich gefunden.",
     "avoidTitle": "Vermeiden:",
