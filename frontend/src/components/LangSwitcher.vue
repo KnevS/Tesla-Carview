@@ -4,7 +4,7 @@
       type="button"
       class="lang-trigger"
       :class="{ compact }"
-      @click="open = !open"
+      @click="toggle"
       :aria-label="$t('lang.switcher')"
       :title="$t('lang.switcher')"
     >
@@ -52,6 +52,10 @@ const rootEl    = ref(null);
 const current     = computed(() => langStore.current);
 const currentLang = computed(() => LANGS.find(l => l.code === current.value) || LANGS[0]);
 
+function toggle(e) {
+  e.stopPropagation();
+  open.value = !open.value;
+}
 function choose(code) {
   // Profil-Persistenz nur für eingeloggte User; auf Login-Seite bleibt's lokal.
   langStore.setLang(code, { persistToProfile: !!authStore.token });
@@ -84,6 +88,7 @@ onBeforeUnmount(() => {
   color: inherit;
   transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
   cursor: pointer;
+  touch-action: manipulation;
 }
 .lang-trigger:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.18); }
 .lang-trigger:active { transform: scale(0.98); }

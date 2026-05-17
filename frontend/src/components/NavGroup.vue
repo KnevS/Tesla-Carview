@@ -84,8 +84,12 @@ function onHoverLeave() {
   if (openTimer) { clearTimeout(openTimer); openTimer = null; }
   closeTimer = setTimeout(() => { open.value = false; closeTimer = null; }, CLOSE_DELAY);
 }
-function onTriggerClick() {
-  // Touch / Click: Toggle. Auf Hover-Geräten wirkt das wie ein Pin/Unpin.
+function onTriggerClick(e) {
+  // stopPropagation verhindert, dass derselbe Click-Event den document-Listener
+  // (onDocClick) erreicht und das Dropdown sofort wieder schließt — notwendig
+  // für Touch-Browser (Tesla-Display, Chromium-Touch-Mode) wo das Bubbling
+  // zeitlich mit dem Handler-Aufruf kollidiert.
+  e.stopPropagation();
   clearTimers();
   open.value = !open.value;
 }
@@ -128,6 +132,7 @@ onBeforeUnmount(() => {
   background: transparent;
   border: 1px solid transparent;
   cursor: pointer;
+  touch-action: manipulation;
   transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
 }
 .nav-group-trigger:hover { background: rgba(255,255,255,0.06); color: white; }

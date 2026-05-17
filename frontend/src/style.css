@@ -20,6 +20,12 @@ html, body {
   text-rendering: optimizeLegibility;
 }
 
+/* touch-action: manipulation eliminiert den 300ms Tap-Delay auf Touch-Displays
+ * (Tesla-Infotainment, Tablets) für alle interaktiven Elemente global. */
+button, a, select, input, label, [role="button"], [role="option"] {
+  touch-action: manipulation;
+}
+
 body {
   @apply text-white font-sans;
   /* Schwacher Radial-Sheen oben + Atmosphaere unten — die App wirkt
