@@ -49,24 +49,38 @@ jobs:
           path: frontend/dist/
           retention-days: 7
 
-  docker-multiarch:
-    name: Docker – multi-arch build check
+  build-images:
+    name: Docker – build & push to GHCR
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [backend, frontend]
+    permissions:
+      packages: write
     steps:
       - uses: actions/checkout@v6
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
-      - name: Build backend (amd64 + arm64 + arm/v7)
-        uses: docker/build-push-action@v5
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build & push backend (amd64 + arm64 + arm/v7)
+        uses: docker/build-push-action@v7
         with:
           context: ./backend
           platforms: linux/amd64,linux/arm64,linux/arm/v7
-          push: false
-      - name: Build frontend (amd64 + arm64 + arm/v7)
-        uses: docker/build-push-action@v5
+          push: true
+          tags: ghcr.io/knevs/tesla-carview/backend:main
+          build-args: |
+            GIT_HASH=${{ github.sha }}
+            GIT_BRANCH=${{ github.ref_name }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+      - name: Build & push frontend (amd64 + arm64 + arm/v7)
+        uses: docker/build-push-action@v7
         with:
           context: ./frontend
           platforms: linux/amd64,linux/arm64,linux/arm/v7
-          push: false
+          push: true
+          tags: ghcr.io/knevs/tesla-carview/frontend:main

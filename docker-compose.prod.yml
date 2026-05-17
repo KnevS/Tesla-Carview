@@ -11,13 +11,7 @@ services:
   #   - cpus '0.75' fuer Backend laesst der CLI / SSH-Session genug
   #     Headroom, falls der Poller eine Schleife dreht.
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-      args:
-        GIT_HASH: ${GIT_HASH:-unknown}
-        GIT_BRANCH: ${GIT_BRANCH:-unknown}
-        BUILD_DATE: ${BUILD_DATE:-}
+    image: ghcr.io/knevs/tesla-carview/backend:main
     container_name: tesla-carview-backend
     restart: unless-stopped
     env_file:
@@ -44,9 +38,7 @@ services:
       start_period: 30s
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    image: ghcr.io/knevs/tesla-carview/frontend:main
     container_name: tesla-carview-frontend
     restart: unless-stopped
     networks:

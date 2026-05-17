@@ -161,7 +161,8 @@ fi  # end DEPLOY_MODE branch
 step "Container starten"
 cd "$APP_DIR"
 mkdir -p data
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml pull
+docker compose -f docker-compose.prod.yml up -d
 ok "Container laufen"
 
 FRONTEND_URL="${FRONTEND_URL:-http://localhost:8080}"

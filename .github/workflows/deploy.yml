@@ -1,7 +1,11 @@
 name: Deploy
 
 on:
-  push:
+  # Triggers only after CI has successfully built and pushed the images.
+  # This guarantees the GHCR images exist before we pull them on the server.
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
@@ -22,6 +26,10 @@ jobs:
   check-secrets:
     name: Secrets vorhanden?
     runs-on: ubuntu-latest
+    # For workflow_run: only deploy when CI succeeded. For manual dispatch: always.
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
     outputs:
       ready: ${{ steps.check.outputs.ready }}
     steps:
@@ -41,6 +49,11 @@ jobs:
     needs: check-secrets
     if: needs.check-secrets.outputs.ready == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      packages: read
+    env:
+      GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GHCR_ACTOR: ${{ github.actor }}
     steps:
       - uses: actions/checkout@v6
 
@@ -50,7 +63,8 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          command_timeout: 30m
+          envs: GHCR_TOKEN,GHCR_ACTOR
+          command_timeout: 10m
           script: |
             APP_DIR="${{ secrets.DEPLOY_APP_DIR }}"
             APP_DIR="${APP_DIR:-/opt/tesla-carview}"
@@ -65,38 +79,12 @@ jobs:
                 backend/src/services/demoLifecycle.js \
                 frontend/src/views/Demo.vue
             fi
-            GIT_HASH=$(sudo git rev-parse --short HEAD)
-            GIT_BRANCH=$(sudo git rev-parse --abbrev-ref HEAD)
-            BUILD_DATE=$(sudo git log -1 --format=%ci)
-            # docker compose liest .env automatisch aus dem CWD; das ist robuster
-            # als 'sudo --preserve-env' (verbietet diese Server-sudoers-Policy)
-            # oder Inline-Vars vor sudo (werden gestrippt). Die .env wird nur
-            # fuer den Build geschrieben und danach geloescht — keine Spur.
-            # Drei einzelne echo-tee statt printf — printf '\n' wurde durch
-            # appleboy/ssh-action irgendwo verstuemmelt, sodass alles in
-            # einer Zeile landete und docker die Werte nicht parsen konnte.
-            # WICHTIG: sudoers erlaubt NOPASSWD nur fuer docker und git —
-            # `sudo tee/cat/rm` wuerden ein Passwort verlangen und im
-            # SSH-Skript ohne TTY silent haengen. Daher:
-            # Env-File in /tmp (Deploy-User hat dort Schreibrecht ohne sudo) und
-            # via `--env-file` an docker compose mitgeben (laeuft mit sudo).
-            ENV_TMP=$(mktemp /tmp/tcv-deploy-env.XXXXXX)
-            {
-              echo "GIT_HASH=$GIT_HASH"
-              echo "GIT_BRANCH=$GIT_BRANCH"
-              echo "BUILD_DATE=$BUILD_DATE"
-            } > "$ENV_TMP"
-            echo "--- env-file fuer den Build: ---"
-            cat "$ENV_TMP"
-            echo "--- ---"
-            sudo docker compose --env-file "$ENV_TMP" \
-              -f /opt/tesla-carview/docker-compose.prod.yml up -d --build backend frontend
-            rm -f "$ENV_TMP"
+            # Pull pre-built images from GHCR (no local build needed)
+            echo "$GHCR_TOKEN" | sudo docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml pull backend frontend
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d backend frontend
+            sudo docker logout ghcr.io
             # Sicherstellen dass nginx im richtigen Compose-Netzwerk laeuft.
-            # Passiert wenn nginx aus einem alten Systemstart stammt und im
-            # veralteten tesla-carview_default statt tesla-carview_tesla-net haengt.
-            # network connect statt force-recreate: kein Container-Restart,
-            # kein depends_on-Cascade auf backend/frontend.
             COMPOSE_NET="tesla-carview_tesla-net"
             if ! sudo docker inspect tesla-carview-nginx \
                 --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' \
@@ -104,8 +92,8 @@ jobs:
               echo "==> nginx nicht in $COMPOSE_NET — network connect"
               sudo docker network connect "$COMPOSE_NET" tesla-carview-nginx
             fi
-            # Nginx-Config nach jedem Deploy neu einlesen (bind-mount bleibt)
             sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml \
               exec -T nginx nginx -s reload
-            sudo docker system prune -f
+            sudo docker image prune -f
+            GIT_HASH=$(sudo git rev-parse --short HEAD)
             echo "Deployment erfolgreich: $(date) | $GIT_HASH"
