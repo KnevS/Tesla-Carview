@@ -34,6 +34,7 @@ Runs on: **Linux servers** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), local
 | **Battery** | Degradation tracking, range history over time |
 | **Tech** | Live telemetry: TPMS, power flow, climate, charging status |
 | **Controls** | Vehicle commands: climate, climate-keeper (dog/camp), seat heaters (5 seats × 4 levels), steering-wheel heater, doors, frunk/tailgate, windows, sentry mode, charging incl. amps slider and charge port, departure schedule, boombox, software update, navigation (Virtual Key required) |
+| **Route planner** | Interactive route planner with SoC-aware charging stops incl. charge time estimate; departure SoC (live or manual), target SoC and charging target configurable; weather (Open-Meteo), traffic (HERE Maps), speed cameras (OpenStreetMap) along the route; map view with tile proxy |
 | **Logbook** | BMF-compliant electronic Fahrtenbuch: classification, business partner, purpose, odometer columns, consecutive numbering in PDF, post-export lock, manual entry, trip merge/split |
 | **Billing** | Home-charging cost statement for company cars (Monta integration optional) |
 | **Service log** | Maintenance, repairs, tires, inspections with cost |
@@ -44,7 +45,8 @@ Runs on: **Linux servers** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), local
 | **PDF reimbursement** | Signable PDF for home-charging reimbursement (client-side, no cloud) |
 | **Notifications** | Web Push when charging finishes, plus maintenance reminders |
 | **User handbook** | Complete guide readable directly inside the app |
-| **Color theme** | Customizable color profile (6 accent colors, stored locally) |
+| **Design & themes** | 4 design styles (Glass, Cyber, Minimal, Sport) + 6 accent colors, all stored locally; design picker with miniature previews in Settings |
+| **Settings** | All sections collapsible and individually reorderable (drag-to-sort) |
 | **Navigation** | Sortable, individually hideable navigation entries |
 | **Mobile / Tesla** | Installable PWA for iPhone/iPad (Safari), Android, the Tesla in-car browser and desktop. Compact card view in the logbook on narrow screens. |
 | **System status** | Traffic-light card (Tesla token, Virtual Key, Fleet Telemetry, poller, DB) — green/yellow/red at a glance |

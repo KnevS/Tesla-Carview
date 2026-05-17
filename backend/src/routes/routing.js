@@ -184,7 +184,7 @@ router.get('/stats', (req, res) => {
   if (guardAccess(res, () => assertVehicleAccess(req.db, vehicleId, req.user))) return;
 
   const battery = req.db.prepare(
-    'SELECT soc, rated_range_km FROM battery_history WHERE vehicle_id=? ORDER BY timestamp DESC LIMIT 1'
+    'SELECT soc, rated_range_km FROM battery_snapshots WHERE vehicle_id=? ORDER BY timestamp DESC LIMIT 1'
   ).get(vehicleId);
 
   const consumption = req.db.prepare(`

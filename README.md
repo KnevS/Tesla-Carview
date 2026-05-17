@@ -45,7 +45,7 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 | **PDF-Abrechnung** | Unterschriftsreife PDF für Heimladen-Erstattung (clientseitig, keine Cloud) |
 | **Benachrichtigungen** | Web Push bei Ladeende, plus Wartungserinnerungen |
 | **Benutzerhandbuch** | Vollständige Anleitung direkt in der App lesbar |
-| **Farbschema** | Anpassbares Farbprofil (6 Akzentfarben, lokal gespeichert) |
+| **Design & Themes** | 4 Design-Stile (Glass, Cyber, Minimal, Sport) + 6 Akzentfarben, alles lokal gespeichert; Design-Picker mit Miniatur-Previews in den Einstellungen |
 | **Einstellungen** | Alle Sektionen per Klick ein-/ausklappbar (SortableSection), Reihenfolge persönlich sortierbar |
 | **Navigation** | Individuell sortierbare und ein-/ausblendbare Navigationspunkte |
 | **Mobile / Tesla** | Installierbare PWA für iPhone/iPad (Safari), Android, Tesla-Fahrzeug-Browser und Desktop. Kompakte Karten-Ansicht im Fahrtenbuch für schmale Bildschirme. |
