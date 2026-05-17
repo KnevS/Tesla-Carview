@@ -72,6 +72,8 @@ paths = [
   # selbst anschlagen.
   '''CLAUDE\.md''',
   '''frontend/src/handbook/.*''',
+  # Wiki-Doku enthaelt .env-Beispiele mit Platzhaltern wie TESLA_CLIENT_ID=your-client-id-here
+  '''\.github/wiki/.*''',
   # gitleaks-Selbstreferenz
   '''\.gitleaks\.toml$''',
 ]

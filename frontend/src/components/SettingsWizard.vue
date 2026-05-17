@@ -295,7 +295,7 @@
                   <span v-else class="text-xs text-amber-400">{{ $t('wizard.sExt.notConfigured') }}</span>
                 </div>
                 <p class="text-xs text-gray-400">{{ $t('wizard.sExt.grokEnvHint') }}</p>
-                <code v-if="!adminStatus.grok?.configured" class="block bg-gray-950 rounded px-3 py-2 text-xs text-amber-300 font-mono select-all">XAI_API_KEY=sk-…</code>
+                <code v-if="!adminStatus.grok?.configured" class="block bg-gray-950 rounded px-3 py-2 text-xs text-amber-300 font-mono select-all">XAI_API_KEY=your-xai-api-key-here</code>
               </div>
             </div>
           </template>

@@ -212,7 +212,7 @@
         </label>
         <div class="flex gap-2">
           <input v-model="monCfg.anthropic_key" type="password"
-            :placeholder="monCfg.anthropic_configured ? 'Neuen Key eingeben zum Überschreiben' : 'sk-ant-…'"
+            :placeholder="monCfg.anthropic_configured ? 'Neuen Key eingeben zum Überschreiben' : 'Anthropic API-Key eingeben'"
             class="input flex-1 text-sm" @keyup.enter="saveMonitoringConfig" />
           <button @click="saveMonitoringConfig" :disabled="monSaving || !monCfg.anthropic_key"
             class="px-3 py-1.5 rounded-lg text-sm bg-tesla-red text-white hover:bg-red-600 disabled:opacity-40">
