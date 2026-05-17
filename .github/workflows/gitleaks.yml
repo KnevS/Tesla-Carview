@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           # Volle Historie scannen, damit auch alte Commits gegen die
           # aktuellen Regeln gecheckt werden. Bei Pull-Requests reicht
