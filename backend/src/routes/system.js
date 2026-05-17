@@ -611,8 +611,12 @@ router.get('/update-check', requireAuth, async (req, res) => {
     const latestHash   = data.sha?.slice(0, 7) ?? null;
     const latestDate   = data.commit?.committer?.date ?? null;
     const latestMsg    = data.commit?.message?.split('\n')[0] ?? null;
-    const updateAvailable = latestHash && current.hash !== 'unknown' && latestHash !== current.hash;
-    res.json({ current: current.hash, currentDate: current.date, latest: latestHash, latestDate, latestMsg, updateAvailable });
+    // GIT_HASH may be a full 40-char SHA (set by CI via github.sha) or a short
+    // 7-char hash (set by the old server-side git rev-parse). Normalise to 7
+    // chars before comparing so both sources match.
+    const currentShort = current.hash !== 'unknown' ? current.hash.slice(0, 7) : 'unknown';
+    const updateAvailable = latestHash && currentShort !== 'unknown' && currentShort !== latestHash;
+    res.json({ current: currentShort, currentDate: current.date, latest: latestHash, latestDate, latestMsg, updateAvailable });
   } catch (e) {
     res.status(502).json({ error: 'GitHub nicht erreichbar', current: current.hash });
   }
