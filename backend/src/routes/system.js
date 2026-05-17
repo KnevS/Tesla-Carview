@@ -607,10 +607,20 @@ router.get('/update-check', requireAuth, async (req, res) => {
   if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Nur für Administratoren' });
   const current = getGitInfo();
   try {
-    const data = await fetchJson('https://api.github.com/repos/KnevS/Tesla-Carview/commits/main');
-    const latestHash   = data.sha?.slice(0, 7) ?? null;
-    const latestDate   = data.commit?.committer?.date ?? null;
-    const latestMsg    = data.commit?.message?.split('\n')[0] ?? null;
+    // Fetch recent commits and skip CI bot commits (version-badge, wiki-sync)
+    // so automated housekeeping commits don't falsely trigger an update banner.
+    const commits = await fetchJson(
+      'https://api.github.com/repos/KnevS/Tesla-Carview/commits?sha=main&per_page=10'
+    );
+    const realCommit = Array.isArray(commits)
+      ? commits.find(c =>
+          c.committer?.login !== 'github-actions[bot]' &&
+          c.author?.login    !== 'github-actions[bot]'
+        )
+      : null;
+    const latestHash = realCommit?.sha?.slice(0, 7) ?? null;
+    const latestDate = realCommit?.commit?.committer?.date ?? null;
+    const latestMsg  = realCommit?.commit?.message?.split('\n')[0] ?? null;
     // GIT_HASH may be a full 40-char SHA (set by CI via github.sha) or a short
     // 7-char hash (set by the old server-side git rev-parse). Normalise to 7
     // chars before comparing so both sources match.
