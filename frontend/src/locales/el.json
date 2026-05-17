@@ -505,7 +505,9 @@
     "toastSent": "Εντολή στάλθηκε",
     "toastRejected": "Εντολή απορρίφθηκε",
     "toastAsleep": "Το όχημα κοιμάται – αφυπνίστε το πρώτα",
-    "toastSendError": "Σφάλμα αποστολής"
+    "toastSendError": "Σφάλμα αποστολής",
+    "layoutCompact": "Sympykni provoли",
+    "layoutTiles": "Provoли πλακιδίων"
   },
   "exportPage": {
     "title": "Εξαγωγή δεδομένων",
@@ -1698,7 +1700,10 @@
     "avoidTollsTip": "Αποφυγή δρόμων με διόδια",
     "avoidFerry": "Πλοία",
     "avoidFerryTip": "Αποφυγή ferry",
-    "actionsTitle": "Ενέργειες"
+    "actionsTitle": "Ενέργειες",
+    "exportICS": "Exagogi os symvan imerologiou (.ics)",
+    "icsTooltip": "Lypsi diadromis os arxeio .ics gia Apple Calendar, Google Calendar i Outlook",
+    "icsPrivacyNote": "An ayto to imerologio einai koinoxrysto: episimainete ayto to symvan os Idiotiko oste i ekkinisi, o proorismos kai i ora na min einai orata se alloys."
   },
   "wizard": {
     "title": "Οδηγός Ρυθμίσεων",

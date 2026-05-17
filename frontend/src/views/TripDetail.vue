@@ -194,8 +194,8 @@
 
       <!-- Batterie -->
       <div class="card">
-        <h2 class="text-lg font-semibold mb-3">Batterie</h2>
-        <div class="flex gap-8">
+        <h2 class="text-lg font-semibold mb-3">Batterie & Effizienz</h2>
+        <div class="flex flex-wrap gap-6 mb-4">
           <div v-tooltip="'Batterieladezustand zu Fahrtbeginn'">
             <p class="text-gray-400 text-sm">Start SoC</p>
             <p class="text-3xl font-bold text-green-400">{{ trip.start_soc }}%</p>
@@ -210,6 +210,46 @@
             <p class="text-xl font-bold">{{ fmt(trip.energy_used_kwh, 2) }} kWh</p>
           </div>
         </div>
+
+        <!-- Rekuperation — wird nur angezeigt wenn Daten vorhanden -->
+        <template v-if="trip.regen_kwh > 0">
+          <div class="border-t border-gray-700 pt-3 space-y-3">
+            <h3 class="text-sm font-semibold text-gray-300 flex items-center gap-1.5">
+              ⚡ Rekuperation
+              <span class="text-xs text-gray-500 font-normal"
+                v-tooltip="'Energie, die durch Bremsen und Verzögern zurück in die Batterie gewonnen wurde'">ℹ️</span>
+            </h3>
+            <div class="grid grid-cols-3 gap-3 text-center">
+              <div class="bg-gray-800 rounded-xl py-2.5 px-2"
+                v-tooltip="'Rekuperierte Energie — gemessen aus negativen Leistungswerten der Fahrtdaten'">
+                <p class="text-xs text-gray-400 mb-0.5">Rückgewonnen</p>
+                <p class="text-lg font-bold text-emerald-400">{{ fmt(trip.regen_kwh, 2) }} kWh</p>
+              </div>
+              <div class="bg-gray-800 rounded-xl py-2.5 px-2"
+                v-tooltip="'Anteil der rekuperierten Energie am Gesamtverbrauch — je höher, desto effizienter der Fahrstil'">
+                <p class="text-xs text-gray-400 mb-0.5">Reku-Quote</p>
+                <p class="text-lg font-bold" :class="regenRatioClass">{{ regenRatioPct }}%</p>
+              </div>
+              <div class="bg-gray-800 rounded-xl py-2.5 px-2"
+                v-tooltip="'Nettoeffizienz nach Abzug der Rekuperation — zeigt den echten Energiebedarf der Strecke'">
+                <p class="text-xs text-gray-400 mb-0.5">Netto-Verbrauch</p>
+                <p class="text-lg font-bold text-blue-300">{{ netConsumption }}</p>
+              </div>
+            </div>
+            <!-- Balken-Visualisierung -->
+            <div v-tooltip="'Grün = rekuperierte Energie / Rot = Nettoverbrauch nach Rekuperation'">
+              <div class="flex h-3 rounded-full overflow-hidden bg-gray-700">
+                <div class="bg-emerald-500 transition-all"
+                  :style="{ width: regenBarPct + '%' }"></div>
+                <div class="bg-tesla-red transition-all flex-1"></div>
+              </div>
+              <div class="flex justify-between text-xs text-gray-500 mt-1">
+                <span>⚡ Rekuperation</span>
+                <span>🔋 Netto</span>
+              </div>
+            </div>
+          </div>
+        </template>
       </div>
     </template>
   </div>
@@ -258,6 +298,34 @@ const consumption = computed(() =>
   trip.value?.distance_km
     ? fmtEfficiency(trip.value.energy_used_kwh / trip.value.distance_km * 100)
     : '–'
+);
+
+// ── Rekuperation ──
+const regenKwh = computed(() => trip.value?.regen_kwh ?? 0);
+const grossKwh = computed(() => trip.value?.energy_used_kwh ?? 0);
+
+const regenRatioPct = computed(() => {
+  if (!grossKwh.value || !regenKwh.value) return 0;
+  return Math.min(99, Math.round((regenKwh.value / grossKwh.value) * 100));
+});
+
+const regenRatioClass = computed(() => {
+  const p = regenRatioPct.value;
+  if (p >= 25) return 'text-emerald-400';
+  if (p >= 12) return 'text-yellow-400';
+  return 'text-gray-400';
+});
+
+const netConsumption = computed(() => {
+  const net = grossKwh.value - regenKwh.value;
+  const dist = trip.value?.distance_km;
+  if (!dist || net <= 0) return '–';
+  return fmtEfficiency(net / dist * 100);
+});
+
+// Anteil des grünen Balkens am Gesamt-Bar (0–50 % max, damit rot immer sichtbar bleibt)
+const regenBarPct = computed(() =>
+  Math.min(50, regenRatioPct.value)
 );
 
 const chartOpts = {

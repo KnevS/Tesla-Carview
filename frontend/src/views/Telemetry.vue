@@ -97,24 +97,7 @@
       <SortableSection v-if="sid === 'tpms'" page-id="telemetry" section-id="tpms"
         title="Reifendruck (TPMS)" icon="🛞"
         :collapsed="isCollapsed('tpms')" @toggle="toggle('tpms')" @move="(f,t,p) => moveSection(f,t,p)">
-        <div class="relative mx-auto w-52 h-36">
-          <svg viewBox="0 0 208 144" class="absolute inset-0 w-full h-full">
-            <rect x="44" y="32" width="120" height="80" rx="16" fill="none" stroke="#374151" stroke-width="2"/>
-            <rect x="64" y="16" width="80" height="40" rx="10" fill="none" stroke="#374151" stroke-width="2"/>
-          </svg>
-          <div class="absolute top-0 left-0" v-tooltip="'Vorderreifen links – optimaler Druck: 2.4–2.9 bar'">
-            <TireBadge :value="data.vehicle.tpms.fl" label="VL" />
-          </div>
-          <div class="absolute top-0 right-0" v-tooltip="'Vorderreifen rechts – optimaler Druck: 2.4–2.9 bar'">
-            <TireBadge :value="data.vehicle.tpms.fr" label="VR" />
-          </div>
-          <div class="absolute bottom-0 left-0" v-tooltip="'Hinterreifen links – optimaler Druck: 2.4–2.9 bar'">
-            <TireBadge :value="data.vehicle.tpms.rl" label="HL" />
-          </div>
-          <div class="absolute bottom-0 right-0" v-tooltip="'Hinterreifen rechts – optimaler Druck: 2.4–2.9 bar'">
-            <TireBadge :value="data.vehicle.tpms.rr" label="HR" />
-          </div>
-        </div>
+        <TireMap :tpms="data.vehicle.tpms" />
       </SortableSection>
 
       <!-- Climate -->
@@ -204,6 +187,7 @@ import { useUnits } from '../store/prefs.js';
 import api from '../api.js';
 import AppIcon from '../components/AppIcon.vue';
 import SortableSection from '../components/SortableSection.vue';
+import TireMap from '../components/TireMap.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
 
 const appStore = useAppStore();
@@ -214,23 +198,6 @@ const TELEMETRY_SECTIONS = ['hero', 'map', 'power', 'tpms', 'climate', 'charging
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('telemetry', TELEMETRY_SECTIONS);
 
 // Inline sub-components
-const TireBadge = {
-  props: ['value', 'label'],
-  setup(props) {
-    const cls = computed(() => {
-      if (props.value == null) return 'border-gray-600 text-gray-500';
-      if (props.value < 2.0 || props.value > 3.2) return 'border-red-500 text-red-400 bg-red-900/20';
-      if (props.value < 2.3 || props.value > 2.9) return 'border-yellow-500 text-yellow-400 bg-yellow-900/20';
-      return 'border-green-500 text-green-400 bg-green-900/20';
-    });
-    return () => h('div', { class: 'flex flex-col items-center gap-0.5' }, [
-      h('div', { class: `w-14 h-9 rounded border-2 flex items-center justify-center text-xs font-bold ${cls.value}` },
-        props.value != null ? props.value + ' b' : '—'),
-      h('div', { class: 'text-xs text-gray-500' }, props.label),
-    ]);
-  },
-};
-
 const DataRow = {
   props: ['label', 'value', 'tooltip'],
   setup(props) {

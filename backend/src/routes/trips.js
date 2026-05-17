@@ -429,17 +429,31 @@ router.get('/:id', (req, res) => {
     if (!trip) return res.status(404).json({ error: 'Fahrt nicht gefunden' });
 
 
-    const points = trip.source === 'telemetry'
-      ? db.prepare(
-          `SELECT timestamp, lat, lon, speed_kmh, power_kw, soc AS battery_level
-           FROM telemetry_points WHERE trip_id = ? ORDER BY timestamp ASC`
-        ).all(trip.id)
-      : db.prepare(
-          `SELECT timestamp, lat, lon, speed_kmh, power_kw, soc AS battery_level
-           FROM trip_points WHERE trip_id = ? ORDER BY timestamp ASC`
-        ).all(trip.id);
+    const pointsTable = trip.source === 'telemetry' ? 'telemetry_points' : 'trip_points';
+    const points = db.prepare(
+      `SELECT timestamp, lat, lon, speed_kmh, power_kw, soc AS battery_level
+       FROM ${pointsTable} WHERE trip_id = ? ORDER BY timestamp ASC`
+    ).all(trip.id);
 
-    res.json({ ...trip, points });
+    // Rekuperation: Summe aller negativen power_kw-Werte × Zeitdelta → kWh
+    // Benutzt SQLite-Fensterfunktion LEAD (verfügbar ab SQLite 3.25 / 2018).
+    const regenRow = db.prepare(
+      `SELECT ROUND(
+         COALESCE(SUM(
+           CASE WHEN power_kw < 0 AND next_ts IS NOT NULL
+           THEN ABS(power_kw) * (next_ts - timestamp) / 3600.0
+           ELSE 0 END
+         ), 0), 3
+       ) AS regen_kwh
+       FROM (
+         SELECT timestamp, power_kw,
+                LEAD(timestamp) OVER (ORDER BY timestamp) AS next_ts
+         FROM ${pointsTable}
+         WHERE trip_id = ? AND power_kw IS NOT NULL
+       )`
+    ).get(trip.id);
+
+    res.json({ ...trip, points, regen_kwh: regenRow?.regen_kwh ?? 0 });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

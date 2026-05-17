@@ -505,7 +505,9 @@
     "toastSent": "Commande envoyée",
     "toastRejected": "Commande refusée",
     "toastAsleep": "Véhicule en veille – réveillez-le d'abord",
-    "toastSendError": "Erreur d'envoi"
+    "toastSendError": "Erreur d'envoi",
+    "layoutCompact": "Vue compacte",
+    "layoutTiles": "Vue en tuiles"
   },
   "exportPage": {
     "title": "Exporter les données",
@@ -1698,7 +1700,10 @@
     "avoidTollsTip": "Éviter les routes à péage",
     "avoidFerry": "Ferries",
     "avoidFerryTip": "Éviter les traversées en ferry",
-    "actionsTitle": "Actions"
+    "actionsTitle": "Actions",
+    "exportICS": "Exporter en événement calendrier (.ics)",
+    "icsTooltip": "Télécharger l'itinéraire en .ics pour Apple Calendrier, Google Calendar ou Outlook",
+    "icsPrivacyNote": "Si ce calendrier est partagé: marquez cet événement comme Privé afin que le départ, la destination et l'horaire ne soient pas visibles."
   },
   "wizard": {
     "title": "Assistant de configuration",

@@ -505,7 +505,9 @@
     "toastSent": "Command sent",
     "toastRejected": "Command rejected",
     "toastAsleep": "Vehicle is asleep – wake it first",
-    "toastSendError": "Error sending command"
+    "toastSendError": "Error sending command",
+    "layoutCompact": "Compact view",
+    "layoutTiles": "Tile view"
   },
   "exportPage": {
     "title": "Export data",
@@ -1698,7 +1700,10 @@
     "avoidTollsTip": "Avoid toll roads",
     "avoidFerry": "Ferries",
     "avoidFerryTip": "Avoid ferry connections",
-    "actionsTitle": "Actions"
+    "actionsTitle": "Actions",
+    "exportICS": "Export as calendar event (.ics)",
+    "icsTooltip": "Download route as .ics file for import into Apple Calendar, Google Calendar or Outlook",
+    "icsPrivacyNote": "If this calendar is shared: please mark this event as Private so start, destination and travel time are not visible to others."
   },
   "wizard": {
     "title": "Settings Wizard",

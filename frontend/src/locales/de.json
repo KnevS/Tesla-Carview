@@ -505,7 +505,9 @@
     "toastSent": "Befehl gesendet",
     "toastRejected": "Befehl abgelehnt",
     "toastAsleep": "Fahrzeug schläft – zuerst aufwecken",
-    "toastSendError": "Fehler beim Senden des Befehls"
+    "toastSendError": "Fehler beim Senden des Befehls",
+    "layoutCompact": "Kompakt-Ansicht",
+    "layoutTiles": "Kachel-Ansicht"
   },
   "exportPage": {
     "title": "Daten exportieren",
@@ -1697,7 +1699,10 @@
     "avoidTollsTip": "Mautpflichtige Straßen meiden",
     "avoidFerry": "Fähren",
     "avoidFerryTip": "Fährverbindungen meiden",
-    "actionsTitle": "Aktionen"
+    "actionsTitle": "Aktionen",
+    "exportICS": "Als Kalender-Termin exportieren (.ics)",
+    "icsTooltip": "Route als .ics-Datei herunterladen und in Apple Kalender, Google Calendar oder Outlook importieren",
+    "icsPrivacyNote": "Falls dieser Kalender geteilt wird: Termin bitte als Privat markieren, damit Startort, Ziel und Reisezeit für andere nicht sichtbar sind."
   },
   "wizard": {
     "title": "Einstellungs-Assistent",
