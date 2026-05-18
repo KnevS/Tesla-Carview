@@ -9,6 +9,7 @@
     "start": "node src/index.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1048.0",
     "@simplewebauthn/server": "^10.0.0",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
@@ -26,6 +27,7 @@
     "otpauth": "^9.3.3",
     "protobufjs": "^7.4.0",
     "qrcode": "^1.5.3",
+    "ssh2-sftp-client": "^10.0.3",
     "ws": "^8.18.0",
     "zod": "^3.23.8"
   },

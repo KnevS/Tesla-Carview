@@ -274,6 +274,145 @@
       <p v-else class="text-xs text-gray-500">Noch keine Heal-Ereignisse protokolliert.</p>
     </div>
 
+    <!-- Automatisches Backup (admin only) -->
+    <div v-if="isAdmin" class="card space-y-4">
+      <h2 class="font-semibold flex items-center gap-2">
+        <AppIcon name="download" :size="20" class="text-tesla-red" />
+        Automatisches Backup
+        <span v-if="bkpCfg.enabled" class="text-xs text-green-400 ml-auto font-normal">● Aktiv</span>
+        <span v-else class="text-xs text-gray-500 ml-auto font-normal">● Inaktiv</span>
+      </h2>
+
+      <label class="flex items-center gap-3 cursor-pointer select-none">
+        <input type="checkbox" v-model="bkpCfg.enabled" class="w-4 h-4 accent-tesla-red" />
+        <span class="text-sm">Tägliches Backup aktivieren</span>
+      </label>
+
+      <template v-if="bkpCfg.enabled">
+        <!-- Uhrzeit -->
+        <div class="flex items-center gap-3 text-sm">
+          <span class="text-gray-400 shrink-0">Uhrzeit (UTC):</span>
+          <select v-model.number="bkpCfg.hour_utc" class="input text-sm w-32">
+            <option v-for="h in 24" :key="h-1" :value="h-1">{{ String(h-1).padStart(2,'0') }}:00 UTC</option>
+          </select>
+          <span class="text-xs text-gray-500">(02:00 UTC ≈ 03:00 / 04:00 Berlin)</span>
+        </div>
+
+        <!-- Modus-Tabs -->
+        <div>
+          <p class="text-xs text-gray-400 mb-2">Backup-Ziel</p>
+          <div class="flex gap-1 rounded-lg bg-gray-800/60 p-1 text-sm">
+            <button v-for="m in [{k:'local',l:'📁 Lokal'},{k:'path',l:'🗂 Pfad'},{k:'s3',l:'☁ S3'},{k:'sftp',l:'🔒 SFTP'}]"
+              :key="m.k" @click="bkpCfg.mode = m.k"
+              :class="bkpCfg.mode===m.k
+                ? 'bg-tesla-red text-white shadow'
+                : 'text-gray-400 hover:text-white'"
+              class="flex-1 py-1.5 px-2 rounded-md transition text-center text-xs font-medium">
+              {{ m.l }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Modus: lokal -->
+        <div v-if="bkpCfg.mode==='local'" class="space-y-2">
+          <p class="text-xs text-gray-400">
+            Speichert die Backup-JSON nach <code class="text-gray-300">/app/data/backups/</code>
+            (= <code class="text-gray-300">./data/backups/</code> auf dem Host). Kein Setup nötig.
+          </p>
+          <div class="flex items-center gap-3 text-sm">
+            <span class="text-gray-400">Aufbewahrung:</span>
+            <input type="number" v-model.number="bkpCfg.retention_days" min="1" max="365"
+              class="input text-sm w-24" />
+            <span class="text-gray-400">Tage</span>
+          </div>
+        </div>
+
+        <!-- Modus: benutzerdefinierter Pfad -->
+        <div v-if="bkpCfg.mode==='path'" class="space-y-2">
+          <p class="text-xs text-gray-400">
+            Pfad <strong>innerhalb des Containers</strong>. Muss als Volume in
+            <code class="text-gray-300">docker-compose.prod.yml</code> gemountet sein,
+            z. B. <code class="text-gray-300">/mnt/nas:/mnt/nas</code>.
+          </p>
+          <input v-model="bkpCfg.path" type="text" placeholder="/mnt/nas/backups"
+            class="w-full input text-sm font-mono" />
+          <div class="flex items-center gap-3 text-sm">
+            <span class="text-gray-400">Aufbewahrung:</span>
+            <input type="number" v-model.number="bkpCfg.retention_days" min="1" max="365"
+              class="input text-sm w-24" />
+            <span class="text-gray-400">Tage</span>
+          </div>
+        </div>
+
+        <!-- Modus: S3 -->
+        <div v-if="bkpCfg.mode==='s3'" class="space-y-2">
+          <p class="text-xs text-gray-400">
+            Amazon S3, MinIO, Backblaze B2, Cloudflare R2 o. Ä.
+            Endpoint leer lassen für AWS, sonst vollständige URL angeben.
+          </p>
+          <div class="grid sm:grid-cols-2 gap-2">
+            <input v-model="bkpCfg.s3_bucket" type="text" placeholder="Bucket-Name" class="input text-sm" />
+            <input v-model="bkpCfg.s3_region" type="text" placeholder="us-east-1" class="input text-sm" />
+          </div>
+          <input v-model="bkpCfg.s3_endpoint" type="text"
+            placeholder="https://minio.example.com  (leer = AWS S3)"
+            class="w-full input text-sm font-mono" />
+          <input v-model="bkpCfg.s3_prefix" type="text" placeholder="tesla-carview/"
+            class="w-full input text-sm font-mono" />
+          <input v-model="bkpCfg.s3_key_id" type="text" placeholder="Access Key ID"
+            class="w-full input text-sm font-mono" />
+          <input v-model="bkpCfg.s3_secret_input" type="password"
+            :placeholder="bkpCfg.s3_secret_set ? '••••••  (leer lassen = nicht ändern)' : 'Secret Access Key'"
+            class="w-full input text-sm font-mono" />
+        </div>
+
+        <!-- Modus: SFTP -->
+        <div v-if="bkpCfg.mode==='sftp'" class="space-y-2">
+          <p class="text-xs text-gray-400">
+            Lädt die Backup-JSON auf einen SFTP-Server hoch. Passwortauthentifizierung.
+          </p>
+          <div class="grid sm:grid-cols-3 gap-2">
+            <input v-model="bkpCfg.sftp_host" type="text" placeholder="backup.example.com"
+              class="sm:col-span-2 input text-sm" />
+            <input v-model.number="bkpCfg.sftp_port" type="number" placeholder="22" class="input text-sm" />
+          </div>
+          <input v-model="bkpCfg.sftp_user" type="text" placeholder="Benutzername"
+            class="w-full input text-sm" />
+          <input v-model="bkpCfg.sftp_pw_input" type="password"
+            :placeholder="bkpCfg.sftp_password_set ? '••••••  (leer lassen = nicht ändern)' : 'Passwort'"
+            class="w-full input text-sm" />
+          <input v-model="bkpCfg.sftp_path" type="text" placeholder="/backups/"
+            class="w-full input text-sm font-mono" />
+        </div>
+      </template>
+
+      <!-- Letzter Lauf -->
+      <div v-if="bkpCfg.last_run" class="border-t border-gray-700 pt-3 space-y-1">
+        <div class="flex items-center gap-2 text-xs">
+          <span :class="bkpCfg.last_status==='success' ? 'text-green-400' : 'text-red-400'">
+            {{ bkpCfg.last_status==='success' ? '✓' : '✗' }}
+          </span>
+          <span class="text-gray-400">Letzter Lauf: {{ new Date(bkpCfg.last_run).toLocaleString('de-DE') }}</span>
+        </div>
+        <p v-if="bkpCfg.last_filename" class="text-xs text-gray-500 font-mono truncate">{{ bkpCfg.last_filename }}</p>
+        <p v-if="bkpCfg.last_error" class="text-xs text-red-400">{{ bkpCfg.last_error }}</p>
+      </div>
+      <p v-else class="text-xs text-gray-500">Noch kein automatischer Backup durchgeführt.</p>
+
+      <!-- Aktionen -->
+      <div class="flex gap-2 flex-wrap items-center">
+        <button @click="saveBackupConfig" :disabled="bkpSaving"
+          class="px-3 py-1.5 rounded-lg text-sm bg-tesla-red text-white hover:bg-red-600 disabled:opacity-40 transition">
+          {{ bkpSaving ? '…' : 'Speichern' }}
+        </button>
+        <button @click="triggerBackupNow" :disabled="bkpRunning"
+          class="px-3 py-1.5 rounded-lg text-sm border border-gray-600 text-gray-300 hover:border-gray-400 disabled:opacity-40 transition">
+          {{ bkpRunning ? 'Läuft …' : 'Jetzt sichern' }}
+        </button>
+      </div>
+      <p v-if="bkpMsg" :class="bkpMsgOk ? 'text-green-400' : 'text-red-400'" class="text-xs mt-1">{{ bkpMsg }}</p>
+    </div>
+
     <!-- Externe API-Schlüssel (admin only) -->
     <div v-if="isAdmin" id="api-keys-section" class="card space-y-4">
       <h2 class="font-semibold flex items-center gap-2">
@@ -1023,6 +1162,58 @@ function fmtDate(d) {
   return d ? new Date(d).toLocaleString('de-DE') : '—';
 }
 
+// ─── Automatisches Backup ─────────────────────────────────────────────────
+const bkpCfg     = ref({ enabled: false, mode: 'local', hour_utc: 2, retention_days: 30 });
+const bkpSaving  = ref(false);
+const bkpRunning = ref(false);
+const bkpMsg     = ref('');
+const bkpMsgOk   = ref(true);
+
+async function loadBackupConfig() {
+  try {
+    const { data } = await api.get('/system/backup-config');
+    bkpCfg.value = { ...data, s3_secret_input: '', sftp_pw_input: '' };
+  } catch { /* ignore */ }
+}
+
+async function saveBackupConfig() {
+  bkpSaving.value = true; bkpMsg.value = '';
+  try {
+    const payload = { ...bkpCfg.value };
+    if (payload.s3_secret_input?.trim()) payload.s3_secret = payload.s3_secret_input;
+    if (payload.sftp_pw_input?.trim())   payload.sftp_password = payload.sftp_pw_input;
+    // Felder, die der Server nicht braucht, entfernen
+    ['s3_secret_input', 'sftp_pw_input', 's3_secret_set', 'sftp_password_set',
+     'last_run', 'last_status', 'last_error', 'last_filename'].forEach(k => delete payload[k]);
+    await api.put('/system/backup-config', payload);
+    bkpMsg.value = '✓ Gespeichert';
+    bkpMsgOk.value = true;
+    await loadBackupConfig();
+  } catch (e) {
+    bkpMsg.value = e.response?.data?.error ?? 'Fehler beim Speichern';
+    bkpMsgOk.value = false;
+  } finally {
+    bkpSaving.value = false;
+    setTimeout(() => { bkpMsg.value = ''; }, 3000);
+  }
+}
+
+async function triggerBackupNow() {
+  bkpRunning.value = true; bkpMsg.value = '';
+  try {
+    const { data } = await api.post('/system/backup-now');
+    bkpMsg.value = `✓ Backup: ${data.target}`;
+    bkpMsgOk.value = true;
+    await loadBackupConfig();
+  } catch (e) {
+    bkpMsg.value = e.response?.data?.error ?? 'Fehler';
+    bkpMsgOk.value = false;
+  } finally {
+    bkpRunning.value = false;
+    setTimeout(() => { bkpMsg.value = ''; }, 8000);
+  }
+}
+
 onMounted(async () => {
   try {
     const { data } = await api.get('/system/version');
@@ -1038,6 +1229,7 @@ onMounted(async () => {
     loadMonitoringConfig();
     loadSmtpConfig();
     loadMonitoringLog();
+    loadBackupConfig();
   }
 });
 </script>

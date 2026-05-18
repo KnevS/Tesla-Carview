@@ -17,6 +17,7 @@ import {
 } from '../db/database.js';
 import { getFuzzingConfig, setFuzzingConfig } from '../services/gpsFuzzing.js';
 import { getTenantStatus as getCircuitStatus, CIRCUIT_THRESHOLD } from '../services/teslaCircuitBreaker.js';
+import { getBackupConfig, setBackupConfig, runBackupForTenant } from '../services/autoBackupService.js';
 import https from 'https';
 
 const router = Router();
@@ -719,6 +720,60 @@ router.put('/smtp-config', requireAuth, requireAdmin, (req, res) => {
     upsert.run('smtp.password', password.trim());
   if (from     !== undefined) upsert.run('smtp.from', from.trim());
   res.json({ ok: true });
+});
+
+// ── Auto-Backup-Konfiguration ────────────────────────────────────────────────
+
+router.get('/backup-config', requireAuth, requireAdmin, (req, res) => {
+  const cfg = getBackupConfig(req.db);
+  // Sensible Felder maskieren — Frontend zeigt "••••••" wenn gesetzt
+  res.json({
+    ...cfg,
+    s3_secret:     cfg.s3_secret     ? '••••••' : '',
+    sftp_password: cfg.sftp_password ? '••••••' : '',
+    s3_secret_set:     !!cfg.s3_secret,
+    sftp_password_set: !!cfg.sftp_password,
+  });
+});
+
+router.put('/backup-config', requireAuth, requireAdmin, (req, res) => {
+  const allowed = [
+    'enabled', 'mode', 'hour_utc', 'retention_days', 'path',
+    's3_bucket', 's3_region', 's3_endpoint', 's3_key_id', 's3_secret', 's3_prefix',
+    'sftp_host', 'sftp_port', 'sftp_user', 'sftp_password', 'sftp_path',
+  ];
+  const updates = {};
+  for (const k of allowed) {
+    if (req.body[k] !== undefined) updates[k] = req.body[k];
+  }
+  if (updates.mode && !['local', 'path', 's3', 'sftp'].includes(updates.mode)) {
+    return res.status(400).json({ error: 'Ungültiger Modus' });
+  }
+  if (updates.hour_utc !== undefined) {
+    updates.hour_utc = parseInt(updates.hour_utc, 10);
+    if (isNaN(updates.hour_utc) || updates.hour_utc < 0 || updates.hour_utc > 23)
+      return res.status(400).json({ error: 'Stunde muss 0–23 sein' });
+  }
+  // Leerer String = "nicht ändern" für Passwortfelder
+  if (updates.s3_secret     === '••••••') delete updates.s3_secret;
+  if (updates.sftp_password === '••••••') delete updates.sftp_password;
+  setBackupConfig(req.db, updates);
+  auditLog(req.db, req.user.sub, 'backup_config_updated', req, { mode: updates.mode });
+  res.json({ ok: true });
+});
+
+router.post('/backup-now', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const result = await runBackupForTenant(req.tenantId);
+    if (result.ok) {
+      auditLog(req.db, req.user.sub, 'manual_backup_triggered', req, { target: result.target });
+      res.json(result);
+    } else {
+      res.status(500).json({ error: result.error });
+    }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 router.post('/smtp-test', requireAuth, requireAdmin, async (req, res) => {

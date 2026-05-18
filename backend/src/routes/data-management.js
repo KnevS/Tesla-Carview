@@ -7,35 +7,10 @@ import { auditLog } from '../services/auditService.js';
 import { copyFileSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { getTenantById } from '../db/database.js';
+import { BACKUP_TABLES } from '../db/backupTables.js';
 
 const router = Router();
 router.use(requireAuth);
-
-/** Tabellen, die in das vollstaendige Backup eines Tenants kommen.
- *  Reihenfolge ist beim Restore irrelevant — wir disablen waehrend des
- *  Restores temporaer die Foreign Keys, sonst gibt's Henne-Ei-Probleme
- *  (vehicle_users referenziert vehicles + users etc.). Was beim Restore
- *  bewusst NICHT zurueckgespielt wird:
- *    - push_subscriptions (browser-spezifisch — neue Subscription noetig)
- *    - refresh_tokens     (leben im master.db, nicht hier)
- *    - oauth_pkce         (transient, leben ebenfalls im master.db)
- *  passkey_credentials wird mitgesichert: die credential_id ist server-
- *  seitig gespeichert und gehoert zum User-Record — nach einem Restore
- *  auf denselben Server laeuft der Passkey sofort wieder, weil die
- *  user_id aus dem Backup erhalten bleibt. */
-const BACKUP_TABLES = [
-  'users', 'drivers', 'vehicles',
-  'trips', 'trip_points',
-  'charging_locations', 'charging_sessions', 'charging_points',
-  'battery_snapshots', 'logbook_entries', 'telemetry_points',
-  'vehicle_state_cache', 'vehicle_users',
-  'passkey_credentials',
-  'mfa_backup_codes', 'audit_logs',
-  'tokens', 'tenant_settings', 'virtual_key',
-  'user_invites', 'legal_acceptance',
-  'service_intervals', 'trip_changes',
-  'billing_periods', 'tesla_api_usage', 'tesla_usage_events',
-];
 
 // Restore-Upload bis 500 MB im RAM — fuer einen Tenant ueblicherweise
 // 10–100 MB. Falls jemand riesige Telemetrie-Datenbanken sichert,
