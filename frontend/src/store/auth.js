@@ -35,13 +35,17 @@ export const useAuthStore = defineStore('auth', {
       try {
         const { data } = await api.get('/auth/tenants');
         this.availableTenants = data;
-        if (!this.tenantSlug) {
+        const nonDemo = data.filter(t => !t.is_demo);
+        // Gespeicherten Slug zurücksetzen wenn er einem Demo-Mandanten gehört
+        const storedIsDemo = this.tenantSlug &&
+          data.find(t => t.slug === this.tenantSlug)?.is_demo;
+        if (!this.tenantSlug || storedIsDemo) {
           if (data.length === 1) {
             this.tenantSlug = data[0].slug;
-          } else {
-            // Bei mehreren Mandanten: auto-select wenn genau ein nicht-Demo-Mandant aktiv
-            const nonDemo = data.filter(t => !t.is_demo);
-            if (nonDemo.length === 1) this.tenantSlug = nonDemo[0].slug;
+            localStorage.setItem(TENANT_SLUG_KEY, this.tenantSlug);
+          } else if (nonDemo.length === 1) {
+            this.tenantSlug = nonDemo[0].slug;
+            localStorage.setItem(TENANT_SLUG_KEY, this.tenantSlug);
           }
         }
       } catch { /* ignorieren */ }
