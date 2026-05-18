@@ -58,6 +58,45 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 
 ---
 
+## Vorschau
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/01-dashboard.png" alt="Dashboard" /></td>
+    <td><img src="docs/screenshots/02-trips.png" alt="Fahrten" /></td>
+    <td><img src="docs/screenshots/04-charging.png" alt="Laden" /></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Dashboard</em></td>
+    <td align="center"><em>Fahrten</em></td>
+    <td align="center"><em>Laden</em></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/07-route-planner.png" alt="Routenplaner" /></td>
+    <td><img src="docs/screenshots/10-route-charging-en.png" alt="Ladeplanung mit Ladestopps" /></td>
+    <td><img src="docs/screenshots/08-control.png" alt="Fahrzeugsteuerung" /></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Routenplaner</em></td>
+    <td align="center"><em>Ladeplanung (Stuttgart → Berlin)</em></td>
+    <td align="center"><em>Fahrzeugsteuerung</em></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/06-logbook.png" alt="Fahrtenbuch" /></td>
+    <td><img src="docs/screenshots/12-trips-company-en.png" alt="Dienstwagen-Modus" /></td>
+    <td><img src="docs/screenshots/09-settings.png" alt="Einstellungen" /></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Fahrtenbuch</em></td>
+    <td align="center"><em>Dienstwagen-Modus</em></td>
+    <td align="center"><em>Einstellungen</em></td>
+  </tr>
+</table>
+
+📸 [Alle Screenshots in der Wiki →](../../wiki/Screenshots)
+
+---
+
 ## Multi-Mandanten-Architektur (seit v2.0)
 
 Seit v2.0 unterstützt Tesla Carview **mehrere Mandanten** mit vollständiger Datenisolierung:

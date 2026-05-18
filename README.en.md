@@ -58,6 +58,45 @@ Runs on: **Linux servers** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), local
 
 ---
 
+## Preview
+
+<table>
+  <tr>
+    <td><img src="docs/screenshots/01-dashboard.png" alt="Dashboard" /></td>
+    <td><img src="docs/screenshots/02-trips.png" alt="Trips" /></td>
+    <td><img src="docs/screenshots/04-charging.png" alt="Charging" /></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Dashboard</em></td>
+    <td align="center"><em>Trips</em></td>
+    <td align="center"><em>Charging</em></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/07-route-planner.png" alt="Route planner" /></td>
+    <td><img src="docs/screenshots/10-route-charging-en.png" alt="Charging plan with stops" /></td>
+    <td><img src="docs/screenshots/08-control.png" alt="Vehicle controls" /></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Route planner</em></td>
+    <td align="center"><em>Charging plan (Stuttgart → Berlin)</em></td>
+    <td align="center"><em>Vehicle controls</em></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/06-logbook.png" alt="Logbook" /></td>
+    <td><img src="docs/screenshots/12-trips-company-en.png" alt="Company car mode" /></td>
+    <td><img src="docs/screenshots/09-settings.png" alt="Settings" /></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Logbook</em></td>
+    <td align="center"><em>Company car mode</em></td>
+    <td align="center"><em>Settings</em></td>
+  </tr>
+</table>
+
+📸 [All screenshots in the Wiki →](../../wiki/Screenshots)
+
+---
+
 ## Multi-tenant architecture (since v2.0)
 
 Since v2.0 Tesla Carview supports **multiple tenants** with full data isolation:
