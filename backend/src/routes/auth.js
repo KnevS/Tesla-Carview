@@ -6,7 +6,7 @@ import { validate } from '../middleware/validate.js';
 import { loginRateLimit } from '../middleware/security.js';
 import { requireAuth } from '../middleware/auth.js';
 import {
-  findUserByUsername, verifyPassword,
+  findUserByUsername, verifyPassword, rehashIfLegacy,
   recordFailedLogin, resetFailedLogins, isLockedOut,
 } from '../services/userService.js';
 import { verifyTotp, verifyBackupCode, decryptMfaSecret } from '../services/mfaService.js';
@@ -114,6 +114,8 @@ router.post('/login', loginRateLimit, validate(z.object({
   }
 
   resetFailedLogins(db, user.id);
+  // Transparentes Upgrade bcrypt -> Argon2id beim ersten Login nach Update.
+  await rehashIfLegacy(db, user, password);
   const accessToken  = issueAccessToken(user, tenant.id);
   const refreshToken = issueRefreshToken(user.id, tenant.id, req);
   setRefreshCookie(res, refreshToken);

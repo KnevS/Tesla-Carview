@@ -1,8 +1,16 @@
 import bcrypt from 'bcryptjs';
+import argon2 from 'argon2';
 
-const SALT_ROUNDS         = 12;
+const SALT_ROUNDS         = 12; // behalten fuer Altdaten-Verifikation
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_SECONDS     = 15 * 60;
+
+// Argon2id-Optionen gemaess OWASP-Empfehlung 2024:
+// t=3 Iterationen, 64 MB Memory, p=4 Parallelitaet.
+const ARGON2_OPTIONS = { type: argon2.argon2id, memoryCost: 65536, timeCost: 3, parallelism: 4 };
+
+const isArgon2Hash = h => typeof h === 'string' && h.startsWith('$argon2');
+const isBcryptHash = h => typeof h === 'string' && (h.startsWith('$2b$') || h.startsWith('$2a$'));
 
 /**
  * Defaults pro Rolle:
@@ -14,7 +22,7 @@ const LOCKOUT_SECONDS     = 15 * 60;
  * tatsaechlich aktiviert (siehe routes/mfa.js).
  */
 export async function createUser(db, username, password, role = 'user', email = null) {
-  const hash = await bcrypt.hash(password, SALT_ROUNDS);
+  const hash = await argon2.hash(password, ARGON2_OPTIONS);
   const isAdmin = role === 'admin';
   const result = db.prepare(
     `INSERT INTO users
@@ -42,11 +50,22 @@ export function findUserById(db, id) {
 }
 
 export async function verifyPassword(user, password) {
-  return bcrypt.compare(password, user.password_hash);
+  const hash = user.password_hash;
+  if (isArgon2Hash(hash)) return argon2.verify(hash, password);
+  if (isBcryptHash(hash)) return bcrypt.compare(password, hash);
+  return false;
+}
+
+// Wird vom Login-Flow aufgerufen wenn der gespeicherte Hash noch bcrypt ist.
+// Ersetzt ihn transparent durch Argon2id — der User merkt nichts.
+export async function rehashIfLegacy(db, user, password) {
+  if (!isBcryptHash(user.password_hash)) return;
+  const newHash = await argon2.hash(password, ARGON2_OPTIONS);
+  db.prepare('UPDATE users SET password_hash=? WHERE id=?').run(newHash, user.id);
 }
 
 export async function changePassword(db, userId, newPassword) {
-  const hash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+  const hash = await argon2.hash(newPassword, ARGON2_OPTIONS);
   db.prepare('UPDATE users SET password_hash=? WHERE id=?').run(hash, userId);
 }
 
