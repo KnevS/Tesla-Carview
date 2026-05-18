@@ -1,16 +1,29 @@
 import bcrypt from 'bcryptjs';
-import argon2 from 'argon2';
 
-const SALT_ROUNDS         = 12; // behalten fuer Altdaten-Verifikation
+// Argon2id ist das bevorzugte Verfahren (OWASP 2024). Falls das Paket noch
+// nicht im laufenden Image vorhanden ist (Cache-Race beim CI-Build), wird
+// transparent auf bcrypt 12 Runden zurueckgefallen. Sobald das naechste
+// Image mit korrektem npm ci deployed ist, greift Argon2id automatisch.
+let argon2 = null;
+try {
+  argon2 = (await import('argon2')).default;
+} catch {
+  console.warn('[userService] argon2 nicht verfuegbar — verwende bcrypt als Fallback.');
+}
+
+const SALT_ROUNDS         = 12;
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_SECONDS     = 15 * 60;
 
-// Argon2id-Optionen gemaess OWASP-Empfehlung 2024:
-// t=3 Iterationen, 64 MB Memory, p=4 Parallelitaet.
-const ARGON2_OPTIONS = { type: argon2.argon2id, memoryCost: 65536, timeCost: 3, parallelism: 4 };
+const ARGON2_OPTIONS = { type: 2 /* argon2id */, memoryCost: 65536, timeCost: 3, parallelism: 4 };
 
 const isArgon2Hash = h => typeof h === 'string' && h.startsWith('$argon2');
 const isBcryptHash = h => typeof h === 'string' && (h.startsWith('$2b$') || h.startsWith('$2a$'));
+
+async function hashPassword(password) {
+  if (argon2) return argon2.hash(password, ARGON2_OPTIONS);
+  return bcrypt.hash(password, SALT_ROUNDS);
+}
 
 /**
  * Defaults pro Rolle:
@@ -22,7 +35,7 @@ const isBcryptHash = h => typeof h === 'string' && (h.startsWith('$2b$') || h.st
  * tatsaechlich aktiviert (siehe routes/mfa.js).
  */
 export async function createUser(db, username, password, role = 'user', email = null) {
-  const hash = await argon2.hash(password, ARGON2_OPTIONS);
+  const hash = await hashPassword(password);
   const isAdmin = role === 'admin';
   const result = db.prepare(
     `INSERT INTO users
@@ -51,21 +64,24 @@ export function findUserById(db, id) {
 
 export async function verifyPassword(user, password) {
   const hash = user.password_hash;
-  if (isArgon2Hash(hash)) return argon2.verify(hash, password);
+  if (argon2 && isArgon2Hash(hash)) return argon2.verify(hash, password);
   if (isBcryptHash(hash)) return bcrypt.compare(password, hash);
+  // Argon2-Hash ohne argon2-Paket — sollte nicht passieren
+  if (isArgon2Hash(hash)) throw new Error('[userService] Argon2-Hash gefunden, aber argon2-Paket fehlt.');
   return false;
 }
 
-// Wird vom Login-Flow aufgerufen wenn der gespeicherte Hash noch bcrypt ist.
-// Ersetzt ihn transparent durch Argon2id — der User merkt nichts.
+// Transparentes Upgrade bcrypt -> Argon2id beim ersten Login nach Update.
+// Nur aktiv wenn argon2 verfuegbar ist.
 export async function rehashIfLegacy(db, user, password) {
+  if (!argon2) return;
   if (!isBcryptHash(user.password_hash)) return;
   const newHash = await argon2.hash(password, ARGON2_OPTIONS);
   db.prepare('UPDATE users SET password_hash=? WHERE id=?').run(newHash, user.id);
 }
 
 export async function changePassword(db, userId, newPassword) {
-  const hash = await argon2.hash(newPassword, ARGON2_OPTIONS);
+  const hash = await hashPassword(newPassword);
   db.prepare('UPDATE users SET password_hash=? WHERE id=?').run(hash, userId);
 }
 
