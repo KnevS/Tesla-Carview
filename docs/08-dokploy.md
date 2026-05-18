@@ -89,19 +89,22 @@ Der A-Record der Domain muss auf die Server-IP zeigen.
 
 ---
 
-## 6. Persistente Daten (Volumes)
+## 6. Persistente Daten (Bind-Mount)
 
-Tesla Carview speichert alle Daten im Docker-Volume `tesla_data`.
-Dokploy verwaltet dieses Volume automatisch wenn es in der `docker-compose.prod.yml`
-definiert ist – keine zusätzliche Konfiguration nötig.
+Tesla Carview verwendet ein **Bind-Mount** (`./data:/app/data`), kein benanntes Docker-Volume.
+Alle Datenbankdateien (`master.db`, `tenants/*.db`) liegen direkt im Verzeichnis
+`data/` unterhalb des App-Verzeichnisses auf dem Host — standardmäßig `/opt/tesla-carview/data/`.
 
-Empfohlener Mount-Pfad auf dem Host (für Backups):
+Für Backups genügt ein einfaches `cp`:
 
 ```bash
-# Im Dokploy-Dashboard → Volumes → Host Path hinzufügen:
-Host-Pfad:      /opt/tesla-carview-data
-Container-Pfad: /app/data
+# Manuelles Backup:
+cp /opt/tesla-carview/data/master.db /opt/backups/
+cp /opt/tesla-carview/data/tenants/*.db /opt/backups/
 ```
+
+Der integrierte Auto-Backup (System-Einstellungen → Automatisches Backup) kann Backups
+alternativ auf S3 oder per SFTP ablegen – ohne Cron-Job auf dem Host.
 
 ---
 

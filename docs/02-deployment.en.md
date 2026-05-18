@@ -166,14 +166,14 @@ GitHub → repository → Settings → Secrets and variables → Actions → *Ne
 
 ```bash
 # create a backup:
-docker run --rm \
-  -v tesla-carview_tesla_data:/data \
-  -v /opt/backups:/backup \
-  alpine tar czf /backup/tesla-db-$(date +%Y%m%d-%H%M).tar.gz /data
+cp /opt/tesla-carview/data/master.db /opt/backups/master-$(date +%Y%m%d-%H%M).db
+cp /opt/tesla-carview/data/tenants/*.db /opt/backups/
 
 # automatic daily at 3 a.m. (crontab -e as root):
-0 3 * * * docker run --rm -v tesla-carview_tesla_data:/data -v /opt/backups:/backup alpine tar czf /backup/tesla-db-$(date +\%Y\%m\%d).tar.gz /data
+0 3 * * * cp /opt/tesla-carview/data/master.db /opt/tesla-carview/data/tenants/*.db /opt/backups/
 ```
+
+> **Note:** Tesla Carview uses a bind-mount (`./data:/app/data`), not a named Docker volume. All database files reside directly under `/opt/tesla-carview/data/` on the host. Alternatively, the built-in auto-backup can be configured in the app's system settings (local, path, S3, or SFTP).
 
 ---
 
