@@ -56,25 +56,50 @@ echo ""
 echo "==> Geänderte Container neu starten"
 $COMPOSE up -d --remove-orphans
 
-# Private Dateien in Container injizieren (GHCR-Images haben nur Stubs)
+# Private Dateien verarbeiten (GHCR-Images haben nur Stubs)
 echo ""
-echo "==> Private Overlay-Dateien in Container injizieren"
+echo "==> Private Overlay-Dateien verarbeiten"
 if [ -d "$PRIVATE_REPO" ]; then
+  BACKEND_CHANGED=0
+  FRONTEND_CHANGED=0
+
   while IFS= read -r file; do
     src="$APP_DIR/$file"
-    # Ziel-Pfad: backend/* → /app/src/..., frontend/* wird nicht in Backend injiziert
     case "$file" in
       backend/*)
         dst="/app/${file#backend/}"
         if [ -f "$src" ]; then
-          docker cp "$src" "tesla-carview-backend:$dst" && echo "    ✓ $file"
+          docker cp "$src" "tesla-carview-backend:$dst" && echo "    ✓ Backend: $file"
+          BACKEND_CHANGED=1
         fi
+        ;;
+      frontend/*)
+        FRONTEND_CHANGED=1
         ;;
     esac
   done < <(git --git-dir="$PRIVATE_REPO" ls-files)
-  # Backend neu starten damit Node.js die injizierten Dateien lädt
-  docker restart tesla-carview-backend
-  echo "    Backend restartet mit privaten Dateien."
+
+  # Backend: Neustart damit Node.js die injizierten Dateien lädt
+  if [ "$BACKEND_CHANGED" -eq 1 ]; then
+    docker restart tesla-carview-backend
+    echo "    Backend restartet mit privaten Dateien."
+  fi
+
+  # Frontend: lokal bauen (private Demo.vue kann nicht in pre-compiled Bundle injiziert werden)
+  if [ "$FRONTEND_CHANGED" -eq 1 ]; then
+    echo "    Frontend lokal bauen (enthält private Demo.vue) …"
+    cd "$APP_DIR/frontend"
+    npm install --silent 2>/dev/null
+    ./node_modules/.bin/vite build --silent 2>/dev/null || node_modules/.bin/vite build
+    cd "$APP_DIR"
+
+    # Gebaute Dateien in laufenden Frontend-Container kopieren
+    FRONTEND_CONTAINER=$(docker ps --filter name=tesla-carview-frontend --format "{{.Names}}" | head -1)
+    if [ -n "$FRONTEND_CONTAINER" ]; then
+      docker cp "$APP_DIR/frontend/dist/." "$FRONTEND_CONTAINER":/usr/share/nginx/html/
+      echo "    ✓ Frontend: dist/ → Container $FRONTEND_CONTAINER"
+    fi
+  fi
 else
   echo "    Kein privates Repo gefunden — übersprungen."
 fi
