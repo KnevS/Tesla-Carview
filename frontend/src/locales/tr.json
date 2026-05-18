@@ -1538,6 +1538,9 @@
     "adminLastUpdated": "Son değişiklik: {date}",
     "adminSyncMode": "Yalnızca varsayılan dili (Almanca) düzenle",
     "adminSyncModeHint": "Önerilen. Kaydedildiğinde Almanca metin diğer tüm dillere 1:1 kopyalanır. Public görünümde bu sayfanın şu anda yalnızca Almanca olarak güncellendiğine dair bir bildirim gösterilir.",
+    "adminPropagate": "Tüm dillere uygula",
+    "adminPropagateHint": "Mevcut metni 6 dil sürümüne kopyalar.",
+    "adminPropagated": "Tüm dillere uygulandı. Sürüm: {version}",
     "syncedFromDefaultBanner": "Bu sayfa şu anda yalnızca Almanca olarak güncelleniyor — gördüğünüz içerik Almanca orijinal metindir."
   },
   "invite": {

@@ -1538,6 +1538,9 @@
     "adminLastUpdated": "Última modificación: {date}",
     "adminSyncMode": "Mantener solo el idioma por defecto (alemán)",
     "adminSyncModeHint": "Recomendado. Al guardar, el texto en alemán se copia 1:1 a todos los demás idiomas. La vista pública muestra un aviso de que esta página solo se mantiene actualmente en alemán.",
+    "adminPropagate": "Aplicar a todos los idiomas",
+    "adminPropagateHint": "Copia el texto actual en las 6 versiones de idioma.",
+    "adminPropagated": "Aplicado a todos los idiomas. Versión: {version}",
     "syncedFromDefaultBanner": "Esta página solo se mantiene actualmente en alemán — el contenido mostrado es la versión alemana original."
   },
   "invite": {

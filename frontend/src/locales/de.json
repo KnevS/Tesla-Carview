@@ -1538,6 +1538,9 @@
     "adminLastUpdated": "Zuletzt geändert: {date}",
     "adminSyncMode": "Nur Default-Sprache (Deutsch) pflegen",
     "adminSyncModeHint": "Empfohlen. Beim Speichern wird der deutsche Text 1:1 in alle anderen Sprachen kopiert. Im Public-View wird dort ein Hinweis eingeblendet, dass die Seite derzeit nur auf Deutsch gepflegt wird.",
+    "adminPropagate": "In alle Sprachen übernehmen",
+    "adminPropagateHint": "Schreibt den aktuellen Text dieser Locale in alle 6 Sprachversionen.",
+    "adminPropagated": "In alle Sprachen übernommen. Version: {version}",
     "syncedFromDefaultBanner": "Diese Seite wird derzeit nur auf Deutsch gepflegt — der angezeigte Inhalt ist die deutsche Originalfassung."
   },
   "invite": {

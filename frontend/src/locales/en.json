@@ -1538,6 +1538,9 @@
     "adminLastUpdated": "Last updated: {date}",
     "adminSyncMode": "Only maintain the default language (German)",
     "adminSyncModeHint": "Recommended. When you save, the German text is copied 1:1 into all other languages. The public view shows a banner that this page is currently only maintained in German.",
+    "adminPropagate": "In all languages",
+    "adminPropagateHint": "Writes the current text to all 6 language versions.",
+    "adminPropagated": "Applied to all languages. Version: {version}",
     "syncedFromDefaultBanner": "This page is currently only maintained in German — what you see here is the German source text."
   },
   "invite": {

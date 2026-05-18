@@ -60,10 +60,16 @@
           <input type="checkbox" v-model="bumpVersion" class="h-4 w-4 accent-tesla-red" />
           <span>{{ $t('legal.adminBumpVersion') }}</span>
         </label>
-        <div class="flex items-center gap-3 pt-1">
+        <div class="flex items-center gap-2 flex-wrap pt-1">
           <button @click="save" :disabled="saving || bodyMd === ''"
                   class="btn-primary">
             {{ saving ? '…' : $t('legal.adminSave') }}
+          </button>
+          <button @click="propagateToAll" :disabled="propagating || bodyMd === ''"
+                  class="px-3 py-1.5 rounded-lg text-sm border border-indigo-500 text-indigo-300
+                         hover:bg-indigo-500/20 disabled:opacity-40 transition"
+                  :title="$t('legal.adminPropagateHint')">
+            {{ propagating ? '…' : $t('legal.adminPropagate') }}
           </button>
           <span v-if="savedMsg" class="text-xs text-green-400">{{ savedMsg }}</span>
           <span v-if="error" class="text-xs text-red-400">{{ error }}</span>
@@ -137,9 +143,10 @@ const locale  = ref(syncMode.value ? DEFAULT_LOCALE : 'de');
 const meta    = ref(null);
 const bodyMd  = ref('');
 const bumpVersion = ref(false);
-const saving  = ref(false);
-const savedMsg = ref('');
-const error   = ref('');
+const saving     = ref(false);
+const propagating = ref(false);
+const savedMsg   = ref('');
+const error      = ref('');
 const allRows = ref([]);
 // Sortierreihenfolge nach updated_at pro View in localStorage.
 // Default desc (juengste Aenderung oben). Client-seitig, weil
@@ -167,12 +174,9 @@ const versionMap = computed(() => Object.fromEntries(
 const previewHtml = computed(() => {
   if (!bodyMd.value) return '';
   const decorated = bodyMd.value.replace(
-    /<<[A-Z_]+>>/g, m => `<span class="legal-placeholder">${m}</span>`
+    /<<[A-Z_]+>>/g,
+    m => `<span class="legal-placeholder">${m.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`
   );
-  // sanitize auch in der Admin-Preview — sonst koennte der Admin im
-  // eigenen Editor ein injiziertes <script> live ausfuehren. Sieht
-  // beim Editieren genauso aus wie die spaeter im Public-View
-  // sanitizierte Variante, also gleich der Wahrheit.
   return sanitizeMarkdown(decorated);
 });
 
@@ -220,6 +224,26 @@ async function save() {
     error.value = err.response?.data?.error || err.message;
   } finally {
     saving.value = false;
+  }
+}
+
+async function propagateToAll() {
+  propagating.value = true;
+  error.value = '';
+  savedMsg.value = '';
+  try {
+    const { data } = await api.put(`/legal/admin/${scope.value}/_/all`, {
+      body_md: bodyMd.value,
+      bumpVersion: bumpVersion.value,
+    });
+    savedMsg.value = t('legal.adminPropagated', { version: data.version });
+    bumpVersion.value = false;
+    await loadAll();
+    await loadOne();
+  } catch (err) {
+    error.value = err.response?.data?.error || err.message;
+  } finally {
+    propagating.value = false;
   }
 }
 
