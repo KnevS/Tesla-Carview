@@ -23,6 +23,20 @@ export const securityHeaders = helmet({
   frameguard: { action: 'deny' },
   noSniff: true,
   referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  // Sperrt Browser-APIs, die die App nicht braucht. Verhindert, dass
+  // injizierter Code auf Kamera, Mikrofon, Geolocation etc. zugreift.
+  permissionsPolicy: {
+    features: {
+      camera:          [],
+      microphone:      [],
+      geolocation:     [],
+      payment:         [],
+      usb:             [],
+      bluetooth:       [],
+      fullscreen:      ["'self'"],
+      displayCapture:  [],
+    },
+  },
 });
 
 /** Strenge Begrenzung fuer Login-Versuche: max. 10 pro 15 Minuten pro IP */

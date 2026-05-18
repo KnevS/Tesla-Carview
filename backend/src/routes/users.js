@@ -5,6 +5,7 @@ import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import { createUser, findUserById, changePassword, verifyPassword } from '../services/userService.js';
 import { auditLog } from '../services/auditService.js';
+import { getMasterDb } from '../db/database.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -177,6 +178,11 @@ router.put('/me/password', validate(z.object({
     return res.status(400).json({ error: 'Neues Passwort muss sich vom alten unterscheiden' });
   }
   await changePassword(req.db, user.id, req.body.newPassword);
+  // Alle aktiven Refresh-Tokens dieses Users invalidieren — ein kompromittiertes
+  // Token aus einer fremden Session soll nach Passwort-Aenderung wertlos sein.
+  getMasterDb().prepare('DELETE FROM refresh_tokens WHERE user_id=? AND tenant_id=?')
+    .run(user.id, req.tenantId);
+  res.clearCookie('refresh_token', { path: '/api/auth' });
   auditLog(req.db, user.id, 'password_changed', req);
   res.json({ success: true });
 });
