@@ -172,12 +172,14 @@ Administratoren haben diese Rechte implizit — die Häkchen sind bei Admin-Kont
 
 **Manueller Export** — Unter **Export**: CSV oder JSON für Fahrten und Ladesessions, sowie Vollbackup als ZIP.
 
-**Automatisches Backup (Server)** — Die SQLite-Datenbanken liegen im Docker-Volume `tesla_data`. Für automatische Backups auf dem Server:
+**Automatisches Backup (Server)** — Die SQLite-Datenbanken liegen im Bind-Mount-Verzeichnis `./data` (relativ zum Compose-File, standardmäßig `/opt/tesla-carview/data`). Für automatische Backups auf dem Server:
 
 ```bash
 # Tägliches Backup um 3 Uhr (crontab -e):
-0 3 * * * cp /var/lib/docker/volumes/tesla_data/_data/*.db /backup/
+0 3 * * * cp /opt/tesla-carview/data/master.db /opt/tesla-carview/data/tenants/*.db /backup/
 ```
+
+Das **App-interne Vollbackup** (Admin → Datenverwaltung → „Backup erstellen") exportiert alle 26 Tabellen als JSON — inklusive Passkey-Credentials. Nach einem Restore auf demselben Server sind registrierte Passkeys sofort wieder nutzbar.
 
 > ⚠️ **Wichtig vor dem Löschen**
 >

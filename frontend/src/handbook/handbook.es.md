@@ -172,12 +172,14 @@ Los administradores tienen estos tres derechos de forma implícita: las casillas
 
 **Exportación manual** — En **Exportación**: CSV o JSON para viajes y sesiones de carga, además de copia completa como ZIP.
 
-**Copia automática (servidor)** — Las bases de datos SQLite están en el volumen Docker `tesla_data`. Para copias automáticas en el servidor:
+**Copia automática (servidor)** — Las bases de datos SQLite se encuentran en el directorio bind-mount `./data` (relativo al archivo Compose, normalmente `/opt/tesla-carview/data`). Para copias automáticas en el servidor:
 
 ```bash
 # Copia diaria a las 3 (crontab -e):
-0 3 * * * cp /var/lib/docker/volumes/tesla_data/_data/*.db /backup/
+0 3 * * * cp /opt/tesla-carview/data/master.db /opt/tesla-carview/data/tenants/*.db /backup/
 ```
+
+La **copia de seguridad integrada** (Admin → Gestión de datos → «Backup erstellen») exporta las 26 tablas en JSON, incluidas las credenciales de passkey. Tras restaurar en el mismo servidor, las passkeys registradas vuelven a funcionar de inmediato.
 
 > ⚠️ **Importante antes de borrar**
 >

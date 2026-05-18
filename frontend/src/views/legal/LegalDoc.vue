@@ -136,7 +136,7 @@ async function load() {
     const filled = autoFill(data.body_md, data.updated_at);
     const decorated = filled.replace(
       /<<[A-Z_]+>>/g,
-      m => `<span class="legal-placeholder">${m}</span>`
+      m => `<span class="legal-placeholder">${m.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`
     );
     // sanitize VOR v-html — diese Seite ist oeffentlich (auch unauth),
     // ein <script> im Markdown wuerde jeden Besucher exploiten.

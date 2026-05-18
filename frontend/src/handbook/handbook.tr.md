@@ -172,12 +172,14 @@ Yöneticiler bu üç hakka örtük olarak sahiptir — kutucuklar yönetici hesa
 
 **Manuel dışa aktarma** — **Dışa aktarma** altında: Sürüşler ve şarj seansları için CSV veya JSON, ayrıca ZIP olarak tam yedek.
 
-**Otomatik yedek (sunucu)** — SQLite veritabanları `tesla_data` Docker birimindedir. Sunucuda otomatik yedekleme için:
+**Otomatik yedek (sunucu)** — SQLite veritabanları, `./data` bind-mount dizinindedir (Compose dosyasına göre, genellikle `/opt/tesla-carview/data`). Sunucuda otomatik yedekleme için:
 
 ```bash
 # Saat 03:00'te günlük yedek (crontab -e):
-0 3 * * * cp /var/lib/docker/volumes/tesla_data/_data/*.db /backup/
+0 3 * * * cp /opt/tesla-carview/data/master.db /opt/tesla-carview/data/tenants/*.db /backup/
 ```
+
+**Yerleşik tam yedek** (Admin → Veri yönetimi → «Backup erstellen»), passkey kimlik bilgileri de dahil olmak üzere tüm 26 tabloyu JSON olarak dışa aktarır. Aynı sunucuya geri yüklemeden sonra kayıtlı passkey'ler hemen çalışır.
 
 > ⚠️ **Silmeden önce önemli**
 >

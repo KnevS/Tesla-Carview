@@ -172,12 +172,14 @@ Les administrateurs disposent implicitement de ces trois droits — les cases à
 
 **Export manuel** — Sous **Export** : CSV ou JSON pour les trajets et sessions de recharge, ainsi qu'une sauvegarde complète au format ZIP.
 
-**Sauvegarde automatique (serveur)** — Les bases SQLite se trouvent dans le volume Docker `tesla_data`. Pour des sauvegardes automatiques côté serveur :
+**Sauvegarde automatique (serveur)** — Les bases SQLite se trouvent dans le répertoire bind-mount `./data` (relatif au fichier Compose, normalement `/opt/tesla-carview/data`). Pour des sauvegardes automatiques côté serveur :
 
 ```bash
 # Sauvegarde quotidienne à 3 h (crontab -e) :
-0 3 * * * cp /var/lib/docker/volumes/tesla_data/_data/*.db /backup/
+0 3 * * * cp /opt/tesla-carview/data/master.db /opt/tesla-carview/data/tenants/*.db /backup/
 ```
+
+La **sauvegarde complète intégrée** (Admin → Gestion des données → « Backup erstellen ») exporte les 26 tables en JSON, y compris les identifiants de clés d'accès (passkeys). Après restauration sur le même serveur, les passkeys enregistrées fonctionnent immédiatement.
 
 > ⚠️ **Important avant suppression**
 >

@@ -172,12 +172,14 @@ curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/set
 
 **Χειροκίνητη εξαγωγή** — Στο **Εξαγωγή**: CSV ή JSON για διαδρομές και συνεδρίες φόρτισης, καθώς και πλήρες backup ως ZIP.
 
-**Αυτόματο backup (διακομιστής)** — Οι βάσεις SQLite βρίσκονται στον τόμο Docker `tesla_data`. Για αυτόματα backup στον διακομιστή:
+**Αυτόματο backup (διακομιστής)** — Οι βάσεις SQLite βρίσκονται στον κατάλογο bind-mount `./data` (σχετικά με το αρχείο Compose, συνήθως `/opt/tesla-carview/data`). Για αυτόματα backup στον διακομιστή:
 
 ```bash
 # Καθημερινό backup στις 03:00 (crontab -e):
-0 3 * * * cp /var/lib/docker/volumes/tesla_data/_data/*.db /backup/
+0 3 * * * cp /opt/tesla-carview/data/master.db /opt/tesla-carview/data/tenants/*.db /backup/
 ```
+
+Το **ενσωματωμένο πλήρες backup** (Admin → Διαχείριση δεδομένων → «Backup erstellen») εξάγει και τους 26 πίνακες σε JSON, συμπεριλαμβανομένων των διαπιστευτηρίων passkey. Μετά από επαναφορά στον ίδιο διακομιστή, τα καταχωρημένα passkeys λειτουργούν αμέσως.
 
 > ⚠️ **Σημαντικό πριν τη διαγραφή**
 >

@@ -16,7 +16,9 @@ Day-to-day operations for self-hosters: backup, restore, maintenance, demo mode,
 2. "💾 Full backup & restore" card → **"⬇ Backup erstellen"** button
 3. A JSON file is downloaded — filename `tesla-carview-backup-<slug>-YYYY-MM-DD.json`
 
-Contents: all 25 tables of the active tenant DB (vehicles, trips + GPS points, charging sessions, telemetry, logbook, service intervals, users, audit logs, settings, Tesla OAuth tokens, Virtual Key, legal acceptances, trip change history). Deliberately excluded: `push_subscriptions` (browser-specific) and `refresh_tokens` (those live in `master.db`).
+Contents: all 26 tables of the active tenant DB (vehicles, trips + GPS points, charging sessions, telemetry, logbook, service intervals, users, passkey credentials, audit logs, settings, Tesla OAuth tokens, Virtual Key, legal acceptances, trip change history). Deliberately excluded: `push_subscriptions` (browser-specific) and `refresh_tokens` (those live in `master.db`).
+
+> **Passkeys**: `passkey_credentials` is included in the backup. After restoring to the **same server**, registered passkeys work immediately — the `credential_id` is stored server-side and the `user_id` is preserved by the restore. Restoring to a different server or domain requires re-registering passkeys (WebAuthn is domain-bound).
 
 **Via CLI / cron** (for external backup strategies):
 
@@ -137,24 +139,27 @@ Restart backend. An additional tenant with slug `demo` and DB file `data/tenants
 
 ### Hard limits (encoded in `routes/demo.js`)
 
-| Constant | Value | Meaning |
-|---|---|---|
-| `MAX_ACTIVE_DEMO_USERS` | `10` | Concurrent testers. HTTP 503 when full. |
-| `DEMO_SIGNUPS_PER_IP` | `1` / 24 h | Per IP only 1 signup per 24h window |
-| `DEMO_LIFETIME_DAYS` | `14` | Account + all its data deleted after 14 d, no remnants |
+| Constant | Default | ENV variable | Meaning |
+|---|---|---|---|
+| `MAX_ACTIVE_DEMO_USERS` | `200` | `MAX_ACTIVE_DEMO_USERS` | Concurrent testers. HTTP 503 when full. |
+| `DEMO_SIGNUPS_PER_IP` | `2` / 24 h | `DEMO_SIGNUPS_PER_IP` | At most 2 signups per IP per 24h window |
+| `DEMO_LIFETIME_DAYS` | `2` | `DEMO_LIFETIME_DAYS` | Account + all its data deleted after 2 d, no remnants |
+
+All three are overridable via environment variable — for a private instance with `DEMO_ENABLED=true`, consider setting `MAX_ACTIVE_DEMO_USERS=5` and `DEMO_LIFETIME_DAYS=1`.
 
 ### What testers see
 
 - Login page shows a blue "🧪 Tesla Carview ausprobieren — ohne Tesla" card with free slots
 - One click → user `tester-<hex>` is created, logged in, fake vehicle + 3 weeks history seeded
 - Banner at the top of the app: "Demo-Modus — Konto und Daten werden am DD.MM.YYYY automatisch gelöscht (X Tage übrig)"
-- Privacy and terms pages automatically show a **tester addendum** (no SLA, no support, fake data, 14-day deletion, etc.)
+- Privacy and terms pages automatically show a **tester addendum** (no SLA, no support, fake data, deletion after `DEMO_LIFETIME_DAYS` days)
 - Every 30 min: a new fake trip per demo vehicle — so the demo feels alive
 
 ### Cleanup
 
 - Every 6 h the demo lifecycle runs: users with `expires_at < now` are deleted in one transaction, together with every dependent table (vehicles, trips, GPS points, charging, battery, telemetry, logbook, MFA codes, audit logs, charging locations, service intervals)
 - The demo tenant itself stays — only the tester data is wiped
+- **Isolation**: the demo slug is **never** written to `localStorage` — a tester who closes the browser tab and reopens the production URL will not accidentally end up in the demo tenant
 
 ---
 
@@ -237,12 +242,15 @@ When everything is on fire and only a clean restart will do:
 # 2. Stop containers
 docker compose -f docker-compose.prod.yml down
 
-# 3. Remove volume — ALL DATA GONE
-docker volume rm tesla-carview_tesla_data
+# 3. Wipe the data directory — ALL DATA GONE
+# Data lives in the bind-mount ./data (not in a Docker named volume!)
+rm -rf ./data/master.db ./data/tenants/
 
 # 4. Start fresh — setup wizard appears automatically
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml up -d
 ```
+
+> Since v2.0 the SQLite databases live under `./data` as a bind-mount (relative to the Compose file), **not** in a Docker named volume. `docker volume rm` has no effect on this setup.
 
 To restore a backup afterwards, complete the setup wizard with a temporary admin account, log in, and use the UI restore flow.
 

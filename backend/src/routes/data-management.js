@@ -18,13 +18,18 @@ router.use(requireAuth);
  *  bewusst NICHT zurueckgespielt wird:
  *    - push_subscriptions (browser-spezifisch — neue Subscription noetig)
  *    - refresh_tokens     (leben im master.db, nicht hier)
- *    - oauth_pkce         (transient, leben ebenfalls im master.db) */
+ *    - oauth_pkce         (transient, leben ebenfalls im master.db)
+ *  passkey_credentials wird mitgesichert: die credential_id ist server-
+ *  seitig gespeichert und gehoert zum User-Record — nach einem Restore
+ *  auf denselben Server laeuft der Passkey sofort wieder, weil die
+ *  user_id aus dem Backup erhalten bleibt. */
 const BACKUP_TABLES = [
   'users', 'drivers', 'vehicles',
   'trips', 'trip_points',
   'charging_locations', 'charging_sessions', 'charging_points',
   'battery_snapshots', 'logbook_entries', 'telemetry_points',
   'vehicle_state_cache', 'vehicle_users',
+  'passkey_credentials',
   'mfa_backup_codes', 'audit_logs',
   'tokens', 'tenant_settings', 'virtual_key',
   'user_invites', 'legal_acceptance',

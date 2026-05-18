@@ -172,12 +172,14 @@ Administrators implicitly hold all three rights — the checkboxes are hidden fo
 
 **Manual export** — Under **Export**: CSV or JSON for trips and charging sessions, plus a full backup as ZIP.
 
-**Automatic backup (server)** — The SQLite databases live in the Docker volume `tesla_data`. For automatic server-side backups:
+**Automatic backup (server)** — The SQLite databases live in the bind-mount directory `./data` (relative to the Compose file, normally `/opt/tesla-carview/data`). For automatic server-side backups:
 
 ```bash
 # Daily backup at 3 AM (crontab -e):
-0 3 * * * cp /var/lib/docker/volumes/tesla_data/_data/*.db /backup/
+0 3 * * * cp /opt/tesla-carview/data/master.db /opt/tesla-carview/data/tenants/*.db /backup/
 ```
+
+The **built-in full backup** (Admin → Data management → "Backup erstellen") exports all 26 tables as JSON — passkey credentials included. After a restore to the same server, registered passkeys work immediately.
 
 > ⚠️ **Important before deletion**
 >

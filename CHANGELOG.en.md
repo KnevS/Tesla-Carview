@@ -7,6 +7,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.1.4] — 2026-05-18
+
+### Fixed
+- **Passkey login broken after upgrading to simplewebauthn v10** — Four breaking API changes were corrected: challenge is now stored as a base64url string instead of a Uint8Array blob; `excludeCredentials[].id` must be a string (not a Buffer); `credentialID` from `registrationInfo` is a Uint8Array and is now properly converted; the `authenticator` parameter in `verifyAuthenticationResponse` was renamed to `credential` (with `publicKey` replacing `credentialPublicKey`). Passkeys could neither be registered nor used since the v10 upgrade.
+- **Legal page placeholder rendering** — `<<NAME>>` and similar unfilled placeholders in imprint / privacy policy were mangled by the HTML parser to `<>`. Fix: the `<<` characters are now HTML-encoded (`&lt;&lt;NAME&gt;&gt;`) before the markdown render.
+
+### Changed
+- **Full backup now includes `passkey_credentials`** — The table was missing from `BACKUP_TABLES`. Passkeys now survive a JSON restore to the same server (WebAuthn is domain-bound; restoring to a different domain still requires re-registering passkeys).
+
+---
+
 ## [v3.1.3] — 2026-05-17
 
 ### Added
@@ -160,7 +171,7 @@ Multi-tenancy, route planner with SoC-aware charging stops, route avoidance (Val
 - **AES-256-GCM encryption at rest** — Tesla OAuth tokens, TOTP secrets, Virtual Key encrypted with AES-GCM
 - **Audit log** — admin viewer for security-relevant events (CSV export, GDPR-compliant)
 - **Fleet Telemetry primary** — WebSocket streaming as preferred data source, saves >95% API budget
-- **Full backup + restore** — JSON export of all 25 tables, safety pre-backup before restore
+- **Full backup + restore** — JSON export of all tables, safety pre-backup before restore
 - **GitHub Actions CI/CD** — gitleaks, OWASP dependency check, auto-deploy via SSH
 
 ### Improved

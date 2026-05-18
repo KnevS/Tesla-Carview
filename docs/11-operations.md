@@ -16,7 +16,9 @@ Was Self-Hoster im Tagesgeschäft brauchen: Backup, Restore, Wartung, Demo-Modus
 2. Karte „💾 Vollständiges Backup & Restore" → Button **„⬇ Backup erstellen"**
 3. Eine JSON-Datei wird heruntergeladen — Name: `tesla-carview-backup-<slug>-YYYY-MM-DD.json`
 
-Inhalt: alle 25 Tabellen der aktiven Tenant-DB (Fahrzeuge, Fahrten + GPS-Punkte, Ladesessions, Telemetrie, Logbuch, Wartungsintervalle, Benutzer, Audit-Logs, Einstellungen, Tesla-OAuth-Token, Virtual Key, Legal-Akzeptanzen, Trip-Änderungshistorie). Bewusst ausgeschlossen: `push_subscriptions` (browser-spezifisch) und `refresh_tokens` (liegen in `master.db`).
+Inhalt: alle 26 Tabellen der aktiven Tenant-DB (Fahrzeuge, Fahrten + GPS-Punkte, Ladesessions, Telemetrie, Logbuch, Wartungsintervalle, Benutzer, Passkey-Credentials, Audit-Logs, Einstellungen, Tesla-OAuth-Token, Virtual Key, Legal-Akzeptanzen, Trip-Änderungshistorie). Bewusst ausgeschlossen: `push_subscriptions` (browser-spezifisch) und `refresh_tokens` (liegen in `master.db`).
+
+> **Passkeys**: `passkey_credentials` ist im Backup enthalten. Nach einem Restore auf **denselben Server** funktionieren registrierte Passkeys sofort weiter — die `credential_id` liegt serverseitig vor und die `user_id` bleibt durch den Restore erhalten. Restore auf einen anderen Server oder eine andere Domain erfordert eine neue Passkey-Registrierung (WebAuthn ist domain-gebunden).
 
 **Per CLI / Cron** (für externe Backup-Strategien):
 
@@ -137,24 +139,27 @@ Backend neustarten. Beim ersten Start wird automatisch ein zusätzlicher Mandant
 
 ### Hard-Limits (encoded in `routes/demo.js`)
 
-| Konstante | Wert | Bedeutung |
-|---|---|---|
-| `MAX_ACTIVE_DEMO_USERS` | `10` | Gleichzeitig aktive Tester. HTTP 503 wenn voll. |
-| `DEMO_SIGNUPS_PER_IP` | `1` / 24 h | Pro IP nur 1 Signup pro 24h-Fenster |
-| `DEMO_LIFETIME_DAYS` | `14` | Account inkl. aller Daten wird nach 14 d rückstandslos gelöscht |
+| Konstante | Default | ENV-Variable | Bedeutung |
+|---|---|---|---|
+| `MAX_ACTIVE_DEMO_USERS` | `200` | `MAX_ACTIVE_DEMO_USERS` | Gleichzeitig aktive Tester. HTTP 503 wenn voll. |
+| `DEMO_SIGNUPS_PER_IP` | `2` / 24 h | `DEMO_SIGNUPS_PER_IP` | Pro IP maximal 2 Signups pro 24h-Fenster |
+| `DEMO_LIFETIME_DAYS` | `2` | `DEMO_LIFETIME_DAYS` | Account inkl. aller Daten wird nach 2 d rückstandslos gelöscht |
+
+Alle drei Werte sind per ENV-Variable überschreibbar — für eine private Instanz mit `DEMO_ENABLED=true` bietet es sich an, `MAX_ACTIVE_DEMO_USERS=5` und `DEMO_LIFETIME_DAYS=1` zu setzen.
 
 ### Was die Tester sehen
 
 - Login-Seite zeigt eine blaue Karte „🧪 Tesla Carview ausprobieren — ohne Tesla" mit freien Slots
 - Klick → User `tester-<hex>` wird erzeugt, eingeloggt, Fake-Fahrzeug + 3 Wochen Historie geseedet
 - Banner oben in der App: „Demo-Modus — Konto und Daten werden am DD.MM.YYYY automatisch gelöscht (X Tage übrig)"
-- Privacy- und Terms-Seiten zeigen automatisch einen **Tester-Zusatz** (kein Anspruch auf Verfügbarkeit, kein SLA, Fake-Daten, 14-Tage-Löschung, etc.)
+- Privacy- und Terms-Seiten zeigen automatisch einen **Tester-Zusatz** (kein Anspruch auf Verfügbarkeit, kein SLA, Fake-Daten, Löschung nach `DEMO_LIFETIME_DAYS` Tagen)
 - Alle 30 min: eine neue Fake-Fahrt pro Demo-Fahrzeug — damit die Demo „lebendig" wirkt
 
 ### Cleanup
 
 - Alle 6 h läuft der Demo-Lifecycle: User mit `expires_at < now` werden in einer Transaktion komplett gelöscht (User-Row + alle abhängigen Tabellen: Fahrzeuge, Trips, GPS-Punkte, Charging, Battery, Telemetrie, Logbuch, MFA-Codes, Audit-Logs, Charging-Locations, Service-Intervalle)
 - Der Demo-Mandant selbst bleibt persistent — nur die Tester-Daten werden gelöscht
+- **Isolation**: Der Demo-Slug wird **nie** in `localStorage` geschrieben — ein Tester, der das Browser-Tab schließt und die Produktiv-URL neu öffnet, landet nicht versehentlich im Demo-Mandanten
 
 ---
 
@@ -237,12 +242,15 @@ Wenn alles schiefläuft und ein sauberer Neustart nötig ist:
 # 2. Container stoppen
 docker compose -f docker-compose.prod.yml down
 
-# 3. Volume entfernen — ALLE DATEN WEG
-docker volume rm tesla-carview_tesla_data
+# 3. Daten-Verzeichnis leeren — ALLE DATEN WEG
+# Die DBs liegen im Bind-Mount ./data (nicht in einem Docker-Volume!)
+rm -rf ./data/master.db ./data/tenants/
 
 # 4. Neu starten — Setup-Wizard kommt automatisch
-docker compose -f docker-compose.prod.yml up -d --build
+docker compose -f docker-compose.prod.yml up -d
 ```
+
+> Die SQLite-Daten liegen seit v2.0 als Bind-Mount unter `./data` (relativ zum Compose-File), **nicht** in einem Docker Named Volume. `docker volume rm` ist für dieses Setup wirkungslos.
 
 Falls du das Backup wiederherstellen willst, durchläufst du den Setup-Wizard mit einem temporären Admin-Konto, loggst dich ein und nutzt dann die UI-Restore-Funktion.
 

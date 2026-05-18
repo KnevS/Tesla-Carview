@@ -42,9 +42,13 @@ function storeChallenge(tenantId, userId, challenge) {
   )`);
   getMasterDb().prepare('DELETE FROM passkey_challenges WHERE created_at < unixepoch() - 300').run();
   const id = randomBytes(16).toString('hex');
+  // In simplewebauthn v10, challenge is a Uint8Array — immer als base64url-String speichern.
+  const challengeStr = typeof challenge === 'string'
+    ? challenge
+    : Buffer.from(challenge).toString('base64url');
   getMasterDb().prepare(
     'INSERT INTO passkey_challenges (id, tenant_id, user_id, challenge) VALUES (?, ?, ?, ?)'
-  ).run(id, tenantId, userId ?? null, challenge);
+  ).run(id, tenantId, userId ?? null, challengeStr);
   return id;
 }
 
@@ -74,8 +78,7 @@ router.post('/register-options', requireAuth, async (req, res) => {
       userName: user.username,
       userDisplayName: user.username,
       excludeCredentials: existingCredentials.map(c => ({
-        id: Buffer.from(c.credential_id, 'base64url'),
-        type: 'public-key',
+        id: c.credential_id, // v10: base64url-String, kein Buffer
       })),
       authenticatorSelection: {
         residentKey: 'preferred',
@@ -111,13 +114,17 @@ router.post('/register-verify', requireAuth, async (req, res) => {
     if (!verification.verified) return res.status(400).json({ error: 'Verifikation fehlgeschlagen' });
 
     const { credentialID, credentialPublicKey, counter, credentialDeviceType } = verification.registrationInfo;
+    // v10: credentialID ist ein Uint8Array — als base64url-String in DB speichern.
+    const credIdStr = typeof credentialID === 'string'
+      ? credentialID
+      : Buffer.from(credentialID).toString('base64url');
     req.db.prepare(
       `INSERT OR REPLACE INTO passkey_credentials
        (user_id, credential_id, public_key, counter, device_type, transports)
        VALUES (?, ?, ?, ?, ?, ?)`
     ).run(
       req.user.sub,
-      credentialID,
+      credIdStr,
       Buffer.from(credentialPublicKey).toString('base64url'),
       counter,
       deviceName ?? credentialDeviceType ?? null,
@@ -184,11 +191,12 @@ router.post('/login-verify', async (req, res) => {
       expectedChallenge: stored.challenge,
       expectedOrigin:    RP_ORIGIN,
       expectedRPID:      RP_ID,
-      authenticator: {
-        credentialID:        Buffer.from(credential.credential_id, 'base64url'),
-        credentialPublicKey: Buffer.from(credential.public_key, 'base64url'),
-        counter:             credential.counter,
-        transports:          credential.transports ? JSON.parse(credential.transports) : undefined,
+      // v10: 'authenticator' → 'credential', credentialPublicKey → publicKey (Uint8Array)
+      credential: {
+        id:         credential.credential_id,
+        publicKey:  Buffer.from(credential.public_key, 'base64url'),
+        counter:    credential.counter,
+        transports: credential.transports ? JSON.parse(credential.transports) : undefined,
       },
     });
 
