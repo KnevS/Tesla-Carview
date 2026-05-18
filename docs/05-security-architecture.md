@@ -15,7 +15,7 @@ auf einem selbst betriebenen Server. Die Hauptbedrohungen sind:
 | Cookie-Diebstahl (CSRF) | `SameSite=Strict` + JSON-API (kein Formular-Submit) |
 | Man-in-the-Middle | TLS 1.3, HSTS, OCSP-Stapling |
 | Clickjacking | `X-Frame-Options: DENY` + CSP `frame-src 'none'` |
-| Datenleck bei DB-Kompromittierung | Passwort-Hashes (bcrypt), Token-Hashes (SHA-256), MFA-Codes (bcrypt) **+ AES-256-GCM at-rest** für Tesla-Tokens, MFA-Secret, Virtual-Key Private-Key (siehe „Encryption at rest" unten) |
+| Datenleck bei DB-Kompromittierung | Passwort-Hashes (Argon2id), Token-Hashes (SHA-256), MFA-Codes (bcrypt) **+ AES-256-GCM at-rest** für Tesla-Tokens, MFA-Secret, Virtual-Key Private-Key (siehe „Encryption at rest" unten) |
 | Stored-XSS via Admin-Markdown (Legal-Texte) | `DOMPurify` vor `v-html`, Allow-List Tags + Attribute, Link-Schemata auf http(s)/mailto/tel beschränkt |
 | IDOR (User A liest Daten von User B im selben Tenant) | `assertVehicleAccess`/`assertTripAccess`/`assertChargingAccess`-Helper in jeder mutierenden Route; Admin sieht alles im Tenant, normale User nur via `vehicle_users` zugeordnete Fahrzeuge |
 | Setup-Race-Hijack (Angreifer registriert ersten Admin) | Optionales `SETUP_TOKEN`-ENV-Gate (Header `X-Setup-Token`) + Rate-Limit + atomare Check-then-Write |
@@ -35,9 +35,12 @@ werden können:
 | TOTP MFA-Secret | `users.mfa_secret` | `v1:iv:tag:ciphertext` |
 | Tesla Virtual-Key Private-Key (PEM) | `virtual_key.private_key_pem` | `v1:iv:tag:ciphertext` |
 
-**Key-Persistenz:** `data/.encryption-key` (32 Bytes, mode 0600). Beim
-ersten Backend-Start automatisch generiert. **Gehört ins Backup** —
-ohne Key sind Tesla-Verbindungen, MFA-Setups und Virtual-Keys verloren.
+**Key-Quellen (Priorität):**
+1. `ENCRYPTION_KEY_B64` (Umgebungsvariable, base64-codierte 32 Bytes) — empfohlen, liegt außerhalb von `data/`. Erzeugen: `openssl rand -base64 32`
+2. `/run/secrets/encryption_key` (Docker Secret, 32 Raw-Bytes)
+3. `data/.encryption-key` (Datei, mode 0600) — Fallback und bestehende Installationen; beim ersten Start automatisch generiert.
+
+**Wichtig:** Der Key gehört ins Backup. Ohne ihn sind Tesla-Verbindungen, MFA-Setups und Virtual-Keys unwiederbringlich verloren.
 
 Einseitig gehashed (SHA-256 + `timingSafeEqual`) für Random-Tokens, die
 nur verifiziert werden:
@@ -112,10 +115,15 @@ httpOnly Cookie: Nicht per JS lesbar   -->  XSS kann Cookie nicht lesen
 
 ## Passwort-Hashing
 
-**bcrypt** mit 12 Runden:
-- ~300ms Rechenzeit pro Hash (erschwertes Brute-Forcing)
+**Argon2id** (seit v3.1.5, OWASP-Empfehlung 2024):
+- Parameter: t=3 Iterationen, m=65536 (64 MB RAM), p=4 Threads
+- Memory-Hard: GPU/ASIC-Brute-Force erheblich teurer als bei bcrypt
 - Jeder Hash enthält ein zufälliges Salt (Rainbow-Table-Schutz)
-- Timing-safe Vergleich (kein Timing-Angriff möglich)
+- Timing-safe Vergleich via `argon2.verify()`
+
+**Migration:** Bestehende bcrypt-Hashes (12 Runden) werden beim nächsten
+erfolgreichen Login transparent durch Argon2id ersetzt. Beide Formate
+werden während der Übergangsphase gleichzeitig akzeptiert.
 
 ## MFA-TOTP
 
@@ -151,11 +159,17 @@ object-src  'none'          # Kein Flash, kein PDF-Reader
 frame-src   'none'          # Kein iFrame-Embedding
 ```
 
+**Permissions-Policy** (seit v3.1.5) — sperrt Browser-APIs, die die App nicht nutzt:
+```
+camera=(), microphone=(), geolocation=(), payment=(),
+usb=(), bluetooth=(), display-capture=()
+```
+
 ## Datenbankschema (Sicherheitsrelevante Tabellen)
 
 ```sql
 users
-  password_hash  -- bcrypt, 12 Runden
+  password_hash  -- Argon2id (bcrypt-Altdaten werden beim Login migriert)
   mfa_secret     -- base32-kodiert (TOTP-Secret)
   locked_until   -- Lockout-Zeitstempel
 

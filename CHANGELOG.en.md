@@ -7,6 +7,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.1.5] — 2026-05-18
+
+### Security
+- **Argon2id replaces bcrypt for password hashes** — New passwords and password changes now use Argon2id (t=3, m=64 MB, p=4 — OWASP 2024 recommendation). Existing bcrypt hashes remain valid and are transparently migrated on the next successful login. No manual action required.
+- **Encryption key can be separated from database files** — The AES-256-GCM key can now be supplied via `ENCRYPTION_KEY_B64` (environment variable, outside `data/`) or as a Docker secret. Existing `data/.encryption-key` installations continue to work unchanged.
+- **Refresh tokens invalidated on password change** — After a password change all active sessions for that user are immediately terminated. A previously stolen refresh token no longer survives a password reset.
+- **Refresh tokens invalidated on user deletion / deactivation** — When an admin deletes or deactivates a user, their active sessions are terminated immediately.
+- **`Permissions-Policy` header added** — The browser is now explicitly instructed to block camera, microphone, geolocation, payment, USB, and Bluetooth access for the app.
+
+---
+
 ## [v3.1.4] — 2026-05-18
 
 ### Fixed

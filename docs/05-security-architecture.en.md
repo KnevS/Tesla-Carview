@@ -15,7 +15,7 @@ on a self-operated server. The main threats are:
 | Cookie theft (CSRF) | `SameSite=Strict` + JSON API (no form submit) |
 | Man-in-the-middle | TLS 1.3, HSTS, OCSP stapling |
 | Clickjacking | `X-Frame-Options: DENY` + CSP `frame-src 'none'` |
-| Data leak from DB compromise | Password hashes (bcrypt), token hashes (SHA-256), MFA codes (bcrypt) **+ AES-256-GCM at-rest** for Tesla tokens, MFA secret, Virtual-Key private key (see "Encryption at rest" below) |
+| Data leak from DB compromise | Password hashes (Argon2id), token hashes (SHA-256), MFA codes (bcrypt) **+ AES-256-GCM at-rest** for Tesla tokens, MFA secret, Virtual-Key private key (see "Encryption at rest" below) |
 | Stored XSS via admin markdown (legal pages) | `DOMPurify` before `v-html`, allow-list of tags/attributes, URL schemes restricted to http(s)/mailto/tel |
 | IDOR (user A reads user B's data within the same tenant) | `assertVehicleAccess`/`assertTripAccess`/`assertChargingAccess` helpers in every mutating route; admins see everything within their tenant, regular users see only vehicles linked via `vehicle_users` |
 | Setup-race hijack (attacker registers the first admin) | Optional `SETUP_TOKEN` env gate (header `X-Setup-Token`) + rate limit + atomic check-then-write |
@@ -34,7 +34,13 @@ backend needs at runtime and therefore cannot be hashed:
 | TOTP MFA secret | `users.mfa_secret` | `v1:iv:tag:ciphertext` |
 | Tesla Virtual-Key private key (PEM) | `virtual_key.private_key_pem` | `v1:iv:tag:ciphertext` |
 
-**Key persistence:** `data/.encryption-key` (32 bytes, mode 0600). Auto-
+**Key sources (priority):**
+1. `ENCRYPTION_KEY_B64` (environment variable, base64-encoded 32 bytes) — recommended; lives outside `data/`. Generate: `openssl rand -base64 32`
+2. `/run/secrets/encryption_key` (Docker secret, 32 raw bytes)
+3. `data/.encryption-key` (file, mode 0600) — fallback and existing installations; auto-generated on first start.
+
+**Important:** The key must be included in your backup. Without it, Tesla connections, MFA setups, and Virtual Keys are permanently lost.
+
 generated on first backend start. **Include it in your backup** — without
 the key, Tesla connections, MFA setups and Virtual-Keys are unrecoverable.
 
@@ -108,10 +114,15 @@ httpOnly cookie: not readable from JS    -->  XSS cannot read the cookie
 
 ## Password hashing
 
-**bcrypt** with 12 rounds:
-- ~300 ms compute per hash (slows brute forcing)
+**Argon2id** (since v3.1.5, OWASP 2024 recommendation):
+- Parameters: t=3 iterations, m=65536 (64 MB RAM), p=4 threads
+- Memory-hard: GPU/ASIC brute-forcing is significantly more expensive than bcrypt
 - Every hash contains a random salt (rainbow-table protection)
-- Timing-safe comparison (no timing attack possible)
+- Timing-safe comparison via `argon2.verify()`
+
+**Migration:** Existing bcrypt hashes (12 rounds) are transparently replaced
+with Argon2id on the next successful login. Both formats are accepted during
+the transition period.
 
 ## MFA TOTP
 
@@ -147,11 +158,17 @@ object-src  'none'          # no Flash, no PDF reader
 frame-src   'none'          # no iframe embedding
 ```
 
+**Permissions-Policy** (since v3.1.5) — locks browser APIs the app does not use:
+```
+camera=(), microphone=(), geolocation=(), payment=(),
+usb=(), bluetooth=(), display-capture=()
+```
+
 ## Database schema (security-relevant tables)
 
 ```sql
 users
-  password_hash  -- bcrypt, 12 rounds
+  password_hash  -- Argon2id (bcrypt legacy hashes migrated on login)
   mfa_secret     -- base32 encoded (TOTP secret)
   locked_until   -- lockout timestamp
 
