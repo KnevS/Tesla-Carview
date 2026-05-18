@@ -110,8 +110,11 @@ router.delete('/:id', requireAdmin, (req, res) => {
   if (+req.params.id === req.user.sub) {
     return res.status(400).json({ error: 'Eigenes Konto kann nicht geloescht werden' });
   }
-  req.db.prepare('DELETE FROM users WHERE id=?').run(req.params.id);
-  auditLog(req.db, req.user.sub, 'user_deleted', req, { targetId: req.params.id });
+  const targetId = +req.params.id;
+  getMasterDb().prepare('DELETE FROM refresh_tokens WHERE user_id=? AND tenant_id=?')
+    .run(targetId, req.tenantId);
+  req.db.prepare('DELETE FROM users WHERE id=?').run(targetId);
+  auditLog(req.db, req.user.sub, 'user_deleted', req, { targetId });
   res.json({ success: true });
 });
 
@@ -120,8 +123,16 @@ router.put('/:id/toggle', requireAdmin, (req, res) => {
   if (+req.params.id === req.user.sub) {
     return res.status(400).json({ error: 'Eigenes Konto kann nicht deaktiviert werden' });
   }
-  req.db.prepare('UPDATE users SET is_active = NOT is_active WHERE id=?').run(req.params.id);
-  auditLog(req.db, req.user.sub, 'user_toggled', req, { targetId: req.params.id });
+  const targetId = +req.params.id;
+  const updated = req.db.prepare(
+    'UPDATE users SET is_active = NOT is_active WHERE id=? RETURNING is_active'
+  ).get(targetId);
+  // Bei Deaktivierung sofort alle Sessions beenden
+  if (updated && !updated.is_active) {
+    getMasterDb().prepare('DELETE FROM refresh_tokens WHERE user_id=? AND tenant_id=?')
+      .run(targetId, req.tenantId);
+  }
+  auditLog(req.db, req.user.sub, 'user_toggled', req, { targetId });
   res.json({ success: true });
 });
 
