@@ -234,6 +234,7 @@ router.post('/login-verify', async (req, res) => {
       user: { id: user.id, username: user.username, role: user.role, tenantId },
     });
   } catch (err) {
+    console.error('[Passkey] login-verify Fehler:', err.message, '| RP_ID:', RP_ID, '| Origin:', RP_ORIGIN);
     res.status(401).json({ error: err.message });
   }
 });
