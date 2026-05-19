@@ -191,12 +191,12 @@ router.post('/login-verify', async (req, res) => {
       expectedChallenge: stored.challenge,
       expectedOrigin:    RP_ORIGIN,
       expectedRPID:      RP_ID,
-      // v10: 'authenticator' → 'credential', credentialPublicKey → publicKey (Uint8Array)
-      credential: {
-        id:         credential.credential_id,
-        publicKey:  Buffer.from(credential.public_key, 'base64url'),
-        counter:    credential.counter,
-        transports: credential.transports ? JSON.parse(credential.transports) : undefined,
+      // v10.0.1 destructures 'authenticator' (nicht 'credential') mit credentialPublicKey/credentialID
+      authenticator: {
+        credentialID:        credential.credential_id,
+        credentialPublicKey: Buffer.from(credential.public_key, 'base64url'),
+        counter:             credential.counter,
+        transports:          credential.transports ? JSON.parse(credential.transports) : undefined,
       },
     });
 
