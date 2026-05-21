@@ -18,10 +18,10 @@ services:
       - ./backend/.env
     volumes:
       - tesla_data:/app/data
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     networks:
       - tesla-net
+    depends_on:
+      - tesla-proxy
     deploy:
       resources:
         limits:
@@ -69,6 +69,42 @@ services:
         limits:
           memory: 64M
           cpus: '0.25'
+
+  # tesla-http-proxy: Tesla Signed-Command Proxy.
+  # Laeuft im tesla-net mit dem Network-Alias 'host.docker.internal',
+  # damit der Backend-Code (PROXY_BASE = https://host.docker.internal:4443)
+  # ohne Aenderung weiterfunktioniert. Kein Host-Port-Mapping noetig —
+  # nur der Backend-Container muss ihn erreichen koennen.
+  # Benoetigt User 988 (tesla-proxy auf dem Host) fuer Lese-Zugriff auf Keys.
+  tesla-proxy:
+    image: tesla/vehicle-command:latest
+    container_name: tesla-carview-proxy
+    restart: unless-stopped
+    user: "988:988"
+    command:
+      - -port
+      - "4443"
+      - -host
+      - "0.0.0.0"
+      - -tls-key
+      - /config/server.key
+      - -cert
+      - /config/server.crt
+      - -key-file
+      - /config/tesla_priv.pem
+    volumes:
+      - /etc/tesla-proxy:/config:ro
+    networks:
+      tesla-net:
+        aliases:
+          - host.docker.internal
+    security_opt:
+      - no-new-privileges:true
+    deploy:
+      resources:
+        limits:
+          memory: 64M
+          cpus: "0.25"
 
 volumes:
   tesla_data:
