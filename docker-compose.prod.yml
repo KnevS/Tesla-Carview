@@ -18,6 +18,12 @@ services:
       - ./backend/.env
     volumes:
       - tesla_data:/app/data
+      # Demo-Feature: private Implementierungen werden via tc-private.git
+      # auf dem Host bereitgestellt und per Volume-Mount in den Container
+      # gemounted (ueberschreiben die oeffentlichen Stubs im Image).
+      # Stubs bleiben das Fallback fuer Instanzen ohne privates Overlay.
+      - ./backend/src/routes/demo.js:/app/src/routes/demo.js:ro
+      - ./backend/src/services/demoLifecycle.js:/app/src/services/demoLifecycle.js:ro
     networks:
       - tesla-net
     depends_on:
