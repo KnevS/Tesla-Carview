@@ -56,112 +56,130 @@
       </ul>
     </div>
 
-    <!-- Jahresübersicht — Karten zeigen primaer Kilometer (grosse Zahl) und
-         darunter die Trip-Anzahl + Anteil. -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-      <div class="card text-center space-y-1">
-        <p class="text-xs text-gray-400 uppercase tracking-wide">Gesamt km</p>
-        <p class="text-3xl font-bold text-white">{{ fmt(yearStats.total_km) }}</p>
-        <p class="text-xs text-gray-500">{{ yearStats.trips }} Fahrten</p>
-      </div>
-      <div class="card text-center space-y-1">
-        <p class="text-xs text-gray-400 uppercase tracking-wide">Privat (km)</p>
-        <p class="text-3xl font-bold text-gray-300">{{ fmt(yearStats.private_km) }}</p>
-        <p class="text-xs text-gray-500">
-          {{ yearStats.private_trips }} {{ yearStats.private_trips === 1 ? 'Fahrt' : 'Fahrten' }}
-          · {{ pct(yearStats.private_km, yearStats.total_km) }}%
-        </p>
-      </div>
-      <div class="card text-center space-y-1">
-        <p class="text-xs text-gray-400 uppercase tracking-wide">Dienst (km)</p>
-        <p class="text-3xl font-bold text-blue-300">{{ fmt(yearStats.business_km) }}</p>
-        <p class="text-xs text-gray-500">
-          {{ yearStats.business_trips }} {{ yearStats.business_trips === 1 ? 'Fahrt' : 'Fahrten' }}
-          · {{ pct(yearStats.business_km, yearStats.total_km) }}%
-        </p>
-      </div>
-      <div class="card text-center space-y-1">
-        <p class="text-xs text-gray-400 uppercase tracking-wide">Arbeitsweg (km)</p>
-        <p class="text-3xl font-bold text-green-300">{{ fmt(yearStats.commute_km) }}</p>
-        <p class="text-xs text-gray-500">
-          {{ yearStats.commute_trips }} {{ yearStats.commute_trips === 1 ? 'Fahrt' : 'Fahrten' }}
-          · {{ pct(yearStats.commute_km, yearStats.total_km) }}%
-        </p>
-      </div>
-    </div>
+    <!-- Dynamisches Sektions-Layout: per Drag sortierbar, kollabierbar. -->
+    <template v-for="sid in layoutOrder" :key="sid">
 
-    <!-- Heatmap: Aktivitaet pro Tag, Filter nach Jahr/Monat/Woche/Alle. -->
-    <div class="card space-y-3">
-      <h2 class="font-semibold flex items-center gap-2" v-tooltip="$t('trips.heatmapTooltip')">
-        <AppIcon name="calendar" :size="20" class="text-tesla-red" />
-        {{ $t('trips.heatmapTitle') }}
-      </h2>
-      <TripsHeatmap />
-    </div>
+      <!-- Jahresübersicht — Karten zeigen primaer Kilometer (grosse Zahl) und
+           darunter die Trip-Anzahl + Anteil. -->
+      <SortableSection v-if="sid === 'stats'"
+        page-id="fahrtenbuch" section-id="stats"
+        title="Jahresübersicht" icon="📊"
+        :collapsed="isCollapsed('stats')"
+        @toggle="toggle('stats')"
+        @move="(f, t, p) => moveSection(f, t, p)">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-gray-800 rounded-xl p-4 text-center space-y-1">
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Gesamt km</p>
+            <p class="text-3xl font-bold text-white">{{ fmt(yearStats.total_km) }}</p>
+            <p class="text-xs text-gray-500">{{ yearStats.trips }} Fahrten</p>
+          </div>
+          <div class="bg-gray-800 rounded-xl p-4 text-center space-y-1">
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Privat (km)</p>
+            <p class="text-3xl font-bold text-gray-300">{{ fmt(yearStats.private_km) }}</p>
+            <p class="text-xs text-gray-500">
+              {{ yearStats.private_trips }} {{ yearStats.private_trips === 1 ? 'Fahrt' : 'Fahrten' }}
+              · {{ pct(yearStats.private_km, yearStats.total_km) }}%
+            </p>
+          </div>
+          <div class="bg-gray-800 rounded-xl p-4 text-center space-y-1">
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Dienst (km)</p>
+            <p class="text-3xl font-bold text-blue-300">{{ fmt(yearStats.business_km) }}</p>
+            <p class="text-xs text-gray-500">
+              {{ yearStats.business_trips }} {{ yearStats.business_trips === 1 ? 'Fahrt' : 'Fahrten' }}
+              · {{ pct(yearStats.business_km, yearStats.total_km) }}%
+            </p>
+          </div>
+          <div class="bg-gray-800 rounded-xl p-4 text-center space-y-1">
+            <p class="text-xs text-gray-400 uppercase tracking-wide">Arbeitsweg (km)</p>
+            <p class="text-3xl font-bold text-green-300">{{ fmt(yearStats.commute_km) }}</p>
+            <p class="text-xs text-gray-500">
+              {{ yearStats.commute_trips }} {{ yearStats.commute_trips === 1 ? 'Fahrt' : 'Fahrten' }}
+              · {{ pct(yearStats.commute_km, yearStats.total_km) }}%
+            </p>
+          </div>
+        </div>
+      </SortableSection>
 
-    <!-- Standort-Heatmap auf Leaflet — wo war ich oft. -->
-    <div class="card space-y-3">
-      <h2 class="font-semibold flex items-center gap-2">
-        <AppIcon name="pin" :size="20" class="text-tesla-red" />
-        {{ $t('trips.locationHeatmapTitle') }}
-      </h2>
-      <LocationHeatmap />
-    </div>
+      <!-- Heatmap: Aktivitaet pro Tag -->
+      <SortableSection v-if="sid === 'heatmap'"
+        page-id="fahrtenbuch" section-id="heatmap"
+        :title="$t('trips.heatmapTitle')" icon="📅"
+        :collapsed="isCollapsed('heatmap')"
+        @toggle="toggle('heatmap')"
+        @move="(f, t, p) => moveSection(f, t, p)">
+        <TripsHeatmap />
+      </SortableSection>
 
-    <!-- Jahresbericht-PDF clientseitig via jsPDF. -->
-    <div class="card space-y-3">
-      <h2 class="font-semibold flex items-center gap-2">
-        <AppIcon name="export" :size="20" class="text-tesla-red" />
-        {{ $t('trips.annualReportTitle') }}
-      </h2>
-      <AnnualReportButton />
-    </div>
+      <!-- Standort-Heatmap auf Leaflet -->
+      <SortableSection v-if="sid === 'location'"
+        page-id="fahrtenbuch" section-id="location"
+        :title="$t('trips.locationHeatmapTitle')" icon="📍"
+        :collapsed="isCollapsed('location')"
+        @toggle="toggle('location')"
+        @move="(f, t, p) => moveSection(f, t, p)">
+        <LocationHeatmap />
+      </SortableSection>
 
-    <!-- Monatsübersicht (Tabelle bleibt unveraendert, ist meist nur am
-         Desktop relevant). -->
-    <div v-if="!selMonth && months.length" class="card space-y-3 hidden md:block">
-      <h2 class="font-semibold">Monatsübersicht {{ selYear }}</h2>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="text-gray-400 border-b border-gray-700">
-              <th class="text-left py-2">Monat</th>
-              <th class="text-right py-2">Fahrten</th>
-              <th class="text-right py-2">Gesamt km</th>
-              <th class="text-right py-2">Privat km</th>
-              <th class="text-right py-2">Dienst km</th>
-              <th class="text-right py-2">Arbeitsweg km</th>
-              <th class="text-right py-2">Privat %</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="m in months" :key="m.month"
-              @click="selMonth = m.month.split('-')[1]; load()"
-              class="border-b border-gray-800 hover:bg-gray-700 cursor-pointer transition">
-              <td class="py-2 font-medium">{{ fmtMonth(m.month) }}</td>
-              <td class="text-right text-gray-300">{{ m.trips }}</td>
-              <td class="text-right font-semibold">{{ fmt(m.total_km) }}</td>
-              <td class="text-right text-gray-300">{{ fmt(m.private_km) }}</td>
-              <td class="text-right text-blue-300">{{ fmt(m.business_km) }}</td>
-              <td class="text-right text-green-300">{{ fmt(m.commute_km) }}</td>
-              <td class="text-right" :class="pctColor(m.private_km, m.total_km)">
-                {{ pct(m.private_km, m.total_km) }}%
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <!-- Jahresbericht-PDF -->
+      <SortableSection v-if="sid === 'annual'"
+        page-id="fahrtenbuch" section-id="annual"
+        :title="$t('trips.annualReportTitle')" icon="📄"
+        :collapsed="isCollapsed('annual')"
+        @toggle="toggle('annual')"
+        @move="(f, t, p) => moveSection(f, t, p)">
+        <AnnualReportButton />
+      </SortableSection>
 
-    <!-- Fahrten — Tabelle (Desktop) ODER Karten (Smartphone, Tesla,
-         und alle, die showCompactView gewaehlt haben). -->
-    <div class="card space-y-3">
-      <h2 class="font-semibold">
-        Fahrten{{ selMonth ? ' – ' + monthName(+selMonth) + ' ' + selYear : ' ' + selYear }}
-        <span class="text-gray-400 font-normal text-sm ml-2">({{ trips.length }})</span>
-      </h2>
+      <!-- Monatsübersicht (nur Desktop, nur wenn kein spezifischer Monat gewählt) -->
+      <SortableSection v-if="sid === 'months' && !selMonth && months.length"
+        page-id="fahrtenbuch" section-id="months"
+        :title="'Monatsübersicht ' + selYear" icon="📆"
+        :collapsed="isCollapsed('months')"
+        @toggle="toggle('months')"
+        @move="(f, t, p) => moveSection(f, t, p)"
+        class="hidden md:block">
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-gray-400 border-b border-gray-700">
+                <th class="text-left py-2">Monat</th>
+                <th class="text-right py-2">Fahrten</th>
+                <th class="text-right py-2">Gesamt km</th>
+                <th class="text-right py-2">Privat km</th>
+                <th class="text-right py-2">Dienst km</th>
+                <th class="text-right py-2">Arbeitsweg km</th>
+                <th class="text-right py-2">Privat %</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="m in months" :key="m.month"
+                @click="selMonth = m.month.split('-')[1]; load()"
+                class="border-b border-gray-800 hover:bg-gray-700 cursor-pointer transition">
+                <td class="py-2 font-medium">{{ fmtMonth(m.month) }}</td>
+                <td class="text-right text-gray-300">{{ m.trips }}</td>
+                <td class="text-right font-semibold">{{ fmt(m.total_km) }}</td>
+                <td class="text-right text-gray-300">{{ fmt(m.private_km) }}</td>
+                <td class="text-right text-blue-300">{{ fmt(m.business_km) }}</td>
+                <td class="text-right text-green-300">{{ fmt(m.commute_km) }}</td>
+                <td class="text-right" :class="pctColor(m.private_km, m.total_km)">
+                  {{ pct(m.private_km, m.total_km) }}%
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </SortableSection>
 
-      <div v-if="!trips.length" class="text-gray-400 text-sm text-center py-8">
+      <!-- Fahrten — Tabelle (Desktop) ODER Karten (Smartphone, Tesla) -->
+      <SortableSection v-if="sid === 'trips'"
+        page-id="fahrtenbuch" section-id="trips"
+        :title="'Fahrten' + (selMonth ? ' – ' + monthName(+selMonth) + ' ' + selYear : ' ' + selYear) + ' (' + trips.length + ')'"
+        icon="🚗"
+        :collapsed="isCollapsed('trips')"
+        @toggle="toggle('trips')"
+        @move="(f, t, p) => moveSection(f, t, p)">
+        <div class="space-y-3">
+          <div v-if="!trips.length" class="text-gray-400 text-sm text-center py-8">
         Keine Fahrten für diesen Zeitraum.
       </div>
 
@@ -296,8 +314,11 @@
             </tr>
           </tfoot>
         </table>
-      </div>
-    </div>
+          </div>
+        </div>
+      </SortableSection>
+
+    </template><!-- end v-for layoutOrder -->
 
     <!-- Modal: Manuelle Fahrt-Erfassung — Teleport: kein clipping durch
          .card-Backdrop-Stacking-Context. -->
@@ -392,6 +413,8 @@ import LocationHeatmap from '../components/LocationHeatmap.vue';
 import AnnualReportButton from '../components/AnnualReportButton.vue';
 import SortToggle from '../components/SortToggle.vue';
 import { useSortDirection } from '../composables/useSortDirection.js';
+import SortableSection from '../components/SortableSection.vue';
+import { usePageLayout } from '../composables/usePageLayout.js';
 
 const appStore  = useAppStore();
 const { fmtDistance } = useUnits();
@@ -403,6 +426,10 @@ const selMonth  = ref('');
 const selType   = ref('');
 // Sortierreihenfolge pro View in localStorage. Default desc (Neueste oben).
 const { direction: sortDir } = useSortDirection('fahrtenbuch');
+
+// Dynamisches Sektions-Layout: per Drag sortierbar, kollabierbar.
+const FB_SECTIONS = ['stats', 'heatmap', 'location', 'annual', 'months', 'trips'];
+const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('fahrtenbuch', FB_SECTIONS);
 
 // Karten-/Tabellen-Umschalter (manueller Override). Initial: bei
 // schmalem Viewport (< 768 px) automatisch Karten. localStorage merkt

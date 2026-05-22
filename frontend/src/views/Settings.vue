@@ -150,7 +150,8 @@
       <div v-if="appStore.selectedVehicle" class="space-y-4">
         <div class="flex gap-4 items-center">
           <img :src="vehicleImageUrl" :alt="appStore.selectedVehicle.display_name"
-            class="h-24 object-contain bg-gray-800 rounded-lg px-2"
+            class="h-24 w-40 object-contain bg-gray-800 rounded-lg px-2"
+            @error="e => e.target.style.opacity = '0.3'"
             v-tooltip="hasOptionCodes
               ? 'Vorschau basiert auf den echten Werks-Optionen deines Tesla (Farbe, Felgen, Spoiler, Trim)'
               : 'Vorschau basiert nur auf Modell + Farbe. Sobald der Tesla-Poller dein Auto erreicht, kommen Felgen + Trim automatisch dazu.'" />
