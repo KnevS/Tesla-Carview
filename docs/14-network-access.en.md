@@ -219,7 +219,7 @@ A VPS (Virtual Private Server) is a small rented Linux server in a data centre. 
 | [Contabo](https://contabo.com) | VPS S | ~€5.99 | 4 vCPU · 8 GB RAM · 100 GB | Lots of storage for multi-tenant |
 | [IONOS](https://www.ionos.com) | VPS S | ~€1.00 | 1 vCore · 1 GB RAM · 10 GB | First month cheap, then higher |
 
-> 💡 **Discount code for netcup:** We can send you a personal discount code for netcup on request. Just send a short e-mail to [sven@krische.com](mailto:sven@krische.com) with the subject "netcup TeslaView".
+> 💡 **Discount code for netcup:** We can send you a personal discount code for netcup on request. Just send a short e-mail to [rabatt-code-netcup@krische.com](mailto:rabatt-code-netcup@krische.com) with the subject "netcup TeslaView".
 
 > **Why VPS nano G11s for TeslaView?** Tesla Carview uses ~150–200 MB RAM at idle (backend + nginx + proxy). 2 GB RAM gives plenty of headroom. The 60 GB SSD has room for many years of telemetry data (SQLite grows ~500 MB/year for an active vehicle). 2 vCores ensure that export and migration queries don't block the poller.
 
