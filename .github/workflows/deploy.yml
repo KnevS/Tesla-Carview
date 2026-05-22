@@ -78,6 +78,21 @@ jobs:
                 backend/src/routes/demo.js \
                 backend/src/services/demoLifecycle.js \
                 frontend/src/views/Demo.vue
+              # Frontend lokal bauen — privates Demo.vue muss zur Compile-Zeit im Bundle sein.
+              # Das Ergebnis wird in frontend-dist-private/ abgelegt und vom Container
+              # per Volume-Mount (:ro) serviert (volume-mount ist in docker-compose.prod.yml).
+              echo "==> Privates Frontend-Bundle bauen …"
+              GIT_HASH=$(sudo git -C "$APP_DIR" rev-parse --short HEAD 2>/dev/null || echo unknown)
+              sudo docker build \
+                --build-arg GIT_HASH="$GIT_HASH" \
+                -t tesla-carview-frontend-private:local \
+                "$APP_DIR/frontend" 2>&1 | tail -8
+              sudo docker create --name tmp-frontend-extract tesla-carview-frontend-private:local
+              sudo rm -rf "$APP_DIR/frontend-dist-private"
+              sudo docker cp tmp-frontend-extract:/usr/share/nginx/html "$APP_DIR/frontend-dist-private"
+              sudo docker rm tmp-frontend-extract
+              sudo docker image rm tesla-carview-frontend-private:local 2>/dev/null || true
+              echo "==> Privates Frontend-Bundle bereit."
             fi
             # Pull pre-built images from GHCR (no local build needed)
             echo "$GHCR_TOKEN" | sudo docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin

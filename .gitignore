@@ -12,3 +12,4 @@ data/
 *.pem
 CLAUDE.md
 *.bak
+frontend-dist-private/

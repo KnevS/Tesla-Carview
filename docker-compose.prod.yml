@@ -47,6 +47,11 @@ services:
     image: ghcr.io/knevs/tesla-carview/frontend:main
     container_name: tesla-carview-frontend
     restart: unless-stopped
+    volumes:
+      # Demo-Feature: privat kompiliertes Frontend-Bundle (enthaelt vollstaendige Demo.vue).
+      # Wird durch deploy.sh automatisch neu gebaut wenn /opt/tc-private.git vorhanden ist.
+      # Ueberschreibt den oeffentlichen Stub aus dem GHCR-Image.
+      - ./frontend-dist-private:/usr/share/nginx/html:ro
     networks:
       - tesla-net
     depends_on:

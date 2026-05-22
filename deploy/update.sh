@@ -85,20 +85,27 @@ if [ -d "$PRIVATE_REPO" ]; then
     echo "    Backend restartet mit privaten Dateien."
   fi
 
-  # Frontend: lokal bauen (private Demo.vue kann nicht in pre-compiled Bundle injiziert werden)
-  if [ "$FRONTEND_CHANGED" -eq 1 ]; then
-    echo "    Frontend lokal bauen (enthält private Demo.vue) …"
-    cd "$APP_DIR/frontend"
-    npm install --silent 2>/dev/null
-    ./node_modules/.bin/vite build --silent 2>/dev/null || node_modules/.bin/vite build
-    cd "$APP_DIR"
+  # Frontend: via Docker lokal bauen (private Demo.vue ist zur Compile-Zeit erforderlich,
+  # kann nicht nachträglich via Volume-Mount injiziert werden).
+  # Das Ergebnis landet in frontend-dist-private/ und wird vom Container
+  # via Volume-Mount (:ro) serviert (kein Container-Neustart nötig, da bind-mount live ist).
+  if [ "$FRONTEND_CHANGED" -eq 1 ] || [ ! -f "$APP_DIR/frontend-dist-private/index.html" ]; then
+    echo "    Frontend via Docker lokal bauen (enthält private Demo.vue) …"
+    GIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    docker build \
+      --build-arg GIT_HASH="$GIT_HASH" \
+      -t tesla-carview-frontend-private:local \
+      "$APP_DIR/frontend" 2>&1 | tail -5
 
-    # Gebaute Dateien in laufenden Frontend-Container kopieren
-    FRONTEND_CONTAINER=$(docker ps --filter name=tesla-carview-frontend --format "{{.Names}}" | head -1)
-    if [ -n "$FRONTEND_CONTAINER" ]; then
-      docker cp "$APP_DIR/frontend/dist/." "$FRONTEND_CONTAINER":/usr/share/nginx/html/
-      echo "    ✓ Frontend: dist/ → Container $FRONTEND_CONTAINER"
-    fi
+    # dist/ aus dem Image in frontend-dist-private/ auf dem Host extrahieren
+    docker create --name tmp-frontend-extract tesla-carview-frontend-private:local
+    rm -rf "$APP_DIR/frontend-dist-private"
+    docker cp tmp-frontend-extract:/usr/share/nginx/html "$APP_DIR/frontend-dist-private"
+    docker rm tmp-frontend-extract
+
+    echo "    ✓ Frontend: privates Bundle in frontend-dist-private/ → wird live serviert."
+    # Dangling Zwischen-Image aufräumen
+    docker image rm tesla-carview-frontend-private:local 2>/dev/null || true
   fi
 else
   echo "    Kein privates Repo gefunden — übersprungen."
