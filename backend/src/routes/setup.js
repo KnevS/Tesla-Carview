@@ -59,7 +59,11 @@ function recordSetupAcceptance(db, userId, accepts, ip, ua) {
 }
 
 // Prüft ob Setup noch erforderlich ist
+// Cache-Control: no-store verhindert, dass Browser oder Proxies die Antwort
+// cachen — ein gecachtes needsSetup:true wuerde den Wizard faelschlich
+// triggern, auch wenn der Admin laengst angelegt ist (Browser-304-Bug).
 router.get('/status', (_req, res) => {
+  res.set('Cache-Control', 'no-store');
   const tenants = getAllTenants();
   if (tenants.length === 0) return res.json({ needsSetup: true });
 
