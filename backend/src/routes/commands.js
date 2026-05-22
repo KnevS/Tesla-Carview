@@ -101,7 +101,16 @@ router.post('/:vehicleId/:command', async (req, res) => {
   if (!vehicle) return res.status(404).json({ error: 'Fahrzeug nicht gefunden' });
   if (!vehicle.vin) return res.status(400).json({ error: 'Fahrzeug hat keine VIN hinterlegt' });
   try {
-    const data = await apiProxyPost(req.db, `/api/1/vehicles/${vehicle.vin}/command/${command}`, req.body ?? {});
+    let data;
+    if (command === 'navigation_request') {
+      // navigation_request wird vom tesla-http-proxy mit
+      // "command requires using the REST API" abgelehnt.
+      // Es muss direkt ueber die Fleet-REST-API gesendet werden.
+      if (!vehicle.tesla_id) return res.status(400).json({ error: 'Fahrzeug hat keine Tesla-ID' });
+      data = await apiPost(req.db, `/api/1/vehicles/${vehicle.tesla_id}/command/${command}`, req.body ?? {});
+    } else {
+      data = await apiProxyPost(req.db, `/api/1/vehicles/${vehicle.vin}/command/${command}`, req.body ?? {});
+    }
     res.json(data?.response ?? data);
   } catch (e) {
     const status = e.response?.status;
