@@ -17,7 +17,7 @@ export function usePageLayout(pageId, defaultSections) {
     const extra = defaultSections.filter(id => !stored.order.includes(id));
     return {
       order:     [...stored.order, ...extra],
-      collapsed: stored.collapsed ?? [...defaultSections],
+      collapsed: stored.collapsed ?? [],
     };
   });
 

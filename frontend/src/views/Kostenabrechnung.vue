@@ -54,168 +54,184 @@
         </transition>
       </Teleport>
 
-      <!-- Jahresübersicht -->
-      <div class="grid grid-cols-3 gap-4">
-        <div class="card text-center space-y-1">
-          <p class="text-xs text-gray-400 uppercase tracking-wide">Geladene kWh</p>
-          <p class="text-3xl font-bold text-white">{{ fmtN(yearTotal.kwh, 1) }}</p>
-          <p class="text-xs text-gray-500">{{ yearTotal.sessions }} Sessions</p>
-        </div>
-        <div class="card text-center space-y-1">
-          <p class="text-xs text-gray-400 uppercase tracking-wide">Ø Strompreis</p>
-          <p class="text-3xl font-bold text-white">{{ fmtN(vehicle.electricity_rate_kwh ?? 0.30, 2) }}</p>
-          <p class="text-xs text-gray-500">€/kWh</p>
-        </div>
-        <div class="card text-center space-y-1 bg-green-900/20 border border-green-800">
-          <p class="text-xs text-gray-400 uppercase tracking-wide">Erstattungsbetrag</p>
-          <p class="text-3xl font-bold text-green-300">{{ fmtN(yearTotal.amount, 2) }} €</p>
-          <p class="text-xs text-gray-500">inkl. MwSt.</p>
-        </div>
-      </div>
+      <!-- Dynamisches Sektions-Layout -->
+      <template v-for="sid in layoutOrder" :key="sid">
 
-      <!-- Monatsübersicht -->
-      <div class="card space-y-3" v-if="months.length">
-        <h2 class="font-semibold">Monatsübersicht {{ selYear }}</h2>
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="text-gray-400 border-b border-gray-700">
-                <th class="text-left py-2">Monat</th>
-                <th class="text-right py-2">Sessions</th>
-                <th class="text-right py-2">kWh (Tesla)</th>
-                <th class="text-right py-2">kWh (MID)</th>
-                <th class="text-right py-2">Tarif €/kWh</th>
-                <th class="text-right py-2 text-green-300">Betrag €</th>
-                <th class="text-center py-2">Abgerechnet</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="m in months" :key="m.month"
-                class="border-b border-gray-800 hover:bg-gray-700 transition cursor-pointer"
-                @click="selMonth = m.month.split('-')[1]; load()">
-                <td class="py-2 font-medium">{{ fmtMonth(m.month) }}</td>
-                <td class="text-right text-gray-300">{{ m.sessions }}</td>
-                <td class="text-right text-gray-300">{{ fmtN(m.total_kwh_tesla, 1) }}</td>
-                <td class="text-right" :class="m.total_kwh_mid > 0 ? 'text-white font-medium' : 'text-gray-500'">
-                  {{ m.total_kwh_mid > 0 ? fmtN(m.total_kwh_mid, 1) : '–' }}
-                </td>
-                <td class="text-right text-gray-300">{{ fmtN(m.avg_rate, 2) }}</td>
-                <td class="text-right font-bold text-green-300">{{ fmtN(m.total_amount, 2) }}</td>
-                <td class="text-center">
-                  <span class="text-xs px-2 py-0.5 rounded-full"
-                    :class="m.submitted ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400'">
-                    {{ m.submitted ? 'Ja' : 'Ausstehend' }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr class="border-t border-gray-600 font-bold">
-                <td colspan="2" class="py-2 text-gray-400">Summe {{ selYear }}</td>
-                <td class="text-right">{{ fmtN(months.reduce((s,m)=>s+m.total_kwh_tesla,0),1) }}</td>
-                <td class="text-right">{{ fmtN(months.reduce((s,m)=>s+m.total_kwh_mid,0),1) }}</td>
-                <td></td>
-                <td class="text-right text-green-300">{{ fmtN(months.reduce((s,m)=>s+m.total_amount,0),2) }}</td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-      </div>
+        <!-- Jahresübersicht -->
+        <SortableSection v-if="sid === 'overview'"
+          page-id="kostenabrechnung" section-id="overview"
+          title="Jahresübersicht" icon="💶"
+          :collapsed="isCollapsed('overview')"
+          @toggle="toggle('overview')"
+          @move="(f, t, p) => moveSection(f, t, p)">
+          <div class="grid grid-cols-3 gap-4">
+            <div class="bg-gray-800 rounded-xl p-4 text-center space-y-1">
+              <p class="text-xs text-gray-400 uppercase tracking-wide">Geladene kWh</p>
+              <p class="text-3xl font-bold text-white">{{ fmtN(yearTotal.kwh, 1) }}</p>
+              <p class="text-xs text-gray-500">{{ yearTotal.sessions }} Sessions</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-4 text-center space-y-1">
+              <p class="text-xs text-gray-400 uppercase tracking-wide">Ø Strompreis</p>
+              <p class="text-3xl font-bold text-white">{{ fmtN(vehicle.electricity_rate_kwh ?? 0.30, 2) }}</p>
+              <p class="text-xs text-gray-500">€/kWh</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-4 text-center space-y-1 bg-green-900/20 border border-green-800">
+              <p class="text-xs text-gray-400 uppercase tracking-wide">Erstattungsbetrag</p>
+              <p class="text-3xl font-bold text-green-300">{{ fmtN(yearTotal.amount, 2) }} €</p>
+              <p class="text-xs text-gray-500">inkl. MwSt.</p>
+            </div>
+          </div>
+        </SortableSection>
 
-      <!-- Sessions-Detail -->
-      <div class="card space-y-3">
-        <div class="flex items-center justify-between">
-          <h2 class="font-semibold">
-            Ladesessions{{ selMonth ? ' – ' + monthName(+selMonth) : '' }}
-            <span class="text-gray-400 font-normal text-sm ml-2">({{ sessions.length }})</span>
-          </h2>
-          <div v-if="selMonth" class="flex gap-2">
-            <button @click="markMonthBilled" class="btn-primary text-xs"
+        <!-- Monatsübersicht -->
+        <SortableSection v-if="sid === 'months' && months.length"
+          page-id="kostenabrechnung" section-id="months"
+          :title="'Monatsübersicht ' + selYear" icon="📆"
+          :collapsed="isCollapsed('months')"
+          @toggle="toggle('months')"
+          @move="(f, t, p) => moveSection(f, t, p)">
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-gray-400 border-b border-gray-700">
+                  <th class="text-left py-2">Monat</th>
+                  <th class="text-right py-2">Sessions</th>
+                  <th class="text-right py-2">kWh (Tesla)</th>
+                  <th class="text-right py-2">kWh (MID)</th>
+                  <th class="text-right py-2">Tarif €/kWh</th>
+                  <th class="text-right py-2 text-green-300">Betrag €</th>
+                  <th class="text-center py-2">Abgerechnet</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="m in months" :key="m.month"
+                  class="border-b border-gray-800 hover:bg-gray-700 transition cursor-pointer"
+                  @click="selMonth = m.month.split('-')[1]; load()">
+                  <td class="py-2 font-medium">{{ fmtMonth(m.month) }}</td>
+                  <td class="text-right text-gray-300">{{ m.sessions }}</td>
+                  <td class="text-right text-gray-300">{{ fmtN(m.total_kwh_tesla, 1) }}</td>
+                  <td class="text-right" :class="m.total_kwh_mid > 0 ? 'text-white font-medium' : 'text-gray-500'">
+                    {{ m.total_kwh_mid > 0 ? fmtN(m.total_kwh_mid, 1) : '–' }}
+                  </td>
+                  <td class="text-right text-gray-300">{{ fmtN(m.avg_rate, 2) }}</td>
+                  <td class="text-right font-bold text-green-300">{{ fmtN(m.total_amount, 2) }}</td>
+                  <td class="text-center">
+                    <span class="text-xs px-2 py-0.5 rounded-full"
+                      :class="m.submitted ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400'">
+                      {{ m.submitted ? 'Ja' : 'Ausstehend' }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr class="border-t border-gray-600 font-bold">
+                  <td colspan="2" class="py-2 text-gray-400">Summe {{ selYear }}</td>
+                  <td class="text-right">{{ fmtN(months.reduce((s,m)=>s+m.total_kwh_tesla,0),1) }}</td>
+                  <td class="text-right">{{ fmtN(months.reduce((s,m)=>s+m.total_kwh_mid,0),1) }}</td>
+                  <td></td>
+                  <td class="text-right text-green-300">{{ fmtN(months.reduce((s,m)=>s+m.total_amount,0),2) }}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </SortableSection>
+
+        <!-- Sessions-Detail -->
+        <SortableSection v-if="sid === 'sessions'"
+          page-id="kostenabrechnung" section-id="sessions"
+          :title="'Ladesessions' + (selMonth ? ' – ' + monthName(+selMonth) : '') + ' (' + sessions.length + ')'"
+          icon="⚡"
+          :collapsed="isCollapsed('sessions')"
+          @toggle="toggle('sessions')"
+          @move="(f, t, p) => moveSection(f, t, p)">
+          <template #badge>
+            <button v-if="selMonth" @click="markMonthBilled" class="btn-primary text-xs"
               v-tooltip="'Alle Sessions dieses Monats als abgerechnet markieren'">
               ✓ Monat abrechnen
             </button>
+          </template>
+          <div v-if="!sessions.length" class="text-center text-gray-400 py-8 text-sm">
+            Keine Heimlade-Sessions gefunden.
+            <span v-if="!vehicle.monta_api_key"> Monta API-Key in Einstellungen hinterlegen für MID-Daten.</span>
           </div>
-        </div>
+          <div class="overflow-x-auto" v-else>
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-gray-400 border-b border-gray-700">
+                  <th class="text-left py-2">Datum</th>
+                  <th class="text-left py-2">Ort</th>
+                  <th class="text-right py-2">kWh Tesla</th>
+                  <th class="text-right py-2">kWh MID</th>
+                  <th class="text-right py-2">€/kWh</th>
+                  <th class="text-right py-2 text-green-300">Betrag €</th>
+                  <th class="text-center py-2">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="s in sessions" :key="s.id" class="border-b border-gray-800">
+                  <td class="py-2 whitespace-nowrap">
+                    {{ fmtDate(s.start_time) }}<br>
+                    <span class="text-xs text-gray-500">{{ fmtTime(s.start_time) }}</span>
+                  </td>
+                  <td class="py-2 text-gray-300 max-w-32 truncate">
+                    {{ s.location_name_resolved || s.location_name || 'Heimladen' }}
+                    <span v-if="s.is_home_charged" class="ml-1 text-green-400"
+                          v-tooltip="'Per Monta als Heim-Ladung erkannt'">🏠</span>
+                  </td>
+                  <td class="text-right text-gray-400">{{ fmtN(s.energy_added_kwh, 2) }}</td>
+                  <td class="text-right">
+                    <input :value="s.energy_kwh_mid"
+                      @change="e => updateSession(s, { energy_kwh_mid: +e.target.value || null })"
+                      type="number" step="0.01" min="0"
+                      class="w-20 bg-gray-700 rounded px-2 py-0.5 text-right text-white text-xs focus:outline-none focus:ring-1 focus:ring-tesla-red"
+                      :placeholder="fmtN(s.energy_added_kwh, 2)" />
+                  </td>
+                  <td class="text-right">
+                    <input :value="s.billing_rate_kwh ?? vehicle.electricity_rate_kwh ?? 0.30"
+                      @change="e => updateSession(s, { billing_rate_kwh: +e.target.value })"
+                      type="number" step="0.001" min="0"
+                      class="w-16 bg-gray-700 rounded px-2 py-0.5 text-right text-white text-xs focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+                  </td>
+                  <td class="text-right font-bold text-green-300">
+                    {{ fmtN(calcAmount(s), 2) }}
+                  </td>
+                  <td class="text-center">
+                    <button @click="toggleStatus(s)"
+                      class="text-xs px-2 py-0.5 rounded-full transition"
+                      :class="s.billing_status === 'billed' ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'">
+                      {{ s.billing_status === 'billed' ? 'Abgerechnet' : 'Ausstehend' }}
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </SortableSection>
 
-        <div v-if="!sessions.length" class="text-center text-gray-400 py-8 text-sm">
-          Keine Heimlade-Sessions gefunden.
-          <span v-if="!vehicle.monta_api_key"> Monta API-Key in Einstellungen hinterlegen für MID-Daten.</span>
-        </div>
+        <!-- Abrechnungsvorlage -->
+        <SortableSection v-if="sid === 'template' && selMonth && sessions.length"
+          page-id="kostenabrechnung" section-id="template"
+          title="Abrechnungsvorlage" icon="📝"
+          :collapsed="isCollapsed('template')"
+          @toggle="toggle('template')"
+          @move="(f, t, p) => moveSection(f, t, p)">
+          <div class="bg-gray-800 rounded-xl p-4 font-mono text-sm space-y-1 text-gray-200">
+            <p class="font-bold text-white">Erstattungsantrag Ladekosten Dienstwagen</p>
+            <p class="text-gray-400">{{ monthName(+selMonth) }} {{ selYear }}</p>
+            <br>
+            <p>Fahrzeug: {{ vehicle.display_name }} ({{ vehicle.license_plate || vehicle.vin }})</p>
+            <p v-if="vehicle.company_name">Arbeitgeber: {{ vehicle.company_name }}</p>
+            <br>
+            <p>Geladene Energie (MID-Zähler): {{ fmtN(sessions.reduce((s,x)=>s+(x.energy_kwh_mid||x.energy_added_kwh||0),0),2) }} kWh</p>
+            <p>Angewandter Strompreis: {{ fmtN(vehicle.electricity_rate_kwh??0.30,3) }} €/kWh</p>
+            <p class="border-t border-gray-600 pt-1 mt-1 font-bold text-green-300">Erstattungsbetrag: {{ fmtN(sessions.reduce((s,x)=>s+calcAmount(x),0),2) }} €</p>
+            <br>
+            <p class="text-xs text-gray-500">Gemäß BDEW-Empfehlung / Arbeitgebererstattung nach §3 Nr. 46 EStG steuerbefreit bis 0,30 €/kWh</p>
+          </div>
+        </SortableSection>
 
-        <div class="overflow-x-auto" v-else>
-          <table class="w-full text-sm">
-            <thead>
-              <tr class="text-gray-400 border-b border-gray-700">
-                <th class="text-left py-2">Datum</th>
-                <th class="text-left py-2">Ort</th>
-                <th class="text-right py-2">kWh Tesla</th>
-                <th class="text-right py-2">kWh MID</th>
-                <th class="text-right py-2">€/kWh</th>
-                <th class="text-right py-2 text-green-300">Betrag €</th>
-                <th class="text-center py-2">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="s in sessions" :key="s.id" class="border-b border-gray-800">
-                <td class="py-2 whitespace-nowrap">
-                  {{ fmtDate(s.start_time) }}<br>
-                  <span class="text-xs text-gray-500">{{ fmtTime(s.start_time) }}</span>
-                </td>
-                <td class="py-2 text-gray-300 max-w-32 truncate">
-                  {{ s.location_name_resolved || s.location_name || 'Heimladen' }}
-                  <!-- 🏠-Marker, wenn Monta-Sync diese Session als Heim-Wallbox-
-                       Ladung erkannt hat (chargePointId-Match). -->
-                  <span v-if="s.is_home_charged" class="ml-1 text-green-400"
-                        v-tooltip="'Per Monta als Heim-Ladung erkannt'">🏠</span>
-                </td>
-                <td class="text-right text-gray-400">{{ fmtN(s.energy_added_kwh, 2) }}</td>
-                <td class="text-right">
-                  <input :value="s.energy_kwh_mid"
-                    @change="e => updateSession(s, { energy_kwh_mid: +e.target.value || null })"
-                    type="number" step="0.01" min="0"
-                    class="w-20 bg-gray-700 rounded px-2 py-0.5 text-right text-white text-xs focus:outline-none focus:ring-1 focus:ring-tesla-red"
-                    :placeholder="fmtN(s.energy_added_kwh, 2)" />
-                </td>
-                <td class="text-right">
-                  <input :value="s.billing_rate_kwh ?? vehicle.electricity_rate_kwh ?? 0.30"
-                    @change="e => updateSession(s, { billing_rate_kwh: +e.target.value })"
-                    type="number" step="0.001" min="0"
-                    class="w-16 bg-gray-700 rounded px-2 py-0.5 text-right text-white text-xs focus:outline-none focus:ring-1 focus:ring-tesla-red" />
-                </td>
-                <td class="text-right font-bold text-green-300">
-                  {{ fmtN(calcAmount(s), 2) }}
-                </td>
-                <td class="text-center">
-                  <button @click="toggleStatus(s)"
-                    class="text-xs px-2 py-0.5 rounded-full transition"
-                    :class="s.billing_status === 'billed' ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'">
-                    {{ s.billing_status === 'billed' ? 'Abgerechnet' : 'Ausstehend' }}
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Abrechnungsvorlage -->
-      <div class="card space-y-3" v-if="selMonth && sessions.length">
-        <h2 class="font-semibold">Abrechnungsvorlage</h2>
-        <div class="bg-gray-800 rounded-xl p-4 font-mono text-sm space-y-1 text-gray-200">
-          <p class="font-bold text-white">Erstattungsantrag Ladekosten Dienstwagen</p>
-          <p class="text-gray-400">{{ monthName(+selMonth) }} {{ selYear }}</p>
-          <br>
-          <p>Fahrzeug: {{ vehicle.display_name }} ({{ vehicle.license_plate || vehicle.vin }})</p>
-          <p v-if="vehicle.company_name">Arbeitgeber: {{ vehicle.company_name }}</p>
-          <br>
-          <p>Geladene Energie (MID-Zähler): {{ fmtN(sessions.reduce((s,x)=>s+(x.energy_kwh_mid||x.energy_added_kwh||0),0),2) }} kWh</p>
-          <p>Angewandter Strompreis: {{ fmtN(vehicle.electricity_rate_kwh??0.30,3) }} €/kWh</p>
-          <p class="border-t border-gray-600 pt-1 mt-1 font-bold text-green-300">Erstattungsbetrag: {{ fmtN(sessions.reduce((s,x)=>s+calcAmount(x),0),2) }} €</p>
-          <br>
-          <p class="text-xs text-gray-500">Gemäß BDEW-Empfehlung / Arbeitgebererstattung nach §3 Nr. 46 EStG steuerbefreit bis 0,30 €/kWh</p>
-        </div>
-      </div>
+      </template><!-- end v-for layoutOrder -->
     </template>
   </div>
 </template>
@@ -227,6 +243,8 @@ import api from '../api.js';
 import AppIcon from '../components/AppIcon.vue';
 import SortToggle from '../components/SortToggle.vue';
 import { useSortDirection } from '../composables/useSortDirection.js';
+import SortableSection from '../components/SortableSection.vue';
+import { usePageLayout } from '../composables/usePageLayout.js';
 
 const appStore = useAppStore();
 const vehicle  = ref(null);
@@ -238,6 +256,10 @@ const selYear  = ref(String(new Date().getFullYear()));
 const selMonth = ref(String(new Date().getMonth() + 1).padStart(2, '0'));
 // Sortierreihenfolge pro View in localStorage. Default desc (Neueste oben).
 const { direction: sortDir } = useSortDirection('kostenabrechnung');
+
+// Dynamisches Sektions-Layout: per Drag sortierbar, kollabierbar.
+const KA_SECTIONS = ['overview', 'months', 'sessions', 'template'];
+const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('kostenabrechnung', KA_SECTIONS);
 
 const years = computed(() => Array.from({ length: 5 }, (_, i) => String(new Date().getFullYear() - i)));
 
