@@ -49,8 +49,8 @@ jobs:
           path: frontend/dist/
           retention-days: 7
 
-  build-images:
-    name: Docker – build & push to GHCR
+  build-backend:
+    name: Docker – build & push backend
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [backend, frontend]
@@ -66,17 +66,39 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build & push backend (amd64 + arm64 + arm/v7)
+      # arm/v7 (32-Bit ARM) wird bewusst ausgeschlossen: better-sqlite3
+      # kompiliert native Binaries via node-gyp, was unter QEMU arm/v7
+      # konsistent mit SIGILL (exit 132) fehlschlaegt. arm64 (Pi 4/5,
+      # Apple M) und amd64 (Produktionsserver) funktionieren problemlos.
+      - name: Build & push backend (amd64 + arm64)
         uses: docker/build-push-action@v7
         with:
           context: ./backend
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ghcr.io/knevs/tesla-carview/backend:main
           build-args: |
             GIT_HASH=${{ github.sha }}
             GIT_BRANCH=${{ github.ref_name }}
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
+
+  build-frontend:
+    name: Docker – build & push frontend
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [backend, frontend]
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build & push frontend (amd64 + arm64 + arm/v7)
         uses: docker/build-push-action@v7
         with:
