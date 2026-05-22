@@ -34,7 +34,7 @@ export const DASHBOARD_CARD_DEFS = [
 const DEFAULTS = {
   theme_color:    'red',
   theme_design:   'glass',
-  lang:           'de',
+  lang:           null,   // null = kein Override; Sprache kommt von users.lang (langStore)
   unit_distance:  'km',
   unit_temp:      'celsius',
   unit_efficiency:'kwh100',
@@ -156,6 +156,10 @@ export const usePrefsStore = defineStore('prefs', {
         nav.hidden = this.data.nav_hidden ?? [];
         nav._persist();
       }
+      // Sicherstellen, dass neue Routen (nach einem App-Update) auch dann
+      // sichtbar sind, wenn der User alte Prefs gespeichert hat — sync()
+      // haengt fehlende Keys ans Ende und bereinigt veraltete.
+      nav.sync();
     },
   },
 });
