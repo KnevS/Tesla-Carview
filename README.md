@@ -49,6 +49,11 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 | **Einstellungen** | Alle Sektionen per Klick ein-/ausklappbar (SortableSection), Reihenfolge persönlich sortierbar |
 | **Navigation** | Individuell sortierbare und ein-/ausblendbare Navigationspunkte |
 | **Mobile / Tesla** | Installierbare PWA für iPhone/iPad (Safari), Android, Tesla-Fahrzeug-Browser und Desktop. Kompakte Karten-Ansicht im Fahrtenbuch für schmale Bildschirme. |
+| **CO₂-Vergleich** | Tesla-CO₂ vs. Diesel-Äquivalent, eingesparte Tonnen, Strommix-Faktor (0,38 kg/kWh DE) — pro Woche im Energiebericht |
+| **Wetter-Verbrauch** | Verbrauchskorrelation nach Temperatur-Bucket (< −10 °C bis > 30 °C) im Energiebericht — sieht wie Kälte/Hitze den Verbrauch beeinflusst |
+| **Klimastatistiken** | Tägliche Klimaanlage-Nutzung (Stunden), Sitzheizung, Vorklimatisierungen, kältester/wärmster Tag |
+| **Firmware-Tracker** | Automatisches Aufzeichnen jeder neuen Fahrzeug-Softwareversion mit Verlauf und Installationsdauer |
+| **Community Benchmark** | Opt-in anonymer Verbrauchsvergleich mit anderen Fahrern desselben Modells; k-Anonymität, SHA-256-Hash, DSGVO-konform |
 | **System-Status** | Ampel-Karte (Tesla-Token, Virtual Key, Fleet Telemetry, Poller, DB) — grün/gelb/rot auf einen Blick |
 | **Aktivitäts-Heatmap** | Kalender-Heatmap aller Fahrten (Jahr/Monat/Woche/Alle) im Fahrtenbuch, Klick führt zur Fahrtenliste des Tages |
 | **Mandanten-Pseudonym** | Datenschutz: Login-Seite zeigt zufälligen `adjective-noun`-Pseudonym statt Klarnamen, vom Admin neu generierbar |

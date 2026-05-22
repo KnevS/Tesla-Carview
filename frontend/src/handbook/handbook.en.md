@@ -524,6 +524,67 @@ The last 50 entries from the heal log and security-check log are shown directly 
 
 **Privacy**: Requests are routed through the backend — never directly from your browser to xAI. No raw data (full VIN, exact addresses) is transmitted.
 
+## 🌍 CO₂ Comparison {#co2}
+
+The **CO₂ comparison** in the Energy Report shows how eco-friendly your driving is:
+
+- **Tesla CO₂** — Calculated from your consumption against the German grid mix (0.38 kg CO₂/kWh). The real value is lower if you charge with solar or green energy.
+- **Diesel equivalent** — How much CO₂ a comparable car with 7 l/100 km (2.65 kg CO₂/l) would have produced.
+- **Tonnes saved** — The difference between Tesla and diesel. Shows how much CO₂ you have actually saved.
+
+Values are calculated for the selected period (4/8/12 weeks) and shown per-week in the trend chart as a green bar.
+
+## 🌡️ Weather Consumption {#weather-consumption}
+
+The **weather consumption correlation** shows how outside temperature affects your consumption. The bar chart in the Energy Report groups all trips into 6 temperature buckets:
+
+| Range | Typical behaviour |
+|---|---|
+| < −10 °C | Very high consumption (heating, cold battery) |
+| −10 to 0 °C | High consumption |
+| 0 to 10 °C | Elevated consumption |
+| 10 to 20 °C | Optimal range |
+| 20 to 30 °C | Slightly elevated (AC) |
+| > 30 °C | Elevated consumption (AC) |
+
+Buckets with fewer than 2 trips are not shown. Bar colour transitions from green (efficient) through yellow to red (inefficient).
+
+## ❄️ Climate Statistics {#climate-stats}
+
+The **Climate Statistics** page (`/climate`) shows daily usage of your vehicle's climate system:
+
+- **Air conditioning** — Hours per period (extrapolated from the polling interval)
+- **Seat heating driver/passenger** — Number of days seat heaters were active
+- **Preconditioning count** — How often the app or a schedule switched on climate
+- **Coldest/hottest day** — Outside resp. interior temperature extremes
+
+Data is collected **automatically at every vehicle sync**. Select the time range at the top (30 / 90 / 365 days). In the daily chart 🪑 = seat heating active, 🔄 = preconditioning.
+
+## 📦 Firmware Update Tracker {#firmware}
+
+The **Firmware Tracker** in Admin → System shows all software versions ever detected on your vehicle:
+
+- **Current version** — highlighted at the top
+- **History** — detection date, previous version, days installed
+- **Total updates** — how many times the vehicle received a new software version
+
+Detection is automatic: every time the backend sync detects a new `car_version`, it is stored in `firmware_versions`. Only one row per version is stored (no duplicates).
+
+## 🌍 Community Benchmark {#community-benchmark}
+
+The **Community Benchmark** (in the Energy Report) enables anonymous consumption comparison with other Tesla drivers of the same model.
+
+**Privacy principles:**
+- Aggregated values only (kWh/100 km) — no raw data, no GPS coordinates
+- Your instance is stored as a SHA-256 hash, not as a name or email
+- Minimum **3 contributors** required before statistics are shown (k-anonymity)
+- Revocable at any time: switch off the toggle → data is deleted immediately
+
+**Participating:**
+1. Enable the "Participate" toggle
+2. Click "Contribute data" — your current average consumption is submitted
+3. Once ≥ 3 contributors exist for your model, you see average, P25, P75 and your position
+
 ## 🔧 Troubleshooting {#troubleshooting}
 
 **The vehicle does not return GPS data**

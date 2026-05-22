@@ -49,6 +49,11 @@ Runs on: **Linux servers** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), local
 | **Settings** | All sections collapsible and individually reorderable (drag-to-sort) |
 | **Navigation** | Sortable, individually hideable navigation entries |
 | **Mobile / Tesla** | Installable PWA for iPhone/iPad (Safari), Android, the Tesla in-car browser and desktop. Compact card view in the logbook on narrow screens. |
+| **CO₂ comparison** | Tesla CO₂ vs. diesel equivalent, tonnes saved, grid-mix factor (0.38 kg/kWh DE) — per week in the Energy Report |
+| **Weather consumption** | Consumption correlation by temperature bucket (< −10 °C to > 30 °C) in the Energy Report — shows how cold and heat affect range |
+| **Climate statistics** | Daily AC usage (hours), seat heating, preconditioning count, coldest/hottest day |
+| **Firmware tracker** | Automatically records every new vehicle software version with history and days installed |
+| **Community Benchmark** | Opt-in anonymous consumption comparison with other drivers of the same model; k-anonymity, SHA-256 hash, GDPR-compliant |
 | **System status** | Traffic-light card (Tesla token, Virtual Key, Fleet Telemetry, poller, DB) — green/yellow/red at a glance |
 | **Activity heatmap** | Calendar heatmap of all trips (Year/Month/Week/All), click navigates to that day's trip list |
 | **Tenant pseudonym** | Privacy: login page shows a random `adjective-noun` pseudonym instead of the real tenant name, regeneratable by admin |

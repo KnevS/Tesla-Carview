@@ -521,6 +521,43 @@ Le journal heal et le journal security-check (50 dernières entrées) sont direc
 
 **Confidentialité** : Les requêtes passent par le backend — jamais directement depuis votre navigateur vers xAI.
 
+## 🌍 Comparaison CO₂ {#co2}
+
+La **comparaison CO₂** dans le Rapport Énergie montre l'impact environnemental de votre conduite :
+
+- **CO₂ Tesla** — Calculé à partir de votre consommation et du mix électrique allemand (0,38 kg CO₂/kWh). La valeur réelle est inférieure si vous chargez avec du solaire ou de l'énergie verte.
+- **Équivalent diesel** — Quantité de CO₂ qu'une voiture similaire à 7 l/100 km (2,65 kg CO₂/l) aurait produite.
+- **Tonnes économisées** — La différence entre Tesla et diesel.
+
+Les valeurs sont calculées pour la période sélectionnée (4/8/12 semaines) et affichées par semaine dans le graphique de tendance sous forme de barre verte.
+
+## 🌡️ Consommation météo {#weather-consumption}
+
+La **corrélation consommation-météo** montre comment la température extérieure influence votre consommation. Le diagramme à barres regroupe tous les trajets en 6 plages de température (< −10 °C à > 30 °C). Les couleurs passent de vert (efficace) à rouge (inefficace).
+
+## ❄️ Statistiques climatiques {#climate-stats}
+
+La page **Statistiques climatiques** (`/climate`) affiche l'utilisation quotidienne du système climatique :
+
+- **Climatisation** — Heures par période
+- **Sièges chauffants conducteur/passager** — Jours d'utilisation
+- **Préconditionements** — Nombre de démarrages via app ou planning
+- **Jour le plus froid/chaud** — Températures extrêmes
+
+Les données sont collectées **automatiquement à chaque synchronisation**. Dans le graphique quotidien : 🪑 = siège chauffant actif, 🔄 = préconditionnement.
+
+## 📦 Suivi des mises à jour firmware {#firmware}
+
+Le **suivi firmware** dans Admin → Système affiche toutes les versions logicielles détectées sur votre véhicule : version actuelle, historique (date, durée d'installation) et nombre total de mises à jour.
+
+## 🌍 Benchmark Communauté {#community-benchmark}
+
+Le **Benchmark Communauté** (dans le Rapport Énergie) permet une comparaison anonyme de consommation avec d'autres conducteurs Tesla du même modèle.
+
+**Principes de confidentialité :** valeurs agrégées uniquement (kWh/100 km), instance stockée comme hash SHA-256, minimum 3 participants requis (k-anonymat), révocable à tout moment.
+
+**Participer :** activer le toggle, puis cliquer sur « Contribuer les données ». Une fois ≥ 3 participants pour votre modèle, vous voyez la moyenne, P25, P75 et votre position.
+
 ## 🔧 Dépannage {#troubleshooting}
 
 **Le véhicule ne renvoie pas de données GPS**

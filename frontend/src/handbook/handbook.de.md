@@ -524,6 +524,67 @@ Der **Grok Chat** bringt xAI-gestützte Konversation direkt in Tesla Carview. Du
 
 **Datenschutz**: Anfragen laufen über das Backend — nie direkt vom Browser zu xAI. Keine Klardaten (vollständige VIN, exakte Adressen).
 
+## 🌍 CO₂-Vergleich {#co2}
+
+Der **CO₂-Vergleich** im Energiebericht zeigt, wie umweltfreundlich du fährst:
+
+- **Tesla-CO₂** — Hochrechnung deines Verbrauchs auf den deutschen Strommix (0,38 kg CO₂/kWh). Realer Wert ist niedriger, wenn du Solar- oder Ökostrom lädst.
+- **Diesel-Äquivalent** — Wie viel CO₂ ein vergleichbares Fahrzeug mit 7 l/100 km (2,65 kg CO₂/l) verursacht hätte.
+- **Eingesparte Tonnen** — Der Unterschied zwischen Tesla und Diesel. Zeigt, wie viel CO₂ du tatsächlich gespart hast.
+
+Die Werte werden für den gewählten Zeitraum (4/8/12 Wochen) berechnet und auch pro Woche im Trend-Chart als grüner Balken angezeigt.
+
+## 🌡️ Wetter-Verbrauch {#weather-consumption}
+
+Die **Wetter-Verbrauchskorrelation** zeigt, wie Außentemperatur deinen Verbrauch beeinflusst. Das Balkendiagramm im Energiebericht gruppiert alle Fahrten in 6 Temperatur-Buckets:
+
+| Bereich | Typisches Verhalten |
+|---|---|
+| < −10 °C | Sehr hoher Verbrauch (Heizung, Akku-Kälte) |
+| −10 bis 0 °C | Hoher Verbrauch |
+| 0 bis 10 °C | Erhöhter Verbrauch |
+| 10 bis 20 °C | Optimaler Bereich |
+| 20 bis 30 °C | Minimal erhöht (Klimaanlage) |
+| > 30 °C | Erhöhter Verbrauch (Klimaanlage) |
+
+Balken mit weniger als 2 Fahrten werden nicht angezeigt. Die Farbe der Balken wechselt von Grün (günstig) über Gelb zu Rot (ungünstig).
+
+## ❄️ Klimastatistiken {#climate-stats}
+
+Die **Klimastatistiken**-Seite (`/climate`) zeigt die tägliche Nutzung des Klimasystems deines Fahrzeugs:
+
+- **Klimaanlage** — Stunden pro Zeitraum (gezählt aus dem Polling-Intervall, hochgerechnet)
+- **Sitzheizung Fahrer/Beifahrer** — Anzahl Tage, an denen Sitzheizungen aktiv waren
+- **Vorklimatisierungen** — Wie oft die App/ein Zeitplan die Klimaanlage eingeschaltet hat
+- **Kältester/wärmster Tag** — Außen- bzw. Innentemperatur-Extremwerte
+
+Die Daten werden **automatisch bei jedem Fahrzeug-Sync** erfasst. Wähle den Zeitraum oben (30 / 90 / 365 Tage). Im täglichen Diagramm bedeutet 🪑 = Sitzheizung aktiv, 🔄 = Vorklimatisierung.
+
+## 📦 Firmware-Update-Tracker {#firmware}
+
+Der **Firmware-Tracker** in Admin → System zeigt alle bisher installierten Softwareversionen deines Fahrzeugs:
+
+- **Aktuelle Version** — oben hervorgehoben
+- **Verlauf** — Datum der Erkennung, Vorgänger-Version, Tage installiert
+- **Gesamtanzahl Updates** — wie oft das Fahrzeug eine neue Version erhalten hat
+
+Die Erkennung erfolgt automatisch: Jedes Mal wenn der Backend-Sync eine neue `car_version` feststellt, wird sie in `firmware_versions` gespeichert. Es wird nur eine Zeile pro Version gespeichert (kein Duplikat).
+
+## 🌍 Community Benchmark {#community-benchmark}
+
+Der **Community Benchmark** (im Energiebericht) ermöglicht anonymen Verbrauchsvergleich mit anderen Tesla-Fahrern desselben Modells.
+
+**Datenschutz-Prinzipien:**
+- Nur aggregierte Werte (kWh/100 km) — keine Rohdaten, keine GPS-Koordinaten
+- Deine Instanz wird als SHA-256-Hash gespeichert, nicht als Name oder E-Mail
+- Mindestens **3 Teilnehmer** nötig, bevor Statistiken angezeigt werden (k-Anonymität)
+- Widerruf jederzeit: Toggle ausschalten → Daten werden sofort gelöscht
+
+**Mitmachen:**
+1. Toggle „Mitmachen" aktivieren
+2. Auf „Daten beitragen" klicken — dein aktueller Durchschnittsverbrauch wird übermittelt
+3. Sobald ≥ 3 Teilnehmer für dein Modell vorhanden sind, siehst du Ø, P25, P75 und deine Position
+
 ## 🔧 Fehlerbehebung {#troubleshooting}
 
 **Das Fahrzeug gibt keine GPS-Daten zurück**

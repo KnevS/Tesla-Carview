@@ -521,6 +521,43 @@ El log heal y el log security-check (últimas 50 entradas) son consultables dire
 
 **Privacidad**: Las solicitudes se enrutan a través del backend — nunca directamente desde tu navegador a xAI.
 
+## 🌍 Comparación de CO₂ {#co2}
+
+La **comparación de CO₂** en el Informe de Energía muestra el impacto ambiental de tu conducción:
+
+- **CO₂ Tesla** — Calculado a partir de tu consumo y la mezcla eléctrica alemana (0,38 kg CO₂/kWh).
+- **Equivalente diésel** — CO₂ que habría producido un vehículo similar a 7 l/100 km (2,65 kg CO₂/l).
+- **Toneladas ahorradas** — La diferencia entre Tesla y diésel.
+
+Los valores se calculan para el período seleccionado (4/8/12 semanas) y se muestran por semana en el gráfico de tendencias como barra verde.
+
+## 🌡️ Consumo por clima {#weather-consumption}
+
+La **correlación consumo-temperatura** muestra cómo la temperatura exterior influye en tu consumo. El gráfico de barras agrupa todos los viajes en 6 rangos de temperatura (< −10 °C a > 30 °C). Los colores van de verde (eficiente) a rojo (ineficiente).
+
+## ❄️ Estadísticas climáticas {#climate-stats}
+
+La página **Estadísticas climáticas** (`/climate`) muestra el uso diario del sistema de climatización:
+
+- **Aire acondicionado** — Horas por período
+- **Calefacción de asientos conductor/pasajero** — Días de uso
+- **Precondicionamientos** — Veces que la app o un horario activó el clima
+- **Día más frío/cálido** — Temperaturas extremas
+
+Los datos se recopilan **automáticamente en cada sincronización**. En el gráfico diario: 🪑 = calefacción de asiento activa, 🔄 = precondicionamiento.
+
+## 📦 Rastreador de firmware {#firmware}
+
+El **rastreador de firmware** en Admin → Sistema muestra todas las versiones de software detectadas en tu vehículo: versión actual, historial (fecha, días instalado) y total de actualizaciones.
+
+## 🌍 Benchmark Comunidad {#community-benchmark}
+
+El **Benchmark Comunidad** (en el Informe de Energía) permite comparar anónimamente el consumo con otros conductores Tesla del mismo modelo.
+
+**Principios de privacidad:** solo valores agregados (kWh/100 km), instancia almacenada como hash SHA-256, mínimo 3 participantes requeridos (k-anonimato), revocable en cualquier momento.
+
+**Participar:** activar el interruptor, luego hacer clic en «Contribuir datos». Una vez que haya ≥ 3 participantes para tu modelo, verás la media, P25, P75 y tu posición.
+
 ## 🔧 Solución de problemas {#troubleshooting}
 
 **El vehículo no devuelve datos GPS**

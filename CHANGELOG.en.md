@@ -7,6 +7,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.2.0] — 2026-05-22
+
+### New
+- **CO₂ comparison in Energy Report** — New section shows Tesla CO₂ consumption vs. diesel equivalent, tonnes of CO₂ saved, and the German grid mix factor (0.38 kg/kWh). Per-week CO₂ savings are shown in the trend chart.
+- **Weather consumption correlation** — Temperature bar chart in the Energy Report: average consumption across 6 temperature buckets (< −10 °C to > 30 °C). Shows how cold and heat affect range. New backend endpoint `GET /api/trips/weather-consumption`.
+- **Firmware update tracker** — New `firmware_versions` table automatically records each new software version detected during sync. Full update history (date, version, days installed) visible in Admin → System.
+- **Climate statistics** — New page `/climate` with daily breakdown: AC usage (hours), seat heating driver/passenger, preconditioning count, coldest/hottest day. Data is collected automatically at every vehicle sync via `hvac_daily_stats` table.
+- **Community Benchmark** (opt-in) — Anonymous consumption comparison with other Tesla drivers of the same model. Opt-in via toggle; contributions are stored as a SHA-256-hashed instance UUID, never as plain data. k-anonymity: minimum 3 contributors required. P25–P75 range visible. Revocable at any time.
+
+### Improved
+- **Bundle cache-busting fixed** — The Vite entry bundle was always named `index-local.js` (no `.git` in Docker build context), which was frozen by nginx's `immutable` cache for one year. CI now passes `GIT_HASH` as `--build-arg`; each deploy produces `index-<7charHash>.js` as a unique filename.
+
+---
+
 ## [v3.1.5] — 2026-05-18
 
 ### Security

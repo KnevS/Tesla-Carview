@@ -521,6 +521,43 @@ Heal günlüğü ve security-check günlüğünün son 50 girişi doğrudan bu k
 
 **Gizlilik**: İstekler backend üzerinden yönlendirilir — tarayıcınızdan xAI'ye hiçbir zaman doğrudan değil.
 
+## 🌍 CO₂ Karşılaştırması {#co2}
+
+Enerji Raporu'ndaki **CO₂ karşılaştırması** sürüşünüzün çevresel etkisini gösterir:
+
+- **Tesla CO₂** — Tüketiminize ve Almanya elektrik karışımına göre hesaplanır (0,38 kg CO₂/kWh).
+- **Dizel eşdeğeri** — Benzer bir aracın (7 l/100 km, 2,65 kg CO₂/l) üretmiş olacağı CO₂.
+- **Tasarruf edilen tonlar** — Tesla ile dizel arasındaki fark.
+
+Değerler seçilen dönem için (4/8/12 hafta) hesaplanır ve trend grafiğinde haftalık yeşil çubuk olarak gösterilir.
+
+## 🌡️ Hava Durumu Tüketimi {#weather-consumption}
+
+**Tüketim-sıcaklık korelasyonu**, dış sıcaklığın tüketiminizi nasıl etkilediğini gösterir. Çubuk grafik tüm sürüşleri 6 sıcaklık aralığına göre gruplar (< −10 °C ile > 30 °C). Renkler yeşilden (verimli) kırmızıya (verimsiz) geçer.
+
+## ❄️ İklim İstatistikleri {#climate-stats}
+
+**İklim İstatistikleri** sayfası (`/climate`) aracınızın günlük klima sistemi kullanımını gösterir:
+
+- **Klima** — Dönem başına saat
+- **Koltuk ısıtma sürücü/yolcu** — Kullanım günleri
+- **Ön iklim sayısı** — Uygulama veya zamanlama ile başlatma sayısı
+- **En soğuk/sıcak gün** — Sıcaklık uç değerleri
+
+Veriler **her araç senkronizasyonunda otomatik olarak** toplanır. Günlük grafikte: 🪑 = koltuk ısıtma aktif, 🔄 = ön iklim.
+
+## 📦 Firmware Takipçisi {#firmware}
+
+Admin → Sistem'deki **firmware takipçisi** araçta tespit edilen tüm yazılım sürümlerini gösterir: güncel sürüm, geçmiş (tarih, kurulu gün sayısı) ve toplam güncelleme sayısı.
+
+## 🌍 Topluluk Karşılaştırması {#community-benchmark}
+
+Enerji Raporu'ndaki **Topluluk Karşılaştırması**, aynı modeldeki diğer Tesla sürücüleriyle anonim tüketim karşılaştırması yapmanızı sağlar.
+
+**Gizlilik ilkeleri:** yalnızca toplu değerler (kWh/100 km), SHA-256 hash olarak saklanan örnek, minimum 3 katılımcı gerekli (k-anonimlik), istediğiniz zaman iptal edilebilir.
+
+**Katılım:** geçişi etkinleştirin, ardından «Veri katkıla» düğmesine tıklayın. Modeliniz için ≥ 3 katılımcı olduğunda ortalama, P25, P75 ve konumunuzu görürsünüz.
+
 ## 🔧 Sorun giderme {#troubleshooting}
 
 **Araç GPS verisi döndürmüyor**
