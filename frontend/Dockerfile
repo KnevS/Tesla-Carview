@@ -9,7 +9,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci
 COPY . .
-RUN npm run build
+# GIT_HASH wird vom CI als --build-arg uebergeben (kein .git-Dir im Build-Context).
+# Ohne ARG wuerde vite.config.js auf 'local' zurueckfallen → unveraenderlicher
+# Dateiname index-local.js → Browser cached das Bundle immutable fuer 1 Jahr.
+ARG GIT_HASH=local
+RUN GIT_HASH=${GIT_HASH} npm run build
 
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html

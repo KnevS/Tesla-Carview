@@ -20,8 +20,12 @@ import { execSync } from 'node:child_process';
 // Git-Commit-Hash als Entry-Chunk-Suffix → neuer Filename bei jedem Deploy,
 // verhindert dass Browsers einen alten index-*.js aus dem immutable-Cache
 // liefern obwohl der Inhalt (z.B. lazy-Route-Referenzen) sich geändert hat.
+// GIT_HASH aus Docker-Build-Arg hat Vorrang (kein .git im Container-Build-Context);
+// Fallback: git-Kommando fuer lokale Builds; letzter Fallback: 'local'.
 let gitHash = 'local';
-try { gitHash = execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { /* kein git */ }
+try {
+  gitHash = (process.env.GIT_HASH || execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()).slice(0, 7);
+} catch { /* kein git */ }
 
 export default defineConfig({
   build: {
