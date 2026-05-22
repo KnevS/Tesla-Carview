@@ -172,19 +172,36 @@ export function seedNewDemoUser(db, userId, username) {
 
 /** Wird periodisch vom Scheduler aufgerufen: pro Demo-Mandant + pro
  *  Demo-Fahrzeug eine kleine Aktualisierung — eine kurze neue Fahrt
- *  und etwa jede 4. Iteration auch eine Ladesession. */
+ *  und etwa jede 4. Iteration auch eine Ladesession.
+ *
+ *  Prepared Statements werden einmalig VOR der Schleife erstellt —
+ *  nicht pro Iteration — damit kein unnötiger GC-Druck entsteht. */
 export function tickDemoActivity(db) {
   const vehicles = db.prepare(
-    "SELECT * FROM vehicles WHERE vin LIKE 'DEMO%'"
+    "SELECT id, vin FROM vehicles WHERE vin LIKE 'DEMO%'"
   ).all();
   if (!vehicles.length) return 0;
+
+  // Statements einmalig vorkompilieren (nicht in der Schleife)
+  const stmtLastTrip = db.prepare(
+    'SELECT MAX(end_time) AS ts, MAX(end_odometer_km) AS km, MAX(end_soc) AS soc FROM trips WHERE vehicle_id=?'
+  );
+  const stmtInsertTrip = db.prepare(
+    `INSERT INTO trips
+       (vehicle_id, start_time, end_time, start_lat, start_lon, end_lat, end_lon,
+        start_address, end_address, distance_km, energy_used_kwh,
+        start_soc, end_soc, start_odometer_km, end_odometer_km,
+        trip_type, purpose, source)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'demo')`
+  );
+  const stmtUpdateVehicle = db.prepare(
+    'UPDATE vehicles SET state_updated_at=? WHERE id=?'
+  );
 
   const now = Math.floor(Date.now() / 1000);
   let touched = 0;
   for (const v of vehicles) {
-    const last = db.prepare(
-      'SELECT MAX(end_time) AS ts, MAX(end_odometer_km) AS km, MAX(end_soc) AS soc FROM trips WHERE vehicle_id=?'
-    ).get(v.id) ?? {};
+    const last = stmtLastTrip.get(v.id) ?? {};
     const startSoc = last.soc ?? 70;
     const lastTs   = last.ts  ?? (now - 86400);
     if (now - lastTs < 25 * 60) continue; // <25 min seit letzter Fahrt → skip
@@ -195,14 +212,7 @@ export function tickDemoActivity(db) {
     const dur   = Math.max(360, Math.round(km / 50 * 3600 + Math.random() * 600));
     const endSoc = Math.max(15, startSoc - Math.round(used / MODEL_Y_USABLE_KWH * 100));
     const tripType = Math.random() < 0.3 ? 'business' : 'private';
-    db.prepare(
-      `INSERT INTO trips
-         (vehicle_id, start_time, end_time, start_lat, start_lon, end_lat, end_lon,
-          start_address, end_address, distance_km, energy_used_kwh,
-          start_soc, end_soc, start_odometer_km, end_odometer_km,
-          trip_type, purpose, source)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'demo')`
-    ).run(
+    stmtInsertTrip.run(
       v.id, now - dur, now,
       tpl.lat1, tpl.lon1, tpl.lat2, tpl.lon2,
       tpl.from, tpl.to, km, Math.round(used * 100) / 100,
@@ -211,7 +221,7 @@ export function tickDemoActivity(db) {
       Math.round((last.km ?? 12500) + km),
       tripType, pick(TRIP_PURPOSES),
     );
-    db.prepare('UPDATE vehicles SET state_updated_at=? WHERE id=?').run(now, v.id);
+    stmtUpdateVehicle.run(now, v.id);
     touched++;
   }
   return touched;

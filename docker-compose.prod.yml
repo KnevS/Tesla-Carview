@@ -31,7 +31,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 384M
+          memory: 512M   # erhöht von 384M: Demo-Mandant mit 52 Fahrzeugen braucht mehr Headroom
           cpus: '0.75'
         reservations:
           memory: 96M
