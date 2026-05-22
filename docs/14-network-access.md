@@ -208,14 +208,19 @@ certbot --nginx -d mein-tesla.freeddns.org
 
 Ein VPS (Virtual Private Server) ist ein kleiner gemieteter Linux-Server im Rechenzentrum. Er hat immer eine **feste, öffentliche IPv4-Adresse** — keine DynDNS-Trickserei nötig.
 
-**Preisvergleich (Stand 2025):**
+**Preisvergleich (Stand 2026):**
 
-| Anbieter | Produkt | Preis/Monat | Besonderheit |
-|---|---|---|---|
-| [netcup](https://www.netcup.de) | VPS 1000 G11 | ~4,44€ | Deutsche Rechenzentren, gute Docs |
-| [Hetzner](https://www.hetzner.com) | CX22 | ~4,35€ | Sehr zuverlässig, Nürnberg/Falkenstein |
-| [Contabo](https://contabo.com) | VPS S | ~5,99€ | Viel Speicher |
-| [IONOS](https://www.ionos.de) | VPS S | ~1,00€ | Erstes Monat günstig, dann teurer |
+| Anbieter | Produkt | Preis/Monat | Specs | Besonderheit |
+|---|---|---|---|---|
+| [netcup](https://www.netcup.com/de/server/vps-lite) | **VPS nano G11s** ⭐ | **~3,08€** | 2 vCore · 2 GB RAM · 60 GB SSD | Günstigster Einstieg, DE-Rechenzentrum, unlimitierter Traffic — **empfohlen für TeslaView** |
+| [netcup](https://www.netcup.de) | VPS 1000 G11 | ~4,44€ | 2 vCore · 2 GB RAM · 40 GB SSD | Etwas mehr Leistungsreserve |
+| [Hetzner](https://www.hetzner.com) | CX22 | ~4,35€ | 2 vCPU · 4 GB RAM · 40 GB | Sehr zuverlässig, Nürnberg/Falkenstein |
+| [Contabo](https://contabo.com) | VPS S | ~5,99€ | 4 vCPU · 8 GB RAM · 100 GB | Viel Speicher für Multi-Tenant |
+| [IONOS](https://www.ionos.de) | VPS S | ~1,00€ | 1 vCore · 1 GB RAM · 10 GB | Erstes Monat günstig, dann teurer |
+
+> 💡 **Rabattcode für netcup:** Wir können dir auf Anfrage einen persönlichen Rabattcode für netcup zukommen lassen. Schreib einfach eine kurze E-Mail an [sven@krische.com](mailto:sven@krische.com) mit dem Betreff „netcup TeslaView".
+
+> **Warum VPS nano G11s für TeslaView?** Tesla Carview benötigt im Idle ~150–200 MB RAM (Backend + nginx + Proxy). Mit 2 GB RAM ist reichlich Headroom vorhanden. Die 60 GB SSD bieten Platz für viele Jahre Telemetrie-Daten (SQLite wächst ca. 500 MB/Jahr bei aktivem Fahrzeug). 2 vCores sorgen dafür, dass Export- und Migrations-Queries den Poller nicht blockieren.
 
 ### Setup bei netcup (Beispiel)
 

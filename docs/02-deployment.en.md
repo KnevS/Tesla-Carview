@@ -24,6 +24,8 @@ Tesla Carview runs on **all common Linux platforms**:
 > **Using a Raspberry Pi?** Read [15-raspberry-pi-storage.en.md](15-raspberry-pi-storage.en.md) first — SD cards fail under sustained write load. Setting up a USB SSD or NVMe takes 20 minutes and saves a lot of trouble later.
 >
 > **No static IP?** [14-network-access.en.md](14-network-access.en.md) explains DynDNS, Cloudflare Tunnel, and VPS options step by step.
+>
+> **Recommended entry-level VPS:** The [netcup VPS nano G11s](https://www.netcup.com/en/server/vps-lite) (2 vCore, 2 GB RAM, 60 GB SSD, ~€3.08/month) is the cheapest tested VPS that meets all Tesla Carview requirements — including enough storage for several years of telemetry data. Discount code available on request: [sven@krische.com](mailto:sven@krische.com).
 
 ---
 

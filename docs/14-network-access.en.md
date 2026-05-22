@@ -209,14 +209,19 @@ certbot --nginx -d my-tesla.freeddns.org
 
 A VPS (Virtual Private Server) is a small rented Linux server in a data centre. It always has a **fixed, public IPv4 address** — no DynDNS tricks needed.
 
-**Price comparison (2025):**
+**Price comparison (2026):**
 
-| Provider | Product | Price/month | Notes |
-|---|---|---|---|
-| [netcup](https://www.netcup.eu) | VPS 1000 G11 | ~€4.44 | German data centres, good community |
-| [Hetzner](https://www.hetzner.com) | CX22 | ~€4.35 | Very reliable, Nuremberg/Falkenstein |
-| [Contabo](https://contabo.com) | VPS S | ~€5.99 | Lots of storage |
-| [IONOS](https://www.ionos.com) | VPS S | ~€1.00 | First month cheap, then higher |
+| Provider | Product | Price/month | Specs | Notes |
+|---|---|---|---|---|
+| [netcup](https://www.netcup.com/en/server/vps-lite) | **VPS nano G11s** ⭐ | **~€3.08** | 2 vCore · 2 GB RAM · 60 GB SSD | Cheapest entry point, German DC, unlimited traffic — **recommended for TeslaView** |
+| [netcup](https://www.netcup.eu) | VPS 1000 G11 | ~€4.44 | 2 vCore · 2 GB RAM · 40 GB SSD | Slightly more performance headroom |
+| [Hetzner](https://www.hetzner.com) | CX22 | ~€4.35 | 2 vCPU · 4 GB RAM · 40 GB | Very reliable, Nuremberg/Falkenstein |
+| [Contabo](https://contabo.com) | VPS S | ~€5.99 | 4 vCPU · 8 GB RAM · 100 GB | Lots of storage for multi-tenant |
+| [IONOS](https://www.ionos.com) | VPS S | ~€1.00 | 1 vCore · 1 GB RAM · 10 GB | First month cheap, then higher |
+
+> 💡 **Discount code for netcup:** We can send you a personal discount code for netcup on request. Just send a short e-mail to [sven@krische.com](mailto:sven@krische.com) with the subject "netcup TeslaView".
+
+> **Why VPS nano G11s for TeslaView?** Tesla Carview uses ~150–200 MB RAM at idle (backend + nginx + proxy). 2 GB RAM gives plenty of headroom. The 60 GB SSD has room for many years of telemetry data (SQLite grows ~500 MB/year for an active vehicle). 2 vCores ensure that export and migration queries don't block the poller.
 
 ### Setup at netcup (example)
 
