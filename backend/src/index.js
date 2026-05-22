@@ -55,6 +55,9 @@ import pairRoutes from './routes/pair.js';
 import energyReportRoutes     from './routes/energyReport.js';
 import notificationRulesRoutes from './routes/notificationRules.js';
 import sleepRoutes             from './routes/sleep.js';
+import firmwareRoutes          from './routes/firmware.js';
+import hvacRoutes              from './routes/hvac.js';
+import communityRoutes         from './routes/community.js';
 
 const app    = express();
 const PORT   = process.env.PORT || 3000;
@@ -136,6 +139,9 @@ app.use('/api/routing',            routingRoutes);
 app.use('/api/energy',             energyReportRoutes);
 app.use('/api/notification-rules', notificationRulesRoutes);
 app.use('/api/sleep',              sleepRoutes);
+app.use('/api/firmware',           firmwareRoutes);
+app.use('/api/hvac',               hvacRoutes);
+app.use('/api/community',          communityRoutes);
 
 // Globaler Error-Handler — fängt alle ungehandelten Throws/Rejects der Routes
 app.use((err, _req, res, _next) => {

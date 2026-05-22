@@ -138,6 +138,19 @@ export async function syncVehicleState(db, vehicle, state) {
   // Notification-Rules + Sleep-Monitoring (best-effort, darf Sync nie crashen)
   evaluateRules(db, vehicle.id, charge, drive).catch(() => {});
   trackSleepEvents(db, vehicle.id, vs?.state || 'unknown', charge?.battery_level);
+
+  // Software-Update-Tracker: neue Firmware-Version erkennen und speichern
+  const carVersion = vs?.car_version;
+  if (carVersion) {
+    try {
+      db.prepare(
+        'INSERT OR IGNORE INTO firmware_versions (vehicle_id, version, detected_at) VALUES (?, ?, ?)'
+      ).run(vehicle.id, carVersion, now);
+    } catch { /* ignore */ }
+  }
+
+  // HVAC-Statistiken aggregieren (best-effort)
+  try { trackHvacStats(db, vehicle.id, climate, now); } catch { /* ignore */ }
 }
 
 // ---- Odometer Trip Helpers ------------------------------------------------
@@ -522,4 +535,57 @@ export function trackSleepEvents(db, vehicleId, currentState, currentSoc) {
   } catch (err) {
     console.error('[SleepMonitor] Fehler:', err.message);
   }
+}
+
+// ── HVAC-Statistiken ──────────────────────────────────────────────────────────
+
+/**
+ * Aggregiert Klimaanlagen- und Sitzheizungsnutzung in hvac_daily_stats.
+ * Wird bei jedem Sync-Aufruf aufgerufen (best-effort, nie crashen).
+ *
+ * climate_state-Felder die ausgewertet werden:
+ *   is_climate_on       — Klimaanlage/Heizung aktiv
+ *   is_preconditioning  — Vorklimatisierung aktiv
+ *   seat_heater_left    — Sitzheizung Fahrer (0–3)
+ *   seat_heater_right   — Sitzheizung Beifahrer (0–3)
+ *   inside_temp         — Innentemperatur °C
+ *   outside_temp        — Außentemperatur °C
+ */
+export function trackHvacStats(db, vehicleId, climate, nowTs) {
+  if (!climate) return;
+  const day = new Date(nowTs * 1000).toISOString().slice(0, 10);
+  // Poll-Intervall: Poller läuft alle 10min im PARKED-Modus → 10 min = 1 Poll
+  const POLL_MINUTES = 10;
+
+  const climateOn    = climate.is_climate_on       ? 1 : 0;
+  const precon       = climate.is_preconditioning   ? 1 : 0;
+  const seatLeft     = (climate.seat_heater_left  ?? 0) > 0 ? 1 : 0;
+  const seatRight    = (climate.seat_heater_right ?? 0) > 0 ? 1 : 0;
+  const insideTemp   = typeof climate.inside_temp  === 'number' ? climate.inside_temp  : null;
+  const outsideTemp  = typeof climate.outside_temp === 'number' ? climate.outside_temp : null;
+
+  db.prepare(`
+    INSERT INTO hvac_daily_stats
+      (vehicle_id, day, climate_on_minutes, seat_heat_left_on, seat_heat_right_on,
+       precondition_count, max_inside_temp_c, min_outside_temp_c)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(vehicle_id, day) DO UPDATE SET
+      climate_on_minutes  = climate_on_minutes  + excluded.climate_on_minutes,
+      seat_heat_left_on   = seat_heat_left_on   + excluded.seat_heat_left_on,
+      seat_heat_right_on  = seat_heat_right_on  + excluded.seat_heat_right_on,
+      precondition_count  = precondition_count  + excluded.precondition_count,
+      max_inside_temp_c   = CASE
+        WHEN excluded.max_inside_temp_c IS NOT NULL
+             AND (max_inside_temp_c IS NULL OR excluded.max_inside_temp_c > max_inside_temp_c)
+        THEN excluded.max_inside_temp_c ELSE max_inside_temp_c END,
+      min_outside_temp_c  = CASE
+        WHEN excluded.min_outside_temp_c IS NOT NULL
+             AND (min_outside_temp_c IS NULL OR excluded.min_outside_temp_c < min_outside_temp_c)
+        THEN excluded.min_outside_temp_c ELSE min_outside_temp_c END
+  `).run(
+    vehicleId, day,
+    climateOn ? POLL_MINUTES : 0,
+    seatLeft, seatRight, precon,
+    insideTemp, outsideTemp,
+  );
 }

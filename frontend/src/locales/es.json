@@ -1093,6 +1093,14 @@
         "deleteFailed": "Error al eliminar",
         "loadDetailFailed": "No se pudieron cargar los detalles"
       }
+    },
+    "firmware": {
+      "title": "Historial de firmware del vehículo",
+      "titleTip": "Cada nueva versión de firmware se detecta automáticamente y se guarda con su fecha.",
+      "current": "Actual",
+      "currentTag": "(actual)",
+      "noData": "No hay versiones de firmware registradas aún – se guardarán automáticamente en la próxima sincronización.",
+      "hint": "Las versiones se detectan automáticamente cuando el vehículo se sincroniza."
     }
   },
   "drivers": {
@@ -1958,7 +1966,24 @@
     "scoreGood": "Bueno",
     "scoreAverage": "Promedio",
     "scorePoor": "Necesita mejora",
-    "kwh100Unit": "kWh/100 km"
+    "kwh100Unit": "kWh/100 km",
+    "sectionCo2": "Comparación CO₂",
+    "co2Tesla": "Tesla (electricidad)",
+    "co2Diesel": "Motor térmico (diésel)",
+    "co2Saved": "CO₂ ahorrado",
+    "co2KgUnit": "kg CO₂",
+    "co2TeslaTooltip": "Emisiones de CO₂ de tu Tesla según la mezcla eléctrica (0,38 kg/kWh)",
+    "co2DieselTooltip": "Emisiones de CO₂ de un vehículo diésel equivalente (7 L/100 km, 2,65 kg/L)",
+    "co2SavedTooltip": "Emisiones de CO₂ ahorradas en comparación con un vehículo de combustión equivalente",
+    "co2GridMix": "mezcla eléctrica",
+    "co2DieselLabel": "Equivalente térmico",
+    "co2Hint": "Base: mezcla eléctrica 0,38 kg CO₂/kWh · Diésel 7 L/100 km × 2,65 kg CO₂/L",
+    "sectionWeather": "Consumo por temperatura",
+    "weatherSubtitle": "Consumo de energía promedio por rango de temperatura exterior",
+    "weatherChartTooltip": "Muestra cómo el frío/calor afecta tu consumo. Mín. 2 viajes por rango.",
+    "weatherBarLabel": "kWh/100 km",
+    "weatherHint": "Solo viajes con datos de temperatura · Mín. 2 viajes por rango",
+    "noWeatherData": "Aún no hay datos de temperatura – se recopilan automáticamente durante los viajes"
   },
   "automations": {
     "title": "Automatizaciones",
@@ -2028,5 +2053,49 @@
     "operator": "Operador",
     "tooltipDcOnly": "Mostrar solo estaciones de carga rápida DC.",
     "tooltipRadius": "Radio de búsqueda alrededor de la ubicación seleccionada."
+  },
+  "climate": {
+    "title": "Estadísticas climáticas",
+    "subtitle": "Uso de A/C, calefacción y calefacción de asientos",
+    "daySuffix": "d",
+    "climateHours": "Climatización",
+    "seatHeatLeft": "Asiento calef. conductor",
+    "seatHeatRight": "Asiento calef. pasajero",
+    "preconCount": "Preacondicionamientos",
+    "coldestDay": "Día más frío",
+    "hottestDay": "Interior más caliente",
+    "insideTemp": "Temp. interior",
+    "days": "días",
+    "dailyChart": "Vista diaria",
+    "dailyChartTip": "Muestra el uso de A/C (barra), calefacción de asientos (🪑) y preacondicionamiento (🔄) por día.",
+    "noData": "Aún no hay datos climáticos – se recopilan automáticamente en cada sincronización.",
+    "tooltipClimateHours": "Horas en que el A/C o la calefacción estaba activa",
+    "tooltipSeatHeatLeft": "Número de días en que el calefactor del asiento del conductor estaba activo",
+    "tooltipSeatHeatRight": "Número de días en que el calefactor del asiento del pasajero estaba activo",
+    "tooltipPrecon": "Cuántas veces se detectó el preacondicionamiento",
+    "tooltipColdest": "Día con la temperatura exterior más baja registrada",
+    "tooltipHottest": "Día con la temperatura interior más alta registrada"
+  },
+  "community": {
+    "title": "Benchmark Comunidad",
+    "titleTip": "Compara tu consumo de forma anónima con otros conductores de Tesla del mismo modelo.",
+    "optIn": "Participar",
+    "optInActiveTooltip": "Participas en el Benchmark Comunidad – tus datos se contribuyen de forma anónima.",
+    "optInInactiveTooltip": "Activa para comparar anónimamente tu consumo con la comunidad.",
+    "optOutHint": "Activa el interruptor para contribuir tu consumo anonimizado y compararte con otros conductores.",
+    "privacyPoint1": "Solo valores agregados (kWh/100 km) – sin datos en bruto, sin coordenadas GPS",
+    "privacyPoint2": "Tu identidad permanece completamente anónima – la clave del modelo es el único identificador",
+    "privacyPoint3": "Revocable en cualquier momento – los datos se eliminan inmediatamente de la comunidad",
+    "yourStats": "Tu consumo (último año)",
+    "trips": "viajes",
+    "contributors": "participantes",
+    "you": "Tú",
+    "range": "Rango",
+    "contribute": "Contribuir datos",
+    "contributeTooltip": "Enviar anónimamente tu consumo promedio actual al grupo comunitario.",
+    "contributeSuccess": "¡Gracias! Tu contribución ha sido enviada.",
+    "contributeError": "Error al contribuir – por favor inténtalo de nuevo más tarde.",
+    "notEnough": "Todavía no hay suficientes participantes ({count}/{min}) para este modelo. ¡Sé uno de los primeros!",
+    "loading": "Cargando datos de la comunidad…"
   }
 }

@@ -27,6 +27,7 @@ export function requireAuth(req, res, next) {
   try {
     req.db       = getDb(tenantId);
     req.tenantId = tenantId;
+    req.tenant   = tenant;
   } catch {
     return res.status(401).json({ error: 'Mandant nicht gefunden' });
   }

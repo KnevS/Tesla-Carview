@@ -1093,6 +1093,14 @@
         "deleteFailed": "Échec de la suppression",
         "loadDetailFailed": "Impossible de charger les détails"
       }
+    },
+    "firmware": {
+      "title": "Historique firmware du véhicule",
+      "titleTip": "Chaque nouvelle version firmware est détectée automatiquement et enregistrée avec sa date.",
+      "current": "Actuel",
+      "currentTag": "(actuel)",
+      "noData": "Aucune version firmware enregistrée – sera enregistrée automatiquement lors de la prochaine synchronisation.",
+      "hint": "Les versions sont détectées automatiquement lors de la synchronisation du véhicule."
     }
   },
   "drivers": {
@@ -1958,7 +1966,24 @@
     "scoreGood": "Bien",
     "scoreAverage": "Moyen",
     "scorePoor": "À améliorer",
-    "kwh100Unit": "kWh/100 km"
+    "kwh100Unit": "kWh/100 km",
+    "sectionCo2": "Comparaison CO₂",
+    "co2Tesla": "Tesla (électricité)",
+    "co2Diesel": "Thermique (diesel)",
+    "co2Saved": "CO₂ économisé",
+    "co2KgUnit": "kg CO₂",
+    "co2TeslaTooltip": "Émissions CO₂ de votre Tesla selon le mix électrique (0,38 kg/kWh)",
+    "co2DieselTooltip": "Émissions CO₂ d'un véhicule diesel équivalent (7 L/100 km, 2,65 kg/L)",
+    "co2SavedTooltip": "Émissions CO₂ économisées par rapport à un véhicule thermique équivalent",
+    "co2GridMix": "mix électrique",
+    "co2DieselLabel": "Équivalent thermique",
+    "co2Hint": "Base : mix électrique 0,38 kg CO₂/kWh · Diesel 7 L/100 km × 2,65 kg CO₂/L",
+    "sectionWeather": "Consommation par température",
+    "weatherSubtitle": "Consommation d'énergie moyenne par plage de température extérieure",
+    "weatherChartTooltip": "Montre l'impact du froid/chaleur sur votre consommation. Min. 2 trajets par plage.",
+    "weatherBarLabel": "kWh/100 km",
+    "weatherHint": "Uniquement trajets avec données de température · Min. 2 trajets par plage",
+    "noWeatherData": "Pas encore de données de température – collectées automatiquement lors des trajets"
   },
   "automations": {
     "title": "Automatisations",
@@ -2028,5 +2053,49 @@
     "operator": "Opérateur",
     "tooltipDcOnly": "Afficher uniquement les bornes DC rapides.",
     "tooltipRadius": "Rayon de recherche autour de l'emplacement sélectionné."
+  },
+  "climate": {
+    "title": "Statistiques climatisation",
+    "subtitle": "Utilisation de la clim, du chauffage et des sièges chauffants",
+    "daySuffix": "j",
+    "climateHours": "Climatisation",
+    "seatHeatLeft": "Siège chauf. conducteur",
+    "seatHeatRight": "Siège chauf. passager",
+    "preconCount": "Préconditionn.",
+    "coldestDay": "Jour le plus froid",
+    "hottestDay": "Intérieur le plus chaud",
+    "insideTemp": "Temp. intérieure",
+    "days": "jours",
+    "dailyChart": "Vue quotidienne",
+    "dailyChartTip": "Affiche l'utilisation de la clim (barre), chauffage siège (🪑) et préconditionnement (🔄) par jour.",
+    "noData": "Pas encore de données climatiques – collectées automatiquement à chaque synchronisation.",
+    "tooltipClimateHours": "Heures pendant lesquelles la clim ou le chauffage était actif",
+    "tooltipSeatHeatLeft": "Nombre de jours où le siège conducteur chauffant était actif",
+    "tooltipSeatHeatRight": "Nombre de jours où le siège passager chauffant était actif",
+    "tooltipPrecon": "Nombre de fois où le préconditionnement a été détecté",
+    "tooltipColdest": "Jour avec la température extérieure la plus basse enregistrée",
+    "tooltipHottest": "Jour avec la température intérieure la plus haute enregistrée"
+  },
+  "community": {
+    "title": "Benchmark Communauté",
+    "titleTip": "Comparez anonymement votre consommation avec d'autres conducteurs Tesla du même modèle.",
+    "optIn": "Participer",
+    "optInActiveTooltip": "Vous participez au Benchmark Communauté – vos données sont contribuées anonymement.",
+    "optInInactiveTooltip": "Activez pour comparer anonymement votre consommation avec la communauté.",
+    "optOutHint": "Activez le bouton pour contribuer votre consommation anonymisée et vous comparer à d'autres conducteurs.",
+    "privacyPoint1": "Valeurs agrégées uniquement (kWh/100 km) – pas de données brutes, pas de coordonnées GPS",
+    "privacyPoint2": "Votre identité reste totalement anonyme – la clé du modèle est le seul identifiant",
+    "privacyPoint3": "Révocable à tout moment – les données sont immédiatement supprimées de la communauté",
+    "yourStats": "Votre consommation (dernière année)",
+    "trips": "trajets",
+    "contributors": "participants",
+    "you": "Vous",
+    "range": "Plage",
+    "contribute": "Contribuer les données",
+    "contributeTooltip": "Soumettre anonymement votre consommation moyenne actuelle au pool communautaire.",
+    "contributeSuccess": "Merci ! Votre contribution a été soumise.",
+    "contributeError": "Erreur lors de la contribution – veuillez réessayer plus tard.",
+    "notEnough": "Pas encore assez de participants ({count}/{min}) pour ce modèle. Soyez l'un des premiers !",
+    "loading": "Chargement des données communautaires…"
   }
 }

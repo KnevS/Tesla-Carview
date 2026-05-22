@@ -54,3 +54,21 @@ CREATE TABLE IF NOT EXISTS legal_content (
   PRIMARY KEY (scope, locale)
 );
 CREATE INDEX IF NOT EXISTS idx_legal_content_scope ON legal_content(scope);
+
+-- Community Benchmarks: opt-in anonymisierte Verbrauchsdaten.
+-- Jeder Mandant kann mit seiner Instanz-UUID opt-in Aggregate beitragen.
+-- Gespeichert werden NUR anonyme Aggregate — keine Einzel-Trips, keine VINs,
+-- keine Koordinaten. Das Modell (model_key) ist der einzige Identifikator.
+-- Ein Mandant kann seinen Beitrag jederzeit löschen (opt-out).
+CREATE TABLE IF NOT EXISTS community_benchmarks (
+  id              INTEGER PRIMARY KEY,
+  instance_uuid   TEXT    NOT NULL,                 -- GUID der Instanz (kein Rückschluss auf Person)
+  model_key       TEXT    NOT NULL,                 -- z.B. 'model y', 'model 3', 'model s'
+  avg_kwh_100km   REAL    NOT NULL,                 -- Durchschnittsverbrauch
+  sample_trips    INTEGER NOT NULL,                 -- Anzahl Fahrten im Beitrag
+  total_km        REAL    NOT NULL,                 -- Gesamtkilometer
+  country_code    TEXT,                             -- optional: DE, AT, CH, etc.
+  contributed_at  INTEGER NOT NULL DEFAULT (unixepoch()),
+  UNIQUE(instance_uuid, model_key)
+);
+CREATE INDEX IF NOT EXISTS idx_benchmarks_model ON community_benchmarks(model_key);

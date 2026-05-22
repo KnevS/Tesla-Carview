@@ -71,6 +71,7 @@ const routes = [
   { path: '/system',        component: System,        meta: { title: 'System' } },
   { path: '/grok',          component: () => import('../views/GrokChat.vue'),    meta: { title: 'Grok Chat' } },
   { path: '/sleep',         component: () => import('../views/SleepMonitor.vue'), meta: { title: 'Schlaf-Monitor' } },
+  { path: '/climate',       component: () => import('../views/ClimateStats.vue'),  meta: { title: 'Klimastatistiken' } },
   { path: '/energy',        component: () => import('../views/EnergyReport.vue'), meta: { title: 'Energiebericht' } },
   { path: '/automations',   component: () => import('../views/Automations.vue'),  meta: { title: 'Automatisierungen' } },
   { path: '/chargers',      component: () => import('../views/ChargerFinder.vue'),meta: { title: 'Ladestationen' } },

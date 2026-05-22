@@ -743,4 +743,53 @@ router.delete('/:id', (req, res) => {
   }
 });
 
+/**
+ * GET /api/trips/weather-consumption?vehicle_id=X
+ *
+ * Gruppiert abgeschlossene Fahrten nach Außentemperatur-Buckets und
+ * berechnet den Durchschnittsverbrauch je Temperaturbereich.
+ * Grundlage: trips.outside_temp_avg_c + trips.energy_used_kwh / distance_km.
+ *
+ * Buckets: < -10, -10–0, 0–10, 10–20, 20–30, > 30 °C
+ */
+router.get('/weather-consumption', (req, res) => {
+  const { vehicle_id } = req.query;
+  if (!vehicle_id) return res.status(400).json({ error: 'vehicle_id erforderlich' });
+  if (guardAccess(res, () => assertVehicleAccess(req.db, parseInt(vehicle_id), req.user))) return;
+
+  const BUCKETS = [
+    { label: '< −10 °C', min: -999, max: -10 },
+    { label: '−10–0 °C', min: -10,  max:   0 },
+    { label: '0–10 °C',  min:   0,  max:  10 },
+    { label: '10–20 °C', min:  10,  max:  20 },
+    { label: '20–30 °C', min:  20,  max:  30 },
+    { label: '> 30 °C',  min:  30,  max: 999 },
+  ];
+
+  try {
+    const trips = req.db.prepare(`
+      SELECT outside_temp_avg_c, energy_used_kwh, distance_km
+      FROM trips
+      WHERE vehicle_id=?
+        AND end_time IS NOT NULL
+        AND outside_temp_avg_c IS NOT NULL
+        AND energy_used_kwh > 0
+        AND distance_km > 1
+    `).all(parseInt(vehicle_id));
+
+    const buckets = BUCKETS.map(b => {
+      const hits = trips.filter(t => t.outside_temp_avg_c >= b.min && t.outside_temp_avg_c < b.max);
+      const validHits = hits.filter(t => t.distance_km > 0);
+      const avgKwh = validHits.length
+        ? +(validHits.reduce((s, t) => s + (t.energy_used_kwh / t.distance_km * 100), 0) / validHits.length).toFixed(2)
+        : null;
+      return { label: b.label, count: hits.length, avg_kwh_100km: hits.length >= 2 ? avgKwh : null };
+    });
+
+    res.json({ buckets });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

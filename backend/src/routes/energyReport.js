@@ -98,6 +98,22 @@ router.get('/report', async (req, res) => {
       trend = (diff >= 0 ? '+' : '') + diff;
     }
 
+    // CO₂-Vergleich: Tesla-Strom vs. Diesel-Äquivalent
+    // Deutscher Strommix ~0.38 kg CO₂/kWh, Diesel 7L/100km × 2.65 kg/L
+    const gridKgPerKwh    = 0.38;
+    const dieselKgPer100km = 7 * 2.65;
+    const co2_tesla_kg    = +(allKwh * gridKgPerKwh).toFixed(1);
+    const co2_diesel_kg   = +(allKm * dieselKgPer100km / 100).toFixed(1);
+    const co2_saved_kg    = +Math.max(0, co2_diesel_kg - co2_tesla_kg).toFixed(1);
+    // CO₂ auch pro Woche berechnen
+    for (const w of weekData) {
+      const wElec   = +(w.total_kwh * gridKgPerKwh).toFixed(1);
+      const wDiesel = +(w.total_km  * dieselKgPer100km / 100).toFixed(1);
+      w.co2_tesla_kg  = wElec;
+      w.co2_diesel_kg = wDiesel;
+      w.co2_saved_kg  = +Math.max(0, wDiesel - wElec).toFixed(1);
+    }
+
     res.json({
       wltp_kwh_100km: wltp,
       weeks: weekData,
@@ -107,6 +123,12 @@ router.get('/report', async (req, res) => {
         avg_consumption: allAvg ? +allAvg.toFixed(1) : null,
         eco_score:       ecoScore(allAvg, wltp),
         score_trend:     trend,
+        co2: {
+          tesla_kg:        co2_tesla_kg,
+          diesel_kg:       co2_diesel_kg,
+          saved_kg:        co2_saved_kg,
+          grid_kg_per_kwh: gridKgPerKwh,
+        },
       },
     });
   } catch (err) {

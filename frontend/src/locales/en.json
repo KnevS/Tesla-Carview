@@ -1093,6 +1093,14 @@
         "deleteFailed": "Delete failed",
         "loadDetailFailed": "Could not load tenant details"
       }
+    },
+    "firmware": {
+      "title": "Vehicle Firmware History",
+      "titleTip": "Every new firmware version is automatically detected and saved with its date.",
+      "current": "Current",
+      "currentTag": "(current)",
+      "noData": "No firmware versions recorded yet – saved automatically on next vehicle sync.",
+      "hint": "Versions are automatically detected when the vehicle syncs."
     }
   },
   "drivers": {
@@ -1958,7 +1966,24 @@
     "scoreGood": "Good",
     "scoreAverage": "Average",
     "scorePoor": "Needs improvement",
-    "kwh100Unit": "kWh/100 km"
+    "kwh100Unit": "kWh/100 km",
+    "sectionCo2": "CO₂ Comparison",
+    "co2Tesla": "Tesla (electricity)",
+    "co2Diesel": "ICE vehicle (diesel)",
+    "co2Saved": "CO₂ saved",
+    "co2KgUnit": "kg CO₂",
+    "co2TeslaTooltip": "CO₂ emissions of your Tesla based on the grid mix (0.38 kg/kWh)",
+    "co2DieselTooltip": "CO₂ emissions of a comparable diesel vehicle (7 L/100 km, 2.65 kg/L)",
+    "co2SavedTooltip": "CO₂ emissions saved compared to an equivalent combustion engine vehicle",
+    "co2GridMix": "grid mix",
+    "co2DieselLabel": "ICE equivalent",
+    "co2Hint": "Based on: grid mix 0.38 kg CO₂/kWh · Diesel 7 L/100 km × 2.65 kg CO₂/L",
+    "sectionWeather": "Consumption by Temperature",
+    "weatherSubtitle": "Average energy consumption per outside temperature range",
+    "weatherChartTooltip": "Shows how cold/heat affects your energy consumption. At least 2 trips per range for a value.",
+    "weatherBarLabel": "kWh/100 km",
+    "weatherHint": "Only trips with temperature data · Min. 2 trips per range",
+    "noWeatherData": "No temperature data yet – collected automatically during trips"
   },
   "automations": {
     "title": "Automations",
@@ -2028,5 +2053,49 @@
     "operator": "Operator",
     "tooltipDcOnly": "Show only DC fast charging stations (CCS, CHAdeMO, Supercharger).",
     "tooltipRadius": "Search radius around the selected location."
+  },
+  "climate": {
+    "title": "Climate Statistics",
+    "subtitle": "A/C, heating and seat heater usage of your vehicle",
+    "daySuffix": "d",
+    "climateHours": "A/C & heating",
+    "seatHeatLeft": "Driver seat heat",
+    "seatHeatRight": "Passenger seat heat",
+    "preconCount": "Preconditionings",
+    "coldestDay": "Coldest day",
+    "hottestDay": "Hottest interior",
+    "insideTemp": "Interior temp",
+    "days": "days",
+    "dailyChart": "Daily view",
+    "dailyChartTip": "Shows A/C usage (bar), seat heating (🪑) and preconditioning (🔄) per day. Outside temp on the right.",
+    "noData": "No climate data yet – collected automatically on every vehicle sync.",
+    "tooltipClimateHours": "Hours the A/C or heating was active (extrapolated from polling interval)",
+    "tooltipSeatHeatLeft": "Number of days the driver seat heater was active",
+    "tooltipSeatHeatRight": "Number of days the passenger seat heater was active",
+    "tooltipPrecon": "How many times preconditioning (via app/schedule) was detected",
+    "tooltipColdest": "Day with the lowest recorded outside temperature",
+    "tooltipHottest": "Day with the highest recorded interior temperature"
+  },
+  "community": {
+    "title": "Community Benchmark",
+    "titleTip": "Compare your consumption anonymously with other Tesla drivers of the same model.",
+    "optIn": "Participate",
+    "optInActiveTooltip": "You are participating in the Community Benchmark – your data is contributed anonymously.",
+    "optInInactiveTooltip": "Enable to anonymously compare your consumption with the community.",
+    "optOutHint": "Enable the toggle to contribute your anonymised consumption and compare yourself with other drivers.",
+    "privacyPoint1": "Aggregated values only (kWh/100 km) – no raw data, no GPS coordinates",
+    "privacyPoint2": "Your identity remains fully anonymous – model key is the only identifier",
+    "privacyPoint3": "Revocable at any time – data is deleted from the community immediately",
+    "yourStats": "Your consumption (last year)",
+    "trips": "trips",
+    "contributors": "contributors",
+    "you": "You",
+    "range": "Range",
+    "contribute": "Contribute data",
+    "contributeTooltip": "Submit your current average consumption anonymously to the community pool.",
+    "contributeSuccess": "Thank you! Your contribution has been submitted.",
+    "contributeError": "Error contributing – please try again later.",
+    "notEnough": "Not enough contributors yet ({count}/{min}) for this model. Be one of the first!",
+    "loading": "Loading community data…"
   }
 }

@@ -161,6 +161,39 @@
       </details>
     </div>
 
+    <!-- Fahrzeug-Firmware-Historie -->
+    <div v-if="selectedVehicle" class="card space-y-3">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <h2 class="font-semibold flex items-center gap-2">
+          <AppIcon name="refresh" :size="20" class="text-blue-400" />
+          {{ $t('system.firmware.title') }}
+          <InfoTip :text="$t('system.firmware.titleTip')" />
+        </h2>
+        <span v-if="firmware.current" class="text-xs bg-blue-900/40 border border-blue-700/40 text-blue-300 px-2 py-0.5 rounded-full">
+          {{ $t('system.firmware.current') }}: {{ firmware.current.version }}
+        </span>
+      </div>
+      <div v-if="firmware.history?.length" class="space-y-1">
+        <div v-for="(f, idx) in firmware.history" :key="f.version"
+          class="flex items-center gap-3 p-2.5 rounded-lg transition"
+          :class="idx === 0 ? 'bg-blue-900/20 border border-blue-700/30' : 'bg-gray-800'">
+          <div class="w-2 h-2 rounded-full shrink-0"
+            :class="idx === 0 ? 'bg-blue-400' : 'bg-gray-600'"></div>
+          <div class="flex-1 min-w-0">
+            <span class="font-mono text-sm" :class="idx === 0 ? 'text-blue-300' : 'text-gray-300'">
+              {{ f.version }}
+            </span>
+            <span v-if="idx === 0" class="ml-2 text-xs text-blue-400">{{ $t('system.firmware.currentTag') }}</span>
+          </div>
+          <div class="text-xs text-gray-500 shrink-0">
+            {{ fmtDate(f.detected_at) }}
+          </div>
+        </div>
+      </div>
+      <p v-else class="text-gray-400 text-sm">{{ $t('system.firmware.noData') }}</p>
+      <p class="text-xs text-gray-600">{{ $t('system.firmware.hint') }}</p>
+    </div>
+
     <!-- Monitoring & Selbstheilung (admin only) -->
     <div v-if="isAdmin" class="card space-y-4">
       <div class="flex items-center justify-between flex-wrap gap-2">
@@ -769,16 +802,31 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, h, resolveDirective, withDirectives, reactive } from 'vue';
+import { ref, computed, onMounted, watch, h, resolveDirective, withDirectives, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../store/auth.js';
+import { useAppStore } from '../store/index.js';
 import api from '../api.js';
 import AppIcon from '../components/AppIcon.vue';
+import InfoTip from '../components/InfoTip.vue';
 
 const auth    = useAuthStore();
+const appStore = useAppStore();
+const selectedVehicle = computed(() => appStore.selectedVehicle);
 const isAdmin = computed(() => auth.user?.role === 'admin');
 const { t }   = useI18n();
 const tt = (key) => t('system.tenants.' + key);
+
+// ─── Firmware-Historie ─────────────────────────────────────────────
+const firmware = ref({ current: null, history: [], total_updates: 0 });
+async function loadFirmware() {
+  const vid = selectedVehicle.value?.id;
+  if (!vid) return;
+  try {
+    const { data } = await api.get(`/firmware/${vid}`);
+    firmware.value = data;
+  } catch { /* ignore */ }
+}
 
 const ver   = ref({});
 const stats = ref(null);
@@ -1220,6 +1268,8 @@ onMounted(async () => {
     ver.value = data;
   } catch { /* ignore */ }
 
+  loadFirmware();
+
   if (isAdmin.value) {
     await reloadStats();
     loadHealth();
@@ -1232,4 +1282,6 @@ onMounted(async () => {
     loadBackupConfig();
   }
 });
+
+watch(() => appStore.selectedVehicleId, loadFirmware);
 </script>

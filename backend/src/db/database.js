@@ -832,6 +832,31 @@ function runTenantMigrations(db) {
   )`);
   db.exec('CREATE INDEX IF NOT EXISTS idx_sleep_events_vehicle ON vehicle_sleep_events(vehicle_id, sleep_at DESC)');
 
+  // Software-Update-Tracker: erfasst jede neue Firmware-Version pro Fahrzeug
+  db.exec(`CREATE TABLE IF NOT EXISTS firmware_versions (
+    id             INTEGER PRIMARY KEY,
+    vehicle_id     INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+    version        TEXT    NOT NULL,
+    detected_at    INTEGER NOT NULL DEFAULT (unixepoch()),
+    UNIQUE(vehicle_id, version)
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_firmware_vehicle ON firmware_versions(vehicle_id, detected_at DESC)');
+
+  // HVAC-Statistiken: aggregierte Klimaanlagen-/Sitzheizungsnutzung pro Tag
+  db.exec(`CREATE TABLE IF NOT EXISTS hvac_daily_stats (
+    id             INTEGER PRIMARY KEY,
+    vehicle_id     INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+    day            TEXT    NOT NULL,   -- YYYY-MM-DD
+    climate_on_minutes  INTEGER DEFAULT 0,
+    seat_heat_left_on   INTEGER DEFAULT 0,  -- Anzahl Polls mit Sitzheizung links > 0
+    seat_heat_right_on  INTEGER DEFAULT 0,
+    precondition_count  INTEGER DEFAULT 0,
+    max_inside_temp_c   REAL,
+    min_outside_temp_c  REAL,
+    UNIQUE(vehicle_id, day)
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_hvac_vehicle ON hvac_daily_stats(vehicle_id, day DESC)');
+
   // Indexes
   db.exec('CREATE INDEX IF NOT EXISTS idx_trips_vehicle      ON trips(vehicle_id, start_time DESC)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_charging_vehicle   ON charging_sessions(vehicle_id, start_time DESC)');

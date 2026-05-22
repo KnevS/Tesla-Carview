@@ -1093,6 +1093,14 @@
         "deleteFailed": "Silme başarısız",
         "loadDetailFailed": "Ayrıntılar yüklenemedi"
       }
+    },
+    "firmware": {
+      "title": "Araç Yazılım Geçmişi",
+      "titleTip": "Her yeni yazılım sürümü otomatik olarak tespit edilir ve tarihi kaydedilir.",
+      "current": "Güncel",
+      "currentTag": "(güncel)",
+      "noData": "Henüz yazılım sürümü kaydedilmedi – bir sonraki araç senkronizasyonunda otomatik olarak kaydedilecek.",
+      "hint": "Sürümler araç senkronize edildiğinde otomatik olarak tespit edilir."
     }
   },
   "drivers": {
@@ -1958,7 +1966,24 @@
     "scoreGood": "İyi",
     "scoreAverage": "Ortalama",
     "scorePoor": "Geliştirilmeli",
-    "kwh100Unit": "kWh/100 km"
+    "kwh100Unit": "kWh/100 km",
+    "sectionCo2": "CO₂ Karşılaştırması",
+    "co2Tesla": "Tesla (elektrik)",
+    "co2Diesel": "İçten yanmalı (dizel)",
+    "co2Saved": "Tasarruf edilen CO₂",
+    "co2KgUnit": "kg CO₂",
+    "co2TeslaTooltip": "Tesla'nızın şebeke karışımına göre CO₂ emisyonları (0,38 kg/kWh)",
+    "co2DieselTooltip": "Eşdeğer bir dizel aracın CO₂ emisyonları (7 L/100 km, 2,65 kg/L)",
+    "co2SavedTooltip": "Eşdeğer içten yanmalı araçla karşılaştırıldığında tasarruf edilen CO₂ emisyonları",
+    "co2GridMix": "şebeke karışımı",
+    "co2DieselLabel": "İçten yanmalı eşdeğeri",
+    "co2Hint": "Temel: şebeke karışımı 0,38 kg CO₂/kWh · Dizel 7 L/100 km × 2,65 kg CO₂/L",
+    "sectionWeather": "Sıcaklığa Göre Tüketim",
+    "weatherSubtitle": "Dış sıcaklık aralığına göre ortalama enerji tüketimi",
+    "weatherChartTooltip": "Soğuğun/sıcağın tüketiminizi nasıl etkilediğini gösterir. Her aralık için min. 2 yolculuk.",
+    "weatherBarLabel": "kWh/100 km",
+    "weatherHint": "Yalnızca sıcaklık verileri olan yolculuklar · Her aralık için min. 2 yolculuk",
+    "noWeatherData": "Henüz sıcaklık verisi yok – yolculuklar sırasında otomatik olarak toplanır"
   },
   "automations": {
     "title": "Otomasyonlar",
@@ -2028,5 +2053,49 @@
     "operator": "Operatör",
     "tooltipDcOnly": "Yalnızca DC hızlı şarj istasyonlarını göster.",
     "tooltipRadius": "Seçilen konum etrafında arama yarıçapı."
+  },
+  "climate": {
+    "title": "İklim İstatistikleri",
+    "subtitle": "Aracınızın klima, ısıtma ve koltuk ısıtma kullanımı",
+    "daySuffix": "g",
+    "climateHours": "Klima ve ısıtma",
+    "seatHeatLeft": "Sürücü koltuk ısıtma",
+    "seatHeatRight": "Yolcu koltuk ısıtma",
+    "preconCount": "Ön klimatizasyon",
+    "coldestDay": "En soğuk gün",
+    "hottestDay": "En sıcak iç mekan",
+    "insideTemp": "İç sıcaklık",
+    "days": "gün",
+    "dailyChart": "Günlük görünüm",
+    "dailyChartTip": "Her gün için klima kullanımını (çubuk), koltuk ısıtmayı (🪑) ve ön klimatizasyonu (🔄) gösterir.",
+    "noData": "Henüz iklim verisi yok – her araç senkronizasyonunda otomatik olarak toplanır.",
+    "tooltipClimateHours": "Klima veya ısıtmanın aktif olduğu saatler",
+    "tooltipSeatHeatLeft": "Sürücü koltuğu ısıtıcısının aktif olduğu gün sayısı",
+    "tooltipSeatHeatRight": "Yolcu koltuğu ısıtıcısının aktif olduğu gün sayısı",
+    "tooltipPrecon": "Ön klimatizasyonun kaç kez tespit edildiği",
+    "tooltipColdest": "Kaydedilen en düşük dış sıcaklığa sahip gün",
+    "tooltipHottest": "Kaydedilen en yüksek iç sıcaklığa sahip gün"
+  },
+  "community": {
+    "title": "Topluluk Karşılaştırması",
+    "titleTip": "Tüketiminizi aynı modeldeki diğer Tesla sürücüleriyle anonim olarak karşılaştırın.",
+    "optIn": "Katıl",
+    "optInActiveTooltip": "Topluluk Karşılaştırmasına katılıyorsunuz – verileriniz anonim olarak katkıda bulunulur.",
+    "optInInactiveTooltip": "Tüketiminizi toplulukla anonim olarak karşılaştırmak için etkinleştirin.",
+    "optOutHint": "Anonimleştirilmiş tüketiminizi katkılamak ve diğer sürücülerle karşılaştırmak için geçişi etkinleştirin.",
+    "privacyPoint1": "Yalnızca toplu değerler (kWh/100 km) – ham veri yok, GPS koordinatları yok",
+    "privacyPoint2": "Kimliğiniz tamamen anonim kalır – model anahtarı tek tanımlayıcıdır",
+    "privacyPoint3": "İstediğiniz zaman iptal edilebilir – veriler topluluktan hemen silinir",
+    "yourStats": "Tüketiminiz (geçen yıl)",
+    "trips": "sürüş",
+    "contributors": "katılımcı",
+    "you": "Siz",
+    "range": "Aralık",
+    "contribute": "Veri katkıla",
+    "contributeTooltip": "Mevcut ortalama tüketiminizi anonim olarak topluluk havuzuna gönderin.",
+    "contributeSuccess": "Teşekkürler! Katkınız gönderildi.",
+    "contributeError": "Katkı sırasında hata – lütfen daha sonra tekrar deneyin.",
+    "notEnough": "Bu model için henüz yeterli katılımcı yok ({count}/{min}). İlklerden biri olun!",
+    "loading": "Topluluk verileri yükleniyor…"
   }
 }
