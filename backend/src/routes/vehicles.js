@@ -12,11 +12,21 @@ router.get('/', (req, res) => {
   // Admins sehen alle Fahrzeuge des Tenants, normale User nur die, fuer
   // die in vehicle_users eine Zuordnung existiert. Sonst koennte ein
   // User in einem Multi-Fahrer-Tenant fremde VINs / Display-Namen sehen.
+  // vehicle_state_cache wird per LEFT JOIN eingeblendet (kein Tesla-Call,
+  // nur DB-Cache) — liefert battery_level, shift_state, odometer_km
+  // und updated_at fuer den Status-Bar im Nevs-Edition Design.
+  const join = `
+    LEFT JOIN vehicle_state_cache sc ON sc.vehicle_id = v.id`;
+  const cols = `v.*, sc.battery_level, sc.shift_state,
+    COALESCE(sc.odometer_km, v.odometer_km) AS odometer_km_live,
+    sc.updated_at AS state_cached_at`;
   if (req.user?.role === 'admin') {
-    return res.json(req.db.prepare('SELECT * FROM vehicles').all());
+    return res.json(req.db.prepare(
+      `SELECT ${cols} FROM vehicles v ${join}`
+    ).all());
   }
   res.json(req.db.prepare(
-    `SELECT v.* FROM vehicles v
+    `SELECT ${cols} FROM vehicles v ${join}
        JOIN vehicle_users vu ON vu.vehicle_id = v.id
       WHERE vu.user_id = ?`
   ).all(req.user.sub));

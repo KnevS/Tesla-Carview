@@ -581,6 +581,10 @@ html[data-design="sport"] .glass-bar {
  *    --night: #06100F  (Basis-Schwarz)
  */
 html[data-design="editorial"] body {
+  /* Nevs-Edition: Manrope als Body-Font — klarer, moderner als System-Sans */
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 400;
+  letter-spacing: -.003em;
   background:
     linear-gradient(rgba(102,204,191,.035) 1px, transparent 1px) 0 0 / 72px 72px,
     linear-gradient(90deg, rgba(102,204,191,.035) 1px, transparent 1px) 0 0 / 72px 72px,
@@ -647,22 +651,138 @@ html[data-design="editorial"] .input:focus {
   box-shadow: 0 0 0 3px rgba(102,204,191,.1);
 }
 
-/* Labels: Monospace Uppercase — das editorial Erkennungszeichen */
-html[data-design="editorial"] .label {
-  font-family: ui-monospace, 'JetBrains Mono', 'SF Mono', monospace;
+/* Labels + Mono-Elemente: JetBrains Mono mit OpenType-Features */
+html[data-design="editorial"] .label,
+html[data-design="editorial"] code,
+html[data-design="editorial"] .mono {
+  font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+  font-feature-settings: "ss01", "ss02";
   text-transform: uppercase;
   letter-spacing: .1em;
   font-size: .7rem;
   color: rgba(102,204,191,.7);
 }
 
-/* Headlines: enger Tracking, editorial-schwer */
-html[data-design="editorial"] h1,
-html[data-design="editorial"] h2 {
-  letter-spacing: -.03em;
-  font-weight: 700;
+/* Headlines: Bricolage Grotesque — grosses variables Optik-Gewicht, enges Tracking */
+html[data-design="editorial"] h1 {
+  font-family: 'Bricolage Grotesque', 'Inter Tight', system-ui;
+  font-weight: 800;
+  letter-spacing: -.04em;
+  line-height: 1.0;
 }
-html[data-design="editorial"] h3 { letter-spacing: -.02em; }
+html[data-design="editorial"] h2 {
+  font-family: 'Bricolage Grotesque', 'Inter Tight', system-ui;
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1.05;
+}
+html[data-design="editorial"] h3 {
+  font-family: 'Bricolage Grotesque', 'Inter Tight', system-ui;
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+html[data-design="editorial"] h4 {
+  font-family: 'Bricolage Grotesque', 'Inter Tight', system-ui;
+  font-weight: 600;
+  letter-spacing: -.015em;
+}
+
+/* Grosse Zahlenwerte (Dashboard-Stats, Kilometer, kWh) */
+html[data-design="editorial"] .text-3xl,
+html[data-design="editorial"] .text-4xl,
+html[data-design="editorial"] .text-5xl,
+html[data-design="editorial"] .text-6xl {
+  font-family: 'Bricolage Grotesque', system-ui;
+  font-weight: 700;
+  letter-spacing: -.04em;
+}
+
+/* Buttons mit Manrope fuer klarere Lesbarkeit */
+html[data-design="editorial"] .btn-primary,
+html[data-design="editorial"] .btn-secondary {
+  font-family: 'Manrope', system-ui, sans-serif;
+  font-weight: 600;
+}
+
+/* ─── Editorial Status-Bar (Nevs-Edition) ───────────────────────────
+ * Schmaler Technologie-Streifen ueber der NavBar. Mono-Font, Petrol-
+ * Akzent, pulsierende Live-Indikatoren — wie im indasys-Referenzdesign.
+ * Nur gerendert wenn data-design="editorial" aktiv. */
+.editorial-status-bar {
+  background: #040d0c;
+  border-bottom: 1px solid rgba(102,204,191,.12);
+  font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+  font-size: .7rem;
+  letter-spacing: .06em;
+  color: rgba(255,255,255,.55);
+  line-height: 1;
+}
+.esb-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 7px clamp(14px, 2.5vw, 36px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.esb-left, .esb-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.esb-sep { opacity: .3; }
+.esb-vehicle { color: rgba(255,255,255,.75); font-weight: 500; letter-spacing: .04em; }
+.esb-time    { color: rgba(102,204,191,.5); }
+
+/* Pulsierender Status-Punkt */
+.esb-pulse-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.esb-pulse {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.esb-pulse--driving {
+  background: #34E29C;
+  box-shadow: 0 0 0 0 rgba(52,226,156,.6);
+  animation: esb-pulse-anim 1.6s infinite;
+}
+.esb-pulse--online {
+  background: #66CCBF;
+  box-shadow: 0 0 0 0 rgba(102,204,191,.5);
+  animation: esb-pulse-anim 2.4s infinite;
+}
+.esb-pulse--offline {
+  background: rgba(255,255,255,.22);
+}
+.esb-pulse-label {
+  color: rgba(255,255,255,.5);
+  font-size: .64rem;
+  letter-spacing: .14em;
+}
+@keyframes esb-pulse-anim {
+  0%   { box-shadow: 0 0 0 0 currentColor; }
+  60%  { box-shadow: 0 0 0 7px rgba(0,0,0,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,0,0,0); }
+}
+
+/* Einzelne Stat-Items rechts */
+.esb-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.esb-stat-icon { opacity: .35; font-size: .65rem; }
+.esb-stat-val  { color: rgba(255,255,255,.7); font-weight: 500; }
+.esb-stat-val--green  { color: #34E29C; }
+.esb-stat-val--yellow { color: #F6C54A; }
+.esb-stat-val--red    { color: #F66062; }
 
 /* Navbar: warm-dunkel mit Petrol-Trennlinie */
 html[data-design="editorial"] .glass-bar {

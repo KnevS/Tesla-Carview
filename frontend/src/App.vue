@@ -1,6 +1,9 @@
 <template>
   <div class="min-h-screen bg-tesla-dark flex flex-col">
     <DemoBanner />
+    <!-- Nevs-Edition: technischer Status-Streifen ueber der NavBar.
+         Nur sichtbar wenn data-design="editorial" und eingeloggt. -->
+    <EditorialStatusBar v-if="authStore.isAuthenticated" />
     <NavBar v-if="authStore.isAuthenticated" />
     <main :class="['flex-1', authStore.isAuthenticated ? 'max-w-7xl w-full mx-auto px-4 py-6' : '']">
       <!-- sanfter Routenwechsel; respektiert prefers-reduced-motion (siehe style) -->
@@ -43,11 +46,12 @@
 import { ref, watch } from 'vue';
 import NavBar    from './components/NavBar.vue';
 import AppFooter from './components/AppFooter.vue';
-import LegalAcceptanceModal from './components/LegalAcceptanceModal.vue';
-import InstallPrompt        from './components/InstallPrompt.vue';
-import MaintenanceOverlay   from './components/MaintenanceOverlay.vue';
-import DemoBanner           from './components/DemoBanner.vue';
-import SettingsWizard       from './components/SettingsWizard.vue';
+import LegalAcceptanceModal  from './components/LegalAcceptanceModal.vue';
+import InstallPrompt         from './components/InstallPrompt.vue';
+import MaintenanceOverlay    from './components/MaintenanceOverlay.vue';
+import DemoBanner            from './components/DemoBanner.vue';
+import SettingsWizard        from './components/SettingsWizard.vue';
+import EditorialStatusBar    from './components/EditorialStatusBar.vue';
 import { useAuthStore } from './store/auth.js';
 import { usePrefsStore } from './store/prefs.js';
 import api from './api.js';

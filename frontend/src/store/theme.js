@@ -24,7 +24,7 @@ export const DESIGNS = [
   { key: 'cyber',     label: 'Cyberpunk-Tesla',     icon: '⚡', tagline: 'Neon-Glow, scharfe Linien' },
   { key: 'minimal',   label: 'Minimal Swiss',       icon: '◻',  tagline: 'Reduziert, Zahlen im Fokus' },
   { key: 'sport',     label: 'Sport / Performance', icon: '▰',  tagline: 'Kantig, mutig, Tacho-Look' },
-  { key: 'editorial', label: 'Tech-Editorial',      icon: '◈',  tagline: 'Petrol, Grid-Mesh, Mono-Labels' },
+  { key: 'editorial', label: 'Nevs-Edition',         icon: '◈',  tagline: 'Bricolage · Petrol · Mono-Labels' },
 ];
 
 const STORAGE_KEY = 'tesla-carview-theme';
