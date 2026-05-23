@@ -259,18 +259,27 @@ router.put('/ocm-config', (req, res) => {
   res.json({ configured: true, masked: ocm_api_key.slice(0, 8) + '…' + ocm_api_key.slice(-4) });
 });
 
-// GET /api/routing/chargers?lat=&lon=&radius_km=
+// GET /api/routing/chargers?lat=&lon=&radius_km=  (oder radius= in Metern)
 router.get('/chargers', async (req, res) => {
   const lat    = parseFloat(req.query.lat);
   const lon    = parseFloat(req.query.lon);
-  const radius = Math.min(parseFloat(req.query.radius_km) || 30, 150);
+  // Akzeptiert radius_km (km) ODER radius (Meter) vom Frontend
+  const radiusKm = req.query.radius_km
+    ? parseFloat(req.query.radius_km)
+    : req.query.radius
+      ? parseFloat(req.query.radius) / 1000
+      : 30;
+  const radius = Math.min(radiusKm, 150);
   if (isNaN(lat) || isNaN(lon)) return res.status(400).json({ error: 'lat und lon erforderlich' });
 
+  // DC-Fast-Only Filter: Frontend kann dcOnly=true senden; levelid 3 = DC fast
+  const dcOnly = req.query.dcOnly === 'true' || req.query.level === '3';
+
   const params = new URLSearchParams({
-    maxresults: 50, compact: true, verbose: false,
+    maxresults: 100, compact: true, verbose: false,
     latitude: lat, longitude: lon, distance: radius, distanceunit: 'KM',
-    levelid: '3',   // DC Fast only (>40 kW)
   });
+  if (dcOnly) params.set('levelid', '3');
   const ocmKey = getOcmKey(req.db);
   if (ocmKey) params.set('key', ocmKey);
 
@@ -281,16 +290,27 @@ router.get('/chargers', async (req, res) => {
     if (r.status === 403) return res.status(403).json({ error: 'OpenChargeMap API-Key fehlt', code: 'NO_API_KEY' });
     if (!r.ok) return res.status(502).json({ error: 'OpenChargeMap nicht erreichbar' });
     const data = await r.json();
-    const stations = (Array.isArray(data) ? data : []).map(s => ({
-      id:       s.ID,
-      name:     s.AddressInfo?.Title ?? 'Ladestation',
-      lat:      s.AddressInfo?.Latitude,
-      lon:      s.AddressInfo?.Longitude,
-      address:  s.AddressInfo?.AddressLine1 ?? null,
-      max_kw:   s.Connections?.reduce((m, c) => Math.max(m, c.PowerKW ?? 0), 0) || null,
-      operator: s.OperatorInfo?.Title ?? null,
-      is_tesla: (s.OperatorInfo?.Title ?? '').toLowerCase().includes('tesla'),
-    })).filter(s => s.lat && s.lon);
+    const stations = (Array.isArray(data) ? data : []).map(s => {
+      const conns = s.Connections ?? [];
+      // Eindeutige Steckertypen (ohne null/undefined)
+      const connTypes = [...new Set(
+        conns.map(c => c.ConnectionType?.Title).filter(Boolean)
+      )];
+      return {
+        id:              s.ID,
+        name:            s.AddressInfo?.Title ?? 'Ladestation',
+        lat:             s.AddressInfo?.Latitude,
+        lon:             s.AddressInfo?.Longitude,
+        address:         [s.AddressInfo?.AddressLine1, s.AddressInfo?.Postcode, s.AddressInfo?.Town]
+                           .filter(Boolean).join(', ') || null,
+        max_kw:          conns.reduce((m, c) => Math.max(m, c.PowerKW ?? 0), 0) || null,
+        num_points:      s.NumberOfPoints ?? conns.length || null,
+        connector_types: connTypes,
+        operator:        s.OperatorInfo?.Title ?? null,
+        is_tesla:        (s.OperatorInfo?.Title ?? '').toLowerCase().includes('tesla'),
+        status_ok:       s.StatusType?.IsOperational !== false,
+      };
+    }).filter(s => s.lat && s.lon);
     res.json(stations);
   } catch (err) {
     res.status(500).json({ error: err.message });

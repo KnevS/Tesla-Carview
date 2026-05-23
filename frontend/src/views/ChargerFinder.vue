@@ -52,32 +52,37 @@
 
     <!-- Station list -->
     <div v-if="stations.length" class="space-y-3">
-      <div v-for="s in stations" :key="s.ID"
+      <div v-for="s in stations" :key="s.id"
         class="p-4 bg-gray-800 rounded-xl border border-gray-700 hover:border-gray-600 transition">
         <div class="flex items-start justify-between gap-4">
           <div class="flex-1 min-w-0">
-            <p class="font-semibold truncate">{{ s.AddressInfo?.Title ?? '—' }}</p>
-            <p class="text-sm text-gray-400 truncate mt-0.5">{{ formatAddress(s) }}</p>
+            <div class="flex items-center gap-2">
+              <p class="font-semibold truncate">{{ s.name ?? '—' }}</p>
+              <span v-if="s.is_tesla"
+                class="shrink-0 px-1.5 py-0.5 bg-tesla-red/20 text-tesla-red rounded text-xs font-medium">Tesla</span>
+            </div>
+            <p class="text-sm text-gray-400 truncate mt-0.5">{{ s.address ?? '' }}</p>
             <div class="flex flex-wrap gap-3 mt-2 text-xs text-gray-400">
-              <span v-if="operatorName(s)" class="flex items-center gap-1">
-                🏢 {{ operatorName(s) }}
+              <span v-if="s.operator" class="flex items-center gap-1">
+                🏢 {{ s.operator }}
               </span>
-              <span v-if="maxPower(s)" class="flex items-center gap-1 text-green-400">
-                ⚡ {{ $t('chargers.power') }}: {{ maxPower(s) }} kW
+              <span v-if="s.max_kw" class="flex items-center gap-1 text-green-400 font-medium">
+                ⚡ {{ s.max_kw }} kW
               </span>
-              <span class="flex items-center gap-1">
-                🔌 {{ $t('chargers.connections') }}: {{ connCount(s) }}
+              <span v-if="s.num_points" class="flex items-center gap-1">
+                🔌 {{ s.num_points }} {{ $t('chargers.connections') }}
               </span>
             </div>
-            <div class="flex flex-wrap gap-1 mt-2">
-              <span v-for="conn in connTypes(s)" :key="conn"
+            <!-- Steckertypen -->
+            <div v-if="s.connector_types?.length" class="flex flex-wrap gap-1 mt-2">
+              <span v-for="conn in s.connector_types" :key="conn"
                 class="px-2 py-0.5 bg-gray-700 rounded-full text-xs text-gray-300">
                 {{ conn }}
               </span>
             </div>
           </div>
-          <a v-if="s.AddressInfo?.Latitude"
-            :href="`https://maps.google.com/?q=${s.AddressInfo.Latitude},${s.AddressInfo.Longitude}`"
+          <a v-if="s.lat && s.lon"
+            :href="`https://maps.google.com/?q=${s.lat},${s.lon}`"
             target="_blank" rel="noopener"
             class="shrink-0 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 text-white rounded-lg text-xs transition">
             {{ $t('chargers.openInMaps') }}
@@ -132,11 +137,11 @@ async function search() {
   searched.value = true;
   try {
     const params = new URLSearchParams({
-      lat:    currentLat.value,
-      lon:    currentLon.value,
-      radius: radius.value,
+      lat:       currentLat.value,
+      lon:       currentLon.value,
+      radius_km: Math.round(parseInt(radius.value) / 1000), // Meter → km
+      dcOnly:    dcOnly.value ? 'true' : 'false',
     });
-    if (dcOnly.value) params.set('level', '3');
     const { data } = await api.get(`/routing/chargers?${params}`);
     stations.value = data ?? [];
   } catch {
