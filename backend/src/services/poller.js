@@ -12,68 +12,143 @@ import {
  * Hybrid-Polling-Strategie mit Quota-Schonung.
  *
  * Drei Betriebsmodi (ohne Telemetry):
- *   DRIVING  — shift_state D/R/N → 30s  (Auto faehrt aktiv)
- *   PARKED   — online aber steht → 5min (laedt, wartet, klimatisiert)
- *   IDLE     — offline           → 15min
+ *   DRIVING  — shift_state D/R/N → 30s   (Auto faehrt aktiv)
+ *   PARKED   — online aber steht → 20min  (laedt, wartet, klimatisiert)
+ *   IDLE     — offline           → 90min  (schlaeft)
  *
  * Mit Fleet Telemetry:
  *   HEARTBEAT — 1 Call/Stunde zur Stammdaten-Aktualisierung
  *
- * Tages-Cap: max. DAILY_CAP Calls pro Fahrzeug. Bei Erreichen 30min
- * Zwangspause — schützt gegen unerwartete Endlos-Online-Phasen.
+ * Kosten-Budget:
+ *   Tages-Cap:   DAILY_CAP    Calls pro Fahrzeug, DB-persistent (ueberlebt Neustarts).
+ *   Monats-Cap:  MONTHLY_CAP  Calls pro Fahrzeug, ebenfalls DB-persistent.
+ *   Beide werden in tesla_api_usage aggregiert — kein Verlust bei Restart.
+ *
+ * 404-Circuit-Breaker: nach CONSECUTIVE_404_THRESHOLD aufeinanderfolgenden
+ * 404-Antworten wird der Tenant fuer 6h pausiert (Auto evtl. abgemeldet
+ * oder API-Endpunkt geaendert).
  */
-const POLL_INTERVAL_DRIVING   = 30_000;       // 30s  — faehrt (shift D/R/N)
-const POLL_INTERVAL_PARKED    = 600_000;      // 10min — online, steht (war 5min)
-const POLL_INTERVAL_IDLE      = 2_700_000;    // 45min — offline (war 15min)
-const POLL_INTERVAL_HEARTBEAT = 3_600_000;    // 1h   — Telemetry aktiv
-const TELEMETRY_FRESH_S       = 15 * 60;      // 15min: Telemetry-Signal gilt als frisch
+const POLL_INTERVAL_DRIVING   =    30_000; // 30s   — faehrt aktiv
+const POLL_INTERVAL_PARKED    = 1_200_000; // 20min — online, steht
+const POLL_INTERVAL_IDLE      = 5_400_000; // 90min — offline
+const POLL_INTERVAL_HEARTBEAT = 3_600_000; // 1h    — Telemetry aktiv
+const TELEMETRY_FRESH_S       = 15 * 60;  // 15min: Telemetry-Signal gilt als frisch
 
-const DAILY_CAP = 80; // max. vehicle_data-Calls pro Fahrzeug & Tag
+// Kosten-Limits (konfigurierbar via .env)
+const DAILY_CAP   = parseInt(process.env.TESLA_DAILY_CAP   ?? '30',  10); // max. Calls/Tag/Fahrzeug
+const MONTHLY_CAP = parseInt(process.env.TESLA_MONTHLY_CAP ?? '400', 10); // max. Calls/Monat/Fahrzeug
 
-// In-memory Tageszaehler — Key: vehicle.id (DB-ID, nicht tesla_id).
-// Resets beim Container-Neustart; das ist vertretbar, weil wir beim
-// naechsten Start eines neuen Tages sowieso frisch beginnen wollen.
-// Wichtiger als persistence ist das harte Tages-Ende: nach DAILY_CAP
-// Calls wird erst am naechsten UTC-Tag weiter gepollt (keine 30min-
-// Schleife mehr, die nach Restarts wieder neu beginnt).
-const dailyCalls = new Map();
+// 404-Breaker: nach N aufeinanderfolgenden 404ern → 6h Pause
+const CONSECUTIVE_404_THRESHOLD = 5;
+const PAUSE_404_MS = 6 * 60 * 60 * 1000; // 6 Stunden
 
-function todayKey() { return new Date().toISOString().slice(0, 10); }
+// Per-Fahrzeug 404-Zaehler (in-memory — resets bei Restart, das ist OK)
+const consecutive404 = new Map();
 
-function endOfTodayMs() {
-  const d = new Date();
-  d.setUTCHours(23, 59, 59, 999);
-  return d.getTime();
+function todayKey()   { return new Date().toISOString().slice(0, 10); }
+function thisMonth()  { return new Date().toISOString().slice(0, 7);  }
+
+// ---------------------------------------------------------------------------
+// DB-persistenter Tages-/Monats-Cap
+// Nutzt die tesla_api_usage-Tabelle (die ohnehin jeden Call trackt) als
+// Quelle der Wahrheit — ueberlebt Container-Neustarts sicher.
+// ---------------------------------------------------------------------------
+
+/** Gibt die Anzahl vehicle_data-Calls fuer heute (UTC-Datum) zurueck. */
+function getTodayCallCount(db) {
+  const row = db.prepare(
+    `SELECT COALESCE(SUM(count), 0) AS n
+     FROM tesla_api_usage
+     WHERE period = ?
+       AND endpoint LIKE '%/vehicle_data'`
+  ).get(todayKey());
+  return row?.n ?? 0;
 }
 
-function getCapRecord(vehicleId) {
-  const today = todayKey();
-  let r = dailyCalls.get(vehicleId);
-  if (!r || r.date !== today) {
-    r = { date: today, count: 0, pausedUntilMs: 0 };
-    dailyCalls.set(vehicleId, r);
+/** Gibt die Anzahl vehicle_data-Calls fuer den aktuellen Monat zurueck. */
+function getMonthCallCount(db) {
+  const row = db.prepare(
+    `SELECT COALESCE(SUM(count), 0) AS n
+     FROM tesla_api_usage
+     WHERE period = ?
+       AND endpoint LIKE '%/vehicle_data'`
+  ).get(thisMonth());
+  return row?.n ?? 0;
+}
+
+/**
+ * Gibt true zurueck wenn der Tages- oder Monats-Cap erreicht ist.
+ * Loggt einmalig wenn ein Limit getroffen wird.
+ */
+function isOverBudget(db, vehicleName) {
+  // Monats-Cap hat Vorrang
+  const monthCount = getMonthCallCount(db);
+  if (monthCount >= MONTHLY_CAP) {
+    // Nur einmal pro Stunde loggen, nicht bei jedem Poll-Tick
+    const key = 'monthly_' + thisMonth();
+    if (!consecutive404.has(key)) {
+      consecutive404.set(key, true);
+      console.warn(
+        `[Poller] ${vehicleName}: Monats-Cap (${MONTHLY_CAP} Calls) erreicht.` +
+        ` Kosten bisher: ~$${(monthCount * 0.005).toFixed(2)}` +
+        ` — Polling bis naechsten Monat gestoppt.` +
+        ` Limit via TESLA_MONTHLY_CAP anpassbar.`
+      );
+    }
+    return true;
   }
-  return r;
-}
 
-function isCapPaused(vehicleId) {
-  const r = dailyCalls.get(vehicleId);
-  if (!r) return false;
-  if (r.pausedUntilMs && r.pausedUntilMs > Date.now()) return true;
-  if (r.pausedUntilMs && r.pausedUntilMs <= Date.now()) r.pausedUntilMs = 0;
+  // Tages-Cap
+  const dayCount = getTodayCallCount(db);
+  if (dayCount >= DAILY_CAP) {
+    const key = 'daily_' + todayKey();
+    if (!consecutive404.has(key)) {
+      consecutive404.set(key, true);
+      console.warn(
+        `[Poller] ${vehicleName}: Tages-Cap (${DAILY_CAP} Calls) erreicht` +
+        ` (heute: ${dayCount}/${DAILY_CAP})` +
+        ` — Pause bis Tagesende. Limit via TESLA_DAILY_CAP anpassbar.`
+      );
+    }
+    return true;
+  }
   return false;
 }
 
-function incrementCap(vehicleId, displayName) {
-  const r = getCapRecord(vehicleId);
-  r.count++;
-  if (r.count >= DAILY_CAP && !r.pausedUntilMs) {
-    r.pausedUntilMs = endOfTodayMs();
+/** 404-Zaehler hochsetzen; gibt true zurueck wenn Breaker oeffnet. */
+function record404(tenantId, tenantLabel) {
+  const now = Date.now();
+  let s = consecutive404.get(tenantId) ?? { count: 0, pausedUntilMs: 0 };
+
+  // Pause noch aktiv?
+  if (s.pausedUntilMs > now) return true;
+
+  s.count++;
+  if (s.count >= CONSECUTIVE_404_THRESHOLD) {
+    s.pausedUntilMs = now + PAUSE_404_MS;
+    s.count = 0;
     console.warn(
-      `[Poller] ${displayName}: Tages-Cap (${DAILY_CAP} Calls) erreicht` +
-      ` → Pause bis Tagesende (${new Date(r.pausedUntilMs).toISOString()})`
+      `[Poller] 404-Breaker OPEN fuer "${tenantLabel}" —` +
+      ` ${CONSECUTIVE_404_THRESHOLD} aufeinanderfolgende 404er.` +
+      ` Pause 6h bis ${new Date(s.pausedUntilMs).toISOString()}.` +
+      ` Moegliche Ursachen: Tesla-Konto ohne Fleet-API-Zugang, VIN-Wechsel oder API-Aenderung.`
     );
   }
+  consecutive404.set(tenantId, s);
+  return s.pausedUntilMs > now;
+}
+
+function reset404(tenantId) {
+  const s = consecutive404.get(tenantId);
+  if (s) { s.count = 0; consecutive404.set(tenantId, s); }
+}
+
+function is404Paused(tenantId) {
+  const s = consecutive404.get(tenantId);
+  if (!s) return false;
+  if (s.pausedUntilMs > Date.now()) return true;
+  if (s.pausedUntilMs) { s.pausedUntilMs = 0; consecutive404.set(tenantId, s); }
+  return false;
 }
 
 /** Auto faehrt aktiv wenn shift_state D, R oder N gesetzt ist. */
@@ -88,13 +163,18 @@ function isCoveredByTelemetry(vehicle, nowS) {
 }
 
 export async function startPoller() {
-  console.log('[Poller] Starte Tesla Hybrid-Service (Telemetry-first, Polling als Fallback)...');
+  console.log(
+    `[Poller] Starte Tesla Hybrid-Service (Telemetry-first, Polling als Fallback)...` +
+    ` | Tages-Cap: ${DAILY_CAP} | Monats-Cap: ${MONTHLY_CAP}` +
+    ` | Parked-Interval: ${POLL_INTERVAL_PARKED / 60000}min` +
+    ` | Idle-Interval: ${POLL_INTERVAL_IDLE / 60000}min`
+  );
   poll();
 }
 
 async function poll() {
-  let anyDriving     = false; // → POLL_INTERVAL_DRIVING (30s)
-  let anyParked      = false; // → POLL_INTERVAL_PARKED  (5min)
+  let anyDriving = false;
+  let anyParked  = false;
   const nowS = Math.floor(Date.now() / 1000);
 
   try {
@@ -103,6 +183,7 @@ async function poll() {
       if (tenant.status === 'suspended') continue;
       if (tenant.is_demo) continue;
       if (isCircuitOpen(tenant.id)) continue;
+      if (is404Paused(tenant.id)) continue;
 
       try {
         const db = getDb(tenant.id);
@@ -120,35 +201,36 @@ async function poll() {
             if (list.length) console.log(`[Poller] ${list.length} Fahrzeug(e) fuer Mandant "${tenant.slug}" synchronisiert`);
             recordSuccess(tenant.id, tenant.slug);
           } catch (err) {
-            if (err.response?.status === 403) { record403(tenant.id, tenant.slug); continue; }
+            if (err.response?.status === 403)  { record403(tenant.id, tenant.slug); continue; }
+            if (err.response?.status === 404)  { record404(tenant.id, tenant.slug); continue; }
             if (err.message && err.response?.status !== 401) recordOtherFailure(tenant.id);
           }
         }
 
         const vehicles = db.prepare('SELECT * FROM vehicles').all();
-        let tenant403 = false;
+        let tenantBlocked = false;
 
         for (const vehicle of vehicles) {
-          if (tenant403) break;
+          if (tenantBlocked) break;
 
-          // Telemetry-Heartbeat-Logik (unveraendert)
+          // Telemetry-Heartbeat-Logik
           const covered  = isCoveredByTelemetry(vehicle, nowS);
           const lastPoll = vehicle.state_updated_at ?? 0;
           if (covered && (nowS - lastPoll) < POLL_INTERVAL_HEARTBEAT / 1000) continue;
 
-          // Tages-Cap: Pause wenn Limit erreicht
-          if (isCapPaused(vehicle.id)) continue;
+          // Kosten-Cap pruefen (DB-persistent, ueberlebt Neustarts)
+          if (isOverBudget(db, vehicle.display_name)) continue;
 
           try {
             const data  = await getVehicleData(db, vehicle.tesla_id);
             const state = data?.response;
             if (!state) continue;
 
-            incrementCap(vehicle.id, vehicle.display_name);
+            reset404(tenant.id); // Erfolg → 404-Zaehler zuruecksetzen
 
             if (!covered) {
-              if (isDriving(state))          anyDriving = true;
-              else if (state.state === 'online') anyParked = true;
+              if (isDriving(state))              anyDriving = true;
+              else if (state.state === 'online') anyParked  = true;
             }
 
             await syncVehicleState(db, vehicle, state);
@@ -156,8 +238,12 @@ async function poll() {
           } catch (err) {
             if (err.response?.status === 403) {
               record403(tenant.id, tenant.slug);
-              tenant403 = true;
+              tenantBlocked = true;
               break;
+            }
+            if (err.response?.status === 404) {
+              const paused = record404(tenant.id, tenant.slug);
+              if (paused) { tenantBlocked = true; break; }
             }
             if (err.response?.status !== 408) {
               console.error(`[Poller] Fahrzeug ${vehicle.display_name} (${tenant.slug}):`, err.message);
@@ -173,9 +259,9 @@ async function poll() {
     console.error('[Poller] Allgemeiner Fehler:', err.message);
   }
 
-  // Naechster Lauf: schnellster Modus der gerade aktiv ist gewinnt
-  const next = anyDriving  ? POLL_INTERVAL_DRIVING
-             : anyParked   ? POLL_INTERVAL_PARKED
-             :               POLL_INTERVAL_IDLE;
+  // Naechster Lauf: schnellster aktiver Modus gewinnt
+  const next = anyDriving ? POLL_INTERVAL_DRIVING
+             : anyParked  ? POLL_INTERVAL_PARKED
+             :              POLL_INTERVAL_IDLE;
   setTimeout(poll, next);
 }
