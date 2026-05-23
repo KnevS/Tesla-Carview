@@ -517,8 +517,12 @@
       </div>
 
       <!-- ─── Karte ──────────────────────────────────────────────────────────── -->
-      <!-- Höhe: auf Desktop durch Grid-Zelle (flex-1), auf Mobile min 420px. -->
-      <div class="card p-0 overflow-hidden rounded-2xl min-h-[420px] lg:min-h-0">
+      <!-- Höhe: auf Desktop durch Grid-Zelle (flex-1), auf Mobile min 420px.
+           isolate: erzwingt expliziten Stacking Context, damit Leaflet-Layer-Panes
+           (z-index 200–700) nicht aus dem Card-Context heraus "floating" über der
+           NavBar-Dropdown erscheinen (backdrop-filter allein ist in WebKit nicht
+           immer ausreichend für Context-Isolation). -->
+      <div class="card p-0 overflow-hidden rounded-2xl min-h-[420px] lg:min-h-0 isolate">
         <div id="route-map" class="w-full h-full"></div>
 
         <!-- Karten-Layer-Schalter (immer sichtbar, direkt auf der Karte) -->

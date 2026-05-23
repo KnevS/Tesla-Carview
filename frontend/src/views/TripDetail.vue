@@ -18,8 +18,10 @@
           tooltip="Energieverbrauch pro 100 km — das wichtigste Effizienzmaß für Elektrofahrzeuge" />
       </div>
 
-      <!-- GPS-Karte + Schieber -->
-      <div class="card space-y-3">
+      <!-- GPS-Karte + Schieber: isolate verhindert, dass Leaflet-Panes
+           mit ihren hohen z-Indizes (200-700) aus dem Stacking Context
+           herausfloaten und NavBar-Dropdowns überdecken. -->
+      <div class="card space-y-3 isolate">
         <h2 class="text-lg font-semibold">GPS-Track</h2>
 
         <div v-if="hasPoints">
