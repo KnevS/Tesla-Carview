@@ -20,10 +20,11 @@ export const THEMES = [
  *  - sport:   Mutig, kantig, Akzent-balken, „Tachometer"-Anmutung.
  */
 export const DESIGNS = [
-  { key: 'glass',   label: 'Premium Glass',    icon: '✨', tagline: 'Weich, edel, viel Tiefe' },
-  { key: 'cyber',   label: 'Cyberpunk-Tesla',  icon: '⚡', tagline: 'Neon-Glow, scharfe Linien' },
-  { key: 'minimal', label: 'Minimal Swiss',    icon: '◻',  tagline: 'Reduziert, Zahlen im Fokus' },
-  { key: 'sport',   label: 'Sport / Performance', icon: '▰', tagline: 'Kantig, mutig, Tacho-Look' },
+  { key: 'glass',     label: 'Premium Glass',       icon: '✨', tagline: 'Weich, edel, viel Tiefe' },
+  { key: 'cyber',     label: 'Cyberpunk-Tesla',     icon: '⚡', tagline: 'Neon-Glow, scharfe Linien' },
+  { key: 'minimal',   label: 'Minimal Swiss',       icon: '◻',  tagline: 'Reduziert, Zahlen im Fokus' },
+  { key: 'sport',     label: 'Sport / Performance', icon: '▰',  tagline: 'Kantig, mutig, Tacho-Look' },
+  { key: 'editorial', label: 'Tech-Editorial',      icon: '◈',  tagline: 'Petrol, Grid-Mesh, Mono-Labels' },
 ];
 
 const STORAGE_KEY = 'tesla-carview-theme';

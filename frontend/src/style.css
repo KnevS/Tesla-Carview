@@ -568,6 +568,110 @@ html[data-design="sport"] .glass-bar {
   border-bottom: 1px solid var(--accent);
 }
 
+/* ─── Tech-Editorial ────────────────────────────────────────────────
+ *  Portiert vom indasys-"Beyond-IT"-Design (Tech-Editorial-Aesthetic).
+ *  Petrol-Teal (#66CCBF) als Chrome-Farbe für Borders, Labels und den
+ *  Grid-Mesh-Background. Pill-Buttons, Mono-Uppercase-Labels, warmes
+ *  Nacht-Dunkel als Basis statt kaltem Schwarz.
+ *
+ *  Petrol-Referenzpalette (aus dem Original):
+ *    --p-300: #66CCBF  (hell, Labels, Borders)
+ *    --p-400: #3FAEA0  (mittel, Hover)
+ *    --p-700: #1A5C56  (dunkel, Hintergrund-Tint)
+ *    --night: #06100F  (Basis-Schwarz)
+ */
+html[data-design="editorial"] body {
+  background:
+    linear-gradient(rgba(102,204,191,.035) 1px, transparent 1px) 0 0 / 72px 72px,
+    linear-gradient(90deg, rgba(102,204,191,.035) 1px, transparent 1px) 0 0 / 72px 72px,
+    radial-gradient(1100px 600px at 65% 0%, rgba(63,174,160,.14), transparent 55%),
+    radial-gradient(800px 500px at 10% 100%, rgba(26,92,86,.12), transparent 60%),
+    #06100F;
+}
+
+/* Karten: warm-dunkler Hintergrund, Petrol-Rand, feines Glow */
+html[data-design="editorial"] .card {
+  border-radius: 0.75rem;
+  background-color: rgba(8,18,16,.82);
+  background-image: linear-gradient(140deg, rgba(102,204,191,.045) 0%, transparent 55%);
+  border: 1px solid rgba(102,204,191,.14);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
+  box-shadow:
+    inset 0 1px 0 rgba(102,204,191,.06),
+    0 8px 28px -10px rgba(0,0,0,.65),
+    0 24px 64px -20px rgba(0,0,0,.5);
+}
+html[data-design="editorial"] .card-interactive:hover {
+  border-color: rgba(102,204,191,.32);
+  box-shadow:
+    inset 0 1px 0 rgba(102,204,191,.1),
+    0 16px 40px -14px rgba(0,0,0,.55);
+  transform: translateY(-3px);
+}
+
+/* Pill-Buttons — das markanteste Merkmal des Stils */
+html[data-design="editorial"] .btn-primary {
+  border-radius: 999px;
+  background: var(--accent);
+  font-weight: 600;
+  letter-spacing: .01em;
+  box-shadow: 0 6px 20px -6px color-mix(in srgb, var(--accent) 50%, transparent);
+}
+html[data-design="editorial"] .btn-primary:hover:not(:disabled) {
+  background: var(--accent-hover);
+  filter: none;
+  box-shadow: 0 10px 28px -6px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+html[data-design="editorial"] .btn-secondary {
+  border-radius: 999px;
+  background: transparent;
+  border-color: rgba(102,204,191,.28);
+  color: rgba(102,204,191,.9);
+}
+html[data-design="editorial"] .btn-secondary:hover {
+  border-color: rgba(102,204,191,.55);
+  background: rgba(102,204,191,.06);
+  color: #fff;
+}
+
+/* Inputs mit Petrol-Fokusring */
+html[data-design="editorial"] .input {
+  border-radius: 0.625rem;
+  background: rgba(6,16,15,.65);
+  border-color: rgba(102,204,191,.16);
+}
+html[data-design="editorial"] .input:focus {
+  border-color: rgba(102,204,191,.5);
+  background: rgba(6,16,15,.8);
+  box-shadow: 0 0 0 3px rgba(102,204,191,.1);
+}
+
+/* Labels: Monospace Uppercase — das editorial Erkennungszeichen */
+html[data-design="editorial"] .label {
+  font-family: ui-monospace, 'JetBrains Mono', 'SF Mono', monospace;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-size: .7rem;
+  color: rgba(102,204,191,.7);
+}
+
+/* Headlines: enger Tracking, editorial-schwer */
+html[data-design="editorial"] h1,
+html[data-design="editorial"] h2 {
+  letter-spacing: -.03em;
+  font-weight: 700;
+}
+html[data-design="editorial"] h3 { letter-spacing: -.02em; }
+
+/* Navbar: warm-dunkel mit Petrol-Trennlinie */
+html[data-design="editorial"] .glass-bar {
+  background: rgba(6,13,12,.9);
+  border-bottom: 1px solid rgba(102,204,191,.14);
+  backdrop-filter: saturate(140%) blur(16px);
+  -webkit-backdrop-filter: saturate(140%) blur(16px);
+}
+
 /* ─── Design-Preview-Kacheln im Settings-Picker ────────────────────
  *  Jede Kachel zeigt die wichtigsten visuellen Eigenschaften ihres
  *  Stils im Miniformat. Damit der User vorher sieht was er bekommt.
@@ -640,3 +744,24 @@ html[data-design="sport"] .glass-bar {
   border-left: 3px solid var(--accent);
 }
 .design-preview--sport .design-preview__chip { background: var(--accent); border-radius: 1px; }
+
+/* Editorial — Quadratraster, Petrol-Chrome, Mono-Stil */
+.design-preview--editorial .design-preview__inner {
+  background:
+    linear-gradient(rgba(102,204,191,.06) 1px, transparent 1px) 0 0 / 11px 11px,
+    linear-gradient(90deg, rgba(102,204,191,.06) 1px, transparent 1px) 0 0 / 11px 11px,
+    rgba(6,13,12,.96);
+  border-radius: 0.5rem;
+  border-color: rgba(102,204,191,.24);
+  box-shadow: inset 0 1px 0 rgba(102,204,191,.06);
+}
+.design-preview--editorial .design-preview__chip {
+  background: rgba(102,204,191,.75);
+  border-radius: 999px;
+  height: 5px;
+  width: 42%;
+}
+.design-preview--editorial .design-preview__bar {
+  background: rgba(102,204,191,.18);
+  border-radius: 999px;
+}
