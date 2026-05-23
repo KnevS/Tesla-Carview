@@ -300,12 +300,11 @@ Tesla rechnet jeden `/vehicle_data`-Call ab (≈ 0,005 €/Aufruf). Ohne Fleet T
 | Offline/schläft | 45 min | bis 32 |
 | Mit Fleet Telemetry | 1 h Heartbeat | 24 |
 
-**Tages-Cap:** Standardmäßig max. 80 Calls/Fahrzeug/Tag, danach Pause bis Mitternacht.
+**Tages-Cap:** Standardmäßig max. 30 Calls/Fahrzeug/Tag (konfigurierbar via `TESLA_DAILY_CAP`), danach Pause bis Mitternacht. **Monats-Cap:** Standardmäßig max. 400 Calls/Fahrzeug/Monat (konfigurierbar via `TESLA_MONTHLY_CAP`). Beide Caps sind DB-persistent und werden durch Container-Neustarts nicht zurückgesetzt.
 
 **Kosten senken:**
 - Fleet Telemetry einrichten → reduziert auf ~24 Calls/Tag (~3,60 €/Monat)
 - In Einstellungen → Tesla-Verbindung: Monatslimit + Hard-Stop aktivieren
-- Deployments bündeln (jeder Neustart setzt den In-Memory-Cap zurück)
 
 ## 🔌 Monta-Integration (Abrechnung) {#monta}
 
@@ -470,6 +469,17 @@ Tesla Carview ist eine **PWA** (Progressive Web App) — du kannst sie wie eine 
 
 **Empfehlung:** Lass dir Carview auf dem Tesla-Display als Lesezeichen ablegen — Tesla zeigt eingestellte Lesezeichen direkt im Browser-Schnellzugriff. Für das Eintragen von Fahrt-Notizen während einer kurzen Pause ist das schneller als die URL jedes Mal zu tippen.
 
+### 📲 iPhone-Navigation: Tab Bar
+
+Auf dem iPhone und anderen Smartphones zeigt Tesla Carview eine **native iOS-style Tab Bar** am unteren Bildschirmrand:
+
+- **4 Schnell-Tabs** — Dashboard, Fahrten, Laden, Steuerung immer direkt erreichbar
+- **„Mehr"-Taste** → öffnet ein Bottom Sheet mit allen anderen Bereichen (Fahrtenbuch, Batterie, Grok, Admin …)
+- **Dynamic Island / Home Indicator** werden korrekt ausgespart
+- Der aktive Tab wird mit einem kleinen Indikator-Strich markiert
+
+Im **Nevs-Edition**-Design wechselt die Tab Bar zur Petrol-Farbgebung.
+
 ## 🗺️ Routenplaner {#route-planner}
 
 Der Routenplaner unter **Routenplaner** berechnet Fahrrouten und zeigt Schnellladestationen entlang der Strecke an.
@@ -483,7 +493,7 @@ Der Routenplaner unter **Routenplaner** berechnet Fahrrouten und zeigt Schnellla
 
 Die gewählten Optionen werden im Browser gespeichert und gelten für alle folgenden Routenberechnungen bis zur nächsten Änderung. Das Routing nutzt intern die Valhalla-Engine (openstreetmap.de); bei kurzfristiger Nichterreichbarkeit wird automatisch auf OSRM umgestellt (Hinweis erscheint als Toast).
 
-**Schnellladestationen** — Die Karte zeigt Supercharger und CCS-Schnelllader entlang der Route. Voraussetzung: ein kostenloser OpenChargeMap-API-Key muss in **Admin → System → Externe API-Schlüssel** hinterlegt sein. Fehlt der Key, erscheint ein Toast mit Direkt-Link zu den Einstellungen.
+**Schnellladestationen** — Die Karte zeigt Supercharger und CCS-Schnelllader entlang der Route. Voraussetzung: ein kostenloser OpenChargeMap-API-Key muss in **Admin → System → Externe API-Schlüssel** hinterlegt sein. Fehlt der Key, erscheint ein Toast mit Direkt-Link zu den Einstellungen. Die Suche verwendet den gewählten Radius (5/10/25/50 km) korrekt, zeigt Stationsnamen und Adressen, filtert nach DC-only und liefert Informationen zu Steckertypen, Anzahl der Ladepunkte und Tesla-Kompatibilität.
 
 **Echtzeit-Verkehr** — Wenn ein HERE Maps API-Key konfiguriert ist (ebenfalls unter Admin → System), wird der aktuelle Verkehrsfluss berücksichtigt und in der Reisezeit-Schätzung abgebildet.
 
@@ -584,6 +594,28 @@ Der **Community Benchmark** (im Energiebericht) ermöglicht anonymen Verbrauchsv
 1. Toggle „Mitmachen" aktivieren
 2. Auf „Daten beitragen" klicken — dein aktueller Durchschnittsverbrauch wird übermittelt
 3. Sobald ≥ 3 Teilnehmer für dein Modell vorhanden sind, siehst du Ø, P25, P75 und deine Position
+
+## 🎨 Design & Themes {#design-themes}
+
+Tesla Carview bietet **5 Design-Stile** und **6 Akzentfarben** — alle lokal gespeichert, kein Server-Reload nötig.
+
+### Design-Stile
+
+| Design | Charakter |
+|---|---|
+| ✨ **Premium Glass** | Weich, edel, Glasmorphismus mit Backdrop-Blur |
+| ⚡ **Cyberpunk-Tesla** | Neon-Glow, scharfe Linien, monospace-lastig |
+| ◻ **Minimal Swiss** | Viel Weißraum, reduziert, Zahlen im Fokus |
+| ▰ **Sport / Performance** | Kantig, mutig, Tachometer-Anmutung |
+| ◈ **Nevs-Edition** | Tech-Editorial, Petrol-Akzent, Bricolage Grotesque Typographie |
+
+**Nevs-Edition** ist der einzige Stil mit eigener Typographie-Suite: *Bricolage Grotesque* für Headlines, *Manrope* als Body-Font und *JetBrains Mono* für Labels. Dazu kommt ein schmaler **Status-Streifen** über der NavBar mit Live-Fahrzeugdaten (Akkustand, Gang, Kilometerstand, letztes Sync-Signal).
+
+### Akzentfarben
+
+6 Farben: Tesla Rot, Elektro Blau, Energie Grün, Lila, Sonnenuntergang, Eisblau — frei kombinierbar mit jedem Design-Stil.
+
+Wechseln: **Einstellungen → Design & Farben**.
 
 ## 🔧 Fehlerbehebung {#troubleshooting}
 

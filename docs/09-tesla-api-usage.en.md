@@ -142,21 +142,28 @@ Tesla bills **every** such call (0.005 USD/call ≈ 0.005 EUR).
 **Typical scenario** (8 h online/parked, 16 h sleeping):
 8 × 6 + 16 × 1.3 ≈ **69 calls/day** = roughly **€1/month**
 
-### Daily cap
+### Daily cap and monthly cap
 
-There is a built-in daily cap per vehicle per day (default: 80 calls).
+There is a built-in daily cap per vehicle per day (default: 30 calls, configurable via `TESLA_DAILY_CAP`).
 Once reached the poller pauses until UTC midnight.
 
-> **Important:** The cap counter is in-memory only. On a container restart
-> (e.g. triggered by a deployment) it resets to 0. If you deploy frequently,
-> consider setting a lower cap to compensate.
+There is also a monthly cap (default: 400 calls, configurable via `TESLA_MONTHLY_CAP`).
+When the monthly limit is reached, polling stops automatically until the next month.
+
+> **Important:** Both cap counters are now **DB-persistent** — they are stored in the
+> `tesla_api_usage` table and survive container restarts. Multiple deployments per day
+> therefore no longer cause the cap to reset, reliably preventing unexpected costs even
+> with frequent container restarts.
 
 ### Why can a bill still be high?
 
-- **Many container restarts** — cap resets, calls accumulate
 - **Vehicle online for a long time** — PARKED interval (10 min) fires continuously
 - **Fleet Telemetry not active** — no heartbeat mode, poller works blind
 - **Debugging / manual API calls** also count towards the monthly bill
+
+> **Note on container restarts:** The daily and monthly caps are now DB-persistent
+> and are no longer reset by restarts. Multiple deployments per day therefore no
+> longer accumulate unexpected costs.
 
 ### Recommendations
 

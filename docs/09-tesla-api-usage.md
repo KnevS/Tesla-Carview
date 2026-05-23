@@ -143,21 +143,28 @@ Tesla rechnet **jeden** dieser Calls ab (0,005 USD/Aufruf = ca. 0,005 EUR).
 **Typisches Szenario** (8 h online/parked, 16 h schläft):
 8 × 6 + 16 × 1,3 ≈ **69 Calls/Tag** = ca. **1 EUR/Monat**
 
-### Tages-Cap
+### Tages-Cap und Monats-Cap
 
-Pro Fahrzeug und Tag gibt es einen eingebauten Tages-Cap (Standard: 80 Calls).
+Pro Fahrzeug und Tag gibt es einen eingebauten Tages-Cap (Standard: 30 Calls, konfigurierbar via `TESLA_DAILY_CAP`).
 Wird er erreicht, pausiert der Poller bis Mitternacht UTC.
 
-> **Wichtig:** Der Cap-Zähler liegt im Arbeitsspeicher. Bei einem Container-
-> Neustart (z. B. durch ein Deployment) startet er neu bei 0. Wer täglich
-> viele Deployments hat, sollte den Cap entsprechend niedriger setzen.
+Zusätzlich gibt es einen Monats-Cap (Standard: 400 Calls, konfigurierbar via `TESLA_MONTHLY_CAP`).
+Wird das Monatslimit erreicht, stoppt das Polling automatisch bis zum nächsten Monat.
+
+> **Wichtig:** Ab dieser Version sind beide Cap-Zähler **DB-persistent** — sie werden in der
+> `tesla_api_usage`-Tabelle gespeichert und überleben Container-Neustarts. Bei mehreren
+> Deployments pro Tag summieren sich die Calls daher korrekt und der Cap schützt auch bei
+> häufigen Neustarts zuverlässig vor unerwarteten Kosten.
 
 ### Warum kann eine Rechnung trotzdem hoch sein?
 
-- **Viele Container-Neustarts** → Cap resetet, Calls summieren sich
 - **Fahrzeug lange online** → PARKED-Intervall (10 min) greift dauerhaft
 - **Fleet Telemetry nicht aktiv** → kein Heartbeat-Modus, Poller arbeitet blind
 - **Debugging / manuelle API-Calls** zählen ebenfalls in die monatliche Abrechnung
+
+> **Hinweis zu Container-Neustarts:** Der Tages-Cap und Monats-Cap sind nun DB-persistent
+> und werden durch Neustarts nicht mehr zurückgesetzt. Mehrere Deployments pro Tag erhöhen
+> daher das Risiko von unerwarteten Kosten nicht mehr.
 
 ### Empfehlungen
 

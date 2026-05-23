@@ -300,12 +300,11 @@ Tesla bills every `/vehicle_data` call (≈ €0.005/call). Without Fleet Teleme
 | Offline / sleeping | 45 min | up to 32 |
 | With Fleet Telemetry | 1 h heartbeat | 24 |
 
-**Daily cap:** By default max. 80 calls/vehicle/day, then paused until midnight.
+**Daily cap:** By default max. 30 calls/vehicle/day (configurable via `TESLA_DAILY_CAP`), then paused until midnight. **Monthly cap:** By default max. 400 calls/vehicle/month (configurable via `TESLA_MONTHLY_CAP`). Both caps are DB-persistent and survive container restarts.
 
 **Reducing costs:**
 - Set up Fleet Telemetry → drops to ~24 calls/day (~€3.60/month)
 - In Settings → Tesla connection: set a monthly limit and enable hard stop
-- Bundle deployments (each container restart resets the in-memory cap)
 
 ## 🔌 Monta integration (Billing) {#monta}
 
@@ -470,6 +469,17 @@ Tesla Carview is a **PWA** (Progressive Web App) — you can install it like a n
 
 **Recommended:** bookmark Carview on the Tesla display — Tesla shows saved bookmarks in the browser quick access. For jotting down a trip purpose during a short stop that's much faster than typing the URL again.
 
+### 📲 iPhone Navigation: Tab Bar
+
+On iPhone and other smartphones, Tesla Carview shows a **native iOS-style tab bar** at the bottom:
+
+- **4 quick tabs** — Dashboard, Trips, Charging, Control always one tap away
+- **"More" button** → opens a bottom sheet with all other sections (Logbook, Battery, Grok, Admin …)
+- **Dynamic Island / Home Indicator** are properly respected
+- The active tab is marked with a small indicator pill
+
+In **Nevs-Edition** design, the tab bar switches to petrol color.
+
 ## 🗺️ Route Planner {#route-planner}
 
 The Route Planner calculates driving routes and shows fast-charging stations along the way.
@@ -483,7 +493,7 @@ The Route Planner calculates driving routes and shows fast-charging stations alo
 
 The selected options are saved in the browser and apply to all subsequent calculations until changed. Routing uses the Valhalla engine (openstreetmap.de); if Valhalla is temporarily unavailable the app falls back to OSRM and shows a toast.
 
-**Fast-charging stations** — The map shows Superchargers and CCS fast-chargers along the route. Requires a free OpenChargeMap API key set in **Admin → System → External API keys**. If the key is missing a toast appears with a direct link to settings.
+**Fast-charging stations** — The map shows Superchargers and CCS fast-chargers along the route. Requires a free OpenChargeMap API key set in **Admin → System → External API keys**. If the key is missing a toast appears with a direct link to settings. The search correctly uses the selected radius (5/10/25/50 km), displays station names and addresses, supports DC-only filtering, and shows connector types, number of charge points and Tesla compatibility.
 
 **Live traffic** — When a HERE Maps API key is configured (also under Admin → System), current traffic flow is factored into the travel-time estimate.
 
@@ -584,6 +594,28 @@ The **Community Benchmark** (in the Energy Report) enables anonymous consumption
 1. Enable the "Participate" toggle
 2. Click "Contribute data" — your current average consumption is submitted
 3. Once ≥ 3 contributors exist for your model, you see average, P25, P75 and your position
+
+## 🎨 Design & Themes {#design-themes}
+
+Tesla Carview offers **5 design styles** and **6 accent colors** — all stored locally, no server reload needed.
+
+### Design Styles
+
+| Design | Character |
+|---|---|
+| ✨ **Premium Glass** | Soft, elegant, glassmorphism with backdrop blur |
+| ⚡ **Cyberpunk-Tesla** | Neon glow, sharp lines, monospace-heavy |
+| ◻ **Minimal Swiss** | Lots of space, reduced, numbers in focus |
+| ▰ **Sport / Performance** | Angular, bold, tachometer aesthetic |
+| ◈ **Nevs-Edition** | Tech-editorial, petrol accent, Bricolage Grotesque typography |
+
+**Nevs-Edition** is the only style with its own typography suite: *Bricolage Grotesque* for headlines, *Manrope* as body font and *JetBrains Mono* for labels. It also includes a slim **status bar** above the NavBar showing live vehicle data (battery level, gear, odometer, last sync signal).
+
+### Accent Colors
+
+6 colors: Tesla Red, Electric Blue, Energy Green, Purple, Sunset, Ice Blue — freely combinable with any design style.
+
+Switch in: **Settings → Design & Colors**.
 
 ## 🔧 Troubleshooting {#troubleshooting}
 

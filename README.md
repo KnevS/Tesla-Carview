@@ -45,10 +45,10 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 | **PDF-Abrechnung** | Unterschriftsreife PDF für Heimladen-Erstattung (clientseitig, keine Cloud) |
 | **Benachrichtigungen** | Web Push bei Ladeende, plus Wartungserinnerungen |
 | **Benutzerhandbuch** | Vollständige Anleitung direkt in der App lesbar |
-| **Design & Themes** | 4 Design-Stile (Glass, Cyber, Minimal, Sport) + 6 Akzentfarben, alles lokal gespeichert; Design-Picker mit Miniatur-Previews in den Einstellungen |
+| **Design & Themes** | 5 Design-Stile (Glass, Cyber, Minimal, Sport, **Nevs-Edition**) + 6 Akzentfarben, alles lokal gespeichert; Nevs-Edition mit eigener Bricolage-Grotesque-Typographie und Live-Status-Streifen |
 | **Einstellungen** | Alle Sektionen per Klick ein-/ausklappbar (SortableSection), Reihenfolge persönlich sortierbar |
 | **Navigation** | Individuell sortierbare und ein-/ausblendbare Navigationspunkte |
-| **Mobile / Tesla** | Installierbare PWA für iPhone/iPad (Safari), Android, Tesla-Fahrzeug-Browser und Desktop. Kompakte Karten-Ansicht im Fahrtenbuch für schmale Bildschirme. |
+| **Mobile / Tesla** | Installierbare PWA für iPhone/iPad (Safari), Android, Tesla-Fahrzeug-Browser und Desktop. iOS-style Tab Bar am unteren Bildschirmrand (4 Schnell-Tabs + „Mehr"-Bottom-Sheet). Kompakte Karten-Ansicht im Fahrtenbuch für schmale Bildschirme. |
 | **CO₂-Vergleich** | Tesla-CO₂ vs. Diesel-Äquivalent, eingesparte Tonnen, Strommix-Faktor (0,38 kg/kWh DE) — pro Woche im Energiebericht |
 | **Wetter-Verbrauch** | Verbrauchskorrelation nach Temperatur-Bucket (< −10 °C bis > 30 °C) im Energiebericht — sieht wie Kälte/Hitze den Verbrauch beeinflusst |
 | **Klimastatistiken** | Tägliche Klimaanlage-Nutzung (Stunden), Sitzheizung, Vorklimatisierungen, kältester/wärmster Tag |

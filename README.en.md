@@ -45,10 +45,10 @@ Runs on: **Linux servers** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), local
 | **PDF reimbursement** | Signable PDF for home-charging reimbursement (client-side, no cloud) |
 | **Notifications** | Web Push when charging finishes, plus maintenance reminders |
 | **User handbook** | Complete guide readable directly inside the app |
-| **Design & themes** | 4 design styles (Glass, Cyber, Minimal, Sport) + 6 accent colors, all stored locally; design picker with miniature previews in Settings |
+| **Design & themes** | 5 design styles (Glass, Cyber, Minimal, Sport, **Nevs-Edition**) + 6 accent colors, all stored locally; Nevs-Edition with its own Bricolage Grotesque typography and live status bar |
 | **Settings** | All sections collapsible and individually reorderable (drag-to-sort) |
 | **Navigation** | Sortable, individually hideable navigation entries |
-| **Mobile / Tesla** | Installable PWA for iPhone/iPad (Safari), Android, the Tesla in-car browser and desktop. Compact card view in the logbook on narrow screens. |
+| **Mobile / Tesla** | Installable PWA for iPhone/iPad (Safari), Android, the Tesla in-car browser and desktop. iOS-style bottom tab bar (4 quick tabs + "More" bottom sheet). Compact card view in the logbook on narrow screens. |
 | **CO₂ comparison** | Tesla CO₂ vs. diesel equivalent, tonnes saved, grid-mix factor (0.38 kg/kWh DE) — per week in the Energy Report |
 | **Weather consumption** | Consumption correlation by temperature bucket (< −10 °C to > 30 °C) in the Energy Report — shows how cold and heat affect range |
 | **Climate statistics** | Daily AC usage (hours), seat heating, preconditioning count, coldest/hottest day |

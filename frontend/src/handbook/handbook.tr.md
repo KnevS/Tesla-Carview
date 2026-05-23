@@ -467,6 +467,17 @@ Tesla Carview bir **PWA**'dır (Progressive Web App) — App Store veya Google P
 
 **Öneri:** Carview'i Tesla tarayıcısında yer imi olarak kaydet — Tesla, kaydedilen yer imlerini doğrudan tarayıcı hızlı erişiminde gösterir. Kısa bir durakta seyahat notu girmek, her seferinde URL yazmaktan çok daha hızlıdır.
 
+### 📲 iPhone Navigasyonu: Sekme Çubuğu
+
+iPhone ve diğer akıllı telefonlarda Tesla Carview, ekranın altında **iOS tarzı bir sekme çubuğu** gösterir:
+
+- **4 hızlı sekme** — Pano, Sürüşler, Şarj, Kontrol her zaman tek dokunuşla erişilebilir
+- **"Daha fazla" düğmesi** → diğer tüm bölümleri içeren bir alt sayfa açar (Yol defteri, Batarya, Grok, Admin …)
+- **Dynamic Island / Home Indicator** doğru şekilde desteklenir
+- Etkin sekme küçük bir göstergeyle işaretlenir
+
+**Nevs-Edition** tasarımında sekme çubuğu petrol rengine döner.
+
 ## 🗺️ Rota planlayıcı {#route-planner}
 
 Rota planlayıcı, sürüş güzergahları hesaplar ve yol boyunca hızlı şarj istasyonlarını gösterir.
@@ -480,7 +491,7 @@ Rota planlayıcı, sürüş güzergahları hesaplar ve yol boyunca hızlı şarj
 
 Seçenekler tarayıcıda kaydedilir. Yönlendirme Valhalla (openstreetmap.de) kullanır; erişilemezse otomatik olarak OSRM'ye geçilir ve toast bildirimi gösterilir.
 
-**Hızlı şarj istasyonları** — Güzergah boyunca Supercharger'lar ve CCS. Admin → System → Harici API anahtarları altında ücretsiz bir OpenChargeMap API anahtarı gerektirir.
+**Hızlı şarj istasyonları** — Güzergah boyunca Supercharger'lar ve CCS. Admin → System → Harici API anahtarları altında ücretsiz bir OpenChargeMap API anahtarı gerektirir. Arama, seçilen yarıçapı (5/10/25/50 km) doğru kullanır, istasyon adlarını ve adreslerini gösterir, yalnızca DC filtresini destekler ve konnektör türleri, şarj noktası sayısı ve Tesla uyumluluğunu gösterir.
 
 **Gerçek zamanlı trafik** — HERE Maps API anahtarı yapılandırıldığında, güncel trafik akışı seyahat süresi tahminine dahil edilir.
 
@@ -557,6 +568,28 @@ Enerji Raporu'ndaki **Topluluk Karşılaştırması**, aynı modeldeki diğer Te
 **Gizlilik ilkeleri:** yalnızca toplu değerler (kWh/100 km), SHA-256 hash olarak saklanan örnek, minimum 3 katılımcı gerekli (k-anonimlik), istediğiniz zaman iptal edilebilir.
 
 **Katılım:** geçişi etkinleştirin, ardından «Veri katkıla» düğmesine tıklayın. Modeliniz için ≥ 3 katılımcı olduğunda ortalama, P25, P75 ve konumunuzu görürsünüz.
+
+## 🎨 Tasarım & Temalar {#design-themes}
+
+Tesla Carview **5 tasarım stili** ve **6 vurgu rengi** sunar — tümü yerel olarak saklanır, sunucu yeniden yüklemesi gerekmez.
+
+### Tasarım stilleri
+
+| Tasarım | Karakter |
+|---|---|
+| ✨ **Premium Glass** | Yumuşak, zarif, backdrop blur ile glassmorfizm |
+| ⚡ **Cyberpunk-Tesla** | Neon parıltı, keskin çizgiler, monospace ağırlıklı |
+| ◻ **Minimal Swiss** | Bol boşluk, sade, sayılar odakta |
+| ▰ **Sport / Performance** | Köşeli, cesur, hız göstergesi estetiği |
+| ◈ **Nevs-Edition** | Tech-editoryal, petrol vurgusu, Bricolage Grotesque tipografi |
+
+**Nevs-Edition**, kendi tipografi paketine sahip tek stildir: başlıklar için *Bricolage Grotesque*, gövde fontu olarak *Manrope* ve etiketler için *JetBrains Mono*. Ayrıca NavBar'ın üzerinde gerçek zamanlı araç verilerini (batarya seviyesi, vites, kilometre, son senkronizasyon sinyali) gösteren ince bir **durum çubuğu** içerir.
+
+### Vurgu renkleri
+
+6 renk: Tesla Kırmızısı, Elektrik Mavisi, Enerji Yeşili, Mor, Gün Batımı, Buz Mavisi — her tasarım stiliyle serbestçe birleştirilebilir.
+
+Değiştirmek için: **Ayarlar → Tasarım & Renkler**.
 
 ## 🔧 Sorun giderme {#troubleshooting}
 

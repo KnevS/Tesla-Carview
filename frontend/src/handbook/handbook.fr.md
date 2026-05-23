@@ -467,6 +467,17 @@ Tesla Carview est une **PWA** (Progressive Web App) — installable comme une ap
 
 **Recommandation :** Ajoutez Carview en favori dans le navigateur Tesla — Tesla affiche les favoris directement dans l'accès rapide du navigateur. Pour saisir des notes de voyage lors d'une courte pause, c'est plus rapide que de retaper l'URL à chaque fois.
 
+### 📲 Navigation iPhone : barre d'onglets
+
+Sur iPhone et autres smartphones, Tesla Carview affiche une **barre d'onglets style iOS natif** en bas de l'écran :
+
+- **4 onglets rapides** — Tableau de bord, Trajets, Recharge, Commandes toujours accessibles
+- **Bouton « Plus »** → ouvre un volet inférieur avec toutes les autres sections (Carnet, Batterie, Grok, Admin …)
+- **Dynamic Island / Home Indicator** correctement pris en compte
+- L'onglet actif est marqué d'un petit indicateur
+
+Dans le design **Nevs-Edition**, la barre d'onglets adopte la teinte pétrole.
+
 ## 🗺️ Planificateur de route {#route-planner}
 
 Le planificateur calcule des itinéraires de conduite et affiche les bornes de recharge rapide en chemin.
@@ -480,7 +491,7 @@ Le planificateur calcule des itinéraires de conduite et affiche les bornes de r
 
 Les options sont sauvegardées dans le navigateur. Le routage utilise Valhalla (openstreetmap.de) ; en cas d'indisponibilité, repli automatique sur OSRM avec notification toast.
 
-**Bornes de recharge** — Superchargeurs et CCS le long du trajet. Nécessite une clé API OpenChargeMap gratuite dans Admin → System → Clés API externes.
+**Bornes de recharge** — Superchargeurs et CCS le long du trajet. Nécessite une clé API OpenChargeMap gratuite dans Admin → System → Clés API externes. La recherche utilise correctement le rayon sélectionné (5/10/25/50 km), affiche les noms et adresses des stations, prend en charge le filtre DC uniquement et indique les types de connecteurs, le nombre de points de charge et la compatibilité Tesla.
 
 **Trafic en temps réel** — Avec une clé HERE Maps configurée, le trafic actuel est intégré à l'estimation du temps de trajet.
 
@@ -557,6 +568,28 @@ Le **Benchmark Communauté** (dans le Rapport Énergie) permet une comparaison a
 **Principes de confidentialité :** valeurs agrégées uniquement (kWh/100 km), instance stockée comme hash SHA-256, minimum 3 participants requis (k-anonymat), révocable à tout moment.
 
 **Participer :** activer le toggle, puis cliquer sur « Contribuer les données ». Une fois ≥ 3 participants pour votre modèle, vous voyez la moyenne, P25, P75 et votre position.
+
+## 🎨 Design & Thèmes {#design-themes}
+
+Tesla Carview propose **5 styles de design** et **6 couleurs d'accentuation** — tout enregistré localement, sans rechargement serveur.
+
+### Styles de design
+
+| Design | Caractère |
+|---|---|
+| ✨ **Premium Glass** | Doux, élégant, glassmorphisme avec backdrop blur |
+| ⚡ **Cyberpunk-Tesla** | Lueur néon, lignes nettes, monospace marqué |
+| ◻ **Minimal Swiss** | Beaucoup d'espace, épuré, chiffres au premier plan |
+| ▰ **Sport / Performance** | Anguleux, audacieux, esthétique tachymètre |
+| ◈ **Nevs-Edition** | Tech-éditorial, accent pétrole, typographie Bricolage Grotesque |
+
+**Nevs-Edition** est le seul style avec sa propre suite typographique : *Bricolage Grotesque* pour les titres, *Manrope* comme police de corps et *JetBrains Mono* pour les labels. Il inclut également une fine **barre de statut** au-dessus de la NavBar affichant les données du véhicule en temps réel (niveau de batterie, rapport, odomètre, dernier signal de sync).
+
+### Couleurs d'accentuation
+
+6 couleurs : Rouge Tesla, Bleu électrique, Vert énergie, Violet, Coucher de soleil, Bleu glacé — combinables librement avec n'importe quel style.
+
+Changer : **Paramètres → Design & Couleurs**.
 
 ## 🔧 Dépannage {#troubleshooting}
 

@@ -73,6 +73,8 @@ Empfehlung: erst manuell ein paar Updates über `deploy/update.sh` machen, vertr
 | `PORT` | `3000` | TCP-Port des Backend-HTTP-Servers (innen im Container). |
 | `DB_PATH` | `/app/data/tesla-carview.db` | Pfad zur Legacy-Datenbank — wird beim ersten Start als „default"-Mandant migriert, danach nicht mehr genutzt. |
 | `ENABLE_POLLER` | `true` | Wenn `false`: kein zyklisches Tesla-API-Polling (für dedizierte Lese-Replicas). |
+| `TESLA_DAILY_CAP` | `30` | Maximale `vehicle_data`-Calls pro Fahrzeug und Tag. DB-persistent — überlebt Container-Neustarts. |
+| `TESLA_MONTHLY_CAP` | `400` | Maximale `vehicle_data`-Calls pro Fahrzeug und Monat. Polling stoppt automatisch wenn Limit erreicht. |
 | `NODE_ENV` | `production` | Standard-Produktiv-Setup. `development` aktiviert dev-Server-Verhalten. |
 
 ---
