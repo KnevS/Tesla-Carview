@@ -11,6 +11,16 @@
    * Dark-Modus zu rendern — sonst kippt ein hell-konfigurierter Browser
    * z.B. dunkle Schrift in unsere dunklen Eingabefelder. */
   color-scheme: dark;
+
+  /* Safe-Area-Variablen fuer iOS (Dynamic Island, Home Indicator).
+   * Fallback 0px fuer alle anderen Plattformen. */
+  --safe-top:    env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left:   env(safe-area-inset-left,  0px);
+  --safe-right:  env(safe-area-inset-right, 0px);
+
+  /* Mobile Tab Bar Hoehe inkl. Safe-Area */
+  --tab-bar-h: 56px;
 }
 
 html, body {
@@ -884,4 +894,241 @@ html[data-design="editorial"] .glass-bar {
 .design-preview--editorial .design-preview__bar {
   background: rgba(102,204,191,.18);
   border-radius: 999px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+ * MOBILE / iPHONE EXPERIENCE
+ * Inspiriert von den indasys iPhone-App + Mobile-Web Clickdummies.
+ * Ziel: native iOS-Feeling — Bottom Tab Bar, Safe Areas, Touch-Feedback.
+ * ═══════════════════════════════════════════════════════════════════ */
+
+/* Haupt-Content: auf Mobile Platz fuer Bottom Tab Bar schaffen */
+@media (max-width: 767px) {
+  main {
+    padding-bottom: calc(var(--tab-bar-h) + var(--safe-bottom) + 1rem) !important;
+  }
+
+  /* Karten: aktivere Touch-Rueckmeldung auf touch-only Geraeten */
+  .card-interactive:active,
+  .card:active { transform: scale(0.975); transition: transform 0.1s; }
+
+  /* Groessere Touch-Targets fuer Buttons */
+  .btn-primary, .btn-secondary {
+    min-height: 48px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+/* ─── Mobile Tab Bar ───────────────────────────────────────────── */
+.mobile-tab-bar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 200;
+  height: calc(var(--tab-bar-h) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  background: rgba(14, 14, 16, 0.88);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  backdrop-filter: saturate(180%) blur(24px);
+  border-top: 0.5px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: flex-start;
+  padding-top: 6px;
+  gap: 0;
+}
+
+/* Nevs-Edition Variante: Petrol-Akzent */
+html[data-design="editorial"] .mobile-tab-bar {
+  background: rgba(6, 16, 15, 0.9);
+  border-top-color: rgba(102, 204, 191, 0.14);
+}
+
+.mtb-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 2px 2px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: rgba(255, 255, 255, 0.45);
+  transition: color 0.18s;
+  position: relative;
+  cursor: pointer;
+  background: none;
+  border: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  text-decoration: none;
+}
+.mtb-btn:active { transform: scale(0.88); transition: transform 0.1s; }
+.mtb-btn.active { color: var(--accent); }
+html[data-design="editorial"] .mtb-btn.active { color: #66CCBF; }
+
+.mtb-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px; height: 28px;
+}
+
+/* Aktiv-Indikator: kleines Pill ueber dem Icon (wie iOS 18) */
+.mtb-active-pill {
+  position: absolute;
+  top: -3px; left: 50%;
+  transform: translateX(-50%);
+  width: 20px; height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--accent);
+}
+html[data-design="editorial"] .mtb-active-pill { background: #66CCBF; }
+
+.mtb-label {
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 56px;
+}
+
+/* ─── More / Bottom Sheet ──────────────────────────────────────── */
+.mtb-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: rgba(0, 0, 0, 0.55);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: flex-end;
+}
+.mtb-sheet {
+  width: 100%;
+  background: #111214;
+  border-radius: 24px 24px 0 0;
+  padding: 12px 20px calc(var(--safe-bottom) + 20px);
+  max-height: 75vh;
+  overflow-y: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+html[data-design="editorial"] .mtb-sheet {
+  background: #0b1816;
+  border-top-color: rgba(102, 204, 191, 0.16);
+}
+.mtb-sheet-handle {
+  width: 36px; height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+  margin: 0 auto 18px;
+}
+.mtb-sheet-title {
+  font-family: 'Bricolage Grotesque', system-ui;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+html[data-design="editorial"] .mtb-sheet-title {
+  border-bottom-color: rgba(102, 204, 191, 0.1);
+}
+.mtb-sheet-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.mtb-sheet-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: background 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+.mtb-sheet-item:active { transform: scale(0.96); background: rgba(255, 255, 255, 0.1); }
+.mtb-sheet-item.active { color: var(--accent); border-color: var(--accent-soft); }
+html[data-design="editorial"] .mtb-sheet-item:active { background: rgba(102, 204, 191, 0.08); }
+html[data-design="editorial"] .mtb-sheet-item.active  { color: #66CCBF; border-color: rgba(102, 204, 191, 0.2); }
+.mtb-sheet-icon {
+  width: 32px; height: 32px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.07);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+.mtb-sheet-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* ─── Sheet Transition ─────────────────────────────────────────── */
+.sheet-enter-active, .sheet-leave-active {
+  transition: opacity 0.25s ease;
+}
+.sheet-enter-active .mtb-sheet,
+.sheet-leave-active .mtb-sheet {
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.sheet-enter-from, .sheet-leave-to { opacity: 0; }
+.sheet-enter-from .mtb-sheet,
+.sheet-leave-to .mtb-sheet { transform: translateY(100%); }
+
+/* ─── Eyebrow Labels (indasys-Pattern) ────────────────────────── */
+/* Mono-Label mit Linienpräfix: ─── SECTION TITLE
+   Verwendung: <span class="eyebrow">Dashboard</span> */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  font-family: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.45);
+}
+.eyebrow::before {
+  content: "";
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  flex-shrink: 0;
+}
+html[data-design="editorial"] .eyebrow { color: rgba(102, 204, 191, 0.6); }
+
+/* ─── Mobile: NavBar Scroll-Strip ausblenden (ersetzt durch Tab Bar) ─ */
+@media (max-width: 767px) {
+  /* Der alte horizontale Scroll-Streifen in der NavBar wird auf Mobile
+   * durch die neue Bottom Tab Bar ersetzt. Die md:hidden-Klasse auf dem
+   * Streifen selbst greift bereits, diese Regel ist defensiv. */
+  .navbar > .md\\:hidden { display: none !important; }
+}
+
+/* ─── Bento Grid: Mobile-optimiert ────────────────────────────── */
+@media (max-width: 767px) {
+  .bento-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 10px !important;
+  }
+  .bento-grid .bento-feature {
+    grid-column: span 2;
+  }
 }

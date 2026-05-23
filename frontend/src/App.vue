@@ -39,6 +39,10 @@
     <!-- Einstellungs-Wizard: erscheint beim ersten Login oder wenn manuell
          aus den Einstellungen gestartet. -->
     <SettingsWizard v-if="showWizard" @close="showWizard = false" @done="showWizard = false" />
+    <!-- iOS-style Bottom Tab Bar — nur Mobile, ersetzt den horizontalen
+         Scroll-Streifen in der NavBar. Respektiert Dynamic Island / Home
+         Indicator via env(safe-area-inset-bottom). -->
+    <MobileTabBar />
   </div>
 </template>
 
@@ -52,6 +56,7 @@ import MaintenanceOverlay    from './components/MaintenanceOverlay.vue';
 import DemoBanner            from './components/DemoBanner.vue';
 import SettingsWizard        from './components/SettingsWizard.vue';
 import EditorialStatusBar    from './components/EditorialStatusBar.vue';
+import MobileTabBar          from './components/MobileTabBar.vue';
 import { useAuthStore } from './store/auth.js';
 import { usePrefsStore } from './store/prefs.js';
 import api from './api.js';
