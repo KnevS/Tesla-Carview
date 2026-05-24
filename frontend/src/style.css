@@ -1,6 +1,62 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* ─── Custom theme tokens (Tailwind v4 @theme) ───────────────────────
+ * Replaces tailwind.config.js theme.extend.
+ * Colors, fonts, animations, shadows → CSS variables → utility classes.
+ */
+
+/* Keyframes must be defined outside @theme in v4 */
+@keyframes fadeIn {
+  0%   { opacity: 0; transform: translateY(4px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes lift {
+  0%   { transform: translateY(0); }
+  100% { transform: translateY(-2px); }
+}
+@keyframes pulseRed {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(227,25,55,0.5); }
+  50%       { box-shadow: 0 0 0 8px rgba(227,25,55,0); }
+}
+
+@theme {
+  /* ── Brand colors ────────────────────────────────────────────────── */
+  --color-tesla-red:   var(--accent);
+  --color-tesla-dark:  #0F1115;
+  --color-tesla-deep:  #0A0C10;
+  --color-tesla-gray:  #1B1F25;
+  --color-tesla-line:  rgba(255,255,255,0.06);
+  --color-tesla-light: #F4F4F4;
+
+  /* ── Typography ─────────────────────────────────────────────────── */
+  --font-sans:    system-ui, -apple-system, 'Segoe UI', Roboto, Inter, sans-serif;
+  --font-mono:    ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --font-display: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  --tracking-tighter: -0.025em;
+  --tracking-tight:   -0.015em;
+
+  /* ── Blur scale additions ────────────────────────────────────────── */
+  --blur-xs: 2px;
+
+  /* ── Box shadows ─────────────────────────────────────────────────── */
+  --shadow-glass:   0 1px 0 0 rgba(255,255,255,0.04) inset, 0 8px 24px -8px rgba(0,0,0,0.55), 0 24px 64px -16px rgba(0,0,0,0.5);
+  --shadow-glassHi: 0 1px 0 0 rgba(255,255,255,0.07) inset, 0 12px 32px -8px rgba(0,0,0,0.65), 0 30px 80px -20px rgba(0,0,0,0.55);
+  --shadow-glow:    0 0 0 1px rgba(227,25,55,0.4), 0 8px 32px -8px rgba(227,25,55,0.35);
+  --shadow-pop:     0 18px 40px -10px rgba(0,0,0,0.65);
+  --shadow-ring:    0 0 0 2px rgba(227,25,55,0.55);
+
+  /* ── Background images ───────────────────────────────────────────── */
+  --bg-image-accent-grad:   linear-gradient(135deg, #E31937 0%, #B0142B 50%, #7A0E1F 100%);
+  --bg-image-card-grad:     linear-gradient(140deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.015) 100%);
+  --bg-image-card-grad-red: linear-gradient(140deg, rgba(227,25,55,0.18) 0%, rgba(227,25,55,0.04) 60%, rgba(255,255,255,0.015) 100%);
+  --bg-image-sheen:         radial-gradient(80% 60% at 50% 0%, rgba(255,255,255,0.08), transparent 60%);
+
+  /* ── Animations ──────────────────────────────────────────────────── */
+  --animate-fade-in:   fadeIn 0.4s ease;
+  --animate-lift:      lift 0.25s ease forwards;
+  --animate-pulse-red: pulseRed 2.2s ease-in-out infinite;
+}
 
 :root {
   --accent:        #16A34A;
