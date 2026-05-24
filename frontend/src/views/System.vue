@@ -130,6 +130,15 @@
               <span>Alle Daten bleiben erhalten – die Datenbanken liegen im Docker-Volume
               <code>tesla_data</code> und werden beim Update nicht berührt.</span>
             </p>
+            <button @click="triggerDeploy" :disabled="deployBusy"
+              class="mt-1 btn-primary text-sm px-4 py-2 flex items-center gap-2 disabled:opacity-40"
+              v-tooltip="'Deployment automatisch auslösen (erfordert DEPLOY_WEBHOOK_URL in .env)'">
+              <span v-if="deployBusy" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              <AppIcon v-else name="bolt" :size="16" />
+              {{ deployBusy ? 'Startet…' : 'Jetzt deployen' }}
+            </button>
+            <p v-if="deployMsg" class="text-xs mt-1"
+               :class="deployOk ? 'text-green-400' : 'text-yellow-400'">{{ deployMsg }}</p>
           </div>
         </div>
 
@@ -1033,6 +1042,24 @@ async function deleteOcmKey() {
 const updateInfo     = ref(null);
 const updateChecking = ref(false);
 const updateError    = ref('');
+const deployBusy = ref(false);
+const deployMsg  = ref('');
+const deployOk   = ref(true);
+
+async function triggerDeploy() {
+  deployBusy.value = true;
+  deployMsg.value  = '';
+  try {
+    await api.post('/system/update/trigger');
+    deployMsg.value = '✓ Deployment gestartet – Seite in ca. 1–2 Min neu laden.';
+    deployOk.value  = true;
+  } catch (e) {
+    deployMsg.value = e.response?.data?.error ?? 'Fehler beim Auslösen';
+    deployOk.value  = false;
+  } finally {
+    deployBusy.value = false;
+  }
+}
 
 // ─── Mandanten-Verwaltung ─────────────────────────────────────────
 const expandedId    = ref(null);

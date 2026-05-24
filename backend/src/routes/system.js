@@ -633,6 +633,31 @@ router.get('/update-check', requireAuth, async (req, res) => {
   }
 });
 
+
+// POST /api/system/update/trigger — fires the configured deploy webhook.
+// Activate by setting DEPLOY_WEBHOOK_URL in backend/.env (any webhook-based
+// deploy system works: Dokploy, Coolify, Portainer webhooks, etc.).
+// Returns 501 when not configured so the frontend can hide the button.
+router.post('/update/trigger', requireAuth, requireAdmin, async (req, res) => {
+  const webhookUrl = process.env.DEPLOY_WEBHOOK_URL;
+  if (!webhookUrl) return res.status(501).json({ error: 'DEPLOY_WEBHOOK_URL nicht konfiguriert' });
+  try {
+    const resp = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!resp.ok) {
+      const txt = await resp.text().catch(() => '');
+      throw new Error('Webhook Status ' + resp.status + (txt ? ': ' + txt.slice(0, 120) : ''));
+    }
+    auditLog(req.db, req.user.sub, 'system_update_triggered', req, {});
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+
 // ── Monitoring-Konfiguration ─────────────────────────────────────────────────
 
 const MONITORING_KEYS = ['monitoring.alert_email', 'monitoring.heal_enabled', 'monitoring.anthropic_key'];
