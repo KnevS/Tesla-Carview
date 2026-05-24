@@ -7,6 +7,30 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.3.3] — 2026-05-24
+
+### Neu — Benachrichtigungen: Web Push + Telegram Bot
+
+- **Zentraler Benachrichtigungs-Dispatcher** (`services/notifyService.js`) — ein einziger `notify()`-Aufruf sendet gleichzeitig an alle konfigurierten Kanäle (Web Push + Telegram). Jeder Kanal schlägt unabhängig fehl ohne den anderen zu blockieren.
+- **Telegram-Bot** (`services/telegramBot.js`, `routes/telegram.js`):
+  - Bot via `@BotFather` erstellen → `TELEGRAM_BOT_TOKEN` in `.env` setzen
+  - **Verknüpfungsflow**: Einstellungen → Benachrichtigungen → Code erzeugen → `/start <CODE>` im Telegram
+  - **Bot-Befehle**: `/status` (Batterie, km, Schloss), `/battery` (SoC-Details), `/trips` (letzte 5 Fahrten), `/unlink`, `/help`
+  - **Webhook + Polling**: Webhook-Modus wenn `TELEGRAM_WEBHOOK_URL` gesetzt (empfohlen); automatischer Fallback auf Long-Polling
+  - Multi-Tenant: Ein Bot für alle Mandanten; `chat_id → tenant_id + user_id` über master DB
+- **Web Push** (`routes/notifications.js`, Service Worker bereits integriert):
+  - Nutzerbasierte Subscriptions ergänzen die fahrzeugbasierten
+  - VAPID-Keys einmalig generieren: `docker exec <backend> npx web-push generate-vapid-keys`
+  - Pro Gerät abonnieren/deabonnieren; Test-Button sendet sofortige Benachrichtigung
+  - iPhone/iPad: Benachrichtigungen werden automatisch auf der **Apple Watch** gespiegelt
+- **Wächter-Modus-Alarm** — wenn der Wächter-Modus aktiviert wird während kein Nutzer anwesend ist, erscheint sofort ein `🚨 Wächter-Alarm — Fahrzeug möglicherweise berührt` auf allen Kanälen
+- **Ereignis-Einstellungen** — pro Nutzer konfigurierbare Schalter für: Ladeende, Akku-Warnung, Wächter-Alarm, Neue Fahrt, Fahrtenbuch-Erinnerung
+- **Einstellungs-UI** (`Settings.vue`) — neuer Abschnitt „🔔 Benachrichtigungen" mit Web-Push-Verwaltung, Telegram-Verknüpfungs-Assistent und Ereignis-Checkboxen
+- **Datenbank** (`master-schema.sql`): neue Tabellen `telegram_links`, `telegram_link_codes`, `user_push_subscriptions`
+- **`.env.example`** mit `TELEGRAM_BOT_TOKEN` und `TELEGRAM_WEBHOOK_URL`
+
+---
+
 ## [v3.3.2] — 2026-05-24
 
 ### Neu

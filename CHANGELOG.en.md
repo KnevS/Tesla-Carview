@@ -7,6 +7,30 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.3.3] — 2026-05-24
+
+### New — Notifications: Web Push + Telegram Bot
+
+- **Unified notification dispatcher** (`services/notifyService.js`) — single `notify()` call sends to all configured channels simultaneously (Web Push + Telegram). Each channel fails independently without blocking the other.
+- **Telegram Bot integration** (`services/telegramBot.js`, `routes/telegram.js`):
+  - Create your bot via `@BotFather` → set `TELEGRAM_BOT_TOKEN` in `.env`
+  - **Linking flow**: Settings → Notifications → Generate code → `/start <CODE>` in Telegram — link completed in seconds
+  - **Commands**: `/status` (battery, km, locked state), `/battery` (detailed SoC), `/trips` (last 5 trips), `/unlink`, `/help`
+  - **Webhook + polling**: uses webhook mode if `TELEGRAM_WEBHOOK_URL` is set (recommended for production); falls back to long-polling automatically
+  - Cross-tenant design: one bot serves all tenants; `chat_id → tenant_id + user_id` lookup via master DB
+- **Web Push** (`routes/notifications.js`, service worker already built):
+  - User-based subscriptions replace the vehicle-based legacy approach (both coexist)
+  - Generate VAPID keys once: `docker exec <backend> npx web-push generate-vapid-keys`
+  - Subscribe/unsubscribe per device; test button sends immediate notification
+  - iPhone/iPad: notifications are automatically mirrored to **Apple Watch**
+- **Sentry mode alert** — when the Tesla activates Sentry mode (wakes from parking due to a threat) while no user is present, a real-time alert is sent via all configured channels: `🚨 Sentry alert — vehicle may have been touched`
+- **Notification preferences** — per-user toggles for each event type: charging complete, battery low, sentry alert, trip recorded, logbook reminder. Stored in `tenant_settings`.
+- **Settings UI** (`Settings.vue`) — new "🔔 Notifications" section with Web Push management (subscribe/unsubscribe/test), Telegram linking wizard, and event-type checkboxes.
+- **DB** (`master-schema.sql`): new tables `telegram_links`, `telegram_link_codes`, `user_push_subscriptions`
+- **`.env.example`** updated with `TELEGRAM_BOT_TOKEN` and `TELEGRAM_WEBHOOK_URL` instructions
+
+---
+
 ## [v3.3.2] — 2026-05-24
 
 ### New

@@ -890,6 +890,141 @@
       </div>
     </SortableSection>
 
+    <!-- ── Benachrichtigungen (Web Push + Telegram) ──────────────────────── -->
+    <SortableSection
+      page-id="settings" section-id="notifications"
+      title="🔔 Benachrichtigungen" icon="🔔"
+      :collapsed="isCollapsed('notifications')"
+      @toggle="toggle('notifications')"
+      @move="() => {}">
+
+      <div class="space-y-6">
+
+        <!-- Web Push -->
+        <div class="space-y-3">
+          <h4 class="font-semibold text-sm text-gray-200 flex items-center gap-2">
+            📲 Browser-Push (Apple Watch, iPhone, Desktop)
+            <InfoTip text="Web-Push-Nachrichten erscheinen auf deinem Gerät auch wenn die App nicht geöffnet ist. Auf iPhone/Apple Watch werden sie automatisch gespiegelt." />
+          </h4>
+          <div v-if="pushState === 'unsupported'" class="text-sm text-gray-500">
+            Dein Browser unterstützt Web Push nicht.
+          </div>
+          <div v-else-if="pushState === 'denied'" class="text-sm text-yellow-400">
+            Push-Benachrichtigungen im Browser blockiert. Bitte in den Browser-Einstellungen erlauben.
+          </div>
+          <div v-else class="flex items-center gap-3">
+            <div v-if="pushSubscribed" class="flex items-center gap-2 text-sm text-green-400">
+              <AppIcon name="check" :size="16" /> Aktiv auf diesem Gerät
+            </div>
+            <div v-else class="text-sm text-gray-400">Inaktiv auf diesem Gerät</div>
+            <button v-if="!pushSubscribed" @click="subscribePush"
+              :disabled="pushLoading"
+              class="btn-primary text-xs px-3 py-1.5">
+              {{ pushLoading ? 'Aktiviere…' : 'Aktivieren' }}
+            </button>
+            <button v-else @click="unsubscribePush"
+              :disabled="pushLoading"
+              class="btn-secondary text-xs px-3 py-1.5">
+              {{ pushLoading ? 'Deaktiviere…' : 'Deaktivieren' }}
+            </button>
+            <button v-if="pushSubscribed" @click="testPush"
+              class="btn-secondary text-xs px-3 py-1.5"
+              v-tooltip="'Sendet sofort eine Test-Benachrichtigung auf dieses Gerät'">
+              Test
+            </button>
+          </div>
+          <p v-if="pushMsg" class="text-xs" :class="pushMsgErr ? 'text-red-400' : 'text-green-400'">{{ pushMsg }}</p>
+        </div>
+
+        <hr class="border-gray-700" />
+
+        <!-- Telegram -->
+        <div class="space-y-3">
+          <h4 class="font-semibold text-sm text-gray-200 flex items-center gap-2">
+            ✈️ Telegram Bot
+            <InfoTip text="Erhalte Benachrichtigungen (Ladeende, Akku-Warnung, Wächter-Alarm, Fahrtenbuch-Erinnerung) direkt im Telegram-Messenger — ohne App geöffnet zu haben." />
+          </h4>
+
+          <!-- Bot nicht konfiguriert -->
+          <div v-if="!tgBotConfigured" class="text-sm text-gray-500">
+            Telegram-Bot ist nicht konfiguriert. Admin muss <code class="text-xs bg-gray-800 px-1 rounded">TELEGRAM_BOT_TOKEN</code> in der <code class="text-xs bg-gray-800 px-1 rounded">.env</code> setzen.
+          </div>
+
+          <!-- Verknüpft -->
+          <div v-else-if="tgLinked" class="space-y-2">
+            <div class="flex items-center gap-2 text-sm text-green-400">
+              <AppIcon name="check" :size="16" />
+              Verknüpft mit <span class="font-mono text-blue-300">@{{ tgUsername || '(unbekannt)' }}</span>
+            </div>
+            <div class="flex gap-2">
+              <a v-if="tgBotUsername" :href="`https://t.me/${tgBotUsername}`" target="_blank"
+                class="btn-secondary text-xs px-3 py-1.5">Bot öffnen →</a>
+              <button @click="unlinkTelegram" class="btn-secondary text-xs px-3 py-1.5 text-red-300">
+                Verknüpfung aufheben
+              </button>
+            </div>
+          </div>
+
+          <!-- Verknüpfungsflow -->
+          <div v-else class="space-y-3">
+            <div v-if="!tgCode" class="flex items-center gap-2">
+              <button @click="generateTgCode" :disabled="tgCodeLoading"
+                class="btn-primary text-xs px-3 py-1.5">
+                {{ tgCodeLoading ? 'Erzeuge…' : 'Verknüpfungs-Code erzeugen' }}
+              </button>
+              <span v-if="tgBotUsername" class="text-gray-500 text-xs">
+                Bot: <a :href="`https://t.me/${tgBotUsername}`" target="_blank"
+                  class="text-blue-400 hover:text-blue-300">@{{ tgBotUsername }}</a>
+              </span>
+            </div>
+
+            <div v-if="tgCode" class="bg-gray-800/70 border border-gray-600 rounded-xl p-4 space-y-3">
+              <p class="text-sm text-gray-300 font-medium">So verknüpfst du Telegram:</p>
+              <ol class="text-xs text-gray-400 space-y-1 list-decimal list-inside">
+                <li>Öffne Telegram und suche nach
+                  <a v-if="tgBotUsername" :href="`https://t.me/${tgBotUsername}`" target="_blank"
+                    class="text-blue-400 font-mono">@{{ tgBotUsername }}</a>
+                  <span v-else class="text-gray-500">deinen Bot</span>
+                </li>
+                <li>Sende folgende Nachricht an den Bot:</li>
+              </ol>
+              <div class="flex items-center gap-2 bg-gray-900 rounded-lg px-3 py-2">
+                <code class="text-blue-300 font-mono text-sm flex-1">/start {{ tgCode }}</code>
+                <button @click="copyTgCode" class="text-gray-400 hover:text-white transition"
+                  v-tooltip="tgCodeCopied ? 'Kopiert!' : 'Kopieren'">
+                  <AppIcon :name="tgCodeCopied ? 'check' : 'copy'" :size="16" />
+                </button>
+              </div>
+              <p class="text-xs text-gray-500 flex items-center gap-1">
+                <AppIcon name="clock" :size="12" />
+                Gültig noch {{ tgCodeExpiresIn }}
+              </p>
+              <button @click="checkTgStatus" class="btn-secondary text-xs px-3 py-1.5">
+                Status prüfen
+              </button>
+            </div>
+          </div>
+          <p v-if="tgMsg" class="text-xs" :class="tgMsgErr ? 'text-red-400' : 'text-green-400'">{{ tgMsg }}</p>
+        </div>
+
+        <hr class="border-gray-700" />
+
+        <!-- Ereignis-Einstellungen -->
+        <div class="space-y-3">
+          <h4 class="font-semibold text-sm text-gray-200">Welche Ereignisse möchtest du erhalten?</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <label v-for="(label, key) in notifTypes" :key="key"
+              class="flex items-center gap-3 cursor-pointer select-none bg-gray-800/50 rounded-lg px-3 py-2 hover:bg-gray-700/50 transition">
+              <input type="checkbox" v-model="notifPrefs[key]" @change="saveNotifPrefs"
+                class="accent-tesla-red w-4 h-4 cursor-pointer" />
+              <span class="text-sm text-gray-200">{{ label }}</span>
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </SortableSection>
+
     <div class="card">
       <button @click="logout" class="text-red-400 hover:text-red-300 text-sm transition"
         v-tooltip="'Aktuelle Session beenden – du wirst zur Login-Seite weitergeleitet'">Abmelden</button>
@@ -913,7 +1048,7 @@ import { useLangStore, LANGS } from '../store/lang.js';
 import SortableSection from '../components/SortableSection.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
 
-const SETTINGS_SECTIONS = ['language', 'tenantLang', 'pseudonym', 'vehicle', 'tariff', 'serviceIntervals', 'drivers', 'mfa', 'passkey', 'geofences', 'gpsFuzzing', 'tesla', 'webhooks', 'password', 'audit', 'appearance', 'teslaUsage'];
+const SETTINGS_SECTIONS = ['language', 'tenantLang', 'pseudonym', 'vehicle', 'tariff', 'serviceIntervals', 'drivers', 'mfa', 'passkey', 'geofences', 'gpsFuzzing', 'tesla', 'webhooks', 'password', 'audit', 'appearance', 'teslaUsage', 'notifications'];
 const { isCollapsed, toggle } = usePageLayout('settings', SETTINGS_SECTIONS);
 
 const auth     = useAuthStore();
@@ -1575,6 +1710,220 @@ async function resetUsageMonth() {
 
 loadUsageConfig();
 loadGpsFuzzing();
+
+// ── Benachrichtigungen: Web Push + Telegram ───────────────────────────────────
+
+// ─ Web Push ─
+const pushState      = ref('loading'); // loading | unsupported | denied | default | subscribed
+const pushSubscribed = ref(false);
+const pushLoading    = ref(false);
+const pushMsg        = ref('');
+const pushMsgErr     = ref(false);
+let   _swReg         = null;
+
+async function initPushState() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    pushState.value = 'unsupported'; return;
+  }
+  const perm = Notification.permission;
+  if (perm === 'denied') { pushState.value = 'denied'; return; }
+
+  try {
+    _swReg = await navigator.serviceWorker.ready;
+    const sub = await _swReg.pushManager.getSubscription();
+    pushSubscribed.value = !!sub;
+    pushState.value = 'ready';
+  } catch {
+    pushState.value = 'ready';
+  }
+}
+
+async function subscribePush() {
+  pushLoading.value = true; pushMsg.value = '';
+  try {
+    const { data } = await api.get('/notifications/vapid-public-key');
+    if (!data.key) { pushMsg.value = 'VAPID-Key nicht konfiguriert (Admin: .env setzen)'; pushMsgErr.value = true; return; }
+
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') { pushState.value = 'denied'; return; }
+
+    if (!_swReg) _swReg = await navigator.serviceWorker.ready;
+    const sub = await _swReg.pushManager.subscribe({
+      userVisibleOnly:      true,
+      applicationServerKey: urlBase64ToUint8Array(data.key),
+    });
+
+    await api.post('/notifications/subscribe', { subscription: sub.toJSON() });
+    pushSubscribed.value = true;
+    pushMsg.value = 'Push aktiviert! Du erhältst jetzt Benachrichtigungen.'; pushMsgErr.value = false;
+  } catch (err) {
+    pushMsg.value = err.message || 'Fehler beim Aktivieren'; pushMsgErr.value = true;
+  } finally {
+    pushLoading.value = false;
+    setTimeout(() => { pushMsg.value = ''; }, 4000);
+  }
+}
+
+async function unsubscribePush() {
+  pushLoading.value = true;
+  try {
+    if (!_swReg) _swReg = await navigator.serviceWorker.ready;
+    const sub = await _swReg.pushManager.getSubscription();
+    if (sub) {
+      await api.delete('/notifications/unsubscribe', { data: { endpoint: sub.endpoint } });
+      await sub.unsubscribe();
+    }
+    pushSubscribed.value = false;
+    pushMsg.value = 'Push deaktiviert.'; pushMsgErr.value = false;
+  } catch (err) {
+    pushMsg.value = err.message; pushMsgErr.value = true;
+  } finally {
+    pushLoading.value = false;
+    setTimeout(() => { pushMsg.value = ''; }, 3000);
+  }
+}
+
+async function testPush() {
+  try {
+    await api.post('/notifications/test');
+    pushMsg.value = 'Testbenachrichtigung gesendet!'; pushMsgErr.value = false;
+  } catch (err) {
+    pushMsg.value = err.response?.data?.error || err.message; pushMsgErr.value = true;
+  } finally {
+    setTimeout(() => { pushMsg.value = ''; }, 3000);
+  }
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw     = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
+}
+
+// ─ Telegram ─
+const tgLinked       = ref(false);
+const tgUsername     = ref('');
+const tgBotUsername  = ref('');
+const tgBotConfigured = ref(false);
+const tgCode         = ref('');
+const tgCodeExpiry   = ref(0);
+const tgCodeCopied   = ref(false);
+const tgCodeLoading  = ref(false);
+const tgMsg          = ref('');
+const tgMsgErr       = ref(false);
+let   tgCodeTimer    = null;
+
+const tgCodeExpiresIn = computed(() => {
+  const diff = tgCodeExpiry.value - Math.floor(Date.now() / 1000);
+  if (diff <= 0) return 'abgelaufen';
+  const m = Math.floor(diff / 60);
+  const s = diff % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+});
+
+async function loadTgStatus() {
+  try {
+    const { data } = await api.get('/telegram/status');
+    tgLinked.value       = data.linked;
+    tgUsername.value     = data.telegram_username || '';
+    tgBotUsername.value  = data.bot_username || '';
+    tgBotConfigured.value = data.bot_configured;
+  } catch { /* ignorieren */ }
+}
+
+async function generateTgCode() {
+  tgCodeLoading.value = true;
+  clearInterval(tgCodeTimer);
+  try {
+    const { data } = await api.post('/telegram/generate-code');
+    tgCode.value       = data.code;
+    tgCodeExpiry.value = data.expiresAt;
+    // Ablauf-Ticker
+    tgCodeTimer = setInterval(() => {
+      if (tgCodeExpiry.value - Math.floor(Date.now() / 1000) <= 0) {
+        clearInterval(tgCodeTimer);
+        tgCode.value = '';
+      }
+    }, 1000);
+    // Alle 3s prüfen ob verknüpft
+    const pollTimer = setInterval(async () => {
+      await checkTgStatus();
+      if (tgLinked.value) clearInterval(pollTimer);
+    }, 3000);
+  } catch (err) {
+    tgMsg.value = err.response?.data?.error || err.message; tgMsgErr.value = true;
+    setTimeout(() => { tgMsg.value = ''; }, 3000);
+  } finally {
+    tgCodeLoading.value = false;
+  }
+}
+
+async function checkTgStatus() {
+  const { data } = await api.get('/telegram/status');
+  tgLinked.value   = data.linked;
+  tgUsername.value = data.telegram_username || '';
+  if (data.linked) {
+    tgCode.value = '';
+    clearInterval(tgCodeTimer);
+    tgMsg.value = `✓ Verknüpft mit @${data.telegram_username || '(unbekannt)'}!`; tgMsgErr.value = false;
+    setTimeout(() => { tgMsg.value = ''; }, 4000);
+  }
+}
+
+async function unlinkTelegram() {
+  if (!confirm('Telegram-Verknüpfung wirklich aufheben?')) return;
+  try {
+    await api.delete('/telegram/unlink');
+    tgLinked.value = false;
+    tgMsg.value = 'Verknüpfung aufgehoben.'; tgMsgErr.value = false;
+    setTimeout(() => { tgMsg.value = ''; }, 3000);
+  } catch (err) {
+    tgMsg.value = err.response?.data?.error || err.message; tgMsgErr.value = true;
+  }
+}
+
+async function copyTgCode() {
+  try {
+    await navigator.clipboard.writeText(`/start ${tgCode.value}`);
+    tgCodeCopied.value = true;
+    setTimeout(() => { tgCodeCopied.value = false; }, 2000);
+  } catch { /* Clipboard nicht verfügbar */ }
+}
+
+// ─ Ereignis-Einstellungen ─
+const notifTypes = {
+  charging_complete: '⚡ Ladevorgang abgeschlossen',
+  battery_low:       '🔋 Akku unter Schwellwert',
+  sentry_alert:      '🚨 Wächter-Alarm (Fahrzeug berührt)',
+  trip_recorded:     '🚗 Neue Fahrt aufgezeichnet',
+  logbook_reminder:  '📋 Fahrtenbuch-Erinnerung',
+};
+const notifPrefs = ref({
+  charging_complete: true,
+  battery_low:       true,
+  sentry_alert:      true,
+  trip_recorded:     false,
+  logbook_reminder:  true,
+});
+
+async function loadNotifPrefs() {
+  try {
+    const { data } = await api.get('/notifications/prefs');
+    Object.assign(notifPrefs.value, data);
+  } catch { /* ignorieren */ }
+}
+
+async function saveNotifPrefs() {
+  try {
+    await api.put('/notifications/prefs', notifPrefs.value);
+  } catch { /* stilles Fail */ }
+}
+
+// Init
+initPushState();
+loadTgStatus();
+loadNotifPrefs();
 </script>
 
 <style scoped>

@@ -233,7 +233,7 @@ async function poll() {
               else if (state.state === 'online') anyParked  = true;
             }
 
-            await syncVehicleState(db, vehicle, state);
+            await syncVehicleState(db, vehicle, state, tenant.id);
             recordSuccess(tenant.id, tenant.slug);
           } catch (err) {
             if (err.response?.status === 403) {

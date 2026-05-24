@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1048.0",
-    "argon2": "^0.41.1",
     "@simplewebauthn/server": "^10.0.0",
+    "argon2": "^0.41.1",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^9.6.0",
@@ -29,6 +29,8 @@
     "protobufjs": "^7.4.0",
     "qrcode": "^1.5.3",
     "ssh2-sftp-client": "^10.0.3",
+    "telegraf": "^4.16.3",
+    "web-push": "^3.6.7",
     "ws": "^8.18.0",
     "zod": "^3.23.8"
   },

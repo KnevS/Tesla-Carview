@@ -72,3 +72,40 @@ CREATE TABLE IF NOT EXISTS community_benchmarks (
   UNIQUE(instance_uuid, model_key)
 );
 CREATE INDEX IF NOT EXISTS idx_benchmarks_model ON community_benchmarks(model_key);
+
+-- Telegram Bot-Anbindung: verknüpft Telegram-Chat-IDs mit Nutzern (mandantenübergreifend).
+-- Lookup geschieht über chat_id → tenant_id + user_id beim Empfang von Bot-Nachrichten.
+CREATE TABLE IF NOT EXISTS telegram_links (
+  id               INTEGER PRIMARY KEY,
+  tenant_id        TEXT    NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  user_id          INTEGER NOT NULL,
+  chat_id          TEXT    NOT NULL UNIQUE,
+  telegram_username TEXT,
+  linked_at        INTEGER DEFAULT (unixepoch()),
+  UNIQUE(tenant_id, user_id)
+);
+
+-- Temporäre Verknüpfungs-Codes (6 Zeichen, 10 Minuten gültig).
+-- Nutzer startet /start <code> im Bot, Backend verifiziert und verknüpft.
+CREATE TABLE IF NOT EXISTS telegram_link_codes (
+  code       TEXT    PRIMARY KEY,
+  tenant_id  TEXT    NOT NULL,
+  user_id    INTEGER NOT NULL,
+  expires_at INTEGER NOT NULL
+);
+
+-- Nutzer-basierte Web-Push-Subscriptions (ergänzt die vehicle-basierten).
+-- Ermöglicht Benachrichtigungen unabhängig vom ausgewählten Fahrzeug.
+CREATE TABLE IF NOT EXISTS user_push_subscriptions (
+  id                INTEGER PRIMARY KEY,
+  tenant_id         TEXT    NOT NULL,
+  user_id           INTEGER NOT NULL,
+  subscription_json TEXT    NOT NULL,
+  user_agent        TEXT,
+  created_at        INTEGER DEFAULT (unixepoch()),
+  UNIQUE(tenant_id, user_id, subscription_json)
+);
+
+CREATE INDEX IF NOT EXISTS idx_telegram_links_chat ON telegram_links(chat_id);
+CREATE INDEX IF NOT EXISTS idx_telegram_links_user ON telegram_links(tenant_id, user_id);
+CREATE INDEX IF NOT EXISTS idx_user_push_subs ON user_push_subscriptions(tenant_id, user_id);

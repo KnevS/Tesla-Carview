@@ -3,12 +3,13 @@ import { maybeAutoClassify } from './geofenceClassifier.js';
 import { maybeFuzz } from './gpsFuzzing.js';
 import { dispatch as dispatchWebhook } from './webhookDispatcher.js';
 import { buildTlmFromState, sendToAbrp } from './abrpService.js';
+import { notifySentryAlert } from './notifyService.js';
 
 const BATTERY_SNAPSHOT_INTERVAL = 15 * 60;
 const MODEL_Y_USABLE_KWH = 75;
 const milesToKm = m => m * 1.60934;
 
-export async function syncVehicleState(db, vehicle, state) {
+export async function syncVehicleState(db, vehicle, state, tenantId = null) {
   const now = Math.floor(Date.now() / 1000);
 
   const drive   = state.drive_state;
@@ -99,15 +100,32 @@ export async function syncVehicleState(db, vehicle, state) {
     else if (wasPresent && !nowPresent)  finishOdometerTrip(db, vehicle, charge, odomKm, now, outsideTempC);
     else if (nowPresent && odomKm)       keepOdometerTripAlive(db, vehicle, odomKm);
 
+    // Sentry-Modus-Änderung erkennen: wenn Wächter aktiviert wird während
+    // kein Nutzer anwesend ist → Wächter-Alarm senden (Fahrzeug berührt/geweckt).
+    const wasSentry  = cache?.sentry_mode ?? 0;
+    const nowSentry  = vs.sentry_mode ? 1 : 0;
+    const sentryTriggered = !wasSentry && nowSentry && !nowPresent;
+
+    // Sentry-Modus in Cache schreiben (Spalte nachrüsten falls fehlend)
+    try {
+      db.exec("ALTER TABLE vehicle_state_cache ADD COLUMN sentry_mode INTEGER NOT NULL DEFAULT 0");
+    } catch { /* Spalte existiert bereits */ }
+
     db.prepare(`
-      INSERT INTO vehicle_state_cache (vehicle_id, is_user_present, odometer_km, battery_level, updated_at)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO vehicle_state_cache (vehicle_id, is_user_present, odometer_km, battery_level, sentry_mode, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?)
       ON CONFLICT(vehicle_id) DO UPDATE SET
         is_user_present=excluded.is_user_present,
         odometer_km=excluded.odometer_km,
         battery_level=excluded.battery_level,
+        sentry_mode=excluded.sentry_mode,
         updated_at=excluded.updated_at
-    `).run(vehicle.id, nowPresent, odomKm, charge?.battery_level, now);
+    `).run(vehicle.id, nowPresent, odomKm, charge?.battery_level, nowSentry, now);
+
+    // Sentry-Alarm asynchron senden (blockiert nicht den Sync-Loop)
+    if (sentryTriggered && tenantId) {
+      notifySentryAlert(vehicle, db, tenantId).catch(() => {});
+    }
   }
 
   // GPS-Fahrzeuge nehmen nie den !driveValid-Pfad oben, weshalb

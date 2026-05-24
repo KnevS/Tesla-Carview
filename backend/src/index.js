@@ -58,6 +58,8 @@ import sleepRoutes             from './routes/sleep.js';
 import firmwareRoutes          from './routes/firmware.js';
 import hvacRoutes              from './routes/hvac.js';
 import communityRoutes         from './routes/community.js';
+import telegramRoutes          from './routes/telegram.js';
+import { initTelegramBot }     from './services/telegramBot.js';
 
 const app    = express();
 const PORT   = process.env.PORT || 3000;
@@ -105,6 +107,7 @@ app.use('/api/legal',       legalPublicRoutes);          // GET /legal/{scope}/{
 app.use('/api/user-invites', userInviteRoutes);            // /:token/validate (GET) + /:token/accept (POST) — public
 app.use('/api/demo',        demoRoutes);                    // signup + status — public, only active when DEMO_ENABLED=true
 app.use('/api/pair',       pairRoutes);                     // QR-Pair-Login: init + poll + info + confirm — public
+app.use('/api/telegram',   telegramRoutes);                 // Webhook öffentlich; Link/Status benötigt Auth intern
 
 // Alle weiteren Routen benötigen einen gültigen JWT + Mandanten-DB (req.db)
 app.use(requireAuth);
@@ -190,6 +193,8 @@ server.listen(PORT, async () => {
   // Wartung. Auto-Update aus Git ist opt-in via AUTO_UPDATE_ENABLED=true.
   startNightlyMaintenance();
   startAutoBackupScheduler();
+  // Telegram Bot initialisieren (nur wenn TELEGRAM_BOT_TOKEN gesetzt).
+  initTelegramBot().catch(err => console.error('[Telegram] Init fehlgeschlagen:', err.message));
   // Demo-Mandant + Lifecycle nur, wenn explizit aktiviert.
   if (process.env.DEMO_ENABLED === 'true') {
     try { ensureDemoTenant(); }
