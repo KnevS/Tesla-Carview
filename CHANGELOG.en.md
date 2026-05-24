@@ -7,6 +7,25 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.3.0] — 2026-05-24
+
+### Improved
+- **Mobile UX — iPhone / Android** — NavBar is hidden on small screens; the existing MobileTabBar now covers Settings, Handbook, vehicle selector, and Logout in an iOS-style bottom sheet ("More"). Safe-area insets (`env(safe-area-inset-*)`) prevent content from hiding behind notch and home indicator. Settings sections default to collapsed on mobile to avoid excessive scrolling.
+- **Touch targets meet HIG** — Climate Keeper buttons, seat heater pads, and temperature ±buttons enlarged to at least 44 × 44 px on mobile via responsive Tailwind classes. iOS form inputs forced to `font-size: 16px` to suppress the automatic zoom.
+- **Bundle size −57 %** — All 25+ view imports converted to lazy `() => import()`. Heavy vendor libraries (Leaflet, Chart.js, jsPDF, vue-i18n, marked, DOMPurify) split into separate cached chunks via Vite `manualChunks`. Result: 2.3 MB → 1.0 MB raw, ~670 KB → ~257 KB gzip.
+- **Leaflet CSS loaded lazily** — `leaflet/dist/leaflet.css` is no longer part of the global bundle; it is dynamically imported inside `LocationHeatmap.vue` only when the map view is first visited.
+
+### New
+- **Hygiene check script** (`scripts/hygiene-check.sh`) — 7-section health check: Docker, Node, disk, npm audit (frontend + backend), bundle size, `.env` completeness, Docker container health, SQLite integrity, and SSL certificate expiry. Flags: `--fix` (auto-prune images, run `npm audit fix`), `--ci` (no colour output, exit 1 on failures). Automatically invoked at the end of `deploy/setup.sh`.
+- **Nightly hygiene automation** — `nightlyMaintenance.js` now runs Docker image pruning, npm audit (critical findings written to the tenant audit log), and bundle-size checks every night at 03:30 Europe/Berlin. Results visible in Admin → System → Maintenance.
+- **CI security gates** — GitHub Actions now runs `npm audit --audit-level=high` for both frontend and backend as a blocking merge gate. Bundle size is measured after every build (warn > 800 KB, block > 1.5 MB); results appear in the PR step summary.
+- **Dependabot** — Automatic weekly npm dependency PRs for `/frontend` and `/backend`; monthly GitHub Actions updates. Patch/minor updates grouped; major updates as individual PRs for manual review.
+
+### CI / Infrastructure
+- **`chunkSizeWarningLimit: 800`** added to `vite.config.js` — Vite now warns locally when any chunk exceeds 800 KB, matching the CI threshold.
+
+---
+
 ## [v3.2.0] — 2026-05-22
 
 ### New

@@ -165,6 +165,13 @@ docker compose -f docker-compose.prod.yml pull
 docker compose -f docker-compose.prod.yml up -d
 ok "Container laufen"
 
+# Post-Install Hygiene-Check — validiert das frisch aufgesetzte System
+if [[ -f "$APP_DIR/scripts/hygiene-check.sh" ]]; then
+  echo ""
+  step "Post-Install Systemcheck"
+  bash "$APP_DIR/scripts/hygiene-check.sh" --ci 2>/dev/null || true
+fi
+
 FRONTEND_URL="${FRONTEND_URL:-http://localhost:8080}"
 echo ""
 echo -e "${BOLD}${GREEN}================================================================${RESET}"

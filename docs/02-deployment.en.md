@@ -179,6 +179,38 @@ cp /opt/tesla-carview/data/tenants/*.db /opt/backups/
 
 ---
 
+## Post-install health check
+
+After the initial setup (and at any time afterwards) you can run the built-in hygiene check:
+
+```bash
+bash /opt/tesla-carview/scripts/hygiene-check.sh
+```
+
+The script checks 7 areas and prints a colour-coded summary:
+
+| # | Check | Auto-fix |
+|---|---|---|
+| 1 | System environment — Docker version, Node.js ≥ 20, disk usage | — |
+| 2 | Dependency security — `npm audit` for frontend + backend | `--fix` runs `npm audit fix` |
+| 3 | Bundle size — main JS chunk vs. thresholds (warn > 1.2 MB, fail > 1.5 MB) | — |
+| 4 | `.env` completeness — all required keys present? | — |
+| 5 | Docker health — unhealthy/exited containers, dangling images + volumes | `--fix` prunes images |
+| 6 | Database integrity — SQLite `PRAGMA integrity_check` per tenant | — |
+| 7 | SSL certificate — days until expiry for your configured domain | — |
+
+```bash
+# CI mode (no colours, exit 1 on failures — used by setup.sh and GitHub Actions):
+bash scripts/hygiene-check.sh --ci
+
+# Auto-fix mode (runs npm audit fix, prunes Docker images):
+bash scripts/hygiene-check.sh --fix
+```
+
+The nightly maintenance job (`backend/src/services/nightlyMaintenance.js`) runs a subset of these checks automatically every night at 03:30 Europe/Berlin and writes results to the admin health log (`Admin → System → Maintenance`).
+
+---
+
 ## View logs
 
 ```bash
