@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  --accent:        #E31937;
-  --accent-hover:  #c4162e;
-  --accent-soft:   rgba(227,25,55,0.18);
+  --accent:        #16A34A;
+  --accent-hover:  #15803d;
+  --accent-soft:   rgba(22,163,74,0.18);
   /* Tesla Carview ist eine Dark-Only-App (App-Shell ist immer bg-tesla-dark).
    * `color-scheme: dark` weist den Browser an, native Form-Widgets im
    * Dark-Modus zu rendern — sonst kippt ein hell-konfigurierter Browser

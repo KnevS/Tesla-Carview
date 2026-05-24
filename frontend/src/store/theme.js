@@ -32,8 +32,8 @@ const DESIGN_KEY  = 'tesla-carview-design';
 
 export const useThemeStore = defineStore('theme', {
   state: () => ({
-    activeKey:  localStorage.getItem(STORAGE_KEY) || 'red',
-    designKey:  localStorage.getItem(DESIGN_KEY)  || 'glass',
+    activeKey:  localStorage.getItem(STORAGE_KEY) || 'green',
+    designKey:  localStorage.getItem(DESIGN_KEY)  || 'editorial',
   }),
   getters: {
     activeTheme(state) {

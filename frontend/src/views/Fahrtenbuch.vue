@@ -436,10 +436,10 @@
               <code class="text-xs text-blue-300 break-all flex-1 text-left">{{ qrModal.pairUrl }}</code>
               <button @click="copyUrl"
                 class="text-gray-400 hover:text-white transition flex-shrink-0"
-                :title="qrModal.copied ? \'Kopiert!\' : \'Kopieren\'"
-                v-tooltip="qrModal.copied ? \'Kopiert!\' : \'URL in Zwischenablage kopieren\'"
+                :title="qrModal.copied ? 'Kopiert!' : 'Kopieren'"
+                v-tooltip="qrModal.copied ? 'Kopiert!' : 'URL in Zwischenablage kopieren'"
               >
-                <AppIcon :name="qrModal.copied ? \'check\' : \'copy\'" :size="16" />
+                <AppIcon :name="qrModal.copied ? 'check' : 'copy'" :size="16" />
               </button>
             </div>
           </div>
@@ -452,7 +452,7 @@
         </template>
 
         <!-- Bestätigt -->
-        <template v-else-if="qrModal.status === \'confirmed\'">
+        <template v-else-if="qrModal.status === 'confirmed'">
           <div class="py-4 space-y-3">
             <div class="w-14 h-14 rounded-full bg-green-500/20 flex items-center justify-center mx-auto">
               <AppIcon name="check" :size="32" class="text-green-400" />
@@ -463,7 +463,7 @@
         </template>
 
         <!-- Abgelaufen -->
-        <template v-else-if="qrModal.status === \'expired\'">
+        <template v-else-if="qrModal.status === 'expired'">
           <div class="py-2 space-y-3">
             <AppIcon name="warning" :size="40" class="text-yellow-400 mx-auto" />
             <p class="text-yellow-300 text-sm">QR-Code abgelaufen.</p>
