@@ -9,9 +9,9 @@
     "start": "node src/index.js"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1048.0",
+    "@aws-sdk/client-s3": "^3.1053.0",
     "@simplewebauthn/server": "^10.0.0",
-    "argon2": "^0.41.1",
+    "argon2": "^0.44.0",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^9.6.0",
@@ -24,14 +24,14 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.1.1",
-    "nodemailer": "^8.0.7",
+    "nodemailer": "^8.0.8",
     "otpauth": "^9.3.3",
     "protobufjs": "^7.4.0",
     "qrcode": "^1.5.3",
     "ssh2-sftp-client": "^10.0.3",
     "telegraf": "^4.16.3",
     "web-push": "^3.6.7",
-    "ws": "^8.18.0",
+    "ws": "^8.21.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
