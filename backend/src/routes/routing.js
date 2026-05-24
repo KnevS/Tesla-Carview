@@ -304,7 +304,7 @@ router.get('/chargers', async (req, res) => {
         address:         [s.AddressInfo?.AddressLine1, s.AddressInfo?.Postcode, s.AddressInfo?.Town]
                            .filter(Boolean).join(', ') || null,
         max_kw:          conns.reduce((m, c) => Math.max(m, c.PowerKW ?? 0), 0) || null,
-        num_points:      s.NumberOfPoints ?? conns.length || null,
+        num_points:      (s.NumberOfPoints ?? conns.length) || null,
         connector_types: connTypes,
         operator:        s.OperatorInfo?.Title ?? null,
         is_tesla:        (s.OperatorInfo?.Title ?? '').toLowerCase().includes('tesla'),
