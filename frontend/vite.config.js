@@ -29,10 +29,37 @@ try {
 
 export default defineConfig({
   build: {
+    // Budget-Grenze: Warnung wenn ein Chunk > 800 KB (unkomprimiert).
+    // Der Haupt-Chunk enthält Vue + alle Stores + geteilte Komponenten und
+    // ist legitim größer. vendor-pdf und vendor-charts laden nur on-demand.
+    chunkSizeWarningLimit: 800,
+
     rollupOptions: {
       external: ['html2canvas'],
       output: {
         entryFileNames: `assets/[name]-${gitHash}.js`,
+
+        // Schwere Vendor-Bibliotheken in eigene Chunks auslagern.
+        // Browser cached diese Chunks separat — beim nächsten Deploy
+        // bleibt z.B. der Leaflet-Chunk unverändert im Cache.
+        manualChunks(id) {
+          // Leaflet (Karten) — nur geladen wenn Karten-View besucht wird
+          if (id.includes('node_modules/leaflet')) return 'vendor-leaflet';
+          // Chart.js + vue-chartjs — nur geladen wenn Chart-Views besucht werden
+          if (id.includes('node_modules/chart.js') ||
+              id.includes('node_modules/vue-chartjs')) return 'vendor-charts';
+          // jsPDF — nur geladen wenn PDF-Export ausgelöst wird
+          if (id.includes('node_modules/jspdf') ||
+              id.includes('node_modules/jspdf-autotable')) return 'vendor-pdf';
+          // DOMPurify (Markdown-Sanitizer, Grok-Chat)
+          if (id.includes('node_modules/dompurify')) return 'vendor-sanitize';
+          // marked (Markdown-Parser, Handbuch)
+          if (id.includes('node_modules/marked')) return 'vendor-markdown';
+          // vue-i18n runtime (groß, aber selten geändert)
+          if (id.includes('node_modules/vue-i18n') ||
+              id.includes('node_modules/@intlify') ||
+              id.includes('node_modules/@vue/devtools-api')) return 'vendor-i18n';
+        },
       },
     },
   },

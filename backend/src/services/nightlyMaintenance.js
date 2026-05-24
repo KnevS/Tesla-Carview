@@ -161,7 +161,66 @@ async function runOnce() {
   }
   result.tasks.tenants = tenantSummaries;
 
-  // 3. Optional: Auto-Update aus dem Git-Repo (opt-in)
+  // 3. System-Hygiene: Docker + npm audit + Bundle-Größe
+  try {
+    const hygieneReport = {};
+
+    // 3a. Docker dangling images + build-cache bereinigen
+    const prune = await execAsync('docker image prune -f 2>/dev/null && docker builder prune -f --filter until=168h 2>/dev/null || true');
+    hygieneReport.docker_prune = prune.ok ? 'ok' : 'skipped';
+
+    // 3b. npm audit Backend — kritische Schwachstellen in den Audit-Log schreiben
+    const auditRaw = await execAsync('npm audit --json', {
+      cwd: path.join(process.env.APP_DIR || '/opt/tesla-carview', 'backend'),
+    });
+    if (auditRaw.stdout) {
+      try {
+        const auditData = JSON.parse(auditRaw.stdout);
+        const vulns = auditData.metadata?.vulnerabilities ?? {};
+        hygieneReport.npm_audit = {
+          critical: vulns.critical ?? 0,
+          high:     vulns.high     ?? 0,
+          moderate: vulns.moderate ?? 0,
+          low:      vulns.low      ?? 0,
+        };
+        // Kritische Schwachstellen → System-Audit-Eintrag pro Tenant
+        if ((vulns.critical ?? 0) > 0) {
+          for (const t of getAllTenants()) {
+            try {
+              auditLog(getDb(t.id), null, 'security_vulnerability',
+                null, { severity: 'critical', count: vulns.critical, source: 'npm-audit-backend' });
+            } catch { /* Tenant ggf. gesperrt */ }
+          }
+        }
+      } catch { hygieneReport.npm_audit = 'parse_failed'; }
+    }
+
+    // 3c. Bundle-Größe messen und mit Schwelle vergleichen
+    const BUNDLE_WARN_KB = 800;
+    const distDir = process.env.DIST_DIR || '/opt/tesla-carview/frontend-dist-private';
+    const bundleCheck = await execAsync(
+      `find "${distDir}/assets" -name "index-*.js" -o -name "index.js" 2>/dev/null | xargs ls -la 2>/dev/null | awk '{print $5}' | sort -rn | head -1`
+    );
+    if (bundleCheck.ok && bundleCheck.stdout.trim()) {
+      const sizeKB = Math.round(parseInt(bundleCheck.stdout.trim(), 10) / 1024);
+      hygieneReport.bundle_size_kb = sizeKB;
+      hygieneReport.bundle_ok = sizeKB < BUNDLE_WARN_KB;
+      if (sizeKB >= BUNDLE_WARN_KB) {
+        for (const t of getAllTenants()) {
+          try {
+            auditLog(getDb(t.id), null, 'performance_warning',
+              null, { type: 'bundle_too_large', size_kb: sizeKB, threshold_kb: BUNDLE_WARN_KB });
+          } catch { /* ignore */ }
+        }
+      }
+    }
+
+    result.tasks.hygiene = hygieneReport;
+  } catch (e) {
+    result.tasks.hygiene_error = e.message;
+  }
+
+  // 4. Optional: Auto-Update aus dem Git-Repo (opt-in)
   if (process.env.AUTO_UPDATE_ENABLED === 'true') {
     const repoDir = process.env.UPDATE_REPO_DIR || '/opt/tesla-carview';
     try {

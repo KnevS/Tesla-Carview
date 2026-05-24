@@ -7,7 +7,10 @@ import { revealDirective }  from './directives/reveal.js';
 import InfoTip from './components/InfoTip.vue';
 import { i18n } from './plugins/i18n.js';
 import './style.css';
-import 'leaflet/dist/leaflet.css';
+// leaflet/dist/leaflet.css wird NICHT mehr global importiert —
+// es landet in jedem Karten-View / Komponente als lazy import,
+// sodass der Leaflet-CSS-Chunk nur heruntergeladen wird wenn
+// der User tatsächlich eine Karten-Seite besucht.
 import { useAuthStore }  from './store/auth.js';
 import { useAppStore }   from './store/index.js';
 import { useThemeStore } from './store/theme.js';

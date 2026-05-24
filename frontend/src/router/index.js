@@ -1,34 +1,43 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/auth.js';
 import api from '../api.js';
-import Dashboard   from '../views/Dashboard.vue';
-import Trips       from '../views/Trips.vue';
-import TripDetail  from '../views/TripDetail.vue';
-import Charging    from '../views/Charging.vue';
-import Battery     from '../views/Battery.vue';
-import Logbook     from '../views/Logbook.vue';
-import Export      from '../views/Export.vue';
-import Login       from '../views/Login.vue';
-import MfaVerify   from '../views/MfaVerify.vue';
-import MfaSetup    from '../views/MfaSetup.vue';
-import Settings    from '../views/Settings.vue';
-import Telemetry    from '../views/Telemetry.vue';
-import Control      from '../views/Control.vue';
-import RoutePlanner from '../views/RoutePlanner.vue';
-import Fahrtenbuch      from '../views/Fahrtenbuch.vue';
-import Kostenabrechnung from '../views/Kostenabrechnung.vue';
-import System      from '../views/System.vue';
-import Setup       from '../views/Setup.vue';
-import Register      from '../views/Register.vue';
-import PasswordReset from '../views/PasswordReset.vue';
-import Handbook      from '../views/Handbook.vue';
-import UserManagement from '../views/UserManagement.vue';
-import DataManagement from '../views/DataManagement.vue';
-import Support        from '../views/Support.vue';
-import Imprint        from '../views/legal/Imprint.vue';
-import Privacy        from '../views/legal/Privacy.vue';
-import Terms          from '../views/legal/Terms.vue';
-import InviteAccept   from '../views/InviteAccept.vue';
+
+// ─── Eager (immer geladen — kritischer Pfad, kein Map/Chart/PDF) ──────────────
+// Login + Setup sind Einstiegspunkte ohne Auth, müssen sofort ready sein.
+// Dashboard ist die erste Seite nach Login.
+import Login        from '../views/Login.vue';
+import Setup        from '../views/Setup.vue';
+import Register     from '../views/Register.vue';
+import Dashboard    from '../views/Dashboard.vue';
+import InviteAccept from '../views/InviteAccept.vue';
+
+// ─── Lazy (beim ersten Navigieren geladen, danach gecacht) ───────────────────
+// Jede View hat ihren eigenen Chunk → Browser lädt nur was gebraucht wird.
+// Chart.js / Leaflet / jsPDF landen automatisch in eigenen Vendor-Chunks
+// (manualChunks in vite.config.js).
+const Trips          = () => import('../views/Trips.vue');
+const TripDetail     = () => import('../views/TripDetail.vue');
+const Charging       = () => import('../views/Charging.vue');
+const Battery        = () => import('../views/Battery.vue');
+const Logbook        = () => import('../views/Logbook.vue');
+const Export         = () => import('../views/Export.vue');
+const MfaVerify      = () => import('../views/MfaVerify.vue');
+const MfaSetup       = () => import('../views/MfaSetup.vue');
+const Settings       = () => import('../views/Settings.vue');
+const Telemetry      = () => import('../views/Telemetry.vue');
+const Control        = () => import('../views/Control.vue');
+const RoutePlanner   = () => import('../views/RoutePlanner.vue');
+const Fahrtenbuch    = () => import('../views/Fahrtenbuch.vue');
+const Kostenabrechnung = () => import('../views/Kostenabrechnung.vue');
+const System         = () => import('../views/System.vue');
+const PasswordReset  = () => import('../views/PasswordReset.vue');
+const Handbook       = () => import('../views/Handbook.vue');
+const UserManagement = () => import('../views/UserManagement.vue');
+const DataManagement = () => import('../views/DataManagement.vue');
+const Support        = () => import('../views/Support.vue');
+const Imprint        = () => import('../views/legal/Imprint.vue');
+const Privacy        = () => import('../views/legal/Privacy.vue');
+const Terms          = () => import('../views/legal/Terms.vue');
 const LegalAdmin     = () => import('../views/admin/LegalAdmin.vue');
 const AuditLog       = () => import('../views/admin/AuditLog.vue');
 const PairLogin      = () => import('../views/PairLogin.vue');

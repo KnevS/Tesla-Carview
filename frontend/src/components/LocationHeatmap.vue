@@ -23,8 +23,9 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+// Leaflet lazy — wird erst beim Mounten geladen, nicht beim App-Start.
+// Verhindert, dass der 150 KB Leaflet-Bundle den Initial-Load verlangsamt.
+let L = null;
 
 const appStore  = useAppStore();
 const mapEl     = ref(null);
@@ -74,7 +75,12 @@ function render() {
   if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20], maxZoom: 13 });
 }
 
-onMounted(() => {
+onMounted(async () => {
+  // Leaflet + CSS erst beim ersten Mount laden (lazy)
+  if (!L) {
+    await import('leaflet/dist/leaflet.css');
+    L = (await import('leaflet')).default;
+  }
   map = L.map(mapEl.value).setView([51.16, 10.45], 5); // Default: D-Mitte
   L.tileLayer('/api/tiles/{z}/{x}/{y}', {
     attribution: '© OpenStreetMap contributors',

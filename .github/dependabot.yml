@@ -1,0 +1,60 @@
+version: 2
+
+# Dependabot überwacht beide npm-Arbeitsbereiche und GitHub Actions.
+# Automatisch geöffnete PRs werden durch CI geprüft (npm audit + Bundle-Check).
+# Sicherheits-Updates haben höchste Priorität (security: true) und
+# werden in einem separaten Rhythmus geöffnet.
+
+updates:
+  # ─── Frontend-Dependencies ─────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - frontend
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(devdeps)"
+    # Nur patch + minor automatisch — major-Updates als PR zur manuellen Prüfung
+    groups:
+      patch-updates:
+        update-types:
+          - minor
+          - patch
+
+  # ─── Backend-Dependencies ──────────────────────────────────────────────
+  - package-ecosystem: npm
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - backend
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      patch-updates:
+        update-types:
+          - minor
+          - patch
+
+  # ─── GitHub Actions ─────────────────────────────────────────────────────
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels:
+      - dependencies
+      - ci
+    commit-message:
+      prefix: "ci(deps)"

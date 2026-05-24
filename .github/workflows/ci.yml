@@ -8,10 +8,15 @@ on:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  # Bundle-Budget: Haupt-Chunk darf nicht größer als diese Werte sein.
+  # Bei Überschreitung → Fehler im CI, PR kann nicht gemergt werden.
+  BUNDLE_WARN_KB: 800      # Warnung ab hier
+  BUNDLE_FAIL_KB: 1500     # Fehler ab hier (regressiver Bloat)
 
 jobs:
+  # ─── Backend: Syntax + Security ──────────────────────────────────────────
   backend:
-    name: Backend – lint & test
+    name: Backend – lint & security
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -24,11 +29,20 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
-      - run: node --input-type=module --eval "console.log('Backend syntax check passed')"
+
+      - name: Syntax-Check
+        run: node --input-type=module --eval "console.log('Backend syntax check passed')"
         shell: bash
 
+      # npm audit blockiert bei high/critical — moderate ist akzeptabel
+      # (transitive Deps, die wir nicht direkt kontrollieren).
+      - name: Security Audit (npm audit)
+        run: npm audit --audit-level=high
+        continue-on-error: false   # Fehler blockiert den Merge
+
+  # ─── Frontend: Build + Security + Bundle-Größe ───────────────────────────
   frontend:
-    name: Frontend – lint & build
+    name: Frontend – build & bundle-check
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -41,7 +55,55 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
-      - run: npm run build
+
+      # Security Audit Frontend
+      - name: Security Audit (npm audit)
+        run: npm audit --audit-level=high
+        continue-on-error: false
+
+      - name: Build
+        run: npm run build
+
+      # Bundle-Größen-Analyse: Haupt-Chunk ausmessen und mit Budget vergleichen.
+      # Der Wert wird als Job-Summary angezeigt und bei Überschreitung als Fehler markiert.
+      - name: Bundle-Größen-Check
+        shell: bash
+        run: |
+          MAIN_CHUNK=$(ls dist/assets/index-*.js 2>/dev/null | head -1 || ls dist/assets/index.js 2>/dev/null || echo "")
+          if [[ -z "$MAIN_CHUNK" ]]; then
+            echo "⚠ Kein Haupt-Chunk gefunden — Bundle-Check übersprungen"
+            exit 0
+          fi
+          SIZE_BYTES=$(stat -c%s "$MAIN_CHUNK" 2>/dev/null || stat -f%z "$MAIN_CHUNK")
+          SIZE_KB=$((SIZE_BYTES / 1024))
+          GZIP_KB=$(gzip -c "$MAIN_CHUNK" | wc -c | awk '{printf "%.0f", $1/1024}')
+
+          # GitHub Actions Step Summary
+          {
+            echo "## 📦 Bundle-Größe"
+            echo "| Chunk | Größe | Gzip |"
+            echo "|-------|-------|------|"
+            echo "| \`$(basename $MAIN_CHUNK)\` | **${SIZE_KB} KB** | ~${GZIP_KB} KB |"
+
+            # Alle Chunks auflisten
+            echo ""
+            echo "### Alle Chunks"
+            echo "\`\`\`"
+            ls -lh dist/assets/*.js 2>/dev/null | awk '{print $5, $9}' | sort -k1 -rh | head -20
+            echo "\`\`\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          echo "Haupt-Bundle: ${SIZE_KB} KB (gzip: ~${GZIP_KB} KB)"
+
+          if [[ "$SIZE_KB" -ge "$BUNDLE_FAIL_KB" ]]; then
+            echo "::error::Bundle zu groß: ${SIZE_KB} KB >= ${BUNDLE_FAIL_KB} KB Limit! Code-Splitting prüfen."
+            exit 1
+          elif [[ "$SIZE_KB" -ge "$BUNDLE_WARN_KB" ]]; then
+            echo "::warning::Bundle nähert sich dem Budget: ${SIZE_KB} KB (Limit: ${BUNDLE_FAIL_KB} KB)"
+          else
+            echo "✓ Bundle im Budget (${SIZE_KB} KB / ${BUNDLE_FAIL_KB} KB)"
+          fi
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v7
         with:
@@ -49,6 +111,7 @@ jobs:
           path: frontend/dist/
           retention-days: 7
 
+  # ─── Docker: Backend ─────────────────────────────────────────────────────
   build-backend:
     name: Docker – build & push backend
     runs-on: ubuntu-latest
@@ -82,6 +145,7 @@ jobs:
             GIT_BRANCH=${{ github.ref_name }}
             BUILD_DATE=${{ github.event.head_commit.timestamp }}
 
+  # ─── Docker: Frontend ────────────────────────────────────────────────────
   build-frontend:
     name: Docker – build & push frontend
     runs-on: ubuntu-latest
