@@ -67,9 +67,10 @@ if [ -d "$PRIVATE_REPO" ]; then
     src="$APP_DIR/$file"
     case "$file" in
       backend/*)
-        dst="/app/${file#backend/}"
-        if [ -f "$src" ]; then
-          docker cp "$src" "tesla-carview-backend:$dst" && echo "    ✓ Backend: $file"
+        # Datei aus privatem Repo direkt auf den Host extrahieren.
+        # Der Bind-Mount macht sie sofort im Container sichtbar — kein docker cp noetig.
+        if git --git-dir="$PRIVATE_REPO" show "HEAD:$file" > "$src" 2>/dev/null; then
+          echo "    ✓ Backend (host): $file"
           BACKEND_CHANGED=1
         fi
         ;;
