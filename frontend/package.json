@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@simplewebauthn/browser": "^10.0.0",
+    "@simplewebauthn/browser": "^13.3.0",
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",
     "dompurify": "^3.4.5",
@@ -16,10 +16,10 @@
     "jspdf-autotable": "^5.0.8",
     "leaflet": "^1.9.4",
     "marked": "^18.0.4",
-    "pinia": "^2.1.7",
+    "pinia": "^3.0.4",
     "vue": "^3.4.31",
     "vue-chartjs": "^5.3.1",
-    "vue-i18n": "^9.14.1",
+    "vue-i18n": "^11.4.4",
     "vue-router": "^4.3.3"
   },
   "devDependencies": {

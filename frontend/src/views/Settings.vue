@@ -1480,7 +1480,7 @@ async function addPasskey() {
   try {
     const { startRegistration } = await import('@simplewebauthn/browser');
     const { data: opts } = await api.post('/passkey/register-options');
-    const response   = await startRegistration(opts);
+    const response   = await startRegistration({ optionsJSON: opts });
     const ua         = navigator.userAgent;
     const deviceName = /iPhone|iPad/.test(ua) ? 'iPhone/iPad'
                      : /Mac/.test(ua)          ? 'Mac'

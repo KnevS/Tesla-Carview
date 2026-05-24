@@ -172,7 +172,7 @@ async function doAuth() {
 
     // 2. Browser WebAuthn
     const { startAuthentication } = await import('@simplewebauthn/browser');
-    const response = await startAuthentication(opts);
+    const response = await startAuthentication({ optionsJSON: opts });
 
     // 3. Pair-Session bestätigen
     const { data: confirmData } = await api.post(`/pair/confirm/${token}`, {
