@@ -105,7 +105,8 @@ if [ -d "$PRIVATE_REPO" ]; then
     docker cp tmp-frontend-extract:/usr/share/nginx/html "$APP_DIR/frontend-dist-private-new"
     docker rm tmp-frontend-extract
     mkdir -p "$APP_DIR/frontend-dist-private"
-    rsync -a --delete "$APP_DIR/frontend-dist-private-new/" "$APP_DIR/frontend-dist-private/"
+    find "$APP_DIR/frontend-dist-private" -mindepth 1 -delete
+    cp -a "$APP_DIR/frontend-dist-private-new/." "$APP_DIR/frontend-dist-private/"
     rm -rf "$APP_DIR/frontend-dist-private-new"
     docker exec tesla-carview-frontend nginx -s reload
 
