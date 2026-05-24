@@ -9,6 +9,8 @@
       Zentrale Verwaltung: Benutzer, Daten, Einstellungen, Rechtliches und Systemüberwachung.
     </p>
 
+    <SystemHealthBanner />
+
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <RouterLink
         v-for="card in adminCards"
@@ -29,6 +31,7 @@
 
 <script setup>
 import AppIcon from '../../components/AppIcon.vue';
+import SystemHealthBanner from '../../components/SystemHealthBanner.vue';
 
 const adminCards = [
   {
