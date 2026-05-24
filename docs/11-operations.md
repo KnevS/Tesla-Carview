@@ -122,6 +122,46 @@ cd /opt/tesla-carview
 bash deploy/update.sh
 ```
 
+### In-App Deployment (optional)
+
+Admins können das Update direkt aus der Web-UI heraus starten (**System → In-App Deployment**). Dafür läuft ein kleiner Webhook-Daemon auf dem Host, der vom Backend-Container erreichbar ist.
+
+**Einrichten (einmalig):**
+
+```bash
+# 1. Secret generieren
+openssl rand -hex 24   # Ausgabe merken
+
+# 2. Env-Datei anlegen (wird nie committed)
+cp /opt/tesla-carview/deploy/update-webhook.env.example \
+   /opt/tesla-carview/deploy/update-webhook.env
+# UPDATE_WEBHOOK_SECRET=<erzeugten Wert eintragen>
+
+# 3. Systemd-Service installieren
+sudo cp /opt/tesla-carview/deploy/tesla-carview-update-webhook.service \
+        /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now tesla-carview-update-webhook
+
+# 4. URL in backend/.env eintragen
+# DEPLOY_WEBHOOK_URL=http://172.18.0.1:7071/deploy?token=<secret>
+# (172.18.0.1 = Docker-Bridge-Gateway; ggf. anpassen mit: docker network inspect tesla-carview_tesla-net)
+
+# 5. Firewall (falls ufw aktiv)
+sudo ufw allow from 172.18.0.0/16 to any port 7071
+
+# 6. Backend neustarten
+docker compose -f docker-compose.prod.yml up -d backend
+```
+
+**Health-Check:**
+```bash
+curl http://172.18.0.1:7071/health
+# → {"ok":true}
+```
+
+Der Daemon lauscht ausschließlich auf der Docker-Bridge (`172.18.0.1`) und ist damit nicht aus dem Internet erreichbar.
+
 ---
 
 ## 🧪 Demo-Modus aktivieren

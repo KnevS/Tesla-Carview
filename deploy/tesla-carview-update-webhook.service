@@ -1,0 +1,19 @@
+[Unit]
+Description=Tesla Carview Update Webhook
+After=network.target docker.service
+
+[Service]
+Type=simple
+# Secrets aus update-webhook.env (nicht in git — generiere deinen eigenen Wert):
+# cp deploy/update-webhook.env.example deploy/update-webhook.env
+# openssl rand -hex 24  # als UPDATE_WEBHOOK_SECRET eintragen
+EnvironmentFile=/opt/tesla-carview/deploy/update-webhook.env
+ExecStart=/usr/bin/node /opt/tesla-carview/deploy/update-webhook.js
+Restart=always
+RestartSec=5
+User=root
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
