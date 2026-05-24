@@ -902,10 +902,20 @@ html[data-design="editorial"] .glass-bar {
  * Ziel: native iOS-Feeling — Bottom Tab Bar, Safe Areas, Touch-Feedback.
  * ═══════════════════════════════════════════════════════════════════ */
 
-/* Haupt-Content: auf Mobile Platz fuer Bottom Tab Bar schaffen */
+/* Haupt-Content: auf Mobile Platz fuer Bottom Tab Bar schaffen.
+   padding-top schliesst die Notch/Dynamic-Island-Zone (Safe Area) ein,
+   weil die NavBar auf Mobile ausgeblendet ist. Auf Desktop bleibt py-6
+   (Tailwind) aktiv. */
 @media (max-width: 767px) {
   main {
+    padding-top:    calc(var(--safe-top) + 1rem) !important;
     padding-bottom: calc(var(--tab-bar-h) + var(--safe-bottom) + 1rem) !important;
+  }
+
+  /* iOS-Safari zoomt bei focus auf Inputs mit font-size < 16px ein —
+     das fuehrt zu Layout-Verschiebs. Erzwinge 16px fuer alle Inputs. */
+  input, select, textarea {
+    font-size: max(1rem, 16px) !important;
   }
 
   /* Karten: aktivere Touch-Rueckmeldung auf touch-only Geraeten */
@@ -1078,6 +1088,65 @@ html[data-design="editorial"] .mtb-sheet-item.active  { color: #66CCBF; border-c
   font-weight: 600;
   line-height: 1.2;
 }
+
+/* ─── Sheet: Fahrzeug-Zeile ────────────────────────────────────── */
+.mtb-vehicle-row,
+.mtb-vehicle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 12px;
+  margin: 0 4px 8px;
+}
+.mtb-vehicle-select {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+  outline: none;
+}
+.mtb-vehicle-label span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+}
+
+/* ─── Sheet: Trennlinie + System-Aktionen ──────────────────────── */
+.mtb-sheet-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 12px 0 8px;
+}
+.mtb-sheet-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 4px 4px;
+}
+.mtb-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: transparent;
+  border: none;
+  color: rgba(229,231,235,0.8);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
+  cursor: pointer;
+  min-height: 52px;
+}
+.mtb-action-btn:active { background: rgba(255,255,255,0.06); transform: scale(0.98); }
+.mtb-action-btn svg { flex-shrink: 0; opacity: 0.7; }
+.mtb-action-logout { color: rgba(252,165,165,0.85); }
+.mtb-action-logout svg { opacity: 0.8; color: #fca5a5; }
 
 /* ─── Sheet Transition ─────────────────────────────────────────── */
 .sheet-enter-active, .sheet-leave-active {

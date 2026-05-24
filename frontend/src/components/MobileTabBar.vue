@@ -35,13 +35,34 @@
       <span class="mtb-label">{{ $t('nav.more') || 'Mehr' }}</span>
     </button>
 
-    <!-- Bottom Sheet — alle weiteren Routen -->
+    <!-- Bottom Sheet — alle weiteren Routen + System-Aktionen -->
     <Teleport to="body">
       <Transition name="sheet">
         <div v-if="showMore" class="mtb-sheet-backdrop" @click.self="showMore = false">
           <div class="mtb-sheet" role="dialog">
-            <!-- Handle -->
+            <!-- Handle zum Swipen -->
             <div class="mtb-sheet-handle"></div>
+
+            <!-- Fahrzeug-Selector (nur wenn > 1 Fahrzeug) -->
+            <div v-if="appStore.vehicles.length > 1" class="mtb-vehicle-row">
+              <VehicleSilhouette v-if="appStore.selectedVehicle"
+                :model="appStore.selectedVehicle.model"
+                :color="appStore.selectedVehicle.image_color"
+                :width="28" :height="16" />
+              <select v-model="appStore.selectedVehicleId"
+                class="mtb-vehicle-select">
+                <option v-for="v in appStore.vehicles" :key="v.id" :value="v.id">{{ v.display_name }}</option>
+              </select>
+            </div>
+            <!-- Einzelnes Fahrzeug: Name anzeigen -->
+            <div v-else-if="appStore.selectedVehicle" class="mtb-vehicle-label">
+              <VehicleSilhouette
+                :model="appStore.selectedVehicle.model"
+                :color="appStore.selectedVehicle.image_color"
+                :width="28" :height="16" />
+              <span>{{ appStore.selectedVehicle.display_name }}</span>
+            </div>
+
             <div class="mtb-sheet-title">{{ $t('nav.allSections') || 'Alle Bereiche' }}</div>
 
             <div class="mtb-sheet-grid">
@@ -59,6 +80,32 @@
                 <span class="mtb-sheet-label">{{ link.label }}</span>
               </RouterLink>
             </div>
+
+            <!-- Trennlinie + System-Aktionen -->
+            <div class="mtb-sheet-divider"></div>
+            <div class="mtb-sheet-actions">
+              <RouterLink to="/handbook" class="mtb-action-btn" @click="showMore = false">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                </svg>
+                <span>{{ $t('auth.handbook') || 'Handbuch' }}</span>
+              </RouterLink>
+              <RouterLink to="/settings" class="mtb-action-btn" @click="showMore = false">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                <span>{{ $t('settings.title') || 'Einstellungen' }}</span>
+              </RouterLink>
+              <button class="mtb-action-btn mtb-action-logout" @click="logout">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span>{{ $t('common.logout') || 'Ausloggen' }}</span>
+              </button>
+            </div>
           </div>
         </div>
       </Transition>
@@ -68,15 +115,19 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../store/auth.js';
+import { useAppStore }  from '../store/index.js';
 import { useNavStore, NAV_GROUPS } from '../store/nav.js';
 import AppIcon from './AppIcon.vue';
+import VehicleSilhouette from './VehicleSilhouette.vue';
 
 const authStore = useAuthStore();
+const appStore  = useAppStore();
 const navStore  = useNavStore();
 const route     = useRoute();
+const router    = useRouter();
 const { t }     = useI18n();
 
 const showMore = ref(false);
@@ -105,6 +156,13 @@ const extraLinks = computed(() =>
 function isActive(tab) {
   if (tab.to === '/') return route.path === '/';
   return route.path.startsWith(tab.to);
+}
+
+async function logout() {
+  showMore.value = false;
+  if (!confirm(t('common.logout') + '?')) return;
+  await authStore.logout().catch(() => {});
+  router.push('/login');
 }
 
 const isMoreActive = computed(() =>

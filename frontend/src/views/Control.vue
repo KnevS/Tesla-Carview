@@ -64,9 +64,10 @@
           <div class="flex items-center justify-between text-sm">
             <span class="text-gray-300">{{ $t('control.temp') }}</span>
             <div class="flex items-center gap-3">
-              <button @click="temp = Math.max(15, temp - 0.5)" class="w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold transition">−</button>
+              <!-- w-11 h-11 auf Mobile (44×44px), md:w-8 md:h-8 auf Desktop -->
+              <button @click="temp = Math.max(15, temp - 0.5)" class="w-11 h-11 md:w-8 md:h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold transition">−</button>
               <span class="text-white font-bold text-xl w-14 text-center">{{ fmtTemp(temp) }}</span>
-              <button @click="temp = Math.min(28, temp + 0.5)" class="w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold transition">+</button>
+              <button @click="temp = Math.min(28, temp + 0.5)" class="w-11 h-11 md:w-8 md:h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-white font-bold transition">+</button>
             </div>
           </div>
           <button @click="cmd('set_temps', { driver_temp: temp, passenger_temp: temp })" :disabled="busy"
@@ -88,18 +89,19 @@
                Uebernachtung (Camp). -->
           <div>
             <p class="text-xs text-gray-400 mb-1">{{ $t('control.climateMode') }}</p>
+            <!-- py-3 md:py-1.5 → mindestens ~44px auf Mobile (HIG-konform) -->
             <div class="grid grid-cols-4 gap-1">
               <button @click="cmd('set_climate_keeper_mode', { climate_keeper_mode: 0 })" :disabled="busy"
-                class="py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-white text-xs transition disabled:opacity-40"
+                class="py-3 md:py-1.5 rounded bg-gray-700 hover:bg-gray-600 text-white text-xs transition disabled:opacity-40"
                 v-tooltip="$t('control.keeperOffTooltip')">{{ $t('control.keeperOff') }}</button>
               <button @click="cmd('set_climate_keeper_mode', { climate_keeper_mode: 1 })" :disabled="busy"
-                class="py-1.5 rounded bg-blue-700 hover:bg-blue-600 text-white text-xs transition disabled:opacity-40"
+                class="py-3 md:py-1.5 rounded bg-blue-700 hover:bg-blue-600 text-white text-xs transition disabled:opacity-40"
                 v-tooltip="$t('control.keeperKeepTooltip')">{{ $t('control.keeperKeep') }}</button>
               <button @click="cmd('set_climate_keeper_mode', { climate_keeper_mode: 2 })" :disabled="busy"
-                class="py-1.5 rounded bg-yellow-700 hover:bg-yellow-600 text-white text-xs transition disabled:opacity-40"
+                class="py-3 md:py-1.5 rounded bg-yellow-700 hover:bg-yellow-600 text-white text-xs transition disabled:opacity-40"
                 v-tooltip="$t('control.keeperDogTooltip')">{{ $t('control.keeperDog') }}</button>
               <button @click="cmd('set_climate_keeper_mode', { climate_keeper_mode: 3 })" :disabled="busy"
-                class="py-1.5 rounded bg-purple-700 hover:bg-purple-600 text-white text-xs transition disabled:opacity-40"
+                class="py-3 md:py-1.5 rounded bg-purple-700 hover:bg-purple-600 text-white text-xs transition disabled:opacity-40"
                 v-tooltip="$t('control.keeperCampTooltip')">{{ $t('control.keeperCamp') }}</button>
             </div>
           </div>
@@ -125,10 +127,11 @@
         <div v-for="seat in SEATS" :key="seat.id" class="flex items-center gap-2">
           <span class="text-sm text-gray-300 flex-1">{{ seat.label }}</span>
           <div class="flex gap-1">
+            <!-- Sitzheizung: w-11 h-11 auf Mobile (44×44px), md:w-8 md:h-8 Desktop -->
             <button v-for="lvl in 4" :key="lvl-1"
               @click="cmd('remote_seat_heater_request', { heater: seat.id, level: lvl-1 })"
               :disabled="busy"
-              class="w-8 h-8 rounded text-xs font-medium transition disabled:opacity-40"
+              class="w-11 h-11 md:w-8 md:h-8 rounded text-sm md:text-xs font-medium transition disabled:opacity-40"
               :class="lvl === 1
                 ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
                 : ['bg-orange-900 hover:bg-orange-800 text-orange-200',

@@ -11,7 +11,12 @@ export function usePageLayout(pageId, defaultSections) {
   const layoutData = computed(() => {
     const stored = prefs.data.layout?.[pageId];
     if (!stored) {
-      return { order: [...defaultSections], collapsed: [] };
+      // Auf Mobile (< 768px) alle Sektionen standardmäßig zugeklappt —
+      // der User tippt nur auf, was er gerade braucht. Auf Desktop alle
+      // offen (bisheriges Verhalten). Sobald der User eine Sektion
+      // explizit auf-/zuklappt, wird der Zustand gespeichert.
+      const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+      return { order: [...defaultSections], collapsed: isMobile ? [...defaultSections] : [] };
     }
     // Neue Sektionen, die nach dem Speichern hinzugekommen sind, ans Ende hängen
     const extra = defaultSections.filter(id => !stored.order.includes(id));

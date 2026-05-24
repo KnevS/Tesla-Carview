@@ -4,8 +4,13 @@
     <!-- Nevs-Edition: technischer Status-Streifen ueber der NavBar.
          Nur sichtbar wenn data-design="editorial" und eingeloggt. -->
     <EditorialStatusBar v-if="authStore.isAuthenticated" />
-    <NavBar v-if="authStore.isAuthenticated" />
-    <main :class="['flex-1', authStore.isAuthenticated ? 'max-w-7xl w-full mx-auto px-4 py-6' : '']">
+    <!-- NavBar: Desktop/Tablet. Auf Mobile (< md) übernimmt MobileTabBar.
+         NavBar ist auf Mobile ausgeblendet — spart ~64px Content-Höhe.
+         Safe-Area-Top wird in style.css per CSS-Variable abgedeckt. -->
+    <div class="hidden md:block">
+      <NavBar v-if="authStore.isAuthenticated" />
+    </div>
+    <main :class="['flex-1', authStore.isAuthenticated ? 'max-w-7xl w-full mx-auto px-4 md:py-6' : '']">
       <!-- sanfter Routenwechsel; respektiert prefers-reduced-motion (siehe style) -->
       <RouterView v-slot="{ Component }">
         <transition name="route-fade" mode="out-in">
