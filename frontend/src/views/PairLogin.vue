@@ -49,6 +49,11 @@
             <p class="text-gray-400 text-sm">{{ $t('pair.readyHint') }}</p>
           </div>
 
+          <!-- Weiterleitung nach Login anzeigen -->
+          <div v-if="redirectPath" class="bg-blue-900/20 border border-blue-700/40 rounded-lg px-3 py-2 text-xs text-blue-300 text-center">
+            → {{ redirectPath }}
+          </div>
+
           <div v-if="error" class="bg-red-900/40 border border-red-700 rounded-lg px-3 py-2 text-sm text-red-300">
             {{ error }}
           </div>
@@ -71,6 +76,9 @@
           </div>
           <p class="text-green-300 text-lg font-semibold">{{ $t('pair.success') }}</p>
           <p class="text-gray-400 text-sm">{{ $t('pair.successHint', { username }) }}</p>
+          <p v-if="redirectPath" class="text-gray-500 text-xs animate-pulse">
+            {{ $t('pair.redirecting') }}
+          </p>
         </div>
 
         <!-- Fehler beim Bestätigen -->
@@ -90,13 +98,16 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import api from '../api.js';
+import { useAuthStore } from '../store/auth.js';
 import LangSwitcher from '../components/LangSwitcher.vue';
 import AppIcon from '../components/AppIcon.vue';
 
-const route = useRoute();
+const route    = useRoute();
+const router   = useRouter();
+const authStore = useAuthStore();
 const { t } = useI18n();
 
 const token       = route.params.token;
@@ -106,6 +117,7 @@ const authenticating = ref(false);
 const username    = ref('');
 const tenantId    = ref('');
 const expiresAt   = ref(0);
+const redirectPath = ref(null); // Weiterleitung nach Login
 let expiryTimer   = null;
 
 const expiresIn = computed(() => {
@@ -123,8 +135,9 @@ onMounted(async () => {
       state.value = 'already_confirmed';
       return;
     }
-    tenantId.value  = data.tenantId;
-    expiresAt.value = data.expiresAt;
+    tenantId.value   = data.tenantId;
+    expiresAt.value  = data.expiresAt;
+    redirectPath.value = data.redirectPath || null;
 
     // Passkey-Unterstützung prüfen
     const hasAuthenticator = window.PublicKeyCredential?.isUserVerifyingPlatformAuthenticatorAvailable
@@ -162,13 +175,43 @@ async function doAuth() {
     const response = await startAuthentication(opts);
 
     // 3. Pair-Session bestätigen
-    await api.post(`/pair/confirm/${token}`, {
+    const { data: confirmData } = await api.post(`/pair/confirm/${token}`, {
       challengeId: opts.challengeId,
       tenantId:    tenantId.value,
       response,
     });
 
-    username.value = response.userHandle ?? '';
+    username.value = confirmData.username ?? response.userHandle ?? '';
+
+    // 4. Self-Auth: Dieser Browser (z.B. Tesla-Browser) holt seinen eigenen JWT.
+    //    Der Poll-Endpoint gibt accessToken + setzt refresh_token-Cookie.
+    //    Greift nur wenn der Token noch nicht von einem anderen Gerät konsumiert wurde.
+    try {
+      const { data: pollData } = await api.get(`/pair/poll/${token}`);
+      if (pollData.status === 'confirmed' && pollData.accessToken) {
+        // Auth-Store befüllen — dieser Browser ist jetzt eingeloggt
+        authStore.accessToken = pollData.accessToken;
+        authStore.user = { ...pollData.user, tenantSlug: authStore.tenantSlug };
+        if (pollData.user?.tenantId && !authStore.tenantSlug) {
+          // tenantSlug ist nicht im Poll-Response, aber tenantId ist da
+          // tryRestoreSession lädt /auth/me und vervollständigt das Profil
+        }
+        username.value = pollData.user?.username ?? username.value;
+        state.value    = 'success';
+        clearInterval(expiryTimer);
+
+        // Weiterleiten nach kurzer Erfolgsmeldung
+        const dest = pollData.redirectPath || redirectPath.value;
+        if (dest) {
+          setTimeout(() => router.push(dest), 1800);
+        }
+        return;
+      }
+    } catch {
+      // JWT-Holen fehlgeschlagen — Session ist trotzdem bestätigt.
+      // Ein anderes Gerät wird über den Poll-Endpoint authentifiziert.
+    }
+
     state.value = 'success';
     clearInterval(expiryTimer);
   } catch (err) {

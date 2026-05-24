@@ -1914,7 +1914,8 @@
     "successHint": "Diğer cihaz otomatik olarak oturum açacak.",
     "failed": "Kimlik doğrulama başarısız",
     "failedGeneric": "Bilinmeyen hata. Lütfen tekrar deneyin.",
-    "retry": "Tekrar dene"
+    "retry": "Tekrar dene",
+    "redirecting": "Yönlendiriliyor…"
   },
   "sleep": {
     "title": "Uyku Monitörü",

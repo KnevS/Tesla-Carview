@@ -469,6 +469,21 @@ Tesla Carview ist eine **PWA** (Progressive Web App) — du kannst sie wie eine 
 
 **Empfehlung:** Lass dir Carview auf dem Tesla-Display als Lesezeichen ablegen — Tesla zeigt eingestellte Lesezeichen direkt im Browser-Schnellzugriff. Für das Eintragen von Fahrt-Notizen während einer kurzen Pause ist das schneller als die URL jedes Mal zu tippen.
 
+### 🚗 Fahrtenbuch direkt im Tesla-Browser öffnen {#tesla-direkt}
+
+Der Button **„🚗 Im Tesla öffnen"** oben im Fahrtenbuch macht den Tesla-Browser-Zugriff kinderleicht:
+
+1. Öffne in Carview auf deinem Handy oder Desktop **Auswertungen → Fahrtenbuch**.
+2. Klicke auf **„🚗 Im Tesla öffnen"**.
+3. Ein Modal erscheint mit einem **QR-Code** und einer **direkten URL** (z. B. `https://deine-app.example.com/pair/abc123…`).
+4. Öffne im Tesla den Browser und gib die URL ein — oder scanne den QR mit einer Kamera, falls vorhanden.
+5. Der Tesla-Browser öffnet eine Passkey-Authentifizierungsseite. Tippe auf **„Per Passkey bestätigen"** und authentifiziere dich mit dem biometrischen Verfahren des Geräts.
+6. Nach erfolgreicher Authentifizierung ist der Tesla-Browser angemeldet und navigiert direkt ins Fahrtenbuch — ohne weitere Schritte.
+
+Die Pair-Session ist **5 Minuten** gültig. Der dabei gesetzte Refresh-Token-Cookie hält den Tesla-Browser **7 Tage** eingeloggt (wird bei jedem Aufruf automatisch erneuert). Die Fahrtenbuch-URL lässt sich in Teslas Browser-Schnellzugriff als Lesezeichen speichern — nach der Ersteinrichtung reicht ein Tipp.
+
+**Funktioniert für jedes Fahrzeug** — Fahrtenbuch und manuelle Fahrtenerfassung benötigen keine Tesla-API-Verbindung. Auch Fahrer anderer Automarken können die manuelle Eingabe („+ Manuell") nutzen und ein BMF-konformes PDF exportieren.
+
 ### 📲 iPhone-Navigation: Tab Bar
 
 Auf dem iPhone und anderen Smartphones zeigt Tesla Carview eine **native iOS-style Tab Bar** am unteren Bildschirmrand:

@@ -467,6 +467,21 @@ Tesla Carview es una **PWA** (Progressive Web App) — instalable como app nativ
 
 **Recomendación:** Guarda Carview como favorito en el navegador Tesla — Tesla muestra los favoritos guardados directamente en el acceso rápido del navegador. Para anotar notas de viaje en una pausa corta es más rápido que escribir la URL cada vez.
 
+### 🚗 Abrir el libro de registro directamente en el navegador de Tesla {#tesla-directo}
+
+El botón **« 🚗 Abrir en Tesla »** en la parte superior del libro de registro facilita el acceso desde el navegador Tesla:
+
+1. Abre **Análisis → Libro de registro** en Carview desde tu teléfono u ordenador.
+2. Haz clic en **« 🚗 Abrir en Tesla »**.
+3. Aparece un modal con un **código QR** y una **URL directa** (ej. `https://tu-app.example.com/pair/abc123…`).
+4. En el Tesla, abre el navegador e introduce la URL — o escanea el QR con una cámara si está disponible.
+5. El navegador Tesla abre una página de autenticación Passkey. Toca **« Confirmar con Passkey »** y autentícate.
+6. Tras autenticación exitosa, el navegador Tesla inicia sesión y navega directamente al libro de registro.
+
+La sesión es válida **5 minutos**. La cookie refresh-token mantiene la sesión **7 días**. La URL del libro se puede guardar en los marcadores rápidos del navegador Tesla.
+
+**Funciona para cualquier vehículo** — el libro y la entrada manual no requieren conexión a la API de Tesla. Los conductores de otras marcas pueden usar la entrada manual y exportar un PDF conforme.
+
 ### 📲 Navegación iPhone: barra de pestañas
 
 En iPhone y otros smartphones, Tesla Carview muestra una **barra de pestañas estilo iOS nativo** en la parte inferior:

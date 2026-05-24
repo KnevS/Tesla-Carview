@@ -38,6 +38,12 @@
           <AppIcon name="export" :size="16" />
           Finanzamt-PDF
         </button>
+        <!-- Tesla-Browser-Direktzugang: erstellt Pair-Session mit redirect=/fahrtenbuch -->
+        <button @click="openInTesla"
+          class="btn-secondary text-sm min-h-[44px] inline-flex items-center gap-1.5"
+          v-tooltip="'Fahrtenbuch direkt im Tesla-Browser öffnen — erzeugt einen QR-Code und einen Link. Passkey-Login im Tesla-Browser, danach direkt im Fahrtenbuch.'">
+          🚗 Im Tesla öffnen
+        </button>
       </div>
     </div>
 
@@ -399,12 +405,83 @@
       </div>
     </div>
     </Teleport>
+
+    <!-- Tesla-Direktzugang: QR-Modal -->
+    <Teleport to="body">
+    <div v-if="qrModal.show"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm"
+      @click.self="closeQr">
+      <div class="card max-w-sm w-full mx-4 space-y-4 text-center relative">
+        <button @click="closeQr"
+          class="absolute top-3 right-3 text-gray-500 hover:text-white transition text-xl leading-none"
+          aria-label="Schließen">×</button>
+
+        <div class="space-y-1">
+          <p class="text-lg font-semibold">🚗 Fahrtenbuch im Tesla öffnen</p>
+          <p class="text-gray-400 text-xs">
+            Öffne die URL im Tesla-Browser und bestätige per Passkey —<br>
+            du landest danach direkt im Fahrtenbuch.
+          </p>
+        </div>
+
+        <!-- Ausstehend: QR + URL -->
+        <template v-if="qrModal.status === 'pending'">
+          <div v-if="qrModal.qrUrl" class="flex justify-center">
+            <img :src="qrModal.qrUrl" class="rounded-xl w-52 h-52" alt="QR Code für Tesla-Browser" />
+          </div>
+
+          <div class="space-y-1">
+            <p class="text-xs text-gray-500">URL für Tesla-Browser:</p>
+            <div class="flex items-center gap-2 bg-gray-800 rounded-lg px-3 py-2">
+              <code class="text-xs text-blue-300 break-all flex-1 text-left">{{ qrModal.pairUrl }}</code>
+              <button @click="copyUrl"
+                class="text-gray-400 hover:text-white transition flex-shrink-0"
+                :title="qrModal.copied ? \'Kopiert!\' : \'Kopieren\'"
+                v-tooltip="qrModal.copied ? \'Kopiert!\' : \'URL in Zwischenablage kopieren\'"
+              >
+                <AppIcon :name="qrModal.copied ? \'check\' : \'copy\'" :size="16" />
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 text-xs text-gray-500">
+            <div class="animate-spin w-3 h-3 border-2 border-tesla-red border-t-transparent rounded-full"></div>
+            Warte auf Bestätigung im Tesla-Browser…
+            <span class="ml-auto text-gray-600">{{ qrModal.expiresIn }}</span>
+          </div>
+        </template>
+
+        <!-- Bestätigt -->
+        <template v-else-if="qrModal.status === \'confirmed\'">
+          <div class="py-4 space-y-3">
+            <div class="w-14 h-14 rounded-full bg-green-500/20 flex items-center justify-center mx-auto">
+              <AppIcon name="check" :size="32" class="text-green-400" />
+            </div>
+            <p class="text-green-300 font-semibold">Login erfolgreich!</p>
+            <p class="text-gray-500 text-xs">Der Tesla-Browser ist jetzt angemeldet und wurde weitergeleitet.</p>
+          </div>
+        </template>
+
+        <!-- Abgelaufen -->
+        <template v-else-if="qrModal.status === \'expired\'">
+          <div class="py-2 space-y-3">
+            <AppIcon name="warning" :size="40" class="text-yellow-400 mx-auto" />
+            <p class="text-yellow-300 text-sm">QR-Code abgelaufen.</p>
+            <button @click="openInTesla" class="btn-secondary text-sm">Neuen Code erzeugen</button>
+          </div>
+        </template>
+
+        <button @click="closeQr" class="btn-secondary text-sm w-full">Schließen</button>
+      </div>
+    </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAppStore } from '../store/index.js';
+import { useAuthStore } from '../store/auth.js';
 import { useUnits } from '../store/prefs.js';
 import api from '../api.js';
 import TripsHeatmap from '../components/TripsHeatmap.vue';
@@ -417,6 +494,7 @@ import SortableSection from '../components/SortableSection.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
 
 const appStore  = useAppStore();
+const authStore = useAuthStore();
 const { fmtDistance } = useUnits();
 const trips     = ref([]);
 const months    = ref([]);
@@ -732,4 +810,96 @@ onMounted(load);
 watch(() => appStore.selectedVehicleId, load);
 // Sortierwechsel triggert Reload, damit Backend mit korrektem ORDER BY liefert.
 watch(sortDir, load);
+
+// ── Tesla-Browser-Direktzugang ─────────────────────────────────────────────
+// Erstellt eine Pair-Session mit redirect=/fahrtenbuch; zeigt QR + URL im Modal.
+// Das öffnende Gerät (z.B. Tesla-Browser) navigiert zu /pair/<token>, bestätigt
+// per Passkey und landet danach direkt im Fahrtenbuch.
+
+const qrModal = ref({
+  show:      false,
+  status:    'pending', // pending | confirmed | expired
+  qrUrl:     '',
+  pairUrl:   '',
+  token:     '',
+  expiresAt: 0,
+  expiresIn: '',
+  copied:    false,
+});
+let qrPollTimer   = null;
+let qrExpiryTimer = null;
+
+function calcExpiresIn() {
+  const diff = qrModal.value.expiresAt - Math.floor(Date.now() / 1000);
+  if (diff <= 0) return 'abgelaufen';
+  const m = Math.floor(diff / 60);
+  const s = diff % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+async function openInTesla() {
+  closeQr(); // bestehenden Timer stoppen
+  try {
+    const params = new URLSearchParams({ redirect: '/fahrtenbuch' });
+    if (authStore.tenantSlug) params.append('tenantSlug', authStore.tenantSlug);
+    const { data } = await api.get(`/pair/init?${params}`);
+
+    qrModal.value = {
+      show:      true,
+      status:    'pending',
+      qrUrl:     data.qrDataUrl,
+      pairUrl:   `${window.location.origin}/pair/${data.token}`,
+      token:     data.token,
+      expiresAt: data.expiresAt,
+      expiresIn: calcExpiresIn(),
+      copied:    false,
+    };
+
+    // Ablauf-Ticker (1s)
+    qrExpiryTimer = setInterval(() => {
+      qrModal.value.expiresIn = calcExpiresIn();
+      if (qrModal.value.expiresAt - Math.floor(Date.now() / 1000) <= 0) {
+        clearInterval(qrExpiryTimer);
+        clearInterval(qrPollTimer);
+        if (qrModal.value.status === 'pending') qrModal.value.status = 'expired';
+      }
+    }, 1000);
+
+    // Status-Polling über /pair/info (konsumiert den JWT NICHT — das macht der Tesla-Browser selbst)
+    qrPollTimer = setInterval(async () => {
+      try {
+        const { data: info } = await api.get(`/pair/info/${data.token}`);
+        if (info.status === 'already_confirmed') {
+          clearInterval(qrPollTimer);
+          clearInterval(qrExpiryTimer);
+          qrModal.value.status = 'confirmed';
+          setTimeout(() => { if (qrModal.value.show) qrModal.value.show = false; }, 2500);
+        }
+      } catch (e) {
+        // 410 = abgelaufen
+        if (e?.response?.status === 410) {
+          clearInterval(qrPollTimer);
+          clearInterval(qrExpiryTimer);
+          if (qrModal.value.status === 'pending') qrModal.value.status = 'expired';
+        }
+      }
+    }, 2000);
+  } catch (err) {
+    console.error('[Fahrtenbuch] openInTesla Fehler:', err.message);
+  }
+}
+
+function closeQr() {
+  clearInterval(qrPollTimer);
+  clearInterval(qrExpiryTimer);
+  qrModal.value.show = false;
+}
+
+async function copyUrl() {
+  try {
+    await navigator.clipboard.writeText(qrModal.value.pairUrl);
+    qrModal.value.copied = true;
+    setTimeout(() => { qrModal.value.copied = false; }, 2000);
+  } catch { /* Clipboard nicht verfügbar */ }
+}
 </script>

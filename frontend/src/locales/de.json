@@ -1913,7 +1913,8 @@
     "successHint": "Das andere Gerät wird automatisch eingeloggt.",
     "failed": "Authentifizierung fehlgeschlagen",
     "failedGeneric": "Unbekannter Fehler. Bitte erneut versuchen.",
-    "retry": "Erneut versuchen"
+    "retry": "Erneut versuchen",
+    "redirecting": "Weiterleitung…"
   },
   "sleep": {
     "title": "Schlaf-Monitor",

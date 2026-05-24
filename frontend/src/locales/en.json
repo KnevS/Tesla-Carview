@@ -1914,7 +1914,8 @@
     "successHint": "The other device will be logged in automatically.",
     "failed": "Authentication failed",
     "failedGeneric": "Unknown error. Please try again.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "redirecting": "Redirecting…"
   },
   "sleep": {
     "title": "Sleep Monitor",

@@ -469,6 +469,21 @@ Tesla Carview is a **PWA** (Progressive Web App) — you can install it like a n
 
 **Recommended:** bookmark Carview on the Tesla display — Tesla shows saved bookmarks in the browser quick access. For jotting down a trip purpose during a short stop that's much faster than typing the URL again.
 
+### 🚗 Open the logbook directly in the Tesla browser {#tesla-direct}
+
+The **"🚗 Open in Tesla"** button at the top of the Logbook view makes accessing the logbook from the Tesla browser effortless:
+
+1. In Carview on your phone or desktop, open **Analytics → Logbook**.
+2. Click **"🚗 Open in Tesla"**.
+3. A modal appears with a **QR code** and a **direct URL** (e.g. `https://yourapp.example.com/pair/abc123…`).
+4. In the Tesla, open the browser and enter the URL — or scan the QR with a secondary camera if available.
+5. The Tesla browser opens a Passkey-authentication page. Tap **"Confirm with Passkey"** and authenticate using the biometric or security method registered on that device.
+6. After successful authentication, the Tesla browser is logged in and navigates **directly to the Logbook** — no further steps needed.
+
+The pair session is valid for **5 minutes**. The refresh-token cookie set during this flow keeps the Tesla browser logged in for **7 days** (auto-refreshes on each visit). The logbook URL is bookmarkable in Tesla's browser quick access — after initial setup, one tap is all it takes.
+
+**Works for any vehicle** — the logbook and manual trip entry work without a Tesla API connection. Non-Tesla drivers can use manual entry ("+ Manuell") to log every trip and still export a BMF-compliant PDF.
+
 ### 📲 iPhone Navigation: Tab Bar
 
 On iPhone and other smartphones, Tesla Carview shows a **native iOS-style tab bar** at the bottom:

@@ -22,17 +22,27 @@ function ensurePairTable() {
     created_at INTEGER DEFAULT (unixepoch()),
     expires_at INTEGER NOT NULL,
     user_id INTEGER,
-    used_at INTEGER
+    used_at INTEGER,
+    redirect_path TEXT
   )`);
+  // redirect_path-Spalte nachrüsten falls Tabelle älter als dieses Migrationsskript ist
+  try {
+    getMasterDb().exec("ALTER TABLE pair_sessions ADD COLUMN redirect_path TEXT");
+  } catch { /* Spalte existiert bereits */ }
   getMasterDb().prepare('DELETE FROM pair_sessions WHERE expires_at < unixepoch() - 300').run();
 }
 
-// GET /api/pair/init?tenantSlug=xxx
-// Tesla-Browser oder beliebiger Client erstellt neue Pair-Session
+// GET /api/pair/init?tenantSlug=xxx&redirect=/fahrtenbuch
+// Tesla-Browser oder beliebiger Client erstellt neue Pair-Session.
+// Optionaler ?redirect=-Pfad wird nach erfolgreichem Login verwendet.
 router.get('/init', loginRateLimit, async (req, res) => {
   try {
     ensurePairTable();
-    const { tenantSlug } = req.query;
+    const { tenantSlug, redirect: redirectPath } = req.query;
+    // Sicherheitsprüfung: nur interne Pfade erlaubt (keine externe URLs)
+    const safeRedirect = (redirectPath && redirectPath.startsWith('/') && !redirectPath.startsWith('//'))
+      ? redirectPath.slice(0, 200)
+      : null;
     let tenant;
     if (tenantSlug) {
       tenant = getTenantBySlug(tenantSlug);
@@ -59,8 +69,8 @@ router.get('/init', loginRateLimit, async (req, res) => {
     const expiresAt = Math.floor(Date.now() / 1000) + PAIR_TTL;
 
     getMasterDb().prepare(
-      'INSERT INTO pair_sessions (token, tenant_id, expires_at) VALUES (?, ?, ?)'
-    ).run(token, tenant.id, expiresAt);
+      'INSERT INTO pair_sessions (token, tenant_id, expires_at, redirect_path) VALUES (?, ?, ?, ?)'
+    ).run(token, tenant.id, expiresAt, safeRedirect);
 
     const pairUrl = `${RP_ORIGIN}/pair/${token}`;
     const qrDataUrl = await QRCode.toDataURL(pairUrl, {
@@ -69,7 +79,7 @@ router.get('/init', loginRateLimit, async (req, res) => {
       color: { dark: '#e8e8e8', light: '#1a1a1a' },
     });
 
-    res.json({ token, qrDataUrl, expiresAt, tenantId: tenant.id });
+    res.json({ token, qrDataUrl, expiresAt, tenantId: tenant.id, redirectPath: safeRedirect });
   } catch (err) {
     console.error('[Pair] init Fehler:', err.message);
     res.status(500).json({ error: err.message });
@@ -125,6 +135,7 @@ router.get('/poll/:token', async (req, res) => {
       status: 'confirmed',
       accessToken,
       user: { id: user.id, username: user.username, role: user.role, tenantId: row.tenant_id },
+      redirectPath: row.redirect_path ?? null,
     });
   } catch (err) {
     console.error('[Pair] poll Fehler:', err.message);
@@ -137,7 +148,7 @@ router.get('/info/:token', (req, res) => {
   try {
     ensurePairTable();
     const row = getMasterDb().prepare(
-      'SELECT tenant_id, expires_at, user_id, used_at FROM pair_sessions WHERE token=?'
+      'SELECT tenant_id, expires_at, user_id, used_at, redirect_path FROM pair_sessions WHERE token=?'
     ).get(req.params.token);
 
     if (!row) return res.status(404).json({ error: 'Session nicht gefunden' });
@@ -146,7 +157,7 @@ router.get('/info/:token', (req, res) => {
     }
     if (row.user_id) return res.json({ status: 'already_confirmed' });
 
-    res.json({ status: 'pending', tenantId: row.tenant_id, expiresAt: row.expires_at });
+    res.json({ status: 'pending', tenantId: row.tenant_id, expiresAt: row.expires_at, redirectPath: row.redirect_path ?? null });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

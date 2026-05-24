@@ -1914,7 +1914,8 @@
     "successHint": "L'autre appareil sera connecté automatiquement.",
     "failed": "Échec de l'authentification",
     "failedGeneric": "Erreur inconnue. Veuillez réessayer.",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "redirecting": "Redirection…"
   },
   "sleep": {
     "title": "Moniteur de veille",

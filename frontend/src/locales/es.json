@@ -1914,7 +1914,8 @@
     "successHint": "El otro dispositivo iniciará sesión automáticamente.",
     "failed": "Error de autenticación",
     "failedGeneric": "Error desconocido. Por favor inténtalo de nuevo.",
-    "retry": "Intentar de nuevo"
+    "retry": "Intentar de nuevo",
+    "redirecting": "Redirigiendo…"
   },
   "sleep": {
     "title": "Monitor de sueño",

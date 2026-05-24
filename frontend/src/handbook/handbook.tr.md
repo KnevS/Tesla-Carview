@@ -477,6 +477,21 @@ Masaüstü ve tablet tarayıcılarında navigasyon üç ana bölüme ayrılır:
 | **Analiz** | Sürüşler · Yol defteri · Şarj · Enerji raporu · Uyku monitörü · İklim · Servis defteri · Fatura · Dışa aktarma |
 | **Planlama** | Rota planlayıcı · Şarj istasyonları · Otomasyonlar · Grok (YZ) |
 
+### 🚗 Sürüş günlüğünü doğrudan Tesla tarayıcısında açma {#tesla-direkt}
+
+Sürüş günlüğünün üst kısmındaki **« 🚗 Tesla'da Aç »** düğmesi, Tesla tarayıcısından erişimi kolaylaştırır:
+
+1. Telefonunuzda veya bilgisayarınızda Carview'de **Analizler → Sürüş Günlüğü**'nü açın.
+2. **« 🚗 Tesla'da Aç »** düğmesine tıklayın.
+3. Bir **QR kodu** ve **doğrudan URL** içeren bir pencere açılır (örn. `https://uygulamaniz.example.com/pair/abc123…`).
+4. Tesla'da tarayıcıyı açın ve URL'yi girin — varsa QR kodu da tarayabilirsiniz.
+5. Tesla tarayıcısı bir Passkey kimlik doğrulama sayfası açar. **« Passkey ile Onayla »**'ya dokunun ve kimliğinizi doğrulayın.
+6. Başarılı doğrulamanın ardından Tesla tarayıcısı oturum açar ve doğrudan sürüş günlüğüne yönlenir.
+
+Oturum **5 dakika** geçerlidir. Refresh-token çerezi oturumu **7 gün** açık tutar. Sürüş günlüğü URL'si Tesla tarayıcısının hızlı erişim sık kullanılanlarına eklenebilir.
+
+**Her araç için çalışır** — sürüş günlüğü ve manuel giriş Tesla API bağlantısı gerektirmez. Diğer marka araç sürücüleri manuel girişi (« + Manuel ») kullanarak uyumlu PDF dışa aktarabilir.
+
 ### 📲 iPhone Navigasyonu: Sekme Çubuğu
 
 iPhone ve diğer akıllı telefonlarda Tesla Carview, ekranın altında **iOS tarzı bir sekme çubuğu** gösterir:

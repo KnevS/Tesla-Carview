@@ -467,6 +467,21 @@ Tesla Carview est une **PWA** (Progressive Web App) — installable comme une ap
 
 **Recommandation :** Ajoutez Carview en favori dans le navigateur Tesla — Tesla affiche les favoris directement dans l'accès rapide du navigateur. Pour saisir des notes de voyage lors d'une courte pause, c'est plus rapide que de retaper l'URL à chaque fois.
 
+### 🚗 Ouvrir le journal de bord directement dans le navigateur Tesla {#tesla-direct}
+
+Le bouton **« 🚗 Ouvrir dans Tesla »** en haut du journal de bord simplifie l'accès depuis le navigateur Tesla :
+
+1. Ouvrez **Analyses → Journal de bord** dans Carview sur votre téléphone ou ordinateur.
+2. Cliquez sur **« 🚗 Ouvrir dans Tesla »**.
+3. Une fenêtre apparaît avec un **QR code** et une **URL directe** (ex. `https://votre-app.example.com/pair/abc123…`).
+4. Dans la Tesla, ouvrez le navigateur et entrez l'URL — ou scannez le QR avec une caméra si disponible.
+5. Le navigateur Tesla ouvre une page d'authentification Passkey. Appuyez sur **« Confirmer avec Passkey »** et authentifiez-vous.
+6. Après authentification réussie, le navigateur Tesla est connecté et navigue directement vers le journal de bord.
+
+La session est valide **5 minutes**. Le cookie refresh-token maintient la session **7 jours**. L'URL du journal est mémorisable dans les favoris rapides du navigateur Tesla.
+
+**Fonctionne pour tout véhicule** — le journal et la saisie manuelle ne nécessitent pas de connexion à l'API Tesla. Les conducteurs d'autres marques peuvent utiliser la saisie manuelle et exporter un PDF conforme.
+
 ### 📲 Navigation iPhone : barre d'onglets
 
 Sur iPhone et autres smartphones, Tesla Carview affiche une **barre d'onglets style iOS natif** en bas de l'écran :

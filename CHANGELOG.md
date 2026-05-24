@@ -7,6 +7,19 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.3.2] — 2026-05-24
+
+### Neu
+- **Fahrtenbuch — Im Tesla öffnen** (`Fahrtenbuch.vue`) — Neuer Button „🚗 Im Tesla öffnen" erstellt eine Pair-Session mit `redirect=/fahrtenbuch` und zeigt ein Modal mit QR-Code und direktem Link. Der Tesla-Browser öffnet die URL, der Nutzer authentifiziert sich per Passkey direkt im Tesla-Browser (WebAuthn/FIDO2) und landet sofort im Fahrtenbuch — kein separates Gerät zum QR-Scannen notwendig. Das Modal auf dem sendenden Gerät zeigt bei erfolgreicher Anmeldung einen Erfolgs-State.
+- **Pair Self-Authentication** (`PairLogin.vue`) — Nach erfolgreicher Passkey-Bestätigung ruft das bestätigende Gerät (z. B. Tesla-Browser) sofort `/pair/poll/:token` auf, um seinen eigenen JWT und Refresh-Token-Cookie zu erhalten, und navigiert dann zum konfigurierten `redirectPath`. Bisher bestätigte `/pair/<token>` die Session nur für ein anderes Gerät, das pollt.
+- **Pair-Sessions mit Weiterleitungspfad** (`backend/routes/pair.js`) — `/pair/init` akzeptiert jetzt den optionalen Query-Parameter `?redirect=<path>` (validiert: muss mit `/` beginnen, nicht `//`, max. 200 Zeichen). Wird in `pair_sessions.redirect_path` gespeichert (Spalte via `ALTER TABLE … ADD COLUMN` nachgerüstet) und von `/pair/info/:token` sowie `/pair/poll/:token` zurückgegeben.
+- **Copy-Icon** (`lib/icons.js`) — Neues SVG-Icon `copy` (Zwischenablage) für alle `AppIcon`-Verwendungen verfügbar.
+
+### Verbessert
+- **PairLogin.vue** — Zeigt das konfigurierte Weiterleitungsziel vor der Authentifizierung an. Nach erfolgreicher Self-Auth erscheint eine pulsierende „Weiterleitung…"-Meldung vor der Navigation.
+
+---
+
 ## [v3.3.1] — 2026-05-24
 
 ### Behoben
