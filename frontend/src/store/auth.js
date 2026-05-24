@@ -80,7 +80,7 @@ export const useAuthStore = defineStore('auth', {
       const { data: opts } = await api.post('/passkey/login-options', { tenantSlug: slug });
       // 2. Browser-native Passkey-Prompt
       const { startAuthentication } = await import('@simplewebauthn/browser');
-      const response = await startAuthentication(opts);
+      const response = await startAuthentication({ optionsJSON: opts });
       // 3. Verifizieren
       const { data } = await api.post('/passkey/login-verify', {
         challengeId: opts.challengeId,
