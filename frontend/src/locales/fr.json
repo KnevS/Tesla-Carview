@@ -96,7 +96,9 @@
     "group_overview": "Aperçu",
     "group_analytics": "Analyses",
     "group_admin": "Administration",
-    "group_ai": "Assistant IA"
+    "group_ai": "Assistant IA",
+    "group_vehicle": "Véhicule",
+    "group_plan": "Planification"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -2052,7 +2054,12 @@
     "connections": "Connecteurs",
     "operator": "Opérateur",
     "tooltipDcOnly": "Afficher uniquement les bornes DC rapides.",
-    "tooltipRadius": "Rayon de recherche autour de l'emplacement sélectionné."
+    "tooltipRadius": "Rayon de recherche autour de l'emplacement sélectionné.",
+    "addressNotFound": "Adresse introuvable – veuillez être plus précis",
+    "apiKeyMissing": "Clé API OpenChargeMap non configurée",
+    "apiKeyHint": "À saisir dans Admin → Système → Clés API externes",
+    "configureNow": "Configurer maintenant",
+    "errorLoading": "Erreur lors du chargement des stations"
   },
   "climate": {
     "title": "Statistiques climatisation",

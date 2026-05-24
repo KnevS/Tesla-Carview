@@ -7,6 +7,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.3.1] — 2026-05-24
+
+### Fixed
+- **Charging station search — silent failures resolved** — All error states (address not found, missing OpenChargeMap API key, network error) now show a visible, descriptive banner instead of an empty result list. A missing API key shows a direct link to Admin → System for configuration.
+- **Geolocation error handling** — If the browser denies location access, a visible error state is shown instead of silently doing nothing.
+
+### Navigation restructure
+- **"Overview" → "Vehicle"** — The first nav group is renamed to clearly reflect its content (live vehicle status).
+- **"Analytics" cleaned up** — Automations and Charging Stations removed; only data analysis views remain: Trips, Trip log, Charging, Energy report, Sleep monitor, Climate stats, Service log, Billing, Export.
+- **New "Planning" group** — Route planner, Charging stations, Automations, and Grok AI moved here. These are all action- and future-oriented tools.
+- **"AI" group removed** — Grok is now logically at home in Planning.
+- All 6 locales updated with new group labels (`group_vehicle`, `group_plan`).
+- Handbook updated in all 6 languages: new desktop navigation table, updated mobile Tab Bar description, new standalone sections for Charging station finder and Automations.
+
+---
+
 ## [v3.3.0] — 2026-05-24
 
 ### Improved

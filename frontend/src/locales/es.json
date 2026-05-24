@@ -96,7 +96,9 @@
     "group_overview": "Resumen",
     "group_analytics": "Análisis",
     "group_admin": "Administración",
-    "group_ai": "Asistente IA"
+    "group_ai": "Asistente IA",
+    "group_vehicle": "Vehículo",
+    "group_plan": "Planificación"
   },
   "dashboard": {
     "title": "Panel",
@@ -2052,7 +2054,12 @@
     "connections": "Conectores",
     "operator": "Operador",
     "tooltipDcOnly": "Mostrar solo estaciones de carga rápida DC.",
-    "tooltipRadius": "Radio de búsqueda alrededor de la ubicación seleccionada."
+    "tooltipRadius": "Radio de búsqueda alrededor de la ubicación seleccionada.",
+    "addressNotFound": "Dirección no encontrada – sé más específico",
+    "apiKeyMissing": "Clave API de OpenChargeMap no configurada",
+    "apiKeyHint": "Introdúcela en Admin → Sistema → Claves API externas",
+    "configureNow": "Configurar ahora",
+    "errorLoading": "Error al cargar las estaciones"
   },
   "climate": {
     "title": "Estadísticas climáticas",

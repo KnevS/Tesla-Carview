@@ -96,7 +96,9 @@
     "group_overview": "Genel Bakış",
     "group_analytics": "Analiz",
     "group_admin": "Yönetim",
-    "group_ai": "Yapay Zeka"
+    "group_ai": "Yapay Zeka",
+    "group_vehicle": "Araç",
+    "group_plan": "Planlama"
   },
   "dashboard": {
     "title": "Gösterge paneli",
@@ -2052,7 +2054,12 @@
     "connections": "Bağlantılar",
     "operator": "Operatör",
     "tooltipDcOnly": "Yalnızca DC hızlı şarj istasyonlarını göster.",
-    "tooltipRadius": "Seçilen konum etrafında arama yarıçapı."
+    "tooltipRadius": "Seçilen konum etrafında arama yarıçapı.",
+    "addressNotFound": "Adres bulunamadı – daha spesifik ol",
+    "apiKeyMissing": "OpenChargeMap API anahtarı yapılandırılmamış",
+    "apiKeyHint": "Lütfen Admin → Sistem → Harici API anahtarları bölümüne gir",
+    "configureNow": "Şimdi yapılandır",
+    "errorLoading": "İstasyonlar yüklenirken hata oluştu"
   },
   "climate": {
     "title": "İklim İstatistikleri",

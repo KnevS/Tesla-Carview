@@ -499,6 +499,32 @@ Die gewählten Optionen werden im Browser gespeichert und gelten für alle folge
 
 **Ladeplanung** — Bei aktivierter SoC-Planung (Akkustand eingeben) berechnet der Planer intelligente Ladestopps mit Zeitschätzung und prüft, ob die Reichweite für jeden Abschnitt ausreicht.
 
+## 🔌 Ladestationen-Suche {#charger-finder}
+
+Unter **Planung → Ladestationen** lassen sich Schnellladestationen in der Nähe eines beliebigen Ortes suchen.
+
+**Voraussetzung** — Ein kostenloser [OpenChargeMap-API-Key](https://openchargemap.org/site/develop/api) muss in **Admin → System → Externe API-Schlüssel** hinterlegt sein. Fehlt der Key, erscheint ein Hinweis-Banner mit direktem Link zur Konfigurationsseite.
+
+**Suche starten:**
+1. Adresse oder Ort eingeben → **Suchen** (oder Enter drücken)
+2. Alternativ: **📍 Mein Standort** — nutzt die Browser-Geolokalisierung
+3. Radius (5/10/25/50 km) und DC-only-Filter nach Bedarf anpassen
+
+**Ergebnisse** zeigen Name, Adresse, Betreiber, maximale Leistung (kW), Anschlussanzahl und Steckertypen. „In Maps öffnen" startet Google Maps Navigation zur Station.
+
+> **Tipp:** Im Routenplaner sind Schnellladestationen direkt auf der Karte entlang der Route sichtbar — ohne separaten Suchschritt.
+
+## ⚡ Automationen {#automations}
+
+Unter **Planung → Automationen** lassen sich Push-Alarme und automatische Aktionen einrichten — ohne Programmierung.
+
+**Beispiele:**
+- Lade-Alarm bei Akkustand < 20 %
+- Benachrichtigung wenn Laden abgeschlossen
+- Geofence-Aktion wenn Fahrzeug Heimbereich verlässt oder betritt
+
+Automationen werden serverseitig ausgeführt und senden Browser-Push-Benachrichtigungen (erfordert erteilte Push-Berechtigung im Browser).
+
 ## 🟢 System-Status (Admin) {#system-health}
 
 Unter **System** sieht der Admin oben eine farbige Ampel-Karte mit acht Checks:

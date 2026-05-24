@@ -467,12 +467,22 @@ Tesla Carview bir **PWA**'dır (Progressive Web App) — App Store veya Google P
 
 **Öneri:** Carview'i Tesla tarayıcısında yer imi olarak kaydet — Tesla, kaydedilen yer imlerini doğrudan tarayıcı hızlı erişiminde gösterir. Kısa bir durakta seyahat notu girmek, her seferinde URL yazmaktan çok daha hızlıdır.
 
+### 🗂️ Masaüstü navigasyonu: menü grupları
+
+Masaüstü ve tablet tarayıcılarında navigasyon üç ana bölüme ayrılır:
+
+| Grup | İçerik |
+|---|---|
+| **Araç** | Pano · Canlı veriler · Kontrol · Batarya |
+| **Analiz** | Sürüşler · Yol defteri · Şarj · Enerji raporu · Uyku monitörü · İklim · Servis defteri · Fatura · Dışa aktarma |
+| **Planlama** | Rota planlayıcı · Şarj istasyonları · Otomasyonlar · Grok (YZ) |
+
 ### 📲 iPhone Navigasyonu: Sekme Çubuğu
 
 iPhone ve diğer akıllı telefonlarda Tesla Carview, ekranın altında **iOS tarzı bir sekme çubuğu** gösterir:
 
 - **4 hızlı sekme** — Pano, Sürüşler, Şarj, Kontrol her zaman tek dokunuşla erişilebilir
-- **"Daha fazla" düğmesi** → diğer tüm bölümleri içeren bir alt sayfa açar (Yol defteri, Batarya, Grok, Admin …)
+- **"Daha fazla" düğmesi** → diğer tüm bölümleri (Araç, Analiz, Planlama) içeren bir alt sayfa açar; araç seçici, el kitabı, ayarlar ve çıkış da buradadır
 - **Dynamic Island / Home Indicator** doğru şekilde desteklenir
 - Etkin sekme küçük bir göstergeyle işaretlenir
 

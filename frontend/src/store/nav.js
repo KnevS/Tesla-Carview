@@ -4,61 +4,54 @@ import { useAuthStore } from './auth.js';
 /**
  * Single Source of Truth fuer die Navigation.
  *
- * Frueher gab es hier eine flache DEFAULT_LINKS-Liste UND zusaetzlich
- * eine separate Gruppen-Struktur in NavBar.vue (NAV_GROUPS). Die zwei
- * liefen auseinander — die Settings-„Navigationsleiste anpassen"-Karte
- * zeigte Items, die in der echten Leiste anders gruppiert oder gar nicht
- * sichtbar waren (z.B. „system" als normaler Punkt im Store, aber
- * admin-only in der NavBar). Plus: die Customization-Aktionen im Store
- * (Reihenfolge / Ein-Ausblenden) waren wirkungslos, weil NavBar.vue
- * sie nie las.
- *
- * Jetzt: Gruppen + Items hier zentral. NavBar importiert sie und
- * filtert pro User (admin-only) + respektiert user-customization
- * (Reihenfolge + hidden). Settings zeigt genau dieselben Items wie
- * die Bar.
+ * Gruppen-Struktur:
+ *   vehicle   — Fahrzeug-Status & Echtzeit (Dashboard, Technik, Steuerung, Batterie)
+ *   analytics — Historische Auswertungen (Fahrten, Laden, Berichte, Export)
+ *   plan      — Planung & aktive Tools (Route, Ladestationen, Automationen, Grok)
+ *   admin     — Verwaltung (nur Admins)
  */
 
-/** Statische Gruppen-Definition. Items unverhandelbar — Routen muessen
- *  in router/index.js existieren; admin-Items werden zusaetzlich vom
- *  Router-Guard auf authStore.isAdmin geprueft.
- *
- *  `icon` ist ein AppIcon-Name (siehe components/AppIcon.vue), das
- *  alte Emoji bleibt als `emojiFallback` erhalten — wird angezeigt,
- *  falls AppIcon den Namen nicht kennt. */
 export const NAV_GROUPS = [
+  // ── Fahrzeug ──────────────────────────────────────────────────────────────
   {
-    id: 'overview', adminOnly: false,
+    id: 'vehicle', adminOnly: false,
     items: [
-      { key: 'dashboard', to: '/',          icon: 'home',     emojiFallback: '🏠', label: 'Dashboard',    tooltip: 'Übersicht mit Kennzahlen, letzter Fahrt und Monatsstatistik' },
-      { key: 'telemetry', to: '/telemetry', icon: 'gauge',    emojiFallback: '🏎',  label: 'Technik',      tooltip: 'Live-Fahrzeugdaten: Reifendruck, Klima, Leistung, SOC – wie der Track-Mode' },
-      { key: 'control',   to: '/control',   icon: 'steering', emojiFallback: '🎮', label: 'Steuerung',    tooltip: 'Fahrzeug steuern: Klima, Türen, Laden, Navigation' },
-      { key: 'routes',    to: '/routes',    icon: 'map',      emojiFallback: '🗺️', label: 'Routenplaner', tooltip: 'Routen planen, an Tesla senden, in ABRP öffnen und Lieblingsrouten speichern' },
-      { key: 'battery',   to: '/battery',   icon: 'battery',  emojiFallback: '📊', label: 'Batterie',     tooltip: 'Reichweiten-Verlauf und Degradations-Analyse über Zeit' },
+      { key: 'dashboard', to: '/',          icon: 'home',        emojiFallback: '🏠', label: 'Dashboard',    tooltip: 'Übersicht mit Kennzahlen, letzter Fahrt und Monatsstatistik' },
+      { key: 'telemetry', to: '/telemetry', icon: 'gauge',       emojiFallback: '🏎',  label: 'Technik',      tooltip: 'Live-Fahrzeugdaten: Reifendruck, Klima, Leistung, SOC – wie der Track-Mode' },
+      { key: 'control',   to: '/control',   icon: 'steering',    emojiFallback: '🎮', label: 'Steuerung',    tooltip: 'Fahrzeug steuern: Klima, Türen, Laden, Navigation' },
+      { key: 'battery',   to: '/battery',   icon: 'battery',     emojiFallback: '📊', label: 'Batterie',     tooltip: 'Reichweiten-Verlauf und Degradations-Analyse über Zeit' },
     ],
   },
+
+  // ── Auswertungen ──────────────────────────────────────────────────────────
   {
     id: 'analytics', adminOnly: false,
     items: [
-      { key: 'trips',        to: '/trips',            icon: 'map',        emojiFallback: '🗺️', label: 'Fahrten',        tooltip: 'Liste aller aufgezeichneten Fahrten mit GPS-Track auf einer Karte' },
-      { key: 'fahrtenbuch',  to: '/fahrtenbuch',      icon: 'logbook',    emojiFallback: '📋', label: 'Fahrtenbuch',    tooltip: 'Fahrten klassifizieren und Auswertung nach Privat/Dienst/Arbeitsweg' },
-      { key: 'charging',     to: '/charging',         icon: 'bolt',       emojiFallback: '🔋', label: 'Laden',          tooltip: 'Alle Ladevorgänge mit Ladekurven, Kosten und Aufschlüsselung nach Ladertyp' },
-      { key: 'energy',       to: '/energy',           icon: 'sparkles',   emojiFallback: '🌿', label: 'Energiebericht', tooltip: 'Wöchentliche Effizienztrends, kWh/100 km und Eco-Score' },
-      { key: 'sleep',        to: '/sleep',            icon: 'moon',       emojiFallback: '😴', label: 'Schlaf-Monitor',    tooltip: 'Wann schläft das Auto – und wie viel Energie verliert es im Stand?' },
-      { key: 'climate',      to: '/climate',          icon: 'thermometer', emojiFallback: '❄️', label: 'Klimastatistiken',  tooltip: 'Klimaanlagen- und Sitzheizungsnutzung nach Tag – inkl. Vorklimatisierungen' },
-      { key: 'automations',  to: '/automations',      icon: 'bolt',       emojiFallback: '⚡', label: 'Automationen',   tooltip: 'Push-Alarme und automatische Aktionen bei Ladestufe, Geofence u. m.' },
-      { key: 'chargers',     to: '/chargers',         icon: 'bolt',       emojiFallback: '🗺', label: 'Ladestationen',  tooltip: 'Schnellladestationen in deiner Nähe suchen – OpenChargeMap-Daten' },
-      { key: 'logbook',      to: '/logbook',          icon: 'tool',       emojiFallback: '📓', label: 'Betriebsbuch',   tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },
-      { key: 'abrechnung',   to: '/kostenabrechnung', icon: 'cash',       emojiFallback: '💶', label: 'Abrechnung',     tooltip: 'Kostenabrechnung Heimladen für Dienstwagen' },
-      { key: 'export',       to: '/export',           icon: 'export',     emojiFallback: '💾', label: 'Export',         tooltip: 'Daten als CSV/JSON exportieren, Vollbackup erstellen, Push-Benachrichtigungen' },
+      { key: 'trips',       to: '/trips',            icon: 'map',         emojiFallback: '🗺️', label: 'Fahrten',          tooltip: 'Liste aller aufgezeichneten Fahrten mit GPS-Track auf einer Karte' },
+      { key: 'fahrtenbuch', to: '/fahrtenbuch',      icon: 'logbook',     emojiFallback: '📋', label: 'Fahrtenbuch',      tooltip: 'Fahrten klassifizieren und Auswertung nach Privat/Dienst/Arbeitsweg' },
+      { key: 'charging',    to: '/charging',         icon: 'bolt',        emojiFallback: '🔋', label: 'Laden',            tooltip: 'Alle Ladevorgänge mit Ladekurven, Kosten und Aufschlüsselung nach Ladertyp' },
+      { key: 'energy',      to: '/energy',           icon: 'sparkles',    emojiFallback: '🌿', label: 'Energiebericht',   tooltip: 'Wöchentliche Effizienztrends, kWh/100 km und Eco-Score' },
+      { key: 'sleep',       to: '/sleep',            icon: 'moon',        emojiFallback: '😴', label: 'Schlaf-Monitor',   tooltip: 'Wann schläft das Auto – und wie viel Energie verliert es im Stand?' },
+      { key: 'climate',     to: '/climate',          icon: 'thermometer', emojiFallback: '❄️', label: 'Klimastatistiken', tooltip: 'Klimaanlagen- und Sitzheizungsnutzung nach Tag – inkl. Vorklimatisierungen' },
+      { key: 'logbook',     to: '/logbook',          icon: 'tool',        emojiFallback: '📓', label: 'Betriebsbuch',     tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },
+      { key: 'abrechnung',  to: '/kostenabrechnung', icon: 'cash',        emojiFallback: '💶', label: 'Abrechnung',       tooltip: 'Kostenabrechnung Heimladen für Dienstwagen' },
+      { key: 'export',      to: '/export',           icon: 'export',      emojiFallback: '💾', label: 'Export',           tooltip: 'Daten als CSV/JSON exportieren, Vollbackup erstellen, Push-Benachrichtigungen' },
     ],
   },
+
+  // ── Planung ───────────────────────────────────────────────────────────────
+  // Vorausschauende und aktive Tools: Route, Ladeinfrastruktur, Automationen, KI.
   {
-    id: 'ai', adminOnly: false,
+    id: 'plan', adminOnly: false,
     items: [
-      { key: 'grok', to: '/grok', icon: 'sparkles', emojiFallback: '💬', label: 'Grok', tooltip: 'Chat mit Grok KI — stelle Fragen zu deinen Fahrten, Ladedaten und deinem Tesla' },
+      { key: 'routes',      to: '/routes',      icon: 'map',      emojiFallback: '🗺️', label: 'Routenplaner', tooltip: 'Routen planen, an Tesla senden, in ABRP öffnen und Lieblingsrouten speichern' },
+      { key: 'chargers',    to: '/chargers',    icon: 'bolt',     emojiFallback: '🗺', label: 'Ladestationen', tooltip: 'Schnellladestationen in deiner Nähe suchen – OpenChargeMap-Daten' },
+      { key: 'automations', to: '/automations', icon: 'bolt',     emojiFallback: '⚡', label: 'Automationen',  tooltip: 'Push-Alarme und automatische Aktionen bei Ladestufe, Geofence u. m.' },
+      { key: 'grok',        to: '/grok',        icon: 'sparkles', emojiFallback: '💬', label: 'Grok',          tooltip: 'Chat mit Grok KI — stelle Fragen zu deinen Fahrten, Ladedaten und deinem Tesla' },
     ],
   },
+
+  // ── Admin ─────────────────────────────────────────────────────────────────
   {
     id: 'admin', adminOnly: true,
     items: [
@@ -90,34 +83,20 @@ export const useNavStore = defineStore('nav', {
   state: () => {
     const saved = loadStored();
     return {
-      // Reihenfolge bezieht sich auf alle Items global; admin-Items
-      // stehen ans Ende, werden aber pro User durch die Getter
-      // gefiltert.
       order:  saved?.order  ?? ALL_LINKS.map(l => l.key),
       hidden: saved?.hidden ?? [],
     };
   },
   getters: {
-    /** Items, die der aktuelle User sehen darf, in seiner gewuenschten
-     *  Reihenfolge, ohne ausgeblendete. NavBar's Mobile-Strip nutzt das. */
     visibleLinks() {
       const auth = useAuthStore();
       const map = Object.fromEntries(ALL_LINKS.map(l => [l.key, l]));
       return this.order
         .map(k => map[k])
         .filter(Boolean)
-        // Admin-only Items koennen von Admins nie versteckt werden — das
-        // verhindert, dass System/Benutzer/etc. durch einen falschen
-        // localStorage-Eintrag dauerhaft verschwindet.
         .filter(l => !this.hidden.includes(l.key) || (l.adminOnly && auth.isAdmin))
         .filter(l => !l.adminOnly || auth.isAdmin);
     },
-    /** Gruppen-Struktur fuer die Desktop-Dropdowns. Pro Gruppe nur die
-     *  user-sichtbaren Items, in der eigenen Reihenfolge.
-     *
-     *  Admin-Gruppen werden fuer Admins IMMER vollstaendig gerendert —
-     *  unabhaengig von order[] / hidden[], weil ein falscher localStorage-
-     *  Eintrag sonst das System-Menu dauerhaft verstecken kann. */
     visibleGroups() {
       const auth = useAuthStore();
       const visibleByKey = new Set(this.visibleLinks.map(l => l.key));
@@ -125,7 +104,6 @@ export const useNavStore = defineStore('nav', {
         .filter(g => !g.adminOnly || auth.isAdmin)
         .map(g => {
           if (g.adminOnly && auth.isAdmin) {
-            // Admin-Gruppe: alle Items zeigen, nur Reihenfolge aus order[]
             return {
               ...g,
               items: g.items
@@ -143,8 +121,6 @@ export const useNavStore = defineStore('nav', {
         })
         .filter(g => g.items.length > 0);
     },
-    /** Alle Items, die fuer den aktuellen User relevant sind — egal ob
-     *  versteckt oder nicht. Settings-Customization-UI rendert das. */
     allLinks() {
       const auth = useAuthStore();
       const map = Object.fromEntries(ALL_LINKS.map(l => [l.key, l]));
@@ -159,19 +135,13 @@ export const useNavStore = defineStore('nav', {
     _persist() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify({ order: this.order, hidden: this.hidden }));
     },
-    /** Stellt sicher, dass `order` alle aktuell bekannten Item-Keys
-     *  enthaelt — wichtig nach App-Updates, die neue Routen einfuehren. */
     sync() {
       const known = new Set(ALL_LINKS.map(l => l.key));
       const existingInOrder = new Set(this.order);
-      // 1) unbekannte Keys raus (z.B. entfernte Routen)
       this.order = this.order.filter(k => known.has(k));
-      // 2) neue Keys hinten anhaengen
       for (const l of ALL_LINKS) {
         if (!existingInOrder.has(l.key)) this.order.push(l.key);
       }
-      // 3) hidden um abgelaufene Keys und admin-only Items bereinigen
-      // (Admin-Items duerfen nie dauerhaft versteckt sein)
       const adminKeys = new Set(ALL_LINKS.filter(l => l.adminOnly).map(l => l.key));
       this.hidden = this.hidden.filter(k => known.has(k) && !adminKeys.has(k));
       this._persist();

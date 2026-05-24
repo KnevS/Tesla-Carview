@@ -96,7 +96,9 @@
     "group_overview": "Επισκόπηση",
     "group_analytics": "Αναλυτικά",
     "group_admin": "Διαχείριση",
-    "group_ai": "Βοηθός ΑΙ"
+    "group_ai": "Βοηθός ΑΙ",
+    "group_vehicle": "Όχημα",
+    "group_plan": "Σχεδιασμός"
   },
   "dashboard": {
     "title": "Πίνακας ελέγχου",
@@ -2052,7 +2054,12 @@
     "connections": "Συνδέσεις",
     "operator": "Πάροχος",
     "tooltipDcOnly": "Εμφάνιση μόνο σταθμών γρήγορης φόρτισης DC.",
-    "tooltipRadius": "Ακτίνα αναζήτησης γύρω από την επιλεγμένη τοποθεσία."
+    "tooltipRadius": "Ακτίνα αναζήτησης γύρω από την επιλεγμένη τοποθεσία.",
+    "addressNotFound": "Η διεύθυνση δεν βρέθηκε – δοκίμασε πιο συγκεκριμένα",
+    "apiKeyMissing": "Το κλειδί API του OpenChargeMap δεν είναι ρυθμισμένο",
+    "apiKeyHint": "Πρόσθεσέ το σε Admin → Σύστημα → Εξωτερικά κλειδιά API",
+    "configureNow": "Ρύθμιση τώρα",
+    "errorLoading": "Σφάλμα κατά τη φόρτωση των σταθμών"
   },
   "climate": {
     "title": "Στατιστικά Κλιματισμού",

@@ -96,7 +96,9 @@
     "group_overview": "Übersicht",
     "group_analytics": "Auswertung",
     "group_admin": "Verwaltung",
-    "group_ai": "KI-Assistent"
+    "group_ai": "KI-Assistent",
+    "group_vehicle": "Fahrzeug",
+    "group_plan": "Planung"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -2051,7 +2053,12 @@
     "connections": "Anschlüsse",
     "operator": "Betreiber",
     "tooltipDcOnly": "Nur Stationen mit DC-Schnellladung (CCS, CHAdeMO, Supercharger) anzeigen.",
-    "tooltipRadius": "Suchradius um den gewählten Standort."
+    "tooltipRadius": "Suchradius um den gewählten Standort.",
+    "addressNotFound": "Adresse nicht gefunden – bitte genauer eingeben",
+    "apiKeyMissing": "OpenChargeMap API-Key nicht konfiguriert",
+    "apiKeyHint": "Bitte in Admin → System → Externe API-Schlüssel eintragen",
+    "configureNow": "Jetzt konfigurieren",
+    "errorLoading": "Fehler beim Laden der Stationen"
   },
   "climate": {
     "title": "Klimastatistiken",

@@ -499,6 +499,32 @@ The selected options are saved in the browser and apply to all subsequent calcul
 
 **Charge planning** — With SoC planning enabled (enter current battery level) the planner calculates smart charging stops with time estimates and verifies whether range is sufficient for each leg.
 
+## 🔌 Charging station finder {#charger-finder}
+
+Under **Planning → Charging stations** you can search for fast-charging stations near any location.
+
+**Prerequisite** — A free [OpenChargeMap API key](https://openchargemap.org/site/develop/api) must be saved in **Admin → System → External API keys**. If the key is missing, a banner appears with a direct link to the configuration page.
+
+**Start a search:**
+1. Type an address or place → **Search** (or press Enter)
+2. Alternatively: **📍 My location** — uses browser geolocation
+3. Adjust radius (5/10/25/50 km) and the DC-only filter as needed
+
+**Results** show name, address, operator, maximum power (kW), number of connectors, and connector types. "Open in Maps" launches Google Maps navigation to the station.
+
+> **Tip:** In the Route Planner, fast-charging stations are shown directly on the map along the route — without a separate search step.
+
+## ⚡ Automations {#automations}
+
+Under **Planning → Automations** you can set up push alerts and automated actions — no coding required.
+
+**Examples:**
+- Charge alert when battery level drops below 20 %
+- Notification when charging is complete
+- Geofence action when the vehicle leaves or enters the home area
+
+Automations run server-side and send browser push notifications (requires push permission to be granted in your browser).
+
 ## 🟢 System status (admin) {#system-health}
 
 Under **System** admins see a coloured traffic-light card at the top with eight checks:

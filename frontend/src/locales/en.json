@@ -96,7 +96,9 @@
     "group_overview": "Overview",
     "group_analytics": "Analytics",
     "group_admin": "Administration",
-    "group_ai": "AI Assistant"
+    "group_ai": "AI Assistant",
+    "group_vehicle": "Vehicle",
+    "group_plan": "Planning"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -2052,7 +2054,12 @@
     "connections": "Connections",
     "operator": "Operator",
     "tooltipDcOnly": "Show only DC fast charging stations (CCS, CHAdeMO, Supercharger).",
-    "tooltipRadius": "Search radius around the selected location."
+    "tooltipRadius": "Search radius around the selected location.",
+    "addressNotFound": "Address not found – please be more specific",
+    "apiKeyMissing": "OpenChargeMap API key not configured",
+    "apiKeyHint": "Please enter it in Admin → System → External API keys",
+    "configureNow": "Configure now",
+    "errorLoading": "Error loading stations"
   },
   "climate": {
     "title": "Climate Statistics",
