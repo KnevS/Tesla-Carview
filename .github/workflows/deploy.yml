@@ -107,8 +107,11 @@ jobs:
               echo "==> nginx nicht in $COMPOSE_NET — network connect"
               sudo docker network connect "$COMPOSE_NET" tesla-carview-nginx
             fi
+            # Nginx neu starten (kein reload) damit Docker-DNS-Cache für neue
+            # Container-IPs geleert wird. Mit resolver 127.0.0.11 in nginx-internal.conf
+            # wird das künftig automatisch gelöst — der Restart bleibt als Fallback.
             sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml \
-              exec -T nginx nginx -s reload
+              restart nginx
             sudo docker image prune -f
             GIT_HASH=$(sudo git rev-parse --short HEAD)
             echo "Deployment erfolgreich: $(date) | $GIT_HASH"
