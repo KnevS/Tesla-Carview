@@ -128,10 +128,12 @@ if [[ -d "$DIST_DIR/assets" ]]; then
     SIZE_KB=$((SIZE_BYTES / 1024))
     GZIP_KB=$(gzip -c "$MAIN_CHUNK" 2>/dev/null | wc -c | awk '{printf "%.0f", $1/1024}')
 
-    if [[ "$SIZE_KB" -gt 800 ]]; then
-      fail "Haupt-Bundle: ${SIZE_KB} KB (gzip: ~${GZIP_KB} KB) — über Budget (800 KB)!"
-    elif [[ "$SIZE_KB" -gt 500 ]]; then
-      warn "Haupt-Bundle: ${SIZE_KB} KB (gzip: ~${GZIP_KB} KB) — Tendenz beobachten"
+    # Schwellen post-vendor-split: Vue+Pinia+Router+Stores ist legitim ~1MB.
+    # Warnung: > 1200 KB (unerwartetes Wachstum), Fehler: > 1500 KB (Regression)
+    if [[ "$SIZE_KB" -gt 1500 ]]; then
+      fail "Haupt-Bundle: ${SIZE_KB} KB (gzip: ~${GZIP_KB} KB) — massive Regression! Code-Splitting prüfen."
+    elif [[ "$SIZE_KB" -gt 1200 ]]; then
+      warn "Haupt-Bundle: ${SIZE_KB} KB (gzip: ~${GZIP_KB} KB) — Tendenz beobachten (Schwelle 1200 KB)"
     else
       ok "Haupt-Bundle: ${SIZE_KB} KB (gzip: ~${GZIP_KB} KB)"
     fi
@@ -153,19 +155,31 @@ ENV_FILE="$APP_DIR/backend/.env"
 ENV_EXAMPLE="$APP_DIR/backend/.env.example"
 
 if [[ -f "$ENV_FILE" && -f "$ENV_EXAMPLE" ]]; then
-  MISSING=()
+  MISSING_REQ=(); MISSING_OPT=(); PREV_OPTIONAL=0
   while IFS= read -r line; do
-    [[ "$line" =~ ^#|^$ ]] && continue
-    KEY="${line%%=*}"
+    if [[ "$line" =~ ^# ]]; then
+      echo "$line" | grep -qi "optional" && PREV_OPTIONAL=1 || true
+      continue
+    fi
+    [[ -z "$line" ]] && PREV_OPTIONAL=0 && continue
+    KEY="${line%%=*}"; VAL="${line#*=}"
     if ! grep -q "^${KEY}=" "$ENV_FILE" 2>/dev/null; then
-      MISSING+=("$KEY")
+      if [[ "$PREV_OPTIONAL" -eq 1 || -z "$VAL" ]]; then
+        MISSING_OPT+=("$KEY")
+      else
+        MISSING_REQ+=("$KEY")
+      fi
     fi
   done < "$ENV_EXAMPLE"
 
-  if [[ "${#MISSING[@]}" -eq 0 ]]; then
-    ok ".env vollständig (alle Schlüssel aus .env.example vorhanden)"
+  if [[ "${#MISSING_REQ[@]}" -eq 0 && "${#MISSING_OPT[@]}" -eq 0 ]]; then
+    ok ".env vollständig"
+  elif [[ "${#MISSING_REQ[@]}" -gt 0 ]]; then
+    fail "Fehlende Pflicht-Schlüssel: ${MISSING_REQ[*]}"
+    [[ "${#MISSING_OPT[@]}" -gt 0 ]] && info "Optionale nicht konfiguriert: ${MISSING_OPT[*]}"
   else
-    warn "Fehlende .env-Schlüssel: ${MISSING[*]}"
+    ok ".env Pflichtfelder vollständig"
+    info "Optionale Features nicht konfiguriert: ${MISSING_OPT[*]}"
   fi
 else
   [[ ! -f "$ENV_FILE" ]]     && fail ".env nicht gefunden — von .env.example kopieren!"
@@ -257,7 +271,7 @@ section "7. SSL-Zertifikat"
 
 # Domain aus .env lesen
 if [[ -f "$ENV_FILE" ]]; then
-  DOMAIN=$(grep "^DOMAIN=\|^PUBLIC_URL=" "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2 | tr -d '"' | sed 's|https://||')
+  DOMAIN=$(grep "^DOMAIN=\|^PUBLIC_URL=\|^FRONTEND_URL=" "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2- | tr -d '"' | sed 's|https://||' | sed 's|/.*||')
   if [[ -n "$DOMAIN" && "$DOMAIN" != "YOUR_DOMAIN"* ]]; then
     EXPIRY=$(echo | openssl s_client -servername "$DOMAIN" -connect "$DOMAIN:443" 2>/dev/null \
       | openssl x509 -noout -enddate 2>/dev/null \
