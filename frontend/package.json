@@ -11,11 +11,11 @@
     "@simplewebauthn/browser": "^10.0.0",
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",
-    "dompurify": "^3.4.2",
+    "dompurify": "^3.4.5",
     "jspdf": "^4.2.1",
-    "jspdf-autotable": "^5.0.7",
+    "jspdf-autotable": "^5.0.8",
     "leaflet": "^1.9.4",
-    "marked": "^18.0.3",
+    "marked": "^18.0.4",
     "pinia": "^2.1.7",
     "vue": "^3.4.31",
     "vue-chartjs": "^5.3.1",
@@ -23,13 +23,13 @@
     "vue-router": "^4.3.3"
   },
   "devDependencies": {
-    "@intlify/unplugin-vue-i18n": "^11.1.2",
+    "@intlify/unplugin-vue-i18n": "^11.2.3",
     "@vitejs/plugin-vue": "^6.0.6",
     "autoprefixer": "^10.4.19",
-    "postcss": "^8.4.39",
+    "postcss": "^8.5.15",
     "sharp": "^0.34.5",
     "tailwindcss": "^3.4.6",
-    "vite": "^8.0.11"
+    "vite": "^8.0.14"
   },
   "author": {
     "name": "Sven Krische",
