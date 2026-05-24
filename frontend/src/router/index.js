@@ -24,6 +24,9 @@ const Export         = () => import('../views/Export.vue');
 const MfaVerify      = () => import('../views/MfaVerify.vue');
 const MfaSetup       = () => import('../views/MfaSetup.vue');
 const Settings       = () => import('../views/Settings.vue');
+const Profile        = () => import('../views/Profile.vue');
+const AdminHub       = () => import('../views/admin/AdminHub.vue');
+const AdminSettings  = () => import('../views/AdminSettings.vue');
 const Telemetry      = () => import('../views/Telemetry.vue');
 const Control        = () => import('../views/Control.vue');
 const RoutePlanner   = () => import('../views/RoutePlanner.vue');
@@ -73,7 +76,8 @@ const routes = [
   { path: '/logbook',       component: Logbook,       meta: { title: 'Betriebsbuch' } },
   { path: '/export',        component: Export,        meta: { title: 'Export' } },
   { path: '/mfa/setup',     component: MfaSetup,      meta: { title: 'MFA einrichten' } },
-  { path: '/settings',      component: Settings,      meta: { title: 'Einstellungen' } },
+  { path: '/profile',       component: Profile,        meta: { title: 'Mein Profil' } },
+  { path: '/settings',      redirect: '/profile' },
   { path: '/telemetry',     component: Telemetry,     meta: { title: 'Fahrzeugtechnik' } },
   { path: '/control',       component: Control,       meta: { title: 'Steuerung' } },
   { path: '/routes',        component: RoutePlanner,  meta: { title: 'Routenplaner' } },
@@ -85,6 +89,8 @@ const routes = [
   { path: '/automations',   component: () => import('../views/Automations.vue'),  meta: { title: 'Automatisierungen' } },
   { path: '/chargers',      component: () => import('../views/ChargerFinder.vue'),meta: { title: 'Ladestationen' } },
   // Admin
+  { path: '/admin',         component: AdminHub,       meta: { title: 'Administration', admin: true } },
+  { path: '/admin/settings',component: AdminSettings,  meta: { title: 'Admin-Einstellungen', admin: true } },
   { path: '/admin/users',   component: UserManagement, meta: { title: 'Benutzerverwaltung', admin: true } },
   { path: '/admin/data',    component: DataManagement, meta: { title: 'Datenverwaltung',    admin: true } },
   { path: '/admin/legal',   component: LegalAdmin,     meta: { title: 'Rechtliche Inhalte', admin: true } },
