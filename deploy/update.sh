@@ -98,10 +98,16 @@ if [ -d "$PRIVATE_REPO" ]; then
       "$APP_DIR/frontend" 2>&1 | tail -5
 
     # dist/ aus dem Image in frontend-dist-private/ auf dem Host extrahieren
+    # Verzeichnis NICHT loeschen (Bind-Mount bleibt gueltig).
+    # Inhalt via tmp-Dir + rsync atomisch ersetzen.
     docker create --name tmp-frontend-extract tesla-carview-frontend-private:local
-    rm -rf "$APP_DIR/frontend-dist-private"
-    docker cp tmp-frontend-extract:/usr/share/nginx/html "$APP_DIR/frontend-dist-private"
+    rm -rf "$APP_DIR/frontend-dist-private-new"
+    docker cp tmp-frontend-extract:/usr/share/nginx/html "$APP_DIR/frontend-dist-private-new"
     docker rm tmp-frontend-extract
+    mkdir -p "$APP_DIR/frontend-dist-private"
+    rsync -a --delete "$APP_DIR/frontend-dist-private-new/" "$APP_DIR/frontend-dist-private/"
+    rm -rf "$APP_DIR/frontend-dist-private-new"
+    docker exec tesla-carview-frontend nginx -s reload
 
     echo "    ✓ Frontend: privates Bundle in frontend-dist-private/ → wird live serviert."
     # Dangling Zwischen-Image aufräumen
