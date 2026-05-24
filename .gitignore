@@ -13,3 +13,6 @@ data/
 CLAUDE.md
 *.bak
 frontend-dist-private/
+
+# Local webhook secret (never commit)
+deploy/update-webhook.env

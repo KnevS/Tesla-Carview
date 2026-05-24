@@ -130,15 +130,7 @@
               <span>Alle Daten bleiben erhalten – die Datenbanken liegen im Docker-Volume
               <code>tesla_data</code> und werden beim Update nicht berührt.</span>
             </p>
-            <button @click="triggerDeploy" :disabled="deployBusy"
-              class="mt-1 btn-primary text-sm px-4 py-2 flex items-center gap-2 disabled:opacity-40"
-              v-tooltip="'Deployment automatisch auslösen (erfordert DEPLOY_WEBHOOK_URL in .env)'">
-              <span v-if="deployBusy" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              <AppIcon v-else name="bolt" :size="16" />
-              {{ deployBusy ? 'Startet…' : 'Jetzt deployen' }}
-            </button>
-            <p v-if="deployMsg" class="text-xs mt-1"
-               :class="deployOk ? 'text-green-400' : 'text-yellow-400'">{{ deployMsg }}</p>
+
           </div>
         </div>
 
@@ -153,6 +145,24 @@
       <div v-else class="text-sm text-gray-500">
         Klicke „Jetzt prüfen" um nach Updates zu suchen.
       </div>
+
+      <!-- Deploy-Trigger (admin) — immer sichtbar, auch bei aktuellem Build -->
+      <div class="border-t border-white/5 pt-3 mt-2 flex items-center justify-between gap-3 flex-wrap">
+        <p class="text-xs text-gray-400 flex items-center gap-1.5"
+           v-tooltip="'Deployment manuell auslösen — nützlich um nach Fehlern einen Force-Redeploy zu starten. Erfordert DEPLOY_WEBHOOK_URL in backend/.env.'">
+          <AppIcon name="bolt" :size="14" class="text-[var(--accent)]"/>
+          In-App Deployment
+          <InfoTip text="Startet update.sh auf dem Host. Konfiguration: DEPLOY_WEBHOOK_URL in backend/.env setzen." />
+        </p>
+        <button @click="triggerDeploy" :disabled="deployBusy"
+          class="text-xs btn-secondary py-1 px-3 flex items-center gap-1.5 disabled:opacity-40"
+          v-tooltip="'Deployment jetzt auslösen'">
+          <span v-if="deployBusy" class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <AppIcon v-else name="bolt" :size="14" />
+          {{ deployBusy ? 'Startet…' : updateInfo?.updateAvailable ? 'Jetzt deployen' : 'Force-Redeploy' }}
+        </button>
+      </div>
+      <p v-if="deployMsg" class="text-xs mt-1" :class="deployOk ? 'text-green-400' : 'text-yellow-400'">{{ deployMsg }}</p>
 
       <!-- Auto-Update Hinweis -->
       <details class="text-xs text-gray-500 border-t border-gray-800 pt-3">
