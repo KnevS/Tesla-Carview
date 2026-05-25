@@ -6,34 +6,50 @@ Tesla Carview provides two paths for the **initial installation** and an in-app 
 
 ---
 
-## In-app settings wizard {#settings-wizard}
+## In-app assistants {#settings-wizard}
 
-After the first login, the **settings assistant** appears automatically (17 steps for admins, 9 steps for regular users). It can be re-launched at any time via **Settings → Launch assistant**.
+As of v3.4.0 there are **two separate assistants**:
 
-### Admin steps (in order)
+### 1. Personal settings wizard (`SettingsWizard.vue`)
+
+Appears automatically after the first login and can be re-opened at any time via **Settings → 🧙 Start wizard**. Available to **all users**.
 
 | # | Step | Description |
 |---|------|-------------|
-| 1 | **Language** | Choose app language |
-| 2 | **Tesla OAuth** | Connect Tesla account (popup → PostMessage back-channel → auto-refresh) |
-| 3 | **Vehicles** | Sync vehicles from Tesla account |
-| 4 | **Virtual Key** | Show/copy registration URL; check status |
-| 5 | **Fleet Telemetry** | Configure per VIN; status display (live/idle/pending/error) |
-| 6 | **Electricity price** | Home charging price (€/kWh) per vehicle; used for cost calculations |
-| 7 | **Legal check** | Scan for `<<placeholders>>` across all 18 scope×locale entries |
-| 8 | **External APIs** | Configure OCM, HERE and Grok/xAI keys |
-| 9 | **Monitoring** | Configure self-healing + alert email |
-| 10–15 | **Preferences** | Design, color, units, dashboard, navigation, notifications |
-| 16 | **Summary** | Review all changes and apply them together |
+| 1 | **Welcome** | Overview |
+| 2 | **Language** | Select app language |
+| 3 | **Design** | Choose design style (Glass, Cyberpunk, Minimal, Sport, Nevs-Edition) |
+| 4 | **Accent color** | Accent color for buttons and navigation |
+| 5 | **Units** | km/mi, °C/°F, kWh/100km etc. |
+| 6 | **Dashboard** | Card visibility and order |
+| 7 | **Navigation** | Sort and hide navigation items |
+| 8 | **Notifications** | Subscribe to Web Push, select event types |
+| 9 | **Done** | All settings are saved |
 
-### Key behaviours
+### 2. Admin Setup Assistant (`AdminSetupWizard.vue`)
 
-- **Draft mode**: all changes are applied only at the final step ("Save & Apply")
-- **Skip**: every step can be skipped
-- **Tesla OAuth**: opens a popup window; after login the popup closes automatically and the wizard refreshes its status via `postMessage`
-- **Electricity price**: set per vehicle, saved on confirm via `PUT /api/vehicles/:id`
-- **Legal check**: reads `/api/legal/admin/all` and searches for the pattern `/<<[^>]+>>/g`
+Accessible via **Admin Hub → 🛠️ Setup Assistant**. **Admins only.** Guides through all system configuration — no SSH or `.env` editing required.
 
+| Step | Description |
+|------|-------------|
+| **Tesla credentials** | Set Client-ID, Client-Secret, Audience via UI (stored in DB) |
+| **Tesla OAuth** | Connect Tesla account (popup → PostMessage callback → auto-refresh) |
+| **Vehicles** | Sync vehicles from Tesla account |
+| **Virtual Key** | Show/copy registration URL; check status |
+| **Fleet Telemetry** | Configure per VIN; status display |
+| **Web Push (VAPID)** | Generate VAPID keys directly in the browser or enter manually |
+| **Telegram Bot** | Configure bot token (requires server restart) |
+| **Electricity price** | Set home charging rate (€/kWh) per vehicle |
+| **External APIs** | Configure ABRP, Grok/xAI key |
+| **Monitoring** | Self-healing + alert email |
+| **Summary** | Status overview; restart notice if Telegram was configured |
+
+### Notes
+
+- **Draft mode** (personal wizard): changes are saved only at the last step
+- **Immediate save** (admin assistant): credentials are saved step-by-step into `tenant_settings` (DB)
+- **Tesla OAuth**: popup window; closes automatically after sign-in
+- **VAPID generation**: directly in the browser — no `docker exec` needed
 ---
 
 Tesla Carview offers two paths for the initial configuration.

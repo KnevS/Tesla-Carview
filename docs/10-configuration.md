@@ -94,6 +94,31 @@ Die Datei ist `.gitignored`. `frontend/.env.example` ist die im Repo committete 
 
 ---
 
+## 🖥️ Konfiguration via Admin-UI (ab v3.4.0)
+
+Ab v3.4.0 müssen die meisten Secrets **nicht mehr** manuell in `.env` eingetragen werden. Der **Admin-Setup-Assistent** (Admin-Hub → 🛠️) führt durch alle Schritte.
+
+**Technischer Hintergrund — DB-vor-env-Muster:**
+`configService.js` liest für jeden Wert zuerst aus `tenant_settings` (SQLite-DB des Mandanten), dann als Fallback aus der `.env`. Bestehende `.env`-Konfigurationen funktionieren unverändert weiter; sobald ein Wert über die UI gesetzt wird, hat der DB-Wert Vorrang.
+
+| Einstellung | UI-Pfad | `.env`-Fallback-Variable |
+|-------------|---------|--------------------------|
+| Tesla Client-ID | Admin-Hub → 🛠️ → Tesla-Zugangsdaten | `TESLA_CLIENT_ID` |
+| Tesla Client-Secret | Admin-Hub → 🛠️ → Tesla-Zugangsdaten | `TESLA_CLIENT_SECRET` |
+| Tesla Audience | Admin-Hub → 🛠️ → Tesla-Zugangsdaten | `TESLA_AUDIENCE` |
+| VAPID Public Key | Admin-Hub → 🛠️ → Web Push | `VAPID_PUBLIC_KEY` |
+| VAPID Private Key | Admin-Hub → 🛠️ → Web Push | `VAPID_PRIVATE_KEY` |
+| VAPID Contact | Admin-Hub → 🛠️ → Web Push | `VAPID_CONTACT` |
+| Telegram Bot Token | Admin-Hub → 🛠️ → Telegram | `TELEGRAM_BOT_TOKEN` |
+| xAI / Grok API Key | Admin-Hub → 🛠️ → Externe APIs | `XAI_API_KEY` |
+| ABRP Global App Key | Admin-Hub → 🛠️ → Externe APIs | `ABRP_API_KEY` |
+
+> **VAPID-Keys generieren:** Im Admin-Setup-Assistenten auf „🔑 Neu generieren" klicken — kein `docker exec` mehr nötig.
+
+> **Telegram-Bot:** Erfordert nach dem ersten Setzen des Tokens einen Container-Neustart (`docker compose … up -d --build backend`). Der Assistent zeigt einen entsprechenden Hinweis.
+
+---
+
 ## Quick-Reference: Minimal-Setup
 
 ```bash

@@ -6,33 +6,50 @@ Tesla Carview bietet zwei Wege zur **Erst-Installation** und einen In-App-Assist
 
 ---
 
-## In-App-Einstellungs-Assistent {#settings-wizard}
+## In-App-Assistenten {#settings-wizard}
 
-Nach dem ersten Login erscheint automatisch der **Einstellungs-Assistent** (für Admins mit 17 Schritten, für normale Nutzer mit 9 Schritten). Er kann jederzeit über **Einstellungen → Assistent starten** erneut geöffnet werden.
+Ab v3.4.0 gibt es **zwei getrennte Assistenten**:
 
-### Admin-Schritte (in Reihenfolge)
+### 1. Persönlicher Einstellungs-Assistent (`SettingsWizard.vue`)
+
+Erscheint automatisch nach dem ersten Login und kann jederzeit über **Einstellungen → 🧙 Assistent starten** erneut aufgerufen werden. Für **alle Benutzer**.
 
 | # | Schritt | Beschreibung |
 |---|---------|-------------|
-| 1 | **Sprache** | App-Sprache auswählen |
-| 2 | **Tesla OAuth** | Tesla-Konto verbinden (Popup → PostMessage-Rückkanal → Auto-Refresh) |
-| 3 | **Fahrzeuge** | Fahrzeuge aus Tesla-Konto synchronisieren |
-| 4 | **Virtual Key** | Registrierungs-URL anzeigen/kopieren; Status prüfen |
-| 5 | **Fleet Telemetry** | Pro VIN konfigurieren; Statusanzeige (live/idle/ausstehend/Fehler) |
-| 6 | **Strompreis** | Heimlade-Preis (€/kWh) pro Fahrzeug; für Kostenberechnung |
-| 7 | **Legal-Check** | Scan auf `<<Platzhalter>>` in allen 18 Scope×Locale-Einträgen |
-| 8 | **Externe APIs** | OCM-, HERE- und Grok/xAI-Keys konfigurieren |
-| 9 | **Monitoring** | Selbstheilung + Alert-E-Mail konfigurieren |
-| 10–15 | **Präferenzen** | Design, Farbe, Einheiten, Dashboard, Navigation, Benachrichtigungen |
-| 16 | **Zusammenfassung** | Alle Änderungen prüfen und gemeinsam speichern |
+| 1 | **Willkommen** | Überblick |
+| 2 | **Sprache** | App-Sprache wählen |
+| 3 | **Design** | Design-Stil wählen (Glass, Cyberpunk, Minimal, Sport, Nevs-Edition) |
+| 4 | **Akzentfarbe** | Akzentfarbe für Schaltflächen und Navigation |
+| 5 | **Einheiten** | km/mi, °C/°F, kWh/100km etc. |
+| 6 | **Dashboard** | Karten-Sichtbarkeit und Reihenfolge |
+| 7 | **Navigation** | Navigationspunkte sortieren und ausblenden |
+| 8 | **Benachrichtigungen** | Web Push abonnieren, Ereignisse auswählen |
+| 9 | **Fertig** | Alle Einstellungen werden gespeichert |
+
+### 2. Admin-Setup-Assistent (`AdminSetupWizard.vue`)
+
+Erreichbar über **Admin-Hub → 🛠️ Setup-Assistent**. Nur für **Administratoren**. Führt durch alle System-Konfigurationen — kein SSH oder `.env`-Bearbeiten erforderlich.
+
+| Schritt | Beschreibung |
+|---------|-------------|
+| **Tesla-Zugangsdaten** | Client-ID, Client-Secret, Audience über UI setzen (in DB gespeichert) |
+| **Tesla OAuth** | Tesla-Konto verbinden (Popup → PostMessage-Rückkanal → Auto-Refresh) |
+| **Fahrzeuge** | Fahrzeuge aus Tesla-Konto synchronisieren |
+| **Virtual Key** | Registrierungs-URL anzeigen/kopieren; Status prüfen |
+| **Fleet Telemetry** | Pro VIN konfigurieren; Statusanzeige |
+| **Web Push (VAPID)** | VAPID-Keys direkt im Browser generieren oder manuell eingeben |
+| **Telegram Bot** | Bot-Token konfigurieren (erfordert Server-Neustart) |
+| **Strompreis** | Heimlade-Preis (€/kWh) pro Fahrzeug |
+| **Externe APIs** | ABRP, Grok/xAI-Key konfigurieren |
+| **Monitoring** | Selbstheilung + Alert-E-Mail konfigurieren |
+| **Zusammenfassung** | Statusübersicht; Neustart-Hinweis wenn Telegram konfiguriert |
 
 ### Besonderheiten
 
-- **Draft-Modus**: Alle Änderungen werden erst beim letzten Schritt ("Speichern & Anwenden") übernommen
-- **Überspringen**: Jeder Schritt kann übersprungen werden
-- **Tesla OAuth**: Öffnet ein Popup-Fenster; nach erfolgreicher Anmeldung schließt sich das Popup automatisch und der Status im Wizard aktualisiert sich via `postMessage`
-- **Strompreis**: Wird pro Fahrzeug gesetzt und beim Confirm via `PUT /api/vehicles/:id` gespeichert
-- **Legal-Check**: Liest `/api/legal/admin/all` und sucht nach dem Muster `/<<[^>]+>>/g`
+- **Draft-Modus** (persönlicher Assistent): Änderungen werden erst beim letzten Schritt gespeichert
+- **Sofort-Speichern** (Admin-Assistent): Zugangsdaten werden schrittweise in `tenant_settings` (DB) gespeichert
+- **Tesla OAuth**: Popup-Fenster; schließt sich nach Anmeldung automatisch
+- **VAPID-Generierung**: direkt im Browser ohne `docker exec`
 
 ---
 
