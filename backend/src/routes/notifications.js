@@ -14,13 +14,17 @@
 import { Router }      from 'express';
 import { getMasterDb } from '../db/database.js';
 import { requireAuth } from '../middleware/auth.js';
+import { getTenantSetting } from '../services/configService.js';
 
 const router = Router();
 
 // ── VAPID Public Key (kein Auth nötig — nur öffentlicher Schlüssel) ──────────
 
-router.get('/vapid-public-key', (_req, res) => {
-  res.json({ key: process.env.VAPID_PUBLIC_KEY || null });
+router.get('/vapid-public-key', (req, res) => {
+  const key = req.db
+    ? getTenantSetting(req.db, 'vapid.public_key', 'VAPID_PUBLIC_KEY')
+    : (process.env.VAPID_PUBLIC_KEY || null);
+  res.json({ key });
 });
 
 // ── User-basierte Subscription ────────────────────────────────────────────────

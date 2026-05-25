@@ -23,13 +23,23 @@
 
 import { Telegraf } from 'telegraf';
 import { getMasterDb, getAllTenants, getDb } from '../db/database.js';
+import { getTenantSetting } from './configService.js';
 
 let bot = null;
 let webhookMiddleware = null;
 
 /** Initialisiert den Bot. Gibt Express-Middleware zurück (Webhook) oder null (Polling). */
 export async function initTelegramBot() {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
+  // DB has priority: use token from first active non-demo tenant, fall back to .env
+  let token = process.env.TELEGRAM_BOT_TOKEN;
+  try {
+    const tenants = getAllTenants().filter(t => t.status !== 'suspended' && !t.is_demo);
+    for (const t of tenants) {
+      const db  = getDb(t.id);
+      const tok = getTenantSetting(db, 'telegram.bot_token', null);
+      if (tok) { token = tok; break; }
+    }
+  } catch { /* ignore */ }
   if (!token) {
     console.log('[Telegram] Kein TELEGRAM_BOT_TOKEN — Bot deaktiviert.');
     return null;
@@ -39,7 +49,9 @@ export async function initTelegramBot() {
     bot = new Telegraf(token);
     registerCommands(bot);
 
-    const webhookUrl = process.env.TELEGRAM_WEBHOOK_URL || process.env.FRONTEND_URL;
+    const tdb = (() => { try { const ts = getAllTenants().filter(t => !t.is_demo); return ts.length ? getDb(ts[0].id) : null; } catch { return null; } })();
+    const dbWebhook = tdb ? getTenantSetting(tdb, 'telegram.webhook_url', null) : null;
+    const webhookUrl = dbWebhook || process.env.TELEGRAM_WEBHOOK_URL || process.env.FRONTEND_URL;
     if (webhookUrl) {
       // Webhook-Modus: Express übernimmt die Webhook-Route
       const fullUrl = `${webhookUrl}/api/telegram/webhook`;

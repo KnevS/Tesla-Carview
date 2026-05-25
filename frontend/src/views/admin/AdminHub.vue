@@ -11,6 +11,19 @@
 
     <SystemHealthBanner />
 
+    <!-- Setup-Assistent Button -->
+    <button @click="showSetupWizard = true"
+      class="flex items-center gap-3 w-full card p-4 hover:border-tesla-red/40 border border-dashed border-gray-700 text-left transition-all">
+      <span class="text-2xl">🛠️</span>
+      <div class="flex-1">
+        <p class="font-semibold text-white">Setup-Assistent</p>
+        <p class="text-xs text-gray-400 mt-0.5">Tesla-Credentials, Push, Telegram, externe APIs — alles ohne .env-Bearbeitung konfigurieren.</p>
+      </div>
+      <AppIcon name="chevron-right" :size="16" class="text-gray-500" />
+    </button>
+
+    <AdminSetupWizard v-if="showSetupWizard" @close="showSetupWizard = false" />
+
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <RouterLink
         v-for="card in adminCards"
@@ -30,15 +43,19 @@
 </template>
 
 <script setup>
+import { ref } from 'vue';
 import AppIcon from '../../components/AppIcon.vue';
 import SystemHealthBanner from '../../components/SystemHealthBanner.vue';
+import AdminSetupWizard from '../../components/AdminSetupWizard.vue';
+
+const showSetupWizard = ref(false);
 
 const adminCards = [
   {
     to:    '/admin/settings',
     icon:  '⚙️',
     title: 'Einstellungen',
-    desc:  'Tesla-Verbindung, Telemetrie, Strompreis-API, GPS-Fuzzing, Mandanten-Sprache, Pseudonym und API-Budget.',
+    desc:  'Tesla-Verbindung, Telemetrie, Fahrer, Geofences, API-Keys (VAPID, Telegram, Grok, ABRP), GPS-Fuzzing und Budget.',
   },
   {
     to:    '/admin/users',
