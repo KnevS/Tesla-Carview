@@ -330,7 +330,7 @@
       </p>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <button v-for="d in DESIGNS" :key="d.key"
-          @click="themeStore.setDesign(d.key)"
+          @click="selectDesign(d.key)"
           class="design-preview text-left"
           :class="[
             `design-preview--${d.key}`,
@@ -360,7 +360,7 @@
         <p class="text-xs text-gray-500">Akzentfarbe für Schaltflächen und Navigation. Wird lokal gespeichert.</p>
         <div class="flex flex-wrap gap-3">
           <button v-for="t in THEMES" :key="t.key"
-            @click="themeStore.apply(t.key)"
+            @click="selectAccent(t.key)"
             class="flex items-center gap-2 px-3 py-2 rounded-xl border-2 text-sm transition"
             :class="themeStore.activeKey === t.key
               ? 'border-white text-white'
@@ -594,6 +594,10 @@ const groupBorder = id => ({
 }[id] || 'border-gray-700');
 
 const themeStore = useThemeStore();
+const prefsStore = usePrefsStore();
+
+function selectDesign(key) { themeStore.setDesign(key); prefsStore.set("theme_design", key); }
+function selectAccent(key) { themeStore.apply(key); prefsStore.set("theme_color", key); }
 const langStore  = useLangStore();
 
 // ── Sprache ──
