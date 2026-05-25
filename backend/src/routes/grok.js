@@ -7,6 +7,8 @@
 
 import { Router } from 'express';
 import { randomUUID } from 'crypto';
+import { requireAuth, requireAdmin } from '../middleware/auth.js';
+import { getTenantSetting, setTenantSetting } from '../services/configService.js';
 import { buildContext, checkBudget, getTodayUsage, streamChat } from '../services/grokService.js';
 
 const router = Router();
