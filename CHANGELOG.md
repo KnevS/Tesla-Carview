@@ -7,6 +7,37 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.0] - 2026-05-25
+
+### Neu - Admin-Konfiguration via UI
+
+- Tesla Fleet-API Zugangsdaten via Admin-UI setzbar (kein .env-Bearbeiten mehr noetig)
+- VAPID-Keys fuer Web Push direkt im Browser generierbar
+- Telegram Bot Token via UI konfigurierbar
+- Grok/xAI API Key via UI setzbar
+- ABRP Global App-Key via UI setzbar
+- Neuer configService.js: liest aus tenant_settings (DB), faellt auf .env zurueck
+
+### Neu - Admin-Setup-Assistent
+
+- AdminSetupWizard.vue: gefuehrt durch alle System-Konfigurationen
+- Wizard-Split: Admin-Setup-Assistent (System) vs. persoenlicher Wizard (Nutzer)
+
+### Geaendert
+
+- Fahrerverwaltung aus Profil in Admin-Einstellungen verschoben
+- Geofences aus Profil in Admin-Einstellungen verschoben
+
+### Technisch
+
+- teslaApi.js, telemetryConfig.js: DB vor .env fuer Tesla-Credentials
+- notifications.js, serviceReminders.js: DB vor .env fuer VAPID
+- grokService.js: DB vor .env fuer xAI-Key
+- abrpService.js: DB vor .env fuer ABRP-Key
+- telegramBot.js: liest Token beim Start aus tenant_settings
+
+---
+
 ## [v3.3.3] — 2026-05-24
 
 ### Neu — Benachrichtigungen: Web Push + Telegram Bot

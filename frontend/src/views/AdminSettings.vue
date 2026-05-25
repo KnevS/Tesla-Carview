@@ -378,22 +378,289 @@
         </button>
       </div>
     </SortableSection>
+
+    <!-- Fahrerverwaltung (verschoben aus Profil) -->
+    <SortableSection
+      :sortable="false"
+      page-id="admin-settings"
+      section-id="drivers"
+      title="Fahrer & Profile"
+      icon="👤"
+      :collapsed="isCollapsed('drivers')"
+      @toggle="toggle('drivers')"
+    >
+      <p class="text-sm text-gray-400">Fahrer werden Fahrten zugeordnet und erscheinen im Fahrtenbuch.</p>
+      <div class="space-y-2">
+        <div v-for="d in drivers" :key="d.id"
+          class="flex items-center gap-3 bg-gray-800 rounded-xl px-3 py-2">
+          <div class="relative flex-shrink-0">
+            <button @click="editingColor = editingColor === d.id ? null : d.id"
+              class="w-5 h-5 rounded-full border-2 border-gray-600 hover:border-white transition flex-shrink-0"
+              :style="{ background: d.color }"
+              v-tooltip="'Farbe ändern'"></button>
+            <div v-if="editingColor === d.id"
+              class="absolute left-0 top-full mt-1 z-20 bg-gray-900 border border-gray-600 rounded-xl p-2 flex flex-wrap gap-1.5 shadow-xl"
+              style="width: 144px" @click.stop>
+              <button v-for="c in DRIVER_COLORS" :key="c"
+                class="w-7 h-7 rounded-full border-2 transition hover:scale-110"
+                :class="d.color === c ? 'border-white' : 'border-transparent'"
+                :style="{ background: c }"
+                @click="saveDriverColor(d, c)"></button>
+            </div>
+          </div>
+          <input :value="d.name"
+            @change="e => saveDriverName(d, e.target.value)"
+            class="flex-1 bg-transparent text-white text-sm focus:outline-none border-b border-transparent focus:border-gray-500 py-0.5 min-w-0"
+            placeholder="Name" />
+          <button @click="setDefaultDriver(d)"
+            class="text-xs px-2 py-0.5 rounded-full transition flex-shrink-0"
+            :class="d.is_default ? 'bg-tesla-red text-white' : 'bg-gray-700 text-gray-400 hover:text-white'"
+            v-tooltip="d.is_default ? 'Standard-Fahrer – wird bei neuen Fahrten auto-zugewiesen' : 'Als Standard-Fahrer setzen'">
+            {{ d.is_default ? '★ Standard' : '☆ Standard' }}
+          </button>
+          <button @click="deleteDriver(d)"
+            class="text-gray-600 hover:text-red-400 transition text-sm flex-shrink-0"
+            v-tooltip="'Fahrer löschen'">✕</button>
+        </div>
+        <p v-if="!drivers.length" class="text-gray-500 text-sm">Noch keine Fahrer angelegt.</p>
+      </div>
+      <div class="flex gap-2">
+        <input v-model="newDriverName" type="text" placeholder="Name (z.B. Sven)"
+          class="flex-1 bg-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-tesla-red"
+          @keyup.enter="addDriver" />
+        <button @click="addDriver" :disabled="!newDriverName.trim()" class="btn-primary text-sm">+ Hinzufügen</button>
+      </div>
+      <p v-if="driverMsg" class="text-sm" :class="driverOk ? 'text-green-400' : 'text-red-400'">{{ driverMsg }}</p>
+    </SortableSection>
+
+    <!-- Geofences (verschoben aus Profil) -->
+    <SortableSection
+      v-if="appStore.selectedVehicle"
+      :sortable="false"
+      page-id="admin-settings"
+      section-id="geofences"
+      :title="('settings.geofenceTitle')"
+      icon="📍"
+      :collapsed="isCollapsed('geofences')"
+      @toggle="toggle('geofences')"
+    >
+      <GeofenceManager />
+    </SortableSection>
+
+    <!-- Tesla Fleet-API Zugangsdaten -->
+    <SortableSection
+      :sortable="false"
+      page-id="admin-settings"
+      section-id="teslaCredentials"
+      title="Tesla Fleet-API Zugangsdaten"
+      icon="🔑"
+      :collapsed="isCollapsed('teslaCredentials')"
+      @toggle="toggle('teslaCredentials')"
+    >
+      <p class="text-sm text-gray-400">
+        Client-ID und Secret aus dem
+        <a href="https://developer.tesla.com/" target="_blank" rel="noopener" class="text-blue-400 hover:underline">Tesla Developer Portal</a>.
+        Vorrangig gegenüber .env — kein Server-Neustart nötig.
+      </p>
+      <div v-if="teslaCredsCfg.from_env" class="text-xs bg-blue-900/20 border border-blue-700/40 rounded-lg px-3 py-2 text-blue-300">
+        ℹ️ Derzeit aktiv aus <code>.env</code>. Werte hier eingeben, um .env zu überschreiben.
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="label">Client ID</label>
+          <input v-model="teslaCreds.client_id" type="text" placeholder="z.B. abc123def456"
+            class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+        </div>
+        <div>
+          <label class="label">Client Secret</label>
+          <input v-model="teslaCreds.client_secret" type="password"
+            :placeholder="teslaCredsCfg.client_secret_set ? '••••••••••••••••' : 'Secret eingeben'"
+            class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+        </div>
+        <div>
+          <label class="label">Audience (Fleet API URL)</label>
+          <input v-model="teslaCreds.audience" type="text" placeholder="https://fleet-api.prd.eu.vn.cloud.tesla.com"
+            class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+          <p class="text-xs text-gray-500 mt-1">EU: ...eu... | NA: ...na...</p>
+        </div>
+      </div>
+      <button @click="saveTeslaCredentials" :disabled="teslaCreds.saving" class="btn-primary text-sm">
+        {{ teslaCreds.saving ? '…' : 'Zugangsdaten speichern' }}
+      </button>
+      <p v-if="teslaCreds.msg" class="text-sm" :class="teslaCreds.ok ? 'text-green-400' : 'text-red-400'">{{ teslaCreds.msg }}</p>
+    </SortableSection>
+
+    <!-- Web Push / VAPID -->
+    <SortableSection
+      :sortable="false"
+      page-id="admin-settings"
+      section-id="webPush"
+      title="Web Push Benachrichtigungen (VAPID)"
+      icon="🔔"
+      :collapsed="isCollapsed('webPush')"
+      @toggle="toggle('webPush')"
+    >
+      <p class="text-sm text-gray-400">
+        VAPID-Keys ermöglichen Browser-Push-Benachrichtigungen. Einmal generieren, dann nie mehr ändern
+        (sonst müssen alle Nutzer erneut zustimmen).
+      </p>
+      <div v-if="vapidCfg.from_env" class="text-xs bg-blue-900/20 border border-blue-700/40 rounded-lg px-3 py-2 text-blue-300">
+        ℹ️ Derzeit aktiv aus <code>.env</code>. Neuen Key generieren, um .env zu überschreiben.
+      </div>
+      <div v-if="vapidCfg.configured" class="bg-green-900/20 border border-green-700/40 rounded-lg px-3 py-2 text-sm text-green-300">
+        ✓ VAPID konfiguriert — Push-Benachrichtigungen aktiv
+        <br><span class="text-xs text-gray-400 font-mono break-all">{{ vapidCfg.public_key?.slice(0, 40) }}…</span>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="label">Kontakt-E-Mail</label>
+          <input v-model="vapidForm.contact" type="email" placeholder="mailto:admin@example.com"
+            class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+        </div>
+        <div v-if="vapidCfg.configured" class="space-y-2">
+          <label class="label">Manuell überschreiben</label>
+          <input v-model="vapidForm.public_key" type="text" placeholder="Public Key (base64url)"
+            class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red font-mono text-xs" />
+          <input v-model="vapidForm.private_key" type="password" placeholder="Private Key (nur bei Änderung eingeben)"
+            class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button @click="generateVapid" :disabled="vapidForm.generating"
+          class="btn-primary text-sm flex items-center gap-2">
+          {{ vapidForm.generating ? '…' : (vapidCfg.configured ? '🔄 Neu generieren' : '⚡ VAPID-Keys generieren') }}
+        </button>
+        <button v-if="vapidCfg.configured" @click="saveVapidConfig" :disabled="vapidForm.saving" class="btn-secondary text-sm">
+          {{ vapidForm.saving ? '…' : 'Speichern' }}
+        </button>
+      </div>
+      <p v-if="vapidForm.msg" class="text-sm" :class="vapidForm.ok ? 'text-green-400' : 'text-red-400'">{{ vapidForm.msg }}</p>
+    </SortableSection>
+
+    <!-- Telegram Bot -->
+    <SortableSection
+      :sortable="false"
+      page-id="admin-settings"
+      section-id="telegramBot"
+      title="Telegram Bot"
+      icon="✈️"
+      :collapsed="isCollapsed('telegramBot')"
+      @toggle="toggle('telegramBot')"
+    >
+      <p class="text-sm text-gray-400">
+        Erstelle einen Bot über
+        <a href="https://t.me/BotFather" target="_blank" rel="noopener" class="text-blue-400 hover:underline">@BotFather</a>
+        und füge das Token hier ein. Nutzer können danach Benachrichtigungen über Telegram aktivieren.
+      </p>
+      <div v-if="telegramCfg.from_env" class="text-xs bg-blue-900/20 border border-blue-700/40 rounded-lg px-3 py-2 text-blue-300">
+        ℹ️ Derzeit aktiv aus <code>.env</code>. Token hier eingeben überschreibt die .env.
+      </div>
+      <div v-if="telegramCfg.configured" class="bg-green-900/20 border border-green-700/40 rounded-lg px-3 py-2 text-sm text-green-300">
+        ✓ Telegram Bot konfiguriert
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="label">Bot Token</label>
+          <input v-model="telegramForm.bot_token" type="password"
+            :placeholder="telegramCfg.configured ? '••••••••:••••••••••••••••••••' : 'z.B. 123456789:ABCdef…'"
+            class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+        </div>
+        <div>
+          <label class="label">Webhook URL (optional)</label>
+          <input v-model="telegramForm.webhook_url" type="url" placeholder="https://deine-app.example.com"
+            class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+          <p class="text-xs text-gray-500 mt-1">Leer lassen = Long-Polling. Webhook ist effizienter für Produktionsserver.</p>
+        </div>
+      </div>
+      <button @click="saveTelegramConfig" :disabled="telegramForm.saving" class="btn-primary text-sm">
+        {{ telegramForm.saving ? '…' : 'Bot-Token speichern' }}
+      </button>
+      <p v-if="telegramForm.msg" class="text-sm text-amber-300">{{ telegramForm.msg }}</p>
+    </SortableSection>
+
+    <!-- Grok / xAI API Key -->
+    <SortableSection
+      :sortable="false"
+      page-id="admin-settings"
+      section-id="grokKey"
+      title="Grok / xAI API Key"
+      icon="🤖"
+      :collapsed="isCollapsed('grokKey')"
+      @toggle="toggle('grokKey')"
+    >
+      <p class="text-sm text-gray-400">
+        API-Key für den KI-Chat (Grok). Registrierung auf
+        <a href="https://console.x.ai" target="_blank" rel="noopener" class="text-blue-400 hover:underline">console.x.ai</a>.
+      </p>
+      <div v-if="grokCfg.configured" class="bg-green-900/20 border border-green-700/40 rounded-lg px-3 py-2 text-sm text-green-300">
+        ✓ xAI API Key konfiguriert — Grok-Chat aktiv
+      </div>
+      <div class="space-y-2">
+        <input v-model="grokForm.xai_api_key" type="password"
+          :placeholder="grokCfg.configured ? '••••••••••••••••' : 'xai-… Key eingeben'"
+          class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+      </div>
+      <div class="flex gap-2">
+        <button @click="saveGrokKey" :disabled="grokForm.saving" class="btn-primary text-sm">
+          {{ grokForm.saving ? '…' : 'API-Key speichern' }}
+        </button>
+        <button v-if="grokCfg.configured" @click="clearGrokKey" class="btn-secondary text-sm">Key löschen</button>
+      </div>
+      <p v-if="grokForm.msg" class="text-sm" :class="grokForm.ok ? 'text-green-400' : 'text-red-400'">{{ grokForm.msg }}</p>
+    </SortableSection>
+
+    <!-- ABRP Global API Key -->
+    <SortableSection
+      :sortable="false"
+      page-id="admin-settings"
+      section-id="abrpKey"
+      title="ABRP App-Key (Global)"
+      icon="⚡"
+      :collapsed="isCollapsed('abrpKey')"
+      @toggle="toggle('abrpKey')"
+    >
+      <p class="text-sm text-gray-400">
+        Der globale App-API-Key für A Better Route Planner (ABRP), registriert auf
+        <a href="https://api.iternio.com" target="_blank" rel="noopener" class="text-blue-400 hover:underline">api.iternio.com</a>.
+        Nutzer geben ihren persönlichen ABRP-Token separat im Profil ein.
+      </p>
+      <div v-if="abrpCfg.from_env" class="text-xs bg-blue-900/20 border border-blue-700/40 rounded-lg px-3 py-2 text-blue-300">
+        ℹ️ Derzeit aktiv aus <code>.env</code>.
+      </div>
+      <div v-if="abrpCfg.configured" class="bg-green-900/20 border border-green-700/40 rounded-lg px-3 py-2 text-sm text-green-300">
+        ✓ ABRP App-Key: {{ abrpCfg.masked }}
+      </div>
+      <div class="space-y-2">
+        <input v-model="abrpForm.key" type="password"
+          :placeholder="abrpCfg.configured ? '••••••••' : 'API-Key eingeben'"
+          class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+      </div>
+      <div class="flex gap-2">
+        <button @click="saveAbrpKey" :disabled="abrpForm.saving" class="btn-primary text-sm">
+          {{ abrpForm.saving ? '…' : 'Key speichern' }}
+        </button>
+        <button v-if="abrpCfg.configured" @click="clearAbrpKey" class="btn-secondary text-sm">Key löschen</button>
+      </div>
+      <p v-if="abrpForm.msg" class="text-sm" :class="abrpForm.ok ? 'text-green-400' : 'text-red-400'">{{ abrpForm.msg }}</p>
+    </SortableSection>
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../api.js';
 import { useAuthStore } from '../store/auth.js';
 import { useAppStore }  from '../store/index.js';
 import AppIcon from '../components/AppIcon.vue';
 import WebhookManager from '../components/WebhookManager.vue';
+import GeofenceManager from '../components/GeofenceManager.vue';
 import { useLangStore, LANGS } from '../store/lang.js';
 import SortableSection from '../components/SortableSection.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
 
-const ADMIN_SECTIONS = ['tenantLang', 'pseudonym', 'tariff', 'serviceIntervals', 'gpsFuzzing', 'tesla', 'webhooks', 'teslaUsage'];
+const ADMIN_SECTIONS = ['tenantLang', 'pseudonym', 'tariff', 'serviceIntervals', 'gpsFuzzing', 'tesla', 'webhooks', 'teslaUsage', 'drivers', 'geofences', 'teslaCredentials', 'webPush', 'telegramBot', 'grokKey', 'abrpKey'];
 const { isCollapsed, toggle } = usePageLayout('admin-settings', ADMIN_SECTIONS);
 
 const auth     = useAuthStore();
@@ -650,6 +917,199 @@ async function resetUsageMonth() {
   setTimeout(() => { usageMsg.value = ''; }, 2500);
 }
 
+
+// ── Fahrerverwaltung ──
+const DRIVER_COLORS = [
+  '#6b7280','#ef4444','#f97316','#eab308',
+  '#22c55e','#3b82f6','#a855f7','#ec4899',
+];
+const drivers       = ref([]);
+const newDriverName = ref('');
+const driverMsg     = ref('');
+const driverOk      = ref(false);
+const editingColor  = ref(null);
+
+async function loadDrivers() {
+  const { data } = await api.get('/drivers');
+  drivers.value = data;
+}
+async function addDriver() {
+  const name = newDriverName.value.trim();
+  if (!name) return;
+  try {
+    await api.post('/drivers', { name, color: '#6b7280' });
+    newDriverName.value = '';
+    driverMsg.value = 'Fahrer gespeichert.'; driverOk.value = true;
+    await loadDrivers();
+  } catch { driverMsg.value = 'Fehler beim Speichern.'; driverOk.value = false; }
+  setTimeout(() => { driverMsg.value = ''; }, 2500);
+}
+async function saveDriverName(driver, name) {
+  if (!name.trim()) return;
+  await api.patch(`/drivers/${driver.id}`, { name: name.trim() });
+  driver.name = name.trim();
+}
+async function saveDriverColor(driver, color) {
+  editingColor.value = null;
+  await api.patch(`/drivers/${driver.id}`, { color });
+  driver.color = color;
+}
+async function setDefaultDriver(driver) {
+  await api.patch(`/drivers/${driver.id}`, { is_default: driver.is_default ? 0 : 1 });
+  await loadDrivers();
+}
+async function deleteDriver(driver) {
+  if (!confirm(`Fahrer "${driver.name}" loeschen?`)) return;
+  await api.delete(`/drivers/${driver.id}`);
+  await loadDrivers();
+}
+
+// ── Tesla Fleet Credentials ──
+const teslaCredsCfg = ref({ client_id: '', client_secret_set: false, from_env: false });
+const teslaCreds    = ref({ client_id: '', client_secret: '', audience: '', saving: false, msg: '', ok: false });
+
+async function loadTeslaCredentials() {
+  try {
+    const { data } = await api.get('/system/tesla-credentials');
+    teslaCredsCfg.value = data;
+    teslaCreds.value.client_id = data.client_id?.startsWith('(aus .env)') ? '' : (data.client_id || '');
+    teslaCreds.value.audience  = data.audience || '';
+  } catch { /* ignore */ }
+}
+async function saveTeslaCredentials() {
+  teslaCreds.value.saving = true;
+  try {
+    await api.put('/system/tesla-credentials', {
+      client_id:     teslaCreds.value.client_id,
+      client_secret: teslaCreds.value.client_secret,
+      audience:      teslaCreds.value.audience,
+    });
+    teslaCreds.value.msg = 'Zugangsdaten gespeichert.'; teslaCreds.value.ok = true;
+    teslaCreds.value.client_secret = '';
+    await loadTeslaCredentials();
+  } catch { teslaCreds.value.msg = 'Fehler beim Speichern.'; teslaCreds.value.ok = false; }
+  teslaCreds.value.saving = false;
+  setTimeout(() => { teslaCreds.value.msg = ''; }, 3000);
+}
+
+// ── VAPID / Web Push ──
+const vapidCfg  = ref({ configured: false, public_key: '', from_env: false });
+const vapidForm = ref({ contact: '', public_key: '', private_key: '', saving: false, generating: false, msg: '', ok: false });
+
+async function loadVapidConfig() {
+  try {
+    const { data } = await api.get('/system/vapid-config');
+    vapidCfg.value  = data;
+    vapidForm.value.contact = data.contact || '';
+  } catch { /* ignore */ }
+}
+async function generateVapid() {
+  if (!confirm('Neue VAPID-Keys generieren? Alle bestehenden Push-Abonnements müssen erneuert werden!')) return;
+  vapidForm.value.generating = true;
+  try {
+    const { data } = await api.post('/system/vapid-generate');
+    vapidForm.value.msg = 'VAPID-Keys generiert und gespeichert.'; vapidForm.value.ok = true;
+    await loadVapidConfig();
+  } catch (e) { vapidForm.value.msg = e.response?.data?.error || 'Fehler'; vapidForm.value.ok = false; }
+  vapidForm.value.generating = false;
+  setTimeout(() => { vapidForm.value.msg = ''; }, 4000);
+}
+async function saveVapidConfig() {
+  vapidForm.value.saving = true;
+  try {
+    await api.put('/system/vapid-config', {
+      contact:     vapidForm.value.contact,
+      public_key:  vapidForm.value.public_key || undefined,
+      private_key: vapidForm.value.private_key || undefined,
+    });
+    vapidForm.value.msg = 'Gespeichert.'; vapidForm.value.ok = true;
+    vapidForm.value.public_key = ''; vapidForm.value.private_key = '';
+    await loadVapidConfig();
+  } catch { vapidForm.value.msg = 'Fehler.'; vapidForm.value.ok = false; }
+  vapidForm.value.saving = false;
+  setTimeout(() => { vapidForm.value.msg = ''; }, 3000);
+}
+
+// ── Telegram Bot ──
+const telegramCfg  = ref({ configured: false, from_env: false });
+const telegramForm = ref({ bot_token: '', webhook_url: '', saving: false, msg: '' });
+
+async function loadTelegramConfig() {
+  try {
+    const { data } = await api.get('/system/telegram-config');
+    telegramCfg.value  = data;
+    telegramForm.value.webhook_url = data.webhook_url || '';
+  } catch { /* ignore */ }
+}
+async function saveTelegramConfig() {
+  telegramForm.value.saving = true;
+  try {
+    await api.put('/system/telegram-config', {
+      bot_token:   telegramForm.value.bot_token,
+      webhook_url: telegramForm.value.webhook_url,
+    });
+    telegramForm.value.bot_token = '';
+    telegramForm.value.msg = 'Bot-Token gespeichert. Server-Neustart erforderlich, damit der Bot aktiv wird.';
+    await loadTelegramConfig();
+  } catch { telegramForm.value.msg = 'Fehler beim Speichern.'; }
+  telegramForm.value.saving = false;
+  setTimeout(() => { telegramForm.value.msg = ''; }, 6000);
+}
+
+// ── Grok / xAI ──
+const grokCfg  = ref({ configured: false });
+const grokForm = ref({ xai_api_key: '', saving: false, msg: '', ok: false });
+
+async function loadGrokConfig() {
+  try {
+    const { data } = await api.get('/grok/config');
+    grokCfg.value = data;
+  } catch { /* ignore */ }
+}
+async function saveGrokKey() {
+  grokForm.value.saving = true;
+  try {
+    await api.put('/grok/config', { xai_api_key: grokForm.value.xai_api_key });
+    grokForm.value.xai_api_key = '';
+    grokForm.value.msg = 'API-Key gespeichert.'; grokForm.value.ok = true;
+    await loadGrokConfig();
+  } catch { grokForm.value.msg = 'Fehler.'; grokForm.value.ok = false; }
+  grokForm.value.saving = false;
+  setTimeout(() => { grokForm.value.msg = ''; }, 3000);
+}
+async function clearGrokKey() {
+  if (!confirm('xAI API-Key löschen? Grok-Chat wird deaktiviert.')) return;
+  await api.put('/grok/config', { xai_api_key: '' });
+  grokCfg.value.configured = false;
+}
+
+// ── ABRP Global Key ──
+const abrpCfg  = ref({ configured: false, masked: '', from_env: false });
+const abrpForm = ref({ key: '', saving: false, msg: '', ok: false });
+
+async function loadAbrpConfig() {
+  try {
+    const { data } = await api.get('/system/abrp-config');
+    abrpCfg.value = data;
+  } catch { /* ignore */ }
+}
+async function saveAbrpKey() {
+  abrpForm.value.saving = true;
+  try {
+    await api.put('/system/abrp-config', { abrp_api_key: abrpForm.value.key });
+    abrpForm.value.key = '';
+    abrpForm.value.msg = 'ABRP-Key gespeichert.'; abrpForm.value.ok = true;
+    await loadAbrpConfig();
+  } catch { abrpForm.value.msg = 'Fehler.'; abrpForm.value.ok = false; }
+  abrpForm.value.saving = false;
+  setTimeout(() => { abrpForm.value.msg = ''; }, 3000);
+}
+async function clearAbrpKey() {
+  if (!confirm('ABRP App-Key löschen?')) return;
+  await api.put('/system/abrp-config', { abrp_api_key: '' });
+  abrpCfg.value.configured = false;
+}
+
 onMounted(async () => {
   loadTenantDefaultLocale();
   loadTenantPseudonym();
@@ -657,6 +1117,12 @@ onMounted(async () => {
   loadGpsFuzzing();
   loadUsageConfig();
   loadTelemetryStatus();
+  loadDrivers();
+  loadTeslaCredentials();
+  loadVapidConfig();
+  loadTelegramConfig();
+  loadGrokConfig();
+  loadAbrpConfig();
   prefetchTeslaAuthUrl();
   const { data } = await api.get('/auth/tesla/status').catch(() => ({ data: { connected: false } }));
   teslaConnected.value = data.connected;

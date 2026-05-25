@@ -560,12 +560,9 @@ const auth  = useAuthStore();
 
 // ─── Schritt-Liste ──────────────────────────────────────────────────────────
 
-const STEPS = computed(() => {
-  const adminSteps = auth.isAdmin
-    ? ['oauth', 'vehicles', 'virtualkey', 'telemetry', 'electricity', 'legal', 'external', 'monitoring']
-    : [];
-  return ['welcome', 'lang', ...adminSteps, 'design', 'color', 'units', 'dashboard', 'nav', 'notifications', 'summary'];
-});
+const STEPS = computed(() =>
+  ['welcome', 'lang', 'design', 'color', 'units', 'dashboard', 'nav', 'notifications', 'summary']
+);
 
 const step      = ref(0);
 const currentId = computed(() => STEPS.value[step.value] ?? 'summary');

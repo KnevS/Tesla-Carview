@@ -816,4 +816,140 @@ router.post('/smtp-test', requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
+
+// ── Tesla Fleet-API Credentials ──────────────────────────────────────────────
+
+router.get('/tesla-credentials', requireAuth, requireAdmin, (req, res) => {
+  const keys = ['tesla.client_id', 'tesla.client_secret', 'tesla.audience', 'tesla.auth_base'];
+  const rows = req.db.prepare(
+    `SELECT key, value FROM tenant_settings WHERE key IN (${keys.map(() => '?').join(',')})`
+  ).all(...keys);
+  const cfg = Object.fromEntries(rows.map(r => [r.key, r.value]));
+  res.json({
+    client_id:   cfg['tesla.client_id']   || (process.env.TESLA_CLIENT_ID   ? '(aus .env)' : ''),
+    client_secret_set: !!(cfg['tesla.client_secret'] || process.env.TESLA_CLIENT_SECRET),
+    audience:    cfg['tesla.audience']    || process.env.TESLA_AUDIENCE    || '',
+    auth_base:   cfg['tesla.auth_base']   || process.env.TESLA_AUTH_BASE   || '',
+    from_env: !cfg['tesla.client_id'] && !!process.env.TESLA_CLIENT_ID,
+  });
+});
+
+router.put('/tesla-credentials', requireAuth, requireAdmin, (req, res) => {
+  const { client_id, client_secret, audience, auth_base } = req.body;
+  const upsert = req.db.prepare(
+    "INSERT INTO tenant_settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+  );
+  if (client_id     !== undefined) upsert.run('tesla.client_id',     client_id.trim());
+  if (client_secret && typeof client_secret === 'string' && client_secret.trim() && !client_secret.startsWith('••'))
+    upsert.run('tesla.client_secret', client_secret.trim());
+  if (audience      !== undefined) upsert.run('tesla.audience',      audience.trim());
+  if (auth_base     !== undefined) upsert.run('tesla.auth_base',     auth_base.trim());
+  auditLog(req.db, req.user.sub, 'tesla_credentials_updated', req, {});
+  res.json({ ok: true });
+});
+
+// ── VAPID / Web Push ──────────────────────────────────────────────────────────
+
+router.get('/vapid-config', requireAuth, requireAdmin, (req, res) => {
+  const keys = ['vapid.public_key', 'vapid.private_key', 'vapid.contact'];
+  const rows = req.db.prepare(
+    `SELECT key, value FROM tenant_settings WHERE key IN (${keys.map(() => '?').join(',')})`
+  ).all(...keys);
+  const cfg = Object.fromEntries(rows.map(r => [r.key, r.value]));
+  const pubKey = cfg['vapid.public_key'] || process.env.VAPID_PUBLIC_KEY || '';
+  res.json({
+    public_key:      pubKey,
+    private_key_set: !!(cfg['vapid.private_key'] || process.env.VAPID_PRIVATE_KEY),
+    contact:         cfg['vapid.contact'] || process.env.VAPID_CONTACT || '',
+    configured:      !!(pubKey && (cfg['vapid.private_key'] || process.env.VAPID_PRIVATE_KEY)),
+    from_env:        !cfg['vapid.public_key'] && !!process.env.VAPID_PUBLIC_KEY,
+  });
+});
+
+router.put('/vapid-config', requireAuth, requireAdmin, (req, res) => {
+  const { public_key, private_key, contact } = req.body;
+  const upsert = req.db.prepare(
+    "INSERT INTO tenant_settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+  );
+  if (public_key  !== undefined) upsert.run('vapid.public_key',  public_key.trim());
+  if (private_key && typeof private_key === 'string' && private_key.trim() && !private_key.startsWith('••'))
+    upsert.run('vapid.private_key', private_key.trim());
+  if (contact     !== undefined) upsert.run('vapid.contact',     contact.trim());
+  auditLog(req.db, req.user.sub, 'vapid_config_updated', req, {});
+  res.json({ ok: true });
+});
+
+router.post('/vapid-generate', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { generateVAPIDKeys } = await import('web-push');
+    const keys = generateVAPIDKeys();
+    const upsert = req.db.prepare(
+      "INSERT INTO tenant_settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+    );
+    upsert.run('vapid.public_key',  keys.publicKey);
+    upsert.run('vapid.private_key', keys.privateKey);
+    auditLog(req.db, req.user.sub, 'vapid_keys_generated', req, {});
+    res.json({ public_key: keys.publicKey, configured: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Telegram Bot ──────────────────────────────────────────────────────────────
+
+router.get('/telegram-config', requireAuth, requireAdmin, (req, res) => {
+  const keys = ['telegram.bot_token', 'telegram.webhook_url'];
+  const rows = req.db.prepare(
+    `SELECT key, value FROM tenant_settings WHERE key IN (${keys.map(() => '?').join(',')})`
+  ).all(...keys);
+  const cfg = Object.fromEntries(rows.map(r => [r.key, r.value]));
+  res.json({
+    bot_token_set:  !!(cfg['telegram.bot_token']  || process.env.TELEGRAM_BOT_TOKEN),
+    webhook_url:    cfg['telegram.webhook_url'] || process.env.TELEGRAM_WEBHOOK_URL || '',
+    configured:     !!(cfg['telegram.bot_token']  || process.env.TELEGRAM_BOT_TOKEN),
+    from_env:       !cfg['telegram.bot_token']     && !!process.env.TELEGRAM_BOT_TOKEN,
+  });
+});
+
+router.put('/telegram-config', requireAuth, requireAdmin, (req, res) => {
+  const { bot_token, webhook_url } = req.body;
+  const upsert = req.db.prepare(
+    "INSERT INTO tenant_settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+  );
+  if (bot_token && typeof bot_token === 'string' && bot_token.trim() && !bot_token.includes('••'))
+    upsert.run('telegram.bot_token', bot_token.trim());
+  if (webhook_url !== undefined) upsert.run('telegram.webhook_url', webhook_url.trim());
+  auditLog(req.db, req.user.sub, 'telegram_config_updated', req, {});
+  res.json({ ok: true, restart_required: true });
+});
+
+// ── ABRP Global API Key ────────────────────────────────────────────────────────
+
+router.get('/abrp-config', requireAuth, requireAdmin, (req, res) => {
+  const row = req.db.prepare("SELECT value FROM tenant_settings WHERE key='abrp.api_key'").get();
+  const key = row?.value || '';
+  res.json({
+    configured: !!(key || process.env.ABRP_API_KEY),
+    masked:     key ? key.slice(0, 8) + '…' + key.slice(-4) : (process.env.ABRP_API_KEY ? '(aus .env)' : ''),
+    from_env:   !key && !!process.env.ABRP_API_KEY,
+  });
+});
+
+router.put('/abrp-config', requireAuth, requireAdmin, (req, res) => {
+  const { abrp_api_key } = req.body;
+  if (abrp_api_key === '' || abrp_api_key == null) {
+    req.db.prepare("DELETE FROM tenant_settings WHERE key='abrp.api_key'").run();
+    return res.json({ configured: false });
+  }
+  if (typeof abrp_api_key !== 'string' || abrp_api_key.length < 4) {
+    return res.status(400).json({ error: 'Ungültiger ABRP API-Key' });
+  }
+  req.db.prepare(
+    "INSERT INTO tenant_settings (key,value) VALUES ('abrp.api_key',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+  ).run(abrp_api_key);
+  auditLog(req.db, req.user.sub, 'abrp_config_updated', req, {});
+  res.json({ configured: true, masked: abrp_api_key.slice(0, 8) + '…' + abrp_api_key.slice(-4) });
+});
+
+
 export default router;

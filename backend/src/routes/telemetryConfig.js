@@ -3,6 +3,7 @@ import axios from 'axios';
 import { getPublicKeyPem } from '../services/virtualKey.js';
 import { apiProxyPost } from '../services/teslaApi.js';
 import { getAllTenants, getDb } from '../db/database.js';
+import { getTenantSetting } from '../services/configService.js';
 
 const router = Router();
 
@@ -65,10 +66,10 @@ router.get('/telemetry/status', async (req, res) => {
 
 // Einmalige Partner-Registrierung bei Tesla (benötigt für fleet_telemetry_config)
 router.post('/partner/register', async (req, res) => {
-  const clientId     = process.env.TESLA_CLIENT_ID;
-  const clientSecret = process.env.TESLA_CLIENT_SECRET;
-  const audience     = process.env.TESLA_AUDIENCE;
-  const authBase     = process.env.TESLA_AUTH_BASE || 'https://auth.tesla.com/oauth2/v3';
+  const clientId     = getTenantSetting(req.db, tesla.client_id, TESLA_CLIENT_ID);
+  const clientSecret = getTenantSetting(req.db, tesla.client_secret, TESLA_CLIENT_SECRET);
+  const audience     = getTenantSetting(req.db, 'tesla.audience', 'TESLA_AUDIENCE') || 'https://fleet-api.prd.eu.vn.cloud.tesla.com';
+  const authBase     = getTenantSetting(req.db, 'tesla.auth_base', 'TESLA_AUTH_BASE') || 'https://auth.tesla.com/oauth2/v3';
   const domain       = process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || '';
 
   if (!clientId || !clientSecret) {

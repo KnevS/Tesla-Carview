@@ -133,8 +133,23 @@ router.post('/chats/:id/stream', async (req, res) => {
 });
 
 // GET /api/grok/config — prüft ob XAI_API_KEY konfiguriert ist (gibt Key nie zurück)
-router.get('/config', (req, res) => {
-  res.json({ configured: !!process.env.XAI_API_KEY });
+router.get('/config', requireAuth, (req, res) => {
+  const key = getTenantSetting(req.db, 'xai.api_key', 'XAI_API_KEY');
+  res.json({ configured: !!key });
+});
+
+// PUT /api/grok/config — setzt XAI API Key (Admin)
+router.put('/config', requireAuth, requireAdmin, (req, res) => {
+  const { xai_api_key } = req.body;
+  if (xai_api_key === '' || xai_api_key == null) {
+    setTenantSetting(req.db, 'xai.api_key', null);
+    return res.json({ configured: false });
+  }
+  if (typeof xai_api_key !== 'string' || xai_api_key.length < 8) {
+    return res.status(400).json({ error: 'Ungültiger API-Key' });
+  }
+  setTenantSetting(req.db, 'xai.api_key', xai_api_key);
+  res.json({ configured: true, masked: xai_api_key.slice(0, 6) + '…' + xai_api_key.slice(-4) });
 });
 
 // GET /api/grok/usage

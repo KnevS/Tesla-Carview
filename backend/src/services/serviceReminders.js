@@ -16,6 +16,7 @@
  */
 
 import { getAllTenants, getDb } from '../db/database.js';
+import { getTenantSetting } from './configService.js';
 import { dispatch as dispatchWebhook } from './webhookDispatcher.js';
 
 const CHECK_INTERVAL_MS = 24 * 3600 * 1000;          // taeglich
@@ -24,26 +25,16 @@ const MONTH_S           = 30 * 24 * 3600;
 const PUSH_DAYS_AHEAD   = 30;
 const PUSH_KM_AHEAD     = 1000;
 
-let webpush = null;
+let webpushMod = null;
 
 async function loadWebpush() {
-  if (webpush !== null) return webpush;
+  if (webpushMod !== null) return webpushMod;
   try {
-    const mod = await import('web-push');
-    if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-      mod.setVapidDetails(
-        process.env.VAPID_CONTACT || 'mailto:noreply@example.com',
-        process.env.VAPID_PUBLIC_KEY,
-        process.env.VAPID_PRIVATE_KEY,
-      );
-      webpush = mod;
-    } else {
-      webpush = false;
-    }
+    webpushMod = await import('web-push');
   } catch {
-    webpush = false;
+    webpushMod = false;
   }
-  return webpush;
+  return webpushMod;
 }
 
 /** Berechnet, ob ein Intervall in Push-Naehe ist. Liefert null, wenn
@@ -81,7 +72,7 @@ function dueDescription(row, vehicle, now) {
 }
 
 async function runOnce() {
-  const wp = await loadWebpush();
+  const wpMod = await loadWebpush();
   const now = Math.floor(Date.now() / 1000);
 
   for (const tenant of getAllTenants()) {
@@ -103,7 +94,11 @@ async function runOnce() {
       if (!desc) continue;
 
       // Push an alle Subscriptions dieses Fahrzeugs.
-      if (wp) {
+      const vapidPub  = getTenantSetting(db, 'vapid.public_key',  'VAPID_PUBLIC_KEY');
+      const vapidPriv = getTenantSetting(db, 'vapid.private_key', 'VAPID_PRIVATE_KEY');
+      const vapidCont = getTenantSetting(db, 'vapid.contact',     'VAPID_CONTACT') || 'mailto:noreply@example.com';
+      if (wpMod && vapidPub && vapidPriv) {
+        wpMod.setVapidDetails(vapidCont, vapidPub, vapidPriv);
         const subs = db.prepare(
           'SELECT subscription_json FROM push_subscriptions WHERE vehicle_id = ?'
         ).all(it.vehicle_id);
