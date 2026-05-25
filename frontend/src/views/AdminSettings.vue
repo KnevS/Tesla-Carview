@@ -946,21 +946,21 @@ async function addDriver() {
 }
 async function saveDriverName(driver, name) {
   if (!name.trim()) return;
-  await api.patch(, { name: name.trim() });
+  await api.patch(`/drivers/${driver.id}`, { name: name.trim() });
   driver.name = name.trim();
 }
 async function saveDriverColor(driver, color) {
   editingColor.value = null;
-  await api.patch(, { color });
+  await api.patch(`/drivers/${driver.id}`, { color });
   driver.color = color;
 }
 async function setDefaultDriver(driver) {
-  await api.patch(, { is_default: driver.is_default ? 0 : 1 });
+  await api.patch(`/drivers/${driver.id}`, { is_default: driver.is_default ? 0 : 1 });
   await loadDrivers();
 }
 async function deleteDriver(driver) {
-  if (!confirm()) return;
-  await api.delete();
+  if (!confirm(`Fahrer "${driver.name}" loeschen?`)) return;
+  await api.delete(`/drivers/${driver.id}`);
   await loadDrivers();
 }
 
