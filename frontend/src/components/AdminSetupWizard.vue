@@ -355,13 +355,41 @@
           <!-- STEP: summary -->
           <template v-else>
             <div class="text-center space-y-4 py-4">
-              <div class="text-5xl">✅</div>
-              <h3 class="text-xl font-bold">Einrichtung abgeschlossen</h3>
+              <div class="text-5xl">{{ restartDone ? '🔄' : '✅' }}</div>
+              <h3 class="text-xl font-bold">{{ restartDone ? 'Neustart läuft…' : 'Einrichtung abgeschlossen' }}</h3>
               <p class="text-gray-300 text-sm">Alle Konfigurationen wurden gespeichert.</p>
-              <div v-if="needsRestart" class="bg-amber-900/20 border border-amber-700/40 rounded-lg px-4 py-3 text-sm text-amber-300">
-                ⚠️ Für Telegram-Bot und andere Dienst-Neustarts empfiehlt sich ein Container-Neustart.
+
+              <!-- Neustart-Banner + Button -->
+              <div v-if="needsRestart && !restartDone"
+                class="bg-amber-900/20 border border-amber-700/40 rounded-xl px-4 py-4 text-sm text-amber-200 space-y-3 text-left">
+                <p class="font-medium flex items-center gap-2">
+                  ⚠️ Container-Neustart empfohlen
+                </p>
+                <p class="text-xs text-amber-300/80">
+                  Damit der Telegram-Bot und andere neu konfigurierte Dienste aktiv werden,
+                  muss der Backend-Container neu gestartet werden.
+                </p>
+                <button @click="triggerRestart" :disabled="restarting"
+                  class="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white font-medium transition disabled:opacity-50">
+                  <span v-if="restarting" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span v-else>🔄</span>
+                  {{ restarting ? 'Starte neu…' : 'Container jetzt neu starten' }}
+                </button>
+                <p v-if="restartError" class="text-xs text-red-400">{{ restartError }}</p>
               </div>
-              <RouterLink to="/admin/settings" @click="$emit('close')" class="block btn-secondary text-sm">
+
+              <!-- Nach Neustart: Warte-Hinweis + Auto-Reload -->
+              <div v-if="restartDone"
+                class="bg-blue-900/20 border border-blue-700/40 rounded-xl px-4 py-4 text-sm text-blue-200 space-y-2">
+                <p>Der Container startet neu. Die App ist in ca. <strong>{{ restartCountdown }}s</strong> wieder erreichbar.</p>
+                <div class="w-full bg-gray-700 rounded-full h-1.5 overflow-hidden">
+                  <div class="bg-blue-400 h-full rounded-full transition-all duration-1000"
+                    :style="{ width: ((RESTART_WAIT - restartCountdown) / RESTART_WAIT * 100) + '%' }"></div>
+                </div>
+                <p class="text-xs text-blue-300/70">Die Seite wird danach automatisch neu geladen.</p>
+              </div>
+
+              <RouterLink v-if="!restartDone" to="/admin/settings" @click="$emit('close')" class="block btn-secondary text-sm">
                 → Admin-Einstellungen
               </RouterLink>
             </div>
@@ -391,10 +419,41 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive, onMounted } from 'vue';
+import { ref, computed, reactive, onMounted, onUnmounted } from 'vue';
 import api from '../api.js';
 
 const emit = defineEmits(['close', 'done']);
+
+// ─── Container-Neustart ───────────────────────────────────────────────────────
+const RESTART_WAIT    = 12; // Sekunden bis Auto-Reload
+const restarting      = ref(false);
+const restartDone     = ref(false);
+const restartError    = ref('');
+const restartCountdown = ref(RESTART_WAIT);
+let   restartTimer    = null;
+
+async function triggerRestart() {
+  restarting.value = true; restartError.value = '';
+  try {
+    await api.post('/system/container-restart');
+    restartDone.value = true;
+    restarting.value  = false;
+    // Countdown + Auto-Reload
+    restartCountdown.value = RESTART_WAIT;
+    restartTimer = setInterval(() => {
+      restartCountdown.value--;
+      if (restartCountdown.value <= 0) {
+        clearInterval(restartTimer);
+        window.location.reload();
+      }
+    }, 1000);
+  } catch (e) {
+    restartError.value = e.response?.data?.error ?? e.message ?? 'Fehler beim Neustart';
+    restarting.value = false;
+  }
+}
+
+onUnmounted(() => { if (restartTimer) clearInterval(restartTimer); });
 
 const STEPS = [
   'welcome', 'credentials', 'oauth', 'vehicles', 'virtualkey', 'telemetry',

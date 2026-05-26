@@ -658,6 +658,16 @@ router.post('/update/trigger', requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
+// POST /api/system/container-restart — graceful Node.js exit.
+// Docker restart-policy (unless-stopped) bringt den Container automatisch
+// wieder hoch. Antwort wird vor dem Exit gesendet; Neustart dauert ~2-3 s.
+router.post('/container-restart', requireAuth, requireAdmin, (req, res) => {
+  auditLog(req.db, req.user.sub, 'container_restart', req, {});
+  res.json({ ok: true, message: 'Container wird neu gestartet…' });
+  // Kurze Verzögerung damit die Response noch rausgeht, dann Exit
+  setTimeout(() => process.exit(0), 400);
+});
+
 // ── Monitoring-Konfiguration ─────────────────────────────────────────────────
 
 const MONITORING_KEYS = ['monitoring.alert_email', 'monitoring.heal_enabled', 'monitoring.anthropic_key'];
@@ -881,7 +891,9 @@ router.put('/vapid-config', requireAuth, requireAdmin, (req, res) => {
 
 router.post('/vapid-generate', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { generateVAPIDKeys } = await import('web-push');
+    const webPush = await import('web-push');
+    const generateVAPIDKeys = webPush.generateVAPIDKeys ?? webPush.default?.generateVAPIDKeys;
+    if (typeof generateVAPIDKeys !== 'function') throw new Error('web-push: generateVAPIDKeys nicht gefunden');
     const keys = generateVAPIDKeys();
     const upsert = req.db.prepare(
       "INSERT INTO tenant_settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
