@@ -16,3 +16,7 @@ frontend-dist-private/
 
 # Local webhook secret (never commit)
 deploy/update-webhook.env
+
+# Local server-specific compose override (e.g. for reverse-proxy labels)
+docker-compose.override.yml
+docker-compose.override.yaml

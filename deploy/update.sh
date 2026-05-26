@@ -7,7 +7,14 @@
 set -euo pipefail
 
 APP_DIR="/opt/tesla-carview"
-COMPOSE="docker compose -f $APP_DIR/docker-compose.prod.yml"
+# Optionaler server-spezifischer Override (z.B. fuer Reverse-Proxy-Integration).
+# Datei ist gitignored; Drittinstaller haben sie nicht und docker compose nutzt
+# in diesem Fall nur docker-compose.prod.yml.
+OVERRIDE_ARG=""
+if [ -f "$APP_DIR/docker-compose.override.yml" ]; then
+  OVERRIDE_ARG="-f $APP_DIR/docker-compose.override.yml"
+fi
+COMPOSE="docker compose -f $APP_DIR/docker-compose.prod.yml $OVERRIDE_ARG"
 cd "$APP_DIR"
 
 echo "============================================"
