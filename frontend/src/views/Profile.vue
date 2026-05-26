@@ -560,6 +560,7 @@ import { useLangStore, LANGS } from '../store/lang.js';
 import SortableSection from '../components/SortableSection.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
 import InfoTip from '../components/InfoTip.vue';
+import { usePrefsStore } from '../store/prefs.js';
 
 const PROFILE_SECTIONS = ['language', 'vehicle', 'mfa', 'passkey', 'password', 'audit', 'appearance', 'notifications'];
 const { isCollapsed, toggle } = usePageLayout('profile', PROFILE_SECTIONS);
