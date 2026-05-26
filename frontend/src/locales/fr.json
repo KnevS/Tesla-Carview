@@ -1414,9 +1414,9 @@
       "supportNote": "⚠ Remplacez le Client ID et le VIN par vos propres valeurs. Tesla répond généralement en quelques jours."
     },
     "monta": {
-      "title": "🔌 Intégration Monta (facturation recharge domicile)",
-      "desc": "Pour les conducteurs de véhicules de société : Tesla Carview peut récupérer les données de recharge directement depuis votre wallbox Monta et créer un relevé de coûts mensuel pour votre employeur.",
-      "warning": "⚠️ L'intégration Monta est uniquement disponible pour les véhicules de la catégorie Véhicule de société (Paramètres → Profil véhicule → Catégorie).",
+      "title": "🔌 Intégration Monta (recharge domicile & facturation)",
+      "desc": "Tesla Carview peut récupérer les données de recharge directement depuis votre wallbox Monta. Pour les véhicules privés, les informations de recharge sont disponibles ; pour les véhicules de société, un relevé de coûts mensuel pour l'employeur est également disponible.",
+      "warning": "ℹ️ Les fonctions de facturation (PDF, modèle de remboursement) sont réservées aux véhicules de société. Les données de recharge Monta sont disponibles pour tous les véhicules.",
       "step1Title": "Étape 1 – Créer une clé API Monta",
       "step1Items": [
         "Connectez-vous à Monta (application ou web : portal.monta.com).",

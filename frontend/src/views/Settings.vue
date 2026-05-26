@@ -250,9 +250,15 @@
           </div>
         </div>
 
-        <!-- Monta-Konfiguration (nur Dienstwagen) -->
-        <div v-if="vProfile.category === 'company'" class="col-span-2 border-t border-gray-700 pt-3 space-y-3">
+        <!-- Monta-Konfiguration (alle Fahrzeuge) -->
+        <div class="col-span-2 border-t border-gray-700 pt-3 space-y-3">
           <p class="text-sm font-medium text-gray-300">Heimladen / Monta-Konfiguration</p>
+          <!-- Hinweis für Privatfahrzeuge -->
+          <p v-if="vProfile.category !== 'company'"
+             class="text-xs text-blue-300/90 bg-blue-900/20 border border-blue-700/30 rounded-lg px-3 py-2"
+             v-tooltip="'Für Dienstwagen steht zusätzlich eine monatliche Kostenabrechnung zur Verfügung.'">
+            ℹ️ Monta steht als Lade-Informationsquelle zur Verfügung. Die Kostenabrechnung ist Fahrzeugen der Kategorie <strong>Dienstwagen</strong> vorbehalten.
+          </p>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="label">Strompreis Wallbox (€/kWh)</label>

@@ -1414,9 +1414,9 @@
       "supportNote": "⚠ Client ID und VIN durch eigene Werte ersetzen. Tesla antwortet erfahrungsgemäß innerhalb weniger Tage."
     },
     "monta": {
-      "title": "🔌 Monta-Integration (Heimlade-Abrechnung)",
-      "desc": "Für Dienstwagen-Fahrer: Tesla Carview kann Ladedaten direkt aus deiner Monta-Wallbox abrufen und daraus eine monatliche Kostenabrechnung für deinen Arbeitgeber erstellen.",
-      "warning": "⚠️ Monta-Integration ist nur für Fahrzeuge der Kategorie Dienstwagen verfügbar (Einstellungen → Fahrzeugprofil → Kategorie).",
+      "title": "🔌 Monta-Integration (Heimladen & Abrechnung)",
+      "desc": "Tesla Carview kann Ladedaten direkt aus deiner Monta-Wallbox abrufen. Für Privatfahrzeuge stehen die Lade-Informationen zur Verfügung; für Dienstwagen zusätzlich die monatliche Kostenabrechnung für den Arbeitgeber.",
+      "warning": "ℹ️ Die Kostenabrechnung (PDF, Erstattungsvorlage) ist Fahrzeugen der Kategorie Dienstwagen vorbehalten. Monta-Ladedaten können für alle Fahrzeuge genutzt werden.",
       "step1Title": "Schritt 1 – Monta Partner API Zugangsdaten erstellen",
       "step1Items": [
         "Melde dich im Monta Operator Hub an (hub.monta.com).",

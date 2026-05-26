@@ -306,11 +306,14 @@ Tesla bills every `/vehicle_data` call (≈ €0.005/call). Without Fleet Teleme
 - Set up Fleet Telemetry → drops to ~24 calls/day (~€3.60/month)
 - In Settings → Tesla connection: set a monthly limit and enable hard stop
 
-## 🔌 Monta integration (Billing) {#monta}
+## 🔌 Monta integration (Home charging & Billing) {#monta}
 
-For company-car drivers: Tesla Carview can pull charging data directly from your **Monta wallbox** and produce a monthly cost statement for your employer.
+Tesla Carview can pull charging data directly from your **Monta wallbox**. The integration is available for **all vehicles**:
 
-> ⚠️ The Monta integration is only available for vehicles in the **Company car** category (Settings → Vehicle profile → Category).
+- **Private vehicles**: Monta charging sessions are displayed as charge information (🏠 badge in charging history, home-wallbox detection).
+- **Company cars**: In addition, full cost billing is available — monthly overview, PDF reimbursement sheet, and billing template for your employer.
+
+> ℹ️ Billing features (PDF, reimbursement template) are reserved for vehicles in the **Company car** category. Monta charging data is available for all vehicles.
 
 ### Step 1 – Create a Monta API key
 
@@ -329,10 +332,9 @@ The key is shown only once — enter it in Tesla Carview right away.
 ### Step 3 – Enter in Tesla Carview
 
 1. Go to **Settings → Vehicle profile**.
-2. Choose the **💼 Company car** category.
-3. Enter **Wallbox electricity price (€/kWh)** — e.g. `0.34`.
-4. Add the **Monta Charge-Point ID** and **Monta API key**.
-5. Click **Save**.
+2. Enter **Wallbox electricity price (€/kWh)** — e.g. `0.34` (used as billing basis for company cars).
+3. Add the **Monta Charge-Point ID** and **Monta API key**.
+4. Click **Save**.
 
 ### Home wallbox detection
 

@@ -1414,9 +1414,9 @@
       "supportNote": "⚠ Sustituye el Client ID y el VIN por tus propios valores. Tesla suele responder en pocos días."
     },
     "monta": {
-      "title": "🔌 Integración Monta (facturación carga doméstica)",
-      "desc": "Para conductores de vehículos de empresa: Tesla Carview puede obtener datos de carga directamente de tu wallbox Monta y crear un estado de costes mensual para tu empleador.",
-      "warning": "⚠️ La integración Monta solo está disponible para vehículos de la categoría Vehículo de empresa (Ajustes → Perfil del vehículo → Categoría).",
+      "title": "🔌 Integración Monta (carga doméstica y facturación)",
+      "desc": "Tesla Carview puede obtener datos de carga directamente de tu wallbox Monta. Para vehículos privados, la información de carga está disponible; para vehículos de empresa, también se genera un estado de costes mensual para el empleador.",
+      "warning": "ℹ️ Las funciones de facturación (PDF, plantilla de reembolso) están reservadas para vehículos de empresa. Los datos de carga Monta están disponibles para todos los vehículos.",
       "step1Title": "Paso 1 – Crear clave API Monta",
       "step1Items": [
         "Inicia sesión en Monta (app o web: portal.monta.com).",

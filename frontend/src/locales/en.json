@@ -1414,9 +1414,9 @@
       "supportNote": "⚠ Replace Client ID and VIN with your own values. Tesla typically responds within a few days."
     },
     "monta": {
-      "title": "🔌 Monta integration (home charging billing)",
-      "desc": "For company car drivers: Tesla Carview can pull charging data directly from your Monta wallbox and create a monthly cost statement for your employer.",
-      "warning": "⚠️ Monta integration is only available for vehicles in the Company car category (Settings → Vehicle profile → Category).",
+      "title": "🔌 Monta integration (home charging & billing)",
+      "desc": "Tesla Carview can pull charging data directly from your Monta wallbox. For private vehicles, charging information is available; for company cars, a monthly cost statement for your employer is additionally available.",
+      "warning": "ℹ️ Billing features (PDF, reimbursement template) are reserved for vehicles in the Company car category. Monta charging data is available for all vehicles.",
       "step1Title": "Step 1 – Create Monta Partner API credentials",
       "step1Items": [
         "Log in to the Monta Operator Hub (hub.monta.com).",

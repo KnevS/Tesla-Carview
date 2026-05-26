@@ -1414,9 +1414,9 @@
       "supportNote": "⚠ Client ID ve VIN'i kendi değerlerinizle değiştirin. Tesla genellikle birkaç gün içinde yanıt verir."
     },
     "monta": {
-      "title": "🔌 Monta entegrasyonu (ev şarjı faturalaması)",
-      "desc": "Şirket aracı sürücüleri için: Tesla Carview, Monta duvar kutunuzdan şarj verilerini doğrudan çekebilir ve işvereniniz için aylık maliyet özeti oluşturabilir.",
-      "warning": "⚠️ Monta entegrasyonu yalnızca Şirket aracı kategorisindeki araçlar için kullanılabilir (Ayarlar → Araç profili → Kategori).",
+      "title": "🔌 Monta entegrasyonu (ev şarjı & faturalama)",
+      "desc": "Tesla Carview, Monta duvar kutunuzdan şarj verilerini doğrudan çekebilir. Özel araçlarda şarj bilgileri görüntülenir; şirket araçlarında ayrıca işveren için aylık maliyet özeti de oluşturulabilir.",
+      "warning": "ℹ️ Faturalama özellikleri (PDF, geri ödeme şablonu) yalnızca şirket aracı kategorisindeki araçlar içindir. Monta şarj verileri tüm araçlar için kullanılabilir.",
       "step1Title": "Adım 1 – Monta API anahtarı oluştur",
       "step1Items": [
         "Monta'ya giriş yapın (uygulama veya web: portal.monta.com).",

@@ -306,11 +306,14 @@ Tesla rechnet jeden `/vehicle_data`-Call ab (≈ 0,005 €/Aufruf). Ohne Fleet T
 - Fleet Telemetry einrichten → reduziert auf ~24 Calls/Tag (~3,60 €/Monat)
 - In Einstellungen → Tesla-Verbindung: Monatslimit + Hard-Stop aktivieren
 
-## 🔌 Monta-Integration (Abrechnung) {#monta}
+## 🔌 Monta-Integration (Heimladen & Abrechnung) {#monta}
 
-Für Dienstwagen-Fahrer: Tesla Carview kann Ladedaten direkt aus deiner **Monta-Wallbox** abrufen und daraus eine monatliche Kostenabrechnung für deinen Arbeitgeber erstellen.
+Tesla Carview kann Ladedaten direkt aus deiner **Monta-Wallbox** abrufen. Die Integration steht für **alle Fahrzeuge** zur Verfügung:
 
-> ⚠️ Monta-Integration ist nur für Fahrzeuge der Kategorie **Dienstwagen** verfügbar (Einstellungen → Fahrzeugprofil → Kategorie).
+- **Privatfahrzeuge**: Monta-Ladesessions werden als Lade-Information angezeigt (🏠-Badge in der Ladehistorie, Sync mit Heim-Wallbox-Erkennung).
+- **Dienstwagen**: Zusätzlich steht die vollständige Kostenabrechnung zur Verfügung – monatliche Übersicht, PDF-Erstattungsblatt und Abrechnungsvorlage für den Arbeitgeber.
+
+> ℹ️ Die Kostenabrechnung (PDF, Erstattungsvorlage) ist Fahrzeugen der Kategorie **Dienstwagen** vorbehalten. Monta-Ladedaten können für alle Fahrzeuge genutzt werden.
 
 ### Schritt 1 – Monta API-Key erstellen
 
@@ -329,10 +332,9 @@ Der Key ist nur einmal sichtbar – sofort in Tesla Carview eintragen.
 ### Schritt 3 – In Tesla Carview eintragen
 
 1. Gehe zu **Einstellungen → Fahrzeugprofil**.
-2. Wähle Kategorie **💼 Dienstwagen**.
-3. Trage **Strompreis Wallbox (€/kWh)** ein – z. B. `0.34`.
-4. Füge **Monta Charge-Point-ID** und **Monta API-Key** ein.
-5. Klicke **Speichern**.
+2. Trage **Strompreis Wallbox (€/kWh)** ein – z. B. `0.34` (für Dienstwagen Abrechnungsgrundlage).
+3. Füge **Monta Charge-Point-ID** und **Monta API-Key** ein.
+4. Klicke **Speichern**.
 
 ### Heim-Wallbox-Erkennung
 
