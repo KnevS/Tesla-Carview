@@ -18,15 +18,12 @@ services:
       - ./backend/.env
     volumes:
       - tesla_data:/app/data
-      # Demo-Feature: private Implementierungen werden via tc-private.git
-      # auf dem Host bereitgestellt und per Volume-Mount in den Container
-      # gemounted (ueberschreiben die oeffentlichen Stubs im Image).
-      # Stubs bleiben das Fallback fuer Instanzen ohne privates Overlay.
-      - ./backend/src/routes/demo.js:/app/src/routes/demo.js:ro
-      - ./backend/src/services/demoLifecycle.js:/app/src/services/demoLifecycle.js:ro
       # system.js: enthaelt /container-restart Endpoint + generateVAPIDKeys-Fix.
       # Volume-Mount sichert diese Aenderungen gegen Image-Updates ab.
       - ./backend/src/routes/system.js:/app/src/routes/system.js:ro
+      # Demo-Feature wurde aus der Hauptinstanz entfernt (2026-05-26).
+      # Die Demo laeuft als eigenstaendiger Stack unter /opt/tesla-carview-demo
+      # und ist per https://demo.teslaview.krische.com erreichbar.
     networks:
       - tesla-net
     depends_on:
@@ -51,9 +48,9 @@ services:
     container_name: tesla-carview-frontend
     restart: unless-stopped
     volumes:
-      # Demo-Feature: privat kompiliertes Frontend-Bundle (enthaelt vollstaendige Demo.vue).
-      # Wird durch deploy.sh automatisch neu gebaut wenn /opt/tc-private.git vorhanden ist.
-      # Ueberschreibt den oeffentlichen Stub aus dem GHCR-Image.
+      # Kein privates Frontend-Bundle mehr fuer die Hauptinstanz (Demo entfernt 2026-05-26).
+      # Das oeffentliche Bundle aus dem GHCR-Image wird verwendet (Stub-Demo.vue).
+      # Das vollstaendige Demo-Bundle liegt nur in der Demo-Instanz (/opt/tesla-carview-demo).
       - ./frontend-dist-private:/usr/share/nginx/html:ro
     networks:
       - tesla-net
