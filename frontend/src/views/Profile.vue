@@ -467,7 +467,7 @@
             <InfoTip text="Erhalte Benachrichtigungen (Ladeende, Akku-Warnung, Wächter-Alarm, Fahrtenbuch-Erinnerung) direkt im Telegram-Messenger — ohne App geöffnet zu haben." />
           </h4>
           <div v-if="!tgBotConfigured" class="text-sm text-gray-500">
-            Telegram-Bot ist nicht konfiguriert. Admin muss <code class="text-xs bg-gray-800 px-1 rounded">TELEGRAM_BOT_TOKEN</code> in der <code class="text-xs bg-gray-800 px-1 rounded">.env</code> setzen.
+            Telegram-Benachrichtigungen sind auf diesem Server noch nicht verfügbar. Bitte wende dich an einen Administrator.
           </div>
           <div v-else-if="tgLinked" class="space-y-2">
             <div class="flex items-center gap-2 text-sm text-green-400">
@@ -828,7 +828,7 @@ async function subscribePush() {
   pushLoading.value = true; pushMsg.value = '';
   try {
     const { data } = await api.get('/notifications/vapid-public-key');
-    if (!data.key) { pushMsg.value = 'VAPID-Key nicht konfiguriert (Admin: .env setzen)'; pushMsgErr.value = true; return; }
+    if (!data.key) { pushMsg.value = 'Push-Benachrichtigungen sind auf diesem Server noch nicht eingerichtet. Bitte wende dich an einen Administrator.'; pushMsgErr.value = true; return; }
     const perm = await Notification.requestPermission();
     if (perm !== 'granted') { pushState.value = 'denied'; return; }
     if (!_swReg) _swReg = await navigator.serviceWorker.ready;
