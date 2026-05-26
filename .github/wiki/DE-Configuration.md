@@ -153,21 +153,21 @@ Nach dem Speichern: `docker compose -f docker-compose.prod.yml up -d --build bac
 
 ---
 
-## In-App-Konfiguration (Admin → System)
+## In-App-Konfiguration (Admin → Admin-Einstellungen)
 
 Einige Einstellungen erfordern keine `.env`-Änderungen — sie werden direkt in der Admin-Oberfläche konfiguriert und in der Datenbank gespeichert. Diese Einstellungen überstehen Updates und erfordern keinen Container-Neustart.
 
 | Einstellung | Ort | Hinweis |
 |---|---|---|
-| SMTP / E-Mail-Versand | Admin → System → E-Mail | Host, Port, Benutzer, Passwort, Absender — inkl. Test-Mail-Button |
-| OpenChargeMap API-Key | Admin → System → Externe APIs | Ladestation-Overlay im Routenplaner — kostenlos, Registrierung unter [openchargemap.io/site/develop](https://openchargemap.io/site/develop#api) |
-| HERE Maps API-Key | Admin → System → Externe APIs | Echtzeit-Verkehr im Routenplaner — kostenloses Kontingent (250 k Req/Monat), Registrierung unter [developer.here.com](https://developer.here.com) |
-| Monta API-Key | Admin → System → Externe APIs | Home-Ladungs-Sync — erfordert Monta-Account, Key im [Monta Partner Portal](https://monta.com) |
-| xAI API-Key | Admin → System → Externe APIs | Grok Chat KI-Assistent |
-| Anthropic API-Key | Admin → System → Monitoring | KI-gestützter Autofix (Claude Haiku) — siehe unten |
-| Selbstheilung (Heal) | Admin → System → Monitoring | Automatischen Container-Neustart aktivieren/deaktivieren |
-| Alert-E-Mail-Adresse | Admin → System → Monitoring | Wohin Monitoring-Alerts gesendet werden |
-| Strompreis pro kWh | Admin → System oder Setup-Wizard | Energiekosten pro Fahrzeug für Ladekosten-Berechnung |
+| SMTP / E-Mail-Versand | Admin → Admin-Einstellungen → E-Mail | Host, Port, Benutzer, Passwort, Absender — inkl. Test-Mail-Button |
+| OpenChargeMap API-Key | Admin → Admin-Einstellungen → Externe APIs | Ladestation-Overlay im Routenplaner — kostenlos, Registrierung unter [openchargemap.io/site/develop](https://openchargemap.io/site/develop#api) |
+| HERE Maps API-Key | Admin → Admin-Einstellungen → Externe APIs | Echtzeit-Verkehr im Routenplaner — kostenloses Kontingent (250 k Req/Monat), Registrierung unter [developer.here.com](https://developer.here.com) |
+| xAI API-Key | Admin → Admin-Einstellungen → Externe APIs | Grok Chat KI-Assistent |
+| Anthropic API-Key | Admin → Admin-Einstellungen → Monitoring | KI-gestützter Autofix (Claude Haiku) — siehe unten |
+| Selbstheilung (Heal) | Admin → Admin-Einstellungen → Monitoring | Automatischen Container-Neustart aktivieren/deaktivieren |
+| Alert-E-Mail-Adresse | Admin → Admin-Einstellungen → Monitoring | Wohin Monitoring-Alerts gesendet werden |
+| Monta-Zugangsdaten | Einstellungen → Fahrzeugprofil → Heimladen | Pro Fahrzeug: Client ID, Client Secret, Charge-Point-ID — für alle Fahrzeugkategorien verfügbar |
+| Strompreis pro kWh | Einstellungen → Fahrzeugprofil oder Setup-Wizard | Energiekosten pro Fahrzeug für Ladekosten-Berechnung |
 
 Alle oben genannten Einstellungen können auch während des **Setup-Wizards** konfiguriert werden — kein direkter Serverzugriff nötig.
 

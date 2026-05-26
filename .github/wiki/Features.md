@@ -85,10 +85,13 @@ All charging sessions are logged automatically:
 Define home and regular charging spots in **Settings → Charging Locations** — sessions are tagged automatically, and a per-kWh rate is applied for cost calculation.
 
 ### Monta integration
-Enter your Monta API key in Settings. Sessions sync automatically with correct kWh and cost data, and the home flag is set.
+Available for **all vehicles** — configure per vehicle in **Settings → Vehicle profile → Home charging**:
+
+- **Private vehicles**: Monta sessions appear as home charges (🏠 badge, automatic home-wallbox detection via charge-point ID).
+- **Company cars**: additionally, full cost billing — monthly overview, PDF reimbursement sheet, billing template for the employer.
 
 ### Cost calculation & PDF invoice
-Generate PDF invoices for reimbursement (**Billing → Generate Invoice**). Select date range, include/exclude sessions — fully client-side.
+Generate PDF invoices for reimbursement (**Billing → Generate Invoice**). Select date range, include/exclude sessions — fully client-side. Billing features are available for **company car** vehicles only.
 
 ---
 
@@ -203,7 +206,7 @@ A step-by-step wizard guides you through the initial configuration and can be re
 | 5 | Fleet Telemetry | Enable real-time GPS per vehicle |
 | 6 | Electricity price | Per-vehicle energy cost |
 | 7 | Legal | Imprint, privacy, terms (scans for open placeholders) |
-| 8 | External APIs | Monta · OpenChargeMap · HERE Maps · Tibber · xAI |
+| 8 | External APIs | OpenChargeMap · HERE Maps · Tibber · xAI (Monta is per-vehicle in Settings) |
 | 9 | Monitoring | SMTP e-mail delivery · Anthropic key for AI autofix |
 | 10 | Design | Glass / Cyber / Minimal / Sport |
 | 11 | Accent colour | Theme colour |
