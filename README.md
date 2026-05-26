@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v3.4.0-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.4.1-E31937?style=flat-square)](CHANGELOG.md)
 [![Lizenz](https://img.shields.io/badge/Lizenz-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.md)
 
@@ -36,7 +36,7 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 | **Routenplaner** | Interaktiver Routenplaner mit SoC-aware Ladeplanung: automatische Ladestopps inkl. Ladezeit-Schätzung; Abfahrts-SoC (live oder manuell), Ziel-SoC und Ladeziel konfigurierbar; Wetter (Open-Meteo), Verkehr (HERE Maps), Blitzer (OpenStreetMap) entlang der Route; Kartendarstellung mit Tile-Proxy |
 | **Steuerung** | Fahrzeugbefehle: Klima, Climate-Keeper (Hund/Camp), Sitzheizung (5 Plätze × 4 Stufen), Lenkradheizung, Türen, Frunk/Heckklappe, Fenster, Sentry-Mode, Laden inkl. Ampere-Slider und Ladeklappe, Vorklim-Zeitplan, Boombox, Software-Update, Navigation (Virtual Key erforderlich) |
 | **Fahrtenbuch** | Finanzamt-konform nach BMF-Schreiben: Klassifikation, Geschäftspartner, Reisezweck, Kilometerstände, lückenlose Nummerierung im PDF, Lock nach Export, manuelle Nachträge, Trip-Merge/Split |
-| **Abrechnung** | Heimladen-Kostenabrechnung für Dienstwagen (Monta-Integration optional) |
+| **Abrechnung** | Heimladen-Sessions & Monta-Integration für alle Fahrzeuge; Kostenabrechnung (PDF, Erstattungsvorlage) für Dienstwagen |
 | **Betriebsbuch** | Wartungen, Reparaturen, Reifen, Inspektionen mit Kosten |
 | **Export** | CSV/JSON-Export für Fahrten & Laden, Vollbackup |
 | **Wartungsintervalle** | Pro Fahrzeug konfigurierbare Service-Aufgaben (TÜV, Reifen, Bremsflüssigkeit, …) mit Zeit- und km-Intervall + tägliche Push-Erinnerung |
@@ -199,12 +199,16 @@ der App-Domain erreichbar sein, damit das Fahrzeug den Key verifizieren kann.
 
 ## Monta-Integration (optional)
 
-Die Abrechnung unterstützt optionale Synchronisation mit [Monta](https://monta.com) –
-einem EV-Lademanagement-Dienst.
+Tesla Carview unterstützt optionale Synchronisation mit [Monta](https://monta.com) –
+einem EV-Lademanagement-Dienst. Die Integration steht für **alle Fahrzeuge** zur Verfügung:
 
-Konfiguration pro Fahrzeug in den Einstellungen:
+- **Privatfahrzeuge**: Monta-Ladesessions werden in der Abrechnung als Heim-Ladung angezeigt (🏠-Badge, automatische Heimladerkennung).
+- **Dienstwagen**: Zusätzlich vollständige Kostenabrechnung — Monatsübersicht, PDF-Erstattungsblatt, Abrechnungsvorlage für den Arbeitgeber.
+
+Konfiguration pro Fahrzeug in den Einstellungen (Fahrzeugprofil → Heimladen):
 - **Monta Client ID** + **Client Secret** (OAuth2, Partner API)
-- **Charge Point ID** (optional, filtert Sessions auf einen bestimmten Ladepunkt)
+- **Charge Point ID** (filtert Sessions auf einen bestimmten Ladepunkt)
+- **Strompreis Wallbox** (€/kWh, Abrechnungsgrundlage für Dienstwagen)
 
 Die Synchronisation läuft manuell über **Abrechnung → Monta Sync**.
 

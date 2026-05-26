@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v3.4.0-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.4.1-E31937?style=flat-square)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.en.md)
 
@@ -36,7 +36,7 @@ Runs on: **Linux servers** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), local
 | **Controls** | Vehicle commands: climate, climate-keeper (dog/camp), seat heaters (5 seats × 4 levels), steering-wheel heater, doors, frunk/tailgate, windows, sentry mode, charging incl. amps slider and charge port, departure schedule, boombox, software update, navigation (Virtual Key required) |
 | **Route planner** | Interactive route planner with SoC-aware charging stops incl. charge time estimate; departure SoC (live or manual), target SoC and charging target configurable; weather (Open-Meteo), traffic (HERE Maps), speed cameras (OpenStreetMap) along the route; map view with tile proxy |
 | **Logbook** | BMF-compliant electronic Fahrtenbuch: classification, business partner, purpose, odometer columns, consecutive numbering in PDF, post-export lock, manual entry, trip merge/split |
-| **Billing** | Home-charging cost statement for company cars (Monta integration optional) |
+| **Billing** | Home-charging sessions & Monta integration for all vehicles; cost statement (PDF, reimbursement template) for company cars |
 | **Service log** | Maintenance, repairs, tires, inspections with cost |
 | **Export** | CSV/JSON export for trips & charging, full backup |
 | **Service intervals** | Per-vehicle recurring service tasks (MOT, tyres, brake fluid, …) with time- and km-intervals + daily push reminders |
@@ -199,11 +199,15 @@ on the app domain so the vehicle can verify the key.
 
 ## Monta integration (optional)
 
-Billing supports optional sync with [Monta](https://monta.com) — an EV charge-management service.
+Tesla Carview supports optional sync with [Monta](https://monta.com) — an EV charge-management service. The integration is available for **all vehicles**:
 
-Per-vehicle configuration in the settings:
+- **Private vehicles**: Monta charging sessions are shown in the billing view as home charges (🏠 badge, automatic home-wallbox detection).
+- **Company cars**: Additionally, full cost billing — monthly overview, signable PDF reimbursement sheet, billing template for the employer.
+
+Per-vehicle configuration in the settings (Vehicle profile → Home charging):
 - **Monta Client ID** + **Client Secret** (OAuth2, Partner API)
-- **Charge Point ID** (optional, filters sessions to a specific charge point)
+- **Charge Point ID** (filters sessions to a specific charge point)
+- **Wallbox electricity price** (€/kWh, billing basis for company cars)
 
 Sync runs manually via **Billing → Monta Sync**.
 

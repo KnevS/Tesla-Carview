@@ -7,6 +7,28 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.1] - 2026-05-26
+
+### Neu
+
+- **Monta für alle Fahrzeuge**: Monta-Integration nicht mehr auf Dienstwagen beschränkt. Privatfahrzeuge sehen Heim-Ladesessions (🏠-Badge, Monta-Sync); Kostenabrechnung (PDF, Erstattungsvorlage, Betrag-Spalten) bleibt Dienstwagen vorbehalten.
+- **Wizard-Restart-Button**: Abschluss-Seite des Admin-Setup-Assistenten bietet nach Telegram-Konfiguration eine In-App-Schaltfläche zum Container-Neustart inkl. 12-Sekunden-Countdown und automatischem Seitenreload.
+- **Admin-Einstellungen**: Monitoring-, Backup- und Externe-API-Sektionen (OCM, HERE Maps) aus der System-Seite in Admin-Einstellungen verschoben (gehören inhaltlich dorthin).
+
+### Behoben
+
+- **Profil-Seite blank**: fehlender `usePrefsStore`-Import führte zu leerem Profil (Regression aus v3.4.0).
+- **VAPID-Fehlermeldung**: technische Fehlermeldung `VAPID-Key nicht konfiguriert (Admin: .env setzen)` durch benutzerfreundlichen Text ersetzt (Profil + Einstellungen).
+- **Telegram-Fehlermeldung**: gleicher Fix für nicht konfigurierten Telegram-Bot.
+- **`generateVAPIDKeys is not a function`**: `web-push` ESM-Export liefert die Funktion auf `default`, nicht als Named-Export — Fallback-Muster behebt den Fehler beim Key-Generieren im Admin-UI.
+
+### Technisch
+
+- `POST /api/system/container-restart` — neuer Endpoint (Admin, audit-logged); sendet 200 bevor `process.exit(0)` nach 400 ms aufgerufen wird; Docker `restart: unless-stopped` startet den Container neu.
+- `docker-compose.prod.yml`: `backend/src/routes/system.js` als Volume-Mount hinzugefügt (verhindert Überschreiben durch Image-Updates, analog zu `demo.js`).
+
+---
+
 ## [v3.4.0] - 2026-05-25
 
 ### Neu - Admin-Konfiguration via UI
