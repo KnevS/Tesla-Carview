@@ -65,11 +65,13 @@ Runs on: **Linux servers** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), local
 
 ## Preview
 
+Live screenshots from the demo instance, refreshed daily at 04:45:
+
 <table>
   <tr>
-    <td><img src="docs/screenshots/01-dashboard.png" alt="Dashboard" /></td>
-    <td><img src="docs/screenshots/02-trips.png" alt="Trips" /></td>
-    <td><img src="docs/screenshots/04-charging.png" alt="Charging" /></td>
+    <td><img src="https://www.teslaview.krische.com/shots/desktop/dashboard.png" alt="Dashboard" /></td>
+    <td><img src="https://www.teslaview.krische.com/shots/desktop/trips.png" alt="Trips" /></td>
+    <td><img src="https://www.teslaview.krische.com/shots/desktop/charging.png" alt="Charging" /></td>
   </tr>
   <tr>
     <td align="center"><em>Dashboard</em></td>
@@ -77,28 +79,18 @@ Runs on: **Linux servers** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), local
     <td align="center"><em>Charging</em></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/07-route-planner.png" alt="Route planner" /></td>
-    <td><img src="docs/screenshots/10-route-charging-en.png" alt="Charging plan with stops" /></td>
-    <td><img src="docs/screenshots/08-control.png" alt="Vehicle controls" /></td>
+    <td><img src="https://www.teslaview.krische.com/shots/desktop/routes.png" alt="Route planner" /></td>
+    <td><img src="https://www.teslaview.krische.com/shots/desktop/telemetry.png" alt="Telemetry" /></td>
+    <td><img src="https://www.teslaview.krische.com/shots/desktop/settings.png" alt="Settings" /></td>
   </tr>
   <tr>
     <td align="center"><em>Route planner</em></td>
-    <td align="center"><em>Charging plan (Stuttgart → Berlin)</em></td>
-    <td align="center"><em>Vehicle controls</em></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/06-logbook.png" alt="Logbook" /></td>
-    <td><img src="docs/screenshots/12-trips-company-en.png" alt="Company car mode" /></td>
-    <td><img src="docs/screenshots/09-settings.png" alt="Settings" /></td>
-  </tr>
-  <tr>
-    <td align="center"><em>Logbook</em></td>
-    <td align="center"><em>Company car mode</em></td>
+    <td align="center"><em>Telemetry</em></td>
     <td align="center"><em>Settings</em></td>
   </tr>
 </table>
 
-📸 [All screenshots in the Wiki →](../../wiki/Screenshots)
+📸 Live demo: **[demo.teslaview.krische.com](https://demo.teslaview.krische.com)** · [Mobile view](https://www.teslaview.krische.com/shots/mobile/dashboard.png) · [All screenshots](https://www.teslaview.krische.com/#screens)
 
 ---
 
