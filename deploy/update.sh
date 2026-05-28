@@ -107,14 +107,30 @@ if [ -d "$PRIVATE_REPO" ]; then
 
     # dist/ aus dem Image in frontend-dist-private/ auf dem Host extrahieren
     # Verzeichnis NICHT loeschen (Bind-Mount bleibt gueltig).
-    # Inhalt via tmp-Dir + rsync atomisch ersetzen.
+    # Inhalt via tmp-Dir atomisch ersetzen.
     docker create --name tmp-frontend-extract tesla-carview-frontend-private:local
     rm -rf "$APP_DIR/frontend-dist-private-new"
     docker cp tmp-frontend-extract:/usr/share/nginx/html "$APP_DIR/frontend-dist-private-new"
     docker rm tmp-frontend-extract
+    # docker cp legt je nach Version den Quell-Ordner (html/) als Wrapper
+    # an, wenn das Ziel noch nicht existiert. Konsequenz vorher: das frische
+    # Bundle landete in frontend-dist-private-new/html/* statt direkt, und
+    # damit nach dem cp auch im Live-Verzeichnis unter html/ — nginx hat
+    # weiter die alte Version serviert. Defensiv: erkennen + kompensieren.
+    if [ -d "$APP_DIR/frontend-dist-private-new/html" ] \
+        && [ -f "$APP_DIR/frontend-dist-private-new/html/index.html" ]; then
+      SRC="$APP_DIR/frontend-dist-private-new/html"
+    else
+      SRC="$APP_DIR/frontend-dist-private-new"
+    fi
+    if [ ! -f "$SRC/index.html" ]; then
+      echo "    ✗ Frontend-Extract enthält keine index.html — Abbruch, alter Stand bleibt aktiv."
+      rm -rf "$APP_DIR/frontend-dist-private-new"
+      exit 1
+    fi
     mkdir -p "$APP_DIR/frontend-dist-private"
     find "$APP_DIR/frontend-dist-private" -mindepth 1 -delete
-    cp -a "$APP_DIR/frontend-dist-private-new/." "$APP_DIR/frontend-dist-private/"
+    cp -a "$SRC/." "$APP_DIR/frontend-dist-private/"
     rm -rf "$APP_DIR/frontend-dist-private-new"
     docker exec tesla-carview-frontend nginx -s reload
 
