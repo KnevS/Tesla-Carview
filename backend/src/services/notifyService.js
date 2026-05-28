@@ -53,6 +53,18 @@ async function loadWebpush() {
   return _webpushModule;
 }
 
+// Normalisiert einen VAPID-Subject-String. web-push.setVapidDetails verlangt
+// entweder eine URL (https://…) oder eine mailto:-URI. User tragen im UI
+// häufig nur die nackte E-Mail ein → wir präfixen mailto: stillschweigend.
+function normalizeVapidContact(raw) {
+  const s = (raw || '').trim();
+  if (!s) return 'mailto:noreply@example.com';
+  if (/^(https?|mailto):/i.test(s)) return s;
+  if (s.includes('@')) return `mailto:${s}`;
+  // weder Schema noch E-Mail-Heuristik → safer Fallback
+  return 'mailto:noreply@example.com';
+}
+
 function readVapidFromDb(db) {
   if (!db) return null;
   try {
@@ -62,7 +74,7 @@ function readVapidFromDb(db) {
     const cfg = Object.fromEntries(rows.map(r => [r.key, r.value]));
     const pub  = cfg['vapid.public_key']  || process.env.VAPID_PUBLIC_KEY;
     const priv = cfg['vapid.private_key'] || process.env.VAPID_PRIVATE_KEY;
-    const cont = cfg['vapid.contact']     || process.env.VAPID_CONTACT || 'mailto:noreply@example.com';
+    const cont = normalizeVapidContact(cfg['vapid.contact'] || process.env.VAPID_CONTACT);
     if (!pub || !priv) return null;
     return { pub, priv, contact: cont };
   } catch { return null; }
