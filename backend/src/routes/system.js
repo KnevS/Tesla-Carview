@@ -884,7 +884,18 @@ router.put('/vapid-config', requireAuth, requireAdmin, (req, res) => {
   if (public_key  !== undefined) upsert.run('vapid.public_key',  public_key.trim());
   if (private_key && typeof private_key === 'string' && private_key.trim() && !private_key.startsWith('••'))
     upsert.run('vapid.private_key', private_key.trim());
-  if (contact     !== undefined) upsert.run('vapid.contact',     contact.trim());
+  if (contact     !== undefined) {
+    // Web-Push verlangt URL oder mailto:-URI. Plain-E-Mail vom Admin-UI
+    // wird transparent mit mailto: präfixt, damit setVapidDetails() später
+    // nicht „Vapid subject is not a valid URL" wirft.
+    const c = (contact || '').trim();
+    const normalized =
+      !c                            ? '' :
+      /^(https?|mailto):/i.test(c)  ? c :
+      c.includes('@')               ? `mailto:${c}` :
+                                      c;
+    upsert.run('vapid.contact', normalized);
+  }
   auditLog(req.db, req.user.sub, 'vapid_config_updated', req, {});
   res.json({ ok: true });
 });
