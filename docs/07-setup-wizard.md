@@ -50,6 +50,7 @@ Erreichbar über **Admin-Hub → 🛠️ Setup-Assistent**. Nur für **Administr
 - **Sofort-Speichern** (Admin-Assistent): Zugangsdaten werden schrittweise in `tenant_settings` (DB) gespeichert
 - **Tesla OAuth**: Popup-Fenster; schließt sich nach Anmeldung automatisch
 - **VAPID-Generierung**: direkt im Browser ohne `docker exec`
+- **Sprachschalter im Header** (alle Wizards): Jeder Wizard zeigt oben rechts einen kompakten 🌐-Schalter. Sprachwahl gilt sofort für alle Wizard-Texte; bei eingeloggten Usern wird die Wahl ins Profil übernommen. Beim Login wird automatisch die im Profil oder Tenant-Default gespeicherte Sprache angewendet.
 
 ---
 

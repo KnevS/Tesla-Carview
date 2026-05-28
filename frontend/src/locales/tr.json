@@ -42,7 +42,8 @@
     "es": "Español",
     "tr": "Türkçe",
     "el": "Ελληνικά",
-    "switcher": "Dili değiştir"
+    "switcher": "Dili değiştir",
+    "switcherHint": "Dili değiştir — tüm metinlere anında uygulanır"
   },
   "nav": {
     "dashboard": {
@@ -820,7 +821,8 @@
     "qrExpiredLabel": "Süresi doldu",
     "qrExpired": "QR kodunun süresi doldu.",
     "qrRefresh": "Yeni kod oluştur",
-    "qrWaiting": "Akıllı telefon onayı bekleniyor…"
+    "qrWaiting": "Akıllı telefon onayı bekleniyor…",
+    "demoSettingUp": "Demo hazırlanıyor…"
   },
   "register": {
     "title": "Yeni kiracı kaydet",
@@ -885,7 +887,21 @@
     "enterBackup": "Yedek kod girin",
     "useApp": "Kimlik doğrulama uygulamasını kullan",
     "useBackup": "Yedek kod kullan",
-    "backToLogin": "Girişe dön"
+    "backToLogin": "Girişe dön",
+    "requiredBanner": "Güvenlik nedeniyle bu hesap için iki faktörlü kimlik doğrulama zorunludur. Uygulamayı kullanmaya devam etmek için lütfen şimdi kurun.",
+    "step1Body": "Kimlik doğrulama uygulamanızı (örn. Google Authenticator, Authy veya parola yöneticiniz) açın ve bu QR kodu tarayın:",
+    "qrTooltip": "Bu QR kodu kimlik doğrulama uygulamanızla bir kez tarayın. Uygulama bir gizli anahtar kaydeder ve her 30 saniyede yeni bir 6 haneli kod üretir.",
+    "qrLoadError": "QR kod yüklenemedi. Lütfen sayfayı yenileyin.",
+    "nextStep": "İleri",
+    "nextStepTooltip": "QR kodunu uygulamanıza kaydettikten sonra devam edin",
+    "step2Body": "Uygulamanızdaki 6 haneli kodu girin:",
+    "codeTooltip": "Kimlik doğrulama uygulamanızdaki güncel 6 haneli kod. Bağlantının doğru çalıştığını doğrular.",
+    "backStep": "Geri",
+    "activate": "Etkinleştir",
+    "errorActivate": "Etkinleştirme hatası",
+    "backupBody": "Bu kodlar yalnızca bir kez görüntülenir. Güvenli bir yerde saklayın (örn. parola yöneticisi). Her kod tek kullanımlıktır.",
+    "backupTooltip": "Bu kodlar kimlik doğrulama uygulamanıza erişiminizi kaybederseniz son çareniz. Kaybetmeyin!",
+    "backupCodeTooltip": "Tek kullanımlık kod – kullanıldıktan sonra geçersiz olur"
   },
   "setup": {
     "title": "İlk kurulum – yönetici hesabı oluştur",
@@ -1551,7 +1567,10 @@
     "adminPropagate": "Tüm dillere uygula",
     "adminPropagateHint": "Mevcut metni 6 dil sürümüne kopyalar.",
     "adminPropagated": "Tüm dillere uygulandı. Sürüm: {version}",
-    "syncedFromDefaultBanner": "Bu sayfa şu anda yalnızca Almanca olarak güncelleniyor — gördüğünüz içerik Almanca orijinal metindir."
+    "syncedFromDefaultBanner": "Bu sayfa şu anda yalnızca Almanca olarak güncelleniyor — gördüğünüz içerik Almanca orijinal metindir.",
+    "previouslyAccepted": "daha önce kabul edildi",
+    "openInNewTab": "yeni sekmede aç",
+    "contentLoading": "İçerik yükleniyor — takılırsa {link}."
   },
   "invite": {
     "title": "Davetiyeyi kabul et",
@@ -1754,7 +1773,8 @@
       "question": "Hangi birimler görüntülenmeli?",
       "distance": "Mesafe",
       "temp": "Sıcaklık",
-      "efficiency": "Tüketim"
+      "efficiency": "Tüketim",
+      "miles": "Mil (mi)"
     },
     "s5": {
       "title": "Gösterge Paneli",
@@ -1893,6 +1913,48 @@
       "hasPlaceholders": "Aşağıdaki metinler hâlâ yer tutucu içeriyor:",
       "editBtn": "Yasal metinleri düzenle →",
       "hint": "<<AD>> gibi yer tutucular yayına geçmeden önce doldurulmalıdır."
+    },
+    "designs": {
+      "glass": {
+        "label": "Premium Glass",
+        "tagline": "Yumuşak, zarif, derin"
+      },
+      "cyber": {
+        "label": "Cyberpunk Tesla",
+        "tagline": "Neon parıltı, keskin çizgiler"
+      },
+      "minimal": {
+        "label": "Minimal Swiss",
+        "tagline": "Sade, rakamlar odakta"
+      },
+      "sport": {
+        "label": "Sport / Performance",
+        "tagline": "Köşeli, cesur"
+      },
+      "editorial": {
+        "label": "Nevs Edition",
+        "tagline": "Bricolage · Petrol · Mono"
+      }
+    },
+    "themes": {
+      "red": {
+        "label": "Tesla Kırmızı"
+      },
+      "blue": {
+        "label": "Elektrik Mavisi"
+      },
+      "green": {
+        "label": "Enerji Yeşili"
+      },
+      "purple": {
+        "label": "Mor"
+      },
+      "orange": {
+        "label": "Gün Batımı"
+      },
+      "cyan": {
+        "label": "Buz Mavisi"
+      }
     }
   },
   "pair": {
@@ -2105,5 +2167,158 @@
     "contributeError": "Katkı sırasında hata – lütfen daha sonra tekrar deneyin.",
     "notEnough": "Bu model için henüz yeterli katılımcı yok ({count}/{min}). İlklerden biri olun!",
     "loading": "Topluluk verileri yükleniyor…"
+  },
+  "adminSetup": {
+    "title": "🛠️ Yönetici Kurulumu",
+    "step": "Adım {n} / {total}",
+    "welcome": {
+      "title": "Sistem Kurulumu",
+      "body": "Bu sihirbaz tüm sunucu tarafı yapılandırmalarda size rehberlik eder. Buradaki tüm ayarlar veritabanında saklanır — SSH veya .env düzenlemesi gerekmez.",
+      "f1": "Tesla Fleet API kimlik bilgileri",
+      "f2": "Tesla OAuth ve araç eşleştirme",
+      "f3": "Push bildirimleri (VAPID)",
+      "f4": "Telegram botu",
+      "f5": "Harici API'ler (OCM, HERE, Grok, ABRP)",
+      "f6": "İzleme ve e-posta"
+    },
+    "credentials": {
+      "title": "Tesla Fleet API kimlik bilgileri",
+      "question": "Tesla Developer uygulama verilerinizi girin. Veritabanında güvenli şekilde saklanır.",
+      "fromEnvBanner": "ℹ️ Şu anda .env'den aktif. Yeni değerler .env'i geçersiz kılar.",
+      "clientId": "Client ID",
+      "clientSecret": "Client Secret",
+      "secretSetPlaceholder": "(ayarlandı — korumak için boş bırakın)",
+      "secretPlaceholder": "Secret girin",
+      "audience": "Fleet API audience",
+      "audienceHint": "EU: ...eu... | NA: ...na..."
+    },
+    "oauth": {
+      "title": "Tesla OAuth bağlantısı",
+      "question": "Uygulamanın araç verilerinize erişebilmesi için Tesla hesabınızı bağlayın.",
+      "connected": "Bağlı",
+      "notConnected": "Bağlı değil",
+      "hint": "Tesla hesabı, Fleet API kimlik bilgilerinizle bağlantılı olmalı.",
+      "connectBtn": "🔗 Tesla ile bağlan",
+      "opening": "Tesla girişi açılıyor …",
+      "activeHint": "Bağlantı aktif. Araç verileri yükleniyor."
+    },
+    "vehicles": {
+      "title": "Araçlar",
+      "question": "Tesla araçlarınız burada görünür. Gerekirse senkronize edin.",
+      "none": "Araç bulunamadı. Önce Tesla'ya bağlanın.",
+      "syncBtn": "🔄 Araçları getir",
+      "resyncBtn": "🔄 Yeniden getir"
+    },
+    "virtualKey": {
+      "title": "Virtual Key",
+      "question": "Araç komutları (klima, şarj vb.) için Virtual Key gerekir.",
+      "loading": "Yükleniyor …",
+      "exists": "Virtual Key mevcut",
+      "missing": "Virtual Key eksik",
+      "createdAt": "Oluşturuldu",
+      "openOnTesla": "Anahtarı onaylamak için URL'yi Tesla dokunmatik ekranınızda açın.",
+      "regUrl": "Kayıt URL'si:",
+      "copyBtn": "URL'yi kopyala",
+      "copied": "Kopyalandı ✓",
+      "open": "↗ Aç",
+      "recheck": "Tekrar kontrol et"
+    },
+    "telemetry": {
+      "title": "Fleet Telemetry",
+      "question": "Her araç için canlı telemetriyi etkinleştirin.",
+      "needsVkey": "⚠️ Virtual Key eksik — önce önceki adımı tamamlayın.",
+      "activateBtn": "Telemetriyi etkinleştir",
+      "refresh": "Yenile",
+      "noVehicles": "Araç yok.",
+      "statusStreaming": "● Canlı",
+      "statusRegisteredIdle": "◎ Kayıtlı",
+      "statusNotRegistered": "○ Kayıtlı değil",
+      "statusApprovalMissing": "⚠ Onay eksik",
+      "statusError": "✕ Hata"
+    },
+    "vapid": {
+      "title": "Web Push (VAPID)",
+      "question": "Tarayıcı push bildirimleri VAPID anahtarı gerektirir. Bir kez oluştur — bitti.",
+      "fromEnvBanner": "ℹ️ Şu anda .env'den aktif.",
+      "configured": "✓ VAPID yapılandırıldı. Push bildirimleri aktif.",
+      "contactLabel": "İletişim e-postası (VAPID için)",
+      "regenerate": "🔄 Yeniden oluştur",
+      "generate": "⚡ VAPID anahtarları oluştur",
+      "skipHint": "Bu adımı atlayıp VAPID'i daha sonra Yönetici → Ayarlar bölümünde yapılandırabilirsiniz.",
+      "regenConfirm": "VAPID anahtarları yeniden oluşturulsun mu? Tüm push abonelikleri yenilenmeli!",
+      "generated": "✓ VAPID anahtarları oluşturuldu"
+    },
+    "telegram": {
+      "title": "Telegram Bot",
+      "question": "İsteğe bağlı: kullanıcılar bildirimleri Telegram üzerinden alabilir.",
+      "configured": "✓ Telegram botu yapılandırıldı",
+      "botToken": "Bot Token",
+      "tokenSetPlaceholder": "(ayarlandı — korumak için boş bırakın)",
+      "tokenPlaceholder": "123456789:ABCdef…",
+      "webhookUrl": "Webhook URL (isteğe bağlı)",
+      "webhookHint": "Boş = long-polling (genel URL olmadan da çalışır).",
+      "skipHint": "Bu adımı atlayabilirsiniz. Yapılandırma Yönetici → Ayarlar bölümünde de mümkündür.",
+      "saved": "✓ Kaydedildi. Yeniden başlatma önerilir.",
+      "saveError": "Hata."
+    },
+    "electricity": {
+      "title": "Elektrik fiyatı",
+      "question": "Her araç için güncel elektrik fiyatını (€/kWh) girin.",
+      "noVehicles": "Araç mevcut değil.",
+      "currentLabel": "Şu anki:",
+      "notSet": "Ayarlanmadı"
+    },
+    "external": {
+      "title": "Harici API'ler",
+      "question": "Gelişmiş özellikler için isteğe bağlı API anahtarları.",
+      "configured": "✓ Yapılandırıldı",
+      "notConfigured": "Yapılandırılmadı",
+      "keyChangePlaceholder": "Yeni anahtar (boş = değişmedi)",
+      "ocmName": "⚡ OpenChargeMap (OCM)",
+      "ocmHint": "Şarj istasyonu bulucu (anahtar ile ücretsiz).",
+      "ocmPlaceholder": "OCM API anahtarı",
+      "hereName": "🗺️ HERE Maps (trafik)",
+      "hereHint": "Rota planlayıcıda gerçek zamanlı trafik verileri (ücretli).",
+      "herePlaceholder": "HERE API anahtarı",
+      "grokName": "🤖 Grok / xAI",
+      "grokHint": "Araç bağlamlı AI sohbet (xAI API anahtarı gerekli).",
+      "grokPlaceholder": "xai-… anahtarı",
+      "abrpName": "⚡ ABRP uygulama anahtarı",
+      "abrpHint": "A Better Route Planner için genel uygulama anahtarı (api.iternio.com).",
+      "abrpPlaceholder": "ABRP API anahtarı"
+    },
+    "monitoring": {
+      "title": "İzleme ve e-posta",
+      "question": "Uyarı e-postası ve isteğe bağlı SMTP sunucusunu yapılandırın.",
+      "alertEmailName": "📧 Uyarı e-postası",
+      "alertEmailHint": "Sistem sorunlarında bu adres bilgilendirilir.",
+      "smtpName": "📨 SMTP (isteğe bağlı)",
+      "smtpHint": "E-posta bildirimleri ve şifre sıfırlama için.",
+      "smtpConfigured": "✓ Yapılandırıldı",
+      "passwordPlaceholder": "Parola"
+    },
+    "summary": {
+      "titleDone": "Kurulum tamamlandı",
+      "titleRestart": "Yeniden başlatılıyor…",
+      "body": "Tüm yapılandırmalar kaydedildi.",
+      "restartBannerTitle": "⚠️ Konteyner yeniden başlatma önerilir",
+      "restartBannerBody": "Telegram botu ve yeni yapılandırılan diğer hizmetlerin aktif olması için backend konteyneri yeniden başlatılmalıdır.",
+      "restartBtn": "Konteyneri şimdi yeniden başlat",
+      "restarting": "Yeniden başlatılıyor…",
+      "restartError": "Yeniden başlatma hatası",
+      "restartDone": "Konteyner yeniden başlatılıyor. Uygulama ~{sec}s sonra tekrar erişilebilir olacak.",
+      "restartAutoReload": "Sayfa otomatik yeniden yüklenecek.",
+      "adminLink": "→ Yönetici ayarları"
+    },
+    "nav": {
+      "back": "← Geri",
+      "skip": "Atla",
+      "finish": "Bitir",
+      "next": "İleri →",
+      "start": "Başlayalım →",
+      "done": "Tamam"
+    },
+    "msgSaved": "✓ Kaydedildi",
+    "msgError": "Hata"
   }
 }

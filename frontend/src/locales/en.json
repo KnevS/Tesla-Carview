@@ -42,7 +42,8 @@
     "es": "Español",
     "tr": "Türkçe",
     "el": "Ελληνικά",
-    "switcher": "Switch language"
+    "switcher": "Switch language",
+    "switcherHint": "Switch language — applies instantly to all texts"
   },
   "nav": {
     "dashboard": {
@@ -820,7 +821,8 @@
     "qrExpiredLabel": "Expired",
     "qrExpired": "The QR code has expired.",
     "qrRefresh": "Generate new code",
-    "qrWaiting": "Waiting for smartphone confirmation…"
+    "qrWaiting": "Waiting for smartphone confirmation…",
+    "demoSettingUp": "Setting up your demo…"
   },
   "register": {
     "title": "Register new tenant",
@@ -885,7 +887,21 @@
     "enterBackup": "Enter backup code",
     "useApp": "Use authenticator app",
     "useBackup": "Use backup code",
-    "backToLogin": "Back to login"
+    "backToLogin": "Back to login",
+    "requiredBanner": "For security reasons, two-factor authentication is mandatory for this account. Please set it up now to continue using the app.",
+    "step1Body": "Open your authenticator app (e.g. Google Authenticator, Authy or your password manager) and scan this QR code:",
+    "qrTooltip": "Scan this QR code once with your authenticator app. The app stores a secret and generates a new 6-digit code every 30 seconds.",
+    "qrLoadError": "QR code could not be loaded. Please reload the page.",
+    "nextStep": "Next",
+    "nextStepTooltip": "Only continue after saving the QR code in your app",
+    "step2Body": "Enter the 6-digit code from your app:",
+    "codeTooltip": "The current 6-digit code from your authenticator app. Confirms the connection works correctly.",
+    "backStep": "Back",
+    "activate": "Activate",
+    "errorActivate": "Error while activating",
+    "backupBody": "These codes are shown only once. Store them safely (e.g. password manager). Each code is single-use.",
+    "backupTooltip": "These codes are your last resort if you lose access to your authenticator app. Do not lose them!",
+    "backupCodeTooltip": "Single-use code – becomes invalid after use"
   },
   "setup": {
     "title": "Initial setup – create admin account",
@@ -1551,7 +1567,10 @@
     "adminPropagate": "In all languages",
     "adminPropagateHint": "Writes the current text to all 6 language versions.",
     "adminPropagated": "Applied to all languages. Version: {version}",
-    "syncedFromDefaultBanner": "This page is currently only maintained in German — what you see here is the German source text."
+    "syncedFromDefaultBanner": "This page is currently only maintained in German — what you see here is the German source text.",
+    "previouslyAccepted": "previously accepted",
+    "openInNewTab": "open in new tab",
+    "contentLoading": "Content is loading — if this stalls, {link}."
   },
   "invite": {
     "title": "Accept invitation",
@@ -1754,7 +1773,8 @@
       "question": "Which units should be displayed?",
       "distance": "Distance",
       "temp": "Temperature",
-      "efficiency": "Efficiency"
+      "efficiency": "Efficiency",
+      "miles": "Miles (mi)"
     },
     "s5": {
       "title": "Dashboard",
@@ -1893,6 +1913,48 @@
       "hasPlaceholders": "The following texts still contain placeholders:",
       "editBtn": "Edit legal texts →",
       "hint": "Placeholders like <<NAME>> or <<ADDRESS>> must be filled in before going live."
+    },
+    "designs": {
+      "glass": {
+        "label": "Premium Glass",
+        "tagline": "Soft, refined, layered depth"
+      },
+      "cyber": {
+        "label": "Cyberpunk Tesla",
+        "tagline": "Neon glow, sharp lines"
+      },
+      "minimal": {
+        "label": "Minimal Swiss",
+        "tagline": "Reduced, numbers in focus"
+      },
+      "sport": {
+        "label": "Sport / Performance",
+        "tagline": "Edgy, bold, dashboard look"
+      },
+      "editorial": {
+        "label": "Nevs Edition",
+        "tagline": "Bricolage · Petrol · Mono labels"
+      }
+    },
+    "themes": {
+      "red": {
+        "label": "Tesla Red"
+      },
+      "blue": {
+        "label": "Electric Blue"
+      },
+      "green": {
+        "label": "Energy Green"
+      },
+      "purple": {
+        "label": "Purple"
+      },
+      "orange": {
+        "label": "Sunset"
+      },
+      "cyan": {
+        "label": "Ice Blue"
+      }
     }
   },
   "pair": {
@@ -2105,5 +2167,158 @@
     "contributeError": "Error contributing – please try again later.",
     "notEnough": "Not enough contributors yet ({count}/{min}) for this model. Be one of the first!",
     "loading": "Loading community data…"
+  },
+  "adminSetup": {
+    "title": "🛠️ Admin Setup",
+    "step": "Step {n} of {total}",
+    "welcome": {
+      "title": "System Setup",
+      "body": "This assistant walks you through every server-side configuration. Everything you set here is stored in the database — no SSH, no .env editing required.",
+      "f1": "Tesla Fleet API credentials",
+      "f2": "Tesla OAuth & vehicle mapping",
+      "f3": "Push notifications (VAPID)",
+      "f4": "Telegram bot",
+      "f5": "External APIs (OCM, HERE, Grok, ABRP)",
+      "f6": "Monitoring & email"
+    },
+    "credentials": {
+      "title": "Tesla Fleet API credentials",
+      "question": "Enter your Tesla Developer App data. These are stored securely in the database.",
+      "fromEnvBanner": "ℹ️ Currently active from .env. New values will override .env.",
+      "clientId": "Client ID",
+      "clientSecret": "Client Secret",
+      "secretSetPlaceholder": "(set — leave blank to keep)",
+      "secretPlaceholder": "Enter secret",
+      "audience": "Fleet API audience",
+      "audienceHint": "EU: ...eu... | NA: ...na..."
+    },
+    "oauth": {
+      "title": "Tesla OAuth connection",
+      "question": "Link your Tesla account so the app can access your vehicle data.",
+      "connected": "Connected",
+      "notConnected": "Not connected",
+      "hint": "The Tesla account must be linked to your Fleet API credentials.",
+      "connectBtn": "🔗 Connect with Tesla",
+      "opening": "Opening Tesla login …",
+      "activeHint": "Connection active. Vehicle data is loading."
+    },
+    "vehicles": {
+      "title": "Vehicles",
+      "question": "Your Tesla vehicles appear here. Sync if needed.",
+      "none": "No vehicles found. Connect to Tesla first.",
+      "syncBtn": "🔄 Fetch vehicles",
+      "resyncBtn": "🔄 Refetch"
+    },
+    "virtualKey": {
+      "title": "Virtual Key",
+      "question": "Vehicle commands (climate, charging, etc.) require a Virtual Key.",
+      "loading": "Loading …",
+      "exists": "Virtual Key present",
+      "missing": "Virtual Key missing",
+      "createdAt": "Created",
+      "openOnTesla": "Open the URL on your Tesla touchscreen to approve the key.",
+      "regUrl": "Registration URL:",
+      "copyBtn": "Copy URL",
+      "copied": "Copied ✓",
+      "open": "↗ Open",
+      "recheck": "Check again"
+    },
+    "telemetry": {
+      "title": "Fleet Telemetry",
+      "question": "Enable live telemetry for each vehicle.",
+      "needsVkey": "⚠️ Virtual Key missing — please finish the previous step first.",
+      "activateBtn": "Enable telemetry",
+      "refresh": "Refresh",
+      "noVehicles": "No vehicles.",
+      "statusStreaming": "● Live",
+      "statusRegisteredIdle": "◎ Registered",
+      "statusNotRegistered": "○ Not registered",
+      "statusApprovalMissing": "⚠ Approval missing",
+      "statusError": "✕ Error"
+    },
+    "vapid": {
+      "title": "Web Push (VAPID)",
+      "question": "Browser push notifications need VAPID keys. Generate once — done.",
+      "fromEnvBanner": "ℹ️ Currently active from .env.",
+      "configured": "✓ VAPID configured. Push notifications are active.",
+      "contactLabel": "Contact email (for VAPID)",
+      "regenerate": "🔄 Regenerate",
+      "generate": "⚡ Generate VAPID keys",
+      "skipHint": "You can skip this step and configure VAPID later under Admin → Settings.",
+      "regenConfirm": "Regenerate VAPID keys? All push subscriptions must be renewed!",
+      "generated": "✓ VAPID keys generated"
+    },
+    "telegram": {
+      "title": "Telegram Bot",
+      "question": "Optional: users can receive notifications via Telegram.",
+      "configured": "✓ Telegram bot configured",
+      "botToken": "Bot Token",
+      "tokenSetPlaceholder": "(set — leave blank to keep)",
+      "tokenPlaceholder": "123456789:ABCdef…",
+      "webhookUrl": "Webhook URL (optional)",
+      "webhookHint": "Leave blank = long-polling (works without public URL).",
+      "skipHint": "You can skip this step. Configuration also possible under Admin → Settings.",
+      "saved": "✓ Saved. Restart recommended.",
+      "saveError": "Error."
+    },
+    "electricity": {
+      "title": "Electricity price",
+      "question": "Enter the current electricity price (€/kWh) for each vehicle.",
+      "noVehicles": "No vehicles available.",
+      "currentLabel": "Current:",
+      "notSet": "Not set"
+    },
+    "external": {
+      "title": "External APIs",
+      "question": "Optional API keys for advanced features.",
+      "configured": "✓ Configured",
+      "notConfigured": "Not configured",
+      "keyChangePlaceholder": "New key (leave blank = unchanged)",
+      "ocmName": "⚡ OpenChargeMap (OCM)",
+      "ocmHint": "Charging station finder (free with key).",
+      "ocmPlaceholder": "OCM API key",
+      "hereName": "🗺️ HERE Maps (traffic)",
+      "hereHint": "Real-time traffic data in route planner (paid).",
+      "herePlaceholder": "HERE API key",
+      "grokName": "🤖 Grok / xAI",
+      "grokHint": "AI chat with vehicle context (xAI API key required).",
+      "grokPlaceholder": "xai-… key",
+      "abrpName": "⚡ ABRP app key",
+      "abrpHint": "Global app key for A Better Route Planner (api.iternio.com).",
+      "abrpPlaceholder": "ABRP API key"
+    },
+    "monitoring": {
+      "title": "Monitoring & email",
+      "question": "Configure alert email and optional SMTP server.",
+      "alertEmailName": "📧 Alert email",
+      "alertEmailHint": "This address is notified on system problems.",
+      "smtpName": "📨 SMTP (optional)",
+      "smtpHint": "For email notifications and password reset.",
+      "smtpConfigured": "✓ Configured",
+      "passwordPlaceholder": "Password"
+    },
+    "summary": {
+      "titleDone": "Setup complete",
+      "titleRestart": "Restarting…",
+      "body": "All configurations have been saved.",
+      "restartBannerTitle": "⚠️ Container restart recommended",
+      "restartBannerBody": "To activate the Telegram bot and other newly configured services, the backend container needs to restart.",
+      "restartBtn": "Restart container now",
+      "restarting": "Restarting…",
+      "restartError": "Restart error",
+      "restartDone": "The container is restarting. The app will be available again in approx. {sec}s.",
+      "restartAutoReload": "The page will reload automatically.",
+      "adminLink": "→ Admin settings"
+    },
+    "nav": {
+      "back": "← Back",
+      "skip": "Skip",
+      "finish": "Finish",
+      "next": "Next →",
+      "start": "Let's go →",
+      "done": "Done"
+    },
+    "msgSaved": "✓ Saved",
+    "msgError": "Error"
   }
 }

@@ -94,6 +94,8 @@ curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/set
 
 > **İpucu:** Her adım atlanabilir — asistan istediğin zaman yeniden başlatılabilir.
 
+> **🌐 Dil seçici:** Her sihirbaz sağ üstte kompakt bir dil seçici gösterir. Kullanıcı profilinde veya kiracı varsayılanında saklanan dil giriş yapıldığında otomatik olarak uygulanır; seçici, sihirbazı kapatmadan dili anında değiştirmenizi sağlar.
+
 ## 🔑 Virtual Key kurulumu {#virtual-key}
 
 Araç komutları (kapı açma, klima vb.) için araca bir Virtual Key kaydedilmelidir. Bu yalnızca yeni araçlar için gereklidir (`vehicle_command_protocol_required: true`).

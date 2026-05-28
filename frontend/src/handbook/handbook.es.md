@@ -94,6 +94,8 @@ Tras el primer inicio de sesión, el **asistente de configuración** se abre aut
 
 > **Consejo:** Cada paso puede omitirse — el asistente puede relanzarse en cualquier momento.
 
+> **🌐 Selector de idioma:** Cada asistente muestra un selector de idioma compacto arriba a la derecha. El idioma guardado en el perfil de usuario o el predeterminado del tenant se aplica automáticamente al iniciar sesión; el selector permite cambiar el idioma a mitad del asistente sin salir de él.
+
 ## 🔑 Configurar la Virtual Key {#virtual-key}
 
 Para los comandos del vehículo (abrir puertas, climatización, etc.) debe registrarse una Virtual Key en el coche. Esto solo es necesario en vehículos más nuevos (`vehicle_command_protocol_required: true`).

@@ -94,6 +94,8 @@ Après la première connexion, l'**assistant de configuration** s'ouvre automati
 
 > **Conseil :** Chaque étape peut être ignorée — l'assistant peut être relancé à tout moment.
 
+> **🌐 Sélecteur de langue :** Chaque assistant affiche un sélecteur de langue compact en haut à droite. La langue stockée dans le profil utilisateur ou la valeur par défaut du locataire est appliquée automatiquement à la connexion ; le sélecteur permet de changer la langue en cours d'assistant sans le quitter.
+
 ## 🔑 Configurer une Virtual Key {#virtual-key}
 
 Pour les commandes véhicule (ouverture des portes, climatisation, etc.), une Virtual Key doit être enregistrée sur le véhicule. Cela n'est nécessaire que pour les véhicules récents (`vehicle_command_protocol_required: true`).

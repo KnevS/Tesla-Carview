@@ -94,6 +94,8 @@ Nach dem ersten Login öffnet sich automatisch der **Einstellungs-Assistent**. E
 
 > **Tipp:** Alle Schritte können übersprungen werden — der Assistent kann jederzeit erneut gestartet werden.
 
+> **🌐 Sprachschalter:** Jeder Wizard zeigt oben rechts einen kompakten Sprachschalter. Die im Profil oder Mandanten-Default gespeicherte Sprache wird automatisch beim Login angewendet; über den Schalter kann mid-Wizard sofort umgeschaltet werden, ohne den Wizard zu verlassen.
+
 ## 🔑 Virtual Key einrichten {#virtual-key}
 
 Für Fahrzeugbefehle (Türen öffnen, Klimaanlage etc.) muss ein Virtual Key am Fahrzeug registriert werden. Dies ist nur für neuere Fahrzeuge erforderlich (`vehicle_command_protocol_required: true`).

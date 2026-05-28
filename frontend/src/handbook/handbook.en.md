@@ -94,6 +94,8 @@ After the first login the **settings assistant** opens automatically. It can be 
 
 > **Tip:** Every step can be skipped — the assistant can be re-launched at any time.
 
+> **🌐 Language switcher:** Every wizard shows a compact language switcher in the top-right. The language stored in the user profile or tenant default is applied automatically on login; the switcher lets you change the language mid-wizard without leaving it.
+
 ## 🔑 Setting up a Virtual Key {#virtual-key}
 
 For vehicle commands (unlocking doors, climate, etc.) a Virtual Key must be registered on the vehicle. This is only required for newer vehicles (`vehicle_command_protocol_required: true`).

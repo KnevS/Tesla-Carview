@@ -50,6 +50,7 @@ Accessible via **Admin Hub → 🛠️ Setup Assistant**. **Admins only.** Guide
 - **Immediate save** (admin assistant): credentials are saved step-by-step into `tenant_settings` (DB)
 - **Tesla OAuth**: popup window; closes automatically after sign-in
 - **VAPID generation**: directly in the browser — no `docker exec` needed
+- **Language switcher in header** (every wizard): each wizard renders a compact 🌐 switcher in the top-right. Picking a language applies instantly to all wizard texts; for logged-in users the choice is persisted to the profile. On login the language stored in the profile or tenant default is applied automatically.
 ---
 
 Tesla Carview offers two paths for the initial configuration.

@@ -10,9 +10,13 @@
          Viewport. Auf schmalen Bildschirmen (Smartphone, Tesla im
          Hochformat) bleibt der Action-Bereich unten klebend. -->
     <div class="card w-full max-w-3xl flex flex-col max-h-[92vh]">
-      <header class="space-y-1.5 pb-3 border-b border-white/5">
-        <h2 :id="titleId" class="text-xl font-bold">{{ $t('legal.acceptModalTitle') }}</h2>
-        <p class="text-sm text-gray-300">{{ $t('legal.acceptModalBody') }}</p>
+      <header class="flex items-start justify-between gap-3 pb-3 border-b border-white/5">
+        <div class="space-y-1.5 min-w-0">
+          <h2 :id="titleId" class="text-xl font-bold">{{ $t('legal.acceptModalTitle') }}</h2>
+          <p class="text-sm text-gray-300">{{ $t('legal.acceptModalBody') }}</p>
+        </div>
+        <LangSwitcher compact class="shrink-0"
+          v-tooltip="$t('lang.switcherHint')" />
       </header>
 
       <!-- Inhalts-Block: pro pendingScope der volle Markdown-Text
@@ -26,13 +30,13 @@
               <span class="text-xs text-gray-500 ml-2 font-normal">
                 v{{ status[scope]?.currentVersion }}
                 <template v-if="status[scope]?.acceptedVersion">
-                  · zuvor akzeptiert: v{{ status[scope].acceptedVersion }}
+                  · {{ $t('legal.previouslyAccepted') }}: v{{ status[scope].acceptedVersion }}
                 </template>
               </span>
             </h3>
             <RouterLink :to="`/legal/${scope}`" target="_blank" rel="noopener"
                         class="text-xs text-blue-400 hover:text-blue-300 underline whitespace-nowrap">
-              ⤴ in neuem Tab
+              ⤴ {{ $t('legal.openInNewTab') }}
             </RouterLink>
           </div>
           <!-- Markdown gerendert; benutzt die gleichen Styles wie
@@ -41,8 +45,11 @@
           <article v-if="rendered[scope]" v-html="rendered[scope]"
                    class="legal-content prose prose-invert max-w-none text-sm" />
           <p v-else class="text-sm text-gray-400 italic">
-            Inhalt wird geladen — falls das hängenbleibt,
-            <RouterLink :to="`/legal/${scope}`" target="_blank" class="underline">in neuem Tab öffnen</RouterLink>.
+            <i18n-t keypath="legal.contentLoading" tag="span">
+              <template #link>
+                <RouterLink :to="`/legal/${scope}`" target="_blank" class="underline">{{ $t('legal.openInNewTab') }}</RouterLink>
+              </template>
+            </i18n-t>
           </p>
         </section>
       </div>
@@ -87,6 +94,7 @@ import { useAuthStore } from '../store/auth.js';
 import { useLangStore } from '../store/lang.js';
 import { i18n } from '../plugins/i18n.js';
 import api from '../api.js';
+import LangSwitcher from './LangSwitcher.vue';
 
 const auth      = useAuthStore();
 const langStore = useLangStore();

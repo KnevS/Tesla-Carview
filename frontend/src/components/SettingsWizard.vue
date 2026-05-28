@@ -5,15 +5,19 @@
            style="max-height: 90vh">
 
         <!-- Header -->
-        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-800 shrink-0">
-          <div>
+        <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-gray-800 shrink-0">
+          <div class="min-w-0">
             <h2 class="font-bold text-lg">{{ $t('wizard.title') }}</h2>
             <p v-if="step > 0 && !isLast" class="text-xs text-gray-400 mt-0.5">
               {{ $t('wizard.step', { n: step, total: STEPS.length - 2 }) }}
             </p>
           </div>
-          <button @click="$emit('close')" class="text-gray-500 hover:text-white text-2xl leading-none transition"
-                  v-tooltip="$t('common.cancel')">×</button>
+          <div class="flex items-center gap-2 shrink-0">
+            <LangSwitcher compact
+              v-tooltip="$t('lang.switcherHint')" />
+            <button @click="$emit('close')" class="text-gray-500 hover:text-white text-2xl leading-none transition"
+                    v-tooltip="$t('common.cancel')">×</button>
+          </div>
         </div>
 
         <!-- Fortschrittsbalken -->
@@ -376,10 +380,10 @@
                   : 'border-gray-700 bg-gray-800 hover:border-gray-500'">
                 <div class="flex items-center gap-2 font-semibold text-white">
                   <span>{{ d.icon }}</span>
-                  <span>{{ d.label }}</span>
+                  <span>{{ $t(`wizard.designs.${d.key}.label`, d.label) }}</span>
                   <span v-if="(draft.theme_design ?? prefs.data.theme_design) === d.key" class="ml-auto text-tesla-red text-xs">✓</span>
                 </div>
-                <span class="text-xs text-gray-400">{{ d.tagline }}</span>
+                <span class="text-xs text-gray-400">{{ $t(`wizard.designs.${d.key}.tagline`, d.tagline) }}</span>
               </button>
             </div>
           </template>
@@ -398,7 +402,7 @@
                 <span class="w-8 h-8 rounded-full shadow-lg ring-2 ring-offset-2 ring-offset-gray-900 transition"
                   :style="{ background: t.accent }"
                   :class="(draft.theme_color ?? prefs.data.theme_color) === t.key ? 'ring-white' : 'ring-transparent'"></span>
-                <span class="text-xs text-gray-300">{{ t.label }}</span>
+                <span class="text-xs text-gray-300">{{ $t(`wizard.themes.${t.key}.label`, t.label) }}</span>
               </button>
             </div>
           </template>
@@ -412,7 +416,7 @@
                 <div class="flex gap-2">
                   <ToggleChip v-for="o in UNIT_DISTANCE" :key="o.key"
                     :active="(draft.unit_distance ?? prefs.data.unit_distance) === o.key"
-                    @click="draft.unit_distance = o.key">{{ o.label }}</ToggleChip>
+                    @click="draft.unit_distance = o.key">{{ o.labelKey ? $t(o.labelKey, o.label) : o.label }}</ToggleChip>
                 </div>
               </div>
               <div class="card space-y-2">
@@ -465,7 +469,7 @@
               <li v-for="(item, i) in draftNavOrder" :key="item.key"
                 class="flex items-center gap-3 bg-gray-800 rounded-xl px-3 py-2.5">
                 <span class="text-gray-400 text-xs font-mono w-4 text-center">{{ i+1 }}</span>
-                <span class="flex-1 text-sm text-white">{{ item.label }}</span>
+                <span class="flex-1 text-sm text-white">{{ $t(`nav.${item.key}.label`, item.label) }}</span>
                 <button @click="moveNav(i, -1)" :disabled="i === 0"
                   class="text-gray-500 hover:text-white disabled:opacity-20 text-xs px-1">▲</button>
                 <button @click="moveNav(i, 1)" :disabled="i === draftNavOrder.length - 1"
@@ -548,6 +552,7 @@ import { ref, computed, onMounted, reactive } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePrefsStore, DASHBOARD_CARD_DEFS, PREF_KEYS } from '../store/prefs.js';
 import { LANGS } from '../store/lang.js';
+import LangSwitcher from './LangSwitcher.vue';
 import { THEMES, DESIGNS } from '../store/theme.js';
 import { ALL_LINKS } from '../store/nav.js';
 import { useAuthStore } from '../store/auth.js';
@@ -573,7 +578,7 @@ const saving    = ref(false);
 
 const UNIT_DISTANCE = [
   { key: 'km', label: 'km' },
-  { key: 'mi', label: 'Meilen (mi)' },
+  { key: 'mi', labelKey: 'wizard.s4.miles', label: 'Meilen (mi)' },
 ];
 const UNIT_TEMP = [
   { key: 'celsius',    label: '°C (Celsius)' },
