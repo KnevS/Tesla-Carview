@@ -19,7 +19,7 @@ Tesla Carview est une application **auto-hébergée** d'enregistrement de donné
 - 🎮 **Commandes** — Climatisation, portes, lumières — directement depuis l'application
 - 📝 **Carnet d'entretien** — Entretiens, réparations, coûts avec date
 - 📤 **Export** — CSV/JSON pour toutes les données, sauvegarde complète au format ZIP
-- 🔔 **Notifications push** — Notification du navigateur en fin de recharge
+- 🔔 **Notifications push** — Notifications navigateur pour la fin de recharge, l'alarme Sentry, la batterie faible, etc. ; avec boutons d'action (démarrer la clim, trouver une borne, plus tard), regroupement par tag (les mises à jour de charge se remplacent) et miroir automatique vers iPhone/Apple Watch
 - 📱 **Optimisé mobile** — Pleinement utilisable sur iPhone/iPad (Safari), Android et bureau
 
 ## 🔀 Ordre de tri {#sort-order}

@@ -1,4 +1,5 @@
 import { getTenantSetting } from './configService.js';
+import { buildPayload } from './pushPayloads.js';
 
 async function sendPush(db, vehicleId, title, body) {
   try {
@@ -26,11 +27,16 @@ export async function sendChargingCompleteNotification(vehicle, charge, db) {
   const subscriptions = db.prepare('SELECT * FROM push_subscriptions WHERE vehicle_id=?').all(vehicle.id);
   if (!subscriptions.length) return;
 
-  const payload = JSON.stringify({
+  // Charging-Rezept: sanftes Vibrate, Tag pro Fahrzeug (ersetzt vorheriges
+  // Charging-Update statt zu duplizieren), Action „Klima starten" greift
+  // direkt auf /control mit Vorbelegung.
+  const payload = JSON.stringify(buildPayload('charging_complete', {
+    lang:  'de',
     title: `Laden abgeschlossen – ${vehicle.display_name}`,
     body:  `Batterie: ${charge?.battery_level ?? '?'}% | +${(charge?.charge_energy_added || 0).toFixed(1)} kWh geladen`,
-    icon:  '/favicon.ico',
-  });
+    vehicleId: vehicle.id,
+    vin:       vehicle.vin,
+  }));
 
   try {
     const webpush = await import('web-push').catch(() => null);

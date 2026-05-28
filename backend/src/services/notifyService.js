@@ -14,6 +14,19 @@
  */
 
 import { getMasterDb, getAllTenants, getDb } from '../db/database.js';
+import { buildPayload } from './pushPayloads.js';
+
+// Liest die im User-Profil gewählte Sprache aus der Tenant-DB. Wird für
+// Action-Labels in Web-Push-Notifications benötigt — der Service-Worker
+// kann die Labels nicht selbst lokalisieren, weil sie OS-seitig schon
+// in der Notification stehen müssen, wenn sie ankommt.
+function getUserLang(db, userId) {
+  if (!db || !userId) return 'de';
+  try {
+    const row = db.prepare('SELECT lang FROM users WHERE id = ?').get(userId);
+    return row?.lang || 'de';
+  } catch { return 'de'; }
+}
 
 // ── Web Push ──────────────────────────────────────────────────────────────────
 
@@ -82,9 +95,17 @@ async function sendTelegram(masterDb, tenantId, userId, text) {
  * @param {string}  [opts.icon]     Icon-Pfad für Web Push
  * @param {string}  [opts.emoji]    Emoji-Präfix für Telegram-Text
  */
-export async function notify({ tenantId, userId, db, title, body, url = '/', icon = '/icon-192.png', emoji = '🔔' }) {
+export async function notify({
+  tenantId, userId, db, title, body,
+  url = '/', icon = '/icon-192.png', emoji = '🔔',
+  type = 'generic',  // siehe pushPayloads.js → bestimmt Actions/Tag/Vibrate
+  vehicleId = null, vin = null,
+}) {
   const masterDb = getMasterDb();
-  const pushPayload = JSON.stringify({ title, body, url, icon });
+  const lang     = getUserLang(db, userId);
+  const pushPayload = JSON.stringify(buildPayload(type, {
+    lang, title, body, url, icon, vehicleId, vin,
+  }));
   const tgText = `${emoji} *${escMd(title)}*\n${escMd(body)}`;
 
   await Promise.allSettled([
@@ -94,9 +115,18 @@ export async function notify({ tenantId, userId, db, title, body, url = '/', ico
 }
 
 /** Sendet an ALLE Nutzer eines Mandanten (z.B. Admin-Alarm). */
-export async function notifyAllInTenant({ tenantId, db, title, body, url = '/', icon = '/icon-192.png', emoji = '🔔' }) {
+export async function notifyAllInTenant({
+  tenantId, db, title, body,
+  url = '/', icon = '/icon-192.png', emoji = '🔔',
+  type = 'generic',
+  vehicleId = null, vin = null,
+}) {
   const masterDb = getMasterDb();
-  const pushPayload = JSON.stringify({ title, body, url, icon });
+  // Mandant-weite Pushs nutzen Default-Sprache 'de' für Action-Labels —
+  // pro-User-Lang würde hier 1 Payload pro Lang-Bucket erzwingen.
+  const pushPayload = JSON.stringify(buildPayload(type, {
+    lang: 'de', title, body, url, icon, vehicleId, vin,
+  }));
   const tgText = `${emoji} *${escMd(title)}*\n${escMd(body)}`;
 
   // Alle verlinkten Telegram-Nutzer des Mandanten
@@ -135,7 +165,12 @@ export async function notifySentryAlert(vehicle, db, tenantId) {
   const title = `🚨 Wächter-Alarm: ${vehicle.display_name || vehicle.vin?.slice(-6) || 'Fahrzeug'}`;
   const body  = 'Das Fahrzeug wurde möglicherweise berührt oder ist im Parkzustand aufgewacht.';
   const url   = '/';
-  const pushPayload = JSON.stringify({ title, body, url, icon: '/icon-192.png' });
+  // Sentry-Rezept: requireInteraction + starke Vibration + renotify.
+  // Mandant-weite Verteilung, daher Default-Sprache.
+  const pushPayload = JSON.stringify(buildPayload('sentry_alert', {
+    lang: 'de', title, body, url,
+    vehicleId: vehicle.id, vin: vehicle.vin,
+  }));
   const tgText = `🚨 *${escMd(title)}*\n${escMd(body)}\n\n_Carview · ${new Date().toLocaleTimeString('de-DE')}_`;
 
   const wp = await getWebpush();

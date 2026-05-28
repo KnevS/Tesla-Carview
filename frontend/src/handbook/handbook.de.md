@@ -19,7 +19,7 @@ Tesla Carview ist eine **selbst gehostete** Datenlogger-App für Tesla-Fahrzeuge
 - 🎮 **Steuerung** — Klimaanlage, Türen, Licht – direkt aus der App
 - 📝 **Betriebsbuch** — Wartungen, Reparaturen, Kosten mit Datum
 - 📤 **Export** — CSV/JSON für alle Daten, Vollbackup als ZIP
-- 🔔 **Push-Nachrichten** — Browser-Benachrichtigung bei Ladeende
+- 🔔 **Push-Nachrichten** — Browser-Benachrichtigung bei Ladeende, Wächter-Alarm, niedrigem Akku u. a.; mit Action-Buttons (Klima starten, Ladestation finden, später erinnern), Tag-Grouping (mehrfache Ladestände ersetzen sich gegenseitig) und automatischer Spiegelung auf iPhone/Apple Watch
 - 📱 **Mobile-optimiert** — Vollständig nutzbar auf iPhone/iPad (Safari), Android und Desktop
 
 ## 🔀 Sortierreihenfolge {#sort-order}

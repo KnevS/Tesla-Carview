@@ -83,6 +83,8 @@ router.post('/test', requireAuth, async (req, res) => {
     await notify({
       tenantId: req.user.tenantId,
       userId:   req.user.sub,
+      db:       req.db,    // damit user.lang gelesen wird für Action-Labels
+      type:     'generic',
       title:    '🔔 Tesla Carview — Testbenachrichtigung',
       body:     'Push-Notifications funktionieren korrekt!',
       url:      '/',

@@ -19,7 +19,7 @@ Tesla Carview, Tesla araçlar için **kendi sunucunda barındırılan** bir veri
 - 🎮 **Kontrol** — Klima, kapılar, ışıklar — doğrudan uygulamadan
 - 📝 **Servis defteri** — Bakım, onarım, tarihli maliyetler
 - 📤 **Dışa aktarma** — Tüm veriler için CSV/JSON, ZIP olarak tam yedek
-- 🔔 **Push bildirimleri** — Şarj bittiğinde tarayıcı bildirimi
+- 🔔 **Push bildirimleri** — Şarj bitişi, Sentry alarmı, düşük batarya ve daha fazlası için tarayıcı bildirimleri; eylem düğmeleri (klima başlat, şarj bul, ertele), etiket gruplama (tekrarlayan şarj güncellemeleri birbirinin yerine geçer) ve iPhone/Apple Watch'a otomatik yansıma
 - 📱 **Mobil için optimize** — iPhone/iPad (Safari), Android ve masaüstünde tam kullanılabilir
 
 ## 🔀 Sıralama yönü {#sort-order}
