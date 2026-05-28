@@ -51,6 +51,8 @@ Erreichbar über **Admin-Hub → 🛠️ Setup-Assistent**. Nur für **Administr
 - **Tesla OAuth**: Popup-Fenster; schließt sich nach Anmeldung automatisch
 - **VAPID-Generierung**: direkt im Browser ohne `docker exec`
 - **Sprachschalter im Header** (alle Wizards): Jeder Wizard zeigt oben rechts einen kompakten 🌐-Schalter. Sprachwahl gilt sofort für alle Wizard-Texte; bei eingeloggten Usern wird die Wahl ins Profil übernommen. Beim Login wird automatisch die im Profil oder Tenant-Default gespeicherte Sprache angewendet.
+- **Auto-Init beim Backend-Boot**: VAPID-Keys werden für jeden Mandanten automatisch generiert, falls weder in `tenant_settings` noch in der `.env` vorhanden. Push-Benachrichtigungen funktionieren dadurch sofort nach dem ersten Login — der entsprechende Wizard-Schritt zeigt direkt „✓ bereits eingerichtet (Auto)".
+- **Wizard-Prefill** (`GET /api/system/wizard-prefill`): liefert dem Wizard beim Öffnen Defaults (Fleet-API-Audience aus Geo-IP, Alert-E-Mail = Admin-E-Mail, Strompreis-Default je Land) plus Status pro Schritt. Erledigte Schritte werden mit grünem Banner markiert und können direkt übersprungen werden; die Welcome-Übersicht zeigt „X von Y Schritten erledigt".
 
 ---
 

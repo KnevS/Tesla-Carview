@@ -51,6 +51,8 @@ Accessible via **Admin Hub → 🛠️ Setup Assistant**. **Admins only.** Guide
 - **Tesla OAuth**: popup window; closes automatically after sign-in
 - **VAPID generation**: directly in the browser — no `docker exec` needed
 - **Language switcher in header** (every wizard): each wizard renders a compact 🌐 switcher in the top-right. Picking a language applies instantly to all wizard texts; for logged-in users the choice is persisted to the profile. On login the language stored in the profile or tenant default is applied automatically.
+- **Auto-init on backend boot**: VAPID keys are generated automatically per tenant whenever neither `tenant_settings` nor the `.env` provides them. Push notifications therefore work right after the first login — the corresponding wizard step shows “✓ already configured (Auto)”.
+- **Wizard prefill** (`GET /api/system/wizard-prefill`): when the wizard opens it asks the backend for defaults (Fleet API audience from Geo-IP, alert email = admin email, electricity rate by country) plus a status per step. Completed steps are marked with a green banner and can be skipped directly; the welcome screen shows “X of Y steps already done”.
 ---
 
 Tesla Carview offers two paths for the initial configuration.

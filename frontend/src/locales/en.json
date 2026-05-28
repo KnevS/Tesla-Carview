@@ -2179,7 +2179,11 @@
       "f3": "Push notifications (VAPID)",
       "f4": "Telegram bot",
       "f5": "External APIs (OCM, HERE, Grok, ABRP)",
-      "f6": "Monitoring & email"
+      "f6": "Monitoring & email",
+      "summary": "{done} of {total} steps already done — you only need to fill in the remaining {remaining}.",
+      "autoBadge": "Auto",
+      "autoTooltip": "Set up automatically by the system — nothing to do",
+      "optional": "optional"
     },
     "credentials": {
       "title": "Tesla Fleet API credentials",
@@ -2319,6 +2323,9 @@
       "done": "Done"
     },
     "msgSaved": "✓ Saved",
-    "msgError": "Error"
+    "msgError": "Error",
+    "done": {
+      "banner": "This step is already configured. Press “Next” to skip it, or adjust the values below."
+    }
   }
 }

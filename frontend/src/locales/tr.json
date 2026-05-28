@@ -2179,7 +2179,11 @@
       "f3": "Push bildirimleri (VAPID)",
       "f4": "Telegram botu",
       "f5": "Harici API'ler (OCM, HERE, Grok, ABRP)",
-      "f6": "İzleme ve e-posta"
+      "f6": "İzleme ve e-posta",
+      "summary": "{total} adımdan {done} tanesi zaten tamamlandı — yalnızca {remaining} adım doldurmanız gerekiyor.",
+      "autoBadge": "Oto",
+      "autoTooltip": "Sistem tarafından otomatik kuruldu — yapılacak bir şey yok",
+      "optional": "isteğe bağlı"
     },
     "credentials": {
       "title": "Tesla Fleet API kimlik bilgileri",
@@ -2319,6 +2323,9 @@
       "done": "Tamam"
     },
     "msgSaved": "✓ Kaydedildi",
-    "msgError": "Hata"
+    "msgError": "Hata",
+    "done": {
+      "banner": "Bu adım zaten yapılandırıldı. Atlamak için \"İleri\"ye basın veya aşağıdaki değerleri ayarlayın."
+    }
   }
 }

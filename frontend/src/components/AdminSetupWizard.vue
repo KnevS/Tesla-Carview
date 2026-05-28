@@ -30,6 +30,20 @@
         <!-- Inhalt -->
         <div class="flex-1 overflow-y-auto px-6 py-5 space-y-5">
 
+          <!-- Done-Banner: zeigt sich automatisch, wenn der aktuelle Schritt
+               laut /system/wizard-prefill bereits eingerichtet ist. So muss
+               der Admin den Schritt nicht „leer" durchklicken. -->
+          <div v-if="step > 0 && !isLast && stepStatus(currentId)?.done"
+               class="bg-green-900/20 border border-green-700/40 rounded-lg px-3 py-2 text-sm text-green-300 flex items-center gap-2">
+            <span aria-hidden="true">✓</span>
+            <span class="flex-1">{{ $t('adminSetup.done.banner') }}</span>
+            <span v-if="stepStatus(currentId)?.auto"
+                  class="text-xs text-blue-300/80"
+                  v-tooltip="$t('adminSetup.welcome.autoTooltip')">
+              {{ $t('adminSetup.welcome.autoBadge') }}
+            </span>
+          </div>
+
           <!-- STEP: welcome -->
           <template v-if="currentId === 'welcome'">
             <div class="text-center space-y-4 py-4">
@@ -38,14 +52,26 @@
               <p class="text-gray-300 text-sm leading-relaxed">
                 {{ $t('adminSetup.welcome.body') }}
               </p>
-              <div class="bg-gray-800 rounded-xl p-4 text-left space-y-2 text-sm text-gray-300">
-                <p>✓ {{ $t('adminSetup.welcome.f1') }}</p>
-                <p>✓ {{ $t('adminSetup.welcome.f2') }}</p>
-                <p>✓ {{ $t('adminSetup.welcome.f3') }}</p>
-                <p>✓ {{ $t('adminSetup.welcome.f4') }}</p>
-                <p>✓ {{ $t('adminSetup.welcome.f5') }}</p>
-                <p>✓ {{ $t('adminSetup.welcome.f6') }}</p>
+              <!-- Dynamische Status-Übersicht: Prefill liefert pro Schritt
+                   einen Done-Flag. Wir zeigen ✓ (erledigt, ggf. „Auto"),
+                   ⏳ (kann jetzt) oder ○ (offen). -->
+              <div class="bg-gray-800 rounded-xl p-4 text-left space-y-2 text-sm">
+                <div v-for="row in welcomeStatus" :key="row.id"
+                     class="flex items-center gap-2"
+                     :class="row.done ? 'text-green-300' : 'text-gray-300'">
+                  <span class="w-4 text-center" aria-hidden="true">{{ row.done ? '✓' : '○' }}</span>
+                  <span class="flex-1">{{ $t(row.label) }}</span>
+                  <span v-if="row.auto" class="text-xs text-blue-300/80"
+                        v-tooltip="$t('adminSetup.welcome.autoTooltip')">
+                    {{ $t('adminSetup.welcome.autoBadge') }}
+                  </span>
+                  <span v-else-if="row.optional && !row.done"
+                        class="text-xs text-gray-500">{{ $t('adminSetup.welcome.optional') }}</span>
+                </div>
               </div>
+              <p v-if="prefillSummary" class="text-xs text-gray-400">
+                {{ prefillSummary }}
+              </p>
             </div>
           </template>
 
@@ -432,6 +458,85 @@ const { t } = useI18n();
 
 const emit = defineEmits(['close', 'done']);
 
+// ─── Wizard-Prefill ────────────────────────────────────────────────────────
+// /system/wizard-prefill liefert in einem Aufruf:
+//   • defaults.* — Werte, die wir aus Geo-IP / Admin-Profil / Hostname raten
+//     können (z. B. Fleet-API-Audience, Alert-Mail = Admin-Mail).
+//   • steps.*   — Status pro Wizard-Schritt: was ist bereits erledigt?
+// Beides flutet vor dem ersten Render in die Forms — der Admin sieht
+// dadurch vorbelegte Felder und kann erledigte Schritte überspringen.
+const prefill = ref({ defaults: {}, steps: {} });
+
+async function loadPrefill() {
+  try {
+    const { data } = await api.get('/system/wizard-prefill');
+    prefill.value = data;
+  } catch { /* nicht-kritisch: ohne Prefill funktioniert der Wizard wie vorher */ }
+}
+
+// Defaults in leere Formularfelder einspeisen — bestehende Werte
+// werden niemals überschrieben. Wird nach loadCredsCfg, loadVapidCfg etc.
+// aufgerufen, weil deren API-Antworten Vorrang haben.
+function applyPrefillToForms() {
+  const d = prefill.value?.defaults || {};
+  if (!credsForm.value.audience    && d.tesla_audience)   credsForm.value.audience    = d.tesla_audience;
+  if (!vapidForm.value.contact     && d.vapid_contact)    vapidForm.value.contact     = d.vapid_contact;
+  if (!draftAdmin.value.alert_email && d.alert_email)     draftAdmin.value.alert_email = d.alert_email;
+  // Strompreis-Default pro Fahrzeug nur dann setzen, wenn weder Fahrzeug
+  // noch Draft schon einen Wert haben — sonst überschreibt der Default
+  // gespeicherte Mandanten-Werte.
+  if (d.electricity_rate != null) {
+    for (const v of vehicles.value) {
+      if (draftElectricity[v.id] == null && v.electricity_rate_kwh == null) {
+        draftElectricity[v.id] = d.electricity_rate;
+      }
+    }
+  }
+}
+
+// Welcome-Screen-Liste: pro Wizard-Block ein Eintrag mit i18n-Label, Done-Flag,
+// Auto-Flag (vom Backend automatisch erzeugt) und Optional-Flag.
+const welcomeStatus = computed(() => {
+  const s = prefill.value?.steps || {};
+  return [
+    { id: 'credentials', label: 'adminSetup.welcome.f1', done: !!s.credentials?.done },
+    { id: 'oauth',       label: 'adminSetup.welcome.f2', done: !!s.oauth?.done },
+    { id: 'vapid',       label: 'adminSetup.welcome.f3', done: !!s.vapid?.done,    auto: !!s.vapid?.auto },
+    { id: 'telegram',    label: 'adminSetup.welcome.f4', done: !!s.telegram?.done,    optional: true },
+    { id: 'external',    label: 'adminSetup.welcome.f5', done: !!s.external?.done,    optional: true },
+    { id: 'monitoring',  label: 'adminSetup.welcome.f6', done: !!s.monitoring?.done,  optional: true },
+  ];
+});
+
+// Kompakte Zusammenfassung „X von Y Schritten erledigt" für das Welcome.
+const prefillSummary = computed(() => {
+  const rows = welcomeStatus.value;
+  if (!rows.length) return '';
+  const done = rows.filter(r => r.done).length;
+  const remaining = rows.length - done;
+  return t('adminSetup.welcome.summary', { done, total: rows.length, remaining });
+});
+
+// Done-Banner pro Step: nur anzeigen wenn der Status erledigt ist — der
+// User sieht „✓ schon eingerichtet (klick für Details)" statt einem leeren
+// Formular. Identifier mappt 1:1 auf den `currentId`.
+const STEP_DONE_KEY = {
+  credentials: 'credentials',
+  oauth:       'oauth',
+  vehicles:    'vehicles',
+  virtualkey:  'virtualkey',
+  vapid:       'vapid',
+  telegram:    'telegram',
+  electricity: 'electricity',
+  external:    'external',
+  monitoring:  'monitoring',
+};
+function stepStatus(id) {
+  const k = STEP_DONE_KEY[id];
+  if (!k) return null;
+  return prefill.value?.steps?.[k] || null;
+}
+
 // ─── Container-Neustart ───────────────────────────────────────────────────────
 const RESTART_WAIT    = 12; // Sekunden bis Auto-Reload
 const restarting      = ref(false);
@@ -736,7 +841,12 @@ onMounted(async () => {
     loadVapidCfg(),
     loadTelegramCfg(),
     loadAdminStatus(),
+    loadPrefill(),
   ]);
+  // Erst nachdem sowohl Prefill als auch Configs geladen sind: leere
+  // Felder mit Defaults füllen. Reihenfolge ist wichtig — Configs haben
+  // Vorrang, daher applyPrefillToForms() zuletzt.
+  applyPrefillToForms();
 });
 </script>
 

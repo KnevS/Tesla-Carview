@@ -60,6 +60,7 @@ import hvacRoutes              from './routes/hvac.js';
 import communityRoutes         from './routes/community.js';
 import telegramRoutes          from './routes/telegram.js';
 import { initTelegramBot }     from './services/telegramBot.js';
+import { runAutoInitForAllTenants } from './services/autoInit.js';
 
 const app    = express();
 const PORT   = process.env.PORT || 3000;
@@ -176,6 +177,12 @@ server.listen(PORT, async () => {
     console.log('  ERSTER START – Setup erforderlich!');
     console.log(`  Oeffne im Browser: ${frontendUrl}/setup`);
     console.log('='.repeat(56) + '\n');
+  } else {
+    // Auto-Init für bekannte Mandanten: erzeugt fehlende VAPID-Keys etc.
+    // damit der Admin-Setup-Wizard nur noch echte Entscheidungs-Schritte zeigt.
+    runAutoInitForAllTenants(tenants).catch(err =>
+      console.warn('[AutoInit] Boot-Pass fehlgeschlagen:', err.message)
+    );
   }
 
   try {

@@ -2179,7 +2179,11 @@
       "f3": "Notifications push (VAPID)",
       "f4": "Bot Telegram",
       "f5": "APIs externes (OCM, HERE, Grok, ABRP)",
-      "f6": "Monitoring & e-mail"
+      "f6": "Monitoring & e-mail",
+      "summary": "{done} étape(s) sur {total} déjà effectuée(s) — il ne reste que {remaining} à remplir.",
+      "autoBadge": "Auto",
+      "autoTooltip": "Configuré automatiquement par le système — rien à faire",
+      "optional": "optionnel"
     },
     "credentials": {
       "title": "Identifiants Tesla Fleet API",
@@ -2319,6 +2323,9 @@
       "done": "Terminé"
     },
     "msgSaved": "✓ Enregistré",
-    "msgError": "Erreur"
+    "msgError": "Erreur",
+    "done": {
+      "banner": "Cette étape est déjà configurée. Appuyez sur « Suivant » pour l'ignorer, ou ajustez les valeurs ci-dessous."
+    }
   }
 }

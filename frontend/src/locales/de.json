@@ -2178,7 +2178,11 @@
       "f3": "Push-Benachrichtigungen (VAPID)",
       "f4": "Telegram Bot",
       "f5": "Externe APIs (OCM, HERE, Grok, ABRP)",
-      "f6": "Monitoring & E-Mail"
+      "f6": "Monitoring & E-Mail",
+      "summary": "{done} von {total} Schritten bereits erledigt — du musst nur noch {remaining} Schritte ausfüllen.",
+      "autoBadge": "Auto",
+      "autoTooltip": "Vom System automatisch eingerichtet — du musst nichts tun",
+      "optional": "optional"
     },
     "credentials": {
       "title": "Tesla Fleet-API Zugangsdaten",
@@ -2318,6 +2322,9 @@
       "done": "Fertig"
     },
     "msgSaved": "✓ Gespeichert",
-    "msgError": "Fehler"
+    "msgError": "Fehler",
+    "done": {
+      "banner": "Dieser Schritt ist bereits eingerichtet. Klick auf „Weiter\", um ihn zu überspringen, oder passe die Werte unten an."
+    }
   }
 }

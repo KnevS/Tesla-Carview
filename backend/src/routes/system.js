@@ -964,4 +964,136 @@ router.put('/abrp-config', requireAuth, requireAdmin, (req, res) => {
 });
 
 
+// ── Wizard Prefill ────────────────────────────────────────────────────────────
+//
+// Liefert dem Admin-Setup-Wizard auf einen Schwung zwei Dinge:
+//   1. Defaults für leere Felder (Geo-IP → Audience, Admin-Mail → Alert-Mail,
+//      Land → Strompreis-Default …). So muss der Admin diese Werte nicht
+//      selbst nachschlagen oder doppelt tippen.
+//   2. Status pro Wizard-Schritt: was ist bereits konfiguriert/ausgeführt?
+//      Das Frontend kann erledigte Schritte einklappen, sodass nur die
+//      tatsächlich offenen Schritte expandiert bleiben.
+//
+// Read-only, kein Side-Effect — sicher mehrfach aufrufbar.
+const COUNTRY_RATE_EUR_PER_KWH = {
+  // Europa (Q1 2026 Richtwerte für Haushaltsstrom inkl. Steuern; bewusst
+  // konservativ, nur Vorbelegung — der Admin überschreibt im Wizard).
+  DE: 0.40, AT: 0.32, CH: 0.30, IT: 0.35, FR: 0.25, ES: 0.28, NL: 0.40,
+  BE: 0.39, LU: 0.21, IE: 0.34, PT: 0.21, SE: 0.20, NO: 0.15, FI: 0.20,
+  DK: 0.41, PL: 0.24, CZ: 0.22, SK: 0.20, HU: 0.13, RO: 0.15, BG: 0.13,
+  GR: 0.20, CY: 0.32, MT: 0.13, SI: 0.20, HR: 0.16, EE: 0.20, LV: 0.20, LT: 0.20,
+  GB: 0.30, UK: 0.30,
+  TR: 0.10,
+  // Nord-/Südamerika & APAC (€/kWh, grob umgerechnet — nur Hint, kein Tarif).
+  US: 0.16, CA: 0.13, MX: 0.08,
+  AU: 0.30, NZ: 0.22,
+  JP: 0.20, KR: 0.10,
+};
+
+// EU-Region nach Tesla-Convention: alles in Europa + GB + TR.
+const EU_AUDIENCE_COUNTRIES = new Set([
+  'DE','AT','CH','LI','LU','FR','BE','MC','ES','PT','IT','VA','SM','MT',
+  'NL','IE','GB','UK','DK','NO','SE','FI','IS','EE','LV','LT','PL','CZ',
+  'SK','HU','RO','BG','GR','CY','SI','HR','BA','RS','ME','MK','AL','XK',
+  'TR','AD','UA','MD','BY',
+]);
+
+router.get('/wizard-prefill', requireAuth, requireAdmin, async (req, res) => {
+  // ── Geo-IP des aktuellen Admins ────────────────────────────────────────
+  const forwarded = req.headers['x-forwarded-for'];
+  const ip = (forwarded ? forwarded.split(',')[0] : req.socket.remoteAddress || '').trim();
+  let country = null;
+  try {
+    const geo = geoip.lookup(ip);
+    country = geo?.country ?? null;
+  } catch { /* geoip-lite nicht verfügbar → country bleibt null */ }
+  const region = (country && EU_AUDIENCE_COUNTRIES.has(country)) ? 'eu' : 'na';
+  const audienceDefault = region === 'eu'
+    ? 'https://fleet-api.prd.eu.vn.cloud.tesla.com'
+    : 'https://fleet-api.prd.na.vn.cloud.tesla.com';
+  const electricityDefault = (country && COUNTRY_RATE_EUR_PER_KWH[country]) || null;
+
+  // ── Admin-User für Mail-Defaults ──────────────────────────────────────
+  let adminEmail = '';
+  try {
+    const row = req.db.prepare('SELECT email FROM users WHERE id = ? LIMIT 1').get(req.user.sub);
+    adminEmail = row?.email || '';
+  } catch { /* users-Schema variiert nicht — Sicherheitsnetz */ }
+  // Falls der erste Admin im Setup noch keine E-Mail eingetragen hat,
+  // bleibt der Default leer und der Admin tippt sie wie bisher von Hand.
+
+  // ── Tenant-Slug-Vorschlag aus Host-Header ─────────────────────────────
+  const host = (req.headers.host || '').split(':')[0];
+  // erste Subdomain ohne www. → guter Hint für den ersten Mandanten
+  const slugSuggestion = host
+    .replace(/^www\./, '')
+    .split('.')
+    .filter(Boolean)[0] || '';
+
+  // ── Step-Status: was ist schon erledigt? ──────────────────────────────
+  const cfg = Object.fromEntries(
+    req.db.prepare('SELECT key, value FROM tenant_settings').all().map(r => [r.key, r.value])
+  );
+
+  const haveTeslaCreds = !!(
+    (cfg['tesla.client_id']     || process.env.TESLA_CLIENT_ID) &&
+    (cfg['tesla.client_secret'] || process.env.TESLA_CLIENT_SECRET)
+  );
+  const haveTeslaAuthRefresh = !!cfg['tesla.refresh_token'];
+  const vehicleCount = (() => {
+    try { return req.db.prepare('SELECT COUNT(*) AS n FROM vehicles').get().n; }
+    catch { return 0; }
+  })();
+  const haveVirtualKey = (() => {
+    try { return !!req.db.prepare('SELECT 1 FROM virtual_key LIMIT 1').get(); }
+    catch { return false; }
+  })();
+  const haveVapid = !!(
+    (cfg['vapid.public_key']  || process.env.VAPID_PUBLIC_KEY) &&
+    (cfg['vapid.private_key'] || process.env.VAPID_PRIVATE_KEY)
+  );
+  const haveTelegram = !!(cfg['telegram.bot_token'] || process.env.TELEGRAM_BOT_TOKEN);
+  const externalConfigured = [
+    !!cfg['ocm_api_key'],
+    !!cfg['here_api_key'],
+    !!cfg['xai.api_key'],
+    !!cfg['abrp.api_key'],
+  ].filter(Boolean).length;
+  const haveAlertEmail = !!cfg['monitoring.alert_email'];
+  const electricitySet = (() => {
+    try {
+      const row = req.db.prepare(
+        'SELECT COUNT(*) AS n FROM vehicles WHERE electricity_rate_kwh IS NOT NULL'
+      ).get();
+      return vehicleCount > 0 && row.n === vehicleCount;
+    } catch { return false; }
+  })();
+
+  res.json({
+    country,
+    region,
+    defaults: {
+      tesla_audience:    audienceDefault,
+      alert_email:       adminEmail,
+      vapid_contact:     adminEmail ? `mailto:${adminEmail}` : '',
+      electricity_rate:  electricityDefault,
+      tenant_slug:       slugSuggestion,
+    },
+    steps: {
+      credentials: { done: haveTeslaCreds },
+      oauth:       { done: haveTeslaAuthRefresh },
+      vehicles:    { done: vehicleCount > 0, count: vehicleCount },
+      virtualkey:  { done: haveVirtualKey },
+      // Telemetry hängt am Virtual Key + mind. einem Fahrzeug — Status wird
+      // weiterhin live über /telemetry/status geprüft. Hier nur Vor-Indikator.
+      telemetry:   { ready: haveVirtualKey && vehicleCount > 0 },
+      vapid:       { done: haveVapid, auto: haveVapid && !cfg['vapid.contact'] },
+      telegram:    { done: haveTelegram, optional: true },
+      electricity: { done: electricitySet, optional: true },
+      external:    { done: externalConfigured > 0, configured: externalConfigured, optional: true },
+      monitoring:  { done: haveAlertEmail, optional: true },
+    },
+  });
+});
+
 export default router;
