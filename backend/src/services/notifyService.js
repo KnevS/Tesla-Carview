@@ -29,30 +29,64 @@ function getUserLang(db, userId) {
 }
 
 // ── Web Push ──────────────────────────────────────────────────────────────────
+//
+// VAPID-Schlüssel können sowohl in der .env als auch pro Mandant in
+// tenant_settings stehen (DB hat Vorrang, autoInit erzeugt sie dort).
+// Daher: web-push einmal laden, aber VAPID je nach Mandanten-DB vor jedem
+// Send neu setzen. setVapidDetails überschreibt nur das Modul-State —
+// für unsere typischerweise sequenziellen Push-Sequenzen ausreichend.
 
-let _webpush = null;
-async function getWebpush() {
-  if (_webpush !== null) return _webpush;
+let _webpushModule = null;
+async function loadWebpush() {
+  if (_webpushModule !== null) return _webpushModule;
   try {
     const mod = await import('web-push');
-    if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
-      mod.setVapidDetails(
-        process.env.VAPID_CONTACT || 'mailto:noreply@example.com',
-        process.env.VAPID_PUBLIC_KEY,
-        process.env.VAPID_PRIVATE_KEY,
-      );
-      _webpush = mod;
-    } else {
-      _webpush = false;
+    // setVapidDetails findet sich je nach ESM/CJS-Build entweder direkt
+    // oder unter mod.default — beides abdecken.
+    _webpushModule = mod.setVapidDetails ? mod : (mod.default || false);
+    if (_webpushModule && typeof _webpushModule.setVapidDetails !== 'function') {
+      _webpushModule = false;
     }
   } catch {
-    _webpush = false;
+    _webpushModule = false;
   }
-  return _webpush;
+  return _webpushModule;
 }
 
-async function sendWebPush(masterDb, tenantId, userId, payload) {
-  const wp = await getWebpush();
+function readVapidFromDb(db) {
+  if (!db) return null;
+  try {
+    const rows = db.prepare(
+      "SELECT key, value FROM tenant_settings WHERE key IN ('vapid.public_key','vapid.private_key','vapid.contact')"
+    ).all();
+    const cfg = Object.fromEntries(rows.map(r => [r.key, r.value]));
+    const pub  = cfg['vapid.public_key']  || process.env.VAPID_PUBLIC_KEY;
+    const priv = cfg['vapid.private_key'] || process.env.VAPID_PRIVATE_KEY;
+    const cont = cfg['vapid.contact']     || process.env.VAPID_CONTACT || 'mailto:noreply@example.com';
+    if (!pub || !priv) return null;
+    return { pub, priv, contact: cont };
+  } catch { return null; }
+}
+
+/** Sichert ab, dass web-push mit den richtigen VAPID-Keys für den
+ *  Mandanten konfiguriert ist, und liefert das Modul zurück.
+ *  Liefert null, wenn keine Keys verfügbar sind (weder DB noch env). */
+async function getWebpushForTenant(db) {
+  const wp = await loadWebpush();
+  if (!wp) return null;
+  const v = readVapidFromDb(db);
+  if (!v) return null;
+  try {
+    wp.setVapidDetails(v.contact, v.pub, v.priv);
+  } catch (err) {
+    console.warn('[notifyService] setVapidDetails fehlgeschlagen:', err.message);
+    return null;
+  }
+  return wp;
+}
+
+async function sendWebPush(masterDb, tenantDb, tenantId, userId, payload) {
+  const wp = await getWebpushForTenant(tenantDb);
   if (!wp) return;
 
   // Sowohl vehicle-basierte (legacy) als auch user-basierte Subscriptions senden.
@@ -109,7 +143,7 @@ export async function notify({
   const tgText = `${emoji} *${escMd(title)}*\n${escMd(body)}`;
 
   await Promise.allSettled([
-    sendWebPush(masterDb, tenantId, userId, pushPayload),
+    sendWebPush(masterDb, db, tenantId, userId, pushPayload),
     sendTelegram(masterDb, tenantId, userId, tgText),
   ]);
 }
@@ -134,7 +168,7 @@ export async function notifyAllInTenant({
   // Alle User-Push-Subs des Mandanten
   const subs = masterDb.prepare('SELECT subscription_json FROM user_push_subscriptions WHERE tenant_id=?').all(tenantId);
 
-  const wp = await getWebpush();
+  const wp = await getWebpushForTenant(db);
   const tasks = [];
 
   if (wp && subs.length) {
@@ -173,7 +207,7 @@ export async function notifySentryAlert(vehicle, db, tenantId) {
   }));
   const tgText = `🚨 *${escMd(title)}*\n${escMd(body)}\n\n_Carview · ${new Date().toLocaleTimeString('de-DE')}_`;
 
-  const wp = await getWebpush();
+  const wp = await getWebpushForTenant(db);
   const tasks = [];
 
   if (wp) {
