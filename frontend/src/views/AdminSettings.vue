@@ -575,7 +575,55 @@
       <button @click="saveTelegramConfig" :disabled="telegramForm.saving" class="btn-primary text-sm">
         {{ telegramForm.saving ? '…' : 'Bot-Token speichern' }}
       </button>
-      <p v-if="telegramForm.msg" class="text-sm text-amber-300">{{ telegramForm.msg }}</p>
+      <p v-if="telegramForm.msg && !restart.pickerOpen && !restart.active" class="text-sm text-amber-300">{{ telegramForm.msg }}</p>
+
+      <!-- Restart-Picker erscheint direkt nach Telegram-Save. Vier Optionen:
+           Sofort, +10 min, +30 min, Zu Uhrzeit, oder „Später manuell". -->
+      <div v-if="restart.pickerOpen && !restart.active"
+           class="bg-amber-900/15 border border-amber-700/40 rounded-lg p-3 space-y-3">
+        <p class="text-sm text-amber-200 flex items-center gap-2">
+          <span>🔄</span>
+          <span class="flex-1">Damit der Bot aktiv wird, muss der Server-Container neu starten. Wann?</span>
+        </p>
+        <div class="flex flex-wrap items-center gap-2">
+          <button @click="scheduleRestart(0,    'telegram')"
+                  class="btn-primary text-xs px-3 py-1.5">Sofort</button>
+          <button @click="scheduleRestart(600,  'telegram')"
+                  class="btn-secondary text-xs px-3 py-1.5">In 10 Min</button>
+          <button @click="scheduleRestart(1800, 'telegram')"
+                  class="btn-secondary text-xs px-3 py-1.5">In 30 Min</button>
+          <div class="flex items-center gap-1.5">
+            <input type="time" v-model="restart.atTime"
+                   class="bg-gray-700 rounded-lg px-2 py-1 text-xs text-white"
+                   v-tooltip="'Uhrzeit heute (oder morgen, falls schon vorbei)'">
+            <button @click="scheduleAtTime('telegram')"
+                    class="btn-secondary text-xs px-3 py-1.5">Zu Uhrzeit</button>
+          </div>
+          <button @click="restart.pickerOpen = false"
+                  class="text-xs text-gray-400 hover:text-gray-200 px-2 py-1.5">
+            Später manuell
+          </button>
+        </div>
+        <p v-if="restart.error" class="text-xs text-red-400">{{ restart.error }}</p>
+      </div>
+
+      <!-- Aktiver Schedule-Status + Abbrechen-Button -->
+      <div v-if="restart.active"
+           class="bg-blue-900/20 border border-blue-700/40 rounded-lg p-3">
+        <p class="text-sm text-blue-200 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+          <span class="flex-1">
+            Neustart geplant in
+            <strong class="font-mono">{{ formatRemaining(restart.remainingSec) }}</strong>
+            <span class="text-xs text-blue-300/70">
+              ({{ new Date(restart.scheduledFor).toLocaleTimeString() }})
+            </span>
+          </span>
+          <button @click="cancelRestart" class="text-xs text-blue-300 hover:text-blue-100 underline">
+            Abbrechen
+          </button>
+        </p>
+      </div>
     </SortableSection>
 
     <!-- Grok / xAI API Key -->
@@ -940,7 +988,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, reactive, onMounted, onUnmounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../api.js';
 import { useAuthStore } from '../store/auth.js';
@@ -1341,11 +1389,110 @@ async function saveTelegramConfig() {
       webhook_url: telegramForm.value.webhook_url,
     });
     telegramForm.value.bot_token = '';
-    telegramForm.value.msg = 'Bot-Token gespeichert. Server-Neustart erforderlich, damit der Bot aktiv wird.';
+    telegramForm.value.msg = 'Bot-Token gespeichert.';
     await loadTelegramConfig();
+    // Statt nur Hinweis-Text: Picker öffnen, damit der Admin direkt
+    // wählen kann, wann der Restart laufen soll.
+    restart.pickerOpen = true;
+    restart.error      = '';
   } catch { telegramForm.value.msg = 'Fehler beim Speichern.'; }
   telegramForm.value.saving = false;
-  setTimeout(() => { telegramForm.value.msg = ''; }, 6000);
+}
+
+// ── Restart-Scheduler ────────────────────────────────────────────────────
+// Plant einen Container-Neustart (Sofort, in N Sekunden, oder zu Uhrzeit).
+// Backend hält den setTimeout im laufenden Prozess; Frontend pollt nur den
+// Status und zeigt einen lokalen Sekunden-Countdown, der alle 15 s mit
+// dem Server synchronisiert.
+const restart = reactive({
+  pickerOpen:   false,
+  active:       false,
+  scheduledFor: null,
+  remainingSec: 0,
+  atTime:       '',
+  error:        '',
+  pollTimer:    null,
+});
+
+function formatRemaining(sec) {
+  if (sec < 60)  return `${sec}s`;
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  if (m < 60)    return `${m}:${String(s).padStart(2,'0')} min`;
+  const h = Math.floor(m / 60);
+  return `${h}h ${m % 60}min`;
+}
+
+async function loadRestartSchedule() {
+  try {
+    const { data } = await api.get('/system/container-restart-schedule');
+    if (data.scheduled) {
+      restart.active       = true;
+      restart.scheduledFor = data.scheduled_for;
+      restart.remainingSec = data.remaining_sec;
+    } else {
+      restart.active       = false;
+      restart.scheduledFor = null;
+      restart.remainingSec = 0;
+    }
+  } catch { /* nicht-kritisch */ }
+}
+
+async function scheduleRestart(delaySec, reason) {
+  restart.error = '';
+  try {
+    const { data } = await api.post('/system/container-restart-schedule', { delaySec, reason });
+    if (data.immediate) {
+      // Container geht jetzt down — User-Feedback bevor Backend weg ist.
+      restart.active       = true;
+      restart.scheduledFor = data.scheduled_for;
+      restart.remainingSec = 0;
+      restart.pickerOpen   = false;
+      return;
+    }
+    restart.active       = true;
+    restart.scheduledFor = data.scheduled_for;
+    restart.remainingSec = data.delay_sec;
+    restart.pickerOpen   = false;
+    startRestartPoll();
+  } catch (err) {
+    restart.error = err.response?.data?.error || 'Konnte Neustart nicht planen.';
+  }
+}
+
+function scheduleAtTime(reason) {
+  const t = (restart.atTime || '').trim();
+  const m = /^(\d{1,2}):(\d{2})$/.exec(t);
+  if (!m) { restart.error = 'Bitte Uhrzeit als HH:MM angeben.'; return; }
+  const target = new Date();
+  target.setHours(Number(m[1]), Number(m[2]), 0, 0);
+  if (target.getTime() <= Date.now()) target.setDate(target.getDate() + 1);
+  const delay = Math.round((target.getTime() - Date.now()) / 1000);
+  scheduleRestart(delay, reason);
+}
+
+async function cancelRestart() {
+  try {
+    await api.post('/system/container-restart-schedule', { delaySec: -1 });
+    restart.active       = false;
+    restart.scheduledFor = null;
+    restart.remainingSec = 0;
+    stopRestartPoll();
+  } catch { /* ignore */ }
+}
+
+function startRestartPoll() {
+  stopRestartPoll();
+  let tick = 0;
+  restart.pollTimer = setInterval(() => {
+    if (restart.remainingSec > 0) restart.remainingSec -= 1;
+    tick += 1;
+    if (tick >= 15) { tick = 0; loadRestartSchedule(); }
+    if (restart.remainingSec <= 0) stopRestartPoll();
+  }, 1000);
+}
+function stopRestartPoll() {
+  if (restart.pollTimer) { clearInterval(restart.pollTimer); restart.pollTimer = null; }
 }
 
 // ── Grok / xAI ──
@@ -1561,6 +1708,9 @@ onMounted(async () => {
   loadTeslaCredentials();
   loadVapidConfig();
   loadTelegramConfig();
+  // Restart-Schedule beim Öffnen einmal laden — falls schon einer aktiv ist,
+  // zeigt die Telegram-Sektion direkt den Countdown statt der Picker-UI.
+  loadRestartSchedule().then(() => { if (restart.active) startRestartPoll(); });
   loadGrokConfig();
   loadAbrpConfig();
   loadOcmConfig();
@@ -1573,6 +1723,8 @@ onMounted(async () => {
   const { data } = await api.get('/auth/tesla/status').catch(() => ({ data: { connected: false } }));
   teslaConnected.value = data.connected;
 });
+
+onUnmounted(() => { stopRestartPoll(); });
 </script>
 
 <style scoped>

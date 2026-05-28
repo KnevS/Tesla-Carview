@@ -668,6 +668,73 @@ router.post('/container-restart', requireAuth, requireAdmin, (req, res) => {
   setTimeout(() => process.exit(0), 400);
 });
 
+// In-Memory-Timer für geplante Neustarts. Lebt nur im aktuellen Prozess —
+// das ist OK: wenn der Container zwischenzeitlich aus anderem Grund neu
+// startet, ist der Plan ohnehin überflüssig. Nur EIN Timer gleichzeitig.
+let _scheduledRestart = null;
+
+// POST /api/system/container-restart-schedule { delaySec, reason? }
+//   delaySec = 0       → sofort (wie /container-restart)
+//   delaySec > 0       → setTimeout für genau diesen Zeitpunkt
+//   delaySec = null/-1 → vorhandenen geplanten Restart abbrechen
+router.post('/container-restart-schedule', requireAuth, requireAdmin, (req, res) => {
+  const { delaySec, reason } = req.body || {};
+  const num = Number(delaySec);
+
+  if (delaySec === null || num < 0) {
+    if (_scheduledRestart) {
+      clearTimeout(_scheduledRestart.timer);
+      _scheduledRestart = null;
+    }
+    auditLog(req.db, req.user.sub, 'container_restart_cancelled', req, {});
+    return res.json({ cancelled: true });
+  }
+
+  if (!Number.isFinite(num) || num < 0 || num > 86400) {
+    return res.status(400).json({ error: 'delaySec muss zwischen 0 und 86400 (24h) liegen' });
+  }
+
+  if (_scheduledRestart) clearTimeout(_scheduledRestart.timer);
+
+  if (num === 0) {
+    auditLog(req.db, req.user.sub, 'container_restart', req, { reason: reason || null });
+    res.json({ ok: true, scheduled_for: new Date().toISOString(), immediate: true });
+    setTimeout(() => process.exit(0), 400);
+    return;
+  }
+
+  const scheduledFor = new Date(Date.now() + num * 1000);
+  _scheduledRestart = {
+    scheduledFor, reason: reason || null, requestedBy: req.user.sub,
+    timer: setTimeout(() => {
+      console.log(`[Restart] Geplanter Neustart fällig (Verzögerung ${num}s, Grund: ${reason || '-'})`);
+      _scheduledRestart = null;
+      process.exit(0);
+    }, num * 1000),
+  };
+  auditLog(req.db, req.user.sub, 'container_restart_scheduled', req, {
+    delaySec: num, reason: reason || null,
+  });
+  res.json({
+    scheduled_for: scheduledFor.toISOString(),
+    delay_sec:     num,
+    immediate:     false,
+  });
+});
+
+// GET /api/system/container-restart-schedule — Status des aktuellen Plans.
+// Frontend ruft das, um „Neustart in 4:32 min" zu zeigen.
+router.get('/container-restart-schedule', requireAuth, requireAdmin, (_req, res) => {
+  if (!_scheduledRestart) return res.json({ scheduled: false });
+  const remainingMs = _scheduledRestart.scheduledFor.getTime() - Date.now();
+  res.json({
+    scheduled:     true,
+    scheduled_for: _scheduledRestart.scheduledFor.toISOString(),
+    remaining_sec: Math.max(0, Math.round(remainingMs / 1000)),
+    reason:        _scheduledRestart.reason,
+  });
+});
+
 // ── Monitoring-Konfiguration ─────────────────────────────────────────────────
 
 const MONITORING_KEYS = ['monitoring.alert_email', 'monitoring.heal_enabled', 'monitoring.anthropic_key'];
