@@ -113,10 +113,19 @@ jobs:
             else
               echo "==> Frontend-Bundle aktuell (Hash: ${CURRENT_HASH:0:7}) — kein Rebuild nötig."
             fi
-            # Nur Backend-Image aus GHCR ziehen — das Frontend-Image wird durch
-            # das frontend-dist-private Volume überschrieben und muss nicht aktualisiert werden.
+            # Backend-Image aus GHCR ziehen — nur wenn sich der Digest geändert hat.
+            # Das Frontend-Image wird durch frontend-dist-private Volume überschrieben (kein Pull nötig).
             echo "$GHCR_TOKEN" | sudo docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml pull backend
+            BACKEND_IMAGE="ghcr.io/knevs/tesla-carview/backend:main"
+            REMOTE_DIGEST=$(sudo docker manifest inspect "$BACKEND_IMAGE" 2>/dev/null \
+              | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('config',{}).get('digest',''))" 2>/dev/null || echo "")
+            LOCAL_DIGEST=$(sudo docker inspect "$BACKEND_IMAGE" --format '{{.Id}}' 2>/dev/null || echo "none")
+            if [ -z "$REMOTE_DIGEST" ] || [ "$REMOTE_DIGEST" != "$LOCAL_DIGEST" ]; then
+              echo "==> Backend-Image aktualisiert — ziehe neues Image …"
+              sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml pull --quiet backend
+            else
+              echo "==> Backend-Image unverändert (${LOCAL_DIGEST:7:7}) — kein Pull nötig."
+            fi
             sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d backend frontend
             sudo docker logout ghcr.io
             # Sicherstellen dass nginx in beiden erforderlichen Netzwerken läuft.
