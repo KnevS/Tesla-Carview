@@ -1470,7 +1470,7 @@ async function scheduleRestart(delaySec, reason) {
       restart.pickerOpen   = false;
       restart.restarting   = true;
       restart.restartDone  = false;
-      startHealthPoll();
+      listenForAppUp();
       return;
     }
     restart.active       = true;
@@ -1484,7 +1484,7 @@ async function scheduleRestart(delaySec, reason) {
       restart.pickerOpen  = false;
       restart.restarting  = true;
       restart.restartDone = false;
-      startHealthPoll();
+      listenForAppUp();
     } else {
       restart.error = err.response?.data?.error || 'Konnte Neustart nicht planen.';
     }
@@ -1526,24 +1526,24 @@ function stopRestartPoll() {
   if (restart.pollTimer) { clearInterval(restart.pollTimer); restart.pollTimer = null; }
 }
 
-function startHealthPoll() {
-  let elapsed = 0;
-  const timer = setInterval(async () => {
-    elapsed += 2;
-    try {
-      await api.get('/health', { timeout: 3000 });
-      clearInterval(timer);
-      restart.restarting  = false;
-      restart.restartDone = true;
-      setTimeout(() => { restart.restartDone = false; }, 6000);
-    } catch {
-      if (elapsed >= 180) {
-        clearInterval(timer);
-        restart.restarting = false;
-        restart.error = 'Neustart dauert ungewöhnlich lange — bitte Seite neu laden.';
-      }
+function listenForAppUp() {
+  // MaintenanceOverlay sendet 'app-up' wenn /api/health wieder antwortet.
+  // Darauf warten statt einen eigenen Health-Poll zu starten.
+  function onAppUp() {
+    window.removeEventListener('app-up', onAppUp);
+    clearTimeout(fallbackTimer);
+    restart.restarting  = false;
+    restart.restartDone = true;
+    setTimeout(() => { restart.restartDone = false; }, 6000);
+  }
+  window.addEventListener('app-up', onAppUp);
+  const fallbackTimer = setTimeout(() => {
+    window.removeEventListener('app-up', onAppUp);
+    if (restart.restarting) {
+      restart.restarting = false;
+      restart.error = 'Neustart dauert ungewöhnlich lange — bitte Seite neu laden.';
     }
-  }, 2000);
+  }, 180_000);
 }
 
 // ── Grok / xAI ──
