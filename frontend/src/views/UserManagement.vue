@@ -3,6 +3,10 @@
     <div class="flex items-center justify-between flex-wrap gap-3">
       <h1 class="text-2xl font-bold">Benutzerverwaltung</h1>
       <div class="flex items-center gap-2">
+        <RouterLink to="/admin"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-sm text-gray-300 transition">
+          ← Übersicht
+        </RouterLink>
         <SortToggle v-model:direction="sortDir" />
         <button @click="showCreate = true" class="btn-primary text-sm">+ Benutzer anlegen</button>
       </div>
