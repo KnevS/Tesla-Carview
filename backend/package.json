@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon src/index.js",
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "lint": "eslint src"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1053.0",
@@ -35,6 +36,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "eslint": "^10.4.0",
+    "globals": "^17.6.0",
     "nodemon": "^3.1.4"
   },
   "author": {
