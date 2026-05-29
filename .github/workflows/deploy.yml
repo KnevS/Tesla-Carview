@@ -79,9 +79,10 @@ jobs:
                 backend/src/services/demoLifecycle.js \
                 frontend/src/views/Demo.vue
             fi
-            # Frontend lokal bauen wenn sich der Git-Stand seit dem letzten Bundle geändert hat.
-            # Gespeicherter Hash in frontend-dist-private/.build-hash verhindert unnötige Rebuilds.
-            CURRENT_HASH=$(sudo git -C "$APP_DIR" rev-parse HEAD 2>/dev/null || echo unknown)
+            # Frontend nur neu bauen wenn sich frontend/ oder das private Overlay geändert hat.
+            # git log -1 -- frontend/ liefert den letzten Commit der frontend/ berührt hat —
+            # reine Backend- oder Config-Commits lösen keinen teuren Rebuild aus.
+            CURRENT_HASH=$(sudo git -C "$APP_DIR" log -1 --format='%H' -- frontend/ 2>/dev/null || echo unknown)
             BUILD_HASH=$(cat "$APP_DIR/frontend-dist-private/.build-hash" 2>/dev/null || echo "")
             if [ "$CURRENT_HASH" != "$BUILD_HASH" ] || [ ! -f "$APP_DIR/frontend-dist-private/index.html" ]; then
               echo "==> Privates Frontend-Bundle bauen (Hash: ${CURRENT_HASH:0:7}) …"
