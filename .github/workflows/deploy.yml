@@ -113,9 +113,10 @@ jobs:
             else
               echo "==> Frontend-Bundle aktuell (Hash: ${CURRENT_HASH:0:7}) — kein Rebuild nötig."
             fi
-            # Pull pre-built images from GHCR (no local build needed)
+            # Nur Backend-Image aus GHCR ziehen — das Frontend-Image wird durch
+            # das frontend-dist-private Volume überschrieben und muss nicht aktualisiert werden.
             echo "$GHCR_TOKEN" | sudo docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml pull backend frontend
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml pull backend
             sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d backend frontend
             sudo docker logout ghcr.io
             # Sicherstellen dass nginx in beiden erforderlichen Netzwerken läuft.
