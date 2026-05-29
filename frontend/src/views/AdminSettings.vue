@@ -624,6 +624,27 @@
           </button>
         </p>
       </div>
+
+      <!-- Server startet gerade neu -->
+      <div v-if="restart.restarting"
+           class="bg-yellow-900/20 border border-yellow-700/40 rounded-lg p-3">
+        <p class="text-sm text-yellow-200 flex items-center gap-2">
+          <svg class="w-4 h-4 animate-spin shrink-0" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+          </svg>
+          Server startet neu — bitte warten…
+        </p>
+      </div>
+
+      <!-- Neustart erfolgreich -->
+      <div v-if="restart.restartDone"
+           class="bg-green-900/20 border border-green-700/40 rounded-lg p-3">
+        <p class="text-sm text-green-300 flex items-center gap-2">
+          <span>✓</span>
+          Backend bereit — Neustart erfolgreich.
+        </p>
+      </div>
     </SortableSection>
 
     <!-- Grok / xAI API Key -->
@@ -1412,6 +1433,8 @@ const restart = reactive({
   atTime:       '',
   error:        '',
   pollTimer:    null,
+  restarting:   false,
+  restartDone:  false,
 });
 
 function formatRemaining(sec) {
@@ -1443,11 +1466,11 @@ async function scheduleRestart(delaySec, reason) {
   try {
     const { data } = await api.post('/system/container-restart-schedule', { delaySec, reason });
     if (data.immediate) {
-      // Container geht jetzt down — User-Feedback bevor Backend weg ist.
-      restart.active       = true;
-      restart.scheduledFor = data.scheduled_for;
-      restart.remainingSec = 0;
+      restart.active       = false;
       restart.pickerOpen   = false;
+      restart.restarting   = true;
+      restart.restartDone  = false;
+      startHealthPoll();
       return;
     }
     restart.active       = true;
@@ -1493,6 +1516,26 @@ function startRestartPoll() {
 }
 function stopRestartPoll() {
   if (restart.pollTimer) { clearInterval(restart.pollTimer); restart.pollTimer = null; }
+}
+
+function startHealthPoll() {
+  let elapsed = 0;
+  const timer = setInterval(async () => {
+    elapsed += 2;
+    try {
+      await api.get('/health', { timeout: 3000 });
+      clearInterval(timer);
+      restart.restarting  = false;
+      restart.restartDone = true;
+      setTimeout(() => { restart.restartDone = false; }, 6000);
+    } catch {
+      if (elapsed >= 180) {
+        clearInterval(timer);
+        restart.restarting = false;
+        restart.error = 'Neustart dauert ungewöhnlich lange — bitte Seite neu laden.';
+      }
+    }
+  }, 2000);
 }
 
 // ── Grok / xAI ──
