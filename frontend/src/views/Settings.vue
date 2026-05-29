@@ -757,10 +757,10 @@
           </div>
           <div class="design-preview__label">
             <span class="block text-sm font-semibold flex items-center gap-1">
-              <span>{{ d.icon }}</span> {{ d.label }}
+              <span>{{ d.icon }}</span> {{ $t(`wizard.designs.${d.key}.label`, d.label) }}
               <span v-if="themeStore.designKey === d.key" class="text-tesla-red ml-auto">✓</span>
             </span>
-            <span class="block text-xs text-gray-400 mt-0.5">{{ d.tagline }}</span>
+            <span class="block text-xs text-gray-400 mt-0.5">{{ $t(`wizard.designs.${d.key}.tagline`, d.tagline) }}</span>
           </div>
         </button>
       </div>
@@ -781,7 +781,7 @@
               : 'border-gray-700 text-gray-400 hover:border-gray-500'"
             :style="themeStore.activeKey === t.key ? { backgroundColor: t.accent } : {}">
             <span class="w-4 h-4 rounded-full flex-shrink-0" :style="{ backgroundColor: t.accent }"></span>
-            {{ t.label }}
+            {{ $t(`wizard.themes.${t.key}.label`, t.label) }}
           </button>
         </div>
       </div>

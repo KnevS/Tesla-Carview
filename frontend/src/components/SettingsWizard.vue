@@ -834,8 +834,8 @@ function discard() {
 // ─── Labels ────────────────────────────────────────────────────────────────
 
 function langLabel(code)   { return LANGS.find(l => l.code === code)?.label    ?? code; }
-function designLabel(key)  { return DESIGNS.find(d => d.key === key)?.label    ?? key;  }
-function themeLabel(key)   { return THEMES.find(t => t.key === key)?.label     ?? key;  }
+function designLabel(key)  { return key ? t(`wizard.designs.${key}.label`, DESIGNS.find(d => d.key === key)?.label ?? key) : key; }
+function themeLabel(key)   { return key ? t(`wizard.themes.${key}.label`,  THEMES.find(d => d.key === key)?.label  ?? key) : key; }
 
 // ─── Zusammenfassung ───────────────────────────────────────────────────────
 
