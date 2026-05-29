@@ -1,5 +1,6 @@
-/**
 import { getTenantSetting } from './configService.js';
+
+/**
  * A Better Route Planner (ABRP) Telemetry Integration.
  *
  * Sends live vehicle data to ABRP so it can optimize routes in real time.
@@ -66,7 +67,7 @@ export function buildTlmFromPoint(point, ts) {
  * Send a telemetry object to ABRP.
  * Silently skips when ABRP_API_KEY or vehicle.abrp_token is missing.
  */
-export async function sendToAbrp(vehicle, tlm) {
+export async function sendToAbrp(db, vehicle, tlm) {
   const apiKey    = getTenantSetting(db, 'abrp.api_key', 'ABRP_API_KEY');
   const userToken = vehicle?.abrp_token;
   if (!apiKey || !userToken) return;

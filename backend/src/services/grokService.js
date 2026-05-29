@@ -1,5 +1,6 @@
-/**
 import { getTenantSetting } from './configService.js';
+
+/**
  * xAI Grok-Service — Streaming-Chat mit Fahrzeugkontext.
  *
  * API-kompatibel zur OpenAI-Chat-Completions-API (stream: true).

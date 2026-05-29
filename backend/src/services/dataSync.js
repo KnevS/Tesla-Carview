@@ -150,7 +150,7 @@ export async function syncVehicleState(db, vehicle, state, tenantId = null) {
   // ABRP Live-Telemetrie (best-effort, blockiert nicht)
   if (vehicle.abrp_token) {
     const freshVehicle = db.prepare('SELECT * FROM vehicles WHERE id=?').get(vehicle.id);
-    sendToAbrp(freshVehicle, buildTlmFromState(state, now)).catch(() => {});
+    sendToAbrp(db, freshVehicle, buildTlmFromState(state, now)).catch(() => {});
   }
 
   // Notification-Rules + Sleep-Monitoring (best-effort, darf Sync nie crashen)

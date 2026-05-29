@@ -110,7 +110,7 @@ async function runOnce() {
             url:   '/',
           });
           await Promise.allSettled(
-            subs.map(s => wp.sendNotification(JSON.parse(s.subscription_json), payload)
+            subs.map(s => wpMod.sendNotification(JSON.parse(s.subscription_json), payload)
               .catch(err => console.warn('[ServiceReminders] push fehlgeschlagen:', err.message)))
           );
         }

@@ -207,7 +207,7 @@ function storePoint(vin, ts, point) {
   // ABRP Live-Telemetrie (best-effort)
   if (vehicle.abrp_token) {
     const enrichedPoint = { ...point, voltage: point.voltage, current: point.current };
-    sendToAbrp(vehicle, buildTlmFromPoint(enrichedPoint, ts)).catch(() => {});
+    sendToAbrp(db, vehicle, buildTlmFromPoint(enrichedPoint, ts)).catch(() => {});
   }
 }
 
