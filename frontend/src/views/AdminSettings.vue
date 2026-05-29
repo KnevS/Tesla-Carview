@@ -1479,7 +1479,15 @@ async function scheduleRestart(delaySec, reason) {
     restart.pickerOpen   = false;
     startRestartPoll();
   } catch (err) {
-    restart.error = err.response?.data?.error || 'Konnte Neustart nicht planen.';
+    // Kein err.response = Netzwerkfehler: Backend ist sofort weggegangen (immediate restart).
+    if (!err.response) {
+      restart.pickerOpen  = false;
+      restart.restarting  = true;
+      restart.restartDone = false;
+      startHealthPoll();
+    } else {
+      restart.error = err.response?.data?.error || 'Konnte Neustart nicht planen.';
+    }
   }
 }
 
