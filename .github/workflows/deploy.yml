@@ -64,7 +64,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           envs: GHCR_TOKEN,GHCR_ACTOR
-          command_timeout: 10m
+          command_timeout: 20m
           script: |
             APP_DIR="${{ secrets.DEPLOY_APP_DIR }}"
             APP_DIR="${APP_DIR:-/opt/tesla-carview}"
