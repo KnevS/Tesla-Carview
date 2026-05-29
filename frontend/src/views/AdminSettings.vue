@@ -1527,19 +1527,42 @@ function stopRestartPoll() {
 }
 
 function listenForAppUp() {
-  // MaintenanceOverlay sendet 'app-up' wenn /api/health wieder antwortet.
-  // Darauf warten statt einen eigenen Health-Poll zu starten.
-  function onAppUp() {
+  let done = false;
+  let pollTimer = null;
+
+  function finish() {
+    if (done) return;
+    done = true;
     window.removeEventListener('app-up', onAppUp);
-    clearTimeout(fallbackTimer);
+    clearInterval(pollTimer);
+    clearTimeout(timeoutTimer);
     restart.restarting  = false;
     restart.restartDone = true;
     setTimeout(() => { restart.restartDone = false; }, 6000);
   }
+
+  // MaintenanceOverlay-Weg: app-up kommt wenn Overlay sich wieder schließt.
+  function onAppUp() { finish(); }
   window.addEventListener('app-up', onAppUp);
-  const fallbackTimer = setTimeout(() => {
-    window.removeEventListener('app-up', onAppUp);
-    if (restart.restarting) {
+
+  // Direkter Fallback-Poll: startet nach 1.5 s (gibt Backend Zeit um wirklich wegzugehen).
+  // Arbeitet unabhängig von der MaintenanceOverlay — funktioniert auch wenn kein
+  // Axios-Request läuft und deshalb kein app-down/app-up ausgelöst wird.
+  setTimeout(() => {
+    if (done) return;
+    pollTimer = setInterval(async () => {
+      try {
+        const res = await fetch('/api/health', { cache: 'no-store' });
+        if (res.ok) finish();
+      } catch { /* noch nicht erreichbar */ }
+    }, 2000);
+  }, 1500);
+
+  const timeoutTimer = setTimeout(() => {
+    if (!done) {
+      done = true;
+      window.removeEventListener('app-up', onAppUp);
+      clearInterval(pollTimer);
       restart.restarting = false;
       restart.error = 'Neustart dauert ungewöhnlich lange — bitte Seite neu laden.';
     }
