@@ -1,5 +1,23 @@
 <template>
   <div class="max-w-2xl space-y-6">
+
+    <!-- Neustart-Banner: sticky oben, unabhängig von Scroll-Position und Sections -->
+    <div v-if="restart.restarting"
+         class="sticky top-2 z-50 flex items-center gap-3 px-4 py-3 rounded-xl
+                bg-yellow-900/90 border border-yellow-600/60 shadow-lg backdrop-blur-sm text-yellow-100 text-sm">
+      <svg class="w-5 h-5 animate-spin shrink-0" viewBox="0 0 24 24" fill="none">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/>
+      </svg>
+      <span>Server startet neu — bitte warten…</span>
+    </div>
+    <div v-if="restart.restartDone"
+         class="sticky top-2 z-50 flex items-center gap-3 px-4 py-3 rounded-xl
+                bg-green-900/90 border border-green-600/60 shadow-lg backdrop-blur-sm text-green-100 text-sm">
+      <span class="text-lg">✓</span>
+      <span>Backend bereit — Neustart erfolgreich.</span>
+    </div>
+
     <div class="flex items-center justify-between gap-4 flex-wrap">
       <h1 class="text-2xl font-bold">{{ $t('nav.adminSettings.label', 'Admin-Einstellungen') }}</h1>
       <RouterLink to="/admin"
@@ -1538,7 +1556,7 @@ function listenForAppUp() {
     clearTimeout(timeoutTimer);
     restart.restarting  = false;
     restart.restartDone = true;
-    setTimeout(() => { restart.restartDone = false; }, 6000);
+    setTimeout(() => { restart.restartDone = false; }, 15000);
   }
 
   // MaintenanceOverlay-Weg: app-up kommt wenn Overlay sich wieder schließt.
