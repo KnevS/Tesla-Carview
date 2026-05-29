@@ -98,11 +98,33 @@ Workflow — keine PRs nötig. Aber **vor jedem Push**:
 
 ---
 
-## Aktueller Entwicklungsstand (Stand 2026-05-25, v3.4.0)
+## Aktueller Entwicklungsstand (Stand 2026-05-29, v3.4.1)
 
 > Dieser Abschnitt wird von Sessions aktuell gehalten und dient als Einsprung für neue Konversationen.
 
-### Was in der letzten Session getan wurde
+### Was in der letzten Session getan wurde (2026-05-29)
+
+**fix: vier latente ReferenceError-Bugs behoben (`dfc45ce`)**
+- Bug-Klasse: undefinierte Bezeichner, die sauber durch `node --check`/`vite build`
+  laufen und erst zur Laufzeit crashen — genau das Muster der früheren
+  "add missing import"-Commits.
+- `abrpService.js`: `getTenantSetting`-Import lag im JSDoc-Block (nie importiert);
+  `sendToAbrp` bekam kein `db` → Signatur jetzt `sendToAbrp(db, vehicle, tlm)`,
+  Aufrufer in `dataSync.js` + `fleetTelemetry.js` angepasst.
+- `grokService.js`: `getTenantSetting`-Import ebenfalls im JSDoc-Block.
+- `telemetryConfig.js`: `getTenantSetting` mit nackten Bezeichnern statt String-Literalen aufgerufen.
+- `serviceReminders.js`: Push-Send nutzte `wp` statt `wpMod`.
+
+**chore(ci): ESLint no-undef dauerhaft eingerichtet (`2b06aac`)**
+- `eslint` + `globals` (Backend) bzw. + `vue-eslint-parser` (Frontend) als devDeps;
+  je ein `npm run lint`-Script + minimale Flat-Config (`eslint.config.js`).
+- Nur echte Bug-Regeln (`no-undef`, `no-dupe-keys`, `no-unreachable`), kein Stil —
+  CI bleibt aussagekräftig grün.
+- CI (`.github/workflows/ci.yml`): der bisherige No-op-"Syntax-Check" des Backend-Jobs
+  (gab nur einen String aus) ist durch echtes `npm run lint` ersetzt; Frontend-Job
+  bekommt einen Lint-Step vor dem Build. `npm run lint` lokal vor jedem Push laufen lassen.
+
+### Was in v3.4.0 getan wurde
 
 **PR #69 — feat: admin config via UI + wizard split (v3.4.0)**
 - Alle Secrets (Tesla-Credentials, VAPID, Telegram, xAI, ABRP) sind jetzt über die Admin-UI konfigurierbar — kein SSH/.env-Editieren mehr nötig
