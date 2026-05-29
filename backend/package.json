@@ -29,7 +29,7 @@
     "otpauth": "^9.3.3",
     "protobufjs": "^8.4.2",
     "qrcode": "^1.5.3",
-    "ssh2-sftp-client": "^10.0.3",
+    "ssh2-sftp-client": "^12.1.1",
     "telegraf": "^4.16.3",
     "web-push": "^3.6.7",
     "ws": "^8.21.0",
