@@ -51,7 +51,10 @@ export async function initTelegramBot() {
 
     const tdb = (() => { try { const ts = getAllTenants().filter(t => !t.is_demo); return ts.length ? getDb(ts[0].id) : null; } catch { return null; } })();
     const dbWebhook = tdb ? getTenantSetting(tdb, 'telegram.webhook_url', null) : null;
-    const webhookUrl = dbWebhook || process.env.TELEGRAM_WEBHOOK_URL || process.env.FRONTEND_URL;
+    // Webhook nur wenn explizit gesetzt. FRONTEND_URL ist KEIN gültiger Fallback —
+    // reverse-proxy/Auth-Middlewares können /api/telegram/webhook blockieren,
+    // Telegram bekäme dann nur 401/403 und der Bot bliebe stumm (siehe v3.4.2).
+    const webhookUrl = dbWebhook || process.env.TELEGRAM_WEBHOOK_URL || null;
     if (webhookUrl) {
       // Webhook-Modus: Express übernimmt die Webhook-Route
       const fullUrl = `${webhookUrl}/api/telegram/webhook`;
