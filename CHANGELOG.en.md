@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.2] - 2026-05-30
+
+### Fixed
+
+- **Telegram bot silent behind reverse proxy**: `initTelegramBot()` registered a webhook on `FRONTEND_URL/api/telegram/webhook` whenever no dedicated `TELEGRAM_WEBHOOK_URL` was set. If an auth middleware (e.g. Authelia) sits in front of the route, it responds with 401 — Telegram could not reach the bot and long-polling stayed disabled. Removed the `FRONTEND_URL` fallback: without an explicit `TELEGRAM_WEBHOOK_URL` the bot now runs in polling mode.
+
+---
+
 ## [v3.4.1] - 2026-05-26
 
 ### New
