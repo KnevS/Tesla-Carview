@@ -265,3 +265,81 @@ async function poll() {
              :              POLL_INTERVAL_IDLE;
   setTimeout(poll, next);
 }
+
+/**
+ * Beim Backend-Restart bricht die persistente FleetTelemetry-WebSocket
+ * vom Tesla ab. Der Tesla baut sie erst neu auf, wenn ein State-Event
+ * passiert (Fahrt, Ladung, Wake). Bis dahin ist `telemetry_last_signal_at`
+ * der DB-Wert von VOR dem Restart — der Poller würde fälschlich denken,
+ * Telemetry sei aktiv (`isCoveredByTelemetry`) und Polling skippen.
+ * Reset auf NULL erzwingt den Polling-Fallback ab dem ersten Tick.
+ */
+export function resetTelemetryHeartbeat() {
+  let resetCount = 0;
+  for (const tenant of getAllTenants()) {
+    if (tenant.is_demo) continue;
+    try {
+      const db = getDb(tenant.id);
+      const res = db.prepare(
+        'UPDATE vehicles SET telemetry_last_signal_at = NULL WHERE telemetry_last_signal_at IS NOT NULL'
+      ).run();
+      resetCount += res.changes;
+    } catch (err) {
+      console.error(`[Poller] resetTelemetryHeartbeat ${tenant.slug}:`, err.message);
+    }
+  }
+  if (resetCount) {
+    console.log(
+      `[Poller] Telemetry-Heartbeat zurueckgesetzt fuer ${resetCount} Fahrzeug(e) — ` +
+      `Polling uebernimmt bis FleetTelemetry-Stream re-established.`
+    );
+  }
+}
+
+/**
+ * Einmaliger Force-Poll fuer ein einzelnes Fahrzeug — nutzt der Refresh-Button
+ * im Frontend, um nach dem Restart oder bei OFFLINE-Anzeige sofort frische
+ * Daten zu holen. Respektiert den Tages-/Monats-Cap.
+ * Returns: { ok, state?, error?, cap: { day, dayMax, month, monthMax } }
+ */
+export async function forcePollVehicle(db, vehicle, tenantId) {
+  const cap = {
+    day:      getTodayCallCount(db),
+    dayMax:   DAILY_CAP,
+    month:    getMonthCallCount(db),
+    monthMax: MONTHLY_CAP,
+  };
+
+  if (isOverBudget(db, vehicle.display_name)) {
+    return { ok: false, error: 'cap_reached', cap };
+  }
+
+  try {
+    const data  = await getVehicleData(db, vehicle.tesla_id);
+    const state = data?.response;
+    if (!state) return { ok: false, error: 'no_state', cap };
+
+    reset404(tenantId);
+    await syncVehicleState(db, vehicle, state, tenantId);
+    recordSuccess(tenantId);
+
+    // Cap nach dem Call neu lesen — der Counter wurde gerade um 1 erhoeht
+    const newCap = {
+      day:      getTodayCallCount(db),
+      dayMax:   DAILY_CAP,
+      month:    getMonthCallCount(db),
+      monthMax: MONTHLY_CAP,
+    };
+    return { ok: true, state: state.state ?? 'unknown', cap: newCap };
+  } catch (err) {
+    if (err.response?.status === 403) record403(tenantId);
+    else if (err.response?.status === 404) record404(tenantId);
+    else recordOtherFailure(tenantId);
+    return {
+      ok: false,
+      error: err.message,
+      status: err.response?.status,
+      cap,
+    };
+  }
+}
