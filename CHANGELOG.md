@@ -7,6 +7,19 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.6] - 2026-06-01
+
+### Neu
+
+- **Telegram-Info-Befehle**: Fünf neue Read-only-Befehle für den Bot — `/location` (aktueller Standort mit Google-Maps-Link aus der letzten Telemetry-Position), `/range` (Restreichweite + SOC + Stand aus `battery_snapshots`), `/today` (Tagesbilanz: Anzahl Fahrten, km, Anzahl Ladungen, kWh, Kosten — Tagesgrenze in Europe/Berlin), `/service` (nächste fällige Wartungsintervalle, mit "ueberfaellig"-Markierung), `/firmware` (aktuelle Software-Version + Vorgänger aus `firmware_versions`). Alle Befehle nutzen das MarkdownV2-Escape-Pattern aus v3.4.3.
+- **Help-Text erweitert**: `/help` listet jetzt alle neun Befehle inklusive der neuen.
+
+### Behoben
+
+- **`/battery` zeigte "Letzte Ladung: –"**: Statt `charge_energy_added` heißt die Spalte in `charging_sessions` real `energy_added_kwh`. Stiller Bug (kein Crash, nur leere Anzeige). Jetzt richtige Spalte; auch `/today` greift korrekt darauf zu.
+
+---
+
 ## [v3.4.5] - 2026-06-01
 
 ### Behoben
