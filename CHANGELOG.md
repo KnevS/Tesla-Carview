@@ -7,6 +7,19 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.8] - 2026-06-01
+
+### Neu
+
+- **Telegram-Push für proaktive Events**: Ladung beendet, Service-Erinnerungen, Notification-Rules (SOC-Alarme, Geofence-Events) und neue Software-Versionen kommen jetzt zusätzlich zur WebPush-Notification auch im Telegram-Bot an. Beide Kanäle laufen parallel über `notifyService.notifyAllInTenant()` — wer keinen Telegram-Account verknüpft hat, sieht nur die Web-Push, wer beides nutzt, bekommt beides. Sentry-Alarm lief bereits über diesen Kanal (seit v3.3.3), war aber der einzige Trigger.
+- **Software-Update-Erkennung mit Push**: Beim ersten Sync nach einer Firmware-Aktualisierung erkennt der DataSync die neue `car_version` und schickt eine Notification mit der Version. Beim allerersten Tracking eines Fahrzeugs wird die Push unterdrückt (sonst würde jede Bestandsversion eine Erinnerung auslösen).
+
+### Refactored
+
+- **Notification-Pipeline konsolidiert**: Die alte `services/notifications.js` (WebPush-only, fahrzeug-basiert via `push_subscriptions`) wurde gelöscht. `dataSync.js` und `serviceReminders.js` nutzen jetzt einheitlich `notifyService.notifyAllInTenant()`. Vorteil: jede Mutation, die historisch nur Web-Push triggerte, deckt automatisch alle konfigurierten Channels ab. Audit-Konsistenz für die Multi-Channel-Strategie.
+
+---
+
 ## [v3.4.7] - 2026-06-01
 
 ### Neu
