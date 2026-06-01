@@ -6,6 +6,7 @@ import { validate } from '../middleware/validate.js';
 import { createUser, findUserById, changePassword, verifyPassword } from '../services/userService.js';
 import { auditLog } from '../services/auditService.js';
 import { getMasterDb } from '../db/database.js';
+import { sendEmail, isSmtpConfigured } from '../utils/email.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -17,22 +18,78 @@ const INVITE_TTL_DAYS = 14;
 const INVITE_TTL_SECONDS = INVITE_TTL_DAYS * 24 * 60 * 60;
 
 router.post('/invite', requireAdmin, validate(z.object({
-  role: z.enum(['admin', 'user']).optional().default('user'),
-  note: z.string().max(120).optional(),
-})), (req, res) => {
+  role:         z.enum(['admin', 'user']).optional().default('user'),
+  note:         z.string().max(120).optional(),
+  display_name: z.string().max(80).optional(),
+  email:        z.string().email().max(254).optional(),
+  send_email:   z.boolean().optional().default(false),
+})), async (req, res) => {
   const token     = randomBytes(32).toString('hex');
   const expiresAt = Math.floor(Date.now() / 1000) + INVITE_TTL_SECONDS;
+  const displayName = req.body.display_name?.trim() || null;
+  const email       = req.body.email?.trim() || null;
+
   req.db.prepare(
-    `INSERT INTO user_invites (token, role, created_by_user_id, expires_at, note)
-     VALUES (?, ?, ?, ?, ?)`
-  ).run(token, req.body.role, req.user.sub, expiresAt, req.body.note || null);
+    `INSERT INTO user_invites
+       (token, role, created_by_user_id, expires_at, note, display_name, email)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
+  ).run(token, req.body.role, req.user.sub, expiresAt, req.body.note || null, displayName, email);
 
   const base = process.env.FRONTEND_URL || 'http://localhost:5173';
-  auditLog(req.db, req.user.sub, 'user_invite_created', req, { role: req.body.role });
+  const inviteUrl = `${base}/invite/${token}`;
+
+  // E-Mail nur senden wenn ausdruecklich gewuenscht UND Adresse vorhanden
+  // UND SMTP konfiguriert. Fehlt eins davon, faellt die Route auf "Link
+  // anzeigen" zurueck — der Admin kann den Link manuell weitergeben.
+  let emailSent = false;
+  let emailError = null;
+  if (req.body.send_email && email) {
+    if (!isSmtpConfigured(req.db)) {
+      emailError = 'SMTP nicht konfiguriert — Link manuell weitergeben.';
+    } else {
+      try {
+        const greeting = displayName ? `Hallo ${displayName},` : 'Hallo,';
+        await sendEmail(req.db, {
+          to: email,
+          subject: 'Einladung zu Tesla Carview',
+          text:
+            `${greeting}\n\n` +
+            `du wurdest zu Tesla Carview eingeladen. Mit dem folgenden Link kannst ` +
+            `du dein Konto erstellen (gueltig ${INVITE_TTL_DAYS} Tage):\n\n` +
+            `${inviteUrl}\n\n` +
+            `Wenn du diese E-Mail nicht erwartet hast, ignoriere sie einfach.\n`,
+          html:
+            `<p>${greeting}</p>` +
+            `<p>du wurdest zu <strong>Tesla Carview</strong> eingeladen. ` +
+            `Mit dem folgenden Link kannst du dein Konto erstellen ` +
+            `(gueltig ${INVITE_TTL_DAYS} Tage):</p>` +
+            `<p><a href="${inviteUrl}">${inviteUrl}</a></p>` +
+            `<p style="color:#888;font-size:12px">Wenn du diese E-Mail nicht erwartet hast, ignoriere sie einfach.</p>`,
+        });
+        req.db.prepare('UPDATE user_invites SET email_sent_at = ? WHERE token = ?')
+              .run(Math.floor(Date.now() / 1000), token);
+        emailSent = true;
+      } catch (err) {
+        emailError = err.message;
+      }
+    }
+  }
+
+  auditLog(req.db, req.user.sub, 'user_invite_created', req, {
+    role: req.body.role,
+    display_name: displayName,
+    email,
+    email_sent: emailSent,
+    email_error: emailError,
+  });
   res.status(201).json({
     token,
-    url: `${base}/invite/${token}`,
+    url: inviteUrl,
     role: req.body.role,
+    display_name: displayName,
+    email,
+    email_sent: emailSent,
+    email_error: emailError,
     expiresAt,
     expiresInDays: INVITE_TTL_DAYS,
   });
@@ -41,6 +98,7 @@ router.post('/invite', requireAdmin, validate(z.object({
 router.get('/invite', requireAdmin, (req, res) => {
   const rows = req.db.prepare(
     `SELECT i.id, i.token, i.role, i.expires_at, i.used_at, i.note, i.created_at,
+            i.display_name, i.email, i.email_sent_at,
             (SELECT username FROM users WHERE id = i.created_by_user_id) AS created_by_username,
             (SELECT username FROM users WHERE id = i.used_by_user_id)    AS used_by_username
        FROM user_invites i
