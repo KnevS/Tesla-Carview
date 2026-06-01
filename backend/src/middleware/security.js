@@ -39,20 +39,20 @@ export const securityHeaders = helmet({
   },
 });
 
-/** Strenge Begrenzung fuer Login-Versuche: max. 10 pro 15 Minuten pro IP */
+/** Strenge Begrenzung fuer Login-Versuche: 10 pro 15 Minuten pro IP */
 export const loginRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  limit: 10,
   message: { error: 'Zu viele Anmeldeversuche. Bitte 15 Minuten warten.' },
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: false,
 });
 
-/** Allgemeines API-Rate-Limit: max. 120 Anfragen pro Minute pro IP */
+/** Allgemeines API-Rate-Limit: 120 Anfragen pro Minute pro IP */
 export const apiRateLimit = rateLimit({
   windowMs: 60 * 1000,
-  max: 120,
+  limit: 120,
   message: { error: 'Rate-Limit ueberschritten. Bitte warten.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -64,7 +64,7 @@ export const apiRateLimit = rateLimit({
  *  Eng genug, dass legitime User nicht stoppen (5 in 5 min). */
 export const sensitiveTokenRateLimit = rateLimit({
   windowMs: 5 * 60 * 1000,
-  max: 5,
+  limit: 5,
   message: { error: 'Zu viele Versuche. Bitte 5 Minuten warten.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -75,7 +75,7 @@ export const sensitiveTokenRateLimit = rateLimit({
  *  SETUP_TOKEN-Gate). */
 export const setupRateLimit = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 3,
+  limit: 3,
   message: { error: 'Setup-Endpoint Rate-Limit. Bitte 1 Stunde warten.' },
   standardHeaders: true,
   legacyHeaders: false,
