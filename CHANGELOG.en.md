@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.3] - 2026-06-01
+
+### Fixed
+
+- **Telegram bot unresponsive to commands**: `/status`, `/battery` and `/trips` produced messages with unescaped `.` characters from `toLocaleString('de-DE')` (thousand-separator in odometer), `toFixed()` (decimal point in kWh/km) and `toLocaleDateString('de-DE')` (date separator). MarkdownV2 treats `.` as reserved, Telegram replies with `400 Bad Request: can't parse entities`. The polling loop crashes on the first attempt and stops responding. All three places now escape dynamic values through `esc()`. A global `bot.catch()` additionally absorbs single-handler errors so a bug in one command no longer silences the whole bot.
+
+---
+
 ## [v3.4.2] - 2026-05-30
 
 ### Fixed
