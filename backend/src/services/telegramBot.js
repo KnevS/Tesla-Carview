@@ -236,6 +236,11 @@ function registerCommands(bot) {
       return ctx.reply('❓ Unbekannter Befehl\\. Tippe /help für alle Befehle\\.', { parse_mode: 'MarkdownV2' });
     }
   });
+
+  // Globaler Error-Handler — ein Handler-Fehler darf das Polling nicht killen.
+  bot.catch((err, ctx) => {
+    console.error(`[Telegram] Handler-Fehler (${ctx?.updateType}):`, err.message);
+  });
 }
 
 // ── Hilfsfunktionen ───────────────────────────────────────────────────────────
@@ -262,7 +267,7 @@ async function getStatusText(tenantId, userId) {
       const cache = db.prepare('SELECT * FROM vehicle_state_cache WHERE vehicle_id=?').get(v.id);
       const name  = esc(v.display_name || v.vin?.slice(-6) || 'Tesla');
       const soc   = cache?.battery_level != null ? `${cache.battery_level}%` : '–';
-      const km    = cache?.odometer_km   != null ? `${Math.round(cache.odometer_km).toLocaleString('de-DE')} km` : '–';
+      const km    = cache?.odometer_km   != null ? `${esc(Math.round(cache.odometer_km).toLocaleString('de-DE'))} km` : '–';
       const lock  = cache?.is_user_present ? '🔓 Nutzer anwesend' : '🔒 Geparkt';
       const sentry = cache?.sentry_mode ? ' 🛡️ Wächter aktiv' : '';
       lines.push(`*${name}*\n🔋 ${soc}  📍 ${km}  ${lock}${sentry}`);
@@ -290,7 +295,7 @@ async function getBatteryText(tenantId, userId) {
         'SELECT * FROM charging_sessions ORDER BY start_time DESC LIMIT 1'
       ).get();
       const addedKwh = lastCharge?.charge_energy_added != null
-        ? `\\+${Number(lastCharge.charge_energy_added).toFixed(1)} kWh`
+        ? `\\+${esc(Number(lastCharge.charge_energy_added).toFixed(1))} kWh`
         : '–';
 
       lines.push(`*${name}*\n🔋 Akku: ${soc}\n⚡ Letzte Ladung: ${addedKwh}`);
@@ -312,8 +317,8 @@ async function getTripsText(tenantId, userId) {
 
     const lines = ['🗺️ *Letzte 5 Fahrten*\n'];
     for (const t of trips) {
-      const date = new Date(t.start_time * 1000).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-      const km   = t.distance_km ? `${Number(t.distance_km).toFixed(1)} km` : '– km';
+      const date = esc(new Date(t.start_time * 1000).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }));
+      const km   = t.distance_km ? `${esc(Number(t.distance_km).toFixed(1))} km` : '– km';
       const from = esc(t.start_address?.split(',')[0] || '–');
       const to   = esc(t.end_address?.split(',')[0]   || '–');
       const type = { private: '🏠', business: '💼', commute: '🏢' }[t.trip_type] || '🚗';
