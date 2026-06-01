@@ -7,6 +7,21 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.10] - 2026-06-01
+
+### Neu
+
+- **User-Einladung mit Name + E-Mail-Versand**: Die Admin-Form unter `Benutzer → Einladungslink erstellen` akzeptiert jetzt einen optionalen Anzeigenamen und eine optionale E-Mail-Adresse. Wird die Checkbox „Link per E-Mail senden" aktiviert und SMTP ist im Mandanten konfiguriert (`tenant_settings.smtp.*`), schickt das Backend den Einladungslink direkt per `nodemailer` an die angegebene Adresse — der Admin muss den Link nicht mehr manuell weitergeben. Versendete Einladungen zeigen ein `✉ gesendet`-Badge in der Liste. Bei fehlendem SMTP gibt es eine klare Meldung; der Link bleibt zum manuellen Kopieren stehen.
+- **Akzept-Flow übernimmt E-Mail**: `POST /api/user-invites/:token/accept` setzt die Invite-E-Mail beim Anlegen des Users in `users.email` (sofern vorhanden), sodass der neue Nutzer ohne extra Klick eine kontaktierbare Adresse hat.
+
+### Technisch
+
+- Schema: `user_invites` um `display_name`, `email` und `email_sent_at` erweitert (Migration + frisches CREATE TABLE).
+- `routes/users.js POST /invite` validiert `display_name` (≤80) + `email` (RFC) + `send_email` (boolean) via zod. Audit-Log enthält `email`, `email_sent`, `email_error`.
+- `routes/userInvites.js` (public): `validate` liefert `displayName` + `email`; `accept` reicht `email` an `createUser()` durch.
+
+---
+
 ## [v3.4.9] - 2026-06-01
 
 ### Neu

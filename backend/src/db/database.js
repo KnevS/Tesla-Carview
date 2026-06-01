@@ -656,9 +656,24 @@ function runTenantMigrations(db) {
     expires_at          INTEGER NOT NULL,
     used_at             INTEGER,
     used_by_user_id     INTEGER REFERENCES users(id) ON DELETE SET NULL,
-    note                TEXT
+    note                TEXT,
+    display_name        TEXT,
+    email               TEXT,
+    email_sent_at       INTEGER
   )`);
   db.exec('CREATE INDEX IF NOT EXISTS idx_user_invites_token ON user_invites(token)');
+
+  // Migration: display_name + email + email_sent_at fuer bestehende user_invites
+  const inviteCols = col('user_invites');
+  if (!inviteCols.includes('display_name')) {
+    db.exec('ALTER TABLE user_invites ADD COLUMN display_name TEXT');
+  }
+  if (!inviteCols.includes('email')) {
+    db.exec('ALTER TABLE user_invites ADD COLUMN email TEXT');
+  }
+  if (!inviteCols.includes('email_sent_at')) {
+    db.exec('ALTER TABLE user_invites ADD COLUMN email_sent_at INTEGER');
+  }
 
   // users.expires_at — fuer Demo-Tester, die nach 14 Tagen rueckstandlos
   // geloescht werden. Bleibt fuer Echt-Accounts NULL.
