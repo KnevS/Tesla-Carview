@@ -7,6 +7,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.7] - 2026-06-01
+
+### New
+
+- **Telegram inline buttons under `/status`**: Nine quick actions in the chat instead of typing commands — 🔒 Lock / 🔓 Unlock, ❄️ Climate on / off, 🛡 Sentry on / off, ⚡ Charge start / stop, ⟳ Refresh. Each click fires the matching Tesla command via `apiProxyPost` (same pipeline as the frontend Control view). After each action the status is re-rendered so the effect is immediately visible.
+- **Confirm step for Unlock**: 🔓 Unlock is the only security-critical action — it first asks "⚠️ Really unlock?" with two buttons (✅ Yes / ✖ Cancel). No command is sent to Tesla without confirmation.
+- **Audit log per action**: Every Telegram vehicle action (including failures) is written to `audit_logs` as `telegram_command` with `vehicle_id`, `command`, `body` and `result/error`. Honors the mutations-must-be-audited policy.
+- **`/help` extended**: Pointer to the inline buttons under `/status`.
+
+---
+
 ## [v3.4.6] - 2026-06-01
 
 ### New

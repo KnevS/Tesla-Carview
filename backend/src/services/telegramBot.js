@@ -24,11 +24,21 @@
  *  /firmware      — Aktuelle Software-Version + letztes Update
  *  /help          — Befehlsliste
  *  /unlink        — Verknüpfung aufheben
+ *
+ * Inline-Buttons (unter /status):
+ *  🔒 Lock / 🔓 Unlock  — Tueren ver-/entriegeln (Unlock mit Confirm-Step)
+ *  ❄️ Klima an/aus      — Vorklimatisierung starten/stoppen
+ *  🛡 Sentry an/aus      — Wachmodus aktivieren/deaktivieren
+ *  ⚡ Laden an/aus       — Ladevorgang starten/stoppen
+ *  ⟳ Aktualisieren       — Status neu rendern (kein Tesla-Call)
+ * Jede Aktion wird in audit_logs unter "telegram_command" geloggt.
  */
 
-import { Telegraf } from 'telegraf';
+import { Telegraf, Markup } from 'telegraf';
 import { getMasterDb, getAllTenants, getDb } from '../db/database.js';
 import { getTenantSetting } from './configService.js';
+import { apiProxyPost } from './teslaApi.js';
+import { auditLog } from './auditService.js';
 
 let bot = null;
 let webhookMiddleware = null;
@@ -183,12 +193,27 @@ function registerCommands(bot) {
     );
   });
 
-  // /status — Fahrzeugstatus
+  // /status — Fahrzeugstatus mit Inline-Buttons fuer Schnell-Aktionen
   bot.command('status', async ctx => {
     const link = await getLinkForChat(ctx);
     if (!link) return;
     const statusText = await getStatusText(link.tenant_id, link.user_id);
-    return ctx.reply(statusText, { parse_mode: 'MarkdownV2' });
+    const keyboard   = buildStatusKeyboard(link.tenant_id);
+    return ctx.reply(statusText, {
+      parse_mode: 'MarkdownV2',
+      ...(keyboard ? { reply_markup: keyboard.reply_markup } : {}),
+    });
+  });
+
+  // Callback fuer Inline-Buttons: cmd:<vehicle_id>:<action>[:<confirm>]
+  bot.action(/^cmd:(\d+):([a-z_]+)(?::(confirm))?$/, async ctx => {
+    const vehicleId = Number(ctx.match[1]);
+    const action    = ctx.match[2];
+    const confirmed = ctx.match[3] === 'confirm';
+    const link = await getLinkForChat(ctx);
+    if (!link) { await ctx.answerCbQuery('Nicht verknüpft'); return; }
+
+    await handleVehicleAction(ctx, link, vehicleId, action, confirmed);
   });
 
   // /battery — Akkudetails
@@ -274,6 +299,7 @@ function registerCommands(bot) {
       '/firmware — Software\\-Version\n' +
       '/unlink — Bot\\-Verknüpfung aufheben\n' +
       '/help — Diese Hilfe\n\n' +
+      '💡 _Unter /status erscheinen Inline\\-Buttons fuer Lock, Klima, Sentry, Laden_\n' +
       '_Einstellungen findest du in Carview → Einstellungen → Benachrichtigungen_',
       { parse_mode: 'MarkdownV2' }
     );
@@ -579,6 +605,151 @@ function _relTime(ts) {
   if (diffS < 30 * 86400) return `vor ${Math.floor(diffS / 86400)} Tag${Math.floor(diffS / 86400) === 1 ? '' : 'en'}`;
   if (diffS < 365 * 86400) return `vor ${Math.floor(diffS / (30 * 86400))} Monaten`;
   return `vor ${Math.floor(diffS / (365 * 86400))} Jahren`;
+}
+
+// ── Inline-Buttons + Vehicle-Actions ────────────────────────────────────────
+
+/**
+ * Mapping von Callback-Action zu Tesla-Command. Body wird je nach Toggle-Wert
+ * dynamisch zusammengesetzt (siehe handleVehicleAction).
+ */
+const ACTION_MAP = {
+  lock:         { tesla: 'door_lock',                emoji: '🔒', label: 'Verriegelt'   },
+  unlock:       { tesla: 'door_unlock',              emoji: '🔓', label: 'Entriegelt', confirm: true },
+  climate_on:   { tesla: 'auto_conditioning_start',  emoji: '❄️', label: 'Klima an'    },
+  climate_off:  { tesla: 'auto_conditioning_stop',   emoji: '⏹', label: 'Klima aus'   },
+  sentry_on:    { tesla: 'set_sentry_mode', body: { on: true },  emoji: '🛡', label: 'Wachmodus an'  },
+  sentry_off:   { tesla: 'set_sentry_mode', body: { on: false }, emoji: '⏸', label: 'Wachmodus aus' },
+  charge_start: { tesla: 'charge_start',             emoji: '⚡', label: 'Laden gestartet' },
+  charge_stop:  { tesla: 'charge_stop',              emoji: '⏹', label: 'Laden gestoppt' },
+};
+
+/**
+ * Baut das Inline-Keyboard fuer /status. Liefert null, wenn keine Fahrzeuge
+ * existieren. Aktuell ein einziger Button-Block pro erstem Fahrzeug (LIMIT 1):
+ * sobald wir hier multi-vehicle unterstuetzen, kommt eine Auswahl-Reihe dazu.
+ */
+function buildStatusKeyboard(tenantId) {
+  try {
+    const db = getDb(tenantId);
+    const v  = db.prepare('SELECT id FROM vehicles ORDER BY id LIMIT 1').get();
+    if (!v) return null;
+    const id = v.id;
+    return Markup.inlineKeyboard([
+      [
+        Markup.button.callback('🔒 Lock',    `cmd:${id}:lock`),
+        Markup.button.callback('🔓 Unlock',  `cmd:${id}:unlock`),
+      ],
+      [
+        Markup.button.callback('❄️ Klima an', `cmd:${id}:climate_on`),
+        Markup.button.callback('⏹ Klima aus', `cmd:${id}:climate_off`),
+      ],
+      [
+        Markup.button.callback('🛡 Sentry an', `cmd:${id}:sentry_on`),
+        Markup.button.callback('⏸ Sentry aus', `cmd:${id}:sentry_off`),
+      ],
+      [
+        Markup.button.callback('⚡ Laden start', `cmd:${id}:charge_start`),
+        Markup.button.callback('⏹ Laden stop',  `cmd:${id}:charge_stop`),
+      ],
+      [
+        Markup.button.callback('⟳ Aktualisieren', `cmd:${id}:refresh`),
+      ],
+    ]);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fuehrt eine Vehicle-Action aus, loggt in audit_logs und beantwortet den
+ * Callback. Bei "unlock" wird ein Confirm-Schritt eingefuegt.
+ */
+async function handleVehicleAction(ctx, link, vehicleId, action, confirmed) {
+  // /refresh: Status neu rendern, kein Tesla-Call
+  if (action === 'refresh') {
+    try {
+      const text = await getStatusText(link.tenant_id, link.user_id);
+      const kb   = buildStatusKeyboard(link.tenant_id);
+      await ctx.editMessageText(text, {
+        parse_mode: 'MarkdownV2',
+        ...(kb ? { reply_markup: kb.reply_markup } : {}),
+      });
+      await ctx.answerCbQuery('Aktualisiert');
+    } catch (e) {
+      await ctx.answerCbQuery(`Fehler: ${e.message?.slice(0, 100) || 'unbekannt'}`);
+    }
+    return;
+  }
+
+  const spec = ACTION_MAP[action];
+  if (!spec) { await ctx.answerCbQuery('Unbekannte Aktion'); return; }
+
+  // Confirm-Step fuer riskante Aktionen (unlock)
+  if (spec.confirm && !confirmed) {
+    await ctx.answerCbQuery();
+    await ctx.reply(
+      `⚠️ *${spec.emoji} Wirklich ${esc(spec.label.toLowerCase())}?*\n` +
+      `Diese Aktion wird im Audit\\-Log protokolliert\\.`,
+      {
+        parse_mode: 'MarkdownV2',
+        reply_markup: Markup.inlineKeyboard([
+          [
+            Markup.button.callback(`✅ Ja, ${spec.label.toLowerCase()}`, `cmd:${vehicleId}:${action}:confirm`),
+            Markup.button.callback('✖ Abbrechen', `cmd:${vehicleId}:refresh`),
+          ],
+        ]).reply_markup,
+      }
+    );
+    return;
+  }
+
+  // Tesla-Command ausfuehren
+  const db = getDb(link.tenant_id);
+  const v  = db.prepare('SELECT * FROM vehicles WHERE id=?').get(vehicleId);
+  if (!v) { await ctx.answerCbQuery('Fahrzeug nicht gefunden'); return; }
+  if (!v.vin) { await ctx.answerCbQuery('Keine VIN hinterlegt'); return; }
+
+  await ctx.answerCbQuery(`${spec.emoji} ${spec.label} …`);
+  let okText, errText;
+  try {
+    await apiProxyPost(db, `/api/1/vehicles/${v.vin}/command/${spec.tesla}`, spec.body ?? {});
+    okText = `${spec.emoji} ${spec.label}`;
+    auditLog(db, link.user_id, 'telegram_command', null, {
+      vehicle_id: vehicleId,
+      command: spec.tesla,
+      body: spec.body ?? null,
+      result: 'ok',
+    });
+  } catch (e) {
+    const status = e.response?.status;
+    const apiErr = e.response?.data?.error || e.response?.data || e.message;
+    if (status === 408 || /offline|asleep/i.test(String(apiErr))) {
+      errText = 'Fahrzeug schläft oder ist offline';
+    } else {
+      errText = String(apiErr).slice(0, 150);
+    }
+    auditLog(db, link.user_id, 'telegram_command', null, {
+      vehicle_id: vehicleId,
+      command: spec.tesla,
+      body: spec.body ?? null,
+      result: 'error',
+      error: errText,
+    });
+  }
+
+  // Status neu rendern, damit der Nutzer sofort sieht ob's gewirkt hat
+  try {
+    const statusText = await getStatusText(link.tenant_id, link.user_id);
+    const kb         = buildStatusKeyboard(link.tenant_id);
+    const suffix     = errText
+      ? `\n\n❌ ${esc(errText)}`
+      : `\n\n✅ ${esc(okText)}`;
+    await ctx.reply(statusText + suffix, {
+      parse_mode: 'MarkdownV2',
+      ...(kb ? { reply_markup: kb.reply_markup } : {}),
+    });
+  } catch { /* Reply darf nicht crashen */ }
 }
 
 /** Escaped Text für Telegram MarkdownV2. */
