@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.9] - 2026-06-01
+
+### New
+
+- **Telegram `/classify` — classify a trip directly in the chat**: New bot command shows the latest completed trip with date, distance and current label. Inline buttons 🏠 Private / 💼 Business / 🏢 Commute set `trips.trip_type` instantly and suggest the next-older trip, so several trips can be classified in a row. Tax-locked trips (`locked_at IS NOT NULL`) are skipped. Every change is recorded as `telegram_classify_trip` in `audit_logs` with `trip_id`, old and new label. Added to the `/help` menu.
+
+---
+
 ## [v3.4.8] - 2026-06-01
 
 ### New

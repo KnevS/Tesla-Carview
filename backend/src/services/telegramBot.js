@@ -22,6 +22,7 @@
  *  /today         — Tagesbilanz (km, kWh, Kosten, Anzahl Fahrten)
  *  /service       — Naechste faellige Wartung
  *  /firmware      — Aktuelle Software-Version + letztes Update
+ *  /classify      — Letzte Fahrt im Chat als privat/geschaeftlich/pendel markieren
  *  /help          — Befehlsliste
  *  /unlink        — Verknüpfung aufheben
  *
@@ -232,6 +233,29 @@ function registerCommands(bot) {
     return ctx.reply(text, { parse_mode: 'MarkdownV2' });
   });
 
+  // /classify — letzte Fahrt als privat/geschaeftlich/pendel markieren
+  bot.command('classify', async ctx => {
+    const link = await getLinkForChat(ctx);
+    if (!link) return;
+    const result = await getClassifyView(link.tenant_id);
+    if (!result.trip) {
+      return ctx.reply(result.text, { parse_mode: 'MarkdownV2' });
+    }
+    return ctx.reply(result.text, {
+      parse_mode: 'MarkdownV2',
+      reply_markup: buildClassifyKeyboard(result.trip.id).reply_markup,
+    });
+  });
+
+  // Callback fuer Trip-Klassifikation: trip:<trip_id>:<type|next>
+  bot.action(/^trip:(\d+):(private|business|commute|next)$/, async ctx => {
+    const tripId = Number(ctx.match[1]);
+    const newType = ctx.match[2];
+    const link = await getLinkForChat(ctx);
+    if (!link) { await ctx.answerCbQuery('Nicht verknüpft'); return; }
+    await handleClassifyAction(ctx, link, tripId, newType);
+  });
+
   // /location — Aktueller Standort
   bot.command('location', async ctx => {
     const link = await getLinkForChat(ctx);
@@ -295,6 +319,7 @@ function registerCommands(bot) {
       '/location — Aktueller Standort \\(Maps\\-Link\\)\n' +
       '/today — Tagesbilanz \\(km, kWh, Kosten\\)\n' +
       '/trips — Letzte 5 Fahrten\n' +
+      '/classify — Letzte Fahrt klassifizieren \\(privat / geschäftlich / pendel\\)\n' +
       '/service — Naechste faellige Wartung\n' +
       '/firmware — Software\\-Version\n' +
       '/unlink — Bot\\-Verknüpfung aufheben\n' +
@@ -750,6 +775,137 @@ async function handleVehicleAction(ctx, link, vehicleId, action, confirmed) {
       ...(kb ? { reply_markup: kb.reply_markup } : {}),
     });
   } catch { /* Reply darf nicht crashen */ }
+}
+
+// ── Trip Classification ─────────────────────────────────────────────────────
+
+const TRIP_TYPE_LABELS = {
+  private:  { emoji: '🏠', label: 'privat' },
+  business: { emoji: '💼', label: 'geschäftlich' },
+  commute:  { emoji: '🏢', label: 'pendel' },
+};
+
+/**
+ * Holt den naechsten zu klassifizierenden Trip + rendert ihn als Markdown.
+ * Reihenfolge: Trips ohne explizit gesetzten purpose und mit trip_type='private'
+ * (default) zuerst — danach alle vom neusten Ende absteigend.
+ */
+function getClassifyView(tenantId, skipTripId = null) {
+  try {
+    const db = getDb(tenantId);
+    let trip;
+    if (skipTripId) {
+      trip = db.prepare(
+        `SELECT * FROM trips
+         WHERE end_time IS NOT NULL AND id < ?
+           AND (locked_at IS NULL)
+         ORDER BY id DESC LIMIT 1`
+      ).get(skipTripId);
+    } else {
+      trip = db.prepare(
+        `SELECT * FROM trips
+         WHERE end_time IS NOT NULL
+           AND (locked_at IS NULL)
+         ORDER BY id DESC LIMIT 1`
+      ).get();
+    }
+    if (!trip) {
+      return { trip: null, text: 'ℹ️ Keine weitere klassifizierbare Fahrt gefunden\\.' };
+    }
+    return { trip, text: renderTripForClassify(trip) };
+  } catch (err) {
+    return { trip: null, text: `❌ Fehler: ${esc(err.message)}` };
+  }
+}
+
+function renderTripForClassify(trip) {
+  const date = esc(new Date(trip.start_time * 1000).toLocaleString('de-DE', {
+    day: '2-digit', month: '2-digit', year: '2-digit',
+    hour: '2-digit', minute: '2-digit',
+  }));
+  const km   = trip.distance_km ? `${esc(Number(trip.distance_km).toFixed(1))} km` : '– km';
+  const from = esc(trip.start_address?.split(',')[0] || '–');
+  const to   = esc(trip.end_address?.split(',')[0]   || '–');
+  const cur  = TRIP_TYPE_LABELS[trip.trip_type] || TRIP_TYPE_LABELS.private;
+  const purposeLine = trip.purpose ? `\n_Anmerkung:_ ${esc(trip.purpose)}` : '';
+  return (
+    `🏷 *Fahrt klassifizieren*\n\n` +
+    `📅 ${date}\n` +
+    `🛣 ${from} → ${to}\n` +
+    `📏 ${km}\n` +
+    `Aktuell: ${cur.emoji} ${esc(cur.label)}${purposeLine}`
+  );
+}
+
+function buildClassifyKeyboard(tripId) {
+  return Markup.inlineKeyboard([
+    [
+      Markup.button.callback('🏠 Privat',        `trip:${tripId}:private`),
+      Markup.button.callback('💼 Geschäftlich',  `trip:${tripId}:business`),
+      Markup.button.callback('🏢 Pendel',        `trip:${tripId}:commute`),
+    ],
+    [
+      Markup.button.callback('⏮ Nächste älter', `trip:${tripId}:next`),
+    ],
+  ]);
+}
+
+async function handleClassifyAction(ctx, link, tripId, newType) {
+  const db = getDb(link.tenant_id);
+
+  // "next" zeigt die naechst-aeltere Fahrt
+  if (newType === 'next') {
+    const view = getClassifyView(link.tenant_id, tripId);
+    await ctx.answerCbQuery();
+    if (!view.trip) {
+      await ctx.editMessageText(view.text, { parse_mode: 'MarkdownV2' });
+      return;
+    }
+    await ctx.editMessageText(view.text, {
+      parse_mode: 'MarkdownV2',
+      reply_markup: buildClassifyKeyboard(view.trip.id).reply_markup,
+    });
+    return;
+  }
+
+  // trip_type setzen
+  const trip = db.prepare('SELECT * FROM trips WHERE id=?').get(tripId);
+  if (!trip) { await ctx.answerCbQuery('Fahrt nicht gefunden'); return; }
+  if (trip.locked_at) {
+    await ctx.answerCbQuery('Fahrt ist Finanzamt-gesperrt');
+    return;
+  }
+
+  try {
+    db.prepare('UPDATE trips SET trip_type=? WHERE id=?').run(newType, tripId);
+    auditLog(db, link.user_id, 'telegram_classify_trip', null, {
+      trip_id: tripId,
+      from: trip.trip_type,
+      to:   newType,
+    });
+    const spec = TRIP_TYPE_LABELS[newType];
+    await ctx.answerCbQuery(`${spec.emoji} ${spec.label}`);
+
+    // Naechste aeltere Fahrt vorschlagen, damit User in Folge klassifizieren kann
+    const next = getClassifyView(link.tenant_id, tripId);
+    if (!next.trip) {
+      await ctx.editMessageText(
+        renderTripForClassify({ ...trip, trip_type: newType }) +
+        `\n\n✅ Markiert als ${spec.emoji} ${esc(spec.label)}\n_Keine weitere Fahrt vorhanden\\._`,
+        { parse_mode: 'MarkdownV2' }
+      );
+      return;
+    }
+    await ctx.editMessageText(
+      next.text + `\n\n_Vorherige als ${spec.emoji} ${esc(spec.label)} markiert\\._`,
+      {
+        parse_mode: 'MarkdownV2',
+        reply_markup: buildClassifyKeyboard(next.trip.id).reply_markup,
+      }
+    );
+  } catch (err) {
+    await ctx.answerCbQuery(`Fehler: ${err.message?.slice(0, 80) || 'unbekannt'}`);
+  }
 }
 
 /** Escaped Text für Telegram MarkdownV2. */
