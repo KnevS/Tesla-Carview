@@ -10,7 +10,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1053.0",
+    "@aws-sdk/client-s3": "^3.1057.0",
     "@simplewebauthn/server": "^10.0.0",
     "argon2": "^0.44.0",
     "axios": "^1.7.2",
@@ -25,9 +25,9 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.1.1",
-    "nodemailer": "^8.0.8",
+    "nodemailer": "^8.0.10",
     "otpauth": "^9.3.3",
-    "protobufjs": "^8.4.2",
+    "protobufjs": "^8.5.0",
     "qrcode": "^1.5.3",
     "ssh2-sftp-client": "^12.1.1",
     "telegraf": "^4.16.3",
@@ -36,7 +36,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "eslint": "^10.4.0",
+    "eslint": "^10.4.1",
     "globals": "^17.6.0",
     "nodemon": "^3.1.4"
   },
