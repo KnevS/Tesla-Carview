@@ -259,8 +259,8 @@ async function getLinkForChat(ctx) {
 async function getStatusText(tenantId, userId) {
   try {
     const db = getDb(tenantId);
-    const vehicles = db.prepare('SELECT * FROM vehicles WHERE is_active=1 LIMIT 3').all();
-    if (!vehicles.length) return 'ℹ️ Kein aktives Fahrzeug gefunden\\.';
+    const vehicles = db.prepare('SELECT * FROM vehicles ORDER BY id LIMIT 3').all();
+    if (!vehicles.length) return 'ℹ️ Kein Fahrzeug gefunden\\.';
 
     const lines = ['🚗 *Fahrzeugstatus*\n'];
     for (const v of vehicles) {
@@ -281,8 +281,8 @@ async function getStatusText(tenantId, userId) {
 async function getBatteryText(tenantId, userId) {
   try {
     const db = getDb(tenantId);
-    const vehicles = db.prepare('SELECT * FROM vehicles WHERE is_active=1 LIMIT 3').all();
-    if (!vehicles.length) return 'ℹ️ Kein aktives Fahrzeug\\.';
+    const vehicles = db.prepare('SELECT * FROM vehicles ORDER BY id LIMIT 3').all();
+    if (!vehicles.length) return 'ℹ️ Kein Fahrzeug\\.';
 
     const lines = ['🔋 *Akkustand*\n'];
     for (const v of vehicles) {

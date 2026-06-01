@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.4] - 2026-06-01
+
+### Fixed
+
+- **Telegram commands fail with `no such column: is_active`**: `/status` and `/battery` read vehicles via `SELECT * FROM vehicles WHERE is_active=1 LIMIT 3`, but the `vehicles` table has no `is_active` column (the flag only exists on `users`). The bot replied with `❌ Error: no such column: is_active`. Both queries now use `ORDER BY id LIMIT 3`. The `bot.catch()` from v3.4.3 still prevents a single command from silencing the whole bot — but the `is_active` error was user-visible per command.
+
+---
+
 ## [v3.4.3] - 2026-06-01
 
 ### Fixed
