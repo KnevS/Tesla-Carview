@@ -47,11 +47,13 @@ services:
     image: ghcr.io/knevs/tesla-carview/frontend:main
     container_name: tesla-carview-frontend
     restart: unless-stopped
-    volumes:
-      # Kein privates Frontend-Bundle mehr fuer die Hauptinstanz (Demo entfernt 2026-05-26).
-      # Das oeffentliche Bundle aus dem GHCR-Image wird verwendet (Stub-Demo.vue).
-      # Das vollstaendige Demo-Bundle liegt nur in der Demo-Instanz (/opt/tesla-carview-demo).
-      - ./frontend-dist-private:/usr/share/nginx/html:ro
+    # Das Frontend-Bundle kommt direkt aus dem GHCR-Image (Stub-Demo.vue).
+    # KEIN Volume-Mount auf /usr/share/nginx/html: das Verzeichnis
+    # frontend-dist-private/ ist gitignored und existiert bei Frisch-
+    # Installationen nicht → der Bind-Mount legte ein LEERES Verzeichnis an,
+    # ueberdeckte das Image-Bundle und nginx lieferte 403 Forbidden (#84).
+    # Server-spezifische Overrides (z.B. das private Demo-Bundle der separaten
+    # Demo-Instanz) gehoeren in die gitignorete docker-compose.override.yml.
     networks:
       - tesla-net
     depends_on:

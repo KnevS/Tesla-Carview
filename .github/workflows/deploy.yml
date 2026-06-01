@@ -79,43 +79,12 @@ jobs:
                 backend/src/services/demoLifecycle.js \
                 frontend/src/views/Demo.vue
             fi
-            # Frontend nur neu bauen wenn sich frontend/ oder das private Overlay geändert hat.
-            CURRENT_HASH=$(sudo git -C "$APP_DIR" log -1 --format='%H' -- frontend/ 2>/dev/null || echo unknown)
-            BUILD_HASH=$(cat "$APP_DIR/frontend-dist-private/.build-hash" 2>/dev/null || echo "")
-            if [ "$CURRENT_HASH" != "$BUILD_HASH" ] || [ ! -f "$APP_DIR/frontend-dist-private/index.html" ]; then
-              echo "==> Frontend-Bundle bauen (Hash: ${CURRENT_HASH:0:7}) …"
-              GIT_HASH=$(sudo git -C "$APP_DIR" rev-parse --short HEAD 2>/dev/null || echo unknown)
-              cd "$APP_DIR/frontend"
-              # node_modules cachen: npm ci nur wenn package-lock.json sich geändert hat.
-              PKGHASH=$(md5sum package-lock.json 2>/dev/null | cut -d' ' -f1 || echo "")
-              CACHED_PKGHASH=$(cat node_modules/.lock-hash 2>/dev/null || echo "x")
-              if [ "$PKGHASH" != "$CACHED_PKGHASH" ]; then
-                echo "  → npm ci (Abhängigkeiten geändert) …"
-                npm ci --prefer-offline 2>&1 | tail -3
-                echo "$PKGHASH" > node_modules/.lock-hash
-              else
-                echo "  → node_modules aktuell, überspringe npm ci."
-              fi
-              echo "  → Vite build …"
-              GIT_HASH="$GIT_HASH" npm run build 2>&1 | tail -5
-              # Bundle in frontend-dist-private/ kopieren (alpine via Docker wegen sudo-Rechten)
-              sudo docker run --rm \
-                -v "$APP_DIR/frontend/dist:/src:ro" \
-                -v "$APP_DIR/frontend-dist-private:/dist" \
-                alpine sh -c 'rm -rf /dist/* /dist/.[!.]* && cp -r /src/. /dist/'
-              cd "$APP_DIR"
-              # Build-Hash speichern damit nächster Deploy den Rebuild überspringen kann
-              echo "$CURRENT_HASH" | sudo docker run --rm -i \
-                -v "$APP_DIR/frontend-dist-private:/dist" \
-                alpine sh -c 'cat > /dist/.build-hash'
-              sudo docker exec tesla-carview-frontend nginx -s reload 2>/dev/null || true
-              echo "==> Frontend-Bundle bereit."
-            else
-              echo "==> Frontend-Bundle aktuell (Hash: ${CURRENT_HASH:0:7}) — kein Rebuild nötig."
-            fi
-            # Backend-Image aus GHCR ziehen — nur wenn sich der Digest geändert hat.
-            # Das Frontend-Image wird durch frontend-dist-private Volume überschrieben (kein Pull nötig).
+            # Backend- und Frontend-Bundle kommen direkt aus den GHCR-Images.
+            # Frueher wurde das Frontend hier server-seitig gebaut und per
+            # frontend-dist-private/-Volume eingehaengt — dieser Mount ist
+            # entfernt (s. #84), das Image-Bundle wird direkt serviert.
             echo "$GHCR_TOKEN" | sudo docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
+            # Backend nur ziehen wenn sich der Digest geaendert hat.
             BACKEND_IMAGE="ghcr.io/knevs/tesla-carview/backend:main"
             REMOTE_DIGEST=$(sudo docker manifest inspect "$BACKEND_IMAGE" 2>/dev/null \
               | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('config',{}).get('digest',''))" 2>/dev/null || echo "")
@@ -126,6 +95,9 @@ jobs:
             else
               echo "==> Backend-Image unverändert (${LOCAL_DIGEST:7:7}) — kein Pull nötig."
             fi
+            # Frontend-Image immer ziehen (klein; enthaelt das fertige Bundle).
+            echo "==> Frontend-Image ziehen …"
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml pull --quiet frontend
             sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d backend frontend
             sudo docker logout ghcr.io
             # Sicherstellen dass nginx in beiden erforderlichen Netzwerken läuft.
