@@ -7,6 +7,78 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.10] - 2026-06-01
+
+### New
+
+- **User invite with name + e-mail delivery**: The admin form under `Users → Create invite link` now accepts an optional display name and an optional e-mail address. Tick the “Send link by e-mail" checkbox and — if SMTP is configured for the tenant (`tenant_settings.smtp.*`) — the backend sends the invite link directly via `nodemailer`. Sent invites show a `✉ sent` badge in the list. Missing SMTP yields a clear warning; the link still stays visible for manual copy.
+- **Accept flow inherits e-mail**: `POST /api/user-invites/:token/accept` passes the invite's e-mail to `createUser()` so the new user already has a contact address without extra clicks.
+
+### Technical
+
+- Schema: `user_invites` extended with `display_name`, `email`, `email_sent_at` (migration + fresh CREATE TABLE).
+- `routes/users.js POST /invite` validates `display_name` (≤80), `email` (RFC) and `send_email` (boolean) via zod. Audit log includes `email`, `email_sent`, `email_error`.
+- `routes/userInvites.js` (public): `validate` returns `displayName` + `email`; `accept` forwards `email` to `createUser()`.
+
+---
+
+## [v3.4.9] - 2026-06-01
+
+### New
+
+- **Telegram `/classify` — classify a trip directly in the chat**: New bot command shows the latest completed trip with date, distance and current label. Inline buttons 🏠 Private / 💼 Business / 🏢 Commute set `trips.trip_type` instantly and suggest the next-older trip, so several trips can be classified in a row. Tax-locked trips (`locked_at IS NOT NULL`) are skipped. Every change is recorded as `telegram_classify_trip` in `audit_logs` with `trip_id`, old and new label. Added to the `/help` menu.
+
+---
+
+## [v3.4.8] - 2026-06-01
+
+### New
+
+- **Telegram push for proactive events**: Charging-complete, service reminders, notification rules (SOC alerts, geofence events) and new software versions now also reach the Telegram bot, in addition to Web Push. Both channels are dispatched through `notifyService.notifyAllInTenant()` — users without Telegram only see Web Push, users with both get both. Sentry alerts already ran through this pipeline (since v3.3.3), but it was the only trigger.
+- **Software update detection with push**: On first sync after a firmware upgrade, the data sync detects the new `car_version` and sends a notification. The very first vehicle tracking is suppressed (otherwise every existing version would generate a reminder).
+
+### Refactored
+
+- **Notification pipeline consolidated**: The old `services/notifications.js` (Web-Push-only, vehicle-based via `push_subscriptions`) was removed. `dataSync.js` and `serviceReminders.js` now uniformly use `notifyService.notifyAllInTenant()`. Benefit: every mutation that historically only triggered Web Push automatically covers all configured channels. Audit-consistency for the multi-channel strategy.
+
+---
+
+## [v3.4.7] - 2026-06-01
+
+### New
+
+- **Telegram inline buttons under `/status`**: Nine quick actions in the chat instead of typing commands — 🔒 Lock / 🔓 Unlock, ❄️ Climate on / off, 🛡 Sentry on / off, ⚡ Charge start / stop, ⟳ Refresh. Each click fires the matching Tesla command via `apiProxyPost` (same pipeline as the frontend Control view). After each action the status is re-rendered so the effect is immediately visible.
+- **Confirm step for Unlock**: 🔓 Unlock is the only security-critical action — it first asks "⚠️ Really unlock?" with two buttons (✅ Yes / ✖ Cancel). No command is sent to Tesla without confirmation.
+- **Audit log per action**: Every Telegram vehicle action (including failures) is written to `audit_logs` as `telegram_command` with `vehicle_id`, `command`, `body` and `result/error`. Honors the mutations-must-be-audited policy.
+- **`/help` extended**: Pointer to the inline buttons under `/status`.
+
+---
+
+## [v3.4.6] - 2026-06-01
+
+### New
+
+- **Telegram info commands**: Five new read-only bot commands — `/location` (current position with Google Maps link from the latest telemetry point), `/range` (remaining range + SOC + timestamp from `battery_snapshots`), `/today` (today's stats: trip count, km, charge count, kWh, cost — day boundary in Europe/Berlin), `/service` (next due maintenance intervals, with overdue flag), `/firmware` (current software version + previous from `firmware_versions`). All commands use the MarkdownV2-escape pattern from v3.4.3.
+- **Help text expanded**: `/help` now lists all nine commands including the new ones.
+
+### Fixed
+
+- **`/battery` showed "Last charge: –"**: The column in `charging_sessions` is `energy_added_kwh`, not `charge_energy_added`. Silent bug (no crash, just empty value). Now uses the correct column; `/today` also reads it correctly.
+
+---
+
+## [v3.4.5] - 2026-06-01
+
+### Fixed
+
+- **OFFLINE display after auto-deploy**: Each backend restart killed the persistent Tesla→backend FleetTelemetry WebSocket. The Tesla only rebuilds the connection on the next state event (drive, wake, charging). Until then the poller still considered `vehicle.telemetry_last_signal_at` fresh and skipped the polling fallback — the vehicle card showed "OFFLINE · no signal", drive and sleep monitor data aged unnoticed. On boot, `telemetry_last_signal_at` is now reset to `NULL`; the polling loop takes over immediately until the stream is re-established.
+
+### New
+
+- **Refresh button in EditorialStatusBar**: Emergency override for the OFFLINE state. When the user clicks "⟳ Refresh" a one-off `vehicle_data` force-poll is triggered (uses 1 of today's poll budget). The response carries the remaining cap; the frontend shows "Refreshed ({day}/{dayMax} today)" or, if exhausted, "Daily cap reached — paused until tomorrow". Backend: new endpoint `POST /api/commands/:vehicleId/refresh`, internally via new `forcePollVehicle()` export from `poller.js`.
+
+---
+
 ## [v3.4.4] - 2026-06-01
 
 ### Fixed
