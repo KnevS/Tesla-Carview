@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.4] - 2026-06-01
+
+### Behoben
+
+- **Telegram-Befehle scheitern mit `no such column: is_active`**: `/status` und `/battery` lasen Fahrzeuge mit `SELECT * FROM vehicles WHERE is_active=1 LIMIT 3`, doch die `vehicles`-Tabelle hat keine `is_active`-Spalte (das Flag existiert nur auf `users`). Der Bot antwortete mit `❌ Fehler: no such column: is_active`. Beide Stellen verwenden jetzt `ORDER BY id LIMIT 3`. Das `bot.catch()` aus v3.4.3 verhindert weiterhin, dass ein einzelner Befehl den gesamten Bot lahmlegt — der `is_active`-Fehler war aber nutzersichtbar pro Befehl.
+
+---
+
 ## [v3.4.3] - 2026-06-01
 
 ### Behoben
