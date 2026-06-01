@@ -15,7 +15,7 @@
 // (s. unten) loest das normalerweise — aber wenn ein User noch eine alte
 // SW-Version installiert hat, sorgt der Bump dafuer dass das alte Set
 // von Chunk-Referenzen sicher invalidiert wird.
-const CACHE = 'tcv-v3';
+const CACHE = 'tcv-v4';
 // Icons und Manifest sind selten geaendert + hash-los; safe vorzucachen.
 // index.html ('/') BEWUSST NICHT mehr im SHELL — die wird ueber den
 // network-first-Pfad unten frisch geholt, sonst zeigt das SW bei jedem
@@ -88,34 +88,116 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Web-Push — vom Backend (sendChargingCompleteNotification + Wartungs-
-// Reminder). Klick oeffnet die App auf dem im Payload uebergebenen Pfad.
+// ─── Web-Push ───────────────────────────────────────────────────────────────
+//
+// Vom Backend kommen jetzt angereicherte Payloads pro Event-Typ. Felder:
+//   title, body, icon, url            — Basis (kompatibel zur alten Variante)
+//   badge                             — kleines monochromes Icon (Lockscreen,
+//                                        Apple-Watch-Notification-Glyph)
+//   tag                               — gleiche Tag-IDs ersetzen vorherige
+//                                        Notification statt zu duplizieren
+//   actions: [{ action, title, icon }] — Buttons in der Notification (Android,
+//                                        Windows; iOS unterstützt 1-2 Actions
+//                                        in macOS-Notifications der PWA)
+//   vibrate: [ms, ms, …]              — Vibrationsmuster (Android)
+//   requireInteraction: bool          — Notification nicht automatisch
+//                                        verschwinden lassen (kritische
+//                                        Alarme: Sentry, Battery-Low)
+//   renotify: bool                    — Vibration/Sound erneut auslösen,
+//                                        auch wenn Tag schon existiert
+//   silent: bool                      — leise zustellen (Telegram-Spiegel,
+//                                        keine Lockscreen-Störung)
+//   image                             — großes Bild (Charging-Statusbild,
+//                                        Sentry-Snapshot später)
+//   timestamp                         — Sortierung im Notification-Center
+//   data.actions[] — Map<action,url>  — Klick-Ziel pro Action-Button
+//
+// Alles Optionale wird beim Fehlen sauber durch sinnvolle Defaults ersetzt.
 self.addEventListener('push', event => {
-  const data = event.data?.json() ?? {};
+  const data = (() => { try { return event.data?.json() ?? {}; } catch { return {}; } })();
+
+  const opts = {
+    body:  data.body || '',
+    icon:  data.icon  || '/icon-192.png',
+    badge: data.badge || '/badge.svg',
+    data:  {
+      url:     data.url || '/',
+      actions: data.actionUrls || {},   // server-side gepflegte action→url-Map
+      tag:     data.tag || null,
+      ts:      data.timestamp || Date.now(),
+    },
+  };
+  if (data.tag)                opts.tag                = data.tag;
+  if (Array.isArray(data.actions))  opts.actions       = data.actions.slice(0, 2);
+  if (Array.isArray(data.vibrate))  opts.vibrate       = data.vibrate;
+  if (data.requireInteraction) opts.requireInteraction = true;
+  if (data.renotify)           opts.renotify           = true;
+  if (data.silent)             opts.silent             = true;
+  if (data.image)              opts.image              = data.image;
+  if (data.timestamp)          opts.timestamp          = data.timestamp;
+
   event.waitUntil(
-    self.registration.showNotification(data.title || 'Tesla Carview', {
-      body:  data.body || '',
-      icon:  data.icon || '/icon-192.png',
-      badge: '/icon-192.png',
-      data:  { url: data.url || '/' },
-    })
+    self.registration.showNotification(data.title || 'Tesla Carview', opts)
   );
 });
 
+// Reagiert sowohl auf den allgemeinen Notification-Click (Body) als auch
+// auf Klicks auf Action-Buttons. Special-cases:
+//   • action === 'dismiss'  → nur schließen (keine Navigation)
+//   • action === 'snooze'   → in 1h erneut zeigen (lokal, ohne Backend)
+//   • action === 'snooze1d' → in 24h erneut zeigen
+//   • sonst Mapping über data.actions[action] → URL
 self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  const target = event.notification.data?.url || '/';
-  event.waitUntil(
-    (async () => {
-      const cs = await clients.matchAll({ type: 'window', includeUncontrolled: true });
-      for (const c of cs) {
-        if (c.url.includes(self.location.origin)) {
-          await c.focus();
-          c.navigate(target);
+  const n = event.notification;
+  const a = event.action;
+  n.close();
+
+  // Dismiss: nichts tun außer schließen.
+  if (a === 'dismiss') return;
+
+  // Snooze: Notification kommt nach Delay erneut, ohne dass das Backend
+  // sie nochmal senden muss. Tag bleibt erhalten → ersetzt nichts anderes.
+  if (a === 'snooze' || a === 'snooze1d') {
+    const delayMs = a === 'snooze1d' ? 86400000 : 3600000;
+    event.waitUntil((async () => {
+      // self.registration.showNotification kann nach close() sofort wieder
+      // den gleichen Tag öffnen, daher setTimeout. Wir verwenden showTrigger
+      // wenn verfügbar (Chrome behind flag), sonst Fallback via
+      // setTimeout-im-SW (überlebt nur, solange der SW lebt — beste Lösung
+      // ohne Backend-Roundtrip).
+      const opts = {
+        body:  n.body,
+        icon:  n.icon  || '/icon-192.png',
+        badge: n.badge || '/badge.svg',
+        tag:   n.tag   || undefined,
+        data:  n.data,
+      };
+      if ('showTrigger' in Notification.prototype) {
+        try {
+          opts.showTrigger = new TimestampTrigger(Date.now() + delayMs);
+          await self.registration.showNotification(n.title, opts);
           return;
-        }
+        } catch { /* fällt unten in setTimeout */ }
       }
-      await clients.openWindow(target);
-    })()
-  );
+      setTimeout(() => {
+        self.registration.showNotification(n.title, opts).catch(() => {});
+      }, delayMs);
+    })());
+    return;
+  }
+
+  // Action-Klick: schau in der vom Backend mitgegebenen Map nach
+  // explizitem URL-Ziel — fällt auf n.data.url zurück (Body-Klick).
+  const target = (a && n.data?.actions?.[a]) || n.data?.url || '/';
+  event.waitUntil((async () => {
+    const cs = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const c of cs) {
+      if (c.url.includes(self.location.origin)) {
+        await c.focus();
+        c.navigate(target);
+        return;
+      }
+    }
+    await clients.openWindow(target);
+  })());
 });

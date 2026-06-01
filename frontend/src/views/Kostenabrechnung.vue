@@ -20,11 +20,11 @@
           v-tooltip="vehicle?.monta_api_key ? 'MID-Zählerstand von Monta synchronisieren' : 'Monta API-Key in Einstellungen hinterlegen'">
           <span :class="{'animate-spin inline-block': syncing}">⟳</span> Monta Sync
         </button>
-        <button @click="exportCsv" class="btn-secondary text-sm"
+        <button v-if="vehicle?.category === 'company'" @click="exportCsv" class="btn-secondary text-sm"
           v-tooltip="'Aktuelles Set als CSV — Excel-/Buchhaltung-import freundlich (Semikolon, BOM).'">
           CSV Export
         </button>
-        <button @click="exportPdf" :disabled="!sessions.length"
+        <button v-if="vehicle?.category === 'company'" @click="exportPdf" :disabled="!sessions.length"
           class="btn-primary text-sm disabled:opacity-40 inline-flex items-center gap-1.5"
           v-tooltip="'Unterschriftsreife PDF-Abrechnung erzeugen — mit Briefkopf, Tabelle, Summen und Unterschriftsfeld. Ideal fuer den Erstattungsantrag beim Arbeitgeber.'">
           <AppIcon name="export" :size="16" />
@@ -34,15 +34,18 @@
       </div>
     </div>
 
-    <!-- Kein Dienstwagen -->
-    <div v-if="vehicle && vehicle.category !== 'company'" class="card text-center py-12 space-y-3">
-      <AppIcon name="wallet" :size="48" class="text-tesla-red mx-auto" />
-      <p class="text-gray-300 font-medium">Dieses Fahrzeug ist als Privatfahrzeug konfiguriert</p>
-      <p class="text-sm text-gray-500">Unter Einstellungen → Fahrzeugkategorie auf "Dienstwagen" ändern.</p>
-      <RouterLink to="/settings" class="btn-primary inline-block text-sm">Zu den Einstellungen</RouterLink>
+    <!-- Info-Banner für Privatfahrzeuge -->
+    <div v-if="vehicle && vehicle.category !== 'company'"
+         class="flex items-start gap-3 bg-blue-900/20 border border-blue-700/30 rounded-xl px-4 py-3 text-sm text-blue-200">
+      <span class="text-lg leading-none mt-0.5">ℹ️</span>
+      <span>
+        <strong>Privatfahrzeug:</strong> Monta-Ladedaten werden als Information angezeigt.
+        Die <strong>Kostenabrechnung</strong> (PDF, CSV, Erstattungsvorlage) ist Fahrzeugen der Kategorie
+        <RouterLink to="/settings" class="underline underline-offset-2 hover:text-blue-100">Dienstwagen</RouterLink> vorbehalten.
+      </span>
     </div>
 
-    <template v-else-if="vehicle">
+    <template v-if="vehicle">
       <!-- Toast — Teleport, damit kein .card-Stacking-Context den
            Notification-Overlay frisst. -->
       <Teleport to="body">
@@ -57,8 +60,8 @@
       <!-- Dynamisches Sektions-Layout -->
       <template v-for="sid in layoutOrder" :key="sid">
 
-        <!-- Jahresübersicht -->
-        <SortableSection v-if="sid === 'overview'"
+        <!-- Jahresübersicht (nur Dienstwagen: enthält Erstattungsbetrag) -->
+        <SortableSection v-if="sid === 'overview' && vehicle.category === 'company'"
           page-id="kostenabrechnung" section-id="overview"
           title="Jahresübersicht" icon="💶"
           :collapsed="isCollapsed('overview')"
@@ -83,8 +86,8 @@
           </div>
         </SortableSection>
 
-        <!-- Monatsübersicht -->
-        <SortableSection v-if="sid === 'months' && months.length"
+        <!-- Monatsübersicht (nur Dienstwagen: mit Betrag-Spalten) -->
+        <SortableSection v-if="sid === 'months' && months.length && vehicle.category === 'company'"
           page-id="kostenabrechnung" section-id="months"
           :title="'Monatsübersicht ' + selYear" icon="📆"
           :collapsed="isCollapsed('months')"
@@ -146,14 +149,15 @@
           @toggle="toggle('sessions')"
           @move="(f, t, p) => moveSection(f, t, p)">
           <template #badge>
-            <button v-if="selMonth" @click="markMonthBilled" class="btn-primary text-xs"
+            <!-- Monat abrechnen: nur für Dienstwagen sinnvoll -->
+            <button v-if="selMonth && vehicle.category === 'company'" @click="markMonthBilled" class="btn-primary text-xs"
               v-tooltip="'Alle Sessions dieses Monats als abgerechnet markieren'">
               ✓ Monat abrechnen
             </button>
           </template>
           <div v-if="!sessions.length" class="text-center text-gray-400 py-8 text-sm">
             Keine Heimlade-Sessions gefunden.
-            <span v-if="!vehicle.monta_api_key"> Monta API-Key in Einstellungen hinterlegen für MID-Daten.</span>
+            <span v-if="!vehicle.monta_api_key"> Monta API-Key in Einstellungen hinterlegen für Heim-Ladesessions.</span>
           </div>
           <div class="overflow-x-auto" v-else>
             <table class="w-full text-sm">
@@ -163,9 +167,10 @@
                   <th class="text-left py-2">Ort</th>
                   <th class="text-right py-2">kWh Tesla</th>
                   <th class="text-right py-2">kWh MID</th>
-                  <th class="text-right py-2">€/kWh</th>
-                  <th class="text-right py-2 text-green-300">Betrag €</th>
-                  <th class="text-center py-2">Status</th>
+                  <!-- Abrechnungs-Spalten: nur für Dienstwagen -->
+                  <th v-if="vehicle.category === 'company'" class="text-right py-2">€/kWh</th>
+                  <th v-if="vehicle.category === 'company'" class="text-right py-2 text-green-300">Betrag €</th>
+                  <th v-if="vehicle.category === 'company'" class="text-center py-2">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -187,16 +192,17 @@
                       class="w-20 bg-gray-700 rounded px-2 py-0.5 text-right text-white text-xs focus:outline-none focus:ring-1 focus:ring-tesla-red"
                       :placeholder="fmtN(s.energy_added_kwh, 2)" />
                   </td>
-                  <td class="text-right">
+                  <!-- Billing-Felder: nur für Dienstwagen -->
+                  <td v-if="vehicle.category === 'company'" class="text-right">
                     <input :value="s.billing_rate_kwh ?? vehicle.electricity_rate_kwh ?? 0.30"
                       @change="e => updateSession(s, { billing_rate_kwh: +e.target.value })"
                       type="number" step="0.001" min="0"
                       class="w-16 bg-gray-700 rounded px-2 py-0.5 text-right text-white text-xs focus:outline-none focus:ring-1 focus:ring-tesla-red" />
                   </td>
-                  <td class="text-right font-bold text-green-300">
+                  <td v-if="vehicle.category === 'company'" class="text-right font-bold text-green-300">
                     {{ fmtN(calcAmount(s), 2) }}
                   </td>
-                  <td class="text-center">
+                  <td v-if="vehicle.category === 'company'" class="text-center">
                     <button @click="toggleStatus(s)"
                       class="text-xs px-2 py-0.5 rounded-full transition"
                       :class="s.billing_status === 'billed' ? 'bg-green-900 text-green-300' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'">
@@ -209,8 +215,8 @@
           </div>
         </SortableSection>
 
-        <!-- Abrechnungsvorlage -->
-        <SortableSection v-if="sid === 'template' && selMonth && sessions.length"
+        <!-- Abrechnungsvorlage (nur Dienstwagen) -->
+        <SortableSection v-if="sid === 'template' && selMonth && sessions.length && vehicle.category === 'company'"
           page-id="kostenabrechnung" section-id="template"
           title="Abrechnungsvorlage" icon="📝"
           :collapsed="isCollapsed('template')"

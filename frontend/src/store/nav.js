@@ -34,7 +34,7 @@ export const NAV_GROUPS = [
       { key: 'sleep',       to: '/sleep',            icon: 'moon',        emojiFallback: '😴', label: 'Schlaf-Monitor',   tooltip: 'Wann schläft das Auto – und wie viel Energie verliert es im Stand?' },
       { key: 'climate',     to: '/climate',          icon: 'thermometer', emojiFallback: '❄️', label: 'Klimastatistiken', tooltip: 'Klimaanlagen- und Sitzheizungsnutzung nach Tag – inkl. Vorklimatisierungen' },
       { key: 'logbook',     to: '/logbook',          icon: 'tool',        emojiFallback: '📓', label: 'Betriebsbuch',     tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },
-      { key: 'abrechnung',  to: '/kostenabrechnung', icon: 'cash',        emojiFallback: '💶', label: 'Abrechnung',       tooltip: 'Kostenabrechnung Heimladen für Dienstwagen' },
+      { key: 'abrechnung',  to: '/kostenabrechnung', icon: 'cash',        emojiFallback: '💶', label: 'Abrechnung',       tooltip: 'Heimlade-Sessions & Monta-Integration – Kostenabrechnung für Dienstwagen' },
       { key: 'export',      to: '/export',           icon: 'export',      emojiFallback: '💾', label: 'Export',           tooltip: 'Daten als CSV/JSON exportieren, Vollbackup erstellen, Push-Benachrichtigungen' },
     ],
   },

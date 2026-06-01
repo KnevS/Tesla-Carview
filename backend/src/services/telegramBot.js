@@ -17,19 +17,45 @@
  *  /status        — Fahrzeugstatus (Batterie, km, Verriegelung)
  *  /battery       — Detailliertere Akkuinfos
  *  /trips         — Letzte 5 Fahrten
+ *  /location      — Aktueller Standort (Google-Maps-Link)
+ *  /range         — Restreichweite + verbleibende km bei aktuellem Verbrauch
+ *  /today         — Tagesbilanz (km, kWh, Kosten, Anzahl Fahrten)
+ *  /service       — Naechste faellige Wartung
+ *  /firmware      — Aktuelle Software-Version + letztes Update
+ *  /classify      — Letzte Fahrt im Chat als privat/geschaeftlich/pendel markieren
  *  /help          — Befehlsliste
  *  /unlink        — Verknüpfung aufheben
+ *
+ * Inline-Buttons (unter /status):
+ *  🔒 Lock / 🔓 Unlock  — Tueren ver-/entriegeln (Unlock mit Confirm-Step)
+ *  ❄️ Klima an/aus      — Vorklimatisierung starten/stoppen
+ *  🛡 Sentry an/aus      — Wachmodus aktivieren/deaktivieren
+ *  ⚡ Laden an/aus       — Ladevorgang starten/stoppen
+ *  ⟳ Aktualisieren       — Status neu rendern (kein Tesla-Call)
+ * Jede Aktion wird in audit_logs unter "telegram_command" geloggt.
  */
 
-import { Telegraf } from 'telegraf';
+import { Telegraf, Markup } from 'telegraf';
 import { getMasterDb, getAllTenants, getDb } from '../db/database.js';
+import { getTenantSetting } from './configService.js';
+import { apiProxyPost } from './teslaApi.js';
+import { auditLog } from './auditService.js';
 
 let bot = null;
 let webhookMiddleware = null;
 
 /** Initialisiert den Bot. Gibt Express-Middleware zurück (Webhook) oder null (Polling). */
 export async function initTelegramBot() {
-  const token = process.env.TELEGRAM_BOT_TOKEN;
+  // DB has priority: use token from first active non-demo tenant, fall back to .env
+  let token = process.env.TELEGRAM_BOT_TOKEN;
+  try {
+    const tenants = getAllTenants().filter(t => t.status !== 'suspended' && !t.is_demo);
+    for (const t of tenants) {
+      const db  = getDb(t.id);
+      const tok = getTenantSetting(db, 'telegram.bot_token', null);
+      if (tok) { token = tok; break; }
+    }
+  } catch { /* ignore */ }
   if (!token) {
     console.log('[Telegram] Kein TELEGRAM_BOT_TOKEN — Bot deaktiviert.');
     return null;
@@ -39,7 +65,12 @@ export async function initTelegramBot() {
     bot = new Telegraf(token);
     registerCommands(bot);
 
-    const webhookUrl = process.env.TELEGRAM_WEBHOOK_URL || process.env.FRONTEND_URL;
+    const tdb = (() => { try { const ts = getAllTenants().filter(t => !t.is_demo); return ts.length ? getDb(ts[0].id) : null; } catch { return null; } })();
+    const dbWebhook = tdb ? getTenantSetting(tdb, 'telegram.webhook_url', null) : null;
+    // Webhook nur wenn explizit gesetzt. FRONTEND_URL ist KEIN gültiger Fallback —
+    // reverse-proxy/Auth-Middlewares können /api/telegram/webhook blockieren,
+    // Telegram bekäme dann nur 401/403 und der Bot bliebe stumm (siehe v3.4.2).
+    const webhookUrl = dbWebhook || process.env.TELEGRAM_WEBHOOK_URL || null;
     if (webhookUrl) {
       // Webhook-Modus: Express übernimmt die Webhook-Route
       const fullUrl = `${webhookUrl}/api/telegram/webhook`;
@@ -163,12 +194,27 @@ function registerCommands(bot) {
     );
   });
 
-  // /status — Fahrzeugstatus
+  // /status — Fahrzeugstatus mit Inline-Buttons fuer Schnell-Aktionen
   bot.command('status', async ctx => {
     const link = await getLinkForChat(ctx);
     if (!link) return;
     const statusText = await getStatusText(link.tenant_id, link.user_id);
-    return ctx.reply(statusText, { parse_mode: 'MarkdownV2' });
+    const keyboard   = buildStatusKeyboard(link.tenant_id);
+    return ctx.reply(statusText, {
+      parse_mode: 'MarkdownV2',
+      ...(keyboard ? { reply_markup: keyboard.reply_markup } : {}),
+    });
+  });
+
+  // Callback fuer Inline-Buttons: cmd:<vehicle_id>:<action>[:<confirm>]
+  bot.action(/^cmd:(\d+):([a-z_]+)(?::(confirm))?$/, async ctx => {
+    const vehicleId = Number(ctx.match[1]);
+    const action    = ctx.match[2];
+    const confirmed = ctx.match[3] === 'confirm';
+    const link = await getLinkForChat(ctx);
+    if (!link) { await ctx.answerCbQuery('Nicht verknüpft'); return; }
+
+    await handleVehicleAction(ctx, link, vehicleId, action, confirmed);
   });
 
   // /battery — Akkudetails
@@ -184,6 +230,69 @@ function registerCommands(bot) {
     const link = await getLinkForChat(ctx);
     if (!link) return;
     const text = await getTripsText(link.tenant_id, link.user_id);
+    return ctx.reply(text, { parse_mode: 'MarkdownV2' });
+  });
+
+  // /classify — letzte Fahrt als privat/geschaeftlich/pendel markieren
+  bot.command('classify', async ctx => {
+    const link = await getLinkForChat(ctx);
+    if (!link) return;
+    const result = await getClassifyView(link.tenant_id);
+    if (!result.trip) {
+      return ctx.reply(result.text, { parse_mode: 'MarkdownV2' });
+    }
+    return ctx.reply(result.text, {
+      parse_mode: 'MarkdownV2',
+      reply_markup: buildClassifyKeyboard(result.trip.id).reply_markup,
+    });
+  });
+
+  // Callback fuer Trip-Klassifikation: trip:<trip_id>:<type|next>
+  bot.action(/^trip:(\d+):(private|business|commute|next)$/, async ctx => {
+    const tripId = Number(ctx.match[1]);
+    const newType = ctx.match[2];
+    const link = await getLinkForChat(ctx);
+    if (!link) { await ctx.answerCbQuery('Nicht verknüpft'); return; }
+    await handleClassifyAction(ctx, link, tripId, newType);
+  });
+
+  // /location — Aktueller Standort
+  bot.command('location', async ctx => {
+    const link = await getLinkForChat(ctx);
+    if (!link) return;
+    const text = await getLocationText(link.tenant_id, link.user_id);
+    return ctx.reply(text, { parse_mode: 'MarkdownV2', link_preview_options: { is_disabled: true } });
+  });
+
+  // /range — Restreichweite
+  bot.command('range', async ctx => {
+    const link = await getLinkForChat(ctx);
+    if (!link) return;
+    const text = await getRangeText(link.tenant_id, link.user_id);
+    return ctx.reply(text, { parse_mode: 'MarkdownV2' });
+  });
+
+  // /today — Tagesbilanz
+  bot.command('today', async ctx => {
+    const link = await getLinkForChat(ctx);
+    if (!link) return;
+    const text = await getTodayText(link.tenant_id, link.user_id);
+    return ctx.reply(text, { parse_mode: 'MarkdownV2' });
+  });
+
+  // /service — Naechste Wartung
+  bot.command('service', async ctx => {
+    const link = await getLinkForChat(ctx);
+    if (!link) return;
+    const text = await getServiceText(link.tenant_id, link.user_id);
+    return ctx.reply(text, { parse_mode: 'MarkdownV2' });
+  });
+
+  // /firmware — Software-Version
+  bot.command('firmware', async ctx => {
+    const link = await getLinkForChat(ctx);
+    if (!link) return;
+    const text = await getFirmwareText(link.tenant_id, link.user_id);
     return ctx.reply(text, { parse_mode: 'MarkdownV2' });
   });
 
@@ -206,9 +315,16 @@ function registerCommands(bot) {
       '*Tesla Carview Bot — Befehle*\n\n' +
       '/status — Fahrzeugstatus\n' +
       '/battery — Akkustand & Reichweite\n' +
+      '/range — Restreichweite\n' +
+      '/location — Aktueller Standort \\(Maps\\-Link\\)\n' +
+      '/today — Tagesbilanz \\(km, kWh, Kosten\\)\n' +
       '/trips — Letzte 5 Fahrten\n' +
+      '/classify — Letzte Fahrt klassifizieren \\(privat / geschäftlich / pendel\\)\n' +
+      '/service — Naechste faellige Wartung\n' +
+      '/firmware — Software\\-Version\n' +
       '/unlink — Bot\\-Verknüpfung aufheben\n' +
       '/help — Diese Hilfe\n\n' +
+      '💡 _Unter /status erscheinen Inline\\-Buttons fuer Lock, Klima, Sentry, Laden_\n' +
       '_Einstellungen findest du in Carview → Einstellungen → Benachrichtigungen_',
       { parse_mode: 'MarkdownV2' }
     );
@@ -220,6 +336,11 @@ function registerCommands(bot) {
     if (text.startsWith('/')) {
       return ctx.reply('❓ Unbekannter Befehl\\. Tippe /help für alle Befehle\\.', { parse_mode: 'MarkdownV2' });
     }
+  });
+
+  // Globaler Error-Handler — ein Handler-Fehler darf das Polling nicht killen.
+  bot.catch((err, ctx) => {
+    console.error(`[Telegram] Handler-Fehler (${ctx?.updateType}):`, err.message);
   });
 }
 
@@ -239,15 +360,15 @@ async function getLinkForChat(ctx) {
 async function getStatusText(tenantId, userId) {
   try {
     const db = getDb(tenantId);
-    const vehicles = db.prepare('SELECT * FROM vehicles WHERE is_active=1 LIMIT 3').all();
-    if (!vehicles.length) return 'ℹ️ Kein aktives Fahrzeug gefunden\\.';
+    const vehicles = db.prepare('SELECT * FROM vehicles ORDER BY id LIMIT 3').all();
+    if (!vehicles.length) return 'ℹ️ Kein Fahrzeug gefunden\\.';
 
     const lines = ['🚗 *Fahrzeugstatus*\n'];
     for (const v of vehicles) {
       const cache = db.prepare('SELECT * FROM vehicle_state_cache WHERE vehicle_id=?').get(v.id);
       const name  = esc(v.display_name || v.vin?.slice(-6) || 'Tesla');
       const soc   = cache?.battery_level != null ? `${cache.battery_level}%` : '–';
-      const km    = cache?.odometer_km   != null ? `${Math.round(cache.odometer_km).toLocaleString('de-DE')} km` : '–';
+      const km    = cache?.odometer_km   != null ? `${esc(Math.round(cache.odometer_km).toLocaleString('de-DE'))} km` : '–';
       const lock  = cache?.is_user_present ? '🔓 Nutzer anwesend' : '🔒 Geparkt';
       const sentry = cache?.sentry_mode ? ' 🛡️ Wächter aktiv' : '';
       lines.push(`*${name}*\n🔋 ${soc}  📍 ${km}  ${lock}${sentry}`);
@@ -261,8 +382,8 @@ async function getStatusText(tenantId, userId) {
 async function getBatteryText(tenantId, userId) {
   try {
     const db = getDb(tenantId);
-    const vehicles = db.prepare('SELECT * FROM vehicles WHERE is_active=1 LIMIT 3').all();
-    if (!vehicles.length) return 'ℹ️ Kein aktives Fahrzeug\\.';
+    const vehicles = db.prepare('SELECT * FROM vehicles ORDER BY id LIMIT 3').all();
+    if (!vehicles.length) return 'ℹ️ Kein Fahrzeug\\.';
 
     const lines = ['🔋 *Akkustand*\n'];
     for (const v of vehicles) {
@@ -274,8 +395,8 @@ async function getBatteryText(tenantId, userId) {
       const lastCharge = db.prepare(
         'SELECT * FROM charging_sessions ORDER BY start_time DESC LIMIT 1'
       ).get();
-      const addedKwh = lastCharge?.charge_energy_added != null
-        ? `\\+${Number(lastCharge.charge_energy_added).toFixed(1)} kWh`
+      const addedKwh = lastCharge?.energy_added_kwh != null
+        ? `\\+${esc(Number(lastCharge.energy_added_kwh).toFixed(1))} kWh`
         : '–';
 
       lines.push(`*${name}*\n🔋 Akku: ${soc}\n⚡ Letzte Ladung: ${addedKwh}`);
@@ -297,8 +418,8 @@ async function getTripsText(tenantId, userId) {
 
     const lines = ['🗺️ *Letzte 5 Fahrten*\n'];
     for (const t of trips) {
-      const date = new Date(t.start_time * 1000).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
-      const km   = t.distance_km ? `${Number(t.distance_km).toFixed(1)} km` : '– km';
+      const date = esc(new Date(t.start_time * 1000).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }));
+      const km   = t.distance_km ? `${esc(Number(t.distance_km).toFixed(1))} km` : '– km';
       const from = esc(t.start_address?.split(',')[0] || '–');
       const to   = esc(t.end_address?.split(',')[0]   || '–');
       const type = { private: '🏠', business: '💼', commute: '🏢' }[t.trip_type] || '🚗';
@@ -307,6 +428,483 @@ async function getTripsText(tenantId, userId) {
     return lines.join('\n\n');
   } catch (err) {
     return `❌ Fehler: ${esc(err.message)}`;
+  }
+}
+
+async function getLocationText(tenantId, userId) {
+  try {
+    const db = getDb(tenantId);
+    const vehicles = db.prepare('SELECT * FROM vehicles ORDER BY id LIMIT 3').all();
+    if (!vehicles.length) return 'ℹ️ Kein Fahrzeug gefunden\\.';
+
+    const lines = ['📍 *Standort*\n'];
+    for (const v of vehicles) {
+      const last = db.prepare(
+        'SELECT lat, lon, timestamp FROM telemetry_points WHERE vehicle_id=? AND lat IS NOT NULL AND lon IS NOT NULL ORDER BY timestamp DESC LIMIT 1'
+      ).get(v.id);
+      const name = esc(v.display_name || v.vin?.slice(-6) || 'Tesla');
+      if (!last) {
+        lines.push(`*${name}*\n_Keine Positionsdaten verfuegbar_`);
+        continue;
+      }
+      const lat = Number(last.lat).toFixed(5);
+      const lon = Number(last.lon).toFixed(5);
+      const mapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+      const age = esc(_relTime(last.timestamp));
+      // MarkdownV2-Link: [label](url). lat/lon escapen weil Punkt drin.
+      lines.push(`*${name}*\n[${esc(lat)}, ${esc(lon)}](${mapsUrl})\n_${age}_`);
+    }
+    return lines.join('\n\n');
+  } catch (err) {
+    return `❌ Fehler: ${esc(err.message)}`;
+  }
+}
+
+async function getRangeText(tenantId, userId) {
+  try {
+    const db = getDb(tenantId);
+    const vehicles = db.prepare('SELECT * FROM vehicles ORDER BY id LIMIT 3').all();
+    if (!vehicles.length) return 'ℹ️ Kein Fahrzeug gefunden\\.';
+
+    const lines = ['🛣 *Restreichweite*\n'];
+    for (const v of vehicles) {
+      const snap = db.prepare(
+        'SELECT soc, rated_range_km, ideal_range_km, timestamp FROM battery_snapshots WHERE vehicle_id=? ORDER BY timestamp DESC LIMIT 1'
+      ).get(v.id);
+      const cache = db.prepare('SELECT battery_level FROM vehicle_state_cache WHERE vehicle_id=?').get(v.id);
+      const name  = esc(v.display_name || v.vin?.slice(-6) || 'Tesla');
+      const soc   = snap?.soc ?? cache?.battery_level ?? null;
+      const rated = snap?.rated_range_km != null
+        ? `${esc(Math.round(snap.rated_range_km))} km`
+        : '–';
+      const ideal = snap?.ideal_range_km != null
+        ? ` \\(ideal: ${esc(Math.round(snap.ideal_range_km))} km\\)`
+        : '';
+      const socStr = soc != null ? `${soc}%` : '–';
+      const age = snap?.timestamp ? `\n_Stand: ${esc(_relTime(snap.timestamp))}_` : '';
+      lines.push(`*${name}*\n🔋 ${socStr} · ${rated}${ideal}${age}`);
+    }
+    return lines.join('\n\n');
+  } catch (err) {
+    return `❌ Fehler: ${esc(err.message)}`;
+  }
+}
+
+async function getTodayText(tenantId, userId) {
+  try {
+    const db = getDb(tenantId);
+    const vehicles = db.prepare('SELECT * FROM vehicles ORDER BY id LIMIT 3').all();
+    if (!vehicles.length) return 'ℹ️ Kein Fahrzeug gefunden\\.';
+
+    // Tagesgrenze in Europe/Berlin — Carview rechnet auch in lokaler TZ.
+    const todayStart = Math.floor(new Date(new Date().toLocaleDateString('en-CA') + 'T00:00:00').getTime() / 1000);
+
+    const lines = ['📊 *Tagesbilanz heute*\n'];
+    for (const v of vehicles) {
+      const trips = db.prepare(
+        'SELECT COUNT(*) AS n, COALESCE(SUM(distance_km), 0) AS km FROM trips WHERE vehicle_id=? AND start_time >= ? AND end_time IS NOT NULL'
+      ).get(v.id, todayStart);
+
+      const chg = db.prepare(
+        'SELECT COUNT(*) AS n, COALESCE(SUM(energy_added_kwh), 0) AS kwh, COALESCE(SUM(cost), 0) AS cost ' +
+        'FROM charging_sessions WHERE vehicle_id=? AND start_time >= ?'
+      ).get(v.id, todayStart);
+
+      const name = esc(v.display_name || v.vin?.slice(-6) || 'Tesla');
+      const km   = esc(Number(trips.km).toFixed(1));
+      const kwh  = esc(Number(chg.kwh).toFixed(1));
+      const cost = chg.cost > 0 ? ` · ${esc(Number(chg.cost).toFixed(2))} €` : '';
+      lines.push(
+        `*${name}*\n` +
+        `🚗 ${trips.n} Fahrt${trips.n === 1 ? '' : 'en'} · ${km} km\n` +
+        `⚡ ${chg.n} Ladung${chg.n === 1 ? '' : 'en'} · ${kwh} kWh${cost}`
+      );
+    }
+    return lines.join('\n\n');
+  } catch (err) {
+    return `❌ Fehler: ${esc(err.message)}`;
+  }
+}
+
+async function getServiceText(tenantId, userId) {
+  try {
+    const db = getDb(tenantId);
+    const vehicles = db.prepare('SELECT * FROM vehicles ORDER BY id LIMIT 3').all();
+    if (!vehicles.length) return 'ℹ️ Kein Fahrzeug gefunden\\.';
+
+    const nowS  = Math.floor(Date.now() / 1000);
+    const lines = ['🔧 *Wartung*\n'];
+
+    for (const v of vehicles) {
+      const cache = db.prepare('SELECT odometer_km FROM vehicle_state_cache WHERE vehicle_id=?').get(v.id);
+      const odoKm = cache?.odometer_km ?? v.odometer_km ?? 0;
+
+      const items = db.prepare(
+        `SELECT label, interval_months, interval_km, last_done_at, last_done_km, snoozed_until
+         FROM service_intervals
+         WHERE vehicle_id=? AND is_active=1
+         ORDER BY kind`
+      ).all(v.id);
+
+      const name = esc(v.display_name || v.vin?.slice(-6) || 'Tesla');
+      if (!items.length) {
+        lines.push(`*${name}*\n_Keine Wartungsintervalle konfiguriert_`);
+        continue;
+      }
+
+      const due = [];
+      for (const si of items) {
+        if (si.snoozed_until && si.snoozed_until > nowS) continue;
+        const dueByMonth = si.interval_months && si.last_done_at
+          ? si.last_done_at + si.interval_months * 30 * 86400
+          : null;
+        const dueByKm    = si.interval_km && si.last_done_km != null
+          ? si.last_done_km + si.interval_km
+          : null;
+        const monthsLeft = dueByMonth != null ? Math.round((dueByMonth - nowS) / (30 * 86400)) : null;
+        const kmLeft     = dueByKm    != null ? Math.round(dueByKm - odoKm) : null;
+        const overdue    = (monthsLeft != null && monthsLeft <= 0) || (kmLeft != null && kmLeft <= 0);
+        due.push({ label: si.label, monthsLeft, kmLeft, overdue });
+      }
+
+      if (!due.length) {
+        lines.push(`*${name}*\n_Aktuell nichts faellig_`);
+        continue;
+      }
+      // Aelteste/dringlichste zuerst — sortiere nach kleinstem Wert
+      due.sort((a, b) => {
+        const ax = Math.min(a.monthsLeft ?? 1e9, (a.kmLeft ?? 1e9) / 1000);
+        const bx = Math.min(b.monthsLeft ?? 1e9, (b.kmLeft ?? 1e9) / 1000);
+        return ax - bx;
+      });
+      const list = due.slice(0, 4).map(d => {
+        const icon = d.overdue ? '⚠️' : '🔧';
+        const parts = [];
+        if (d.monthsLeft != null) parts.push(`${d.monthsLeft <= 0 ? `${esc(-d.monthsLeft)} Monate ueberfaellig` : `noch ${esc(d.monthsLeft)} Monat${d.monthsLeft === 1 ? '' : 'e'}`}`);
+        if (d.kmLeft != null)     parts.push(`${d.kmLeft <= 0 ? `${esc(-d.kmLeft)} km ueberfaellig` : `noch ${esc(d.kmLeft)} km`}`);
+        return `${icon} ${esc(d.label)} — ${parts.join(' · ')}`;
+      }).join('\n');
+      lines.push(`*${name}*\n${list}`);
+    }
+    return lines.join('\n\n');
+  } catch (err) {
+    return `❌ Fehler: ${esc(err.message)}`;
+  }
+}
+
+async function getFirmwareText(tenantId, userId) {
+  try {
+    const db = getDb(tenantId);
+    const vehicles = db.prepare('SELECT * FROM vehicles ORDER BY id LIMIT 3').all();
+    if (!vehicles.length) return 'ℹ️ Kein Fahrzeug gefunden\\.';
+
+    const lines = ['💾 *Software*\n'];
+    for (const v of vehicles) {
+      const cur = db.prepare(
+        'SELECT version, detected_at FROM firmware_versions WHERE vehicle_id=? ORDER BY detected_at DESC LIMIT 2'
+      ).all(v.id);
+      const name = esc(v.display_name || v.vin?.slice(-6) || 'Tesla');
+      if (!cur.length) {
+        lines.push(`*${name}*\n_Noch keine Versions-Historie_`);
+        continue;
+      }
+      const latest    = cur[0];
+      const prev      = cur[1];
+      const installed = esc(_relTime(latest.detected_at));
+      const fromPart  = prev ? `\nVorher: \`${esc(prev.version)}\`` : '';
+      lines.push(`*${name}*\n\`${esc(latest.version)}\` _\\(installiert ${installed}\\)_${fromPart}`);
+    }
+    return lines.join('\n\n');
+  } catch (err) {
+    return `❌ Fehler: ${esc(err.message)}`;
+  }
+}
+
+/** Relativ-Zeit ausgehend von einem Unix-Timestamp (Sekunden). */
+function _relTime(ts) {
+  if (!ts) return 'unbekannt';
+  const diffS = Math.floor(Date.now() / 1000 - Number(ts));
+  if (diffS < 60)    return 'gerade eben';
+  if (diffS < 3600)  return `vor ${Math.floor(diffS / 60)} min`;
+  if (diffS < 86400) return `vor ${Math.floor(diffS / 3600)} h`;
+  if (diffS < 30 * 86400) return `vor ${Math.floor(diffS / 86400)} Tag${Math.floor(diffS / 86400) === 1 ? '' : 'en'}`;
+  if (diffS < 365 * 86400) return `vor ${Math.floor(diffS / (30 * 86400))} Monaten`;
+  return `vor ${Math.floor(diffS / (365 * 86400))} Jahren`;
+}
+
+// ── Inline-Buttons + Vehicle-Actions ────────────────────────────────────────
+
+/**
+ * Mapping von Callback-Action zu Tesla-Command. Body wird je nach Toggle-Wert
+ * dynamisch zusammengesetzt (siehe handleVehicleAction).
+ */
+const ACTION_MAP = {
+  lock:         { tesla: 'door_lock',                emoji: '🔒', label: 'Verriegelt'   },
+  unlock:       { tesla: 'door_unlock',              emoji: '🔓', label: 'Entriegelt', confirm: true },
+  climate_on:   { tesla: 'auto_conditioning_start',  emoji: '❄️', label: 'Klima an'    },
+  climate_off:  { tesla: 'auto_conditioning_stop',   emoji: '⏹', label: 'Klima aus'   },
+  sentry_on:    { tesla: 'set_sentry_mode', body: { on: true },  emoji: '🛡', label: 'Wachmodus an'  },
+  sentry_off:   { tesla: 'set_sentry_mode', body: { on: false }, emoji: '⏸', label: 'Wachmodus aus' },
+  charge_start: { tesla: 'charge_start',             emoji: '⚡', label: 'Laden gestartet' },
+  charge_stop:  { tesla: 'charge_stop',              emoji: '⏹', label: 'Laden gestoppt' },
+};
+
+/**
+ * Baut das Inline-Keyboard fuer /status. Liefert null, wenn keine Fahrzeuge
+ * existieren. Aktuell ein einziger Button-Block pro erstem Fahrzeug (LIMIT 1):
+ * sobald wir hier multi-vehicle unterstuetzen, kommt eine Auswahl-Reihe dazu.
+ */
+function buildStatusKeyboard(tenantId) {
+  try {
+    const db = getDb(tenantId);
+    const v  = db.prepare('SELECT id FROM vehicles ORDER BY id LIMIT 1').get();
+    if (!v) return null;
+    const id = v.id;
+    return Markup.inlineKeyboard([
+      [
+        Markup.button.callback('🔒 Lock',    `cmd:${id}:lock`),
+        Markup.button.callback('🔓 Unlock',  `cmd:${id}:unlock`),
+      ],
+      [
+        Markup.button.callback('❄️ Klima an', `cmd:${id}:climate_on`),
+        Markup.button.callback('⏹ Klima aus', `cmd:${id}:climate_off`),
+      ],
+      [
+        Markup.button.callback('🛡 Sentry an', `cmd:${id}:sentry_on`),
+        Markup.button.callback('⏸ Sentry aus', `cmd:${id}:sentry_off`),
+      ],
+      [
+        Markup.button.callback('⚡ Laden start', `cmd:${id}:charge_start`),
+        Markup.button.callback('⏹ Laden stop',  `cmd:${id}:charge_stop`),
+      ],
+      [
+        Markup.button.callback('⟳ Aktualisieren', `cmd:${id}:refresh`),
+      ],
+    ]);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fuehrt eine Vehicle-Action aus, loggt in audit_logs und beantwortet den
+ * Callback. Bei "unlock" wird ein Confirm-Schritt eingefuegt.
+ */
+async function handleVehicleAction(ctx, link, vehicleId, action, confirmed) {
+  // /refresh: Status neu rendern, kein Tesla-Call
+  if (action === 'refresh') {
+    try {
+      const text = await getStatusText(link.tenant_id, link.user_id);
+      const kb   = buildStatusKeyboard(link.tenant_id);
+      await ctx.editMessageText(text, {
+        parse_mode: 'MarkdownV2',
+        ...(kb ? { reply_markup: kb.reply_markup } : {}),
+      });
+      await ctx.answerCbQuery('Aktualisiert');
+    } catch (e) {
+      await ctx.answerCbQuery(`Fehler: ${e.message?.slice(0, 100) || 'unbekannt'}`);
+    }
+    return;
+  }
+
+  const spec = ACTION_MAP[action];
+  if (!spec) { await ctx.answerCbQuery('Unbekannte Aktion'); return; }
+
+  // Confirm-Step fuer riskante Aktionen (unlock)
+  if (spec.confirm && !confirmed) {
+    await ctx.answerCbQuery();
+    await ctx.reply(
+      `⚠️ *${spec.emoji} Wirklich ${esc(spec.label.toLowerCase())}?*\n` +
+      `Diese Aktion wird im Audit\\-Log protokolliert\\.`,
+      {
+        parse_mode: 'MarkdownV2',
+        reply_markup: Markup.inlineKeyboard([
+          [
+            Markup.button.callback(`✅ Ja, ${spec.label.toLowerCase()}`, `cmd:${vehicleId}:${action}:confirm`),
+            Markup.button.callback('✖ Abbrechen', `cmd:${vehicleId}:refresh`),
+          ],
+        ]).reply_markup,
+      }
+    );
+    return;
+  }
+
+  // Tesla-Command ausfuehren
+  const db = getDb(link.tenant_id);
+  const v  = db.prepare('SELECT * FROM vehicles WHERE id=?').get(vehicleId);
+  if (!v) { await ctx.answerCbQuery('Fahrzeug nicht gefunden'); return; }
+  if (!v.vin) { await ctx.answerCbQuery('Keine VIN hinterlegt'); return; }
+
+  await ctx.answerCbQuery(`${spec.emoji} ${spec.label} …`);
+  let okText, errText;
+  try {
+    await apiProxyPost(db, `/api/1/vehicles/${v.vin}/command/${spec.tesla}`, spec.body ?? {});
+    okText = `${spec.emoji} ${spec.label}`;
+    auditLog(db, link.user_id, 'telegram_command', null, {
+      vehicle_id: vehicleId,
+      command: spec.tesla,
+      body: spec.body ?? null,
+      result: 'ok',
+    });
+  } catch (e) {
+    const status = e.response?.status;
+    const apiErr = e.response?.data?.error || e.response?.data || e.message;
+    if (status === 408 || /offline|asleep/i.test(String(apiErr))) {
+      errText = 'Fahrzeug schläft oder ist offline';
+    } else {
+      errText = String(apiErr).slice(0, 150);
+    }
+    auditLog(db, link.user_id, 'telegram_command', null, {
+      vehicle_id: vehicleId,
+      command: spec.tesla,
+      body: spec.body ?? null,
+      result: 'error',
+      error: errText,
+    });
+  }
+
+  // Status neu rendern, damit der Nutzer sofort sieht ob's gewirkt hat
+  try {
+    const statusText = await getStatusText(link.tenant_id, link.user_id);
+    const kb         = buildStatusKeyboard(link.tenant_id);
+    const suffix     = errText
+      ? `\n\n❌ ${esc(errText)}`
+      : `\n\n✅ ${esc(okText)}`;
+    await ctx.reply(statusText + suffix, {
+      parse_mode: 'MarkdownV2',
+      ...(kb ? { reply_markup: kb.reply_markup } : {}),
+    });
+  } catch { /* Reply darf nicht crashen */ }
+}
+
+// ── Trip Classification ─────────────────────────────────────────────────────
+
+const TRIP_TYPE_LABELS = {
+  private:  { emoji: '🏠', label: 'privat' },
+  business: { emoji: '💼', label: 'geschäftlich' },
+  commute:  { emoji: '🏢', label: 'pendel' },
+};
+
+/**
+ * Holt den naechsten zu klassifizierenden Trip + rendert ihn als Markdown.
+ * Reihenfolge: Trips ohne explizit gesetzten purpose und mit trip_type='private'
+ * (default) zuerst — danach alle vom neusten Ende absteigend.
+ */
+function getClassifyView(tenantId, skipTripId = null) {
+  try {
+    const db = getDb(tenantId);
+    let trip;
+    if (skipTripId) {
+      trip = db.prepare(
+        `SELECT * FROM trips
+         WHERE end_time IS NOT NULL AND id < ?
+           AND (locked_at IS NULL)
+         ORDER BY id DESC LIMIT 1`
+      ).get(skipTripId);
+    } else {
+      trip = db.prepare(
+        `SELECT * FROM trips
+         WHERE end_time IS NOT NULL
+           AND (locked_at IS NULL)
+         ORDER BY id DESC LIMIT 1`
+      ).get();
+    }
+    if (!trip) {
+      return { trip: null, text: 'ℹ️ Keine weitere klassifizierbare Fahrt gefunden\\.' };
+    }
+    return { trip, text: renderTripForClassify(trip) };
+  } catch (err) {
+    return { trip: null, text: `❌ Fehler: ${esc(err.message)}` };
+  }
+}
+
+function renderTripForClassify(trip) {
+  const date = esc(new Date(trip.start_time * 1000).toLocaleString('de-DE', {
+    day: '2-digit', month: '2-digit', year: '2-digit',
+    hour: '2-digit', minute: '2-digit',
+  }));
+  const km   = trip.distance_km ? `${esc(Number(trip.distance_km).toFixed(1))} km` : '– km';
+  const from = esc(trip.start_address?.split(',')[0] || '–');
+  const to   = esc(trip.end_address?.split(',')[0]   || '–');
+  const cur  = TRIP_TYPE_LABELS[trip.trip_type] || TRIP_TYPE_LABELS.private;
+  const purposeLine = trip.purpose ? `\n_Anmerkung:_ ${esc(trip.purpose)}` : '';
+  return (
+    `🏷 *Fahrt klassifizieren*\n\n` +
+    `📅 ${date}\n` +
+    `🛣 ${from} → ${to}\n` +
+    `📏 ${km}\n` +
+    `Aktuell: ${cur.emoji} ${esc(cur.label)}${purposeLine}`
+  );
+}
+
+function buildClassifyKeyboard(tripId) {
+  return Markup.inlineKeyboard([
+    [
+      Markup.button.callback('🏠 Privat',        `trip:${tripId}:private`),
+      Markup.button.callback('💼 Geschäftlich',  `trip:${tripId}:business`),
+      Markup.button.callback('🏢 Pendel',        `trip:${tripId}:commute`),
+    ],
+    [
+      Markup.button.callback('⏮ Nächste älter', `trip:${tripId}:next`),
+    ],
+  ]);
+}
+
+async function handleClassifyAction(ctx, link, tripId, newType) {
+  const db = getDb(link.tenant_id);
+
+  // "next" zeigt die naechst-aeltere Fahrt
+  if (newType === 'next') {
+    const view = getClassifyView(link.tenant_id, tripId);
+    await ctx.answerCbQuery();
+    if (!view.trip) {
+      await ctx.editMessageText(view.text, { parse_mode: 'MarkdownV2' });
+      return;
+    }
+    await ctx.editMessageText(view.text, {
+      parse_mode: 'MarkdownV2',
+      reply_markup: buildClassifyKeyboard(view.trip.id).reply_markup,
+    });
+    return;
+  }
+
+  // trip_type setzen
+  const trip = db.prepare('SELECT * FROM trips WHERE id=?').get(tripId);
+  if (!trip) { await ctx.answerCbQuery('Fahrt nicht gefunden'); return; }
+  if (trip.locked_at) {
+    await ctx.answerCbQuery('Fahrt ist Finanzamt-gesperrt');
+    return;
+  }
+
+  try {
+    db.prepare('UPDATE trips SET trip_type=? WHERE id=?').run(newType, tripId);
+    auditLog(db, link.user_id, 'telegram_classify_trip', null, {
+      trip_id: tripId,
+      from: trip.trip_type,
+      to:   newType,
+    });
+    const spec = TRIP_TYPE_LABELS[newType];
+    await ctx.answerCbQuery(`${spec.emoji} ${spec.label}`);
+
+    // Naechste aeltere Fahrt vorschlagen, damit User in Folge klassifizieren kann
+    const next = getClassifyView(link.tenant_id, tripId);
+    if (!next.trip) {
+      await ctx.editMessageText(
+        renderTripForClassify({ ...trip, trip_type: newType }) +
+        `\n\n✅ Markiert als ${spec.emoji} ${esc(spec.label)}\n_Keine weitere Fahrt vorhanden\\._`,
+        { parse_mode: 'MarkdownV2' }
+      );
+      return;
+    }
+    await ctx.editMessageText(
+      next.text + `\n\n_Vorherige als ${spec.emoji} ${esc(spec.label)} markiert\\._`,
+      {
+        parse_mode: 'MarkdownV2',
+        reply_markup: buildClassifyKeyboard(next.trip.id).reply_markup,
+      }
+    );
+  } catch (err) {
+    await ctx.answerCbQuery(`Fehler: ${err.message?.slice(0, 80) || 'unbekannt'}`);
   }
 }
 

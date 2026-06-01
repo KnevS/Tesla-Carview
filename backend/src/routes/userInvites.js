@@ -57,11 +57,13 @@ router.get('/:token/validate', (req, res) => {
   }
   res.json({
     valid: true,
-    tenantSlug: tenant.slug,
-    tenantName: tenant.name,
-    role:       invite.role,
-    expiresAt:  invite.expires_at,
-    note:       invite.note,
+    tenantSlug:  tenant.slug,
+    tenantName:  tenant.name,
+    role:        invite.role,
+    expiresAt:   invite.expires_at,
+    note:        invite.note,
+    displayName: invite.display_name,
+    email:       invite.email,
   });
 });
 
@@ -107,7 +109,10 @@ router.post('/:token/accept', async (req, res) => {
     // username-Eindeutigkeit + UNIQUE(token) im ON CONFLICT kuerzen
     // das aber sauber ab.
     const role   = invite.role || 'user';
-    const userId = await createUser(db, username, password, role);
+    // E-Mail aus Invite uebernehmen, falls vorhanden. createUser sorgt
+    // selbst dafuer, dass das Format passt; bei Konflikt mit dem
+    // UNIQUE-Index wirft INSERT, dann wird der User-Erstellung-Catch greifen.
+    const userId = await createUser(db, username, password, role, invite.email || null);
 
     // Invite verbrannt + Akzeptanzen + audit
     // req.ip statt manueller XFF-Parse (trust proxy ist gesetzt) —

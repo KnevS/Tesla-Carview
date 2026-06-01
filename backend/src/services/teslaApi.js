@@ -1,7 +1,8 @@
 import { randomBytes, createHash } from 'crypto';
 import https from 'https';
 import axios from 'axios';
-import { getMasterDb } from '../db/database.js';
+import { getMasterDb, getDb } from '../db/database.js';
+import { getTenantSetting } from './configService.js';
 import { encrypt, decrypt } from './cryptoService.js';
 import {
   assertWithinBudget,
@@ -23,6 +24,7 @@ export function getAuthUrl(tenantId) {
   const codeChallenge = createHash('sha256').update(codeVerifier).digest('base64url');
   const state         = randomBytes(16).toString('hex');
 
+  const tdb    = getDb(tenantId);
   const master = getMasterDb();
   master.prepare('DELETE FROM oauth_pkce WHERE created_at < unixepoch() - 600').run();
   master.prepare(
@@ -31,8 +33,8 @@ export function getAuthUrl(tenantId) {
 
   const params = new URLSearchParams({
     response_type:         'code',
-    client_id:             process.env.TESLA_CLIENT_ID,
-    redirect_uri:          process.env.TESLA_REDIRECT_URI,
+    client_id:             getTenantSetting(tdb, 'tesla.client_id', 'TESLA_CLIENT_ID'),
+    redirect_uri:          getTenantSetting(tdb, 'tesla.redirect_uri', 'TESLA_REDIRECT_URI') || process.env.TESLA_REDIRECT_URI,
     scope:                 SCOPES,
     state,
     code_challenge:        codeChallenge,
@@ -51,10 +53,10 @@ export async function exchangeCode(db, code, state) {
   // Verhindert haengen-bleibende Promises bei Tesla-Auth-Outage (Audit L11).
   const res = await axios.post(`${getAuthBase()}/token`, {
     grant_type:    'authorization_code',
-    client_id:     process.env.TESLA_CLIENT_ID,
-    client_secret: process.env.TESLA_CLIENT_SECRET,
+    client_id:     getTenantSetting(db, 'tesla.client_id', 'TESLA_CLIENT_ID'),
+    client_secret: getTenantSetting(db, 'tesla.client_secret', 'TESLA_CLIENT_SECRET'),
     code,
-    redirect_uri:  process.env.TESLA_REDIRECT_URI,
+    redirect_uri:  getTenantSetting(db, 'tesla.redirect_uri', 'TESLA_REDIRECT_URI') || process.env.TESLA_REDIRECT_URI,
     code_verifier: row.code_verifier,
     audience:      getFleetApiUrl(),
   }, { timeout: 15_000 });
@@ -69,8 +71,8 @@ export async function refreshTokens(db) {
   // toleriert sowohl v1:... als auch Legacy-Klartext.
   const res = await axios.post(`${getAuthBase()}/token`, {
     grant_type:    'refresh_token',
-    client_id:     process.env.TESLA_CLIENT_ID,
-    client_secret: process.env.TESLA_CLIENT_SECRET,
+    client_id:     getTenantSetting(db, 'tesla.client_id', 'TESLA_CLIENT_ID'),
+    client_secret: getTenantSetting(db, 'tesla.client_secret', 'TESLA_CLIENT_SECRET'),
     refresh_token: decrypt(row.refresh_token),
   }, { timeout: 15_000 });
   saveTokens(db, res.data);

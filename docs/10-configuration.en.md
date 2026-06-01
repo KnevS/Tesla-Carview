@@ -94,6 +94,31 @@ The file is `.gitignored`. `frontend/.env.example` is the template committed in 
 
 ---
 
+## 🖥️ Configuration via Admin UI (since v3.4.0)
+
+As of v3.4.0 most secrets no longer need to be manually added to `.env`. The **Admin Setup Assistant** (Admin Hub → 🛠️) guides you through every step.
+
+**Technical background — DB-before-env pattern:**
+`configService.js` reads each value from `tenant_settings` (the tenant's SQLite DB) first, then falls back to `.env`. Existing `.env` configurations continue to work unchanged; once a value is set via the UI, the DB value takes precedence.
+
+| Setting | UI path | `.env` fallback variable |
+|---------|---------|--------------------------|
+| Tesla Client-ID | Admin Hub → 🛠️ → Tesla credentials | `TESLA_CLIENT_ID` |
+| Tesla Client-Secret | Admin Hub → 🛠️ → Tesla credentials | `TESLA_CLIENT_SECRET` |
+| Tesla Audience | Admin Hub → 🛠️ → Tesla credentials | `TESLA_AUDIENCE` |
+| VAPID Public Key | Admin Hub → 🛠️ → Web Push | `VAPID_PUBLIC_KEY` |
+| VAPID Private Key | Admin Hub → 🛠️ → Web Push | `VAPID_PRIVATE_KEY` |
+| VAPID Contact | Admin Hub → 🛠️ → Web Push | `VAPID_CONTACT` |
+| Telegram Bot Token | Admin Hub → 🛠️ → Telegram | `TELEGRAM_BOT_TOKEN` |
+| xAI / Grok API Key | Admin Hub → 🛠️ → External APIs | `XAI_API_KEY` |
+| ABRP Global App Key | Admin Hub → 🛠️ → External APIs | `ABRP_API_KEY` |
+
+> **Generate VAPID keys:** Click "🔑 Generate new" in the Admin Setup Assistant — no `docker exec` needed.
+
+> **Telegram Bot:** Requires a container restart after the token is first set (`docker compose … up -d --build backend`). The assistant shows a notice.
+
+---
+
 ## Quick-reference: minimal setup
 
 ```bash

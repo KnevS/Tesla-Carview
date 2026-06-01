@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { apiPost, apiGet, apiProxyPost } from '../services/teslaApi.js';
+import { forcePollVehicle } from '../services/poller.js';
 
 const router = Router();
 
@@ -64,6 +65,32 @@ router.get('/:vehicleId/state', async (req, res) => {
   } catch (e) {
     res.status(502).json({ error: e.response?.data || e.message });
   }
+});
+
+/** POST /api/commands/:vehicleId/refresh — Notbremse fuer die OFFLINE-Anzeige.
+ *  Macht einen einmaligen vehicle_data-Call, sodass state_updated_at sofort
+ *  frisch wird und das Frontend wieder ONLINE zeigt. Respektiert Tages-/Monats-Cap.
+ *  Nuetzlich nach Backend-Restart (Auto-Deploy), wenn FleetTelemetry-Stream
+ *  noch nicht re-established ist und Polling-Heartbeat noch nicht greift. */
+router.post('/:vehicleId/refresh', async (req, res) => {
+  const vehicle = getVehicle(req.db, req.params.vehicleId);
+  if (!vehicle) return res.status(404).json({ error: 'Fahrzeug nicht gefunden' });
+
+  const result = await forcePollVehicle(req.db, vehicle, req.tenantId);
+
+  if (!result.ok && result.error === 'cap_reached') {
+    return res.status(429).json({
+      error: 'Tages-Cap erreicht — Polling pausiert bis morgen.',
+      cap: result.cap,
+    });
+  }
+  if (!result.ok) {
+    return res.status(result.status || 502).json({
+      error: result.error,
+      cap: result.cap,
+    });
+  }
+  res.json(result);
 });
 
 /** GET /api/commands/:vehicleId/software-update — Status der Tesla-OTA.

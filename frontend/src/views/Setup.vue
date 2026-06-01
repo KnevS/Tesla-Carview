@@ -1,5 +1,12 @@
 <template>
-  <div class="min-h-screen bg-tesla-dark flex items-center justify-center px-4">
+  <div class="min-h-screen bg-tesla-dark flex items-center justify-center px-4 relative">
+
+    <!-- Sprach-Switcher (oben rechts), damit der Admin den Erst-Setup-Assistenten
+         direkt in seiner bevorzugten Sprache durchlaufen kann. -->
+    <div class="absolute top-4 right-4 z-10">
+      <LangSwitcher compact v-tooltip="$t('lang.switcherHint')" />
+    </div>
+
     <div class="w-full max-w-md space-y-6">
 
       <!-- Logo / Header -->
@@ -193,6 +200,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../api.js';
 import AppIcon from '../components/AppIcon.vue';
+import LangSwitcher from '../components/LangSwitcher.vue';
 
 const { t } = useI18n();
 const step = ref(1);

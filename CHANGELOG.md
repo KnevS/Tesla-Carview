@@ -7,6 +7,155 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.10] - 2026-06-01
+
+### Neu
+
+- **User-Einladung mit Name + E-Mail-Versand**: Die Admin-Form unter `Benutzer → Einladungslink erstellen` akzeptiert jetzt einen optionalen Anzeigenamen und eine optionale E-Mail-Adresse. Wird die Checkbox „Link per E-Mail senden" aktiviert und SMTP ist im Mandanten konfiguriert (`tenant_settings.smtp.*`), schickt das Backend den Einladungslink direkt per `nodemailer` an die angegebene Adresse — der Admin muss den Link nicht mehr manuell weitergeben. Versendete Einladungen zeigen ein `✉ gesendet`-Badge in der Liste. Bei fehlendem SMTP gibt es eine klare Meldung; der Link bleibt zum manuellen Kopieren stehen.
+- **Akzept-Flow übernimmt E-Mail**: `POST /api/user-invites/:token/accept` setzt die Invite-E-Mail beim Anlegen des Users in `users.email` (sofern vorhanden), sodass der neue Nutzer ohne extra Klick eine kontaktierbare Adresse hat.
+
+### Technisch
+
+- Schema: `user_invites` um `display_name`, `email` und `email_sent_at` erweitert (Migration + frisches CREATE TABLE).
+- `routes/users.js POST /invite` validiert `display_name` (≤80) + `email` (RFC) + `send_email` (boolean) via zod. Audit-Log enthält `email`, `email_sent`, `email_error`.
+- `routes/userInvites.js` (public): `validate` liefert `displayName` + `email`; `accept` reicht `email` an `createUser()` durch.
+
+---
+
+## [v3.4.9] - 2026-06-01
+
+### Neu
+
+- **Telegram `/classify` — Fahrt direkt im Chat klassifizieren**: Neuer Bot-Befehl zeigt die letzte beendete Fahrt mit Datum, Strecke und aktueller Markierung. Inline-Buttons 🏠 Privat / 💼 Geschäftlich / 🏢 Pendel setzen `trips.trip_type` sofort und schlagen automatisch die nächst-ältere Fahrt vor, sodass mehrere Fahrten in Reihe klassifiziert werden können. Finanzamt-gesperrte Fahrten (`locked_at IS NOT NULL`) werden übersprungen. Jede Änderung landet als `telegram_classify_trip` in `audit_logs` mit `trip_id`, alter und neuer Klassifikation. Ergänzt das `/help`-Menü.
+
+---
+
+## [v3.4.8] - 2026-06-01
+
+### Neu
+
+- **Telegram-Push für proaktive Events**: Ladung beendet, Service-Erinnerungen, Notification-Rules (SOC-Alarme, Geofence-Events) und neue Software-Versionen kommen jetzt zusätzlich zur WebPush-Notification auch im Telegram-Bot an. Beide Kanäle laufen parallel über `notifyService.notifyAllInTenant()` — wer keinen Telegram-Account verknüpft hat, sieht nur die Web-Push, wer beides nutzt, bekommt beides. Sentry-Alarm lief bereits über diesen Kanal (seit v3.3.3), war aber der einzige Trigger.
+- **Software-Update-Erkennung mit Push**: Beim ersten Sync nach einer Firmware-Aktualisierung erkennt der DataSync die neue `car_version` und schickt eine Notification mit der Version. Beim allerersten Tracking eines Fahrzeugs wird die Push unterdrückt (sonst würde jede Bestandsversion eine Erinnerung auslösen).
+
+### Refactored
+
+- **Notification-Pipeline konsolidiert**: Die alte `services/notifications.js` (WebPush-only, fahrzeug-basiert via `push_subscriptions`) wurde gelöscht. `dataSync.js` und `serviceReminders.js` nutzen jetzt einheitlich `notifyService.notifyAllInTenant()`. Vorteil: jede Mutation, die historisch nur Web-Push triggerte, deckt automatisch alle konfigurierten Channels ab. Audit-Konsistenz für die Multi-Channel-Strategie.
+
+---
+
+## [v3.4.7] - 2026-06-01
+
+### Neu
+
+- **Telegram-Inline-Buttons unter `/status`**: Neun Schnell-Aktionen direkt im Chat statt Tippen — 🔒 Lock / 🔓 Unlock, ❄️ Klima an / aus, 🛡 Sentry an / aus, ⚡ Laden start / stop, ⟳ Aktualisieren. Klick triggert den passenden Tesla-Befehl via `apiProxyPost` (gleiche Pipeline wie Frontend-Control-View). Nach jeder Aktion wird der Status neu gerendert, sodass die Wirkung direkt sichtbar ist.
+- **Confirm-Schritt für Unlock**: 🔓 Unlock ist die einzige sicherheitskritische Aktion — sie fragt vorher "⚠️ Wirklich entriegeln?" mit zwei Buttons (✅ Ja / ✖ Abbrechen). Ohne Bestätigung wird kein Command an Tesla geschickt.
+- **Audit-Log pro Aktion**: Jede Telegram-Vehicle-Action (auch Fehlschläge) landet als `telegram_command` in `audit_logs` mit `vehicle_id`, `command`, `body` und `result/error`. Konsistenz-Pflicht für Mutations gewahrt.
+- **`/help` erweitert**: Hinweis auf Inline-Buttons unter `/status`.
+
+---
+
+## [v3.4.6] - 2026-06-01
+
+### Neu
+
+- **Telegram-Info-Befehle**: Fünf neue Read-only-Befehle für den Bot — `/location` (aktueller Standort mit Google-Maps-Link aus der letzten Telemetry-Position), `/range` (Restreichweite + SOC + Stand aus `battery_snapshots`), `/today` (Tagesbilanz: Anzahl Fahrten, km, Anzahl Ladungen, kWh, Kosten — Tagesgrenze in Europe/Berlin), `/service` (nächste fällige Wartungsintervalle, mit "ueberfaellig"-Markierung), `/firmware` (aktuelle Software-Version + Vorgänger aus `firmware_versions`). Alle Befehle nutzen das MarkdownV2-Escape-Pattern aus v3.4.3.
+- **Help-Text erweitert**: `/help` listet jetzt alle neun Befehle inklusive der neuen.
+
+### Behoben
+
+- **`/battery` zeigte "Letzte Ladung: –"**: Statt `charge_energy_added` heißt die Spalte in `charging_sessions` real `energy_added_kwh`. Stiller Bug (kein Crash, nur leere Anzeige). Jetzt richtige Spalte; auch `/today` greift korrekt darauf zu.
+
+---
+
+## [v3.4.5] - 2026-06-01
+
+### Behoben
+
+- **OFFLINE-Anzeige nach Auto-Deploy**: Bei jedem Backend-Restart kappte der Container den persistenten Tesla→Backend FleetTelemetry-WebSocket. Der Tesla baut die Verbindung erst beim nächsten State-Event neu auf (Fahrt, Wake, Ladung). In der Zwischenzeit hielt der Poller `vehicle.telemetry_last_signal_at` für aktuell und übersprang das Polling-Fallback — Fahrzeugkarte zeigte "OFFLINE · kein Signal", Fahrten- und Schlafmonitor-Daten alterten unbemerkt. Beim Boot wird `telemetry_last_signal_at` jetzt auf `NULL` zurückgesetzt; der Polling-Loop übernimmt damit sofort, bis der Stream wieder etabliert ist.
+
+### Neu
+
+- **Refresh-Button im EditorialStatusBar**: Notbremse für OFFLINE-Status. Klickt der Nutzer "⟳ Aktualisieren" wird ein einmaliger `vehicle_data`-Force-Poll ausgelöst (verbraucht 1 vom Tages-Cap). Die Antwort enthält den verbleibenden Cap-Stand, das Frontend zeigt "Aktualisiert ({day}/{dayMax} heute)" bzw. bei erschöpftem Cap "Tages-Cap erreicht — Pause bis morgen". Backend: neuer Endpoint `POST /api/commands/:vehicleId/refresh`, intern via neuer Export `forcePollVehicle()` aus `poller.js`.
+
+---
+
+## [v3.4.4] - 2026-06-01
+
+### Behoben
+
+- **Telegram-Befehle scheitern mit `no such column: is_active`**: `/status` und `/battery` lasen Fahrzeuge mit `SELECT * FROM vehicles WHERE is_active=1 LIMIT 3`, doch die `vehicles`-Tabelle hat keine `is_active`-Spalte (das Flag existiert nur auf `users`). Der Bot antwortete mit `❌ Fehler: no such column: is_active`. Beide Stellen verwenden jetzt `ORDER BY id LIMIT 3`. Das `bot.catch()` aus v3.4.3 verhindert weiterhin, dass ein einzelner Befehl den gesamten Bot lahmlegt — der `is_active`-Fehler war aber nutzersichtbar pro Befehl.
+
+---
+
+## [v3.4.3] - 2026-06-01
+
+### Behoben
+
+- **Telegram-Bot reagiert nicht auf Befehle**: `/status`, `/battery` und `/trips` erzeugten Nachrichten mit unescapeten `.`-Zeichen aus `toLocaleString('de-DE')` (Tausenderpunkt im Kilometerstand), `toFixed()` (Dezimalpunkt bei kWh/km) und `toLocaleDateString('de-DE')` (Trennzeichen im Datum). MarkdownV2 markiert `.` als reserviert, Telegram antwortet mit `400 Bad Request: can't parse entities`. Der Polling-Loop crasht beim ersten Versuch und reagiert ab da nicht mehr. Alle drei Stellen escapen die dynamischen Werte jetzt über `esc()`. Zusätzlich fängt ein globaler `bot.catch()` einzelne Handler-Fehler ab, damit ein Bug in einem Befehl nicht den ganzen Bot stumm schaltet.
+
+---
+
+## [v3.4.2] - 2026-05-30
+
+### Behoben
+
+- **Telegram-Bot stumm hinter Reverse-Proxy**: `initTelegramBot()` registrierte einen Webhook auf `FRONTEND_URL/api/telegram/webhook`, sobald kein dediziertes `TELEGRAM_WEBHOOK_URL` gesetzt war. Steht davor eine Auth-Middleware (z. B. Authelia), antwortet die Route mit 401 — Telegram konnte den Bot daher nicht erreichen, gleichzeitig blieb Long-Polling deaktiviert. Fallback auf `FRONTEND_URL` entfernt: ohne explizite `TELEGRAM_WEBHOOK_URL` läuft der Bot jetzt im Polling-Modus.
+
+---
+
+## [v3.4.1] - 2026-05-26
+
+### Neu
+
+- **Monta für alle Fahrzeuge**: Monta-Integration nicht mehr auf Dienstwagen beschränkt. Privatfahrzeuge sehen Heim-Ladesessions (🏠-Badge, Monta-Sync); Kostenabrechnung (PDF, Erstattungsvorlage, Betrag-Spalten) bleibt Dienstwagen vorbehalten.
+- **Wizard-Restart-Button**: Abschluss-Seite des Admin-Setup-Assistenten bietet nach Telegram-Konfiguration eine In-App-Schaltfläche zum Container-Neustart inkl. 12-Sekunden-Countdown und automatischem Seitenreload.
+- **Admin-Einstellungen**: Monitoring-, Backup- und Externe-API-Sektionen (OCM, HERE Maps) aus der System-Seite in Admin-Einstellungen verschoben (gehören inhaltlich dorthin).
+
+### Behoben
+
+- **Profil-Seite blank**: fehlender `usePrefsStore`-Import führte zu leerem Profil (Regression aus v3.4.0).
+- **VAPID-Fehlermeldung**: technische Fehlermeldung `VAPID-Key nicht konfiguriert (Admin: .env setzen)` durch benutzerfreundlichen Text ersetzt (Profil + Einstellungen).
+- **Telegram-Fehlermeldung**: gleicher Fix für nicht konfigurierten Telegram-Bot.
+- **`generateVAPIDKeys is not a function`**: `web-push` ESM-Export liefert die Funktion auf `default`, nicht als Named-Export — Fallback-Muster behebt den Fehler beim Key-Generieren im Admin-UI.
+
+### Technisch
+
+- `POST /api/system/container-restart` — neuer Endpoint (Admin, audit-logged); sendet 200 bevor `process.exit(0)` nach 400 ms aufgerufen wird; Docker `restart: unless-stopped` startet den Container neu.
+- `docker-compose.prod.yml`: `backend/src/routes/system.js` als Volume-Mount hinzugefügt (verhindert Überschreiben durch Image-Updates, analog zu `demo.js`).
+
+---
+
+## [v3.4.0] - 2026-05-25
+
+### Neu - Admin-Konfiguration via UI
+
+- Tesla Fleet-API Zugangsdaten via Admin-UI setzbar (kein .env-Bearbeiten mehr noetig)
+- VAPID-Keys fuer Web Push direkt im Browser generierbar
+- Telegram Bot Token via UI konfigurierbar
+- Grok/xAI API Key via UI setzbar
+- ABRP Global App-Key via UI setzbar
+- Neuer configService.js: liest aus tenant_settings (DB), faellt auf .env zurueck
+
+### Neu - Admin-Setup-Assistent
+
+- AdminSetupWizard.vue: gefuehrt durch alle System-Konfigurationen
+- Wizard-Split: Admin-Setup-Assistent (System) vs. persoenlicher Wizard (Nutzer)
+
+### Geaendert
+
+- Fahrerverwaltung aus Profil in Admin-Einstellungen verschoben
+- Geofences aus Profil in Admin-Einstellungen verschoben
+
+### Technisch
+
+- teslaApi.js, telemetryConfig.js: DB vor .env fuer Tesla-Credentials
+- notifications.js, serviceReminders.js: DB vor .env fuer VAPID
+- grokService.js: DB vor .env fuer xAI-Key
+- abrpService.js: DB vor .env fuer ABRP-Key
+- telegramBot.js: liest Token beim Start aus tenant_settings
+
+---
+
 ## [v3.3.3] — 2026-05-24
 
 ### Neu — Benachrichtigungen: Web Push + Telegram Bot

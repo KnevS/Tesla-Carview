@@ -250,9 +250,15 @@
           </div>
         </div>
 
-        <!-- Monta-Konfiguration (nur Dienstwagen) -->
-        <div v-if="vProfile.category === 'company'" class="col-span-2 border-t border-gray-700 pt-3 space-y-3">
+        <!-- Monta-Konfiguration (alle Fahrzeuge) -->
+        <div class="col-span-2 border-t border-gray-700 pt-3 space-y-3">
           <p class="text-sm font-medium text-gray-300">Heimladen / Monta-Konfiguration</p>
+          <!-- Hinweis für Privatfahrzeuge -->
+          <p v-if="vProfile.category !== 'company'"
+             class="text-xs text-blue-300/90 bg-blue-900/20 border border-blue-700/30 rounded-lg px-3 py-2"
+             v-tooltip="'Für Dienstwagen steht zusätzlich eine monatliche Kostenabrechnung zur Verfügung.'">
+            ℹ️ Monta steht als Lade-Informationsquelle zur Verfügung. Die Kostenabrechnung ist Fahrzeugen der Kategorie <strong>Dienstwagen</strong> vorbehalten.
+          </p>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="label">Strompreis Wallbox (€/kWh)</label>
@@ -751,10 +757,10 @@
           </div>
           <div class="design-preview__label">
             <span class="block text-sm font-semibold flex items-center gap-1">
-              <span>{{ d.icon }}</span> {{ d.label }}
+              <span>{{ d.icon }}</span> {{ $t(`wizard.designs.${d.key}.label`, d.label) }}
               <span v-if="themeStore.designKey === d.key" class="text-tesla-red ml-auto">✓</span>
             </span>
-            <span class="block text-xs text-gray-400 mt-0.5">{{ d.tagline }}</span>
+            <span class="block text-xs text-gray-400 mt-0.5">{{ $t(`wizard.designs.${d.key}.tagline`, d.tagline) }}</span>
           </div>
         </button>
       </div>
@@ -775,7 +781,7 @@
               : 'border-gray-700 text-gray-400 hover:border-gray-500'"
             :style="themeStore.activeKey === t.key ? { backgroundColor: t.accent } : {}">
             <span class="w-4 h-4 rounded-full flex-shrink-0" :style="{ backgroundColor: t.accent }"></span>
-            {{ t.label }}
+            {{ $t(`wizard.themes.${t.key}.label`, t.label) }}
           </button>
         </div>
       </div>
@@ -947,7 +953,7 @@
 
           <!-- Bot nicht konfiguriert -->
           <div v-if="!tgBotConfigured" class="text-sm text-gray-500">
-            Telegram-Bot ist nicht konfiguriert. Admin muss <code class="text-xs bg-gray-800 px-1 rounded">TELEGRAM_BOT_TOKEN</code> in der <code class="text-xs bg-gray-800 px-1 rounded">.env</code> setzen.
+            Telegram-Benachrichtigungen sind auf diesem Server noch nicht verfügbar. Bitte wende dich an einen Administrator.
           </div>
 
           <!-- Verknüpft -->
@@ -1742,7 +1748,7 @@ async function subscribePush() {
   pushLoading.value = true; pushMsg.value = '';
   try {
     const { data } = await api.get('/notifications/vapid-public-key');
-    if (!data.key) { pushMsg.value = 'VAPID-Key nicht konfiguriert (Admin: .env setzen)'; pushMsgErr.value = true; return; }
+    if (!data.key) { pushMsg.value = 'Push-Benachrichtigungen sind auf diesem Server noch nicht eingerichtet. Bitte wende dich an einen Administrator.'; pushMsgErr.value = true; return; }
 
     const perm = await Notification.requestPermission();
     if (perm !== 'granted') { pushState.value = 'denied'; return; }

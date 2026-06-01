@@ -105,6 +105,15 @@ router.post('/init', setupRateLimit, setupTokenGate, async (req, res) => {
       const name = tenantName || 'Default';
       const tenantId = createTenant(slug, name);
       tenants = getAllTenants();
+      // Auto-Init: VAPID-Keys gleich erzeugen, damit Push beim ersten
+      // Login direkt funktioniert ohne Wizard-Klick. Fehler kippt das
+      // Setup nicht — ohne VAPID läuft die App trotzdem.
+      try {
+        const { ensureTenantAutoInit } = await import('../services/autoInit.js');
+        await ensureTenantAutoInit(tenantId);
+      } catch (err) {
+        console.warn('[Setup] AutoInit fehlgeschlagen:', err.message);
+      }
     }
 
     const db = getDb(tenants[0].id);

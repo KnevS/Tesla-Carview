@@ -7,6 +7,159 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.10] - 2026-06-01
+
+### New
+
+- **User invite with name + e-mail delivery**: The admin form under `Users → Create invite link` now accepts an optional display name and an optional e-mail address. Tick the “Send link by e-mail" checkbox and — if SMTP is configured for the tenant (`tenant_settings.smtp.*`) — the backend sends the invite link directly via `nodemailer`. Sent invites show a `✉ sent` badge in the list. Missing SMTP yields a clear warning; the link still stays visible for manual copy.
+- **Accept flow inherits e-mail**: `POST /api/user-invites/:token/accept` passes the invite's e-mail to `createUser()` so the new user already has a contact address without extra clicks.
+
+### Technical
+
+- Schema: `user_invites` extended with `display_name`, `email`, `email_sent_at` (migration + fresh CREATE TABLE).
+- `routes/users.js POST /invite` validates `display_name` (≤80), `email` (RFC) and `send_email` (boolean) via zod. Audit log includes `email`, `email_sent`, `email_error`.
+- `routes/userInvites.js` (public): `validate` returns `displayName` + `email`; `accept` forwards `email` to `createUser()`.
+
+---
+
+## [v3.4.9] - 2026-06-01
+
+### New
+
+- **Telegram `/classify` — classify a trip directly in the chat**: New bot command shows the latest completed trip with date, distance and current label. Inline buttons 🏠 Private / 💼 Business / 🏢 Commute set `trips.trip_type` instantly and suggest the next-older trip, so several trips can be classified in a row. Tax-locked trips (`locked_at IS NOT NULL`) are skipped. Every change is recorded as `telegram_classify_trip` in `audit_logs` with `trip_id`, old and new label. Added to the `/help` menu.
+
+---
+
+## [v3.4.8] - 2026-06-01
+
+### New
+
+- **Telegram push for proactive events**: Charging-complete, service reminders, notification rules (SOC alerts, geofence events) and new software versions now also reach the Telegram bot, in addition to Web Push. Both channels are dispatched through `notifyService.notifyAllInTenant()` — users without Telegram only see Web Push, users with both get both. Sentry alerts already ran through this pipeline (since v3.3.3), but it was the only trigger.
+- **Software update detection with push**: On first sync after a firmware upgrade, the data sync detects the new `car_version` and sends a notification. The very first vehicle tracking is suppressed (otherwise every existing version would generate a reminder).
+
+### Refactored
+
+- **Notification pipeline consolidated**: The old `services/notifications.js` (Web-Push-only, vehicle-based via `push_subscriptions`) was removed. `dataSync.js` and `serviceReminders.js` now uniformly use `notifyService.notifyAllInTenant()`. Benefit: every mutation that historically only triggered Web Push automatically covers all configured channels. Audit-consistency for the multi-channel strategy.
+
+---
+
+## [v3.4.7] - 2026-06-01
+
+### New
+
+- **Telegram inline buttons under `/status`**: Nine quick actions in the chat instead of typing commands — 🔒 Lock / 🔓 Unlock, ❄️ Climate on / off, 🛡 Sentry on / off, ⚡ Charge start / stop, ⟳ Refresh. Each click fires the matching Tesla command via `apiProxyPost` (same pipeline as the frontend Control view). After each action the status is re-rendered so the effect is immediately visible.
+- **Confirm step for Unlock**: 🔓 Unlock is the only security-critical action — it first asks "⚠️ Really unlock?" with two buttons (✅ Yes / ✖ Cancel). No command is sent to Tesla without confirmation.
+- **Audit log per action**: Every Telegram vehicle action (including failures) is written to `audit_logs` as `telegram_command` with `vehicle_id`, `command`, `body` and `result/error`. Honors the mutations-must-be-audited policy.
+- **`/help` extended**: Pointer to the inline buttons under `/status`.
+
+---
+
+## [v3.4.6] - 2026-06-01
+
+### New
+
+- **Telegram info commands**: Five new read-only bot commands — `/location` (current position with Google Maps link from the latest telemetry point), `/range` (remaining range + SOC + timestamp from `battery_snapshots`), `/today` (today's stats: trip count, km, charge count, kWh, cost — day boundary in Europe/Berlin), `/service` (next due maintenance intervals, with overdue flag), `/firmware` (current software version + previous from `firmware_versions`). All commands use the MarkdownV2-escape pattern from v3.4.3.
+- **Help text expanded**: `/help` now lists all nine commands including the new ones.
+
+### Fixed
+
+- **`/battery` showed "Last charge: –"**: The column in `charging_sessions` is `energy_added_kwh`, not `charge_energy_added`. Silent bug (no crash, just empty value). Now uses the correct column; `/today` also reads it correctly.
+
+---
+
+## [v3.4.5] - 2026-06-01
+
+### Fixed
+
+- **OFFLINE display after auto-deploy**: Each backend restart killed the persistent Tesla→backend FleetTelemetry WebSocket. The Tesla only rebuilds the connection on the next state event (drive, wake, charging). Until then the poller still considered `vehicle.telemetry_last_signal_at` fresh and skipped the polling fallback — the vehicle card showed "OFFLINE · no signal", drive and sleep monitor data aged unnoticed. On boot, `telemetry_last_signal_at` is now reset to `NULL`; the polling loop takes over immediately until the stream is re-established.
+
+### New
+
+- **Refresh button in EditorialStatusBar**: Emergency override for the OFFLINE state. When the user clicks "⟳ Refresh" a one-off `vehicle_data` force-poll is triggered (uses 1 of today's poll budget). The response carries the remaining cap; the frontend shows "Refreshed ({day}/{dayMax} today)" or, if exhausted, "Daily cap reached — paused until tomorrow". Backend: new endpoint `POST /api/commands/:vehicleId/refresh`, internally via new `forcePollVehicle()` export from `poller.js`.
+
+---
+
+## [v3.4.4] - 2026-06-01
+
+### Fixed
+
+- **Telegram commands fail with `no such column: is_active`**: `/status` and `/battery` read vehicles via `SELECT * FROM vehicles WHERE is_active=1 LIMIT 3`, but the `vehicles` table has no `is_active` column (the flag only exists on `users`). The bot replied with `❌ Error: no such column: is_active`. Both queries now use `ORDER BY id LIMIT 3`. The `bot.catch()` from v3.4.3 still prevents a single command from silencing the whole bot — but the `is_active` error was user-visible per command.
+
+---
+
+## [v3.4.3] - 2026-06-01
+
+### Fixed
+
+- **Telegram bot unresponsive to commands**: `/status`, `/battery` and `/trips` produced messages with unescaped `.` characters from `toLocaleString('de-DE')` (thousand-separator in odometer), `toFixed()` (decimal point in kWh/km) and `toLocaleDateString('de-DE')` (date separator). MarkdownV2 treats `.` as reserved, Telegram replies with `400 Bad Request: can't parse entities`. The polling loop crashes on the first attempt and stops responding. All three places now escape dynamic values through `esc()`. A global `bot.catch()` additionally absorbs single-handler errors so a bug in one command no longer silences the whole bot.
+
+---
+
+## [v3.4.2] - 2026-05-30
+
+### Fixed
+
+- **Telegram bot silent behind reverse proxy**: `initTelegramBot()` registered a webhook on `FRONTEND_URL/api/telegram/webhook` whenever no dedicated `TELEGRAM_WEBHOOK_URL` was set. If an auth middleware (e.g. Authelia) sits in front of the route, it responds with 401 — Telegram could not reach the bot and long-polling stayed disabled. Removed the `FRONTEND_URL` fallback: without an explicit `TELEGRAM_WEBHOOK_URL` the bot now runs in polling mode.
+
+---
+
+## [v3.4.1] - 2026-05-26
+
+### New
+
+- **Monta for all vehicles**: Monta integration is no longer limited to company cars. Private vehicles now see home-charging sessions (🏠 badge, Monta sync); billing features (PDF, reimbursement template, cost columns) remain exclusive to company cars.
+- **Wizard restart button**: The Admin Setup Wizard summary page now offers an in-app button to restart the backend container after Telegram configuration, with a 12-second countdown and automatic page reload.
+- **Admin settings consolidation**: Monitoring, backup, and external API sections (OCM, HERE Maps) moved from the System page to Admin Settings (where they logically belong).
+
+### Fixed
+
+- **Profile page blank**: missing `usePrefsStore` import caused an empty profile view (regression from v3.4.0).
+- **VAPID error message**: technical message `VAPID key not configured (Admin: set .env)` replaced with user-friendly text in Profile and Settings.
+- **Telegram error message**: same fix for unconfigured Telegram bot.
+- **`generateVAPIDKeys is not a function`**: `web-push` ESM exports the function on the `default` export, not as a named export — fallback pattern fixes key generation in the Admin UI.
+
+### Technical
+
+- `POST /api/system/container-restart` — new endpoint (admin only, audit-logged); sends 200 before calling `process.exit(0)` after 400 ms; Docker `restart: unless-stopped` brings the container back up.
+- `docker-compose.prod.yml`: `backend/src/routes/system.js` added as a volume mount (prevents overwrite by image updates, same pattern as `demo.js`).
+
+---
+
+## [v3.4.0] - 2026-05-25
+
+### New — Admin configuration via UI
+
+- Tesla Fleet API credentials configurable via Admin UI (no more `.env` editing required)
+- VAPID keys for Web Push can be generated directly in the browser
+- Telegram Bot token configurable via UI
+- Grok/xAI API key configurable via UI
+- ABRP global app key configurable via UI
+- New `configService.js`: reads from `tenant_settings` (DB), falls back to `.env`
+
+### New — Admin Setup Assistant
+
+- `AdminSetupWizard.vue`: guided through all system configuration steps
+- Wizard split: Admin Setup Assistant (system config, admins only) vs. personal wizard (all users)
+
+### Changed
+
+- Driver management moved from Profile to Admin Settings
+- Geofences moved from Profile to Admin Settings
+
+### Technical
+
+- `teslaApi.js`, `telemetryConfig.js`: DB before `.env` for Tesla credentials
+- `notifications.js`, `serviceReminders.js`: DB before `.env` for VAPID keys
+- `grokService.js`: DB before `.env` for xAI key
+- `abrpService.js`: DB before `.env` for ABRP key
+- `telegramBot.js`: reads token from `tenant_settings` on startup
+
+### Fixed
+
+- Design style and accent color selections in Profile now persist across page reloads (PR #70)
+
+---
+
 ## [v3.3.3] — 2026-05-24
 
 ### New — Notifications: Web Push + Telegram Bot

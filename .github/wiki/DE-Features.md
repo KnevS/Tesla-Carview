@@ -76,10 +76,13 @@ Alle Ladesitzungen werden automatisch protokolliert:
 Definiere Heim- und Lieblingsladepunkte unter **Einstellungen → Ladeorte** — Sitzungen werden automatisch zugeordnet, und ein kWh-Tarif für die Kostenberechnung wird gesetzt.
 
 ### Monta-Integration
-Monta-API-Key in den Einstellungen hinterlegen. Ladesitzungen synchronisieren sich automatisch mit korrekten kWh- und Kostendaten.
+Steht für **alle Fahrzeuge** zur Verfügung — pro Fahrzeug unter **Einstellungen → Fahrzeugprofil → Heimladen** konfigurieren:
+
+- **Privatfahrzeuge**: Monta-Sessions erscheinen als Heim-Ladungen (🏠-Badge, automatische Wallbox-Erkennung per Charge-Point-ID).
+- **Dienstwagen**: zusätzlich vollständige Kostenabrechnung — Monatsübersicht, PDF-Erstattungsblatt, Abrechnungsvorlage für den Arbeitgeber.
 
 ### Kostenabrechnung & PDF-Rechnung
-PDF-Rechnungen für die Erstattung (z. B. durch den Arbeitgeber) unter **Abrechnung → Rechnung erstellen** — vollständig clientseitig generiert.
+PDF-Rechnungen für die Erstattung (z. B. durch den Arbeitgeber) unter **Abrechnung → Rechnung erstellen** — vollständig clientseitig generiert. Abrechnungs-Funktionen sind ausschließlich für **Dienstwagen** verfügbar.
 
 ---
 
@@ -194,7 +197,7 @@ Ein schrittweiser Wizard führt durch die Erstkonfiguration und kann jederzeit u
 | 5 | Fleet Telemetry | Echtzeit-GPS pro Fahrzeug aktivieren |
 | 6 | Strompreis | Energiekosten pro Fahrzeug |
 | 7 | Legal | Impressum, Datenschutz, AGB (prüft auf offene Platzhalter) |
-| 8 | Externe APIs | Monta · OpenChargeMap · HERE Maps · Tibber · xAI |
+| 8 | Externe APIs | OpenChargeMap · HERE Maps · Tibber · xAI (Monta: pro Fahrzeug in Einstellungen) |
 | 9 | Monitoring | SMTP E-Mail-Versand · Anthropic-Key für KI-Autofix |
 | 10 | Design | Glass / Cyber / Minimal / Sport |
 | 11 | Akzentfarbe | Theme-Farbe |

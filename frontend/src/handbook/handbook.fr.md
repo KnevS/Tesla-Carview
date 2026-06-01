@@ -19,7 +19,7 @@ Tesla Carview est une application **auto-hébergée** d'enregistrement de donné
 - 🎮 **Commandes** — Climatisation, portes, lumières — directement depuis l'application
 - 📝 **Carnet d'entretien** — Entretiens, réparations, coûts avec date
 - 📤 **Export** — CSV/JSON pour toutes les données, sauvegarde complète au format ZIP
-- 🔔 **Notifications push** — Notification du navigateur en fin de recharge
+- 🔔 **Notifications push** — Notifications navigateur pour la fin de recharge, l'alarme Sentry, la batterie faible, etc. ; avec boutons d'action (démarrer la clim, trouver une borne, plus tard), regroupement par tag (les mises à jour de charge se remplacent) et miroir automatique vers iPhone/Apple Watch
 - 📱 **Optimisé mobile** — Pleinement utilisable sur iPhone/iPad (Safari), Android et bureau
 
 ## 🔀 Ordre de tri {#sort-order}
@@ -93,6 +93,8 @@ Après la première connexion, l'**assistant de configuration** s'ouvre automati
 | **Design → Résumé** | Préférences ; toutes les modifications sont enregistrées à la dernière étape |
 
 > **Conseil :** Chaque étape peut être ignorée — l'assistant peut être relancé à tout moment.
+
+> **🌐 Sélecteur de langue :** Chaque assistant affiche un sélecteur de langue compact en haut à droite. La langue stockée dans le profil utilisateur ou la valeur par défaut du locataire est appliquée automatiquement à la connexion ; le sélecteur permet de changer la langue en cours d'assistant sans le quitter.
 
 ## 🔑 Configurer une Virtual Key {#virtual-key}
 
@@ -304,11 +306,14 @@ Tesla facture chaque appel `/vehicle_data` (≈ 0,005 €/appel). Sans Fleet Tel
 
 **Réduire les coûts :** configurer Fleet Telemetry (→ ~3,60 €/mois), activer un limite mensuelle dans Paramètres → Connexion Tesla.
 
-## 🔌 Intégration Monta (facturation) {#monta}
+## 🔌 Intégration Monta (recharge domicile & facturation) {#monta}
 
-Pour les conducteurs de véhicules de fonction : Tesla Carview peut récupérer les données de recharge directement depuis votre **wallbox Monta** et en générer un décompte mensuel pour votre employeur.
+Tesla Carview peut récupérer les données de recharge directement depuis votre **wallbox Monta**. L'intégration est disponible pour **tous les véhicules** :
 
-> ⚠️ L'intégration Monta n'est disponible que pour les véhicules de catégorie **Véhicule de fonction** (Paramètres → Profil du véhicule → Catégorie).
+- **Véhicules privés** : les sessions Monta sont affichées comme informations de recharge (badge 🏠 dans l'historique, détection de la wallbox domicile).
+- **Véhicules de fonction** : en plus, la facturation complète est disponible — récapitulatif mensuel, feuille PDF de remboursement et modèle de décompte pour l'employeur.
+
+> ℹ️ Les fonctions de facturation (PDF, modèle de remboursement) sont réservées aux véhicules de la catégorie **Véhicule de fonction**. Les données de recharge Monta sont disponibles pour tous les véhicules.
 
 ### Étape 1 – Créer une clé API Monta
 
@@ -327,10 +332,9 @@ La clé n'est visible qu'une seule fois — saisissez-la immédiatement dans Tes
 ### Étape 3 – Saisie dans Tesla Carview
 
 1. Allez dans **Paramètres → Profil du véhicule**.
-2. Choisissez la catégorie **💼 Véhicule de fonction**.
-3. Saisissez le **prix de l'électricité wallbox (€/kWh)** — par ex. `0.34`.
-4. Ajoutez l'**ID du point de recharge Monta** et la **clé API Monta**.
-5. Cliquez sur **Enregistrer**.
+2. Saisissez le **prix de l'électricité wallbox (€/kWh)** — par ex. `0.34` (base de facturation pour les véhicules de fonction).
+3. Ajoutez l'**ID du point de recharge Monta** et la **clé API Monta**.
+4. Cliquez sur **Enregistrer**.
 
 ### Détection de la wallbox domestique
 

@@ -154,9 +154,15 @@
           </div>
         </div>
 
-        <!-- Monta-Konfiguration (nur Dienstwagen) -->
-        <div v-if="vProfile.category === 'company'" class="col-span-2 border-t border-gray-700 pt-3 space-y-3">
+        <!-- Monta-Konfiguration (alle Fahrzeuge) -->
+        <div class="col-span-2 border-t border-gray-700 pt-3 space-y-3">
           <p class="text-sm font-medium text-gray-300">Heimladen / Monta-Konfiguration</p>
+          <!-- Hinweis für Privatfahrzeuge -->
+          <p v-if="vProfile.category !== 'company'"
+             class="text-xs text-blue-300/90 bg-blue-900/20 border border-blue-700/30 rounded-lg px-3 py-2"
+             v-tooltip="'Für Dienstwagen steht zusätzlich eine monatliche Kostenabrechnung zur Verfügung.'">
+            ℹ️ Monta steht als Lade-Informationsquelle zur Verfügung. Die Kostenabrechnung ist Fahrzeugen der Kategorie <strong>Dienstwagen</strong> vorbehalten.
+          </p>
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="label">Strompreis Wallbox (€/kWh)</label>
@@ -188,61 +194,6 @@
       </div>
       <p v-else class="text-gray-400 text-sm">Kein Fahrzeug verbunden.</p>
       </fieldset>
-    </SortableSection>
-
-    <!-- Fahrerverwaltung -->
-    <SortableSection
-      :sortable="false"
-      page-id="profile"
-      section-id="drivers"
-      title="Fahrer &amp; Profile"
-      icon="👤"
-      :collapsed="isCollapsed('drivers')"
-      @toggle="toggle('drivers')"
-    >
-      <div class="space-y-2">
-        <div v-for="d in drivers" :key="d.id"
-          class="flex items-center gap-3 bg-gray-800 rounded-xl px-3 py-2">
-          <div class="relative flex-shrink-0">
-            <button @click="editingColor = editingColor === d.id ? null : d.id"
-              class="w-5 h-5 rounded-full border-2 border-gray-600 hover:border-white transition flex-shrink-0"
-              :style="{ background: d.color }"
-              v-tooltip="'Farbe ändern'"></button>
-            <div v-if="editingColor === d.id"
-              class="absolute left-0 top-full mt-1 z-20 bg-gray-900 border border-gray-600 rounded-xl p-2 flex flex-wrap gap-1.5 shadow-xl"
-              style="width: 144px" @click.stop>
-              <button v-for="c in DRIVER_COLORS" :key="c"
-                class="w-7 h-7 rounded-full border-2 transition hover:scale-110"
-                :class="d.color === c ? 'border-white' : 'border-transparent'"
-                :style="{ background: c }"
-                @click="saveDriverColor(d, c)"></button>
-            </div>
-          </div>
-          <input :value="d.name"
-            @change="e => saveDriverName(d, e.target.value)"
-            class="flex-1 bg-transparent text-white text-sm focus:outline-none border-b border-transparent focus:border-gray-500 py-0.5 min-w-0"
-            :placeholder="'Name'" />
-          <button @click="setDefaultDriver(d)"
-            class="text-xs px-2 py-0.5 rounded-full transition flex-shrink-0"
-            :class="d.is_default ? 'bg-tesla-red text-white' : 'bg-gray-700 text-gray-400 hover:text-white'"
-            v-tooltip="d.is_default ? 'Standard-Fahrer – wird bei neuen Fahrten auto-zugewiesen' : 'Als Standard-Fahrer setzen'">
-            {{ d.is_default ? '★ Standard' : '☆ Standard' }}
-          </button>
-          <button @click="deleteDriver(d)"
-            class="text-gray-600 hover:text-red-400 transition text-sm flex-shrink-0"
-            v-tooltip="'Fahrer löschen – bestehende Fahrten werden auf Kein Fahrer gesetzt'">✕</button>
-        </div>
-        <p v-if="!drivers.length" class="text-gray-500 text-sm">Noch keine Fahrer angelegt.</p>
-      </div>
-      <div class="flex gap-2">
-        <input v-model="newDriverName" type="text" placeholder="Name (z.B. Sven)"
-          class="flex-1 bg-gray-700 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:ring-1 focus:ring-tesla-red"
-          @keyup.enter="addDriver" />
-        <button @click="addDriver" :disabled="!newDriverName.trim()" class="btn-primary text-sm">
-          + Hinzufügen
-        </button>
-      </div>
-      <p v-if="driverMsg" class="text-sm" :class="driverOk ? 'text-green-400' : 'text-red-400'">{{ driverMsg }}</p>
     </SortableSection>
 
     <!-- MFA -->
@@ -323,20 +274,6 @@
       </div>
     </SortableSection>
 
-    <!-- Geofences -->
-    <SortableSection
-      v-if="appStore.selectedVehicle"
-      :sortable="false"
-      page-id="profile"
-      section-id="geofences"
-      :title="$t('settings.geofenceTitle')"
-      icon="📍"
-      :collapsed="isCollapsed('geofences')"
-      @toggle="toggle('geofences')"
-    >
-      <GeofenceManager />
-    </SortableSection>
-
     <!-- Passwort ändern -->
     <SortableSection
       :sortable="false"
@@ -399,7 +336,7 @@
       </p>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <button v-for="d in DESIGNS" :key="d.key"
-          @click="themeStore.setDesign(d.key)"
+          @click="selectDesign(d.key)"
           class="design-preview text-left"
           :class="[
             `design-preview--${d.key}`,
@@ -412,10 +349,10 @@
           </div>
           <div class="design-preview__label">
             <span class="block text-sm font-semibold flex items-center gap-1">
-              <span>{{ d.icon }}</span> {{ d.label }}
+              <span>{{ d.icon }}</span> {{ $t(`wizard.designs.${d.key}.label`, d.label) }}
               <span v-if="themeStore.designKey === d.key" class="text-tesla-red ml-auto">✓</span>
             </span>
-            <span class="block text-xs text-gray-400 mt-0.5">{{ d.tagline }}</span>
+            <span class="block text-xs text-gray-400 mt-0.5">{{ $t(`wizard.designs.${d.key}.tagline`, d.tagline) }}</span>
           </div>
         </button>
       </div>
@@ -429,14 +366,14 @@
         <p class="text-xs text-gray-500">Akzentfarbe für Schaltflächen und Navigation. Wird lokal gespeichert.</p>
         <div class="flex flex-wrap gap-3">
           <button v-for="t in THEMES" :key="t.key"
-            @click="themeStore.apply(t.key)"
+            @click="selectAccent(t.key)"
             class="flex items-center gap-2 px-3 py-2 rounded-xl border-2 text-sm transition"
             :class="themeStore.activeKey === t.key
               ? 'border-white text-white'
               : 'border-gray-700 text-gray-400 hover:border-gray-500'"
             :style="themeStore.activeKey === t.key ? { backgroundColor: t.accent } : {}">
             <span class="w-4 h-4 rounded-full flex-shrink-0" :style="{ backgroundColor: t.accent }"></span>
-            {{ t.label }}
+            {{ $t(`wizard.themes.${t.key}.label`, t.label) }}
           </button>
         </div>
       </div>
@@ -536,7 +473,7 @@
             <InfoTip text="Erhalte Benachrichtigungen (Ladeende, Akku-Warnung, Wächter-Alarm, Fahrtenbuch-Erinnerung) direkt im Telegram-Messenger — ohne App geöffnet zu haben." />
           </h4>
           <div v-if="!tgBotConfigured" class="text-sm text-gray-500">
-            Telegram-Bot ist nicht konfiguriert. Admin muss <code class="text-xs bg-gray-800 px-1 rounded">TELEGRAM_BOT_TOKEN</code> in der <code class="text-xs bg-gray-800 px-1 rounded">.env</code> setzen.
+            Telegram-Benachrichtigungen sind auf diesem Server noch nicht verfügbar. Bitte wende dich an einen Administrator.
           </div>
           <div v-else-if="tgLinked" class="space-y-2">
             <div class="flex items-center gap-2 text-sm text-green-400">
@@ -623,15 +560,15 @@ import api from '../api.js';
 import { useAuthStore } from '../store/auth.js';
 import { useAppStore }  from '../store/index.js';
 import { useNavStore }   from '../store/nav.js';
-import GeofenceManager from '../components/GeofenceManager.vue';
 import AppIcon from '../components/AppIcon.vue';
 import { useThemeStore, THEMES, DESIGNS } from '../store/theme.js';
 import { useLangStore, LANGS } from '../store/lang.js';
 import SortableSection from '../components/SortableSection.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
 import InfoTip from '../components/InfoTip.vue';
+import { usePrefsStore } from '../store/prefs.js';
 
-const PROFILE_SECTIONS = ['language', 'vehicle', 'drivers', 'mfa', 'passkey', 'geofences', 'password', 'audit', 'appearance', 'notifications'];
+const PROFILE_SECTIONS = ['language', 'vehicle', 'mfa', 'passkey', 'password', 'audit', 'appearance', 'notifications'];
 const { isCollapsed, toggle } = usePageLayout('profile', PROFILE_SECTIONS);
 
 const auth     = useAuthStore();
@@ -664,6 +601,10 @@ const groupBorder = id => ({
 }[id] || 'border-gray-700');
 
 const themeStore = useThemeStore();
+const prefsStore = usePrefsStore();
+
+function selectDesign(key) { themeStore.setDesign(key); prefsStore.set("theme_design", key); }
+function selectAccent(key) { themeStore.apply(key); prefsStore.set("theme_color", key); }
 const langStore  = useLangStore();
 
 // ── Sprache ──
@@ -675,56 +616,16 @@ async function onPickLang(code) {
 }
 
 // ── Fahrerverwaltung ──
-const DRIVER_COLORS = [
-  '#6b7280','#ef4444','#f97316','#eab308',
-  '#22c55e','#3b82f6','#a855f7','#ec4899',
-];
-const drivers       = ref([]);
-const newDriverName = ref('');
-const driverMsg     = ref('');
-const driverOk      = ref(false);
-const editingColor  = ref(null);
 
-async function loadDrivers() {
-  const { data } = await api.get('/drivers');
-  drivers.value = data;
-}
 
-async function addDriver() {
-  const name = newDriverName.value.trim();
-  if (!name) return;
-  try {
-    await api.post('/drivers', { name, color: '#6b7280' });
-    newDriverName.value = '';
-    driverMsg.value = 'Fahrer gespeichert.'; driverOk.value = true;
-    await loadDrivers();
-  } catch { driverMsg.value = 'Fehler beim Speichern.'; driverOk.value = false; }
-  setTimeout(() => { driverMsg.value = ''; }, 2500);
-}
 
-async function saveDriverName(driver, name) {
-  if (!name.trim()) return;
-  await api.patch(`/drivers/${driver.id}`, { name: name.trim() });
-  driver.name = name.trim();
-}
 
-async function saveDriverColor(driver, color) {
-  editingColor.value = null;
-  await api.patch(`/drivers/${driver.id}`, { color });
-  driver.color = color;
-}
 
-async function setDefaultDriver(driver) {
-  const newDefault = driver.is_default ? 0 : 1;
-  await api.patch(`/drivers/${driver.id}`, { is_default: newDefault });
-  await loadDrivers();
-}
 
-async function deleteDriver(driver) {
-  if (!confirm(`Fahrer "${driver.name}" löschen? Bestehende Fahrten werden auf "kein Fahrer" gesetzt.`)) return;
-  await api.delete(`/drivers/${driver.id}`);
-  await loadDrivers();
-}
+
+
+
+
 
 // ── Fahrzeugprofil ──
 const teslaConnectedStatus = ref(false);
@@ -933,7 +834,7 @@ async function subscribePush() {
   pushLoading.value = true; pushMsg.value = '';
   try {
     const { data } = await api.get('/notifications/vapid-public-key');
-    if (!data.key) { pushMsg.value = 'VAPID-Key nicht konfiguriert (Admin: .env setzen)'; pushMsgErr.value = true; return; }
+    if (!data.key) { pushMsg.value = 'Push-Benachrichtigungen sind auf diesem Server noch nicht eingerichtet. Bitte wende dich an einen Administrator.'; pushMsgErr.value = true; return; }
     const perm = await Notification.requestPermission();
     if (perm !== 'granted') { pushState.value = 'denied'; return; }
     if (!_swReg) _swReg = await navigator.serviceWorker.ready;
@@ -1104,7 +1005,6 @@ async function saveNotifPrefs() {
 }
 
 onMounted(async () => {
-  loadDrivers();
   loadPasskeys();
   loadTgStatus();
   loadNotifPrefs();

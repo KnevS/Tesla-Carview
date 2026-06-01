@@ -1,3 +1,5 @@
+import { getTenantSetting } from './configService.js';
+
 /**
  * xAI Grok-Service — Streaming-Chat mit Fahrzeugkontext.
  *
@@ -100,7 +102,7 @@ export function buildContext(db, vehicleId) {
  * @param {Function} onDone  - Callback(fullText, tokensIn, tokensOut)
  */
 export async function streamChat(db, chatId, msgId, messages, res, onDone) {
-  const apiKey = process.env.XAI_API_KEY;
+  const apiKey = getTenantSetting(db, 'xai.api_key', 'XAI_API_KEY');
   if (!apiKey) {
     res.write(`data: ${JSON.stringify({ error: 'XAI_API_KEY nicht konfiguriert' })}\n\n`);
     res.end();

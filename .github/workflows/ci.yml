@@ -30,9 +30,12 @@ jobs:
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
 
-      - name: Syntax-Check
-        run: node --input-type=module --eval "console.log('Backend syntax check passed')"
-        shell: bash
+      # ESLint mit no-undef (+ ein paar Bug-Regeln) faengt undefinierte
+      # Bezeichner ab: fehlende/auskommentierte Imports, Tippfehler in
+      # Variablennamen, fehlende Funktionsargumente. Diese Bugs kompilieren
+      # sauber durch und crashen sonst erst zur Laufzeit.
+      - name: Lint (ESLint)
+        run: npm run lint
 
       # npm audit blockiert bei high/critical — moderate ist akzeptabel
       # (transitive Deps, die wir nicht direkt kontrollieren).
@@ -60,6 +63,11 @@ jobs:
       - name: Security Audit (npm audit)
         run: npm audit --audit-level=high
         continue-on-error: false
+
+      # ESLint mit no-undef faengt undefinierte Bezeichner in JS + Vue-SFCs
+      # ab (fehlende Imports, Tippfehler) — der vite build sieht diese nicht.
+      - name: Lint (ESLint)
+        run: npm run lint
 
       - name: Build
         run: npm run build
