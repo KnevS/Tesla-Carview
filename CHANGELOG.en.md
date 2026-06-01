@@ -7,6 +7,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.5] - 2026-06-01
+
+### Fixed
+
+- **OFFLINE display after auto-deploy**: Each backend restart killed the persistent Tesla→backend FleetTelemetry WebSocket. The Tesla only rebuilds the connection on the next state event (drive, wake, charging). Until then the poller still considered `vehicle.telemetry_last_signal_at` fresh and skipped the polling fallback — the vehicle card showed "OFFLINE · no signal", drive and sleep monitor data aged unnoticed. On boot, `telemetry_last_signal_at` is now reset to `NULL`; the polling loop takes over immediately until the stream is re-established.
+
+### New
+
+- **Refresh button in EditorialStatusBar**: Emergency override for the OFFLINE state. When the user clicks "⟳ Refresh" a one-off `vehicle_data` force-poll is triggered (uses 1 of today's poll budget). The response carries the remaining cap; the frontend shows "Refreshed ({day}/{dayMax} today)" or, if exhausted, "Daily cap reached — paused until tomorrow". Backend: new endpoint `POST /api/commands/:vehicleId/refresh`, internally via new `forcePollVehicle()` export from `poller.js`.
+
+---
+
 ## [v3.4.4] - 2026-06-01
 
 ### Fixed
