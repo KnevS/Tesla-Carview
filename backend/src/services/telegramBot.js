@@ -17,6 +17,11 @@
  *  /status        — Fahrzeugstatus (Batterie, km, Verriegelung)
  *  /battery       — Detailliertere Akkuinfos
  *  /trips         — Letzte 5 Fahrten
+ *  /location      — Aktueller Standort (Google-Maps-Link)
+ *  /range         — Restreichweite + verbleibende km bei aktuellem Verbrauch
+ *  /today         — Tagesbilanz (km, kWh, Kosten, Anzahl Fahrten)
+ *  /service       — Naechste faellige Wartung
+ *  /firmware      — Aktuelle Software-Version + letztes Update
  *  /help          — Befehlsliste
  *  /unlink        — Verknüpfung aufheben
  */
@@ -202,6 +207,46 @@ function registerCommands(bot) {
     return ctx.reply(text, { parse_mode: 'MarkdownV2' });
   });
 
+  // /location — Aktueller Standort
+  bot.command('location', async ctx => {
+    const link = await getLinkForChat(ctx);
+    if (!link) return;
+    const text = await getLocationText(link.tenant_id, link.user_id);
+    return ctx.reply(text, { parse_mode: 'MarkdownV2', link_preview_options: { is_disabled: true } });
+  });
+
+  // /range — Restreichweite
+  bot.command('range', async ctx => {
+    const link = await getLinkForChat(ctx);
+    if (!link) return;
+    const text = await getRangeText(link.tenant_id, link.user_id);
+    return ctx.reply(text, { parse_mode: 'MarkdownV2' });
+  });
+
+  // /today — Tagesbilanz
+  bot.command('today', async ctx => {
+    const link = await getLinkForChat(ctx);
+    if (!link) return;
+    const text = await getTodayText(link.tenant_id, link.user_id);
+    return ctx.reply(text, { parse_mode: 'MarkdownV2' });
+  });
+
+  // /service — Naechste Wartung
+  bot.command('service', async ctx => {
+    const link = await getLinkForChat(ctx);
+    if (!link) return;
+    const text = await getServiceText(link.tenant_id, link.user_id);
+    return ctx.reply(text, { parse_mode: 'MarkdownV2' });
+  });
+
+  // /firmware — Software-Version
+  bot.command('firmware', async ctx => {
+    const link = await getLinkForChat(ctx);
+    if (!link) return;
+    const text = await getFirmwareText(link.tenant_id, link.user_id);
+    return ctx.reply(text, { parse_mode: 'MarkdownV2' });
+  });
+
   // /unlink — Verknüpfung aufheben
   bot.command('unlink', async ctx => {
     const chatId = String(ctx.chat.id);
@@ -221,7 +266,12 @@ function registerCommands(bot) {
       '*Tesla Carview Bot — Befehle*\n\n' +
       '/status — Fahrzeugstatus\n' +
       '/battery — Akkustand & Reichweite\n' +
+      '/range — Restreichweite\n' +
+      '/location — Aktueller Standort \\(Maps\\-Link\\)\n' +
+      '/today — Tagesbilanz \\(km, kWh, Kosten\\)\n' +
       '/trips — Letzte 5 Fahrten\n' +
+      '/service — Naechste faellige Wartung\n' +
+      '/firmware — Software\\-Version\n' +
       '/unlink — Bot\\-Verknüpfung aufheben\n' +
       '/help — Diese Hilfe\n\n' +
       '_Einstellungen findest du in Carview → Einstellungen → Benachrichtigungen_',
@@ -294,8 +344,8 @@ async function getBatteryText(tenantId, userId) {
       const lastCharge = db.prepare(
         'SELECT * FROM charging_sessions ORDER BY start_time DESC LIMIT 1'
       ).get();
-      const addedKwh = lastCharge?.charge_energy_added != null
-        ? `\\+${esc(Number(lastCharge.charge_energy_added).toFixed(1))} kWh`
+      const addedKwh = lastCharge?.energy_added_kwh != null
+        ? `\\+${esc(Number(lastCharge.energy_added_kwh).toFixed(1))} kWh`
         : '–';
 
       lines.push(`*${name}*\n🔋 Akku: ${soc}\n⚡ Letzte Ladung: ${addedKwh}`);
@@ -328,6 +378,207 @@ async function getTripsText(tenantId, userId) {
   } catch (err) {
     return `❌ Fehler: ${esc(err.message)}`;
   }
+}
+
+async function getLocationText(tenantId, userId) {
+  try {
+    const db = getDb(tenantId);
+    const vehicles = db.prepare('SELECT * FROM vehicles ORDER BY id LIMIT 3').all();
+    if (!vehicles.length) return 'ℹ️ Kein Fahrzeug gefunden\\.';
+
+    const lines = ['📍 *Standort*\n'];
+    for (const v of vehicles) {
+      const last = db.prepare(
+        'SELECT lat, lon, timestamp FROM telemetry_points WHERE vehicle_id=? AND lat IS NOT NULL AND lon IS NOT NULL ORDER BY timestamp DESC LIMIT 1'
+      ).get(v.id);
+      const name = esc(v.display_name || v.vin?.slice(-6) || 'Tesla');
+      if (!last) {
+        lines.push(`*${name}*\n_Keine Positionsdaten verfuegbar_`);
+        continue;
+      }
+      const lat = Number(last.lat).toFixed(5);
+      const lon = Number(last.lon).toFixed(5);
+      const mapsUrl = `https://www.google.com/maps?q=${lat},${lon}`;
+      const age = esc(_relTime(last.timestamp));
+      // MarkdownV2-Link: [label](url). lat/lon escapen weil Punkt drin.
+      lines.push(`*${name}*\n[${esc(lat)}, ${esc(lon)}](${mapsUrl})\n_${age}_`);
+    }
+    return lines.join('\n\n');
+  } catch (err) {
+    return `❌ Fehler: ${esc(err.message)}`;
+  }
+}
+
+async function getRangeText(tenantId, userId) {
+  try {
+    const db = getDb(tenantId);
+    const vehicles = db.prepare('SELECT * FROM vehicles ORDER BY id LIMIT 3').all();
+    if (!vehicles.length) return 'ℹ️ Kein Fahrzeug gefunden\\.';
+
+    const lines = ['🛣 *Restreichweite*\n'];
+    for (const v of vehicles) {
+      const snap = db.prepare(
+        'SELECT soc, rated_range_km, ideal_range_km, timestamp FROM battery_snapshots WHERE vehicle_id=? ORDER BY timestamp DESC LIMIT 1'
+      ).get(v.id);
+      const cache = db.prepare('SELECT battery_level FROM vehicle_state_cache WHERE vehicle_id=?').get(v.id);
+      const name  = esc(v.display_name || v.vin?.slice(-6) || 'Tesla');
+      const soc   = snap?.soc ?? cache?.battery_level ?? null;
+      const rated = snap?.rated_range_km != null
+        ? `${esc(Math.round(snap.rated_range_km))} km`
+        : '–';
+      const ideal = snap?.ideal_range_km != null
+        ? ` \\(ideal: ${esc(Math.round(snap.ideal_range_km))} km\\)`
+        : '';
+      const socStr = soc != null ? `${soc}%` : '–';
+      const age = snap?.timestamp ? `\n_Stand: ${esc(_relTime(snap.timestamp))}_` : '';
+      lines.push(`*${name}*\n🔋 ${socStr} · ${rated}${ideal}${age}`);
+    }
+    return lines.join('\n\n');
+  } catch (err) {
+    return `❌ Fehler: ${esc(err.message)}`;
+  }
+}
+
+async function getTodayText(tenantId, userId) {
+  try {
+    const db = getDb(tenantId);
+    const vehicles = db.prepare('SELECT * FROM vehicles ORDER BY id LIMIT 3').all();
+    if (!vehicles.length) return 'ℹ️ Kein Fahrzeug gefunden\\.';
+
+    // Tagesgrenze in Europe/Berlin — Carview rechnet auch in lokaler TZ.
+    const todayStart = Math.floor(new Date(new Date().toLocaleDateString('en-CA') + 'T00:00:00').getTime() / 1000);
+
+    const lines = ['📊 *Tagesbilanz heute*\n'];
+    for (const v of vehicles) {
+      const trips = db.prepare(
+        'SELECT COUNT(*) AS n, COALESCE(SUM(distance_km), 0) AS km FROM trips WHERE vehicle_id=? AND start_time >= ? AND end_time IS NOT NULL'
+      ).get(v.id, todayStart);
+
+      const chg = db.prepare(
+        'SELECT COUNT(*) AS n, COALESCE(SUM(energy_added_kwh), 0) AS kwh, COALESCE(SUM(cost), 0) AS cost ' +
+        'FROM charging_sessions WHERE vehicle_id=? AND start_time >= ?'
+      ).get(v.id, todayStart);
+
+      const name = esc(v.display_name || v.vin?.slice(-6) || 'Tesla');
+      const km   = esc(Number(trips.km).toFixed(1));
+      const kwh  = esc(Number(chg.kwh).toFixed(1));
+      const cost = chg.cost > 0 ? ` · ${esc(Number(chg.cost).toFixed(2))} €` : '';
+      lines.push(
+        `*${name}*\n` +
+        `🚗 ${trips.n} Fahrt${trips.n === 1 ? '' : 'en'} · ${km} km\n` +
+        `⚡ ${chg.n} Ladung${chg.n === 1 ? '' : 'en'} · ${kwh} kWh${cost}`
+      );
+    }
+    return lines.join('\n\n');
+  } catch (err) {
+    return `❌ Fehler: ${esc(err.message)}`;
+  }
+}
+
+async function getServiceText(tenantId, userId) {
+  try {
+    const db = getDb(tenantId);
+    const vehicles = db.prepare('SELECT * FROM vehicles ORDER BY id LIMIT 3').all();
+    if (!vehicles.length) return 'ℹ️ Kein Fahrzeug gefunden\\.';
+
+    const nowS  = Math.floor(Date.now() / 1000);
+    const lines = ['🔧 *Wartung*\n'];
+
+    for (const v of vehicles) {
+      const cache = db.prepare('SELECT odometer_km FROM vehicle_state_cache WHERE vehicle_id=?').get(v.id);
+      const odoKm = cache?.odometer_km ?? v.odometer_km ?? 0;
+
+      const items = db.prepare(
+        `SELECT label, interval_months, interval_km, last_done_at, last_done_km, snoozed_until
+         FROM service_intervals
+         WHERE vehicle_id=? AND is_active=1
+         ORDER BY kind`
+      ).all(v.id);
+
+      const name = esc(v.display_name || v.vin?.slice(-6) || 'Tesla');
+      if (!items.length) {
+        lines.push(`*${name}*\n_Keine Wartungsintervalle konfiguriert_`);
+        continue;
+      }
+
+      const due = [];
+      for (const si of items) {
+        if (si.snoozed_until && si.snoozed_until > nowS) continue;
+        const dueByMonth = si.interval_months && si.last_done_at
+          ? si.last_done_at + si.interval_months * 30 * 86400
+          : null;
+        const dueByKm    = si.interval_km && si.last_done_km != null
+          ? si.last_done_km + si.interval_km
+          : null;
+        const monthsLeft = dueByMonth != null ? Math.round((dueByMonth - nowS) / (30 * 86400)) : null;
+        const kmLeft     = dueByKm    != null ? Math.round(dueByKm - odoKm) : null;
+        const overdue    = (monthsLeft != null && monthsLeft <= 0) || (kmLeft != null && kmLeft <= 0);
+        due.push({ label: si.label, monthsLeft, kmLeft, overdue });
+      }
+
+      if (!due.length) {
+        lines.push(`*${name}*\n_Aktuell nichts faellig_`);
+        continue;
+      }
+      // Aelteste/dringlichste zuerst — sortiere nach kleinstem Wert
+      due.sort((a, b) => {
+        const ax = Math.min(a.monthsLeft ?? 1e9, (a.kmLeft ?? 1e9) / 1000);
+        const bx = Math.min(b.monthsLeft ?? 1e9, (b.kmLeft ?? 1e9) / 1000);
+        return ax - bx;
+      });
+      const list = due.slice(0, 4).map(d => {
+        const icon = d.overdue ? '⚠️' : '🔧';
+        const parts = [];
+        if (d.monthsLeft != null) parts.push(`${d.monthsLeft <= 0 ? `${esc(-d.monthsLeft)} Monate ueberfaellig` : `noch ${esc(d.monthsLeft)} Monat${d.monthsLeft === 1 ? '' : 'e'}`}`);
+        if (d.kmLeft != null)     parts.push(`${d.kmLeft <= 0 ? `${esc(-d.kmLeft)} km ueberfaellig` : `noch ${esc(d.kmLeft)} km`}`);
+        return `${icon} ${esc(d.label)} — ${parts.join(' · ')}`;
+      }).join('\n');
+      lines.push(`*${name}*\n${list}`);
+    }
+    return lines.join('\n\n');
+  } catch (err) {
+    return `❌ Fehler: ${esc(err.message)}`;
+  }
+}
+
+async function getFirmwareText(tenantId, userId) {
+  try {
+    const db = getDb(tenantId);
+    const vehicles = db.prepare('SELECT * FROM vehicles ORDER BY id LIMIT 3').all();
+    if (!vehicles.length) return 'ℹ️ Kein Fahrzeug gefunden\\.';
+
+    const lines = ['💾 *Software*\n'];
+    for (const v of vehicles) {
+      const cur = db.prepare(
+        'SELECT version, detected_at FROM firmware_versions WHERE vehicle_id=? ORDER BY detected_at DESC LIMIT 2'
+      ).all(v.id);
+      const name = esc(v.display_name || v.vin?.slice(-6) || 'Tesla');
+      if (!cur.length) {
+        lines.push(`*${name}*\n_Noch keine Versions-Historie_`);
+        continue;
+      }
+      const latest    = cur[0];
+      const prev      = cur[1];
+      const installed = esc(_relTime(latest.detected_at));
+      const fromPart  = prev ? `\nVorher: \`${esc(prev.version)}\`` : '';
+      lines.push(`*${name}*\n\`${esc(latest.version)}\` _\\(installiert ${installed}\\)_${fromPart}`);
+    }
+    return lines.join('\n\n');
+  } catch (err) {
+    return `❌ Fehler: ${esc(err.message)}`;
+  }
+}
+
+/** Relativ-Zeit ausgehend von einem Unix-Timestamp (Sekunden). */
+function _relTime(ts) {
+  if (!ts) return 'unbekannt';
+  const diffS = Math.floor(Date.now() / 1000 - Number(ts));
+  if (diffS < 60)    return 'gerade eben';
+  if (diffS < 3600)  return `vor ${Math.floor(diffS / 60)} min`;
+  if (diffS < 86400) return `vor ${Math.floor(diffS / 3600)} h`;
+  if (diffS < 30 * 86400) return `vor ${Math.floor(diffS / 86400)} Tag${Math.floor(diffS / 86400) === 1 ? '' : 'en'}`;
+  if (diffS < 365 * 86400) return `vor ${Math.floor(diffS / (30 * 86400))} Monaten`;
+  return `vor ${Math.floor(diffS / (365 * 86400))} Jahren`;
 }
 
 /** Escaped Text für Telegram MarkdownV2. */

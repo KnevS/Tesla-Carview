@@ -7,6 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.6] - 2026-06-01
+
+### New
+
+- **Telegram info commands**: Five new read-only bot commands — `/location` (current position with Google Maps link from the latest telemetry point), `/range` (remaining range + SOC + timestamp from `battery_snapshots`), `/today` (today's stats: trip count, km, charge count, kWh, cost — day boundary in Europe/Berlin), `/service` (next due maintenance intervals, with overdue flag), `/firmware` (current software version + previous from `firmware_versions`). All commands use the MarkdownV2-escape pattern from v3.4.3.
+- **Help text expanded**: `/help` now lists all nine commands including the new ones.
+
+### Fixed
+
+- **`/battery` showed "Last charge: –"**: The column in `charging_sessions` is `energy_added_kwh`, not `charge_energy_added`. Silent bug (no crash, just empty value). Now uses the correct column; `/today` also reads it correctly.
+
+---
+
 ## [v3.4.5] - 2026-06-01
 
 ### Fixed
