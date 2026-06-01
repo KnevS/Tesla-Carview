@@ -71,9 +71,13 @@ Tüm şarj oturumları otomatik kayıt:
 - Konum, enerji (kWh), maliyet, hız ve süre
 - Ev şarjı göstergesi (🏠) Monta entegrasyonu ile
 
-**Ayarlar → Şarj Konumları** altında sık kullanılan noktalar tanımlanabilir.  
-Monta API anahtarıyla oturumlar otomatik senkronize edilir.  
-Geri ödeme için PDF fatura (**Faturalama → Fatura Oluştur**) — tamamen istemci tarafında.
+**Ayarlar → Şarj Konumları** altında sık kullanılan noktalar tanımlanabilir.
+
+**Monta entegrasyonu** **tüm araçlar** için kullanılabilir — **Ayarlar → Araç profili → Ev şarjı** bölümünden araç başına yapılandırılır:
+- Özel araçlar: Monta oturumları ev şarjı olarak görünür (🏠 rozeti, otomatik tanıma).
+- Şirket araçları: ek olarak tam faturalandırma — aylık özet, PDF geri ödeme belgesi, işveren şablonu.
+
+Geri ödeme için PDF fatura (**Faturalama → Fatura Oluştur**) — tamamen istemci tarafında. Faturalandırma özellikleri yalnızca **şirket araçları** içindir.
 
 ---
 

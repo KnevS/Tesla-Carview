@@ -114,21 +114,21 @@ docker compose -f /opt/tesla-carview/docker-compose.prod.yml exec backend env | 
 
 ---
 
-## In-app configuration (Admin → System)
+## In-app configuration (Admin → Admin Settings)
 
 Some settings do not require `.env` changes — they are configured directly in the admin interface and stored in the database. These settings survive updates and do not require a container restart.
 
 | Setting | Location | Notes |
 |---|---|---|
-| SMTP / e-mail delivery | Admin → System → E-Mail | Host, port, user, password, sender — includes a send-test button |
-| OpenChargeMap API key | Admin → System → External APIs | Charging station overlay on route planner — free, register at [openchargemap.io/site/develop](https://openchargemap.io/site/develop#api) |
-| HERE Maps API key | Admin → System → External APIs | Real-time traffic on route planner — free tier (250 k req/month), register at [developer.here.com](https://developer.here.com) |
-| Monta API key | Admin → System → External APIs | Home charging sync — requires a Monta account, key in [Monta Partner Portal](https://monta.com) |
-| xAI API key | Admin → System → External APIs | Grok Chat AI assistant — get at [console.x.ai](https://console.x.ai) |
-| Anthropic API key | Admin → System → Monitoring | AI-powered autofix (Claude Haiku) — see below |
-| Self-healing toggle | Admin → System → Monitoring | Enable/disable automatic container restart |
-| Alert e-mail address | Admin → System → Monitoring | Where monitoring alerts are sent |
-| Electricity price per kWh | Admin → System or setup wizard | Per-vehicle energy cost for charging calculations |
+| SMTP / e-mail delivery | Admin → Admin Settings → E-Mail | Host, port, user, password, sender — includes a send-test button |
+| OpenChargeMap API key | Admin → Admin Settings → External APIs | Charging station overlay on route planner — free, register at [openchargemap.io/site/develop](https://openchargemap.io/site/develop#api) |
+| HERE Maps API key | Admin → Admin Settings → External APIs | Real-time traffic on route planner — free tier (250 k req/month), register at [developer.here.com](https://developer.here.com) |
+| xAI API key | Admin → Admin Settings → External APIs | Grok Chat AI assistant — get at [console.x.ai](https://console.x.ai) |
+| Anthropic API key | Admin → Admin Settings → Monitoring | AI-powered autofix (Claude Haiku) — see below |
+| Self-healing toggle | Admin → Admin Settings → Monitoring | Enable/disable automatic container restart |
+| Alert e-mail address | Admin → Admin Settings → Monitoring | Where monitoring alerts are sent |
+| Monta credentials | Settings → Vehicle profile → Home charging | Per-vehicle: Client ID, Client Secret, Charge-Point ID — available for all vehicle categories |
+| Electricity price per kWh | Settings → Vehicle profile or setup wizard | Per-vehicle energy cost for charging calculations |
 
 All of the above can also be configured during the **setup wizard** — no direct server access required.
 

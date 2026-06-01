@@ -11,6 +11,7 @@
 import { Router }       from 'express';
 import { randomBytes }  from 'crypto';
 import { getMasterDb }  from '../db/database.js';
+import { getTenantSetting } from '../services/configService.js';
 import { requireAuth }  from '../middleware/auth.js';
 import { getBotUsername, getTelegramWebhookHandler } from '../services/telegramBot.js';
 
@@ -32,7 +33,7 @@ router.get('/status', requireAuth, async (req, res) => {
       telegram_username: link?.telegram_username || null,
       linked_at:        link?.linked_at || null,
       bot_username:     botUsername,
-      bot_configured:   !!process.env.TELEGRAM_BOT_TOKEN,
+      bot_configured:   !!(process.env.TELEGRAM_BOT_TOKEN || getTenantSetting(req.db, 'telegram.bot_token', null)),
     });
   } catch (err) {
     res.status(500).json({ error: err.message });

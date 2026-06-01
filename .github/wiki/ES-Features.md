@@ -73,8 +73,13 @@ Todas las sesiones de carga se registran automáticamente:
 - Ubicación, energía añadida (kWh), coste estimado, velocidad y duración
 - Indicador de carga en casa (🏠) via integración Monta
 
-Define tus puntos habituales en **Configuración → Ubicaciones de carga**.  
-Genera facturas PDF para reembolso (**Facturación → Crear factura**) — completamente del lado del cliente.
+Define tus puntos habituales en **Configuración → Ubicaciones de carga**.
+
+**Integración Monta** disponible para **todos los vehículos** — configurar por vehículo en **Configuración → Perfil del vehículo → Carga en casa**:
+- Vehículos privados: sesiones Monta como carga en casa (badge 🏠, detección automática).
+- Coches de empresa: además, facturación completa — resumen mensual, PDF de reembolso, plantilla para el empleador.
+
+Genera facturas PDF para reembolso (**Facturación → Crear factura**) — completamente del lado del cliente. Las funciones de facturación son exclusivas para **coches de empresa**.
 
 ---
 

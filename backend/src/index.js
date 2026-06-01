@@ -7,7 +7,7 @@ import cookieParser from 'cookie-parser';
 import { initMasterDb, getAllTenants, getDb } from './db/database.js';
 import { securityHeaders, apiRateLimit } from './middleware/security.js';
 import { requireAuth } from './middleware/auth.js';
-import { startPoller } from './services/poller.js';
+import { startPoller, resetTelemetryHeartbeat } from './services/poller.js';
 import { startServiceReminderScheduler } from './services/serviceReminders.js';
 import { startDemoLifecycle } from './services/demoLifecycle.js';
 import { startNightlyMaintenance } from './services/nightlyMaintenance.js';
@@ -60,6 +60,7 @@ import hvacRoutes              from './routes/hvac.js';
 import communityRoutes         from './routes/community.js';
 import telegramRoutes          from './routes/telegram.js';
 import { initTelegramBot }     from './services/telegramBot.js';
+import { runAutoInitForAllTenants } from './services/autoInit.js';
 
 const app    = express();
 const PORT   = process.env.PORT || 3000;
@@ -176,12 +177,25 @@ server.listen(PORT, async () => {
     console.log('  ERSTER START – Setup erforderlich!');
     console.log(`  Oeffne im Browser: ${frontendUrl}/setup`);
     console.log('='.repeat(56) + '\n');
+  } else {
+    // Auto-Init für bekannte Mandanten: erzeugt fehlende VAPID-Keys etc.
+    // damit der Admin-Setup-Wizard nur noch echte Entscheidungs-Schritte zeigt.
+    runAutoInitForAllTenants(tenants).catch(err =>
+      console.warn('[AutoInit] Boot-Pass fehlgeschlagen:', err.message)
+    );
   }
 
   try {
     await startFleetTelemetryServer(server);
   } catch (err) {
     console.error('[FleetTelemetry] Start fehlgeschlagen:', err.message);
+  }
+
+  // Container-Restart kappt die persistente Tesla→Backend WebSocket. Damit der
+  // Poller-Fallback nicht durch alte telemetry_last_signal_at-Zeitstempel
+  // blockiert wird, beim Boot einmalig auf NULL setzen.
+  try { resetTelemetryHeartbeat(); } catch (err) {
+    console.error('[Poller] resetTelemetryHeartbeat fehlgeschlagen:', err.message);
   }
 
   if (process.env.ENABLE_POLLER !== 'false') {

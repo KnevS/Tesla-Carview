@@ -850,6 +850,38 @@ html[data-design="editorial"] .btn-secondary {
 .esb-stat-val--yellow { color: #F6C54A; }
 .esb-stat-val--red    { color: #F66062; }
 
+/* Refresh-Notbremse: bei OFFLINE/kein Signal Force-Poll triggern */
+.esb-refresh {
+  background: transparent;
+  border: 1px solid rgba(102,204,191,.3);
+  color: rgba(102,204,191,.85);
+  padding: .15rem .55rem;
+  font-size: .7rem;
+  font-family: inherit;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  margin-left: .5rem;
+  transition: all .18s ease;
+}
+.esb-refresh:hover:not(:disabled) {
+  border-color: rgba(102,204,191,.6);
+  background: rgba(102,204,191,.08);
+  color: #66CCBF;
+}
+.esb-refresh:disabled { opacity: .55; cursor: wait; }
+.esb-refresh-ico { display: inline-block; font-size: .9rem; line-height: 1; }
+.esb-refresh-spin { animation: esb-refresh-spin .9s linear infinite; }
+@keyframes esb-refresh-spin { to { transform: rotate(360deg); } }
+.esb-refresh-msg {
+  font-size: .7rem;
+  color: rgba(102,204,191,.65);
+  margin-left: .35rem;
+}
+.esb-refresh-msg--err { color: #F66062; }
+
 /* Navbar: warm-dunkel mit Petrol-Trennlinie */
 html[data-design="editorial"] .glass-bar {
   background: rgba(6,13,12,.9);

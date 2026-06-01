@@ -64,7 +64,7 @@ jobs:
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
           envs: GHCR_TOKEN,GHCR_ACTOR
-          command_timeout: 10m
+          command_timeout: 30m
           script: |
             APP_DIR="${{ secrets.DEPLOY_APP_DIR }}"
             APP_DIR="${APP_DIR:-/opt/tesla-carview}"
@@ -78,28 +78,29 @@ jobs:
                 backend/src/routes/demo.js \
                 backend/src/services/demoLifecycle.js \
                 frontend/src/views/Demo.vue
-              # Frontend lokal bauen — privates Demo.vue muss zur Compile-Zeit im Bundle sein.
-              # Das Ergebnis wird in frontend-dist-private/ abgelegt und vom Container
-              # per Volume-Mount (:ro) serviert (volume-mount ist in docker-compose.prod.yml).
-              echo "==> Privates Frontend-Bundle bauen …"
-              GIT_HASH=$(sudo git -C "$APP_DIR" rev-parse --short HEAD 2>/dev/null || echo unknown)
-              sudo docker build \
-                --build-arg GIT_HASH="$GIT_HASH" \
-                -t tesla-carview-frontend-private:local \
-                "$APP_DIR/frontend" 2>&1 | tail -8
-              sudo docker create --name tmp-frontend-extract tesla-carview-frontend-private:local
-              sudo rm -rf "$APP_DIR/frontend-dist-private"
-              sudo docker cp tmp-frontend-extract:/usr/share/nginx/html "$APP_DIR/frontend-dist-private"
-              sudo docker rm tmp-frontend-extract
-              sudo docker image rm tesla-carview-frontend-private:local 2>/dev/null || true
-              echo "==> Privates Frontend-Bundle bereit."
             fi
-            # Pull pre-built images from GHCR (no local build needed)
+            # Backend- und Frontend-Bundle kommen direkt aus den GHCR-Images.
+            # Frueher wurde das Frontend hier server-seitig gebaut und per
+            # frontend-dist-private/-Volume eingehaengt — dieser Mount ist
+            # entfernt (s. #84), das Image-Bundle wird direkt serviert.
             echo "$GHCR_TOKEN" | sudo docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml pull backend frontend
+            # Backend nur ziehen wenn sich der Digest geaendert hat.
+            BACKEND_IMAGE="ghcr.io/knevs/tesla-carview/backend:main"
+            REMOTE_DIGEST=$(sudo docker manifest inspect "$BACKEND_IMAGE" 2>/dev/null \
+              | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('config',{}).get('digest',''))" 2>/dev/null || echo "")
+            LOCAL_DIGEST=$(sudo docker inspect "$BACKEND_IMAGE" --format '{{.Id}}' 2>/dev/null || echo "none")
+            if [ -z "$REMOTE_DIGEST" ] || [ "$REMOTE_DIGEST" != "$LOCAL_DIGEST" ]; then
+              echo "==> Backend-Image aktualisiert — ziehe neues Image …"
+              sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml pull --quiet backend
+            else
+              echo "==> Backend-Image unverändert (${LOCAL_DIGEST:7:7}) — kein Pull nötig."
+            fi
+            # Frontend-Image immer ziehen (klein; enthaelt das fertige Bundle).
+            echo "==> Frontend-Image ziehen …"
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml pull --quiet frontend
             sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d backend frontend
             sudo docker logout ghcr.io
-            # Sicherstellen dass nginx im richtigen Compose-Netzwerk laeuft.
+            # Sicherstellen dass nginx in beiden erforderlichen Netzwerken läuft.
             COMPOSE_NET="tesla-carview_tesla-net"
             if ! sudo docker inspect tesla-carview-nginx \
                 --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' \
@@ -107,9 +108,12 @@ jobs:
               echo "==> nginx nicht in $COMPOSE_NET — network connect"
               sudo docker network connect "$COMPOSE_NET" tesla-carview-nginx
             fi
-            # Nginx neu starten (kein reload) damit Docker-DNS-Cache für neue
-            # Container-IPs geleert wird. Mit resolver 127.0.0.11 in nginx-internal.conf
-            # wird das künftig automatisch gelöst — der Restart bleibt als Fallback.
+            if ! sudo docker inspect tesla-carview-nginx \
+                --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' \
+                2>/dev/null | grep -q "traefik-proxy"; then
+              echo "==> nginx nicht in traefik-proxy — network connect"
+              sudo docker network connect traefik-proxy tesla-carview-nginx
+            fi
             sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml \
               restart nginx
             sudo docker image prune -f

@@ -1,6 +1,12 @@
 <template>
   <div class="max-w-2xl space-y-6">
-    <h1 class="text-2xl font-bold">Datenverwaltung</h1>
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+      <h1 class="text-2xl font-bold">Datenverwaltung</h1>
+      <RouterLink to="/admin"
+        class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-sm text-gray-300 transition">
+        ← Übersicht
+      </RouterLink>
+    </div>
 
     <div class="bg-yellow-900/30 border border-yellow-700 rounded-xl p-4 text-sm text-yellow-300">
       <p class="font-semibold flex items-center gap-2">

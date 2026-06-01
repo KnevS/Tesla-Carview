@@ -1,7 +1,16 @@
 import { defineStore } from 'pinia';
 import api from '../api.js';
+import { useLangStore } from './lang.js';
 
 const TENANT_SLUG_KEY = 'tc_tenant_slug';
+
+// User-Profil-Locale + Tenant-Default einmal anwenden, sobald wir wissen wer
+// der User ist. Hauptziel: nach Fresh-Login (nicht nur Session-Restore) greift
+// die im Profil hinterlegte Sprache sofort – ohne Reload.
+function applyUserLocale(user) {
+  if (!user) return;
+  try { useLangStore().applyFromUser(user); } catch { /* Pinia noch nicht ready */ }
+}
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -64,6 +73,7 @@ export const useAuthStore = defineStore('auth', {
         this.tenantSlug = data.user.tenantSlug;
         localStorage.setItem(TENANT_SLUG_KEY, data.user.tenantSlug);
       }
+      applyUserLocale(data.user);
       return { requiresMfa: false };
     },
 
@@ -72,6 +82,7 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken  = data.accessToken;
       this.user         = data.user;
       this.mfaTempToken = null;
+      applyUserLocale(data.user);
     },
 
     async loginWithPasskey(tenantSlug) {
@@ -93,6 +104,7 @@ export const useAuthStore = defineStore('auth', {
         this.tenantSlug = data.user.tenantSlug;
         localStorage.setItem(TENANT_SLUG_KEY, data.user.tenantSlug);
       }
+      applyUserLocale(data.user);
     },
 
     async tryRestoreSession() {

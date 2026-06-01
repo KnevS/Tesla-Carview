@@ -19,7 +19,7 @@ Tesla Carview es una aplicación **auto-alojada** de registro de datos para veh�
 - 🎮 **Control** — Climatización, puertas, luces, directamente desde la aplicación
 - 📝 **Libro de mantenimiento** — Mantenimientos, reparaciones, costes con fecha
 - 📤 **Exportación** — CSV/JSON para todos los datos, copia completa como ZIP
-- 🔔 **Notificaciones push** — Notificación del navegador al finalizar la carga
+- 🔔 **Notificaciones push** — Notificaciones del navegador al finalizar la carga, alarma Sentry, batería baja y más; con botones de acción (iniciar climatización, buscar cargador, posponer), agrupación por tag (actualizaciones de carga repetidas se reemplazan) y reflejo automático a iPhone/Apple Watch
 - 📱 **Optimizado para móvil** — Totalmente usable en iPhone/iPad (Safari), Android y escritorio
 
 ## 🔀 Orden de clasificación {#sort-order}
@@ -93,6 +93,8 @@ Tras el primer inicio de sesión, el **asistente de configuración** se abre aut
 | **Diseño → Resumen** | Preferencias; todos los cambios se guardan en el último paso |
 
 > **Consejo:** Cada paso puede omitirse — el asistente puede relanzarse en cualquier momento.
+
+> **🌐 Selector de idioma:** Cada asistente muestra un selector de idioma compacto arriba a la derecha. El idioma guardado en el perfil de usuario o el predeterminado del tenant se aplica automáticamente al iniciar sesión; el selector permite cambiar el idioma a mitad del asistente sin salir de él.
 
 ## 🔑 Configurar la Virtual Key {#virtual-key}
 
@@ -304,11 +306,14 @@ Tesla factura cada llamada `/vehicle_data` (≈ 0,005 €/llamada). Sin Fleet Te
 
 **Reducir costes:** configurar Fleet Telemetry (→ ~3,60 €/mes), activar límite mensual en Ajustes → Conexión Tesla.
 
-## 🔌 Integración con Monta (facturación) {#monta}
+## 🔌 Integración con Monta (carga doméstica y facturación) {#monta}
 
-Para conductores de coche de empresa: Tesla Carview puede leer los datos de carga directamente desde tu **wallbox Monta** y generar una factura mensual para tu empresa.
+Tesla Carview puede leer los datos de carga directamente desde tu **wallbox Monta**. La integración está disponible para **todos los vehículos**:
 
-> ⚠️ La integración con Monta solo está disponible para vehículos en la categoría **Coche de empresa** (Ajustes → Perfil del vehículo → Categoría).
+- **Vehículos privados**: las sesiones Monta se muestran como información de carga (badge 🏠 en el historial, detección de wallbox doméstica).
+- **Coches de empresa**: además, se dispone de la facturación completa — resumen mensual, hoja PDF de reembolso y plantilla para el empleador.
+
+> ℹ️ Las funciones de facturación (PDF, plantilla de reembolso) están reservadas para vehículos de la categoría **Coche de empresa**. Los datos de carga Monta están disponibles para todos los vehículos.
 
 ### Paso 1 – Crear una API key en Monta
 
@@ -327,10 +332,9 @@ La clave solo se muestra una vez: introdúcela en Tesla Carview de inmediato.
 ### Paso 3 – Introducir en Tesla Carview
 
 1. Ve a **Ajustes → Perfil del vehículo**.
-2. Elige la categoría **💼 Coche de empresa**.
-3. Introduce **precio de electricidad de la wallbox (€/kWh)**, p. ej. `0.34`.
-4. Añade el **ID del punto de carga Monta** y la **API key de Monta**.
-5. Pulsa **Guardar**.
+2. Introduce **precio de electricidad de la wallbox (€/kWh)**, p. ej. `0.34` (base de facturación para coches de empresa).
+3. Añade el **ID del punto de carga Monta** y la **API key de Monta**.
+4. Pulsa **Guardar**.
 
 ### Detección de wallbox doméstico
 

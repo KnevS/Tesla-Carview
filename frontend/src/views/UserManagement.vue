@@ -3,6 +3,10 @@
     <div class="flex items-center justify-between flex-wrap gap-3">
       <h1 class="text-2xl font-bold">Benutzerverwaltung</h1>
       <div class="flex items-center gap-2">
+        <RouterLink to="/admin"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-sm text-gray-300 transition">
+          ← Übersicht
+        </RouterLink>
         <SortToggle v-model:direction="sortDir" />
         <button @click="showCreate = true" class="btn-primary text-sm">+ Benutzer anlegen</button>
       </div>
@@ -224,18 +228,40 @@
           {{ userInviteLoading ? 'Generiere…' : '+ Einladungslink erstellen' }}
         </button>
       </div>
-      <div class="flex items-center gap-3 text-sm text-gray-400">
-        <span>Rolle:</span>
-        <select v-model="newUserInviteRole" class="bg-gray-700 rounded-lg px-2 py-1 text-sm text-white">
-          <option value="user">Benutzer</option>
-          <option value="admin">Administrator</option>
-        </select>
-        <span class="text-xs text-gray-500">— Link ist 14 Tage gültig, einmalig verwendbar</span>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+        <label class="space-y-1">
+          <span class="text-xs text-gray-400">Name (optional)</span>
+          <input v-model="newUserInviteDisplayName" type="text" maxlength="80"
+                 placeholder="z. B. Max Mustermann"
+                 class="w-full bg-gray-700 rounded-lg px-2 py-1 text-white" />
+        </label>
+        <label class="space-y-1">
+          <span class="text-xs text-gray-400">E-Mail (optional)</span>
+          <input v-model="newUserInviteEmail" type="email" maxlength="254"
+                 placeholder="user@example.com"
+                 class="w-full bg-gray-700 rounded-lg px-2 py-1 text-white" />
+        </label>
+        <label class="space-y-1">
+          <span class="text-xs text-gray-400">Rolle</span>
+          <select v-model="newUserInviteRole" class="w-full bg-gray-700 rounded-lg px-2 py-1 text-white">
+            <option value="user">Benutzer</option>
+            <option value="admin">Administrator</option>
+          </select>
+        </label>
+        <label class="flex items-center gap-2 self-end pb-1"
+               v-tooltip="'Versendet den Einladungslink direkt an die angegebene E-Mail-Adresse. Erfordert SMTP-Konfiguration in den Mandant-Einstellungen.'">
+          <input v-model="newUserInviteSendEmail" type="checkbox" class="accent-tesla-red"
+                 :disabled="!newUserInviteEmail" />
+          <span class="text-sm text-gray-300">Link per E-Mail senden</span>
+        </label>
       </div>
+      <p class="text-xs text-gray-500">Link ist 14 Tage gültig, einmalig verwendbar.</p>
 
       <div v-if="newUserInviteUrl" class="bg-gray-900 rounded-lg p-3 space-y-2">
         <p class="text-xs text-gray-400">Diesen Link sicher dem neuen Benutzer übermitteln:</p>
         <div class="font-mono text-xs text-green-400 break-all select-all">{{ newUserInviteUrl }}</div>
+        <p v-if="newUserInviteEmailSent" class="text-xs text-green-400">✓ E-Mail an {{ newUserInviteEmailTarget }} versendet</p>
+        <p v-else-if="newUserInviteEmailError" class="text-xs text-yellow-400">⚠ E-Mail nicht versendet: {{ newUserInviteEmailError }}</p>
         <button @click="copyUserInvite" class="btn-secondary text-sm">Kopieren</button>
         <button @click="newUserInviteUrl = ''" class="text-xs text-gray-500 hover:text-gray-300 ml-3">Schließen</button>
       </div>
@@ -250,6 +276,15 @@
                     :class="inv.role === 'admin' ? 'bg-red-900 text-red-300' : 'bg-gray-700 text-gray-400'">
                 {{ inv.role }}
               </span>
+              <span v-if="inv.email_sent_at" class="ml-1 text-xs px-1.5 py-0.5 rounded-full bg-green-900 text-green-300"
+                    v-tooltip="'Einladung wurde per E-Mail versendet'">
+                ✉ gesendet
+              </span>
+            </p>
+            <p v-if="inv.display_name || inv.email" class="text-xs text-gray-300">
+              <span v-if="inv.display_name">{{ inv.display_name }}</span>
+              <span v-if="inv.display_name && inv.email"> · </span>
+              <span v-if="inv.email" class="font-mono">{{ inv.email }}</span>
             </p>
             <p class="text-xs text-gray-500">
               <span v-if="inv.used_at">Verwendet von <strong>{{ inv.used_by_username || 'unbekannt' }}</strong></span>
@@ -438,8 +473,14 @@ async function deleteInvite(token) {
 // User-Invites (gleicher Mandant) — analog zu den Mandanten-Einladungen oben.
 const userInvites      = ref([]);
 const userInviteLoading = ref(false);
-const newUserInviteUrl  = ref('');
-const newUserInviteRole = ref('user');
+const newUserInviteUrl          = ref('');
+const newUserInviteRole         = ref('user');
+const newUserInviteDisplayName  = ref('');
+const newUserInviteEmail        = ref('');
+const newUserInviteSendEmail    = ref(false);
+const newUserInviteEmailSent    = ref(false);
+const newUserInviteEmailTarget  = ref('');
+const newUserInviteEmailError   = ref('');
 
 async function loadUserInvites() {
   try { userInvites.value = (await api.get('/users/invite')).data; }
@@ -448,9 +489,25 @@ async function loadUserInvites() {
 
 async function generateUserInvite() {
   userInviteLoading.value = true;
+  newUserInviteEmailSent.value  = false;
+  newUserInviteEmailTarget.value = '';
+  newUserInviteEmailError.value  = '';
   try {
-    const { data } = await api.post('/users/invite', { role: newUserInviteRole.value });
-    newUserInviteUrl.value = data.url;
+    const payload = { role: newUserInviteRole.value };
+    if (newUserInviteDisplayName.value.trim()) payload.display_name = newUserInviteDisplayName.value.trim();
+    if (newUserInviteEmail.value.trim())       payload.email        = newUserInviteEmail.value.trim();
+    if (newUserInviteSendEmail.value && payload.email) payload.send_email = true;
+
+    const { data } = await api.post('/users/invite', payload);
+    newUserInviteUrl.value          = data.url;
+    newUserInviteEmailSent.value    = !!data.email_sent;
+    newUserInviteEmailTarget.value  = data.email || '';
+    newUserInviteEmailError.value   = data.email_error || '';
+
+    // Form zuruecksetzen, damit der naechste Invite frisch startet
+    newUserInviteDisplayName.value = '';
+    newUserInviteEmail.value       = '';
+    newUserInviteSendEmail.value   = false;
     await loadUserInvites();
   } catch (err) {
     alert(err.response?.data?.error || err.message);

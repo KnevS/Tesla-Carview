@@ -81,10 +81,13 @@ Toutes les sessions de recharge sont journalisées :
 Définissez vos bornes habituelles dans **Paramètres → Lieux de recharge**.
 
 ### Intégration Monta
-Saisissez votre clé API Monta dans les paramètres pour synchroniser les sessions automatiquement.
+Disponible pour **tous les véhicules** — à configurer par véhicule dans **Paramètres → Profil du véhicule → Recharge à domicile** :
+
+- **Véhicules privés** : les sessions Monta apparaissent comme charges à domicile (badge 🏠, détection automatique via l'ID du point de charge).
+- **Véhicules de fonction** : en plus, facturation complète — récapitulatif mensuel, feuille PDF de remboursement, modèle pour l'employeur.
 
 ### Facturation & facture PDF
-Générez des factures PDF pour remboursement (**Facturation → Créer une facture**) — entièrement côté client.
+Générez des factures PDF pour remboursement (**Facturation → Créer une facture**) — entièrement côté client. Les fonctions de facturation sont réservées aux **véhicules de fonction**.
 
 ---
 

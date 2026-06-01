@@ -658,6 +658,83 @@ router.post('/update/trigger', requireAuth, requireAdmin, async (req, res) => {
   }
 });
 
+// POST /api/system/container-restart — graceful Node.js exit.
+// Docker restart-policy (unless-stopped) bringt den Container automatisch
+// wieder hoch. Antwort wird vor dem Exit gesendet; Neustart dauert ~2-3 s.
+router.post('/container-restart', requireAuth, requireAdmin, (req, res) => {
+  auditLog(req.db, req.user.sub, 'container_restart', req, {});
+  res.json({ ok: true, message: 'Container wird neu gestartet…' });
+  // Kurze Verzögerung damit die Response noch rausgeht, dann Exit
+  setTimeout(() => process.exit(0), 400);
+});
+
+// In-Memory-Timer für geplante Neustarts. Lebt nur im aktuellen Prozess —
+// das ist OK: wenn der Container zwischenzeitlich aus anderem Grund neu
+// startet, ist der Plan ohnehin überflüssig. Nur EIN Timer gleichzeitig.
+let _scheduledRestart = null;
+
+// POST /api/system/container-restart-schedule { delaySec, reason? }
+//   delaySec = 0       → sofort (wie /container-restart)
+//   delaySec > 0       → setTimeout für genau diesen Zeitpunkt
+//   delaySec = null/-1 → vorhandenen geplanten Restart abbrechen
+router.post('/container-restart-schedule', requireAuth, requireAdmin, (req, res) => {
+  const { delaySec, reason } = req.body || {};
+  const num = Number(delaySec);
+
+  if (delaySec === null || num < 0) {
+    if (_scheduledRestart) {
+      clearTimeout(_scheduledRestart.timer);
+      _scheduledRestart = null;
+    }
+    auditLog(req.db, req.user.sub, 'container_restart_cancelled', req, {});
+    return res.json({ cancelled: true });
+  }
+
+  if (!Number.isFinite(num) || num < 0 || num > 86400) {
+    return res.status(400).json({ error: 'delaySec muss zwischen 0 und 86400 (24h) liegen' });
+  }
+
+  if (_scheduledRestart) clearTimeout(_scheduledRestart.timer);
+
+  if (num === 0) {
+    auditLog(req.db, req.user.sub, 'container_restart', req, { reason: reason || null });
+    res.json({ ok: true, scheduled_for: new Date().toISOString(), immediate: true });
+    setTimeout(() => process.exit(0), 400);
+    return;
+  }
+
+  const scheduledFor = new Date(Date.now() + num * 1000);
+  _scheduledRestart = {
+    scheduledFor, reason: reason || null, requestedBy: req.user.sub,
+    timer: setTimeout(() => {
+      console.log(`[Restart] Geplanter Neustart fällig (Verzögerung ${num}s, Grund: ${reason || '-'})`);
+      _scheduledRestart = null;
+      process.exit(0);
+    }, num * 1000),
+  };
+  auditLog(req.db, req.user.sub, 'container_restart_scheduled', req, {
+    delaySec: num, reason: reason || null,
+  });
+  res.json({
+    scheduled_for: scheduledFor.toISOString(),
+    delay_sec:     num,
+    immediate:     false,
+  });
+});
+
+// GET /api/system/container-restart-schedule — Status des aktuellen Plans.
+// Frontend ruft das, um „Neustart in 4:32 min" zu zeigen.
+router.get('/container-restart-schedule', requireAuth, requireAdmin, (_req, res) => {
+  if (!_scheduledRestart) return res.json({ scheduled: false });
+  const remainingMs = _scheduledRestart.scheduledFor.getTime() - Date.now();
+  res.json({
+    scheduled:     true,
+    scheduled_for: _scheduledRestart.scheduledFor.toISOString(),
+    remaining_sec: Math.max(0, Math.round(remainingMs / 1000)),
+    reason:        _scheduledRestart.reason,
+  });
+});
+
 // ── Monitoring-Konfiguration ─────────────────────────────────────────────────
 
 const MONITORING_KEYS = ['monitoring.alert_email', 'monitoring.heal_enabled', 'monitoring.anthropic_key'];
@@ -814,6 +891,287 @@ router.post('/smtp-test', requireAuth, requireAdmin, async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+});
+
+
+// ── Tesla Fleet-API Credentials ──────────────────────────────────────────────
+
+router.get('/tesla-credentials', requireAuth, requireAdmin, (req, res) => {
+  const keys = ['tesla.client_id', 'tesla.client_secret', 'tesla.audience', 'tesla.auth_base'];
+  const rows = req.db.prepare(
+    `SELECT key, value FROM tenant_settings WHERE key IN (${keys.map(() => '?').join(',')})`
+  ).all(...keys);
+  const cfg = Object.fromEntries(rows.map(r => [r.key, r.value]));
+  res.json({
+    client_id:   cfg['tesla.client_id']   || (process.env.TESLA_CLIENT_ID   ? '(aus .env)' : ''),
+    client_secret_set: !!(cfg['tesla.client_secret'] || process.env.TESLA_CLIENT_SECRET),
+    audience:    cfg['tesla.audience']    || process.env.TESLA_AUDIENCE    || '',
+    auth_base:   cfg['tesla.auth_base']   || process.env.TESLA_AUTH_BASE   || '',
+    from_env: !cfg['tesla.client_id'] && !!process.env.TESLA_CLIENT_ID,
+  });
+});
+
+router.put('/tesla-credentials', requireAuth, requireAdmin, (req, res) => {
+  const { client_id, client_secret, audience, auth_base } = req.body;
+  const upsert = req.db.prepare(
+    "INSERT INTO tenant_settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+  );
+  if (client_id     !== undefined) upsert.run('tesla.client_id',     client_id.trim());
+  if (client_secret && typeof client_secret === 'string' && client_secret.trim() && !client_secret.startsWith('••'))
+    upsert.run('tesla.client_secret', client_secret.trim());
+  if (audience      !== undefined) upsert.run('tesla.audience',      audience.trim());
+  if (auth_base     !== undefined) upsert.run('tesla.auth_base',     auth_base.trim());
+  auditLog(req.db, req.user.sub, 'tesla_credentials_updated', req, {});
+  res.json({ ok: true });
+});
+
+// ── VAPID / Web Push ──────────────────────────────────────────────────────────
+
+router.get('/vapid-config', requireAuth, requireAdmin, (req, res) => {
+  const keys = ['vapid.public_key', 'vapid.private_key', 'vapid.contact'];
+  const rows = req.db.prepare(
+    `SELECT key, value FROM tenant_settings WHERE key IN (${keys.map(() => '?').join(',')})`
+  ).all(...keys);
+  const cfg = Object.fromEntries(rows.map(r => [r.key, r.value]));
+  const pubKey = cfg['vapid.public_key'] || process.env.VAPID_PUBLIC_KEY || '';
+  res.json({
+    public_key:      pubKey,
+    private_key_set: !!(cfg['vapid.private_key'] || process.env.VAPID_PRIVATE_KEY),
+    contact:         cfg['vapid.contact'] || process.env.VAPID_CONTACT || '',
+    configured:      !!(pubKey && (cfg['vapid.private_key'] || process.env.VAPID_PRIVATE_KEY)),
+    from_env:        !cfg['vapid.public_key'] && !!process.env.VAPID_PUBLIC_KEY,
+  });
+});
+
+router.put('/vapid-config', requireAuth, requireAdmin, (req, res) => {
+  const { public_key, private_key, contact } = req.body;
+  const upsert = req.db.prepare(
+    "INSERT INTO tenant_settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+  );
+  if (public_key  !== undefined) upsert.run('vapid.public_key',  public_key.trim());
+  if (private_key && typeof private_key === 'string' && private_key.trim() && !private_key.startsWith('••'))
+    upsert.run('vapid.private_key', private_key.trim());
+  if (contact     !== undefined) {
+    // Web-Push verlangt URL oder mailto:-URI. Plain-E-Mail vom Admin-UI
+    // wird transparent mit mailto: präfixt, damit setVapidDetails() später
+    // nicht „Vapid subject is not a valid URL" wirft.
+    const c = (contact || '').trim();
+    const normalized =
+      !c                            ? '' :
+      /^(https?|mailto):/i.test(c)  ? c :
+      c.includes('@')               ? `mailto:${c}` :
+                                      c;
+    upsert.run('vapid.contact', normalized);
+  }
+  auditLog(req.db, req.user.sub, 'vapid_config_updated', req, {});
+  res.json({ ok: true });
+});
+
+router.post('/vapid-generate', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const webPush = await import('web-push');
+    const generateVAPIDKeys = webPush.generateVAPIDKeys ?? webPush.default?.generateVAPIDKeys;
+    if (typeof generateVAPIDKeys !== 'function') throw new Error('web-push: generateVAPIDKeys nicht gefunden');
+    const keys = generateVAPIDKeys();
+    const upsert = req.db.prepare(
+      "INSERT INTO tenant_settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+    );
+    upsert.run('vapid.public_key',  keys.publicKey);
+    upsert.run('vapid.private_key', keys.privateKey);
+    auditLog(req.db, req.user.sub, 'vapid_keys_generated', req, {});
+    res.json({ public_key: keys.publicKey, configured: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Telegram Bot ──────────────────────────────────────────────────────────────
+
+router.get('/telegram-config', requireAuth, requireAdmin, (req, res) => {
+  const keys = ['telegram.bot_token', 'telegram.webhook_url'];
+  const rows = req.db.prepare(
+    `SELECT key, value FROM tenant_settings WHERE key IN (${keys.map(() => '?').join(',')})`
+  ).all(...keys);
+  const cfg = Object.fromEntries(rows.map(r => [r.key, r.value]));
+  res.json({
+    bot_token_set:  !!(cfg['telegram.bot_token']  || process.env.TELEGRAM_BOT_TOKEN),
+    webhook_url:    cfg['telegram.webhook_url'] || process.env.TELEGRAM_WEBHOOK_URL || '',
+    configured:     !!(cfg['telegram.bot_token']  || process.env.TELEGRAM_BOT_TOKEN),
+    from_env:       !cfg['telegram.bot_token']     && !!process.env.TELEGRAM_BOT_TOKEN,
+  });
+});
+
+router.put('/telegram-config', requireAuth, requireAdmin, (req, res) => {
+  const { bot_token, webhook_url } = req.body;
+  const upsert = req.db.prepare(
+    "INSERT INTO tenant_settings (key,value) VALUES (?,?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+  );
+  if (bot_token && typeof bot_token === 'string' && bot_token.trim() && !bot_token.includes('••'))
+    upsert.run('telegram.bot_token', bot_token.trim());
+  if (webhook_url !== undefined) upsert.run('telegram.webhook_url', webhook_url.trim());
+  auditLog(req.db, req.user.sub, 'telegram_config_updated', req, {});
+  res.json({ ok: true, restart_required: true });
+});
+
+// ── ABRP Global API Key ────────────────────────────────────────────────────────
+
+router.get('/abrp-config', requireAuth, requireAdmin, (req, res) => {
+  const row = req.db.prepare("SELECT value FROM tenant_settings WHERE key='abrp.api_key'").get();
+  const key = row?.value || '';
+  res.json({
+    configured: !!(key || process.env.ABRP_API_KEY),
+    masked:     key ? key.slice(0, 8) + '…' + key.slice(-4) : (process.env.ABRP_API_KEY ? '(aus .env)' : ''),
+    from_env:   !key && !!process.env.ABRP_API_KEY,
+  });
+});
+
+router.put('/abrp-config', requireAuth, requireAdmin, (req, res) => {
+  const { abrp_api_key } = req.body;
+  if (abrp_api_key === '' || abrp_api_key == null) {
+    req.db.prepare("DELETE FROM tenant_settings WHERE key='abrp.api_key'").run();
+    return res.json({ configured: false });
+  }
+  if (typeof abrp_api_key !== 'string' || abrp_api_key.length < 4) {
+    return res.status(400).json({ error: 'Ungültiger ABRP API-Key' });
+  }
+  req.db.prepare(
+    "INSERT INTO tenant_settings (key,value) VALUES ('abrp.api_key',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value"
+  ).run(abrp_api_key);
+  auditLog(req.db, req.user.sub, 'abrp_config_updated', req, {});
+  res.json({ configured: true, masked: abrp_api_key.slice(0, 8) + '…' + abrp_api_key.slice(-4) });
+});
+
+
+// ── Wizard Prefill ────────────────────────────────────────────────────────────
+//
+// Liefert dem Admin-Setup-Wizard auf einen Schwung zwei Dinge:
+//   1. Defaults für leere Felder (Geo-IP → Audience, Admin-Mail → Alert-Mail,
+//      Land → Strompreis-Default …). So muss der Admin diese Werte nicht
+//      selbst nachschlagen oder doppelt tippen.
+//   2. Status pro Wizard-Schritt: was ist bereits konfiguriert/ausgeführt?
+//      Das Frontend kann erledigte Schritte einklappen, sodass nur die
+//      tatsächlich offenen Schritte expandiert bleiben.
+//
+// Read-only, kein Side-Effect — sicher mehrfach aufrufbar.
+const COUNTRY_RATE_EUR_PER_KWH = {
+  // Europa (Q1 2026 Richtwerte für Haushaltsstrom inkl. Steuern; bewusst
+  // konservativ, nur Vorbelegung — der Admin überschreibt im Wizard).
+  DE: 0.40, AT: 0.32, CH: 0.30, IT: 0.35, FR: 0.25, ES: 0.28, NL: 0.40,
+  BE: 0.39, LU: 0.21, IE: 0.34, PT: 0.21, SE: 0.20, NO: 0.15, FI: 0.20,
+  DK: 0.41, PL: 0.24, CZ: 0.22, SK: 0.20, HU: 0.13, RO: 0.15, BG: 0.13,
+  GR: 0.20, CY: 0.32, MT: 0.13, SI: 0.20, HR: 0.16, EE: 0.20, LV: 0.20, LT: 0.20,
+  GB: 0.30, UK: 0.30,
+  TR: 0.10,
+  // Nord-/Südamerika & APAC (€/kWh, grob umgerechnet — nur Hint, kein Tarif).
+  US: 0.16, CA: 0.13, MX: 0.08,
+  AU: 0.30, NZ: 0.22,
+  JP: 0.20, KR: 0.10,
+};
+
+// EU-Region nach Tesla-Convention: alles in Europa + GB + TR.
+const EU_AUDIENCE_COUNTRIES = new Set([
+  'DE','AT','CH','LI','LU','FR','BE','MC','ES','PT','IT','VA','SM','MT',
+  'NL','IE','GB','UK','DK','NO','SE','FI','IS','EE','LV','LT','PL','CZ',
+  'SK','HU','RO','BG','GR','CY','SI','HR','BA','RS','ME','MK','AL','XK',
+  'TR','AD','UA','MD','BY',
+]);
+
+router.get('/wizard-prefill', requireAuth, requireAdmin, async (req, res) => {
+  // ── Geo-IP des aktuellen Admins ────────────────────────────────────────
+  const forwarded = req.headers['x-forwarded-for'];
+  const ip = (forwarded ? forwarded.split(',')[0] : req.socket.remoteAddress || '').trim();
+  let country = null;
+  try {
+    const geo = geoip.lookup(ip);
+    country = geo?.country ?? null;
+  } catch { /* geoip-lite nicht verfügbar → country bleibt null */ }
+  const region = (country && EU_AUDIENCE_COUNTRIES.has(country)) ? 'eu' : 'na';
+  const audienceDefault = region === 'eu'
+    ? 'https://fleet-api.prd.eu.vn.cloud.tesla.com'
+    : 'https://fleet-api.prd.na.vn.cloud.tesla.com';
+  const electricityDefault = (country && COUNTRY_RATE_EUR_PER_KWH[country]) || null;
+
+  // ── Admin-User für Mail-Defaults ──────────────────────────────────────
+  let adminEmail = '';
+  try {
+    const row = req.db.prepare('SELECT email FROM users WHERE id = ? LIMIT 1').get(req.user.sub);
+    adminEmail = row?.email || '';
+  } catch { /* users-Schema variiert nicht — Sicherheitsnetz */ }
+  // Falls der erste Admin im Setup noch keine E-Mail eingetragen hat,
+  // bleibt der Default leer und der Admin tippt sie wie bisher von Hand.
+
+  // ── Tenant-Slug-Vorschlag aus Host-Header ─────────────────────────────
+  const host = (req.headers.host || '').split(':')[0];
+  // erste Subdomain ohne www. → guter Hint für den ersten Mandanten
+  const slugSuggestion = host
+    .replace(/^www\./, '')
+    .split('.')
+    .filter(Boolean)[0] || '';
+
+  // ── Step-Status: was ist schon erledigt? ──────────────────────────────
+  const cfg = Object.fromEntries(
+    req.db.prepare('SELECT key, value FROM tenant_settings').all().map(r => [r.key, r.value])
+  );
+
+  const haveTeslaCreds = !!(
+    (cfg['tesla.client_id']     || process.env.TESLA_CLIENT_ID) &&
+    (cfg['tesla.client_secret'] || process.env.TESLA_CLIENT_SECRET)
+  );
+  const haveTeslaAuthRefresh = !!cfg['tesla.refresh_token'];
+  const vehicleCount = (() => {
+    try { return req.db.prepare('SELECT COUNT(*) AS n FROM vehicles').get().n; }
+    catch { return 0; }
+  })();
+  const haveVirtualKey = (() => {
+    try { return !!req.db.prepare('SELECT 1 FROM virtual_key LIMIT 1').get(); }
+    catch { return false; }
+  })();
+  const haveVapid = !!(
+    (cfg['vapid.public_key']  || process.env.VAPID_PUBLIC_KEY) &&
+    (cfg['vapid.private_key'] || process.env.VAPID_PRIVATE_KEY)
+  );
+  const haveTelegram = !!(cfg['telegram.bot_token'] || process.env.TELEGRAM_BOT_TOKEN);
+  const externalConfigured = [
+    !!cfg['ocm_api_key'],
+    !!cfg['here_api_key'],
+    !!cfg['xai.api_key'],
+    !!cfg['abrp.api_key'],
+  ].filter(Boolean).length;
+  const haveAlertEmail = !!cfg['monitoring.alert_email'];
+  const electricitySet = (() => {
+    try {
+      const row = req.db.prepare(
+        'SELECT COUNT(*) AS n FROM vehicles WHERE electricity_rate_kwh IS NOT NULL'
+      ).get();
+      return vehicleCount > 0 && row.n === vehicleCount;
+    } catch { return false; }
+  })();
+
+  res.json({
+    country,
+    region,
+    defaults: {
+      tesla_audience:    audienceDefault,
+      alert_email:       adminEmail,
+      vapid_contact:     adminEmail ? `mailto:${adminEmail}` : '',
+      electricity_rate:  electricityDefault,
+      tenant_slug:       slugSuggestion,
+    },
+    steps: {
+      credentials: { done: haveTeslaCreds },
+      oauth:       { done: haveTeslaAuthRefresh },
+      vehicles:    { done: vehicleCount > 0, count: vehicleCount },
+      virtualkey:  { done: haveVirtualKey },
+      // Telemetry hängt am Virtual Key + mind. einem Fahrzeug — Status wird
+      // weiterhin live über /telemetry/status geprüft. Hier nur Vor-Indikator.
+      telemetry:   { ready: haveVirtualKey && vehicleCount > 0 },
+      vapid:       { done: haveVapid, auto: haveVapid && !cfg['vapid.contact'] },
+      telegram:    { done: haveTelegram, optional: true },
+      electricity: { done: electricitySet, optional: true },
+      external:    { done: externalConfigured > 0, configured: externalConfigured, optional: true },
+      monitoring:  { done: haveAlertEmail, optional: true },
+    },
+  });
 });
 
 export default router;

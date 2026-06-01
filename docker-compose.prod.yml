@@ -18,12 +18,12 @@ services:
       - ./backend/.env
     volumes:
       - tesla_data:/app/data
-      # Demo-Feature: private Implementierungen werden via tc-private.git
-      # auf dem Host bereitgestellt und per Volume-Mount in den Container
-      # gemounted (ueberschreiben die oeffentlichen Stubs im Image).
-      # Stubs bleiben das Fallback fuer Instanzen ohne privates Overlay.
-      - ./backend/src/routes/demo.js:/app/src/routes/demo.js:ro
-      - ./backend/src/services/demoLifecycle.js:/app/src/services/demoLifecycle.js:ro
+      # system.js: enthaelt /container-restart Endpoint + generateVAPIDKeys-Fix.
+      # Volume-Mount sichert diese Aenderungen gegen Image-Updates ab.
+      - ./backend/src/routes/system.js:/app/src/routes/system.js:ro
+      # Demo-Feature wurde aus der Hauptinstanz entfernt (2026-05-26).
+      # Die Demo laeuft als eigenstaendiger Stack unter /opt/tesla-carview-demo
+      # und ist per https://demo.teslaview.krische.com erreichbar.
     networks:
       - tesla-net
     depends_on:
@@ -47,11 +47,13 @@ services:
     image: ghcr.io/knevs/tesla-carview/frontend:main
     container_name: tesla-carview-frontend
     restart: unless-stopped
-    volumes:
-      # Demo-Feature: privat kompiliertes Frontend-Bundle (enthaelt vollstaendige Demo.vue).
-      # Wird durch deploy.sh automatisch neu gebaut wenn /opt/tc-private.git vorhanden ist.
-      # Ueberschreibt den oeffentlichen Stub aus dem GHCR-Image.
-      - ./frontend-dist-private:/usr/share/nginx/html:ro
+    # Das Frontend-Bundle kommt direkt aus dem GHCR-Image (Stub-Demo.vue).
+    # KEIN Volume-Mount auf /usr/share/nginx/html: das Verzeichnis
+    # frontend-dist-private/ ist gitignored und existiert bei Frisch-
+    # Installationen nicht → der Bind-Mount legte ein LEERES Verzeichnis an,
+    # ueberdeckte das Image-Bundle und nginx lieferte 403 Forbidden (#84).
+    # Server-spezifische Overrides (z.B. das private Demo-Bundle der separaten
+    # Demo-Instanz) gehoeren in die gitignorete docker-compose.override.yml.
     networks:
       - tesla-net
     depends_on:
