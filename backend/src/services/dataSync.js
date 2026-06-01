@@ -1,9 +1,8 @@
-import { sendChargingCompleteNotification, sendPush } from './notifications.js';
 import { maybeAutoClassify } from './geofenceClassifier.js';
 import { maybeFuzz } from './gpsFuzzing.js';
 import { dispatch as dispatchWebhook } from './webhookDispatcher.js';
 import { buildTlmFromState, sendToAbrp } from './abrpService.js';
-import { notifySentryAlert } from './notifyService.js';
+import { notifySentryAlert, notifyAllInTenant } from './notifyService.js';
 
 const BATTERY_SNAPSHOT_INTERVAL = 15 * 60;
 const MODEL_Y_USABLE_KWH = 75;
@@ -144,7 +143,7 @@ export async function syncVehicleState(db, vehicle, state, tenantId = null) {
   if (charge?.charging_state === 'Charging') {
     handleCharging(db, vehicle, charge, drive, now);
   } else {
-    finishActiveCharging(db, vehicle, charge, now);
+    finishActiveCharging(db, vehicle, charge, now, tenantId);
   }
 
   // ABRP Live-Telemetrie (best-effort, blockiert nicht)
@@ -154,16 +153,35 @@ export async function syncVehicleState(db, vehicle, state, tenantId = null) {
   }
 
   // Notification-Rules + Sleep-Monitoring (best-effort, darf Sync nie crashen)
-  evaluateRules(db, vehicle.id, charge, drive).catch(() => {});
+  evaluateRules(db, vehicle.id, charge, drive, tenantId).catch(() => {});
   trackSleepEvents(db, vehicle.id, vs?.state || 'unknown', charge?.battery_level);
 
-  // Software-Update-Tracker: neue Firmware-Version erkennen und speichern
+  // Software-Update-Tracker: neue Firmware-Version erkennen und benachrichtigen
+  // (nur wenn das Fahrzeug schon bekannte Versionen hat — initialer Import
+  // soll nicht spammen).
   const carVersion = vs?.car_version;
   if (carVersion) {
     try {
-      db.prepare(
+      const hadHistory = !!db.prepare(
+        'SELECT 1 FROM firmware_versions WHERE vehicle_id = ? LIMIT 1'
+      ).get(vehicle.id);
+      const res = db.prepare(
         'INSERT OR IGNORE INTO firmware_versions (vehicle_id, version, detected_at) VALUES (?, ?, ?)'
       ).run(vehicle.id, carVersion, now);
+
+      if (hadHistory && res.changes > 0 && tenantId) {
+        notifyAllInTenant({
+          tenantId,
+          db,
+          title: `Software-Update installiert — ${vehicle.display_name || vehicle.vin?.slice(-6) || 'Tesla'}`,
+          body:  `Neue Version: ${carVersion}`,
+          url:   `/firmware/${vehicle.id}`,
+          emoji: '💾',
+          type:  'generic',
+          vehicleId: vehicle.id,
+          vin:       vehicle.vin,
+        }).catch(() => {});
+      }
     } catch { /* ignore */ }
   }
 
@@ -370,7 +388,7 @@ function handleCharging(db, vehicle, charge, drive, now) {
   }
 }
 
-function finishActiveCharging(db, vehicle, charge, now) {
+function finishActiveCharging(db, vehicle, charge, now, tenantId) {
   const active = db.prepare(
     'SELECT * FROM charging_sessions WHERE vehicle_id=? AND end_time IS NULL ORDER BY id DESC LIMIT 1'
   ).get(vehicle.id);
@@ -386,7 +404,26 @@ function finishActiveCharging(db, vehicle, charge, now) {
   ).run(now, charge?.battery_level, energyKwh, cost, cost, active.id);
 
   console.log(`[Sync] Laden beendet: +${energyKwh.toFixed(1)} kWh${cost != null ? `, ${cost.toFixed(2)} EUR` : ''}`);
-  sendChargingCompleteNotification(vehicle, charge, db).catch(() => {});
+
+  // Multi-channel Notification (WebPush + Telegram). tenantId optional —
+  // ohne ihn fehlt der Adressbereich, dann skippen wir die Push still.
+  if (tenantId) {
+    const name = vehicle.display_name || vehicle.vin?.slice(-6) || 'Tesla';
+    const soc  = charge?.battery_level != null ? `${charge.battery_level}%` : '?';
+    const kwh  = energyKwh.toFixed(1);
+    const costPart = cost != null ? ` · ${cost.toFixed(2)} €` : '';
+    notifyAllInTenant({
+      tenantId,
+      db,
+      title: `Laden abgeschlossen — ${name}`,
+      body:  `Akku: ${soc} · +${kwh} kWh${costPart}`,
+      url:   `/`,
+      emoji: '⚡',
+      type:  'charging_complete',
+      vehicleId: vehicle.id,
+      vin:       vehicle.vin,
+    }).catch(() => {});
+  }
 
   // charging.completed-Webhook (best-effort)
   dispatchWebhook(db, 'charging.completed', {
@@ -451,7 +488,7 @@ function haversineM(lat1, lon1, lat2, lon2) {
 
 const lastGeofenceState = new Map(); // key: `${vehicleId}_${geofenceId}` → boolean (inGeofence)
 
-export async function evaluateRules(db, vehicleId, chargeState, driveState) {
+export async function evaluateRules(db, vehicleId, chargeState, driveState, tenantId = null) {
   try {
     const rules = db.prepare(
       'SELECT * FROM notification_rules WHERE vehicle_id=? AND enabled=1'
@@ -492,7 +529,18 @@ export async function evaluateRules(db, vehicleId, chargeState, driveState) {
       const param = rule.action_param ? JSON.parse(rule.action_param) : {};
       if (rule.action_type === 'push_notify') {
         const msg = param.message || 'Tesla-Alarm ausgelöst';
-        await sendPush(db, vehicleId, 'Tesla Carview', msg);
+        if (tenantId) {
+          await notifyAllInTenant({
+            tenantId,
+            db,
+            title: 'Tesla Carview',
+            body:  msg,
+            url:   '/',
+            emoji: '🔔',
+            type:  'generic',
+            vehicleId,
+          }).catch(() => {});
+        }
       }
       // climate actions: fire-and-forget via teslaApi (imported lazily to avoid circular)
       if (['climate_on', 'climate_off', 'climate_set_temp'].includes(rule.action_type)) {

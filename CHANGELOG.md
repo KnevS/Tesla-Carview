@@ -7,6 +7,78 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.10] - 2026-06-01
+
+### Neu
+
+- **User-Einladung mit Name + E-Mail-Versand**: Die Admin-Form unter `Benutzer → Einladungslink erstellen` akzeptiert jetzt einen optionalen Anzeigenamen und eine optionale E-Mail-Adresse. Wird die Checkbox „Link per E-Mail senden" aktiviert und SMTP ist im Mandanten konfiguriert (`tenant_settings.smtp.*`), schickt das Backend den Einladungslink direkt per `nodemailer` an die angegebene Adresse — der Admin muss den Link nicht mehr manuell weitergeben. Versendete Einladungen zeigen ein `✉ gesendet`-Badge in der Liste. Bei fehlendem SMTP gibt es eine klare Meldung; der Link bleibt zum manuellen Kopieren stehen.
+- **Akzept-Flow übernimmt E-Mail**: `POST /api/user-invites/:token/accept` setzt die Invite-E-Mail beim Anlegen des Users in `users.email` (sofern vorhanden), sodass der neue Nutzer ohne extra Klick eine kontaktierbare Adresse hat.
+
+### Technisch
+
+- Schema: `user_invites` um `display_name`, `email` und `email_sent_at` erweitert (Migration + frisches CREATE TABLE).
+- `routes/users.js POST /invite` validiert `display_name` (≤80) + `email` (RFC) + `send_email` (boolean) via zod. Audit-Log enthält `email`, `email_sent`, `email_error`.
+- `routes/userInvites.js` (public): `validate` liefert `displayName` + `email`; `accept` reicht `email` an `createUser()` durch.
+
+---
+
+## [v3.4.9] - 2026-06-01
+
+### Neu
+
+- **Telegram `/classify` — Fahrt direkt im Chat klassifizieren**: Neuer Bot-Befehl zeigt die letzte beendete Fahrt mit Datum, Strecke und aktueller Markierung. Inline-Buttons 🏠 Privat / 💼 Geschäftlich / 🏢 Pendel setzen `trips.trip_type` sofort und schlagen automatisch die nächst-ältere Fahrt vor, sodass mehrere Fahrten in Reihe klassifiziert werden können. Finanzamt-gesperrte Fahrten (`locked_at IS NOT NULL`) werden übersprungen. Jede Änderung landet als `telegram_classify_trip` in `audit_logs` mit `trip_id`, alter und neuer Klassifikation. Ergänzt das `/help`-Menü.
+
+---
+
+## [v3.4.8] - 2026-06-01
+
+### Neu
+
+- **Telegram-Push für proaktive Events**: Ladung beendet, Service-Erinnerungen, Notification-Rules (SOC-Alarme, Geofence-Events) und neue Software-Versionen kommen jetzt zusätzlich zur WebPush-Notification auch im Telegram-Bot an. Beide Kanäle laufen parallel über `notifyService.notifyAllInTenant()` — wer keinen Telegram-Account verknüpft hat, sieht nur die Web-Push, wer beides nutzt, bekommt beides. Sentry-Alarm lief bereits über diesen Kanal (seit v3.3.3), war aber der einzige Trigger.
+- **Software-Update-Erkennung mit Push**: Beim ersten Sync nach einer Firmware-Aktualisierung erkennt der DataSync die neue `car_version` und schickt eine Notification mit der Version. Beim allerersten Tracking eines Fahrzeugs wird die Push unterdrückt (sonst würde jede Bestandsversion eine Erinnerung auslösen).
+
+### Refactored
+
+- **Notification-Pipeline konsolidiert**: Die alte `services/notifications.js` (WebPush-only, fahrzeug-basiert via `push_subscriptions`) wurde gelöscht. `dataSync.js` und `serviceReminders.js` nutzen jetzt einheitlich `notifyService.notifyAllInTenant()`. Vorteil: jede Mutation, die historisch nur Web-Push triggerte, deckt automatisch alle konfigurierten Channels ab. Audit-Konsistenz für die Multi-Channel-Strategie.
+
+---
+
+## [v3.4.7] - 2026-06-01
+
+### Neu
+
+- **Telegram-Inline-Buttons unter `/status`**: Neun Schnell-Aktionen direkt im Chat statt Tippen — 🔒 Lock / 🔓 Unlock, ❄️ Klima an / aus, 🛡 Sentry an / aus, ⚡ Laden start / stop, ⟳ Aktualisieren. Klick triggert den passenden Tesla-Befehl via `apiProxyPost` (gleiche Pipeline wie Frontend-Control-View). Nach jeder Aktion wird der Status neu gerendert, sodass die Wirkung direkt sichtbar ist.
+- **Confirm-Schritt für Unlock**: 🔓 Unlock ist die einzige sicherheitskritische Aktion — sie fragt vorher "⚠️ Wirklich entriegeln?" mit zwei Buttons (✅ Ja / ✖ Abbrechen). Ohne Bestätigung wird kein Command an Tesla geschickt.
+- **Audit-Log pro Aktion**: Jede Telegram-Vehicle-Action (auch Fehlschläge) landet als `telegram_command` in `audit_logs` mit `vehicle_id`, `command`, `body` und `result/error`. Konsistenz-Pflicht für Mutations gewahrt.
+- **`/help` erweitert**: Hinweis auf Inline-Buttons unter `/status`.
+
+---
+
+## [v3.4.6] - 2026-06-01
+
+### Neu
+
+- **Telegram-Info-Befehle**: Fünf neue Read-only-Befehle für den Bot — `/location` (aktueller Standort mit Google-Maps-Link aus der letzten Telemetry-Position), `/range` (Restreichweite + SOC + Stand aus `battery_snapshots`), `/today` (Tagesbilanz: Anzahl Fahrten, km, Anzahl Ladungen, kWh, Kosten — Tagesgrenze in Europe/Berlin), `/service` (nächste fällige Wartungsintervalle, mit "ueberfaellig"-Markierung), `/firmware` (aktuelle Software-Version + Vorgänger aus `firmware_versions`). Alle Befehle nutzen das MarkdownV2-Escape-Pattern aus v3.4.3.
+- **Help-Text erweitert**: `/help` listet jetzt alle neun Befehle inklusive der neuen.
+
+### Behoben
+
+- **`/battery` zeigte "Letzte Ladung: –"**: Statt `charge_energy_added` heißt die Spalte in `charging_sessions` real `energy_added_kwh`. Stiller Bug (kein Crash, nur leere Anzeige). Jetzt richtige Spalte; auch `/today` greift korrekt darauf zu.
+
+---
+
+## [v3.4.5] - 2026-06-01
+
+### Behoben
+
+- **OFFLINE-Anzeige nach Auto-Deploy**: Bei jedem Backend-Restart kappte der Container den persistenten Tesla→Backend FleetTelemetry-WebSocket. Der Tesla baut die Verbindung erst beim nächsten State-Event neu auf (Fahrt, Wake, Ladung). In der Zwischenzeit hielt der Poller `vehicle.telemetry_last_signal_at` für aktuell und übersprang das Polling-Fallback — Fahrzeugkarte zeigte "OFFLINE · kein Signal", Fahrten- und Schlafmonitor-Daten alterten unbemerkt. Beim Boot wird `telemetry_last_signal_at` jetzt auf `NULL` zurückgesetzt; der Polling-Loop übernimmt damit sofort, bis der Stream wieder etabliert ist.
+
+### Neu
+
+- **Refresh-Button im EditorialStatusBar**: Notbremse für OFFLINE-Status. Klickt der Nutzer "⟳ Aktualisieren" wird ein einmaliger `vehicle_data`-Force-Poll ausgelöst (verbraucht 1 vom Tages-Cap). Die Antwort enthält den verbleibenden Cap-Stand, das Frontend zeigt "Aktualisiert ({day}/{dayMax} heute)" bzw. bei erschöpftem Cap "Tages-Cap erreicht — Pause bis morgen". Backend: neuer Endpoint `POST /api/commands/:vehicleId/refresh`, intern via neuer Export `forcePollVehicle()` aus `poller.js`.
+
+---
+
 ## [v3.4.4] - 2026-06-01
 
 ### Behoben
