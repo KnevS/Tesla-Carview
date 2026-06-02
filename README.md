@@ -43,7 +43,8 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
 | **Audit-Log** | Admin-Viewer für sicherheitsrelevante Ereignisse mit Filter und CSV-Export (DSGVO-konform) |
 | **Dynamischer Stromtarif** | aWattar (DE/AT) und Tibber-Integration: 24h-Preiskurve im Dashboard, Auto-Set des günstigsten 4h-Lade-Fensters |
 | **PDF-Abrechnung** | Unterschriftsreife PDF für Heimladen-Erstattung (clientseitig, keine Cloud) |
-| **Benachrichtigungen** | Web Push bei Ladeende, plus Wartungserinnerungen |
+| **Benachrichtigungen** | Web Push bei Ladeende, plus Wartungserinnerungen — parallel an Telegram, wenn verknüpft |
+| **Telegram-Bot** | Vollständiger 1:1-Bot mit Inline-Buttons: `/status` (mit Lock/Klima/Sentry/Charge-Buttons + Unlock-Confirm), `/battery`, `/range`, `/location` (Maps-Link), `/today`, `/trips`, `/classify` (Fahrt klassifizieren), `/service`, `/firmware`, `/clean` — plus proaktive Push für Ladung-Ende, Sentry-Alarm, Service-Reminder, neue Firmware-Versionen. Audit-Log für jede Vehicle-Action |
 | **Benutzerhandbuch** | Vollständige Anleitung direkt in der App lesbar |
 | **Design & Themes** | 5 Design-Stile (Glass, Cyber, Minimal, Sport, **Nevs-Edition**) + 6 Akzentfarben, alles lokal gespeichert; Nevs-Edition mit eigener Bricolage-Grotesque-Typographie und Live-Status-Streifen |
 | **Einstellungen** | Alle Sektionen per Klick ein-/ausklappbar (SortableSection), Reihenfolge persönlich sortierbar |
@@ -91,6 +92,27 @@ Live-Screenshots aus der Demo-Instanz, täglich um 04:45 automatisch erneuert:
 </table>
 
 📸 Live-Demo: **[demo.teslaview.krische.com](https://demo.teslaview.krische.com)** · [Mobile-Ansicht](https://www.teslaview.krische.com/shots/mobile/dashboard.png) · [Alle Screenshots](https://www.teslaview.krische.com/#screens)
+
+### Telegram-Bot
+
+Verknüpfe dein Konto unter *Einstellungen → Telegram* und nutze den Bot direkt auf dem iPhone/Android:
+
+<table>
+  <tr>
+    <td width="33%"><img src="https://www.teslaview.krische.com/shots/mobile/telegram-status.png" alt="/status mit Inline-Buttons" /></td>
+    <td width="33%"><img src="https://www.teslaview.krische.com/shots/mobile/telegram-notification.png" alt="Push-Benachrichtigung" /></td>
+    <td width="33%"><img src="https://www.teslaview.krische.com/shots/mobile/telegram-classify.png" alt="Fahrt klassifizieren" /></td>
+  </tr>
+  <tr>
+    <td align="center"><em>/status mit Inline-Buttons</em></td>
+    <td align="center"><em>Push-Benachrichtigung</em></td>
+    <td align="center"><em>Fahrt klassifizieren</em></td>
+  </tr>
+</table>
+
+Befehle: `/status`, `/battery`, `/range`, `/location`, `/today`, `/trips`, `/classify`, `/service`, `/firmware`, `/clean`, `/help`, `/unlink`. Inline-Buttons unter `/status` für Lock/Unlock (mit Confirm), Klima, Sentry, Laden. Push-Notifications für Ladung-Ende, Sentry-Alarm, Wartungsfälligkeit und Software-Updates — parallel zum WebPush.
+
+[Alle Telegram-Mockups ansehen ↗](https://www.teslaview.krische.com/#telegram)
 
 ---
 
