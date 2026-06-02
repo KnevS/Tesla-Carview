@@ -23,7 +23,7 @@
  *  /service       — Naechste faellige Wartung
  *  /firmware      — Aktuelle Software-Version + letztes Update
  *  /classify      — Letzte Fahrt im Chat als privat/geschaeftlich/pendel markieren
- *  /clean         — Alle Bot-Nachrichten der letzten ~48h loeschen
+ *  /clean [all]   — Bot-Nachrichten loeschen (default ~200 IDs; "all" bis 1500 IDs zurueck)
  *  /help          — Befehlsliste
  *  /unlink        — Verknüpfung aufheben
  *
@@ -310,13 +310,20 @@ function registerCommands(bot) {
     }
   });
 
-  // /clean — alle Bot-Nachrichten der letzten ~48h aus dem Chat loeschen.
-  // Telegram erlaubt einem Bot nur seine eigenen Nachrichten <48h zu loeschen.
-  // Wir versuchen die letzten ~200 Message-IDs rueckwaerts; User-Messages
-  // schlagen erwartungsgemaess fehl, das ist Teil des Algorithmus.
+  // /clean [all] — Bot-Nachrichten aus dem Chat loeschen.
+  // Telegram-API erlaubt einem Bot nur eigene Nachrichten zu loeschen, und
+  // Telegram selbst lehnt Nachrichten aelter als 48h ab. User-Messages bleiben
+  // im 1:1-Chat unberuehrt — der User muss sie ggf. selbst loeschen.
+  //
+  // /clean       → letzte 200 IDs rueckwaerts, stoppt bei 25 Failures in Folge
+  // /clean all   → bis zu 1500 IDs rueckwaerts, kein Failure-Stop (mehr Bot-Hits
+  //                bei langem User-Block am Stueck), zeigt Aufraeumhinweis am Ende
   bot.command('clean', async ctx => {
     const link = await getLinkForChat(ctx);
     if (!link) return;
+
+    const arg = (ctx.message.text || '').split(/\s+/).slice(1).join(' ').trim().toLowerCase();
+    const allMode = arg === 'all' || arg === 'alle';
 
     const chatId  = ctx.chat.id;
     const startId = ctx.message.message_id;
@@ -326,8 +333,8 @@ function registerCommands(bot) {
 
     let deleted = 0;
     let consecutiveFailures = 0;
-    const MAX_LOOKBACK = 200;
-    const MAX_CONSEC_FAILURES = 25;
+    const MAX_LOOKBACK        = allMode ? 1500 : 200;
+    const MAX_CONSEC_FAILURES = allMode ? Infinity : 25;
 
     for (let i = 1; i <= MAX_LOOKBACK; i++) {
       const msgId = startId - i;
@@ -343,14 +350,19 @@ function registerCommands(bot) {
       }
     }
 
-    // Bestaetigung — selbst-loeschend nach 4 Sekunden
+    // Bestaetigung — selbst-loeschend nach 4 (kurz) bzw. 8 Sekunden (all-Mode)
+    const hint = allMode
+      ? '\n\n_Tipp: Telegram erlaubt Bots nicht, deine eigenen Nachrichten zu loeschen\\. ' +
+        'Falls etwas uebrig bleibt, kannst du den Chat ueber das Profil\\-Menue ' +
+        '\\(⋮ → „Verlauf löschen"\\) komplett leeren\\._'
+      : '';
     const confirm = await ctx.reply(
-      `🧹 ${deleted} Bot\\-Nachricht${deleted === 1 ? '' : 'en'} aus diesem Chat geloescht\\.`,
+      `🧹 ${deleted} Bot\\-Nachricht${deleted === 1 ? '' : 'en'} aus diesem Chat geloescht\\.${hint}`,
       { parse_mode: 'MarkdownV2' }
     );
     setTimeout(() => {
       ctx.telegram.deleteMessage(chatId, confirm.message_id).catch(() => {});
-    }, 4000);
+    }, allMode ? 8000 : 4000);
   });
 
   // /help
@@ -366,7 +378,7 @@ function registerCommands(bot) {
       '/classify — Letzte Fahrt klassifizieren \\(privat / geschäftlich / pendel\\)\n' +
       '/service — Naechste faellige Wartung\n' +
       '/firmware — Software\\-Version\n' +
-      '/clean — Bot\\-Nachrichten aus diesem Chat aufraeumen \\(letzte ~48h\\)\n' +
+      '/clean — Bot\\-Nachrichten dieses Chats aufraeumen \\(`/clean all` fuer aggressiv\\)\n' +
       '/unlink — Bot\\-Verknüpfung aufheben\n' +
       '/help — Diese Hilfe\n\n' +
       '💡 _Unter /status erscheinen Inline\\-Buttons fuer Lock, Klima, Sentry, Laden_\n' +
