@@ -84,21 +84,14 @@ jobs:
             # frontend-dist-private/-Volume eingehaengt — dieser Mount ist
             # entfernt (s. #84), das Image-Bundle wird direkt serviert.
             echo "$GHCR_TOKEN" | sudo docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
-            # Backend nur ziehen wenn sich der Digest geaendert hat.
-            BACKEND_IMAGE="ghcr.io/knevs/tesla-carview/backend:main"
-            REMOTE_DIGEST=$(sudo docker manifest inspect "$BACKEND_IMAGE" 2>/dev/null \
-              | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('config',{}).get('digest',''))" 2>/dev/null || echo "")
-            LOCAL_DIGEST=$(sudo docker inspect "$BACKEND_IMAGE" --format '{{.Id}}' 2>/dev/null || echo "none")
-            if [ -z "$REMOTE_DIGEST" ] || [ "$REMOTE_DIGEST" != "$LOCAL_DIGEST" ]; then
-              echo "==> Backend-Image aktualisiert — ziehe neues Image …"
-              sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml pull --quiet backend
-            else
-              echo "==> Backend-Image unverändert (${LOCAL_DIGEST:7:7}) — kein Pull nötig."
-            fi
-            # Frontend-Image immer ziehen (klein; enthaelt das fertige Bundle).
-            echo "==> Frontend-Image ziehen …"
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml pull --quiet frontend
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d backend frontend
+            # Beide Services immer pullen — der frühere "digest diff first"-Check
+            # war fehleranfällig (manifest inspect-Format hat sich geändert) und
+            # führte gelegentlich dazu, dass --force-recreate auf dem Host nötig
+            # wurde, weil docker compose das neue Image nicht aufnahm.
+            # --pull always sagt docker compose explizit, das Image vor dem Up
+            # neu zu pullen und bei Image-Aenderung den Container neu zu erstellen.
+            echo "==> Backend + Frontend ziehen + Container ggf. neu erstellen …"
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d --pull always backend frontend
             sudo docker logout ghcr.io
             # Sicherstellen dass nginx in beiden erforderlichen Netzwerken läuft.
             COMPOSE_NET="tesla-carview_tesla-net"

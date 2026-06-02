@@ -7,6 +7,37 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.13] - 2026-06-02
+
+### Improved
+
+- **Onboarding preflight in the setup wizard**: Before the wizard asks for Tesla values, a yellow-highlighted block now lists the three Tesla-specific prerequisites: (1) Developer Account registration (approval may take 1–3 weeks — leaving the fields blank is fine; they can be added later via `setup-wizard.sh`), (2) Region NA/EU/Asia, (3) Virtual Key setup with a pointer to `docs/04-tesla-api.en.md`.
+- **README quickstart**: Both language versions get a blockquote at the very top of the quickstart section explaining that Tesla approval is external and time-consuming, but installation can run in parallel. Links straight to `docs/04-tesla-api.en.md` for the detail steps.
+
+Why: new users often only realised at wizard step 2 that Tesla approval takes weeks — the setup time then felt mis-quoted. The preflight makes it clear from the start: the app setup is not the bottleneck.
+
+---
+
+## [v3.4.12] - 2026-06-02
+
+### New
+
+- **Telegram `/clean all` — aggressive chat cleanup**: Pass `all` (or `alle`) to extend the scan range from 200 to up to 1500 message IDs backwards and disable the consecutive-failure brake. Useful for chats with long user-message blocks back-to-back where default mode would have stopped after 25 failures. The confirmation text now mentions that own user messages can't be deleted via the Bot API, with a hint to clear the history manually via the profile menu.
+
+---
+
+## [v3.4.11] - 2026-06-02
+
+### Fixed
+
+- **Telegram "Refresh" button replied with "Error: Bad Request: message is not modified"**: When nothing had changed since the last `/status` render, Telegram refused the `editMessageText` (identical text + identical buttons). The catch block forwarded that verbatim as a CallbackQuery answer. This specific case is now detected and silently answered as "Already current" — all other errors stay visible.
+
+### New
+
+- **Telegram `/clean`**: Removes all bot messages from the chat (last ~48 hours). Handy after a lot of back-and-forth with `/status`, `/classify` or notifications. The bot first deletes the `/clean` message itself, then iterates 200 message IDs backwards and removes its own entries (user messages stay untouched — the Telegram API only allows bots to delete their own anyway). The confirmation popup self-destructs after 4 seconds so the chat ends up truly empty. Documented in `/help`.
+
+---
+
 ## [v3.4.10] - 2026-06-01
 
 ### New
