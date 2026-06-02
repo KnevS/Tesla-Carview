@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v3.4.12-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.4.13-E31937?style=flat-square)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.en.md)
 
@@ -136,6 +136,9 @@ Since v2.0 Tesla Carview supports **multiple tenants** with full data isolation:
 ---
 
 ## Quickstart
+
+> **⏳ Tesla-side preparation (can run in parallel with setup):**
+> Using the Tesla Fleet API means registering an application at [developer.tesla.com](https://developer.tesla.com/). **Tesla approval can take 1–3 weeks.** The installation itself works without it — every non-Tesla feature is immediately available, and you can add the Tesla credentials later via `bash deploy/setup-wizard.sh`. See [docs/04-tesla-api.en.md](docs/04-tesla-api.en.md) for steps and the Virtual Key setup.
 
 ### Raspberry Pi / Linux server (recommended)
 
