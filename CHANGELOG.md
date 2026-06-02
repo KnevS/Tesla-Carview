@@ -7,6 +7,22 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.15] - 2026-06-02
+
+### Aktualisiert (Major-Dependencies)
+
+- **`vue-router` 4.6.4 → 5.1.0** (PR #87): Frontend-Router auf neueste Major-Linie. Composition-API-Aufrufe (`useRouter`, `useRoute`, `router.push/replace`, `beforeEach`-Guards) sind weiter API-stabil — keine Code-Anpassungen nötig. Lokaler Build verifiziert, alle Vue-Files (Login, NavBar, Mobile-TabBar, Settings, PasswordReset, MfaVerify, Profile, Pair, Demo, TripsHeatmap) bauen ohne Warnings.
+- **`@simplewebauthn/server` 10.0.1 → 13.3.1** (PR #88): WebAuthn-Library drei Major-Versionen hoch. Drei Stellen migriert:
+  - `routes/passkey.js` register-verify — `verification.registrationInfo` jetzt mit geschachteltem `credential: {id, publicKey, counter}` statt Top-Level `credentialID/credentialPublicKey/counter`
+  - `routes/passkey.js` login-verify + `routes/pair.js` confirm — Parameter `authenticator: {credentialID, credentialPublicKey, ...}` umbenannt zu `credential: {id, publicKey, counter, transports}`
+  - `generateRegistrationOptions().excludeCredentials[].id` bleibt string — keine Änderung
+
+### Doku
+
+- **Handbook DE + EN**: neue Sektion `## 💬 Telegram-Bot` mit Einrichtungsschritten, vollständiger Befehlsliste, Inline-Button-Übersicht, Push-Quellen und Sicherheitshinweis zu `door_unlock`. Lücke bestand seit v3.3.3 (Bot-Einführung). Andere Handbook-Sprachen (fr, es, el, tr) folgen in einer dedizierten i18n-PR.
+
+---
+
 ## [v3.4.14] - 2026-06-02
 
 ### Neu

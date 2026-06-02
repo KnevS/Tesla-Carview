@@ -533,6 +533,52 @@ Under **Planning → Charging stations** you can search for fast-charging statio
 
 > **Tip:** In the Route Planner, fast-charging stations are shown directly on the map along the route — without a separate search step.
 
+## 💬 Telegram bot {#telegram}
+
+Tesla Carview ships with a fully integrated Telegram bot — vehicle status, commands and push notifications straight on your phone.
+
+**Setup:**
+
+1. **Admin**: store the bot token in the tenant settings under *Telegram* (`telegram.bot_token`)
+2. **User**: in Carview under *Settings → Notifications → Link Telegram* generate a 6-digit code
+3. **In Telegram**: send `/start <code>` to the bot — done
+
+**Commands (all visible in the `/` suggestion list and via the menu button):**
+
+| Command | What |
+|---|---|
+| `/status` | Vehicle status + 9 inline buttons (lock, unlock with confirm, climate, sentry, charge, refresh) |
+| `/battery` | Battery level + last charging session |
+| `/range` | Remaining range (rated + ideal) |
+| `/location` | Current location + Google Maps link |
+| `/today` | Today's stats: trips, km, kWh, cost (€) |
+| `/trips` | Last 5 trips |
+| `/classify` | Label the latest trip as private / business / commute (company-car log) |
+| `/service` | Next due maintenance |
+| `/firmware` | Current software version |
+| `/clean` | Clean up bot messages (`/clean all` for aggressive scan) |
+| `/help` | Command list |
+| `/unlink` | Remove the Carview link |
+
+**Inline buttons under `/status`:**
+
+Instead of typing commands, one tap is enough: 🔒 Lock / 🔓 Unlock (with a confirmation step), ❄️ Climate on/off, 🛡 Sentry on/off, ⚡ Charge start/stop, ⟳ Refresh. Every action is recorded in the audit log as `telegram_command` with `vehicle_id`, `command`, `body` and `result/error`.
+
+**Proactive push (in parallel with Web Push):**
+
+- ⚡ Charging complete (with kWh and cost)
+- 🚨 Sentry alert (Sentry mode detects motion)
+- 🔧 Maintenance due (daily scheduler)
+- 💾 New firmware version installed
+
+Users without a linked Telegram account continue to see only Web Push. Both channels run side by side.
+
+**Security:**
+
+`door_unlock` is the only safety-critical action and requires a second confirmation in the chat. All other actions (lock, climate, sentry, charge) are executed immediately. If someone gains access to the Telegram account, the worst they can do is execute vehicle actions the linked Carview user could perform anyway — the audit log makes that fully traceable.
+
+Mockups + full overview: [www.teslaview.krische.com/#telegram](https://www.teslaview.krische.com/#telegram).
+
 ## ⚡ Automations {#automations}
 
 Under **Planning → Automations** you can set up push alerts and automated actions — no coding required.
