@@ -7,6 +7,18 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.11] - 2026-06-02
+
+### Behoben
+
+- **Telegram „Aktualisieren"-Button antwortete mit „Fehler: Bad Request: message is not modified"**: Wenn sich seit dem letzten `/status`-Render nichts am Fahrzeugzustand geändert hatte, lehnte Telegram den `editMessageText` ab (identischer Text + identische Buttons). Der Catch-Block reichte das wörtlich als CallbackQuery-Antwort durch. Jetzt wird genau dieser Fall erkannt und still als „Bereits aktuell" beantwortet — alle anderen Fehler bleiben sichtbar.
+
+### Neu
+
+- **Telegram `/clean`**: Räumt alle Bot-Nachrichten der letzten ~48 Stunden aus dem Chat. Praktisch nach längerem Hin-und-her mit `/status`, `/classify` oder Notifications. Bot löscht zuerst die `/clean`-Message selbst, dann iteriert er 200 Message-IDs rückwärts und löscht alle Bot-eigenen Einträge (User-Messages bleiben unberührt, Telegram-API erlaubt Bots eh nur die eigenen). Bestätigungs-Popup verschwindet nach 4 Sekunden selbst, sodass der Chat wirklich leer wird. Im `/help`-Menü dokumentiert.
+
+---
+
 ## [v3.4.10] - 2026-06-01
 
 ### Neu
