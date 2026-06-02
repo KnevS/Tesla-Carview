@@ -7,6 +7,45 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.14] - 2026-06-02
+
+### Neu
+
+- **Telegram-Befehlsmenü im Client sichtbar**: Beim Bot-Start wird jetzt `setMyCommands` aufgerufen, sodass alle 12 Befehle direkt im Telegram-Client erscheinen — beim Tippen von `/` als Vorschlagsliste und über den Menü-Button (▤) rechts neben dem Eingabefeld. Bisher musste man `/help` kennen, um die Befehle zu sehen. Jetzt sieht man sie alle mit Kurzbeschreibung + Emoji. Wird einmal pro Bot-Init gesetzt (kein Performance-Overhead), Fehler werden geschluckt damit ein temporäres Telegram-API-Problem den Bot nicht blockiert. Zusätzlich wird der Menü-Button-Typ explizit auf `commands` gesetzt (statt Default-Webapp), damit Tap darauf die Befehlsliste öffnet.
+
+---
+
+## [v3.4.13] - 2026-06-02
+
+### Verbessert
+
+- **Onboarding-Vorab-Hinweis im Setup-Wizard**: Bevor der Wizard nach Tesla-Werten fragt, erscheint ein gelb hervorgehobener Block mit den drei Tesla-spezifischen Vorbereitungen: (1) Developer-Account anlegen (Approval kann 1–3 Wochen dauern — leer lassen erlaubt, Felder später per `setup-wizard.sh` nachtragen), (2) Region NA/EU/Asia, (3) Virtual-Key-Setup-Hinweis mit Verweis auf `docs/04-tesla-api.md`.
+- **README Quickstart-Section**: Beide Sprachversionen bekommen ganz oben einen Blockquote-Hinweis, dass die Tesla-Approval extern und zeitintensiv ist, aber die Installation parallel laufen kann. Verlinkt direkt auf `docs/04-tesla-api.md` für die Detailschritte.
+
+Hintergrund: Neue Nutzer haben oft erst beim Wizard-Schritt 2 gemerkt, dass die Tesla-Approval Wochen dauert — die Setup-Zeit war damit gefühlt schlecht eingeschätzt. Mit dem Vorab-Hinweis weiß man von Anfang an: das App-Setup ist nicht der Engpass.
+
+---
+
+## [v3.4.12] - 2026-06-02
+
+### Neu
+
+- **Telegram `/clean all` — aggressiverer Chat-Cleanup**: Mit dem Argument `all` (oder `alle`) erweitert sich der Scan-Bereich von 200 auf bis zu 1500 Message-IDs rückwärts und ignoriert die Consecutive-Failure-Bremse. Praktisch für Chats mit langen User-Message-Blöcken am Stück (dort hätte der Default-Modus mit 25 Failures in Folge zu früh abgebrochen). Bestätigungstext bekommt den Hinweis, dass eigene User-Nachrichten Telegram-API-bedingt nicht via Bot löschbar sind — Anleitung zum manuellen Verlauf-Leeren in der Bestätigung mit drin.
+
+---
+
+## [v3.4.11] - 2026-06-02
+
+### Behoben
+
+- **Telegram „Aktualisieren"-Button antwortete mit „Fehler: Bad Request: message is not modified"**: Wenn sich seit dem letzten `/status`-Render nichts am Fahrzeugzustand geändert hatte, lehnte Telegram den `editMessageText` ab (identischer Text + identische Buttons). Der Catch-Block reichte das wörtlich als CallbackQuery-Antwort durch. Jetzt wird genau dieser Fall erkannt und still als „Bereits aktuell" beantwortet — alle anderen Fehler bleiben sichtbar.
+
+### Neu
+
+- **Telegram `/clean`**: Räumt alle Bot-Nachrichten der letzten ~48 Stunden aus dem Chat. Praktisch nach längerem Hin-und-her mit `/status`, `/classify` oder Notifications. Bot löscht zuerst die `/clean`-Message selbst, dann iteriert er 200 Message-IDs rückwärts und löscht alle Bot-eigenen Einträge (User-Messages bleiben unberührt, Telegram-API erlaubt Bots eh nur die eigenen). Bestätigungs-Popup verschwindet nach 4 Sekunden selbst, sodass der Chat wirklich leer wird. Im `/help`-Menü dokumentiert.
+
+---
+
 ## [v3.4.10] - 2026-06-01
 
 ### Neu

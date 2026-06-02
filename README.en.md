@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v3.4.10-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.4.14-E31937?style=flat-square)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.en.md)
 
@@ -43,7 +43,8 @@ Runs on: **Linux servers** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), local
 | **Audit log** | Admin viewer for security events with filters and CSV export (GDPR-friendly) |
 | **Dynamic tariff** | aWattar (DE/AT) and Tibber integration: 24h price curve on the dashboard, one-click schedule charging at the cheapest 4h window |
 | **PDF reimbursement** | Signable PDF for home-charging reimbursement (client-side, no cloud) |
-| **Notifications** | Web Push when charging finishes, plus maintenance reminders |
+| **Notifications** | Web Push when charging finishes, plus maintenance reminders — fan-out to Telegram in parallel when linked |
+| **Telegram bot** | Full 1:1 bot with inline buttons: `/status` (with lock/climate/sentry/charge buttons + unlock confirm), `/battery`, `/range`, `/location` (Maps link), `/today`, `/trips`, `/classify` (label a trip), `/service`, `/firmware`, `/clean` — plus proactive push for charging-complete, sentry alerts, service reminders and new firmware versions. Audit log for every vehicle action |
 | **User handbook** | Complete guide readable directly inside the app |
 | **Design & themes** | 5 design styles (Glass, Cyber, Minimal, Sport, **Nevs-Edition**) + 6 accent colors, all stored locally; Nevs-Edition with its own Bricolage Grotesque typography and live status bar |
 | **Settings** | All sections collapsible and individually reorderable (drag-to-sort) |
@@ -92,6 +93,27 @@ Live screenshots from the demo instance, refreshed daily at 04:45:
 
 📸 Live demo: **[demo.teslaview.krische.com](https://demo.teslaview.krische.com)** · [Mobile view](https://www.teslaview.krische.com/shots/mobile/dashboard.png) · [All screenshots](https://www.teslaview.krische.com/#screens)
 
+### Telegram bot
+
+Link your account under *Settings → Telegram* and use the bot directly on iPhone/Android:
+
+<table>
+  <tr>
+    <td width="33%"><img src="https://www.teslaview.krische.com/shots/mobile/telegram-status.png" alt="/status with inline buttons" /></td>
+    <td width="33%"><img src="https://www.teslaview.krische.com/shots/mobile/telegram-notification.png" alt="Push notification" /></td>
+    <td width="33%"><img src="https://www.teslaview.krische.com/shots/mobile/telegram-classify.png" alt="Classify a trip" /></td>
+  </tr>
+  <tr>
+    <td align="center"><em>/status with inline buttons</em></td>
+    <td align="center"><em>Push notification</em></td>
+    <td align="center"><em>Classify a trip</em></td>
+  </tr>
+</table>
+
+Commands: `/status`, `/battery`, `/range`, `/location`, `/today`, `/trips`, `/classify`, `/service`, `/firmware`, `/clean`, `/help`, `/unlink`. Inline buttons under `/status` for lock/unlock (with confirm), climate, sentry, charging. Push notifications for charging-complete, sentry alerts, service reminders and software updates — in parallel with Web Push.
+
+[See all Telegram mockups ↗](https://www.teslaview.krische.com/#telegram)
+
 ---
 
 ## Multi-tenant architecture (since v2.0)
@@ -114,6 +136,9 @@ Since v2.0 Tesla Carview supports **multiple tenants** with full data isolation:
 ---
 
 ## Quickstart
+
+> **⏳ Tesla-side preparation (can run in parallel with setup):**
+> Using the Tesla Fleet API means registering an application at [developer.tesla.com](https://developer.tesla.com/). **Tesla approval can take 1–3 weeks.** The installation itself works without it — every non-Tesla feature is immediately available, and you can add the Tesla credentials later via `bash deploy/setup-wizard.sh`. See [docs/04-tesla-api.en.md](docs/04-tesla-api.en.md) for steps and the Virtual Key setup.
 
 ### Raspberry Pi / Linux server (recommended)
 

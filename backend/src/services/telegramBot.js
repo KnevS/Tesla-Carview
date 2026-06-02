@@ -23,6 +23,7 @@
  *  /service       — Naechste faellige Wartung
  *  /firmware      — Aktuelle Software-Version + letztes Update
  *  /classify      — Letzte Fahrt im Chat als privat/geschaeftlich/pendel markieren
+ *  /clean [all]   — Bot-Nachrichten loeschen (default ~200 IDs; "all" bis 1500 IDs zurueck)
  *  /help          — Befehlsliste
  *  /unlink        — Verknüpfung aufheben
  *
@@ -64,6 +65,11 @@ export async function initTelegramBot() {
   try {
     bot = new Telegraf(token);
     registerCommands(bot);
+    // Befehlsliste im Telegram-Client-Menue (▤ Befehle / "/") setzen,
+    // damit der Nutzer alle verfuegbaren Befehle ohne /help sieht.
+    registerBotCommandMenu(bot).catch(err =>
+      console.warn('[Telegram] setMyCommands fehlgeschlagen:', err.message)
+    );
 
     const tdb = (() => { try { const ts = getAllTenants().filter(t => !t.is_demo); return ts.length ? getDb(ts[0].id) : null; } catch { return null; } })();
     const dbWebhook = tdb ? getTenantSetting(tdb, 'telegram.webhook_url', null) : null;
@@ -92,6 +98,31 @@ export async function initTelegramBot() {
     console.error('[Telegram] Init-Fehler:', err.message);
     return null;
   }
+}
+
+/**
+ * Setzt die Befehlsliste, die im Telegram-Client beim Tippen von "/" und
+ * im Menue-Button (▤) erscheint. Telegram zeigt max. 100 Eintraege; wir
+ * haben deutlich weniger, also kein Cutoff. setMyCommands akzeptiert eine
+ * Scope-Option — wir nutzen den Default (alle Privatchats).
+ */
+async function registerBotCommandMenu(b) {
+  await b.telegram.setMyCommands([
+    { command: 'status',   description: '🚗 Fahrzeugstatus mit Inline-Buttons' },
+    { command: 'battery',  description: '🔋 Akkustand + letzte Ladung' },
+    { command: 'range',    description: '🛣 Restreichweite' },
+    { command: 'location', description: '📍 Aktueller Standort (Maps-Link)' },
+    { command: 'today',    description: '📊 Tagesbilanz (km, kWh, €)' },
+    { command: 'trips',    description: '🗺 Letzte 5 Fahrten' },
+    { command: 'classify', description: '🏷 Letzte Fahrt klassifizieren (privat/business/pendel)' },
+    { command: 'service',  description: '🔧 Naechste faellige Wartung' },
+    { command: 'firmware', description: '💾 Software-Version' },
+    { command: 'clean',    description: '🧹 Bot-Nachrichten aufraeumen (all = aggressiv)' },
+    { command: 'help',     description: 'ℹ️ Alle Befehle anzeigen' },
+    { command: 'unlink',   description: '🔌 Carview-Verknuepfung aufheben' },
+  ]);
+  // Menue-Button rechts neben dem Eingabefeld auf "Befehle" setzen
+  await b.telegram.setChatMenuButton({ menuButton: { type: 'commands' } });
 }
 
 async function startPolling() {
@@ -309,6 +340,61 @@ function registerCommands(bot) {
     }
   });
 
+  // /clean [all] — Bot-Nachrichten aus dem Chat loeschen.
+  // Telegram-API erlaubt einem Bot nur eigene Nachrichten zu loeschen, und
+  // Telegram selbst lehnt Nachrichten aelter als 48h ab. User-Messages bleiben
+  // im 1:1-Chat unberuehrt — der User muss sie ggf. selbst loeschen.
+  //
+  // /clean       → letzte 200 IDs rueckwaerts, stoppt bei 25 Failures in Folge
+  // /clean all   → bis zu 1500 IDs rueckwaerts, kein Failure-Stop (mehr Bot-Hits
+  //                bei langem User-Block am Stueck), zeigt Aufraeumhinweis am Ende
+  bot.command('clean', async ctx => {
+    const link = await getLinkForChat(ctx);
+    if (!link) return;
+
+    const arg = (ctx.message.text || '').split(/\s+/).slice(1).join(' ').trim().toLowerCase();
+    const allMode = arg === 'all' || arg === 'alle';
+
+    const chatId  = ctx.chat.id;
+    const startId = ctx.message.message_id;
+
+    // Erst die /clean-Message selbst loeschen
+    try { await ctx.telegram.deleteMessage(chatId, startId); } catch { /* ignore */ }
+
+    let deleted = 0;
+    let consecutiveFailures = 0;
+    const MAX_LOOKBACK        = allMode ? 1500 : 200;
+    const MAX_CONSEC_FAILURES = allMode ? Infinity : 25;
+
+    for (let i = 1; i <= MAX_LOOKBACK; i++) {
+      const msgId = startId - i;
+      if (msgId <= 0) break;
+      try {
+        await ctx.telegram.deleteMessage(chatId, msgId);
+        deleted++;
+        consecutiveFailures = 0;
+      } catch {
+        // Erwartet bei User-Messages oder Messages > 48h
+        consecutiveFailures++;
+        if (consecutiveFailures > MAX_CONSEC_FAILURES) break;
+      }
+    }
+
+    // Bestaetigung — selbst-loeschend nach 4 (kurz) bzw. 8 Sekunden (all-Mode)
+    const hint = allMode
+      ? '\n\n_Tipp: Telegram erlaubt Bots nicht, deine eigenen Nachrichten zu loeschen\\. ' +
+        'Falls etwas uebrig bleibt, kannst du den Chat ueber das Profil\\-Menue ' +
+        '\\(⋮ → „Verlauf löschen"\\) komplett leeren\\._'
+      : '';
+    const confirm = await ctx.reply(
+      `🧹 ${deleted} Bot\\-Nachricht${deleted === 1 ? '' : 'en'} aus diesem Chat geloescht\\.${hint}`,
+      { parse_mode: 'MarkdownV2' }
+    );
+    setTimeout(() => {
+      ctx.telegram.deleteMessage(chatId, confirm.message_id).catch(() => {});
+    }, allMode ? 8000 : 4000);
+  });
+
   // /help
   bot.command('help', async ctx => {
     return ctx.reply(
@@ -322,6 +408,7 @@ function registerCommands(bot) {
       '/classify — Letzte Fahrt klassifizieren \\(privat / geschäftlich / pendel\\)\n' +
       '/service — Naechste faellige Wartung\n' +
       '/firmware — Software\\-Version\n' +
+      '/clean — Bot\\-Nachrichten dieses Chats aufraeumen \\(`/clean all` fuer aggressiv\\)\n' +
       '/unlink — Bot\\-Verknüpfung aufheben\n' +
       '/help — Diese Hilfe\n\n' +
       '💡 _Unter /status erscheinen Inline\\-Buttons fuer Lock, Klima, Sentry, Laden_\n' +
@@ -702,7 +789,15 @@ async function handleVehicleAction(ctx, link, vehicleId, action, confirmed) {
       });
       await ctx.answerCbQuery('Aktualisiert');
     } catch (e) {
-      await ctx.answerCbQuery(`Fehler: ${e.message?.slice(0, 100) || 'unbekannt'}`);
+      // Telegram lehnt editMessageText ab wenn Text + Buttons identisch sind
+      // ("Bad Request: message is not modified"). Das ist kein Fehler — der
+      // State ist einfach unverändert. Stille beantworten.
+      const desc = e?.response?.description || e?.message || '';
+      if (/message is not modified/i.test(desc)) {
+        await ctx.answerCbQuery('Bereits aktuell');
+        return;
+      }
+      await ctx.answerCbQuery(`Fehler: ${desc.slice(0, 100) || 'unbekannt'}`);
     }
     return;
   }
