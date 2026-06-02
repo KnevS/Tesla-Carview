@@ -533,6 +533,52 @@ Unter **Planung → Ladestationen** lassen sich Schnellladestationen in der Näh
 
 > **Tipp:** Im Routenplaner sind Schnellladestationen direkt auf der Karte entlang der Route sichtbar — ohne separaten Suchschritt.
 
+## 💬 Telegram-Bot {#telegram}
+
+Tesla Carview hat einen voll integrierten Telegram-Bot — Fahrzeugstatus, Befehle und Push-Benachrichtigungen direkt aufs Handy.
+
+**Einrichtung:**
+
+1. **Admin**: Bot-Token in den Tenant-Einstellungen unter *Telegram* hinterlegen (`telegram.bot_token`)
+2. **Nutzer**: In Carview unter *Einstellungen → Benachrichtigungen → Telegram verknüpfen* einen 6-stelligen Code generieren
+3. **Im Telegram**: an den Bot `/start <Code>` schicken — fertig
+
+**Befehle (alle im `/`-Menü und Menü-Button sichtbar):**
+
+| Befehl | Was |
+|---|---|
+| `/status` | Fahrzeugstatus + 9 Inline-Buttons (Lock, Unlock mit Confirm, Klima, Sentry, Laden, Aktualisieren) |
+| `/battery` | Akkustand + letzte Ladung |
+| `/range` | Restreichweite (rated + ideal) |
+| `/location` | Aktueller Standort + Google-Maps-Link |
+| `/today` | Tagesbilanz: Fahrten, km, kWh, Kosten (€) |
+| `/trips` | Letzte 5 Fahrten |
+| `/classify` | Letzte Fahrt als privat/geschäftlich/pendel markieren (Dienstwagen-Fahrtenbuch) |
+| `/service` | Nächste fällige Wartung |
+| `/firmware` | Aktuelle Software-Version |
+| `/clean` | Bot-Nachrichten aufräumen (`/clean all` für aggressiveren Scan) |
+| `/help` | Befehlsliste |
+| `/unlink` | Verknüpfung aufheben |
+
+**Inline-Buttons unter `/status`:**
+
+Statt Befehle zu tippen, ein Tap genügt: 🔒 Lock / 🔓 Unlock (mit Bestätigungs-Schritt), ❄️ Klima an/aus, 🛡 Sentry an/aus, ⚡ Laden start/stop, ⟳ Aktualisieren. Jede Aktion wird im Audit-Log als `telegram_command` mit `vehicle_id`, `command`, `body` und `result/error` festgehalten.
+
+**Proaktive Push (parallel zu Web Push):**
+
+- ⚡ Ladung abgeschlossen (mit kWh und Kosten)
+- 🚨 Sentry-Alarm (Wachmodus erkennt Bewegung)
+- 🔧 Wartungsfälligkeit (täglicher Scheduler)
+- 💾 Neue Firmware-Version installiert
+
+Wer keinen Telegram-Account verknüpft hat, sieht weiterhin nur die Web Push. Beide Channels laufen parallel.
+
+**Sicherheit:**
+
+`door_unlock` ist die einzige sicherheitskritische Aktion und braucht eine zweite Bestätigung im Chat. Alle anderen Aktionen (Lock, Klima, Sentry, Laden) sind direkt ausgeführt. Bei einem fremden Zugriff auf den Telegram-Account können maximal Fahrzeug-Aktionen ausgeführt werden, die der verknüpfte App-User auch in Carview hätte — der Audit-Log macht das nachvollziehbar.
+
+Mockups + komplette Übersicht: [www.teslaview.krische.com/#telegram](https://www.teslaview.krische.com/#telegram).
+
 ## ⚡ Automationen {#automations}
 
 Unter **Planung → Automationen** lassen sich Push-Alarme und automatische Aktionen einrichten — ohne Programmierung.
