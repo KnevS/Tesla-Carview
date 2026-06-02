@@ -65,6 +65,11 @@ export async function initTelegramBot() {
   try {
     bot = new Telegraf(token);
     registerCommands(bot);
+    // Befehlsliste im Telegram-Client-Menue (▤ Befehle / "/") setzen,
+    // damit der Nutzer alle verfuegbaren Befehle ohne /help sieht.
+    registerBotCommandMenu(bot).catch(err =>
+      console.warn('[Telegram] setMyCommands fehlgeschlagen:', err.message)
+    );
 
     const tdb = (() => { try { const ts = getAllTenants().filter(t => !t.is_demo); return ts.length ? getDb(ts[0].id) : null; } catch { return null; } })();
     const dbWebhook = tdb ? getTenantSetting(tdb, 'telegram.webhook_url', null) : null;
@@ -93,6 +98,31 @@ export async function initTelegramBot() {
     console.error('[Telegram] Init-Fehler:', err.message);
     return null;
   }
+}
+
+/**
+ * Setzt die Befehlsliste, die im Telegram-Client beim Tippen von "/" und
+ * im Menue-Button (▤) erscheint. Telegram zeigt max. 100 Eintraege; wir
+ * haben deutlich weniger, also kein Cutoff. setMyCommands akzeptiert eine
+ * Scope-Option — wir nutzen den Default (alle Privatchats).
+ */
+async function registerBotCommandMenu(b) {
+  await b.telegram.setMyCommands([
+    { command: 'status',   description: '🚗 Fahrzeugstatus mit Inline-Buttons' },
+    { command: 'battery',  description: '🔋 Akkustand + letzte Ladung' },
+    { command: 'range',    description: '🛣 Restreichweite' },
+    { command: 'location', description: '📍 Aktueller Standort (Maps-Link)' },
+    { command: 'today',    description: '📊 Tagesbilanz (km, kWh, €)' },
+    { command: 'trips',    description: '🗺 Letzte 5 Fahrten' },
+    { command: 'classify', description: '🏷 Letzte Fahrt klassifizieren (privat/business/pendel)' },
+    { command: 'service',  description: '🔧 Naechste faellige Wartung' },
+    { command: 'firmware', description: '💾 Software-Version' },
+    { command: 'clean',    description: '🧹 Bot-Nachrichten aufraeumen (all = aggressiv)' },
+    { command: 'help',     description: 'ℹ️ Alle Befehle anzeigen' },
+    { command: 'unlink',   description: '🔌 Carview-Verknuepfung aufheben' },
+  ]);
+  // Menue-Button rechts neben dem Eingabefeld auf "Befehle" setzen
+  await b.telegram.setChatMenuButton({ menuButton: { type: 'commands' } });
 }
 
 async function startPolling() {
