@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.12] - 2026-06-02
+
+### Neu
+
+- **Telegram `/clean all` — aggressiverer Chat-Cleanup**: Mit dem Argument `all` (oder `alle`) erweitert sich der Scan-Bereich von 200 auf bis zu 1500 Message-IDs rückwärts und ignoriert die Consecutive-Failure-Bremse. Praktisch für Chats mit langen User-Message-Blöcken am Stück (dort hätte der Default-Modus mit 25 Failures in Folge zu früh abgebrochen). Bestätigungstext bekommt den Hinweis, dass eigene User-Nachrichten Telegram-API-bedingt nicht via Bot löschbar sind — Anleitung zum manuellen Verlauf-Leeren in der Bestätigung mit drin.
+
+---
+
 ## [v3.4.11] - 2026-06-02
 
 ### Behoben

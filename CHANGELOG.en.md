@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.12] - 2026-06-02
+
+### New
+
+- **Telegram `/clean all` — aggressive chat cleanup**: Pass `all` (or `alle`) to extend the scan range from 200 to up to 1500 message IDs backwards and disable the consecutive-failure brake. Useful for chats with long user-message blocks back-to-back where default mode would have stopped after 25 failures. The confirmation text now mentions that own user messages can't be deleted via the Bot API, with a hint to clear the history manually via the profile menu.
+
+---
+
 ## [v3.4.11] - 2026-06-02
 
 ### Fixed
