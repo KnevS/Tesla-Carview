@@ -113,11 +113,14 @@ router.post('/register-verify', requireAuth, async (req, res) => {
 
     if (!verification.verified) return res.status(400).json({ error: 'Verifikation fehlgeschlagen' });
 
-    const { credentialID, credentialPublicKey, counter, credentialDeviceType } = verification.registrationInfo;
-    // v10: credentialID ist ein Uint8Array — als base64url-String in DB speichern.
-    const credIdStr = typeof credentialID === 'string'
-      ? credentialID
-      : Buffer.from(credentialID).toString('base64url');
+    // v13: registrationInfo.credential ist jetzt das WebAuthnCredential-Objekt
+    // mit { id (Base64URLString), publicKey (Uint8Array), counter, transports? }.
+    // credentialDeviceType bleibt als separater Top-Level-Schluessel.
+    const { credential: regCred, credentialDeviceType } = verification.registrationInfo;
+    const credentialID        = regCred.id;
+    const credentialPublicKey = regCred.publicKey;
+    const counter             = regCred.counter;
+    const credIdStr = credentialID;
     req.db.prepare(
       `INSERT OR REPLACE INTO passkey_credentials
        (user_id, credential_id, public_key, counter, device_type, transports)
@@ -191,12 +194,12 @@ router.post('/login-verify', async (req, res) => {
       expectedChallenge: stored.challenge,
       expectedOrigin:    RP_ORIGIN,
       expectedRPID:      RP_ID,
-      // v10.0.1 destructures 'authenticator' (nicht 'credential') mit credentialPublicKey/credentialID
-      authenticator: {
-        credentialID:        credential.credential_id,
-        credentialPublicKey: Buffer.from(credential.public_key, 'base64url'),
-        counter:             credential.counter,
-        transports:          credential.transports ? JSON.parse(credential.transports) : undefined,
+      // v13: 'credential' (vorher 'authenticator') mit { id, publicKey, counter, transports }
+      credential: {
+        id:        credential.credential_id,
+        publicKey: Buffer.from(credential.public_key, 'base64url'),
+        counter:   credential.counter,
+        transports: credential.transports ? JSON.parse(credential.transports) : undefined,
       },
     });
 

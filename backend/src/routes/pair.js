@@ -196,11 +196,12 @@ router.post('/confirm/:token', loginRateLimit, async (req, res) => {
       expectedChallenge: stored.challenge,
       expectedOrigin:    RP_ORIGIN,
       expectedRPID:      RP_ID,
-      authenticator: {
-        credentialID:        Buffer.from(credential.credential_id, 'base64url'),
-        credentialPublicKey: Buffer.from(credential.public_key, 'base64url'),
-        counter:             credential.counter,
-        transports:          credential.transports ? JSON.parse(credential.transports) : undefined,
+      // v13: 'credential' (vorher 'authenticator') mit { id, publicKey, counter, transports }
+      credential: {
+        id:        credential.credential_id,
+        publicKey: Buffer.from(credential.public_key, 'base64url'),
+        counter:   credential.counter,
+        transports: credential.transports ? JSON.parse(credential.transports) : undefined,
       },
     });
 
