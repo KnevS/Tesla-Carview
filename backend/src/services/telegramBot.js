@@ -23,6 +23,7 @@
  *  /service       — Naechste faellige Wartung
  *  /firmware      — Aktuelle Software-Version + letztes Update
  *  /classify      — Letzte Fahrt im Chat als privat/geschaeftlich/pendel markieren
+ *  /clean         — Alle Bot-Nachrichten der letzten ~48h loeschen
  *  /help          — Befehlsliste
  *  /unlink        — Verknüpfung aufheben
  *
@@ -309,6 +310,49 @@ function registerCommands(bot) {
     }
   });
 
+  // /clean — alle Bot-Nachrichten der letzten ~48h aus dem Chat loeschen.
+  // Telegram erlaubt einem Bot nur seine eigenen Nachrichten <48h zu loeschen.
+  // Wir versuchen die letzten ~200 Message-IDs rueckwaerts; User-Messages
+  // schlagen erwartungsgemaess fehl, das ist Teil des Algorithmus.
+  bot.command('clean', async ctx => {
+    const link = await getLinkForChat(ctx);
+    if (!link) return;
+
+    const chatId  = ctx.chat.id;
+    const startId = ctx.message.message_id;
+
+    // Erst die /clean-Message selbst loeschen
+    try { await ctx.telegram.deleteMessage(chatId, startId); } catch { /* ignore */ }
+
+    let deleted = 0;
+    let consecutiveFailures = 0;
+    const MAX_LOOKBACK = 200;
+    const MAX_CONSEC_FAILURES = 25;
+
+    for (let i = 1; i <= MAX_LOOKBACK; i++) {
+      const msgId = startId - i;
+      if (msgId <= 0) break;
+      try {
+        await ctx.telegram.deleteMessage(chatId, msgId);
+        deleted++;
+        consecutiveFailures = 0;
+      } catch {
+        // Erwartet bei User-Messages oder Messages > 48h
+        consecutiveFailures++;
+        if (consecutiveFailures > MAX_CONSEC_FAILURES) break;
+      }
+    }
+
+    // Bestaetigung — selbst-loeschend nach 4 Sekunden
+    const confirm = await ctx.reply(
+      `🧹 ${deleted} Bot\\-Nachricht${deleted === 1 ? '' : 'en'} aus diesem Chat geloescht\\.`,
+      { parse_mode: 'MarkdownV2' }
+    );
+    setTimeout(() => {
+      ctx.telegram.deleteMessage(chatId, confirm.message_id).catch(() => {});
+    }, 4000);
+  });
+
   // /help
   bot.command('help', async ctx => {
     return ctx.reply(
@@ -322,6 +366,7 @@ function registerCommands(bot) {
       '/classify — Letzte Fahrt klassifizieren \\(privat / geschäftlich / pendel\\)\n' +
       '/service — Naechste faellige Wartung\n' +
       '/firmware — Software\\-Version\n' +
+      '/clean — Bot\\-Nachrichten aus diesem Chat aufraeumen \\(letzte ~48h\\)\n' +
       '/unlink — Bot\\-Verknüpfung aufheben\n' +
       '/help — Diese Hilfe\n\n' +
       '💡 _Unter /status erscheinen Inline\\-Buttons fuer Lock, Klima, Sentry, Laden_\n' +
@@ -702,7 +747,15 @@ async function handleVehicleAction(ctx, link, vehicleId, action, confirmed) {
       });
       await ctx.answerCbQuery('Aktualisiert');
     } catch (e) {
-      await ctx.answerCbQuery(`Fehler: ${e.message?.slice(0, 100) || 'unbekannt'}`);
+      // Telegram lehnt editMessageText ab wenn Text + Buttons identisch sind
+      // ("Bad Request: message is not modified"). Das ist kein Fehler — der
+      // State ist einfach unverändert. Stille beantworten.
+      const desc = e?.response?.description || e?.message || '';
+      if (/message is not modified/i.test(desc)) {
+        await ctx.answerCbQuery('Bereits aktuell');
+        return;
+      }
+      await ctx.answerCbQuery(`Fehler: ${desc.slice(0, 100) || 'unbekannt'}`);
     }
     return;
   }
