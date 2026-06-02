@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.14] - 2026-06-02
+
+### Neu
+
+- **Telegram-Befehlsmenü im Client sichtbar**: Beim Bot-Start wird jetzt `setMyCommands` aufgerufen, sodass alle 12 Befehle direkt im Telegram-Client erscheinen — beim Tippen von `/` als Vorschlagsliste und über den Menü-Button (▤) rechts neben dem Eingabefeld. Bisher musste man `/help` kennen, um die Befehle zu sehen. Jetzt sieht man sie alle mit Kurzbeschreibung + Emoji. Wird einmal pro Bot-Init gesetzt (kein Performance-Overhead), Fehler werden geschluckt damit ein temporäres Telegram-API-Problem den Bot nicht blockiert. Zusätzlich wird der Menü-Button-Typ explizit auf `commands` gesetzt (statt Default-Webapp), damit Tap darauf die Befehlsliste öffnet.
+
+---
+
 ## [v3.4.13] - 2026-06-02
 
 ### Verbessert

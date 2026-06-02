@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.14] - 2026-06-02
+
+### New
+
+- **Telegram command menu visible in the client**: On bot init, `setMyCommands` is now called so all 12 commands appear directly in the Telegram client — as a suggestion list when you type `/` and via the menu button (▤) next to the input field. Previously you had to know `/help` to see the commands. Now you see them all with a short description and emoji. Set once per bot init (no runtime overhead); errors are swallowed so a transient Telegram API hiccup doesn't block the bot. The menu button type is explicitly set to `commands` (instead of default webapp) so tapping it opens the command list.
+
+---
+
 ## [v3.4.13] - 2026-06-02
 
 ### Improved
