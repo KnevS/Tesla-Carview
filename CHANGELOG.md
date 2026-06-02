@@ -7,6 +7,17 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.13] - 2026-06-02
+
+### Verbessert
+
+- **Onboarding-Vorab-Hinweis im Setup-Wizard**: Bevor der Wizard nach Tesla-Werten fragt, erscheint ein gelb hervorgehobener Block mit den drei Tesla-spezifischen Vorbereitungen: (1) Developer-Account anlegen (Approval kann 1–3 Wochen dauern — leer lassen erlaubt, Felder später per `setup-wizard.sh` nachtragen), (2) Region NA/EU/Asia, (3) Virtual-Key-Setup-Hinweis mit Verweis auf `docs/04-tesla-api.md`.
+- **README Quickstart-Section**: Beide Sprachversionen bekommen ganz oben einen Blockquote-Hinweis, dass die Tesla-Approval extern und zeitintensiv ist, aber die Installation parallel laufen kann. Verlinkt direkt auf `docs/04-tesla-api.md` für die Detailschritte.
+
+Hintergrund: Neue Nutzer haben oft erst beim Wizard-Schritt 2 gemerkt, dass die Tesla-Approval Wochen dauert — die Setup-Zeit war damit gefühlt schlecht eingeschätzt. Mit dem Vorab-Hinweis weiß man von Anfang an: das App-Setup ist nicht der Engpass.
+
+---
+
 ## [v3.4.12] - 2026-06-02
 
 ### Neu

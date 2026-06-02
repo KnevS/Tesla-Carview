@@ -7,6 +7,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.13] - 2026-06-02
+
+### Improved
+
+- **Onboarding preflight in the setup wizard**: Before the wizard asks for Tesla values, a yellow-highlighted block now lists the three Tesla-specific prerequisites: (1) Developer Account registration (approval may take 1–3 weeks — leaving the fields blank is fine; they can be added later via `setup-wizard.sh`), (2) Region NA/EU/Asia, (3) Virtual Key setup with a pointer to `docs/04-tesla-api.en.md`.
+- **README quickstart**: Both language versions get a blockquote at the very top of the quickstart section explaining that Tesla approval is external and time-consuming, but installation can run in parallel. Links straight to `docs/04-tesla-api.en.md` for the detail steps.
+
+Why: new users often only realised at wizard step 2 that Tesla approval takes weeks — the setup time then felt mis-quoted. The preflight makes it clear from the start: the app setup is not the bottleneck.
+
+---
+
 ## [v3.4.12] - 2026-06-02
 
 ### New
