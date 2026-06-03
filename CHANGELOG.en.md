@@ -7,6 +7,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.17] - 2026-06-03
+
+### Fixed
+
+- **Tooltips stuck open in the Tesla in-car browser**: The global `v-tooltip` directive (`frontend/src/directives/tooltip.js`) used `mouseenter`/`mouseleave` to show and hide. On touch devices (the Tesla center display is touch-only), `mouseleave` doesn't fire reliably after a tap, so the tooltip stayed visible and overlapped other UI. Switched to `pointerType`-aware pointer events:
+  - **Mouse/pen** (`pointerType === 'mouse' | 'pen'`): unchanged — `pointerenter` shows, `pointerleave` hides
+  - **Touch** (`pointerType === 'touch'`): tap on the owner element toggles the tooltip; a second tap or any tap outside dismisses it; plus a 4-second auto-hide as a safety net
+  - **Keyboard**: `focus`/`blur` unchanged
+  - The document-level `pointerdown` listener runs in capture phase so the tooltip dismisses before other handlers see the event
+
+---
+
 ## [v3.4.16] - 2026-06-03
 
 ### Updated

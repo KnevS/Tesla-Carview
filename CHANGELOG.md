@@ -7,6 +7,18 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.17] - 2026-06-03
+
+### Behoben
+
+- **Tooltips blieben im Tesla-Fahrzeug-Browser offen**: Die globale `v-tooltip`-Direktive (`frontend/src/directives/tooltip.js`) hat bisher per `mouseenter`/`mouseleave` ein- und ausgeblendet. Auf Touch-Geräten (Tesla-Center-Display ist Touch-only) feuert `mouseleave` nach einem Tap nicht zuverlässig — der Tooltip blieb dauerhaft sichtbar und überlagerte andere UI-Elemente. Umstellung auf `pointerType`-gestützte Pointer-Events:
+  - **Maus/Stift** (`pointerType === 'mouse' | 'pen'`): unverändert — `pointerenter` zeigt, `pointerleave` blendet aus
+  - **Touch** (`pointerType === 'touch'`): Tap auf das Owner-Element toggelt den Tooltip; ein zweiter Tap oder ein Tap ausserhalb schliesst ihn; zusätzlich Auto-Hide nach 4 Sekunden als Safety-Net
+  - **Tastatur**: `focus`/`blur` unverändert
+  - Document-`pointerdown`-Listener in der capture-Phase damit der Tooltip dismisst bevor andere Handler den Event verarbeiten
+
+---
+
 ## [v3.4.16] - 2026-06-03
 
 ### Aktualisiert
