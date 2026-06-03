@@ -137,10 +137,14 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      # arm/v7 (32-Bit ARM) wird bewusst ausgeschlossen: better-sqlite3
-      # kompiliert native Binaries via node-gyp, was unter QEMU arm/v7
-      # konsistent mit SIGILL (exit 132) fehlschlaegt. arm64 (Pi 4/5,
-      # Apple M) und amd64 (Produktionsserver) funktionieren problemlos.
+      # arm/v7 (32-Bit ARM) ist ausgeschlossen: better-sqlite3 / argon2
+      # kompilieren native Binaries via node-gyp, was unter QEMU arm/v7
+      # konsistent mit SIGILL (exit 132) fehlschlaegt.
+      # arm64: seit better-sqlite3@12 + argon2@0.44 treten SIGILL-Crashes
+      # auch unter QEMU arm64 intermittierend auf (exit 132). Ursache:
+      # node-gyp generiert ARM-Code mit neueren CPU-Extensions die QEMU
+      # nicht vollstaendig emuliert. Wechsel auf node:22-alpine verbessert
+      # die Verfuegbarkeit von Prebuilt-Binaries und reduziert JIT-Crashes.
       - name: Build & push backend (amd64 + arm64)
         uses: docker/build-push-action@v7
         with:
