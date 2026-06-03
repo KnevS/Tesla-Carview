@@ -7,6 +7,18 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.16] - 2026-06-03
+
+### Aktualisiert
+
+- **Backend-Docker-Image `node:20-alpine` → `node:22-alpine`** (PR #105): Node 22 (Active LTS) liefert mehr Prebuilt-Binaries für musl arm64, wodurch `better-sqlite3@12` und `argon2@0.44` seltener auf den `node-gyp`-Fallback fallen, der unter QEMU arm64 mit SIGILL (exit 132) crasht. Vorher blockierte dieser Crash zwei aufeinanderfolgende Deploys auf `main` (CI-Run [26806992094](https://github.com/KnevS/Tesla-Carview/actions/runs/26806992094)). Produktion (amd64) war nie betroffen; die Änderung betrifft ausschließlich den arm64-Image-Build für Raspberry-Pi-4/5-Setups. Kommentar in `.github/workflows/ci.yml` aktualisiert, damit nachvollziehbar bleibt, warum `arm/v7` weiterhin ausgeschlossen ist und welche Bedingungen unter `arm64` noch zu SIGILLs führen können. Nebeneffekt: Die `geoip-lite@2.0.2`-`EBADENGINE`-Warnung (verlangt Node ≥ 24, war reine Advisory) entfällt unter Node 22 ebenfalls nicht — bleibt also kosmetisch, hat aber keinen Einfluss auf Builds.
+
+### Wartung
+
+- **Frontend-Lockfile auf aktuellen `main` synchronisiert** (PR #104): Reine `npm update`-Patch-/Minor-Bumps in `frontend/package-lock.json` (Babel-Tools auf 7.29.7, `@typescript-eslint/*` 8.59.4 → 8.60.1, `@rollup/pluginutils` 5.3.0 → 5.4.0). `npm audit` clean vor und nach dem Update, keine Major-Bumps, kein Code im `frontend/`-Quelltree berührt. CI-`build`-Step der Reverse-Routine bestätigt grünen Vite-Build.
+
+---
+
 ## [v3.4.15] - 2026-06-02
 
 ### Aktualisiert (Major-Dependencies)

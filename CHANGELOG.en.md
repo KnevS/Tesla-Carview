@@ -7,6 +7,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.16] - 2026-06-03
+
+### Updated
+
+- **Backend Docker image `node:20-alpine` → `node:22-alpine`** (PR #105): Node 22 (Active LTS) ships more prebuilt binaries for musl arm64, so `better-sqlite3@12` and `argon2@0.44` fall back to `node-gyp` less often — the source build crashed with SIGILL (exit 132) under QEMU arm64 and blocked two consecutive `main` deploys (CI run [26806992094](https://github.com/KnevS/Tesla-Carview/actions/runs/26806992094)). Production (amd64) was never affected; the change only touches the arm64 image build for Raspberry Pi 4/5 setups. The `.github/workflows/ci.yml` comment was updated so it stays clear why `arm/v7` remains excluded and what conditions can still trigger SIGILLs under `arm64`. Side note: the cosmetic `geoip-lite@2.0.2` `EBADENGINE` warning (requires Node ≥ 24, advisory only) is unaffected — still cosmetic, still builds fine.
+
+### Maintenance
+
+- **Frontend lockfile synced with current `main`** (PR #104): Pure `npm update` patch/minor bumps in `frontend/package-lock.json` (Babel tools to 7.29.7, `@typescript-eslint/*` 8.59.4 → 8.60.1, `@rollup/pluginutils` 5.3.0 → 5.4.0). `npm audit` reports zero vulnerabilities before and after; no major bumps, no source under `frontend/` touched. The reverse-routine CI `build` step confirmed the Vite build stays green.
+
+---
+
 ## [v3.4.15] - 2026-06-02
 
 ### Updated (major dependencies)
