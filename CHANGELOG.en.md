@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.20] - 2026-06-04
+
+### Fixed
+
+- **QR-code login on the Tesla center display looped on "code expired"**: In the cross-device pair flow (Tesla display generates QR, already-logged-in phone scans and confirms), a race condition fired: after the passkey confirm the phone frontend in `PairLogin.vue` also performed a `GET /api/pair/poll/{token}` — the "self-auth" block intended for the same-device flow. The phone got the JWT and the backend marked the session as consumed (`used_at`). The display's parallel poll then saw `used_at != null` and got `status: 'expired'` back → frontend renders "expired", user generates a fresh QR, race repeats. Fix: the phone only runs the self-auth poll when `authStore.accessToken` is empty (i.e. this browser has no login yet). On an already-logged-in phone we leave the JWT claim for the original polling device. Same-device flow (one browser doing init+confirm+poll) keeps working because there `accessToken` is empty at that point.
+
+---
+
 ## [v3.4.19] - 2026-06-04
 
 ### Fixed

@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.20] - 2026-06-04
+
+### Behoben
+
+- **QR-Code-Login im Tesla-Display hing in einer "Code abgelaufen"-Schleife**: Beim Cross-Device-Pair-Flow (Tesla-Display generiert QR, eingeloggtes Phone scannt und bestätigt) lief eine Race-Condition: Nach der Passkey-Confirm hat das Phone-Frontend in `PairLogin.vue` zusätzlich einen `GET /api/pair/poll/{token}` ausgeführt — der "Self-Auth"-Block für den Same-Device-Flow. Das Phone bekam den JWT, der Backend-Endpoint setzte `used_at` als consumed-Marker. Der parallel pollende Tesla-Display sah daraufhin `used_at != null` und bekam `status: 'expired'` zurück → Frontend zeigt "abgelaufen", User generiert neuen QR-Code, Race repetiert. Fix: das Phone macht den Self-Auth-Poll nur noch wenn `authStore.accessToken` leer ist (= dieser Browser hat noch keinen Login). Bei einem bereits eingeloggten Phone überlassen wir den JWT-Claim dem urspr. pollenden Gerät. Same-Device-Flow (ein einziger Browser macht init+confirm+poll) bleibt unverändert funktional, da dort `accessToken` vor dem Confirm leer ist.
+
+---
+
 ## [v3.4.19] - 2026-06-04
 
 ### Behoben

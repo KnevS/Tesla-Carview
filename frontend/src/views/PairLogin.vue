@@ -183,33 +183,32 @@ async function doAuth() {
 
     username.value = confirmData.username ?? response.userHandle ?? '';
 
-    // 4. Self-Auth: Dieser Browser (z.B. Tesla-Browser) holt seinen eigenen JWT.
-    //    Der Poll-Endpoint gibt accessToken + setzt refresh_token-Cookie.
-    //    Greift nur wenn der Token noch nicht von einem anderen Gerät konsumiert wurde.
-    try {
-      const { data: pollData } = await api.get(`/pair/poll/${token}`);
-      if (pollData.status === 'confirmed' && pollData.accessToken) {
-        // Auth-Store befüllen — dieser Browser ist jetzt eingeloggt
-        authStore.accessToken = pollData.accessToken;
-        authStore.user = { ...pollData.user, tenantSlug: authStore.tenantSlug };
-        if (pollData.user?.tenantId && !authStore.tenantSlug) {
-          // tenantSlug ist nicht im Poll-Response, aber tenantId ist da
-          // tryRestoreSession lädt /auth/me und vervollständigt das Profil
-        }
-        username.value = pollData.user?.username ?? username.value;
-        state.value    = 'success';
-        clearInterval(expiryTimer);
+    // 4. Self-Auth nur wenn dieser Browser noch KEINEN Login hat.
+    //    Sonst (typischer Cross-Device-Flow: bereits eingeloggtes Phone
+    //    bestätigt für ein neues Gerät wie ein Tesla-Display) würde der
+    //    Poll hier den JWT vom Display klauen und das Display gerät in
+    //    eine "Code abgelaufen"-Schleife, weil der Server `used_at` setzt.
+    //    Self-Auth-Fall (Same-Device): authStore.accessToken ist leer
+    //    → dieser Browser holt den JWT selbst.
+    if (!authStore.accessToken) {
+      try {
+        const { data: pollData } = await api.get(`/pair/poll/${token}`);
+        if (pollData.status === 'confirmed' && pollData.accessToken) {
+          authStore.accessToken = pollData.accessToken;
+          authStore.user = { ...pollData.user, tenantSlug: authStore.tenantSlug };
+          username.value = pollData.user?.username ?? username.value;
+          state.value    = 'success';
+          clearInterval(expiryTimer);
 
-        // Weiterleiten nach kurzer Erfolgsmeldung
-        const dest = pollData.redirectPath || redirectPath.value;
-        if (dest) {
-          setTimeout(() => router.push(dest), 1800);
+          const dest = pollData.redirectPath || redirectPath.value;
+          if (dest) {
+            setTimeout(() => router.push(dest), 1800);
+          }
+          return;
         }
-        return;
+      } catch {
+        // JWT-Holen fehlgeschlagen — Session ist trotzdem bestätigt.
       }
-    } catch {
-      // JWT-Holen fehlgeschlagen — Session ist trotzdem bestätigt.
-      // Ein anderes Gerät wird über den Poll-Endpoint authentifiziert.
     }
 
     state.value = 'success';
