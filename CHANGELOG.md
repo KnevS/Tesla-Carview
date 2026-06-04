@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.18] - 2026-06-04
+
+### Wartung
+
+- **Frontend- und Backend-Lockfiles auf aktuellen `main` synchronisiert** (PR #106): Patch-/Minor-Bumps aus der nightly Security-Routine. Frontend: `axios` 1.16.1 → 1.17.0, `dompurify` 3.4.7 → 3.4.8. Backend: `axios` 1.16.1 → 1.17.0, `@aws-sdk/client-s3` 3.1057.0 → 3.1061.0 plus Patch-Bumps der `@aws-sdk/*`-Sub-Pakete. `npm audit` clean vor und nach dem Update, kein Major-Bump, kein Code im `src/`-Tree berührt. Bewusst zurückgestellt für manuelles Review: `express` 4.22.2 → 5.x (Breaking-Changes) und `geoip-lite@2.0.2` (verlangt Node ≥ 24, Container läuft Node 22 — kosmetische Warnung, kein Build-Fehler).
+
+---
+
 ## [v3.4.17] - 2026-06-03
 
 ### Behoben
