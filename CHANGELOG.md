@@ -7,6 +7,17 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.19] - 2026-06-04
+
+### Behoben
+
+- **Installer scheiterte bei Fremd-Klonen**: `deploy/setup.sh` setzte hart auf `docker compose pull` aus `ghcr.io/knevs/tesla-carview/{backend,frontend}:main`. Die GHCR-Pakete sind aktuell mit Visibility=`private` veröffentlicht — ein Downloader ohne GitHub-OAuth-Token bekam HTTP 404 ("not found" aus Sicht eines anonymen Aufrufers) und der Container-Start brach ab. Zwei robuste Fallbacks:
+  - **`docker-compose.prod.yml`**: backend und frontend bekommen zusätzlich zur `image:`-Referenz einen `build:`-Block mit `context: ./backend` bzw. `./frontend`. Wenn der Pull aus GHCR fehlschlägt, baut Docker aus dem geklonten Source.
+  - **`deploy/setup.sh`**: Pull-Step ist jetzt fehlertolerant (`pull || echo …`), gefolgt von einem expliziten `docker compose build --pull`. So funktioniert die Installation auch ohne öffentliches GHCR.
+  - Side-Effect: Bei einem Raspberry Pi 3 mit ARMv7 dauert die Erstinstallation jetzt 5–10 Min länger (Vite-Build + npm ci), x86_64/arm64-Maschinen mit GHCR-Visibility=public pullen weiterhin sekundenschnell.
+
+---
+
 ## [v3.4.18] - 2026-06-04
 
 ### Wartung

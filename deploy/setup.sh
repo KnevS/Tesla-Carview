@@ -161,7 +161,21 @@ fi  # end DEPLOY_MODE branch
 step "Container starten"
 cd "$APP_DIR"
 mkdir -p data
-docker compose -f docker-compose.prod.yml pull
+# Try-pull-then-build: GHCR-Images von KnevS/tesla-carview sind nur ueber
+# OAuth-Token erreichbar wenn die Visibility auf "private" steht. Wir
+# tolerieren einen fehlgeschlagenen Pull und fallen auf den lokalen Build
+# zurueck (build:-Block in docker-compose.prod.yml fuer backend/frontend).
+if ! docker compose -f docker-compose.prod.yml pull 2>&1 | tee /tmp/tcv-pull.log; then
+    echo -e "${YELLOW}Pull fehlgeschlagen (GHCR-Images evtl. privat) – baue lokal...${RESET}"
+elif grep -qiE "denied|forbidden|not found|unauthorized" /tmp/tcv-pull.log; then
+    echo -e "${YELLOW}Pull-Antwort enthielt Fehler – baue lokal...${RESET}"
+fi
+# Build greift nur fuer Services mit build:-Block; pre-built tesla-proxy
+# und nginx werden uebersprungen.
+docker compose -f docker-compose.prod.yml build --pull 2>&1 || {
+    echo -e "${RED}Build fehlgeschlagen. Logs oben pruefen.${RESET}"
+    exit 1
+}
 docker compose -f docker-compose.prod.yml up -d
 ok "Container laufen"
 

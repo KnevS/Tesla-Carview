@@ -11,7 +11,14 @@ services:
   #   - cpus '0.75' fuer Backend laesst der CLI / SSH-Session genug
   #     Headroom, falls der Poller eine Schleife dreht.
   backend:
+    # Pull bevorzugt aus GHCR; wenn das Image dort nicht verfügbar ist
+    # (z.B. Visibility=privat bei Fremd-Installationen), baut Docker
+    # automatisch lokal aus ./backend. So bleibt setup.sh robust ohne
+    # zusätzliche Authentication.
     image: ghcr.io/knevs/tesla-carview/backend:main
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: tesla-carview-backend
     restart: unless-stopped
     env_file:
@@ -44,7 +51,11 @@ services:
       start_period: 30s
 
   frontend:
+    # Pull bevorzugt aus GHCR; fallback auf lokalen Build (siehe backend).
     image: ghcr.io/knevs/tesla-carview/frontend:main
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: tesla-carview-frontend
     restart: unless-stopped
     # Das Frontend-Bundle kommt direkt aus dem GHCR-Image (Stub-Demo.vue).
