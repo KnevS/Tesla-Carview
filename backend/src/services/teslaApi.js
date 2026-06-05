@@ -17,7 +17,12 @@ const PROXY_BASE  = 'https://host.docker.internal:4443';
 const getAuthBase    = () => process.env.TESLA_AUTH_BASE || 'https://auth.tesla.com/oauth2/v3';
 const getFleetApiUrl = () => process.env.TESLA_AUDIENCE  || 'https://fleet-api.prd.eu.vn.cloud.tesla.com';
 
-const OWNER_API_BASE = 'https://owner-api.teslamotors.com';
+// Tesla hat owner-api.teslamotors.com fuer Vehicle-Endpoints abgeschaltet
+// (412 "Endpoint is only available on fleetapi"). Owner-Mode-Tokens
+// (client_id=ownerapi) sind weiterhin gueltig, muessen aber gegen die
+// Fleet-API-URL aufgerufen werden — deshalb teilen sich Fleet- und
+// Owner-Modus jetzt dieselbe API-Base. Token-Exchanges schicken
+// `audience` explizit mit, damit Tesla den Token fuer Fleet API ausstellt.
 const OWNER_CLIENT_ID = 'ownerapi';
 
 const SCOPES = 'openid offline_access user_data vehicle_device_data vehicle_cmds vehicle_charging_cmds vehicle_location';
@@ -82,6 +87,7 @@ export async function refreshTokens(db) {
       client_id:     OWNER_CLIENT_ID,
       refresh_token: decrypt(row.refresh_token),
       scope:         'openid email offline_access',
+      audience:      getFleetApiUrl(),
     }, { timeout: 15_000 });
     saveTokens(db, res.data);
     return res.data.access_token;
@@ -104,6 +110,7 @@ export async function connectOwnerToken(db, refreshToken) {
     client_id:     OWNER_CLIENT_ID,
     refresh_token: refreshToken,
     scope:         'openid email offline_access',
+    audience:      getFleetApiUrl(),
   }, { timeout: 15_000 });
   saveTokens(db, res.data);
   setTenantSetting(db, 'tesla.auth_mode', 'owner');
@@ -149,6 +156,7 @@ export async function exchangeOwnerCode(db, code, state) {
     code,
     redirect_uri:  redirectUri,
     code_verifier: row.code_verifier,
+    audience:      getFleetApiUrl(),
   }, { timeout: 15_000 });
   saveTokens(db, res.data);
   setTenantSetting(db, 'tesla.auth_mode', 'owner');
@@ -188,8 +196,9 @@ async function trackedCall(db, method, path, fn) {
 // Schwelle bevor wir lieber neu versuchen. Verhindert Hang bei Outage.
 const FLEET_TIMEOUT_MS = 20_000;
 
-function getApiBase(db) {
-  return getAuthMode(db) === 'owner' ? OWNER_API_BASE : getFleetApiUrl();
+function getApiBase(_db) {
+  // Alle Vehicle-Endpoints laufen ueber Fleet API — unabhaengig vom Auth-Mode.
+  return getFleetApiUrl();
 }
 
 export async function apiGet(db, path) {

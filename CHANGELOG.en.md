@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.22] - 2026-06-05
+
+### Fixed
+
+- **Owner API vehicle endpoints returned HTTP 412**: Tesla disabled `owner-api.teslamotors.com` for vehicle endpoints (`/api/1/vehicles`, `/vehicle_data`) — responses are now "Endpoint is only available on fleetapi". Owner-mode tokens (issued via `client_id=ownerapi`) remain valid and are accepted by the Fleet API. Fix: `getApiBase()` now routes all vehicle calls to the Fleet API URL (`fleet-api.prd.eu.vn.cloud.tesla.com`) regardless of auth mode. In addition, `connectOwnerToken()`, `exchangeOwnerCode()` and the owner-mode branch of `refreshTokens()` now explicitly include `audience: <fleet-api-url>` in the token exchange so Tesla issues the token for Fleet API from the start. Existing owner-mode tokens keep working after the deploy without a re-connect — they get re-issued with the correct audience on the next refresh.
+
+---
+
 ## [v3.4.21] - 2026-06-05
 
 ### Security
