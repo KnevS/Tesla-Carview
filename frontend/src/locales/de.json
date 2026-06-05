@@ -1867,13 +1867,11 @@
       "connectedHint": "Du kannst zum nächsten Schritt weitergehen.",
       "tabFleet": "Fleet OAuth",
       "tabOwner": "Owner API",
-      "ownerInfo": "Kein Fleet API-Zugang nötig. Verbinde dich direkt über ein Tesla Refresh-Token (Owner API).",
+      "ownerInfo": "Kein Fleet API-Zugang nötig. Klick verbinden → Tesla-Login → fertig.",
       "ownerConnected": "Owner API verbunden",
       "ownerActiveHint": "Verbindung aktiv — kein Fleet API-Zugang erforderlich.",
-      "ownerTokenLabel": "Tesla Refresh-Token",
-      "ownerTokenPlaceholder": "Refresh-Token hier einfügen …",
-      "ownerConnecting": "Verbinde …",
-      "ownerConnectBtn": "Mit Owner API verbinden"
+      "ownerConnectBtn": "Mit Owner API verbinden",
+      "ownerOpening": "Öffne Tesla-Login …"
     },
     "sVehicles": {
       "title": "Fahrzeuge",
@@ -2221,13 +2219,12 @@
       "activeHint": "Verbindung aktiv. Fahrzeugdaten werden geladen.",
       "tabFleet": "Fleet OAuth",
       "tabOwner": "Owner API",
-      "ownerInfo": "Kein Fleet API-Zugang nötig. Verbinde dich direkt über ein Tesla Refresh-Token (Owner API).",
+      "ownerInfo": "Kein Fleet API-Zugang nötig. Klick verbinden → Tesla-Login → fertig.",
       "ownerConnected": "Owner API verbunden",
       "ownerActiveHint": "Verbindung aktiv — kein Fleet API-Zugang erforderlich.",
-      "ownerTokenLabel": "Tesla Refresh-Token",
-      "ownerTokenPlaceholder": "Refresh-Token hier einfügen …",
-      "ownerConnecting": "Verbinde …",
-      "ownerConnectBtn": "Mit Owner API verbinden"
+      "ownerConnectBtn": "Mit Owner API verbinden",
+      "ownerOpening": "Öffne Tesla-Login …",
+      "refresh": "↻"
     },
     "vehicles": {
       "title": "Fahrzeuge",

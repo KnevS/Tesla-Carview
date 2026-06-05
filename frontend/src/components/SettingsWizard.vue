@@ -103,10 +103,8 @@
               </p>
             </div>
             <div v-else class="card space-y-4">
-              <div class="bg-blue-900/20 border border-blue-700/40 rounded-lg px-3 py-2 text-xs text-blue-300 space-y-1">
+              <div class="bg-blue-900/20 border border-blue-700/40 rounded-lg px-3 py-2 text-xs text-blue-300">
                 <p>{{ $t('wizard.sOauth.ownerInfo') }}</p>
-                <a href="https://github.com/timdorr/tesla-api" target="_blank" rel="noopener"
-                   class="text-blue-400 hover:underline">tesla-api Docs ↗</a>
               </div>
               <div v-if="oauthStatus === 'connected' && oauthMode === 'owner'" class="flex items-center gap-3">
                 <span class="text-2xl">✅</span>
@@ -116,16 +114,11 @@
                 </div>
               </div>
               <template v-else>
-                <div>
-                  <label class="label">{{ $t('wizard.sOauth.ownerTokenLabel') }}</label>
-                  <textarea v-model="ownerApiToken" rows="3"
-                    :placeholder="$t('wizard.sOauth.ownerTokenPlaceholder')"
-                    class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red font-mono resize-none"></textarea>
-                </div>
-                <button @click="connectOwnerApi" :disabled="ownerApiConnecting || !ownerApiToken.trim()"
+                <button @click="openOwnerOauth" :disabled="ownerOauthOpening"
                   class="w-full btn-primary text-sm">
-                  {{ ownerApiConnecting ? $t('wizard.sOauth.ownerConnecting') : $t('wizard.sOauth.ownerConnectBtn') }}
+                  {{ ownerOauthOpening ? $t('wizard.sOauth.ownerOpening') : $t('wizard.sOauth.ownerConnectBtn') }}
                 </button>
+                <button @click="checkOauthStatus" class="w-full btn-secondary text-sm py-2">↻ {{ $t('wizard.sOauth.refresh') }}</button>
                 <p v-if="ownerApiError" class="text-xs text-red-400">{{ ownerApiError }}</p>
               </template>
             </div>
@@ -668,13 +661,12 @@ const smtpTestState = ref('');  // '' | 'sending' | 'ok' | 'fail'
 
 // ─── OAuth-State ───────────────────────────────────────────────────────────
 
-const oauthStatus     = ref('checking'); // 'checking' | 'connected' | 'disconnected'
-const oauthOpening    = ref(false);
-const oauthMode       = ref('fleet');
-const ownerApiTab     = ref(false);
-const ownerApiToken   = ref('');
-const ownerApiConnecting = ref(false);
-const ownerApiError   = ref('');
+const oauthStatus      = ref('checking'); // 'checking' | 'connected' | 'disconnected'
+const oauthOpening     = ref(false);
+const oauthMode        = ref('fleet');
+const ownerApiTab      = ref(false);
+const ownerOauthOpening = ref(false);
+const ownerApiError    = ref('');
 
 async function checkOauthStatus() {
   oauthStatus.value = 'checking';
@@ -688,17 +680,26 @@ async function checkOauthStatus() {
   }
 }
 
-async function connectOwnerApi() {
-  ownerApiConnecting.value = true;
+async function openOwnerOauth() {
+  ownerOauthOpening.value = true;
   ownerApiError.value = '';
   try {
-    await api.post('/auth/tesla/connect-owner-token', { refresh_token: ownerApiToken.value.trim() });
-    ownerApiToken.value = '';
-    await checkOauthStatus();
+    const { data } = await api.get('/auth/tesla/owner-auth-url');
+    const popup = window.open(data.url, 'tesla_owner_oauth', 'width=600,height=700');
+    const onMsg = async (e) => {
+      if (e.data?.type === 'tesla_connected') {
+        window.removeEventListener('message', onMsg);
+        await checkOauthStatus();
+      }
+    };
+    window.addEventListener('message', onMsg);
+    const timer = setInterval(async () => {
+      if (popup?.closed) { clearInterval(timer); window.removeEventListener('message', onMsg); await checkOauthStatus(); }
+    }, 1000);
   } catch (err) {
     ownerApiError.value = err.response?.data?.error || err.message;
   } finally {
-    ownerApiConnecting.value = false;
+    ownerOauthOpening.value = false;
   }
 }
 

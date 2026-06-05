@@ -110,6 +110,51 @@ export async function connectOwnerToken(db, refreshToken) {
   return res.data.access_token;
 }
 
+export function getOwnerAuthUrl(tenantId) {
+  const codeVerifier  = randomBytes(32).toString('base64url');
+  const codeChallenge = createHash('sha256').update(codeVerifier).digest('base64url');
+  const state         = randomBytes(16).toString('hex');
+
+  const tdb    = getDb(tenantId);
+  const master = getMasterDb();
+  master.prepare('DELETE FROM oauth_pkce WHERE created_at < unixepoch() - 600').run();
+  try { master.prepare("ALTER TABLE oauth_pkce ADD COLUMN mode TEXT DEFAULT 'fleet'").run(); } catch {}
+  master.prepare(
+    'INSERT OR REPLACE INTO oauth_pkce (state, tenant_id, code_verifier, mode) VALUES (?, ?, ?, ?)'
+  ).run(state, tenantId, codeVerifier, 'owner');
+
+  const redirectUri = getTenantSetting(tdb, 'tesla.redirect_uri', 'TESLA_REDIRECT_URI') || process.env.TESLA_REDIRECT_URI;
+  const params = new URLSearchParams({
+    response_type:         'code',
+    client_id:             OWNER_CLIENT_ID,
+    redirect_uri:          redirectUri,
+    scope:                 'openid email offline_access',
+    state,
+    code_challenge:        codeChallenge,
+    code_challenge_method: 'S256',
+  });
+  return `${getAuthBase()}/authorize?${params}`;
+}
+
+export async function exchangeOwnerCode(db, code, state) {
+  const master = getMasterDb();
+  const row = master.prepare('SELECT * FROM oauth_pkce WHERE state=?').get(state);
+  if (!row) throw new Error('PKCE-State nicht gefunden oder abgelaufen');
+  master.prepare('DELETE FROM oauth_pkce WHERE state=?').run(state);
+
+  const redirectUri = getTenantSetting(db, 'tesla.redirect_uri', 'TESLA_REDIRECT_URI') || process.env.TESLA_REDIRECT_URI;
+  const res = await axios.post(`${getAuthBase()}/token`, {
+    grant_type:    'authorization_code',
+    client_id:     OWNER_CLIENT_ID,
+    code,
+    redirect_uri:  redirectUri,
+    code_verifier: row.code_verifier,
+  }, { timeout: 15_000 });
+  saveTokens(db, res.data);
+  setTenantSetting(db, 'tesla.auth_mode', 'owner');
+  return res.data;
+}
+
 function saveTokens(db, data) {
   // Beide Tokens werden verschluesselt persistiert — auch wenn der
   // Access-Token nur ~15 min gilt, ist DB-Leak-Sicherheit billig zu haben.

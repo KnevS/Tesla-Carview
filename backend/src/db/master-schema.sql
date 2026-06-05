@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS oauth_pkce (
   state         TEXT PRIMARY KEY,
   tenant_id     TEXT NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   code_verifier TEXT NOT NULL,
+  mode          TEXT DEFAULT 'fleet',
   created_at    INTEGER DEFAULT (unixepoch())
 );
 

@@ -120,6 +120,10 @@ router.get('/health', requireAuth, async (req, res) => {
   const db = req.db;
   const now = Math.floor(Date.now() / 1000);
   const checks = [];
+  const authMode = (() => {
+    try { return db.prepare("SELECT value FROM tenant_settings WHERE key='tesla.auth_mode'").get()?.value || 'fleet'; }
+    catch { return 'fleet'; }
+  })();
 
   // 1. Tesla OAuth Token
   try {
@@ -142,28 +146,38 @@ router.get('/health', requireAuth, async (req, res) => {
 
   // 2. Virtual Key
   try {
-    const vk = db.prepare('SELECT created_at FROM virtual_key LIMIT 1').get();
-    checks.push({ key: 'virtual_key', label: 'Virtual Key', status: vk ? 'ok' : 'warn',
-      message: vk ? 'Erzeugt' : 'Nicht erzeugt — keine Fahrzeugbefehle möglich',
-      meta: vk ? { created_at: vk.created_at } : null });
+    if (authMode === 'owner') {
+      checks.push({ key: 'virtual_key', label: 'Virtual Key', status: 'info',
+        message: 'Im Owner API-Modus nicht erforderlich' });
+    } else {
+      const vk = db.prepare('SELECT created_at FROM virtual_key LIMIT 1').get();
+      checks.push({ key: 'virtual_key', label: 'Virtual Key', status: vk ? 'ok' : 'warn',
+        message: vk ? 'Erzeugt' : 'Nicht erzeugt — keine Fahrzeugbefehle möglich',
+        meta: vk ? { created_at: vk.created_at } : null });
+    }
   } catch (e) {
     checks.push({ key: 'virtual_key', label: 'Virtual Key', status: 'unknown', message: e.message });
   }
 
   // 3. Fleet Telemetry: letzter empfangener telemetry_point
   try {
-    const lastPt = db.prepare('SELECT MAX(timestamp) AS ts FROM telemetry_points').get()?.ts;
-    if (!lastPt) {
-      checks.push({ key: 'fleet_telemetry', label: 'Fleet Telemetry', status: 'warn',
-        message: 'Noch keine Daten empfangen — beim Tesla Support beantragen' });
+    if (authMode === 'owner') {
+      checks.push({ key: 'fleet_telemetry', label: 'Fleet Telemetry', status: 'info',
+        message: 'Im Owner API-Modus nicht verfügbar — benötigt Fleet API-Zulassung' });
     } else {
-      const mins = Math.round((now - lastPt) / 60);
-      const status = mins > 60 * 24 ? 'warn' : 'ok';
-      checks.push({ key: 'fleet_telemetry', label: 'Fleet Telemetry', status,
-        message: mins < 60 ? `Letzter Datenpunkt vor ${mins} Min`
-          : mins < 60 * 24 ? `Letzter Datenpunkt vor ${Math.round(mins/60)} h`
-          : `Inaktiv seit ${Math.round(mins / 60 / 24)} Tagen`,
-        meta: { last_point: lastPt } });
+      const lastPt = db.prepare('SELECT MAX(timestamp) AS ts FROM telemetry_points').get()?.ts;
+      if (!lastPt) {
+        checks.push({ key: 'fleet_telemetry', label: 'Fleet Telemetry', status: 'warn',
+          message: 'Noch keine Daten empfangen — beim Tesla Support beantragen' });
+      } else {
+        const mins = Math.round((now - lastPt) / 60);
+        const status = mins > 60 * 24 ? 'warn' : 'ok';
+        checks.push({ key: 'fleet_telemetry', label: 'Fleet Telemetry', status,
+          message: mins < 60 ? `Letzter Datenpunkt vor ${mins} Min`
+            : mins < 60 * 24 ? `Letzter Datenpunkt vor ${Math.round(mins/60)} h`
+            : `Inaktiv seit ${Math.round(mins / 60 / 24)} Tagen`,
+          meta: { last_point: lastPt } });
+      }
     }
   } catch (e) {
     checks.push({ key: 'fleet_telemetry', label: 'Fleet Telemetry', status: 'unknown', message: e.message });
@@ -293,6 +307,7 @@ router.get('/health', requireAuth, async (req, res) => {
     summary: checks.some(c => c.status === 'error') ? 'error'
            : checks.some(c => c.status === 'warn')  ? 'warn'
            : 'ok',
+    auth_mode: authMode,
     uptime_seconds: process.uptime(),
     node_version:   process.version,
     checks,
@@ -1113,11 +1128,15 @@ router.get('/wizard-prefill', requireAuth, requireAdmin, async (req, res) => {
     req.db.prepare('SELECT key, value FROM tenant_settings').all().map(r => [r.key, r.value])
   );
 
-  const haveTeslaCreds = !!(
+  const authMode = cfg['tesla.auth_mode'] || 'fleet';
+  const haveTeslaCreds = authMode === 'owner' || !!(
     (cfg['tesla.client_id']     || process.env.TESLA_CLIENT_ID) &&
     (cfg['tesla.client_secret'] || process.env.TESLA_CLIENT_SECRET)
   );
-  const haveTeslaAuthRefresh = !!cfg['tesla.refresh_token'];
+  const haveTeslaAuthRefresh = (() => {
+    try { return !!req.db.prepare('SELECT 1 FROM tokens LIMIT 1').get(); }
+    catch { return !!cfg['tesla.refresh_token']; }
+  })();
   const vehicleCount = (() => {
     try { return req.db.prepare('SELECT COUNT(*) AS n FROM vehicles').get().n; }
     catch { return 0; }
@@ -1157,14 +1176,15 @@ router.get('/wizard-prefill', requireAuth, requireAdmin, async (req, res) => {
       electricity_rate:  electricityDefault,
       tenant_slug:       slugSuggestion,
     },
+    auth_mode: authMode,
     steps: {
-      credentials: { done: haveTeslaCreds },
-      oauth:       { done: haveTeslaAuthRefresh },
+      credentials: { done: haveTeslaCreds, ownerSkip: authMode === 'owner' && !cfg['tesla.client_id'] },
+      oauth:       { done: haveTeslaAuthRefresh, mode: authMode },
       vehicles:    { done: vehicleCount > 0, count: vehicleCount },
-      virtualkey:  { done: haveVirtualKey },
+      virtualkey:  { done: authMode === 'owner' || haveVirtualKey, ownerSkip: authMode === 'owner' },
       // Telemetry hängt am Virtual Key + mind. einem Fahrzeug — Status wird
       // weiterhin live über /telemetry/status geprüft. Hier nur Vor-Indikator.
-      telemetry:   { ready: haveVirtualKey && vehicleCount > 0 },
+      telemetry:   { ready: authMode !== 'owner' && haveVirtualKey && vehicleCount > 0, ownerSkip: authMode === 'owner' },
       vapid:       { done: haveVapid, auto: haveVapid && !cfg['vapid.contact'] },
       telegram:    { done: haveTelegram, optional: true },
       electricity: { done: electricitySet, optional: true },

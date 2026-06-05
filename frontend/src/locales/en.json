@@ -1868,13 +1868,11 @@
       "connectedHint": "You can proceed to the next step.",
       "tabFleet": "Fleet OAuth",
       "tabOwner": "Owner API",
-      "ownerInfo": "No Fleet API approval needed. Connect directly using a Tesla refresh token (Owner API).",
+      "ownerInfo": "No Fleet API approval needed. Click connect → Tesla login → done.",
       "ownerConnected": "Owner API connected",
       "ownerActiveHint": "Connection active — no Fleet API access required.",
-      "ownerTokenLabel": "Tesla Refresh Token",
-      "ownerTokenPlaceholder": "Paste refresh token here …",
-      "ownerConnecting": "Connecting …",
-      "ownerConnectBtn": "Connect via Owner API"
+      "ownerConnectBtn": "Connect via Owner API",
+      "ownerOpening": "Opening Tesla login …"
     },
     "sVehicles": {
       "title": "Vehicles",
@@ -2222,13 +2220,12 @@
       "activeHint": "Connection active. Vehicle data is loading.",
       "tabFleet": "Fleet OAuth",
       "tabOwner": "Owner API",
-      "ownerInfo": "No Fleet API approval needed. Connect directly using a Tesla refresh token (Owner API).",
+      "ownerInfo": "No Fleet API approval needed. Click connect → Tesla login → done.",
       "ownerConnected": "Owner API connected",
       "ownerActiveHint": "Connection active — no Fleet API access required.",
-      "ownerTokenLabel": "Tesla Refresh Token",
-      "ownerTokenPlaceholder": "Paste refresh token here …",
-      "ownerConnecting": "Connecting …",
-      "ownerConnectBtn": "Connect via Owner API"
+      "ownerConnectBtn": "Connect via Owner API",
+      "ownerOpening": "Opening Tesla login …",
+      "refresh": "↻"
     },
     "vehicles": {
       "title": "Vehicles",

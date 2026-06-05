@@ -11,7 +11,7 @@ import {
 } from '../services/userService.js';
 import { verifyTotp, verifyBackupCode, decryptMfaSecret } from '../services/mfaService.js';
 import { auditLog } from '../services/auditService.js';
-import { getAuthUrl, exchangeCode, getAccessToken, connectOwnerToken, getAuthMode } from '../services/teslaApi.js';
+import { getAuthUrl, getOwnerAuthUrl, exchangeCode, exchangeOwnerCode, getAccessToken, connectOwnerToken, getAuthMode } from '../services/teslaApi.js';
 import { getMasterDb, getDb, getTenantBySlug, getTenantByPseudonym, getAllTenants, getTenantById } from '../db/database.js';
 
 const router = Router();
@@ -255,6 +255,9 @@ router.get('/tenants', (_req, res) => {
 router.get('/tesla/auth-url', requireAuth, (req, res) => {
   res.json({ url: getAuthUrl(req.tenantId) });
 });
+router.get('/tesla/owner-auth-url', requireAuth, (req, res) => {
+  res.json({ url: getOwnerAuthUrl(req.tenantId) });
+});
 router.get('/tesla/login', requireAuth, (req, res) => {
   res.redirect(getAuthUrl(req.tenantId));
 });
@@ -271,7 +274,11 @@ router.get('/callback', async (req, res) => {
     const pkce = getMasterDb().prepare('SELECT * FROM oauth_pkce WHERE state=?').get(state);
     if (!pkce) return res.redirect(`${process.env.FRONTEND_URL}/?auth_error=invalid_state`);
     const db = getDb(pkce.tenant_id);
-    await exchangeCode(db, code, state);
+    if ((pkce.mode || 'fleet') === 'owner') {
+      await exchangeOwnerCode(db, code, state);
+    } else {
+      await exchangeCode(db, code, state);
+    }
     // FRONTEND_URL ist Operator-kontrolliert, aber wir escapen es per
     // JSON.stringify, damit ein Single-Quote oder ungewollter Whitespace
     // im ENV-Wert nicht das Inline-<script> sprengt (Audit M5).
