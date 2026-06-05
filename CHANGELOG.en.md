@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.21] - 2026-06-05
+
+### Security
+
+- **Security dependency updates (#107)**: Nightly security routine. 0 open Dependabot alerts, 0 vulnerabilities reported by `npm audit` (frontend 292 + backend 386 packages). Lock-file-only updates (semver ranges unchanged): `marked` 18.0.4 → 18.0.5 (patch, frontend), `@aws-sdk/client-s3` 3.1061.0 → 3.1062.0 (patch, backend), `protobufjs` 8.5.0 → 8.6.0 (minor, backend). Held back for manual review: `express` 4 → 5 (breaking), `geoip-lite` (Node 24 engine mismatch).
+
+---
+
 ## [v3.4.20] - 2026-06-04
 
 ### Fixed
