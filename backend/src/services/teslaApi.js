@@ -2,7 +2,7 @@ import { randomBytes, createHash } from 'crypto';
 import https from 'https';
 import axios from 'axios';
 import { getMasterDb, getDb } from '../db/database.js';
-import { getTenantSetting } from './configService.js';
+import { getTenantSetting, setTenantSetting } from './configService.js';
 import { encrypt, decrypt } from './cryptoService.js';
 import {
   assertWithinBudget,
@@ -17,7 +17,14 @@ const PROXY_BASE  = 'https://host.docker.internal:4443';
 const getAuthBase    = () => process.env.TESLA_AUTH_BASE || 'https://auth.tesla.com/oauth2/v3';
 const getFleetApiUrl = () => process.env.TESLA_AUDIENCE  || 'https://fleet-api.prd.eu.vn.cloud.tesla.com';
 
+const OWNER_API_BASE = 'https://owner-api.teslamotors.com';
+const OWNER_CLIENT_ID = 'ownerapi';
+
 const SCOPES = 'openid offline_access user_data vehicle_device_data vehicle_cmds vehicle_charging_cmds vehicle_location';
+
+function getAuthMode(db) {
+  return getTenantSetting(db, 'tesla.auth_mode', null) || 'fleet';
+}
 
 export function getAuthUrl(tenantId) {
   const codeVerifier  = randomBytes(32).toString('base64url');
@@ -67,6 +74,18 @@ export async function exchangeCode(db, code, state) {
 export async function refreshTokens(db) {
   const row = db.prepare('SELECT refresh_token FROM tokens ORDER BY id DESC LIMIT 1').get();
   if (!row) throw new Error('Keine gespeicherten Tokens');
+  const mode = getAuthMode(db);
+  // Owner API: kein client_secret noetig, anderer client_id
+  if (mode === 'owner') {
+    const res = await axios.post(`${getAuthBase()}/token`, {
+      grant_type:    'refresh_token',
+      client_id:     OWNER_CLIENT_ID,
+      refresh_token: decrypt(row.refresh_token),
+      scope:         'openid email offline_access',
+    }, { timeout: 15_000 });
+    saveTokens(db, res.data);
+    return res.data.access_token;
+  }
   // refresh_token kommt aus der DB potenziell verschluesselt — decrypt
   // toleriert sowohl v1:... als auch Legacy-Klartext.
   const res = await axios.post(`${getAuthBase()}/token`, {
@@ -76,6 +95,18 @@ export async function refreshTokens(db) {
     refresh_token: decrypt(row.refresh_token),
   }, { timeout: 15_000 });
   saveTokens(db, res.data);
+  return res.data.access_token;
+}
+
+export async function connectOwnerToken(db, refreshToken) {
+  const res = await axios.post(`${getAuthBase()}/token`, {
+    grant_type:    'refresh_token',
+    client_id:     OWNER_CLIENT_ID,
+    refresh_token: refreshToken,
+    scope:         'openid email offline_access',
+  }, { timeout: 15_000 });
+  saveTokens(db, res.data);
+  setTenantSetting(db, 'tesla.auth_mode', 'owner');
   return res.data.access_token;
 }
 
@@ -112,10 +143,14 @@ async function trackedCall(db, method, path, fn) {
 // Schwelle bevor wir lieber neu versuchen. Verhindert Hang bei Outage.
 const FLEET_TIMEOUT_MS = 20_000;
 
+function getApiBase(db) {
+  return getAuthMode(db) === 'owner' ? OWNER_API_BASE : getFleetApiUrl();
+}
+
 export async function apiGet(db, path) {
   return trackedCall(db, 'GET', path, async () => {
     const token = await getAccessToken(db);
-    const res = await axios.get(`${getFleetApiUrl()}${path}`, {
+    const res = await axios.get(`${getApiBase(db)}${path}`, {
       headers: { Authorization: `Bearer ${token}` },
       timeout: FLEET_TIMEOUT_MS,
     }).catch(err => {
@@ -128,8 +163,8 @@ export async function apiGet(db, path) {
 
 export async function apiPost(db, path, body) {
   return trackedCall(db, 'POST', path, async () => {
-    const token = await getAccessToken(db);
-    const res   = await axios.post(`${getFleetApiUrl()}${path}`, body, {
+    const token   = await getAccessToken(db);
+    const res   = await axios.post(`${getApiBase(db)}${path}`, body, {
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
       timeout: FLEET_TIMEOUT_MS,
     });
@@ -156,3 +191,5 @@ export async function getVehicles(db) {
 export async function getVehicleData(db, vehicleId) {
   return apiGet(db, `/api/1/vehicles/${vehicleId}/vehicle_data`);
 }
+
+export { getAuthMode };

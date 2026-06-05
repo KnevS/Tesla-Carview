@@ -108,27 +108,66 @@
           <!-- STEP: oauth -->
           <template v-else-if="currentId === 'oauth'">
             <StepHeader :title="$t('adminSetup.oauth.title')" :question="$t('adminSetup.oauth.question')" />
-            <div class="card space-y-4">
+            <div class="flex gap-2">
+              <button @click="ownerApiTab = false"
+                class="flex-1 text-xs rounded-lg px-3 py-2 transition"
+                :class="!ownerApiTab ? 'bg-tesla-red text-white' : 'bg-gray-800 text-gray-400 hover:text-white'">
+                {{ $t('adminSetup.oauth.tabFleet') }}
+              </button>
+              <button @click="ownerApiTab = true"
+                class="flex-1 text-xs rounded-lg px-3 py-2 transition"
+                :class="ownerApiTab ? 'bg-tesla-red text-white' : 'bg-gray-800 text-gray-400 hover:text-white'">
+                {{ $t('adminSetup.oauth.tabOwner') }}
+              </button>
+            </div>
+            <div v-if="!ownerApiTab" class="card space-y-4">
               <div class="flex items-center gap-3">
-                <span v-if="oauthStatus === 'connected'" class="text-2xl">✅</span>
+                <span v-if="oauthStatus === 'connected' && oauthMode !== 'owner'" class="text-2xl">✅</span>
                 <span v-else-if="oauthStatus === 'checking'" class="text-2xl animate-pulse">🔄</span>
                 <span v-else class="text-2xl">❌</span>
                 <div>
                   <p class="text-sm font-semibold text-white">
-                    {{ oauthStatus === 'connected' ? $t('adminSetup.oauth.connected') : $t('adminSetup.oauth.notConnected') }}
+                    {{ oauthStatus === 'connected' && oauthMode !== 'owner' ? $t('adminSetup.oauth.connected') : $t('adminSetup.oauth.notConnected') }}
                   </p>
                   <p class="text-xs text-gray-400">{{ $t('adminSetup.oauth.hint') }}</p>
                 </div>
               </div>
-              <div v-if="oauthStatus !== 'connected'" class="flex gap-2">
+              <div v-if="!(oauthStatus === 'connected' && oauthMode !== 'owner')" class="flex gap-2">
                 <button @click="openOauth" :disabled="oauthOpening" class="flex-1 btn-primary text-sm">
                   {{ oauthOpening ? $t('adminSetup.oauth.opening') : $t('adminSetup.oauth.connectBtn') }}
                 </button>
                 <button @click="checkOauthStatus" class="btn-secondary text-sm px-4">↻</button>
               </div>
-              <p v-if="oauthStatus === 'connected'" class="text-xs text-green-400">
+              <p v-if="oauthStatus === 'connected' && oauthMode !== 'owner'" class="text-xs text-green-400">
                 {{ $t('adminSetup.oauth.activeHint') }}
               </p>
+            </div>
+            <div v-else class="card space-y-4">
+              <div class="bg-blue-900/20 border border-blue-700/40 rounded-lg px-3 py-2 text-xs text-blue-300 space-y-1">
+                <p>{{ $t('adminSetup.oauth.ownerInfo') }}</p>
+                <a href="https://github.com/timdorr/tesla-api" target="_blank" rel="noopener"
+                   class="text-blue-400 hover:underline">tesla-api Docs ↗</a>
+              </div>
+              <div v-if="oauthStatus === 'connected' && oauthMode === 'owner'" class="flex items-center gap-3">
+                <span class="text-2xl">✅</span>
+                <div>
+                  <p class="text-sm font-semibold text-white">{{ $t('adminSetup.oauth.ownerConnected') }}</p>
+                  <p class="text-xs text-gray-400">{{ $t('adminSetup.oauth.ownerActiveHint') }}</p>
+                </div>
+              </div>
+              <template v-else>
+                <div>
+                  <label class="label">{{ $t('adminSetup.oauth.ownerTokenLabel') }}</label>
+                  <textarea v-model="ownerApiToken" rows="3"
+                    :placeholder="$t('adminSetup.oauth.ownerTokenPlaceholder')"
+                    class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red font-mono resize-none"></textarea>
+                </div>
+                <button @click="connectOwnerApi" :disabled="ownerApiConnecting || !ownerApiToken.trim()"
+                  class="w-full btn-primary text-sm">
+                  {{ ownerApiConnecting ? $t('adminSetup.oauth.ownerConnecting') : $t('adminSetup.oauth.ownerConnectBtn') }}
+                </button>
+                <p v-if="ownerApiError" class="text-xs text-red-400">{{ ownerApiError }}</p>
+              </template>
             </div>
           </template>
 
@@ -615,15 +654,36 @@ async function saveCredentials() {
 }
 
 // ─── Tesla OAuth ───────────────────────────────────────────────────────────
-const oauthStatus  = ref('checking');
-const oauthOpening = ref(false);
+const oauthStatus     = ref('checking');
+const oauthOpening    = ref(false);
+const oauthMode       = ref('fleet');
+const ownerApiTab     = ref(false);
+const ownerApiToken   = ref('');
+const ownerApiConnecting = ref(false);
+const ownerApiError   = ref('');
 
 async function checkOauthStatus() {
   oauthStatus.value = 'checking';
   try {
     const { data } = await api.get('/auth/tesla/status');
     oauthStatus.value = data.connected ? 'connected' : 'disconnected';
+    oauthMode.value = data.mode || 'fleet';
+    if (data.mode === 'owner') ownerApiTab.value = true;
   } catch { oauthStatus.value = 'disconnected'; }
+}
+
+async function connectOwnerApi() {
+  ownerApiConnecting.value = true;
+  ownerApiError.value = '';
+  try {
+    await api.post('/auth/tesla/connect-owner-token', { refresh_token: ownerApiToken.value.trim() });
+    ownerApiToken.value = '';
+    await checkOauthStatus();
+  } catch (err) {
+    ownerApiError.value = err.response?.data?.error || err.message;
+  } finally {
+    ownerApiConnecting.value = false;
+  }
 }
 
 async function openOauth() {

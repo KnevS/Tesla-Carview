@@ -11,7 +11,7 @@ import {
 } from '../services/userService.js';
 import { verifyTotp, verifyBackupCode, decryptMfaSecret } from '../services/mfaService.js';
 import { auditLog } from '../services/auditService.js';
-import { getAuthUrl, exchangeCode, getAccessToken } from '../services/teslaApi.js';
+import { getAuthUrl, exchangeCode, getAccessToken, connectOwnerToken, getAuthMode } from '../services/teslaApi.js';
 import { getMasterDb, getDb, getTenantBySlug, getTenantByPseudonym, getAllTenants, getTenantById } from '../db/database.js';
 
 const router = Router();
@@ -300,9 +300,25 @@ router.get('/callback', async (req, res) => {
 router.get('/tesla/status', requireAuth, async (req, res) => {
   try {
     await getAccessToken(req.db);
-    res.json({ connected: true });
+    const mode = getAuthMode(req.db);
+    res.json({ connected: true, mode });
   } catch {
-    res.json({ connected: false });
+    res.json({ connected: false, mode: 'fleet' });
+  }
+});
+
+// POST /api/auth/tesla/connect-owner-token
+router.post('/tesla/connect-owner-token', requireAuth, async (req, res) => {
+  const { refresh_token } = req.body;
+  if (!refresh_token || typeof refresh_token !== 'string' || refresh_token.trim().length < 20) {
+    return res.status(400).json({ error: 'Refresh-Token fehlt oder zu kurz' });
+  }
+  try {
+    await connectOwnerToken(req.db, refresh_token.trim());
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[Auth] Owner-Token-Connect fehlgeschlagen:', err.response?.data || err.message);
+    res.status(400).json({ error: 'Token ungültig oder abgelaufen. Bitte neuen Token generieren.' });
   }
 });
 
