@@ -2327,5 +2327,109 @@
     "done": {
       "banner": "Bu adım zaten yapılandırıldı. Atlamak için \"İleri\"ye basın veya aşağıdaki değerleri ayarlayın."
     }
+  },
+  "myTracking": {
+    "title": "Akıllı Telefon GPS'im",
+    "subtitle": "Kendi OwnTracks cihazlarını yönet + ilk kurulum için QR kodları",
+    "intro": "OwnTracks, GPS konumunu doğrudan bu sunucuya gönderen ücretsiz açık kaynak bir uygulamadır (iOS+Android) — buluta değil. Uygulamayı telefonuna yükle, buradaki QR kodunu tara, tamam.\n\nNe alırsın: her seyahat otomatik tespit edilir (5 km/saat üzerinde başlar, 5 dk durulduktan sonra biter), GPS izi, mesafe ve hız dahil. Pil/iklim verisi yok (bunlar Tesla Fleet API gerektirir).",
+    "noDevices": "Henüz hiç OwnTracks cihazın yok. Şimdi telefonun için bir tane ekle.",
+    "addBtn": "Telefonumu ekle",
+    "addTitle": "Yeni cihaz ekle",
+    "createBtn": "Oluştur ve QR kodu göster",
+    "showQr": "QR kodu göster",
+    "hideQr": "QR kodu gizle",
+    "qrInstructions": "📱 Nasıl kurulur:\n1. App Store'dan OwnTracks uygulamasını yükle\n2. iPhone kamerasını (uygulamayı DEĞİL!) QR koduna doğrult\n3. \"OwnTracks'te Aç\"a dokun\n4. Yapılandırma içe aktarımını onayla\n5. Konum erişimini \"Her Zaman\" yap — tamam.",
+    "manualSetup": "QR kod çalışmazsa manuel kurulum",
+    "downloadOtrc": "Yapılandırma dosyasını (.otrc) indir",
+    "confirmDelete": "\"{label}\" cihazını sil? Bu cihazdan GPS takibi hemen durur.",
+    "lastPing": "Son ping: {time}",
+    "neverPinged": "Hiç iletişime geçilmedi",
+    "justNow": "şu anda",
+    "minsAgo": "{mins} dk önce",
+    "hoursAgo": "{hours} sa önce",
+    "daysAgo": "{days} gün önce",
+    "form": {
+      "label": "Etiket",
+      "labelPlaceholder": "örn. \"Sven'in iPhone'u\"",
+      "vehicle": "Araç",
+      "noVehicles": "Hiçbir araca atanmadın — yöneticine ulaş.",
+      "tripType": "Varsayılan seyahat türü",
+      "tripTypeHint": "Daha sonra her seyahat için yeniden sınıflandırılabilir."
+    },
+    "tripTypes": {
+      "business": "İş",
+      "private": "Özel",
+      "commute": "İşe gidiş-geliş"
+    }
+  },
+  "tco": {
+    "title": "TCO Kokpiti",
+    "subtitle": "Toplam Sahip Olma Maliyeti — bu araç sana gerçekten ne kadara mal oluyor?",
+    "incompleteTitle": "Temel veriler eksik",
+    "incompleteHint": "Aşağıdaki \"Temel veriler\" altında, amortisman ve €/km hesaplanabilmesi için en azından satın alma fiyatı ve tarihi gir.",
+    "residualEstimateHint": "Tahmini kalıntı değer: 8 yıl üzerinde satın alma fiyatının %25'ine doğrusal amortisman. Araç satıldığında gerçek satış fiyatını gir.",
+    "kpi": {
+      "costPerKm": "km başına maliyet",
+      "basis": "Temel: {km}",
+      "total": "Toplam maliyet",
+      "yearsOwned": "{years} yıl sahiplik",
+      "depreciation": "Amortisman",
+      "residual": "Kalıntı değer",
+      "electricity": "Elektrik maliyeti",
+      "fromCharging": "şarj oturumlarından"
+    },
+    "breakdown": {
+      "title": "Maliyet dökümü",
+      "depreciation": "Amortisman (alım − kalıntı/satış)",
+      "insurance": "Sigorta",
+      "tax": "Araç vergisi",
+      "electricity": "Elektrik (şarj)",
+      "service": "Bakım, lastik, onarımlar",
+      "totalRow": "Toplam",
+      "notSet": "henüz kaydedilmedi"
+    },
+    "records": {
+      "title": "Bakım, lastik ve onarım kayıtları",
+      "add": "Kayıt ekle",
+      "empty": "Henüz kayıt yok — bir faturan olur olmaz ekle.",
+      "date": "Tarih",
+      "odometer": "Kilometre sayacı",
+      "category": "Kategori",
+      "label": "Etiket",
+      "labelPlaceholder": "örn. \"60.000 km'de muayene\"",
+      "cost": "Maliyet",
+      "vendor": "Servis / tedarikçi",
+      "notes": "Notlar",
+      "create": "Kayıt oluştur",
+      "confirmDelete": "\"{label}\" kaydını sil?"
+    },
+    "categories": {
+      "service": "Bakım",
+      "tires": "Lastikler",
+      "repair": "Onarım",
+      "inspection": "Muayene",
+      "tuv": "Yıllık muayene",
+      "accessories": "Aksesuarlar",
+      "other": "Diğer"
+    },
+    "base": {
+      "title": "Temel veriler",
+      "purchasePrice": "Satın alma fiyatı",
+      "purchaseDate": "Satın alma tarihi",
+      "salePrice": "Satış fiyatı",
+      "salePricePlaceholder": "boş = henüz satılmadı",
+      "saleDate": "Satış tarihi",
+      "insurance": "Sigorta",
+      "tax": "Araç vergisi",
+      "perYear": "yıl",
+      "initialKm": "Satın alımdaki kilometre sayacı",
+      "initialKmPlaceholder": "örn. 12345",
+      "initialKmHint": "Sahiplik sırasında katedilen mesafeyi hesaplamak için mevcut kilometre sayacından çıkarılır.",
+      "currentKm": "Mevcut kilometre sayacı"
+    }
+  },
+  "notices": {
+    "dismiss": "Anladım, gizle",
+    "adminOnly": "Bu bildirimi yalnızca yöneticiler kapatabilir."
   }
 }

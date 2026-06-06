@@ -7,6 +7,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.5.6] - 2026-06-06
+
+### Changed
+
+- **i18n hygiene: three new top-level blocks in all languages**: `myTracking` (smartphone GPS self-service page), `tco` (TCO cockpit) and `notices` (system update banner) had been maintained only in DE+EN — the four other languages (FR, ES, TR, EL) fell back via `fallbackLocale: 'de'` to the German text. Now: full translations for FR + ES + TR + EL. Three blocks with ~30 strings each × 4 languages = 360 new i18n strings.
+- **Handbook update (`handbook.*.md` in all 6 languages) still pending**: OwnTracks, Owner-API status, TCO cockpit and Ollama mode are not yet described in the in-app handbook — deliberately parked as a separate task because translating markdown in 6 languages is its own sweep.
+
+---
+
 ## [v3.5.5] - 2026-06-06
 
 ### Fixed

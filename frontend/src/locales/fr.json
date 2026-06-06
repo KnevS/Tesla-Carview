@@ -2327,5 +2327,109 @@
     "done": {
       "banner": "Cette étape est déjà configurée. Appuyez sur « Suivant » pour l'ignorer, ou ajustez les valeurs ci-dessous."
     }
+  },
+  "myTracking": {
+    "title": "Mon GPS smartphone",
+    "subtitle": "Gérez vos propres appareils OwnTracks + codes QR pour la première configuration",
+    "intro": "OwnTracks est une application open source gratuite (iOS+Android) qui envoie ta position GPS directement à ce serveur — pas à un cloud. Tu installes l'app sur ton téléphone, scannes le code QR ici, c'est fini.\n\nCe que tu obtiens : chaque trajet est détecté automatiquement (départ au-dessus de 5 km/h, fin après 5 min d'arrêt), incluant trace GPS, distance et vitesse. Pas de données batterie/climat (celles-ci nécessitent l'API Tesla Fleet).",
+    "noDevices": "Tu n'as pas encore d'appareil OwnTracks. Ajoute-en un pour ton téléphone maintenant.",
+    "addBtn": "Ajouter mon téléphone",
+    "addTitle": "Ajouter un nouvel appareil",
+    "createBtn": "Créer & afficher le code QR",
+    "showQr": "Afficher le code QR",
+    "hideQr": "Masquer le code QR",
+    "qrInstructions": "📱 Comment configurer :\n1. Installe l'application OwnTracks depuis l'App Store\n2. Pointe l'appareil photo de l'iPhone (PAS l'app !) vers le code QR\n3. Tape « Ouvrir dans OwnTracks »\n4. Confirme l'importation de la configuration\n5. Règle l'accès à la position sur « Toujours » — terminé.",
+    "manualSetup": "Configuration manuelle si le code QR ne fonctionne pas",
+    "downloadOtrc": "Télécharger le fichier de configuration (.otrc)",
+    "confirmDelete": "Supprimer l'appareil « {label} » ? Le suivi GPS depuis cet appareil s'arrête immédiatement.",
+    "lastPing": "Dernier ping : {time}",
+    "neverPinged": "Jamais contacté",
+    "justNow": "à l'instant",
+    "minsAgo": "il y a {mins} min",
+    "hoursAgo": "il y a {hours} h",
+    "daysAgo": "il y a {days} jours",
+    "form": {
+      "label": "Étiquette",
+      "labelPlaceholder": "ex. « iPhone de Sven »",
+      "vehicle": "Véhicule",
+      "noVehicles": "Tu n'es assigné à aucun véhicule — contacte ton administrateur.",
+      "tripType": "Type de trajet par défaut",
+      "tripTypeHint": "Peut être reclassé par trajet plus tard."
+    },
+    "tripTypes": {
+      "business": "Professionnel",
+      "private": "Privé",
+      "commute": "Trajet domicile-travail"
+    }
+  },
+  "tco": {
+    "title": "Cockpit TCO",
+    "subtitle": "Coût total de possession — combien ce véhicule te coûte vraiment ?",
+    "incompleteTitle": "Données de base incomplètes",
+    "incompleteHint": "Sous « Données de base » ci-dessous, saisis au minimum le prix d'achat et la date pour que la dépréciation et €/km puissent être calculés.",
+    "residualEstimateHint": "Valeur résiduelle estimée : dépréciation linéaire sur 8 ans jusqu'à 25 % du prix d'achat. Saisis le prix de vente réel une fois le véhicule vendu.",
+    "kpi": {
+      "costPerKm": "Coût par km",
+      "basis": "Base : {km}",
+      "total": "Coût total",
+      "yearsOwned": "{years} années de possession",
+      "depreciation": "Dépréciation",
+      "residual": "Valeur résiduelle",
+      "electricity": "Coût électricité",
+      "fromCharging": "depuis les sessions de charge"
+    },
+    "breakdown": {
+      "title": "Ventilation des coûts",
+      "depreciation": "Dépréciation (achat − valeur résiduelle/vente)",
+      "insurance": "Assurance",
+      "tax": "Taxe véhicule",
+      "electricity": "Électricité (charge)",
+      "service": "Entretien, pneus, réparations",
+      "totalRow": "Total",
+      "notSet": "pas encore enregistré"
+    },
+    "records": {
+      "title": "Entretien, pneus et réparations",
+      "add": "Ajouter une entrée",
+      "empty": "Aucune entrée pour le moment — ajoutes-en une dès que tu as une facture.",
+      "date": "Date",
+      "odometer": "Compteur",
+      "category": "Catégorie",
+      "label": "Étiquette",
+      "labelPlaceholder": "ex. « Inspection à 60 000 km »",
+      "cost": "Coût",
+      "vendor": "Garage / fournisseur",
+      "notes": "Notes",
+      "create": "Créer l'entrée",
+      "confirmDelete": "Supprimer l'entrée « {label} » ?"
+    },
+    "categories": {
+      "service": "Entretien",
+      "tires": "Pneus",
+      "repair": "Réparation",
+      "inspection": "Inspection",
+      "tuv": "Contrôle technique",
+      "accessories": "Accessoires",
+      "other": "Autre"
+    },
+    "base": {
+      "title": "Données de base",
+      "purchasePrice": "Prix d'achat",
+      "purchaseDate": "Date d'achat",
+      "salePrice": "Prix de vente",
+      "salePricePlaceholder": "vide = pas encore vendu",
+      "saleDate": "Date de vente",
+      "insurance": "Assurance",
+      "tax": "Taxe véhicule",
+      "perYear": "an",
+      "initialKm": "Compteur à l'achat",
+      "initialKmPlaceholder": "ex. 12345",
+      "initialKmHint": "Soustrait du compteur actuel pour calculer la distance parcourue pendant la possession.",
+      "currentKm": "Compteur actuel"
+    }
+  },
+  "notices": {
+    "dismiss": "Compris, masquer",
+    "adminOnly": "Seuls les administrateurs peuvent masquer cet avis."
   }
 }
