@@ -31,6 +31,67 @@ Kronolojik girişler içeren tüm listelerde (sürüşler, şarj seansları, ser
 
 Seçilen sıralama **görünüm başına tarayıcıda kaydedilir** (`localStorage`) ve sayfa yenileme ve sekme kapatma sonrası korunur — her liste için farklı ayarlayabilirsin (örn. yol defteri "en yeniler üstte", kullanıcı listesi "son giriş en altta").
 
+## ⚠️ 2026 itibarıyla Tesla API durumu {#tesla-api-2026}
+
+Mayıs/Haziran 2026'da Tesla, araç uç noktaları için resmi olmayan Owner API'sini kapattı. Topluluk geçici çözümüne (Tesla hesabından refresh token) güvenenler artık araç verileri yerine **HTTP 401 "invalid bearer token"** alıyor. Tesla Carview bundan iki net sonuç çıkardı:
+
+### Üç veri kaynağı bir bakışta
+
+| Kaynak | Ne alırsınız | Kurulum çabası | Maliyet |
+| --- | --- | --- | --- |
+| **Tesla Fleet API** | Pil, iklim, canlı GPS, TPMS, komutlar | [developer.tesla.com](https://developer.tesla.com) üzerinde uygulama onayı, bekleme süresi haftalar–aylar | Tesla'da ~10 €/ay |
+| **OwnTracks** (akıllı telefon) | GPS izi, seyahat tespiti, mesafe | sihirbazda ~5 dk + uygulama kurulumu | ücretsiz |
+| **Manuel giriş** | API olmadan temel veriler (seyahat günlüğü çalışır) | sihirbazda < 1 dk | ücretsiz |
+
+**Önemli:** üç yol da paralel çalışabilir — OwnTracks size hemen eksiksiz bir GPS seyahat günlüğü verir, manuel giriş Tesla senkronizasyonunu beklemeyi atlar, Fleet API daha sonra pil ve iklim verisi ekler.
+
+### OwnTracks kurulumu (önerilen, hemen kullanılabilir) {#owntracks-setup}
+
+1. **Yönetici sihirbazı** → "Akıllı Telefon GPS (OwnTracks)" adımı → "Yeni cihaz ekle" → etiket, araç, sürücü seçin.
+2. **QR kodunu tara**: oluşturulduktan sonra bir QR kodu gösterilir. **Yerel iPhone kamerası ile** (OwnTracks uygulaması DEĞİL!) tara → "OwnTracks'te Aç" → yapılandırma içe aktarımını onayla.
+3. iOS Ayarları → OwnTracks içinde **konum erişimini "Her Zaman" olarak ayarla**. Yoksa arka plan GPS yok.
+4. Sürücü 5 km/saatten hızlı hareket eder etmez, otomatik olarak bir seyahat başlar. 5 dakika hareketsizlik onu sonlandırır.
+
+**Yönetici hakları olmayan son kullanıcılar için**: her sürücünün "📱 Benim GPS'im" altında kendi sayfası vardır — yönetici yardımına gerek yok.
+
+### Manuel araç girişi {#manual-vehicle}
+
+Sihirbazın "Araçlar" adımında yan yana iki kart bulunur: "☁ Tesla senkronizasyonu (bulut)" ve "✍ Manuel giriş". Manuel varyant:
+
+- Tesla API erişimi olmadan çalışır
+- Alanlar: etiket (zorunlu), plaka, VIN (isteğe bağlı — yoksa sentetik "MANUAL…" VIN), model, başlangıç kilometre sayacı
+- Oluşturan kullanıcı otomatik olarak sürücü olarak eklenir → hemen üzerinde OwnTracks cihazı kaydedebilir
+- Başlangıç kilometre sayacı mevcut kilometre alanına da yazılır — TCO hesaplaması ilk günden çalışır
+
+### TCO Kokpiti (Toplam Sahip Olma Maliyeti) {#tco-cockpit}
+
+`/tco` altında her araç için gerçek toplam maliyeti ve dürüst bir €/km değerini görürsünüz. Dört KPI kartı:
+
+- **km başına maliyet** — toplam maliyet ÷ katedilen km
+- **Toplam maliyet** — tüm kalemlerin toplamı
+- **Amortisman** — alım − satış fiyatı (veya tahmini kalıntı değer: 8 yıl boyunca %25'e doğrusal amortisman)
+- **Elektrik maliyeti** — şarj oturumlarından
+
+Altında oranlarla ayrıntılı döküm + bakım kayıtları CRUD (muayene, lastik, onarım, yıllık muayene, aksesuar, diğer) + temel veri formu (alım fiyatı/tarihi, satış, sigorta, araç vergisi, başlangıç km).
+
+### Yapay zeka sağlayıcısı: Ollama veya Grok {#ai-provider}
+
+Yönetici sihirbazı → "Harici API'ler" → AI sağlayıcısı:
+
+- **🏠 Ollama** (varsayılan, veri egemen): kendi donanımınızda çalışan yerel LLM. Donanım sınıfına göre model önerileri (Pi 4: `llama3.2:1b`, Pi 5: `qwen2.5:3b`, VPS: `llama3:8b`). Sihirbazdan SSE ilerleme çubuğu ile model kurulumu. **Veriler örneği ASLA terk etmez.**
+- **☁ Grok** (bulut): xAI Grok API'si — daha hızlı, ancak her istek ABD sunucularına gider. xAI API anahtarı gerekli, dahili günlük bütçe koruyucusu.
+- **⊝ Kapalı**: AI sohbeti tamamen devre dışı.
+
+< 4 GB RAM'li ana bilgisayarlarda Ollama'yı `docker-compose.override.yml` ile `services.ollama.profiles: [disabled]` kullanarak devre dışı bırakın.
+
+### Benim GPS'im — sürücüler için self-servis {#my-gps}
+
+Oturum açmış her kullanıcının `/my-tracking` ("📱 Benim GPS'im" navigasyonda) altında kendi sayfası vardır:
+
+- **Kendi** OwnTracks cihazlarının listesi (sürücü sadece kendisini, yönetici hepsini görür)
+- Doğrudan kurulum için QR kodu, herhangi bir zamanda yeniden alınabilir (artık kayıp-token sorunu yok)
+- Erişim hakları olan araçlara göre filtrelenmiş araç seçimi — diğer arabalara yanlışlıkla GPS gönderimi yok
+
 ## 📋 Gereksinimler {#requirements}
 
 ### Sunucu

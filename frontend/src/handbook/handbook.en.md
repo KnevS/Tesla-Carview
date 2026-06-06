@@ -31,6 +31,67 @@ Every list with chronological entries (trips, charging sessions, service-log ent
 
 The chosen order is **stored per view in your browser** (`localStorage`) and survives reloads and tab closing — you can set it differently for each list (e.g. trip log "newest first", user list "oldest login last").
 
+## ⚠️ Tesla API status as of 2026 {#tesla-api-2026}
+
+In May/June 2026 Tesla closed the unofficial Owner API for vehicle endpoints. Anyone who relied on the community workaround (refresh token from the Tesla account) now gets **HTTP 401 "invalid bearer token"** instead of vehicle data. Tesla Carview drew two clear conclusions:
+
+### Three data sources at a glance
+
+| Source | What you get | Setup effort | Cost |
+| --- | --- | --- | --- |
+| **Tesla Fleet API** | Battery, climate, live GPS, TPMS, commands | App approval at [developer.tesla.com](https://developer.tesla.com), waiting time weeks–months | ~€10/month at Tesla |
+| **OwnTracks** (smartphone) | GPS track, trip detection, distance | ~5 min in wizard + app install | free |
+| **Manual entry** | Master data without API (logbook works) | < 1 min in wizard | free |
+
+**Important:** all three paths can run in parallel — OwnTracks gives you a complete GPS logbook immediately, manual entry skips waiting for Tesla sync, Fleet API adds battery and climate later.
+
+### OwnTracks setup (recommended, immediately available) {#owntracks-setup}
+
+1. **Admin wizard** → "Smartphone GPS (OwnTracks)" step → "Add new device" → choose label, vehicle, driver.
+2. **Scan the QR code**: after creation a QR code is shown. Scan it **with the native iPhone camera** (NOT with the OwnTracks app!) → "Open in OwnTracks" → confirm configuration import.
+3. Set **location access to "Always"** in iOS settings → OwnTracks. Otherwise no background GPS.
+4. As soon as the driver moves faster than 5 km/h, a trip starts automatically. 5 minutes of standstill ends it.
+
+**For end-users without admin rights**: every driver has their own page under "📱 My GPS" for adding + QR-code scanning — no admin help required.
+
+### Manual vehicle entry {#manual-vehicle}
+
+In the wizard step "Vehicles" two cards sit side by side: "☁ Tesla sync (cloud)" and "✍ Manual entry". The manual variant:
+
+- Works without Tesla API access
+- Fields: label (required), license plate, VIN (optional — synthetic "MANUAL…" VIN otherwise), model, initial odometer
+- The creating user is automatically added as a driver → can immediately register an OwnTracks device on it
+- Initial odometer is also written to the current odometer field — TCO calculation works from day one
+
+### TCO cockpit (Total Cost of Ownership) {#tco-cockpit}
+
+Under `/tco` you see the real total cost per vehicle and an honest €/km value. Four KPI cards:
+
+- **Cost per km** — total cost ÷ km driven
+- **Total cost** — sum of all items
+- **Depreciation** — purchase − sale price (or estimated residual: 8-year linear depreciation to 25 %)
+- **Electricity cost** — from charging sessions
+
+Detailed breakdown below with shares + service-records CRUD (inspection, tires, repair, TÜV, accessories, other) + base-data form (purchase price/date, sale, insurance, vehicle tax, initial km).
+
+### AI provider: Ollama or Grok {#ai-provider}
+
+In the admin wizard → "External APIs" → AI provider:
+
+- **🏠 Ollama** (default, data-sovereign): local LLM running on your own hardware. Model recommendations per hardware class (Pi 4: `llama3.2:1b`, Pi 5: `qwen2.5:3b`, VPS: `llama3:8b`). Model installation from the wizard via SSE progress bar. **Data NEVER leaves the instance.**
+- **☁ Grok** (cloud): xAI Grok API — faster, but every request goes to US servers. xAI API key required, daily budget guard built in.
+- **⊝ Off**: AI chat completely disabled.
+
+On hosts with < 4 GB RAM disable Ollama via `docker-compose.override.yml` with `services.ollama.profiles: [disabled]`.
+
+### My GPS — self-service for drivers {#my-gps}
+
+Every signed-in user has their own page at `/my-tracking` ("📱 My GPS" in the navigation):
+
+- List of **own** OwnTracks devices (driver sees only theirs, admin sees all)
+- QR code for direct setup, retrievable at any time (no more lost-token problem)
+- Vehicle selection filtered to vehicles with access rights — no accidental GPS push to other cars
+
 ## 📋 Requirements {#requirements}
 
 ### Server

@@ -31,6 +31,67 @@ Toutes les listes contenant des entrées chronologiques (trajets, sessions de re
 
 L'ordre choisi est **enregistré par vue dans votre navigateur** (`localStorage`) et persiste après rechargement et fermeture de l'onglet — vous pouvez le régler différemment pour chaque liste (par exemple carnet de bord « plus récents d'abord », liste utilisateurs « dernière connexion en bas »).
 
+## ⚠️ Statut de l'API Tesla en 2026 {#tesla-api-2026}
+
+En mai/juin 2026, Tesla a fermé l'Owner API non officielle pour les endpoints véhicule. Les utilisateurs qui s'appuyaient sur le workaround communautaire (refresh token du compte Tesla) reçoivent désormais **HTTP 401 « invalid bearer token »** au lieu des données véhicule. Tesla Carview en tire deux conclusions claires :
+
+### Trois sources de données en un coup d'œil
+
+| Source | Ce que tu obtiens | Effort de configuration | Coût |
+| --- | --- | --- | --- |
+| **Tesla Fleet API** | Batterie, climatisation, GPS en direct, TPMS, commandes | Approbation app sur [developer.tesla.com](https://developer.tesla.com), délai semaines à mois | ~10 €/mois chez Tesla |
+| **OwnTracks** (smartphone) | Trace GPS, détection des trajets, distance | ~5 min dans l'assistant + installation app | gratuit |
+| **Saisie manuelle** | Données de base sans API (le carnet de bord fonctionne) | < 1 min dans l'assistant | gratuit |
+
+**Important :** les trois voies peuvent fonctionner en parallèle — OwnTracks te donne immédiatement un carnet de bord GPS complet, la saisie manuelle évite d'attendre la synchronisation Tesla, la Fleet API ajoute plus tard les données batterie et climat.
+
+### Configuration OwnTracks (recommandée, immédiatement disponible) {#owntracks-setup}
+
+1. **Assistant admin** → étape « GPS smartphone (OwnTracks) » → « Ajouter un nouvel appareil » → choisir étiquette, véhicule, conducteur.
+2. **Scanner le code QR** : après création, un code QR s'affiche. Le scanner **avec l'appareil photo natif de l'iPhone** (PAS avec l'app OwnTracks !) → « Ouvrir dans OwnTracks » → confirmer l'importation de la configuration.
+3. Régler l'**accès à la position sur « Toujours »** dans les réglages iOS → OwnTracks. Sinon pas de GPS en arrière-plan.
+4. Dès que le conducteur dépasse 5 km/h, un trajet démarre automatiquement. 5 minutes d'arrêt y mettent fin.
+
+**Pour les utilisateurs sans droits admin** : chaque conducteur a sa propre page sous « 📱 Mon GPS » pour ajouter un appareil + scanner le QR — pas besoin de l'aide de l'admin.
+
+### Saisie manuelle de véhicule {#manual-vehicle}
+
+Dans l'étape « Véhicules » de l'assistant, deux cartes côte à côte : « ☁ Sync Tesla (cloud) » et « ✍ Saisie manuelle ». La variante manuelle :
+
+- Fonctionne sans accès à l'API Tesla
+- Champs : étiquette (obligatoire), plaque d'immatriculation, VIN (optionnel — VIN synthétique « MANUAL… » sinon), modèle, compteur initial
+- L'utilisateur créateur est automatiquement ajouté comme conducteur → peut immédiatement enregistrer un appareil OwnTracks dessus
+- Le compteur initial est aussi écrit dans le champ compteur actuel — le calcul TCO fonctionne dès le premier jour
+
+### Cockpit TCO (coût total de possession) {#tco-cockpit}
+
+Sous `/tco`, tu vois le coût total réel par véhicule et une valeur €/km honnête. Quatre cartes KPI :
+
+- **Coût par km** — coût total ÷ km parcourus
+- **Coût total** — somme de toutes les rubriques
+- **Dépréciation** — achat − prix de vente (ou valeur résiduelle estimée : dépréciation linéaire sur 8 ans jusqu'à 25 %)
+- **Coût électricité** — depuis les sessions de charge
+
+Ventilation détaillée en dessous avec les parts + CRUD des entrées de maintenance (inspection, pneus, réparation, contrôle technique, accessoires, autre) + formulaire de données de base (prix/date d'achat, vente, assurance, taxe véhicule, km initial).
+
+### Assistant IA : Ollama ou Grok {#ai-provider}
+
+Dans l'assistant admin → « API externes » → fournisseur IA :
+
+- **🏠 Ollama** (par défaut, souverain en données) : LLM local exécuté sur ton propre matériel. Recommandations de modèle par classe matérielle (Pi 4 : `llama3.2:1b`, Pi 5 : `qwen2.5:3b`, VPS : `llama3:8b`). Installation du modèle depuis l'assistant via barre de progression SSE. **Les données ne quittent JAMAIS l'instance.**
+- **☁ Grok** (cloud) : API xAI Grok — plus rapide, mais chaque requête va vers les serveurs US. Clé API xAI requise, garde-fou de budget journalier intégré.
+- **⊝ Désactivé** : chat IA complètement désactivé.
+
+Sur des hôtes avec < 4 Go de RAM, désactiver Ollama via `docker-compose.override.yml` avec `services.ollama.profiles: [disabled]`.
+
+### Mon GPS — libre-service pour les conducteurs {#my-gps}
+
+Chaque utilisateur connecté a sa propre page sur `/my-tracking` (« 📱 Mon GPS » dans la navigation) :
+
+- Liste des appareils OwnTracks **propres** (le conducteur ne voit que les siens, l'admin tous)
+- Code QR pour la configuration directe, récupérable à tout moment (plus de problème de token perdu)
+- Sélection de véhicule filtrée sur les véhicules avec droits d'accès — pas d'envoi GPS accidentel vers d'autres voitures
+
 ## 📋 Prérequis {#requirements}
 
 ### Serveur

@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.5.7] - 2026-06-06
+
+### Hinzugefügt
+
+- **In-App-Handbuch in 6 Sprachen aktualisiert**: Neue Sektion „⚠️ Tesla-API-Anbindung Stand 2026" mit fünf Unter-Abschnitten (`#tesla-api-2026`, `#owntracks-setup`, `#manual-vehicle`, `#tco-cockpit`, `#ai-provider`, `#my-gps`). Erklärt die Owner-API-Schließung, vergleicht die drei Datenquellen (Fleet API / OwnTracks / Manuell) tabellarisch, beschreibt Step-by-Step die OwnTracks-Einrichtung via QR-Code und nennt klar was wo wann läuft. Vollständige Übersetzungen in DE, EN, FR, ES, TR, EL (alle 6 in-app-Sprachen). Eingefügt nach „Sortierreihenfolge", vor „Voraussetzungen" — damit neue Selbsthoster die Information früh im Handbuch finden.
+
+---
+
 ## [v3.5.6] - 2026-06-06
 
 ### Geändert

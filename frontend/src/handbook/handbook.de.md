@@ -31,6 +31,67 @@ In allen Listen mit chronologischen Einträgen (Fahrten, Lade-Sessions, Betriebs
 
 Die gewählte Reihenfolge wird **pro Ansicht im Browser gespeichert** (`localStorage`) und überdauert Neuladen und Schließen des Tabs — du kannst sie pro Liste unterschiedlich einstellen (z. B. Fahrtenbuch „neueste oben", Benutzerliste „letzter Login zuletzt").
 
+## ⚠️ Tesla-API-Anbindung Stand 2026 {#tesla-api-2026}
+
+Tesla hat im Mai/Juni 2026 die inoffizielle Owner API für Fahrzeug-Endpoints geschlossen. Wer vorher mit dem Community-Workaround (Refresh-Token aus dem Tesla-Account) lief, bekommt jetzt **HTTP 401 „invalid bearer token"** statt Fahrzeugdaten. Tesla Carview hat daraus zwei klare Konsequenzen gezogen:
+
+### Drei Datenquellen im Überblick
+
+| Quelle | Was du bekommst | Setup-Aufwand | Kosten |
+| --- | --- | --- | --- |
+| **Tesla Fleet API** | Akku, Klima, GPS-Live, TPMS, Befehle | App-Approval bei [developer.tesla.com](https://developer.tesla.com), Wartezeit Wochen–Monate | ~10 €/Monat bei Tesla |
+| **OwnTracks** (Smartphone) | GPS-Track, Trip-Erkennung, Distanz | ~5 Min im Wizard + App-Install | kostenlos |
+| **Manuelle Anlage** | Stammdaten ohne API (Fahrtenbuch funktioniert) | < 1 Min im Wizard | kostenlos |
+
+**Wichtig:** alle drei Wege können parallel laufen — OwnTracks gibt dir sofort ein lückenloses GPS-Fahrtenbuch, manuelle Anlage spart das Warten auf den Tesla-Sync, Fleet API ergänzt später Akku- und Klimadaten.
+
+### OwnTracks-Setup (empfohlen, sofort verfügbar) {#owntracks-setup}
+
+1. **Admin-Wizard** → Schritt „Smartphone-GPS (OwnTracks)" → „Neues Gerät anlegen" → Bezeichnung, Fahrzeug, Fahrer wählen.
+2. **QR-Code scannen**: nach dem Anlegen wird ein QR-Code angezeigt. Den **mit der nativen iPhone-Kamera** (NICHT mit der OwnTracks-App!) scannen → „In OwnTracks öffnen" → Konfiguration importieren bestätigen.
+3. **Standortzugriff auf „Immer"** in den iOS-Einstellungen → OwnTracks. Sonst kein Background-GPS.
+4. Sobald der Fahrer schneller als 5 km/h fährt, startet automatisch eine Fahrt. 5 Minuten Stillstand beendet sie wieder.
+
+**Für Endnutzer ohne Admin-Rechte**: jeder Fahrer hat unter „📱 Mein GPS" eine eigene Seite zum Anlegen + QR-Code-Scan — keine Admin-Hilfe nötig.
+
+### Manuelle Fahrzeug-Anlage {#manual-vehicle}
+
+Im Wizard-Schritt „Fahrzeuge" stehen zwei Karten nebeneinander: „☁ Tesla-Sync (Cloud)" und „✍ Manuell anlegen". Die manuelle Variante:
+
+- Funktioniert ohne Tesla-API-Zugriff
+- Felder: Bezeichnung (Pflicht), Kennzeichen, VIN (optional — sonst synthetische „MANUAL…"-VIN), Modell, Initial-Kilometerstand
+- Anlegender User wird automatisch als Fahrer eingetragen → kann sofort OwnTracks-Device drauf registrieren
+- Initial-Kilometerstand landet auch im aktuellen Stand — TCO-Berechnung läuft ab Tag 1
+
+### TCO-Cockpit (Total Cost of Ownership) {#tco-cockpit}
+
+Unter `/tco` siehst du pro Fahrzeug die echten Gesamtkosten und einen ehrlichen €/km-Wert. Vier KPI-Karten:
+
+- **Kosten pro km** — Gesamtkosten ÷ gefahrene km
+- **Gesamtkosten** — Summe aller Posten
+- **Wertverlust** — Anschaffung − Verkaufspreis (oder geschätzter Restwert: 8 Jahre lineare Abschreibung auf 25 %)
+- **Stromkosten** — aus den Lade-Sessions
+
+Detail-Aufschlüsselung darunter mit Anteilen + Service-Records-CRUD (Inspektion, Reifen, Reparatur, HU/AU, Zubehör, sonstiges) + Stammdaten-Form (Anschaffungspreis/-datum, Verkauf, Versicherung, Steuer, Initial-km).
+
+### KI-Assistent: Ollama oder Grok {#ai-provider}
+
+Im Admin-Wizard → „Externe APIs" → KI-Provider:
+
+- **🏠 Ollama** (Default, datensouverän): lokales LLM, läuft auf eigener Hardware. Modell-Empfehlungen je Hardware-Klasse (Pi 4: `llama3.2:1b`, Pi 5: `qwen2.5:3b`, VPS: `llama3:8b`). Modell-Installation aus dem Wizard via SSE-Progress-Bar. **Daten verlassen die Instanz NIE.**
+- **☁ Grok** (Cloud): xAI Grok API — schneller, aber jede Anfrage geht an US-Server. xAI-API-Key erforderlich, Tagesbudget-Wächter eingebaut.
+- **⊝ Aus**: KI-Chat komplett deaktiviert.
+
+Auf Hosts mit < 4 GB RAM Ollama deaktivieren via `docker-compose.override.yml` mit `services.ollama.profiles: [disabled]`.
+
+### Mein GPS — Self-Service für Fahrer {#mein-gps}
+
+Jeder eingeloggte Nutzer hat unter `/my-tracking` („📱 Mein GPS" in der Navigation) eine eigene Seite:
+
+- Liste der **eigenen** OwnTracks-Geräte (Fahrer sieht nur seine, Admin alle)
+- QR-Code für Direkt-Setup, jederzeit erneut abrufbar (kein Verlust-Problem mehr)
+- Fahrzeug-Auswahl gefiltert auf Fahrzeuge mit Zugriffsrechten — kein versehentliches GPS-Pushen auf fremde Autos
+
 ## 📋 Voraussetzungen {#requirements}
 
 ### Server
