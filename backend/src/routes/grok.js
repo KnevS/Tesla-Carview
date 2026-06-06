@@ -9,7 +9,10 @@ import { Router } from 'express';
 import { randomUUID } from 'crypto';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { getTenantSetting, setTenantSetting } from '../services/configService.js';
-import { buildContext, checkBudget, getTodayUsage, streamChat } from '../services/grokService.js';
+import { getTodayUsage } from '../services/grokService.js';
+// Provider-Wahl macht der Dispatcher; Routen kennen Grok/Ollama nicht direkt.
+import { buildContext, checkBudget, streamChat, getActiveProvider, healthCheck } from '../services/aiService.js';
+import { healthCheck as ollamaHealth } from '../services/ollamaService.js';
 
 const router = Router();
 
@@ -162,6 +165,54 @@ router.get('/usage', (req, res) => {
     return parseFloat(row?.value ?? 100);
   })();
   res.json({ ...usage, budget_ct: budget, date: new Date().toISOString().slice(0, 10) });
+});
+
+// ── KI-Provider-Wahl (Ollama lokal vs Grok cloud vs aus) ─────────────────
+//
+// Default-Migration laeuft transparent: hat die Instanz Grok konfiguriert
+// und ai.provider noch nicht gesetzt, antwortet getActiveProvider 'grok'
+// und der Chat funktioniert wie bisher. Erst wenn der Admin hier explizit
+// 'ollama' waehlt, geht der Chat ueber Ollama.
+
+// GET /api/grok/ai-config — aktuelle Wahl + Ollama-Einstellungen + Health
+router.get('/ai-config', requireAuth, async (req, res) => {
+  const provider = getActiveProvider(req.db);
+  const xaiKey   = getTenantSetting(req.db, 'xai.api_key', 'XAI_API_KEY');
+  res.json({
+    provider,
+    grok_configured: !!xaiKey,
+    ollama_url:    getTenantSetting(req.db, 'ai.ollama_url',   null) || 'http://localhost:11434',
+    ollama_model:  getTenantSetting(req.db, 'ai.ollama_model', null) || 'qwen2.5:3b',
+  });
+});
+
+// PUT /api/grok/ai-config — Provider + Ollama-Settings setzen (Admin)
+router.put('/ai-config', requireAuth, requireAdmin, (req, res) => {
+  const { provider, ollama_url, ollama_model } = req.body || {};
+  if (provider && !['ollama', 'grok', 'none'].includes(provider)) {
+    return res.status(400).json({ error: 'provider muss ollama|grok|none sein' });
+  }
+  if (provider) setTenantSetting(req.db, 'ai.provider', provider);
+  if (typeof ollama_url === 'string') {
+    const u = ollama_url.trim();
+    if (u && !/^https?:\/\//.test(u)) return res.status(400).json({ error: 'ollama_url muss mit http(s):// beginnen' });
+    setTenantSetting(req.db, 'ai.ollama_url', u || null);
+  }
+  if (typeof ollama_model === 'string') {
+    setTenantSetting(req.db, 'ai.ollama_model', ollama_model.trim() || null);
+  }
+  res.json({ ok: true });
+});
+
+// GET /api/grok/ai-health — Health-Check des aktuellen Providers
+router.get('/ai-health', requireAuth, async (req, res) => {
+  res.json(await healthCheck(req.db));
+});
+
+// GET /api/grok/ollama-health — explizit Ollama (auch wenn aktuell 'grok')
+//   damit Admin bei Provider-Wahl im UI vorab pruefen kann ob Ollama laeuft
+router.get('/ollama-health', requireAuth, async (req, res) => {
+  res.json(await ollamaHealth(req.db));
 });
 
 export default router;

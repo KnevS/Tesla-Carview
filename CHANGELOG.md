@@ -7,6 +7,23 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.27] - 2026-06-06
+
+### Hinzugefügt
+
+- **Ollama als KI-Provider — datensouveräne Alternative zu Grok**: Bisher lief der KI-Chat ausschließlich über xAI Grok (Cloud, jede Frage geht an US-Server). Ab dieser Version kann jeder Admin im Einrichtungs-Wizard zwischen drei Providern wählen:
+  - 🏠 **Ollama** (lokal): LLM läuft auf eigener Hardware via [Ollama](https://ollama.com). Modell-Empfehlungen je Hardware: Pi 4 → `llama3.2:1b`, Pi 5 → `qwen2.5:3b`, VPS → `llama3:8b`. Daten verlassen die Instanz NIE. Kostenlos (außer Strom).
+  - ☁ **Grok / xAI** (Cloud): wie bisher, Fragen gehen an api.x.ai, pro-Token bezahlt mit Tagesbudget-Wächter.
+  - ⊝ **Aus**: KI-Chat komplett deaktiviert.
+  - Neue Provider-Abstraktion `services/aiService.js` dispatched anhand `ai.provider` tenant-setting. `services/ollamaService.js` mirror't die `streamChat`-Signatur von `grokService.js`, sodass die Routen blind delegieren — Frontend-Chat funktioniert für alle Provider identisch.
+  - Backward-Compat: Bestandsinstallationen mit `xai.api_key` konfiguriert bleiben automatisch auf Grok, bis Admin aktiv umschaltet (Migrations-Default ohne explizites Setting).
+  - Neue Routes: `GET /api/grok/ai-config`, `PUT /api/grok/ai-config`, `GET /api/grok/ai-health`, `GET /api/grok/ollama-health`. Bestehende `/api/grok/*`-URLs unverändert.
+  - Admin-Wizard-Schritt „Externe APIs" zeigt jetzt die KI-Provider-Wahl vor der Grok-API-Key-Karte mit 3-Karten-Auswahl, Ollama-URL/Modell-Inputs, Verbindungs-Test mit Live-Modell-Liste und Hardware-spezifischen Empfehlungen.
+  - Neue tenant_settings: `ai.provider`, `ai.ollama_url` (Default `http://localhost:11434`), `ai.ollama_model` (Default `qwen2.5:3b`).
+  - i18n DE+EN.
+
+---
+
 ## [v3.4.26] - 2026-06-06
 
 ### Hinzugefügt

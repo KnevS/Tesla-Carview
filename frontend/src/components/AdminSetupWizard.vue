@@ -484,6 +484,70 @@
                   :placeholder="adminStatus.here?.configured ? $t('adminSetup.external.keyChangePlaceholder') : $t('adminSetup.external.herePlaceholder')"
                   class="w-full bg-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
               </div>
+              <!-- KI-Provider: Ollama (lokal) vs Grok (Cloud) — vor Grok-Card -->
+              <div class="card space-y-3">
+                <div class="flex items-center justify-between">
+                  <p class="text-sm font-medium text-white">🤖 {{ $t('adminSetup.external.aiProvider') }}</p>
+                  <span v-if="aiConfig.provider === 'ollama'" class="text-xs text-green-400">🏠 Ollama (lokal)</span>
+                  <span v-else-if="aiConfig.provider === 'grok'" class="text-xs text-amber-300">☁ Grok (Cloud)</span>
+                  <span v-else class="text-xs text-gray-500">{{ $t('adminSetup.external.aiOff') }}</span>
+                </div>
+                <p class="text-xs text-gray-400 whitespace-pre-line">{{ $t('adminSetup.external.aiProviderHint') }}</p>
+
+                <div class="grid grid-cols-3 gap-2">
+                  <button @click="aiConfig.provider = 'ollama'" type="button"
+                          :class="aiConfig.provider === 'ollama' ? 'border-tesla-red bg-tesla-red/10 text-white' : 'border-gray-700 text-gray-400 hover:text-white'"
+                          class="border-2 rounded-lg p-2 text-xs">
+                    <div class="font-semibold">🏠 Ollama</div>
+                    <div class="text-[10px] text-gray-400 mt-0.5">lokal · datensouverän</div>
+                  </button>
+                  <button @click="aiConfig.provider = 'grok'" type="button"
+                          :class="aiConfig.provider === 'grok' ? 'border-tesla-red bg-tesla-red/10 text-white' : 'border-gray-700 text-gray-400 hover:text-white'"
+                          class="border-2 rounded-lg p-2 text-xs">
+                    <div class="font-semibold">☁ Grok</div>
+                    <div class="text-[10px] text-gray-400 mt-0.5">xAI Cloud · pro Token</div>
+                  </button>
+                  <button @click="aiConfig.provider = 'none'" type="button"
+                          :class="aiConfig.provider === 'none' ? 'border-tesla-red bg-tesla-red/10 text-white' : 'border-gray-700 text-gray-400 hover:text-white'"
+                          class="border-2 rounded-lg p-2 text-xs">
+                    <div class="font-semibold">⊝ Aus</div>
+                    <div class="text-[10px] text-gray-400 mt-0.5">kein KI-Chat</div>
+                  </button>
+                </div>
+
+                <!-- Ollama-Settings (nur sichtbar wenn Ollama gewählt) -->
+                <div v-if="aiConfig.provider === 'ollama'" class="space-y-2 border-t border-gray-700 pt-3">
+                  <label class="block text-xs">
+                    <span class="text-gray-400">{{ $t('adminSetup.external.ollamaUrl') }}</span>
+                    <input v-model="aiConfig.ollama_url" type="url"
+                           placeholder="http://localhost:11434"
+                           class="mt-1 w-full bg-gray-700 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+                  </label>
+                  <label class="block text-xs">
+                    <span class="text-gray-400">{{ $t('adminSetup.external.ollamaModel') }}</span>
+                    <input v-model="aiConfig.ollama_model"
+                           placeholder="qwen2.5:3b"
+                           class="mt-1 w-full bg-gray-700 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-tesla-red" />
+                    <span class="text-[10px] text-gray-500 mt-0.5 block whitespace-pre-line">{{ $t('adminSetup.external.ollamaModelHint') }}</span>
+                  </label>
+                  <button @click="testOllamaHealth" :disabled="aiOllamaTesting" type="button"
+                          class="text-xs bg-gray-700 hover:bg-gray-600 rounded px-3 py-1.5 disabled:opacity-50">
+                    {{ aiOllamaTesting ? '⟳ ' + $t('common.loading') : '🔌 ' + $t('adminSetup.external.ollamaTest') }}
+                  </button>
+                  <div v-if="aiOllamaHealth" class="text-xs space-y-1 pt-1">
+                    <p v-if="aiOllamaHealth.ok" class="text-green-400">
+                      ✓ {{ $t('adminSetup.external.ollamaOk') }}
+                      <span v-if="aiOllamaHealth.configured_model_available">— {{ aiConfig.ollama_model }} verfügbar</span>
+                      <span v-else class="text-amber-300">— Modell {{ aiConfig.ollama_model }} fehlt</span>
+                    </p>
+                    <p v-else class="text-red-400">✗ {{ aiOllamaHealth.error }}</p>
+                    <p v-if="aiOllamaHealth.models?.length" class="text-gray-500 text-[10px]">
+                      {{ $t('adminSetup.external.ollamaInstalled') }}: {{ aiOllamaHealth.models.join(', ') }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div class="card space-y-2">
                 <div class="flex items-center justify-between">
                   <p class="text-sm font-medium text-white">{{ $t('adminSetup.external.grokName') }}</p>
@@ -1048,6 +1112,33 @@ const adminStatus = ref({ ocm: null, here: null, grok: null, abrp: null, smtp: n
 const draftAdmin  = ref({ ocm_key: '', here_key: '', xai_key: '', abrp_key: '',
   alert_email: '', smtp_host: '', smtp_port: '587', smtp_user: '', smtp_password: '', smtp_from: '' });
 
+// ─── KI-Provider (Ollama lokal vs Grok cloud) ─────────────────────────────
+// Default-Wahl beim ersten Bearbeiten: Ollama (datensouveraen).
+const aiConfig = ref({ provider: 'none', grok_configured: false, ollama_url: 'http://localhost:11434', ollama_model: 'qwen2.5:3b' });
+const aiOllamaHealth = ref(null);
+const aiOllamaTesting = ref(false);
+
+async function loadAiConfig() {
+  try { aiConfig.value = (await api.get('/grok/ai-config')).data; }
+  catch { /* ignore — Endpoint kommt aus v3.4.27 */ }
+}
+
+async function testOllamaHealth() {
+  // Vorher Settings speichern, sonst testet er die alten Werte
+  aiOllamaTesting.value = true;
+  try {
+    await api.put('/grok/ai-config', {
+      ollama_url:   aiConfig.value.ollama_url,
+      ollama_model: aiConfig.value.ollama_model,
+    });
+    aiOllamaHealth.value = (await api.get('/grok/ollama-health')).data;
+  } catch (e) {
+    aiOllamaHealth.value = { ok: false, error: e.response?.data?.error || e.message };
+  } finally {
+    aiOllamaTesting.value = false;
+  }
+}
+
 async function loadAdminStatus() {
   const [ocm, here, grok, smtpCfg, monCfg, abrp] = await Promise.all([
     api.get('/routing/ocm-config').then(r => r.data).catch(() => null),
@@ -1104,6 +1195,13 @@ async function saveAdminData() {
     calls.push(api.put('/routing/traffic-config', { here_api_key: draftAdmin.value.here_key.trim() }));
   if (draftAdmin.value.xai_key.trim())
     calls.push(api.put('/grok/config',            { xai_api_key:  draftAdmin.value.xai_key.trim() }));
+
+  // KI-Provider-Wahl + Ollama-Settings (immer, nicht nur bei input)
+  calls.push(api.put('/grok/ai-config', {
+    provider:     aiConfig.value.provider,
+    ollama_url:   aiConfig.value.ollama_url,
+    ollama_model: aiConfig.value.ollama_model,
+  }));
   if (draftAdmin.value.abrp_key.trim())
     calls.push(api.put('/system/abrp-config',     { abrp_api_key: draftAdmin.value.abrp_key.trim() }));
 
@@ -1138,6 +1236,7 @@ onMounted(async () => {
     loadVapidCfg(),
     loadTelegramCfg(),
     loadAdminStatus(),
+    loadAiConfig(),
     loadPrefill(),
   ]);
   // Erst nachdem sowohl Prefill als auch Configs geladen sind: leere
