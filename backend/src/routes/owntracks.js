@@ -263,37 +263,64 @@ router.get('/qr.png', async (req, res) => {
   }
 });
 
-// ── Admin: Devices verwalten ─────────────────────────────────────────────────
+// ── Devices verwalten: Self-Service fuer Fahrer + erweiterte Rechte fuer Admins ──
+//
+// Berechtigungsmodell:
+//   Admin:      Sieht/verwaltet ALLE Geraete im Tenant. Kann fuer beliebige
+//               vehicle_id + user_id anlegen (z.B. Geraet fuer einen anderen
+//               Fahrer vorbereiten und ihm den QR-Code geben).
+//   Fahrer:     Sieht/verwaltet NUR eigene Geraete (user_id = req.user.sub).
+//               Beim Anlegen wird user_id IMMER auf req.user.sub geforcet
+//               (egal was im Body steht). vehicle_id muss in vehicle_users
+//               als zugewiesen markiert sein — sonst 403.
 
 import { requireAuth } from '../middleware/auth.js';
 
-function requireAdmin(req, res, next) {
-  if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Nur für Administratoren' });
-  next();
-}
+function isAdmin(req) { return req.user?.role === 'admin'; }
 
-router.get('/devices', requireAuth, requireAdmin, (req, res) => {
+router.get('/devices', requireAuth, (req, res) => {
   const master = getMasterDb();
+  if (isAdmin(req)) {
+    const rows = master.prepare(
+      `SELECT id, vehicle_id, user_id, label, default_trip_type, is_active,
+              current_trip_id, last_ping_at, created_at
+       FROM owntracks_devices WHERE tenant_id=? ORDER BY created_at DESC`
+    ).all(req.user.tenantId);
+    return res.json(rows);
+  }
+  // Fahrer: nur eigene Geraete
   const rows = master.prepare(
     `SELECT id, vehicle_id, user_id, label, default_trip_type, is_active,
             current_trip_id, last_ping_at, created_at
-     FROM owntracks_devices WHERE tenant_id=? ORDER BY created_at DESC`
-  ).all(req.user.tenantId);
+     FROM owntracks_devices WHERE tenant_id=? AND user_id=? ORDER BY created_at DESC`
+  ).all(req.user.tenantId, req.user.sub);
   res.json(rows);
 });
 
-router.post('/devices', requireAuth, requireAdmin, (req, res) => {
+router.post('/devices', requireAuth, (req, res) => {
   const { vehicle_id, user_id, label, default_trip_type } = req.body || {};
-  const vid = Number(vehicle_id), uid = Number(user_id);
+  const vid = Number(vehicle_id);
+  // Fahrer kann nur fuer sich selbst anlegen; Admin frei
+  const uid = isAdmin(req) ? Number(user_id) : req.user.sub;
   const lab = String(label || '').slice(0, 80).trim();
   const tt  = ['business', 'private', 'commute'].includes(default_trip_type) ? default_trip_type : 'business';
   if (!vid || !uid || !lab) return res.status(400).json({ error: 'vehicle_id, user_id, label erforderlich' });
 
-  // Vorhandensein prüfen (verhindert Foreign-Key-Verletzungen)
-  const v = req.db.prepare('SELECT 1 FROM vehicles WHERE id=?').get(vid);
-  if (!v) return res.status(400).json({ error: 'Fahrzeug nicht gefunden' });
-  const u = req.db.prepare('SELECT 1 FROM users WHERE id=?').get(uid);
-  if (!u) return res.status(400).json({ error: 'Benutzer nicht gefunden' });
+  if (isAdmin(req)) {
+    if (!req.db.prepare('SELECT 1 FROM vehicles WHERE id=?').get(vid)) {
+      return res.status(400).json({ error: 'Fahrzeug nicht gefunden' });
+    }
+    if (!req.db.prepare('SELECT 1 FROM users WHERE id=?').get(uid)) {
+      return res.status(400).json({ error: 'Benutzer nicht gefunden' });
+    }
+  } else {
+    // Fahrer: vehicle muss in vehicle_users als zugewiesen sein.
+    // Verhindert dass ein Fahrer GPS auf fremde Autos pushen kann.
+    const allowed = req.db.prepare(
+      'SELECT 1 FROM vehicle_users WHERE vehicle_id=? AND user_id=?'
+    ).get(vid, uid);
+    if (!allowed) return res.status(403).json({ error: 'Du hast keinen Zugriff auf dieses Fahrzeug' });
+  }
 
   const token = randomBytes(32).toString('base64url');
   const master = getMasterDb();
@@ -310,7 +337,7 @@ router.post('/devices', requireAuth, requireAdmin, (req, res) => {
   });
 });
 
-router.patch('/devices/:id', requireAuth, requireAdmin, (req, res) => {
+router.patch('/devices/:id', requireAuth, (req, res) => {
   const id = Number(req.params.id);
   const { is_active, default_trip_type, label } = req.body || {};
   const updates = [];
@@ -323,23 +350,52 @@ router.patch('/devices/:id', requireAuth, requireAdmin, (req, res) => {
     updates.push('label=?'); args.push(label.slice(0, 80).trim());
   }
   if (!updates.length) return res.status(400).json({ error: 'Nichts zu ändern' });
+
+  const where = isAdmin(req)
+    ? 'WHERE tenant_id=? AND id=?'
+    : 'WHERE tenant_id=? AND id=? AND user_id=?';
   args.push(req.user.tenantId, id);
+  if (!isAdmin(req)) args.push(req.user.sub);
+
   const master = getMasterDb();
   const r = master.prepare(
-    `UPDATE owntracks_devices SET ${updates.join(', ')} WHERE tenant_id=? AND id=?`
+    `UPDATE owntracks_devices SET ${updates.join(', ')} ${where}`
   ).run(...args);
-  if (r.changes === 0) return res.status(404).json({ error: 'Gerät nicht gefunden' });
+  if (r.changes === 0) return res.status(404).json({ error: 'Gerät nicht gefunden oder kein Zugriff' });
   res.json({ ok: true });
 });
 
-router.delete('/devices/:id', requireAuth, requireAdmin, (req, res) => {
+router.delete('/devices/:id', requireAuth, (req, res) => {
   const id = Number(req.params.id);
   const master = getMasterDb();
-  const r = master.prepare(
-    'DELETE FROM owntracks_devices WHERE tenant_id=? AND id=?'
-  ).run(req.user.tenantId, id);
-  if (r.changes === 0) return res.status(404).json({ error: 'Gerät nicht gefunden' });
+  const r = isAdmin(req)
+    ? master.prepare('DELETE FROM owntracks_devices WHERE tenant_id=? AND id=?')
+        .run(req.user.tenantId, id)
+    : master.prepare('DELETE FROM owntracks_devices WHERE tenant_id=? AND id=? AND user_id=?')
+        .run(req.user.tenantId, id, req.user.sub);
+  if (r.changes === 0) return res.status(404).json({ error: 'Gerät nicht gefunden oder kein Zugriff' });
   res.json({ ok: true });
+});
+
+// GET /api/owntracks/devices/:id/token — Token einmalig abrufen
+// Praktisch: Admin hat fuer einen Fahrer ein Device angelegt, der Token war
+// nur einmal im Response sichtbar. Damit Admin (oder der Fahrer selbst) den
+// QR-Code spaeter nochmal anzeigen kann, gibts diesen Endpoint mit den
+// gleichen Zugriffsregeln wie GET /devices.
+router.get('/devices/:id/token', requireAuth, (req, res) => {
+  const id = Number(req.params.id);
+  const master = getMasterDb();
+  const row = isAdmin(req)
+    ? master.prepare('SELECT device_token FROM owntracks_devices WHERE tenant_id=? AND id=?')
+        .get(req.user.tenantId, id)
+    : master.prepare('SELECT device_token FROM owntracks_devices WHERE tenant_id=? AND id=? AND user_id=?')
+        .get(req.user.tenantId, id, req.user.sub);
+  if (!row) return res.status(404).json({ error: 'Gerät nicht gefunden oder kein Zugriff' });
+  const base = process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
+  res.json({
+    token:       row.device_token,
+    webhook_url: `${base}/api/owntracks/webhook?token=${row.device_token}`,
+  });
 });
 
 export default router;

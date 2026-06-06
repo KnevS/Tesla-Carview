@@ -33,6 +33,7 @@ const RoutePlanner   = () => import('../views/RoutePlanner.vue');
 const Fahrtenbuch    = () => import('../views/Fahrtenbuch.vue');
 const Kostenabrechnung = () => import('../views/Kostenabrechnung.vue');
 const Tco            = () => import('../views/Tco.vue');
+const MyTracking     = () => import('../views/MyTracking.vue');
 const System         = () => import('../views/System.vue');
 const PasswordReset  = () => import('../views/PasswordReset.vue');
 const Handbook       = () => import('../views/Handbook.vue');
@@ -73,6 +74,7 @@ const routes = [
   { path: '/fahrtenbuch',      component: Fahrtenbuch,      meta: { title: 'Fahrtenbuch' } },
   { path: '/kostenabrechnung', component: Kostenabrechnung, meta: { title: 'Kostenabrechnung' } },
   { path: '/tco',              component: Tco,              meta: { title: 'TCO-Cockpit' } },
+  { path: '/my-tracking',      component: MyTracking,       meta: { title: 'Mein Smartphone-GPS' } },
   { path: '/charging',      component: Charging,      meta: { title: 'Laden' } },
   { path: '/battery',       component: Battery,       meta: { title: 'Batterie' } },
   { path: '/logbook',       component: Logbook,       meta: { title: 'Betriebsbuch' } },

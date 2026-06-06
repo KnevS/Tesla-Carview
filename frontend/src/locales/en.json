@@ -655,6 +655,40 @@
     "software": "Software",
     "heading": "Heading"
   },
+  "myTracking": {
+    "title": "My smartphone GPS",
+    "subtitle": "Manage your own OwnTracks devices + QR codes for first setup",
+    "intro": "OwnTracks is a free open-source app (iOS+Android) that pushes your GPS position directly to this server — not to any cloud. You install the app on your phone, scan the QR code here, done.\n\nWhat you get: every trip is detected automatically (start above 5 km/h, end after 5 min standstill), including GPS track, distance and speed. No battery/climate data (those need the Tesla Fleet API).",
+    "noDevices": "You don't have any OwnTracks devices yet. Add one for your phone now.",
+    "addBtn": "Add my phone",
+    "addTitle": "Add new device",
+    "createBtn": "Create & show QR code",
+    "showQr": "Show QR code",
+    "hideQr": "Hide QR code",
+    "qrInstructions": "📱 How to set up:\n1. Install the OwnTracks app from the App Store\n2. Point the iPhone camera (NOT the app!) at the QR code\n3. Tap \"Open in OwnTracks\"\n4. Confirm the configuration import\n5. Set location access to \"Always\" — done.",
+    "manualSetup": "Manual setup if the QR code doesn't work",
+    "downloadOtrc": "Download configuration file (.otrc)",
+    "confirmDelete": "Delete device \"{label}\"? GPS tracking from this device stops immediately.",
+    "lastPing": "Last ping: {time}",
+    "neverPinged": "Never contacted",
+    "justNow": "just now",
+    "minsAgo": "{mins} min ago",
+    "hoursAgo": "{hours} h ago",
+    "daysAgo": "{days} days ago",
+    "form": {
+      "label": "Label",
+      "labelPlaceholder": "e.g. \"Sven's iPhone\"",
+      "vehicle": "Vehicle",
+      "noVehicles": "You aren't assigned to any vehicle — please contact your admin.",
+      "tripType": "Default trip type",
+      "tripTypeHint": "Can be reclassified per trip later."
+    },
+    "tripTypes": {
+      "business": "Business",
+      "private":  "Private",
+      "commute":  "Commute"
+    }
+  },
   "tco": {
     "title": "TCO Cockpit",
     "subtitle": "Total Cost of Ownership — what does this vehicle actually cost you?",

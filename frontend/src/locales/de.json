@@ -655,6 +655,40 @@
     "software": "Software",
     "heading": "Richtung"
   },
+  "myTracking": {
+    "title": "Mein Smartphone-GPS",
+    "subtitle": "Eigene OwnTracks-Geräte verwalten + QR-Codes für die Ersteinrichtung",
+    "intro": "OwnTracks ist eine kostenlose Open-Source-App (iOS+Android), die deine GPS-Position direkt an diesen Server schickt — nicht in eine Cloud. Du installierst die App auf deinem Handy, scannst hier den QR-Code, fertig.\n\nWas du bekommst: jede Fahrt wird automatisch erkannt (Start ab 5 km/h, Ende nach 5 Min Stillstand), inklusive GPS-Track, Distanz und Geschwindigkeit. Keine Akku-/Klima-Daten (die brauchen Tesla Fleet API).",
+    "noDevices": "Du hast noch kein OwnTracks-Gerät registriert. Lege jetzt eins für dein Handy an.",
+    "addBtn": "Mein Handy hinzufügen",
+    "addTitle": "Neues Gerät anlegen",
+    "createBtn": "Anlegen & QR-Code anzeigen",
+    "showQr": "QR-Code anzeigen",
+    "hideQr": "QR-Code verstecken",
+    "qrInstructions": "📱 So geht's:\n1. OwnTracks-App im App Store installieren\n2. iPhone-Kamera (NICHT die App!) auf den QR-Code halten\n3. „In OwnTracks öffnen\" antippen\n4. Konfiguration importieren bestätigen\n5. Standortzugriff auf „Immer\" setzen — fertig.",
+    "manualSetup": "Manueller Setup falls QR-Code nicht funktioniert",
+    "downloadOtrc": "Konfigurations-Datei (.otrc) herunterladen",
+    "confirmDelete": "Gerät „{label}\" löschen? GPS-Tracking dieses Geräts stoppt sofort.",
+    "lastPing": "Letzter Ping: {time}",
+    "neverPinged": "Noch nie kontaktiert",
+    "justNow": "gerade eben",
+    "minsAgo": "vor {mins} Min",
+    "hoursAgo": "vor {hours} Std",
+    "daysAgo": "vor {days} Tagen",
+    "form": {
+      "label": "Bezeichnung",
+      "labelPlaceholder": "z.B. „iPhone Sven\"",
+      "vehicle": "Fahrzeug",
+      "noVehicles": "Du hast keinem Fahrzeug zugeordnete Rechte — bitte beim Admin melden.",
+      "tripType": "Standard-Fahrtart",
+      "tripTypeHint": "Kann pro Trip nachträglich umklassifiziert werden."
+    },
+    "tripTypes": {
+      "business": "Dienstlich",
+      "private":  "Privat",
+      "commute":  "Pendelfahrt"
+    }
+  },
   "tco": {
     "title": "TCO-Cockpit",
     "subtitle": "Total Cost of Ownership — was kostet dich dieses Fahrzeug wirklich?",

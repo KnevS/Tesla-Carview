@@ -7,6 +7,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.5.2] - 2026-06-06
+
+### Added
+
+- **OwnTracks self-service for every driver**: Until now only admins could create devices. Starting now every signed-in user has a dedicated `/my-tracking` page → "My GPS" in the navigation, where they can create a device for their own smartphone and see the QR code for direct scan. Vehicle selection is filtered to vehicles assigned to them via `vehicle_users` — they can't accidentally push GPS to someone else's car. Existing admin functionality in the wizard remains unchanged (admins can still prepare devices for other drivers and hand them the QR code).
+  - Backend permission model: `GET /api/owntracks/devices` returns only own devices for drivers, all for admins. `POST /devices` forces `user_id = req.user.sub` for drivers and validates `vehicle_users` assignment — admins can choose freely. `PATCH/DELETE` analogously with owner check.
+  - New endpoint `GET /api/owntracks/devices/:id/token` lets admin and driver fetch the token (and thus the QR code) of an existing device again — not only once at create time. Useful when an admin sets up a device for a driver and sends the QR later via chat, or when a driver has lost/swapped their phone.
+
+---
+
 ## [v3.5.1] - 2026-06-06
 
 ### Added

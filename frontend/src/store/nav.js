@@ -36,6 +36,7 @@ export const NAV_GROUPS = [
       { key: 'logbook',     to: '/logbook',          icon: 'tool',        emojiFallback: '📓', label: 'Betriebsbuch',     tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },
       { key: 'abrechnung',  to: '/kostenabrechnung', icon: 'cash',        emojiFallback: '💶', label: 'Abrechnung',       tooltip: 'Heimlade-Sessions & Monta-Integration – Kostenabrechnung für Dienstwagen' },
       { key: 'tco',         to: '/tco',              icon: 'wallet',      emojiFallback: '📊', label: 'TCO-Cockpit',      tooltip: 'Total Cost of Ownership – Wertverlust, Versicherung, Steuer, Strom, Wartung, €/km' },
+      { key: 'mytracking',  to: '/my-tracking',      icon: 'smartphone',  emojiFallback: '📱', label: 'Mein GPS',         tooltip: 'Eigene Smartphone-GPS-Geräte (OwnTracks) einrichten + QR-Code anzeigen' },
       { key: 'export',      to: '/export',           icon: 'export',      emojiFallback: '💾', label: 'Export',           tooltip: 'Daten als CSV/JSON exportieren, Vollbackup erstellen, Push-Benachrichtigungen' },
     ],
   },

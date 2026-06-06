@@ -7,6 +7,16 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.5.2] - 2026-06-06
+
+### Hinzugefügt
+
+- **OwnTracks-Self-Service für jeden Fahrer**: Bisher konnten nur Admins Geräte anlegen. Ab jetzt hat jeder eingeloggte Benutzer eine eigene Seite `/my-tracking` → „Mein GPS" in der Navigation, dort kann er für sein eigenes Smartphone ein Gerät anlegen und sieht den QR-Code zum Direkt-Scan. Vehicle-Auswahl ist auf Fahrzeuge gefiltert, die ihm in `vehicle_users` zugewiesen sind — er kann GPS nicht versehentlich auf ein fremdes Auto pushen. Bestehende Admin-Funktionalität im Wizard bleibt unverändert (Admin kann weiterhin für andere Fahrer Geräte vorbereiten und ihnen den QR-Code geben).
+  - Backend-Berechtigungsmodell: `GET /api/owntracks/devices` zeigt für Fahrer nur eigene, für Admin alle. `POST /devices` forced bei Fahrer `user_id = req.user.sub` und prüft `vehicle_users`-Zuweisung — Admin kann frei wählen. `PATCH/DELETE` analog mit Owner-Check.
+  - Neuer Endpoint `GET /api/owntracks/devices/:id/token` ermöglicht es Admin und Fahrer, den Token (und damit den QR-Code) eines existierenden Geräts erneut abzurufen — nicht nur einmalig nach Create. Praktisch wenn Admin ein Gerät für einen Fahrer anlegt und ihm den QR später per Chat schickt, oder wenn ein Fahrer sein Handy verloren/getauscht hat.
+
+---
+
 ## [v3.5.1] - 2026-06-06
 
 ### Hinzugefügt
