@@ -61,6 +61,7 @@ import communityRoutes         from './routes/community.js';
 import telegramRoutes          from './routes/telegram.js';
 import owntracksRoutes         from './routes/owntracks.js';
 import tcoRoutes               from './routes/tco.js';
+import meshRoutes              from './routes/mesh.js';
 import { initTelegramBot }     from './services/telegramBot.js';
 import { runAutoInitForAllTenants } from './services/autoInit.js';
 
@@ -121,6 +122,7 @@ app.use('/api/vehicles',           vehicleRoutes);
 app.use('/api/trips',              tripRoutes);
 app.use('/api/charging',           chargingRoutes);
 app.use('/api/tco',                tcoRoutes);
+app.use('/api/mesh',               meshRoutes);
 app.use('/api/battery',            batteryRoutes);
 app.use('/api/logbook',            logbookRoutes);
 app.use('/api/notifications',      notificationRoutes);

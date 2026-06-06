@@ -1,8 +1,7 @@
 <template>
   <!-- Technischer Status-Streifen im Nevs-Edition Design.
        Nur sichtbar wenn data-design="editorial" aktiv.
-       Zeigt Live-Fahrzeugdaten aus dem lokalen Cache (kein Tesla-API-Call).
-       Inspiriert vom Status-Bar-Pattern aus dem indasys-Clickdummy. -->
+       Zeigt Live-Fahrzeugdaten aus dem lokalen Cache (kein Tesla-API-Call). -->
   <div v-if="isEditorial && vehicle" class="editorial-status-bar">
     <div class="esb-inner">
       <!-- Links: Pulse + Fahrzeugname + letztes Update -->

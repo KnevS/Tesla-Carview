@@ -7,6 +7,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.26] - 2026-06-06
+
+### Added
+
+- **TeslaView Mesh — Phase 1: Foundation**: First step of a federated, privacy-preserving swarm-intelligence infrastructure between self-hosted TeslaView instances. Phase 1 is pure infrastructure with no active data transmission — user-visible swarm features arrive in Phase 2.
+  - New `mesh_contributions` table in master.db (instance_uuid, topic, dimensions_key, metrics_json, sample_count, contributed_at). Generic schema for multiple topics + dimensions — not bound to a specific data type.
+  - New tenant_settings keys: `mesh.enabled`, `mesh.optin.<topic>`, `mesh.hub_url`, `mesh.instance_uuid`. Default OFF everywhere — no implicit data transmission.
+  - New admin routes under `/api/mesh/`: `status`, `optin`, `hub-url`, `contributions` (delete stub). Hub-side routes (POST contributions, GET aggregates) arrive in Phase 2 together with the first concrete topic (range_curve).
+  - Privacy guarantees documented in the schema comment: min-group-size ≥ 5 on read, instance_uuid without personal link, no location, no VIN, opt-in per topic, deletable at any time.
+  - **Principle: federated ≠ external.** Hub URL is configurable; in typical operation the hub runs on one of your own TeslaView instances (P2P-capable). No data ever goes to commercial third parties (OpenAI, Anthropic, Google, Tesla, ChargeMap…).
+
+### Changed
+
+- **`EditorialStatusBar.vue` comment cleanup**: Reference to an external design inspiration removed from the source comment — TeslaView is self-contained and no longer references external projects in source.
+
+---
+
 ## [v3.4.25] - 2026-06-06
 
 ### Added

@@ -136,3 +136,44 @@ CREATE TABLE IF NOT EXISTS owntracks_devices (
 );
 CREATE INDEX IF NOT EXISTS idx_owntracks_token  ON owntracks_devices(device_token);
 CREATE INDEX IF NOT EXISTS idx_owntracks_tenant ON owntracks_devices(tenant_id);
+
+-- ─── TeslaView Mesh — Phase 1: Aggregations-Backbone ─────────────────────
+--
+-- Föderiertes, privacy-preserving Schwarm-Netzwerk zwischen selbsthostenden
+-- TeslaView-Instanzen. Datenfluss:
+--   1. Jede Instanz aggregiert OWN-DB-Daten lokal nach (topic, dimensions)
+--   2. Aggregat (kein Einzeldatum, keine VIN, kein Standort) wird an einen
+--      "Hub" geschickt (= eine andere TeslaView-Instanz mit Mesh-Hub-Mode)
+--   3. Hub akkumuliert in dieser Tabelle, anonymisiert per
+--      instance_uuid (random pro Instanz), bietet Aggregates per HTTP
+--   4. Andere Instanzen lesen die Aggregates für Schwarm-Vergleich
+--
+-- Datenschutz-Garantien:
+--   • Keine Identifikatoren auf Personen oder Fahrzeuge (kein VIN)
+--   • Keine genauen Standorte (höchstens 200-m-Raster, später per Topic)
+--   • Min-Group-Size beim Lesen: Aggregate werden nur ausgespielt wenn
+--     ≥ 5 unterschiedliche instance_uuids zur (topic, dimensions_key)-
+--     Kombination beigetragen haben (Differential-Privacy-Erweiterung in
+--     Phase 3)
+--   • Opt-in pro Topic, Default OFF (siehe tenant_settings 'mesh.optin.*')
+--   • Beiträge können jederzeit per instance_uuid gelöscht werden
+--
+-- topic-Beispiele: 'range_curve', 'charging_speed', 'tco_eur_per_km'
+-- dimensions_key: deterministischer Hash der Dimensionen, z.B.
+--   'model=my|speed=120-140|temp=15-20' → string-key (kein JSON, damit
+--   UNIQUE-Constraint funktioniert)
+-- metrics_json: JSON mit den Aggregat-Werten der Instanz, z.B.
+--   {"median":17.3,"p90":21.5,"sample_count":89}
+CREATE TABLE IF NOT EXISTS mesh_contributions (
+  id              INTEGER PRIMARY KEY,
+  instance_uuid   TEXT    NOT NULL,
+  topic           TEXT    NOT NULL,
+  dimensions_key  TEXT    NOT NULL,
+  metrics_json    TEXT    NOT NULL,
+  sample_count    INTEGER NOT NULL DEFAULT 0,
+  country_code    TEXT,
+  contributed_at  INTEGER NOT NULL DEFAULT (unixepoch()),
+  UNIQUE(instance_uuid, topic, dimensions_key)
+);
+CREATE INDEX IF NOT EXISTS idx_mesh_topic_dims  ON mesh_contributions(topic, dimensions_key);
+CREATE INDEX IF NOT EXISTS idx_mesh_contributed ON mesh_contributions(contributed_at);

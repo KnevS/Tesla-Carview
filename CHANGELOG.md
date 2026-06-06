@@ -7,6 +7,23 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.26] - 2026-06-06
+
+### Hinzugefügt
+
+- **TeslaView Mesh — Phase 1: Foundation**: Erster Schritt einer föderierten, privacy-preserving Schwarm-Intelligenz-Infrastruktur zwischen selbsthostenden TeslaView-Instanzen. Phase 1 ist reine Infrastruktur ohne aktive Datenübertragung — User-sichtbare Schwarm-Features folgen in Phase 2.
+  - Neue Tabelle `mesh_contributions` in master.db (instance_uuid, topic, dimensions_key, metrics_json, sample_count, contributed_at). Generisches Schema für mehrere Topics + Dimensionen — kein Bind an einen konkreten Datentyp.
+  - Neue tenant_settings-Keys: `mesh.enabled`, `mesh.optin.<topic>`, `mesh.hub_url`, `mesh.instance_uuid`. Default überall OFF — keine implizite Datenübertragung.
+  - Neue Admin-Routes unter `/api/mesh/`: `status`, `optin`, `hub-url`, `contributions` (Delete-Stub). Hub-Side-Routes (POST contributions, GET aggregates) folgen in Phase 2 zusammen mit dem ersten konkreten Topic (range_curve).
+  - Datenschutz-Garantien im Schema-Kommentar dokumentiert: Min-Group-Size ≥ 5 beim Lesen, instance_uuid ohne Personenbezug, kein Standort, kein VIN, opt-in pro Topic, jederzeit löschbar.
+  - **Prinzip: föderiert ≠ extern.** Hub-URL ist konfigurierbar; im typischen Betrieb läuft der Hub auf einer der eigenen TeslaView-Instanzen (P2P-fähig). Niemals geht ein Datum an kommerzielle Drittanbieter (OpenAI, Anthropic, Google, Tesla, ChargeMap…).
+
+### Geändert
+
+- **`EditorialStatusBar.vue` Kommentar-Cleanup**: Hinweis auf externe Design-Inspiration aus dem Code-Kommentar entfernt — TeslaView ist eigenständig und referenziert keine externen Projekte mehr im Quelltext.
+
+---
+
 ## [v3.4.25] - 2026-06-06
 
 ### Hinzugefügt
