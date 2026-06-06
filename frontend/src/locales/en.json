@@ -31,7 +31,9 @@
     "donate": "Donate",
     "sortNewestFirst": "Newest first",
     "sortOldestFirst": "Oldest first",
-    "sortToggleTooltip": "Reverse sort order"
+    "sortToggleTooltip": "Reverse sort order",
+    "copy": "Copy",
+    "optional": "optional"
   },
   "lang": {
     "title": "Language / Sprache",
@@ -652,6 +654,72 @@
     "sentry": "Sentry",
     "software": "Software",
     "heading": "Heading"
+  },
+  "tco": {
+    "title": "TCO Cockpit",
+    "subtitle": "Total Cost of Ownership — what does this vehicle actually cost you?",
+    "incompleteTitle": "Base data incomplete",
+    "incompleteHint": "Under \"Base data\" below, enter at least the purchase price and date so depreciation and €/km can be calculated.",
+    "residualEstimateHint": "Estimated residual value: linear depreciation over 8 years to 25% of purchase price. Enter the actual sale price once the vehicle is sold.",
+    "kpi": {
+      "costPerKm": "Cost per km",
+      "basis": "Basis: {km}",
+      "total": "Total cost",
+      "yearsOwned": "{years} years owned",
+      "depreciation": "Depreciation",
+      "residual": "Residual",
+      "electricity": "Electricity cost",
+      "fromCharging": "from charging sessions"
+    },
+    "breakdown": {
+      "title": "Cost breakdown",
+      "depreciation": "Depreciation (purchase − residual/sale)",
+      "insurance": "Insurance",
+      "tax": "Vehicle tax",
+      "electricity": "Electricity (charging)",
+      "service": "Service, tires, repairs",
+      "totalRow": "Total",
+      "notSet": "not recorded yet"
+    },
+    "records": {
+      "title": "Service, tires and repair records",
+      "add": "Add entry",
+      "empty": "No entries yet — add one as soon as you have a bill.",
+      "date": "Date",
+      "odometer": "Odometer",
+      "category": "Category",
+      "label": "Label",
+      "labelPlaceholder": "e.g. \"Inspection at 60,000 km\"",
+      "cost": "Cost",
+      "vendor": "Vendor / shop",
+      "notes": "Notes",
+      "create": "Create entry",
+      "confirmDelete": "Delete entry \"{label}\"?"
+    },
+    "categories": {
+      "service": "Service",
+      "tires": "Tires",
+      "repair": "Repair",
+      "inspection": "Inspection",
+      "tuv": "Annual inspection (TÜV)",
+      "accessories": "Accessories",
+      "other": "Other"
+    },
+    "base": {
+      "title": "Base data",
+      "purchasePrice": "Purchase price",
+      "purchaseDate": "Purchase date",
+      "salePrice": "Sale price",
+      "salePricePlaceholder": "empty = not sold yet",
+      "saleDate": "Sale date",
+      "insurance": "Insurance",
+      "tax": "Vehicle tax",
+      "perYear": "year",
+      "initialKm": "Odometer at purchase",
+      "initialKmPlaceholder": "e.g. 12345",
+      "initialKmHint": "Subtracted from the current odometer to compute distance driven during ownership.",
+      "currentKm": "Current odometer"
+    }
   },
   "settings": {
     "manualLink": "Open official manual",

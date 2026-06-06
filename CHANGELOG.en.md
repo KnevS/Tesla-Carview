@@ -7,6 +7,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.25] - 2026-06-06
+
+### Added
+
+- **TCO cockpit (Total Cost of Ownership)**: New page `/tco` shows the real total cost per vehicle and an honest €/km value — unlike pure consumption or charging stats, the TCO cockpit includes *all* items:
+  - **Depreciation** = purchase price − (sale price if sold, else estimated residual via 8-year linear depreciation to 25%)
+  - **Insurance & vehicle tax** = annual amount × years owned
+  - **Electricity** = sum of `charging_sessions.cost` (already populated by home-charging billing or Monta sync)
+  - **Service, tires, repairs** = new `service_records` table with individual entries (date, category, cost, vendor, notes, optional odometer)
+  4 KPI cards (€/km, total, depreciation, electricity) + cost breakdown with shares + service-records CRUD + base-data form (purchase, sale, insurance, tax, initial odometer). Admin-only writes, read access for any signed-in user.
+  - New columns on `vehicles`: `purchase_price_eur`, `purchase_date`, `sale_price_eur`, `sale_date`, `insurance_eur_year`, `tax_eur_year`, `initial_odometer_km` — all nullable.
+  - New `service_records` table with categories `service|tires|repair|inspection|tuv|accessories|other`.
+  - New routes under `/api/tco/vehicles/:id` (+ `/service-records[/:rid]`).
+  - Navigation: "📊 TCO Cockpit" entry between Billing and Export.
+  - i18n in DE+EN.
+
+### Fixed
+
+- **Deploy script: `Container ... Error when allocating new name: Conflict`**: The previous `docker compose up -d --pull always backend frontend` intermittently failed to stop the running container before recreate — Docker complained "cannot remove container: container is running" and created a random-prefix container instead. The deploy still reported `success`, but the new image never ran. New sequence: `pull → stop → rm → up` plus auto-cleanup for stray random-prefix containers from previous deploys. Downtime increases by ~10 seconds (clean stop before recreate), in exchange for no more broken deploys.
+
+---
+
 ## [v3.4.24] - 2026-06-06
 
 ### Added

@@ -35,6 +35,7 @@ export const NAV_GROUPS = [
       { key: 'climate',     to: '/climate',          icon: 'thermometer', emojiFallback: '❄️', label: 'Klimastatistiken', tooltip: 'Klimaanlagen- und Sitzheizungsnutzung nach Tag – inkl. Vorklimatisierungen' },
       { key: 'logbook',     to: '/logbook',          icon: 'tool',        emojiFallback: '📓', label: 'Betriebsbuch',     tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },
       { key: 'abrechnung',  to: '/kostenabrechnung', icon: 'cash',        emojiFallback: '💶', label: 'Abrechnung',       tooltip: 'Heimlade-Sessions & Monta-Integration – Kostenabrechnung für Dienstwagen' },
+      { key: 'tco',         to: '/tco',              icon: 'wallet',      emojiFallback: '📊', label: 'TCO-Cockpit',      tooltip: 'Total Cost of Ownership – Wertverlust, Versicherung, Steuer, Strom, Wartung, €/km' },
       { key: 'export',      to: '/export',           icon: 'export',      emojiFallback: '💾', label: 'Export',           tooltip: 'Daten als CSV/JSON exportieren, Vollbackup erstellen, Push-Benachrichtigungen' },
     ],
   },

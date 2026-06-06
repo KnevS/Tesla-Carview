@@ -7,6 +7,28 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.25] - 2026-06-06
+
+### Hinzugefügt
+
+- **TCO-Cockpit (Total Cost of Ownership)**: Neue Seite `/tco` zeigt pro Fahrzeug die echten Gesamtkosten und den ehrlichen €/km-Wert — anders als reine Verbrauchs- oder Lade-Statistiken bezieht das TCO-Cockpit *alle* Posten ein:
+  - **Wertverlust** = Anschaffungspreis − (Verkaufspreis falls verkauft, sonst geschätzter Restwert über 8 Jahre lineare Abschreibung auf 25%)
+  - **Versicherung & Steuer** = jährlicher Betrag × Jahre seit Kauf
+  - **Strom** = Summe der `charging_sessions.cost` (kommt schon aus Heimladen-Abrechnung oder Monta-Sync)
+  - **Wartung, Reifen, Reparaturen** = neue Tabelle `service_records` mit Einzelposten (Datum, Kategorie, Kosten, Werkstatt, Notizen, optional km-Stand)
+  4 KPI-Karten (€/km, Gesamt, Wertverlust, Strom) + Kostenaufschlüsselung mit Anteilen + Service-Records-CRUD + Stammdaten-Form (Anschaffung, Verkauf, Versicherung, Steuer, Initial-Kilometer). Admin-only Schreiben, Lesen für alle eingeloggten Nutzer.
+  - Neue Spalten an `vehicles`: `purchase_price_eur`, `purchase_date`, `sale_price_eur`, `sale_date`, `insurance_eur_year`, `tax_eur_year`, `initial_odometer_km` — alle nullable.
+  - Neue Tabelle `service_records` mit Kategorien `service|tires|repair|inspection|tuv|accessories|other`.
+  - Neue Routes unter `/api/tco/vehicles/:id` (+ `/service-records[/:rid]`).
+  - Navigation: Eintrag „📊 TCO-Cockpit" zwischen Abrechnung und Export.
+  - i18n in DE+EN.
+
+### Behoben
+
+- **Deploy-Skript: `Container ... Error when allocating new name: Conflict`**: Der bisherige `docker compose up -d --pull always backend frontend` scheiterte intermittierend daran, den laufenden Container vor dem Recreate zu stoppen — Docker meldete „cannot remove container: container is running" und legte einen Random-Prefix-Container an. Der Deploy meldete trotzdem `success`, aber das neue Image lief nie. Neue Sequenz: `pull → stop → rm → up` plus Auto-Cleanup für etwaige Random-Prefix-Container aus vorherigen Deploys. Downtime steigt um ~10 Sekunden (sauberer Stop vor Recreate), dafür kein zerschossener Deploy mehr.
+
+---
+
 ## [v3.4.24] - 2026-06-06
 
 ### Hinzugefügt

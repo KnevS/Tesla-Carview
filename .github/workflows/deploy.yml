@@ -84,14 +84,44 @@ jobs:
             # frontend-dist-private/-Volume eingehaengt — dieser Mount ist
             # entfernt (s. #84), das Image-Bundle wird direkt serviert.
             echo "$GHCR_TOKEN" | sudo docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
-            # Beide Services immer pullen — der frühere "digest diff first"-Check
-            # war fehleranfällig (manifest inspect-Format hat sich geändert) und
-            # führte gelegentlich dazu, dass --force-recreate auf dem Host nötig
-            # wurde, weil docker compose das neue Image nicht aufnahm.
-            # --pull always sagt docker compose explizit, das Image vor dem Up
-            # neu zu pullen und bei Image-Aenderung den Container neu zu erstellen.
-            echo "==> Backend + Frontend ziehen + Container ggf. neu erstellen …"
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d --pull always backend frontend
+
+            # Deploy-Sequenz: pull → stop → rm → up
+            #
+            # Frueher: ein einziges `up -d --pull always backend frontend` —
+            # das schaeftert intermittierend mit
+            #   "Container Error when allocating new name: Conflict …"
+            #   "cannot remove container …: container is running: stop the
+            #    container before removing or force remove"
+            # weil docker compose den alten Container nicht zuverlaessig
+            # stoppt bevor der neue denselben Namen beansprucht. Der zurueck-
+            # bleibende Container bekommt einen Random-Prefix und der Deploy
+            # meldet trotzdem "success".
+            #
+            # Robuste Sequenz: erst pullen (kein Downtime), dann gestoppter
+            # Container sauber entfernen (kein Name-Conflict), dann hoch-
+            # ziehen. Downtime ~10-15s; akzeptabel fuer ein Deployment.
+            echo "==> Neue Images aus GHCR ziehen …"
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml pull backend frontend
+
+            echo "==> Container stoppen (sauberer Shutdown vor Recreate) …"
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml stop backend frontend || true
+
+            echo "==> Container entfernen (vermeidet Name-Konflikt beim Up) …"
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml rm -f backend frontend || true
+
+            # Falls ein vorheriger Deploy einen Random-Prefix-Container hinter-
+            # lassen hat (selten, aber moeglich vor diesem Fix), raeumen wir
+            # ihn jetzt mit auf damit der saubere Name wieder frei ist.
+            for name in tesla-carview-backend tesla-carview-frontend; do
+              for c in $(sudo docker ps -aq --filter "name=_${name}\$"); do
+                echo "==> Verwaister Random-Prefix-Container: $c"
+                sudo docker rm -f "$c" || true
+              done
+            done
+
+            echo "==> Container hochziehen …"
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d backend frontend
+
             sudo docker logout ghcr.io
             # Sicherstellen dass nginx in beiden erforderlichen Netzwerken läuft.
             COMPOSE_NET="tesla-carview_tesla-net"

@@ -479,6 +479,37 @@ function runTenantMigrations(db) {
     db.exec('ALTER TABLE vehicles ADD COLUMN telemetry_last_error TEXT');
   }
 
+  // TCO-Stammdaten: Anschaffung, Versicherung, Steuer, Verkauf.
+  // Werden vom Admin im TCO-Cockpit gepflegt — nicht vom Poller.
+  // Alle in EUR; NULL = unbekannt (TCO-Berechnung blendet Posten aus).
+  if (!vehiclesCols.includes('purchase_price_eur')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN purchase_price_eur REAL');
+    db.exec('ALTER TABLE vehicles ADD COLUMN purchase_date INTEGER');  // unix seconds
+    db.exec('ALTER TABLE vehicles ADD COLUMN sale_price_eur REAL');
+    db.exec('ALTER TABLE vehicles ADD COLUMN sale_date INTEGER');
+    db.exec('ALTER TABLE vehicles ADD COLUMN insurance_eur_year REAL');
+    db.exec('ALTER TABLE vehicles ADD COLUMN tax_eur_year REAL');
+    db.exec('ALTER TABLE vehicles ADD COLUMN initial_odometer_km REAL');
+  }
+
+  // Service-/Reparatur-/Reifen-Records mit Einzelkosten.
+  // Liefert die Detail-Aufschluesselung im TCO-Cockpit und kann beim
+  // Anlegen optional einen `service_intervals.last_done_*`-Update triggern
+  // (wird vom Frontend explizit gesetzt — kein automatisches Verknuepfen).
+  db.exec(`CREATE TABLE IF NOT EXISTS service_records (
+    id           INTEGER PRIMARY KEY,
+    vehicle_id   INTEGER NOT NULL REFERENCES vehicles(id) ON DELETE CASCADE,
+    performed_at INTEGER NOT NULL,
+    odometer_km  REAL,
+    category     TEXT NOT NULL CHECK(category IN ('service','tires','repair','inspection','tuv','accessories','other')),
+    label        TEXT NOT NULL,
+    cost_eur     REAL NOT NULL,
+    vendor       TEXT,
+    notes        TEXT,
+    created_at   INTEGER NOT NULL DEFAULT (unixepoch())
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_service_records_vehicle ON service_records(vehicle_id, performed_at DESC)');
+
   // Geofences pro Mandant: definiert Home/Work-Standorte, anhand derer
   // neue Trips automatisch als Privat / Arbeitsweg / Dienst klassifiziert
   // werden. radius_m default 200 m — kleiner Polygon-Ersatz, fuer einen

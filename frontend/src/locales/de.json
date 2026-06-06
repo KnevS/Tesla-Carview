@@ -31,7 +31,9 @@
     "donate": "Spenden",
     "sortNewestFirst": "Neueste zuerst",
     "sortOldestFirst": "Älteste zuerst",
-    "sortToggleTooltip": "Sortierreihenfolge umkehren"
+    "sortToggleTooltip": "Sortierreihenfolge umkehren",
+    "copy": "Kopieren",
+    "optional": "optional"
   },
   "lang": {
     "title": "Sprache / Language",
@@ -652,6 +654,72 @@
     "sentry": "Sentry",
     "software": "Software",
     "heading": "Richtung"
+  },
+  "tco": {
+    "title": "TCO-Cockpit",
+    "subtitle": "Total Cost of Ownership — was kostet dich dieses Fahrzeug wirklich?",
+    "incompleteTitle": "Stammdaten unvollständig",
+    "incompleteHint": "Trage unten unter „Stammdaten\" zumindest Anschaffungspreis + Anschaffungsdatum ein, damit der Wertverlust und €/km berechnet werden können.",
+    "residualEstimateHint": "Geschätzter Restwert: lineare Abschreibung über 8 Jahre auf 25% des Anschaffungspreises. Trage den tatsächlichen Verkaufspreis ein, sobald das Fahrzeug verkauft ist.",
+    "kpi": {
+      "costPerKm": "Kosten pro km",
+      "basis": "Basis: {km}",
+      "total": "Gesamtkosten",
+      "yearsOwned": "{years} Jahre Besitz",
+      "depreciation": "Wertverlust",
+      "residual": "Restwert",
+      "electricity": "Stromkosten",
+      "fromCharging": "aus Lade-Sessions"
+    },
+    "breakdown": {
+      "title": "Kostenaufschlüsselung",
+      "depreciation": "Wertverlust (Anschaffung − Restwert/Verkauf)",
+      "insurance": "Versicherung",
+      "tax": "Kfz-Steuer",
+      "electricity": "Strom (Laden)",
+      "service": "Wartung, Reifen, Reparaturen",
+      "totalRow": "Summe",
+      "notSet": "noch nicht erfasst"
+    },
+    "records": {
+      "title": "Wartungs-, Reifen- und Reparatur-Einträge",
+      "add": "Eintrag hinzufügen",
+      "empty": "Noch keine Einträge — leg einen an, sobald du eine Rechnung hast.",
+      "date": "Datum",
+      "odometer": "Kilometerstand",
+      "category": "Kategorie",
+      "label": "Bezeichnung",
+      "labelPlaceholder": "z.B. „Inspektion bei 60.000 km\"",
+      "cost": "Kosten",
+      "vendor": "Werkstatt / Anbieter",
+      "notes": "Notizen",
+      "create": "Eintrag anlegen",
+      "confirmDelete": "Eintrag „{label}\" löschen?"
+    },
+    "categories": {
+      "service": "Service / Wartung",
+      "tires": "Reifen",
+      "repair": "Reparatur",
+      "inspection": "Inspektion",
+      "tuv": "HU / AU (TÜV)",
+      "accessories": "Zubehör",
+      "other": "Sonstiges"
+    },
+    "base": {
+      "title": "Stammdaten",
+      "purchasePrice": "Anschaffungspreis",
+      "purchaseDate": "Anschaffungsdatum",
+      "salePrice": "Verkaufspreis",
+      "salePricePlaceholder": "leer = noch nicht verkauft",
+      "saleDate": "Verkaufsdatum",
+      "insurance": "Versicherung",
+      "tax": "Kfz-Steuer",
+      "perYear": "Jahr",
+      "initialKm": "Kilometerstand bei Kauf",
+      "initialKmPlaceholder": "z.B. 12345",
+      "initialKmHint": "Wird vom aktuellen Kilometerstand abgezogen, um die zurückgelegte Strecke zu berechnen.",
+      "currentKm": "Aktueller Kilometerstand"
+    }
   },
   "settings": {
     "title": "Einstellungen",
