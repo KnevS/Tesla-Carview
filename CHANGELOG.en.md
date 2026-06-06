@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.5.4] - 2026-06-06
+
+### Fixed
+
+- **Wizard step 5 "Virtual Key" stuck on "Loading…"**: Both wizard components (AdminSetupWizard, SettingsWizard) called `GET /api/telemetry/status` and `POST /api/telemetry/configure/:vin` — but the backend mounts those routes under `/api/fleet/telemetry/...` (telemetryConfigRoutes is registered under `/api/fleet`, not `/api/telemetry`). Other views (Settings.vue, AdminSettings.vue) already used the correct path — the wizards were missed during the path migration. Fixed the frontend calls in both wizards to `/fleet/telemetry/...`. Result: "Loading…" hang gone, step 5 correctly shows virtual key status and the telemetry setup button.
+
+---
+
 ## [v3.5.3] - 2026-06-06
 
 ### Added

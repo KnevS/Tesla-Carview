@@ -1192,12 +1192,12 @@ const telemetryConfiguring = reactive({});
 const vkCopied = ref(false);
 
 async function loadTelemetryStatus() {
-  try { const { data } = await api.get('/telemetry/status'); telemetryStatus.value = data; } catch { /* ignore */ }
+  try { const { data } = await api.get('/fleet/telemetry/status'); telemetryStatus.value = data; } catch { /* ignore */ }
 }
 
 async function configureTelemetry(vin) {
   telemetryConfiguring[vin] = true;
-  try { await api.post(`/telemetry/configure/${vin}`); await loadTelemetryStatus(); }
+  try { await api.post(`/fleet/telemetry/configure/${vin}`); await loadTelemetryStatus(); }
   catch { /* ignore */ } finally { telemetryConfiguring[vin] = false; }
 }
 

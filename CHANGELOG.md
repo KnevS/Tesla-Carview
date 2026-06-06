@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.5.4] - 2026-06-06
+
+### Behoben
+
+- **Wizard Schritt 5 „Virtual Key" hing in „Lade…"**: Beide Wizard-Komponenten (AdminSetupWizard, SettingsWizard) riefen `GET /api/telemetry/status` und `POST /api/telemetry/configure/:vin` — Backend-Mount für diese Routen ist aber `/api/fleet/telemetry/...` (telemetryConfigRoutes wird unter `/api/fleet` registriert, nicht unter `/api/telemetry`). Andere Views (Settings.vue, AdminSettings.vue) riefen bereits den korrekten Pfad — die Wizards wurden bei der Pfad-Migration übersehen. Frontend-Aufrufe in beiden Wizards auf `/fleet/telemetry/...` korrigiert. Folgen: „Lade…"-Hänger weg, Schritt 5 zeigt korrekt Virtual-Key-Status und Telemetry-Setup-Button.
+
+---
+
 ## [v3.5.3] - 2026-06-06
 
 ### Hinzugefügt
