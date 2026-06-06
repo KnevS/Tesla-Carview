@@ -689,6 +689,10 @@
       "commute":  "Commute"
     }
   },
+  "notices": {
+    "dismiss": "Got it, hide",
+    "adminOnly": "Only administrators can dismiss this notice."
+  },
   "tco": {
     "title": "TCO Cockpit",
     "subtitle": "Total Cost of Ownership — what does this vehicle actually cost you?",
@@ -2413,7 +2417,8 @@
       "copyBtn": "Copy URL",
       "copied": "Copied ✓",
       "open": "↗ Open",
-      "recheck": "Check again"
+      "recheck": "Check again",
+      "ownerSkipBody": "Virtual Key is part of the Tesla Fleet API — it allows vehicle commands (climate, charging, doors) directly from TeslaView via an encrypted channel.\n\nIn Owner-API mode (your current setup) this is not available. Once your Fleet API approval at developer.tesla.com comes through, switch the mode in the “Tesla connection” step and configure Virtual Key here.\n\nFor a pure logbook setup with OwnTracks, Virtual Key isn't needed — just skip this step."
     },
     "telemetry": {
       "title": "Fleet Telemetry",
@@ -2426,7 +2431,8 @@
       "statusRegisteredIdle": "◎ Registered",
       "statusNotRegistered": "○ Not registered",
       "statusApprovalMissing": "⚠ Approval missing",
-      "statusError": "✕ Error"
+      "statusError": "✕ Error",
+      "ownerSkipBody": "Fleet Telemetry is the real-time push stream (WebSocket) of the Tesla Fleet API — battery, GPS, TPMS, climate every second pushed from Tesla to TeslaView.\n\nIn Owner-API mode (your current setup) this is not available. It would require Fleet API approval + Virtual Key + Tesla-side registration.\n\nFor a pure logbook setup with OwnTracks, Telemetry isn't needed — just skip this step."
     },
     "vapid": {
       "title": "Web Push (VAPID)",
@@ -2527,7 +2533,8 @@
     "msgSaved": "✓ Saved",
     "msgError": "Error",
     "done": {
-      "banner": "This step is already configured. Press “Next” to skip it, or adjust the values below."
+      "banner": "This step is already configured. Press “Next” to skip it, or adjust the values below.",
+      "ownerSkipBanner": "This step requires the Tesla Fleet API. Not available in Owner-API mode — press “Next” to skip."
     }
   }
 }

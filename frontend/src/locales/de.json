@@ -689,6 +689,10 @@
       "commute":  "Pendelfahrt"
     }
   },
+  "notices": {
+    "dismiss": "Verstanden, ausblenden",
+    "adminOnly": "Nur Administratoren können diesen Hinweis ausblenden."
+  },
   "tco": {
     "title": "TCO-Cockpit",
     "subtitle": "Total Cost of Ownership — was kostet dich dieses Fahrzeug wirklich?",
@@ -2412,7 +2416,8 @@
       "copyBtn": "URL kopieren",
       "copied": "Kopiert ✓",
       "open": "↗ Öffnen",
-      "recheck": "Erneut prüfen"
+      "recheck": "Erneut prüfen",
+      "ownerSkipBody": "Virtual Key ist Teil der Tesla Fleet API — er erlaubt Fahrzeugbefehle (Klima, Laden, Türen) direkt aus TeslaView via verschlüsseltem Kanal.\n\nIm Owner-API-Modus (deine aktuelle Konfiguration) ist das nicht aktivierbar. Sobald deine Fleet-API-Genehmigung bei developer.tesla.com durch ist, kannst du den Modus im Schritt „Tesla-Verbindung\" umstellen und dann Virtual Key hier einrichten.\n\nFür reines Fahrtenbuch-Setup mit OwnTracks ist Virtual Key nicht nötig — diesen Schritt einfach überspringen."
     },
     "telemetry": {
       "title": "Fleet Telemetrie",
@@ -2425,7 +2430,8 @@
       "statusRegisteredIdle": "◎ Registriert",
       "statusNotRegistered": "○ Nicht registriert",
       "statusApprovalMissing": "⚠ Genehmigung fehlt",
-      "statusError": "✕ Fehler"
+      "statusError": "✕ Fehler",
+      "ownerSkipBody": "Fleet Telemetry ist der Echtzeit-Push-Stream (WebSocket) der Tesla Fleet API — Akkustand, GPS, TPMS, Klima im Sekundentakt direkt von Tesla zu TeslaView.\n\nIm Owner-API-Modus (deine aktuelle Konfiguration) ist das nicht aktivierbar. Voraussetzung wäre Fleet-API-Genehmigung + Virtual Key + Eintragung bei Tesla.\n\nFür reines Fahrtenbuch-Setup mit OwnTracks ist Telemetry nicht nötig — diesen Schritt einfach überspringen."
     },
     "vapid": {
       "title": "Web Push (VAPID)",
@@ -2526,7 +2532,8 @@
     "msgSaved": "✓ Gespeichert",
     "msgError": "Fehler",
     "done": {
-      "banner": "Dieser Schritt ist bereits eingerichtet. Klick auf „Weiter\", um ihn zu überspringen, oder passe die Werte unten an."
+      "banner": "Dieser Schritt ist bereits eingerichtet. Klick auf „Weiter\", um ihn zu überspringen, oder passe die Werte unten an.",
+      "ownerSkipBanner": "Dieser Schritt benötigt Tesla Fleet API. Im Owner-API-Modus nicht aktivierbar — bitte mit „Weiter\" überspringen."
     }
   }
 }

@@ -32,11 +32,14 @@
 
           <!-- Done-Banner: zeigt sich automatisch, wenn der aktuelle Schritt
                laut /system/wizard-prefill bereits eingerichtet ist. So muss
-               der Admin den Schritt nicht „leer" durchklicken. -->
+               der Admin den Schritt nicht „leer" durchklicken.
+               Sonderfall ownerSkip: Schritte die Fleet API brauchen (Virtual
+               Key, Telemetry) sind im Owner-Mode nicht aktivierbar — Banner
+               sagt ehrlich „nicht erforderlich" statt „eingerichtet". -->
           <div v-if="step > 0 && !isLast && stepStatus(currentId)?.done"
                class="bg-green-900/20 border border-green-700/40 rounded-lg px-3 py-2 text-sm text-green-300 flex items-center gap-2">
-            <span aria-hidden="true">✓</span>
-            <span class="flex-1">{{ $t('adminSetup.done.banner') }}</span>
+            <span aria-hidden="true">{{ stepStatus(currentId)?.ownerSkip ? '⏭' : '✓' }}</span>
+            <span class="flex-1">{{ stepStatus(currentId)?.ownerSkip ? $t('adminSetup.done.ownerSkipBanner') : $t('adminSetup.done.banner') }}</span>
             <span v-if="stepStatus(currentId)?.auto"
                   class="text-xs text-blue-300/80"
                   v-tooltip="$t('adminSetup.welcome.autoTooltip')">
@@ -409,7 +412,12 @@
           <!-- STEP: virtualkey -->
           <template v-else-if="currentId === 'virtualkey'">
             <StepHeader :title="$t('adminSetup.virtualKey.title')" :question="$t('adminSetup.virtualKey.question')" />
-            <div class="card space-y-4">
+            <!-- Owner-Mode: Virtual Key braucht Fleet API, hier kein Setup möglich.
+                 Ehrliche Erklärung statt leere Form. -->
+            <div v-if="oauthMode === 'owner'" class="card bg-amber-900/15 border border-amber-700/40 text-sm text-amber-100 whitespace-pre-line">
+              {{ $t('adminSetup.virtualKey.ownerSkipBody') }}
+            </div>
+            <div v-else class="card space-y-4">
               <div v-if="telemetryStatus === null" class="text-sm text-gray-400">{{ $t('adminSetup.virtualKey.loading') }}</div>
               <template v-else>
                 <div class="flex items-center gap-3">
@@ -445,7 +453,12 @@
           <!-- STEP: telemetry -->
           <template v-else-if="currentId === 'telemetry'">
             <StepHeader :title="$t('adminSetup.telemetry.title')" :question="$t('adminSetup.telemetry.question')" />
-            <div v-if="telemetryStatus === null" class="text-sm text-gray-400">{{ $t('adminSetup.virtualKey.loading') }}</div>
+            <!-- Owner-Mode: Telemetry-Stream braucht Fleet API + Virtual Key,
+                 hier kein Setup möglich. Ehrliche Erklärung statt leere Form. -->
+            <div v-if="oauthMode === 'owner'" class="card bg-amber-900/15 border border-amber-700/40 text-sm text-amber-100 whitespace-pre-line">
+              {{ $t('adminSetup.telemetry.ownerSkipBody') }}
+            </div>
+            <div v-else-if="telemetryStatus === null" class="text-sm text-gray-400">{{ $t('adminSetup.virtualKey.loading') }}</div>
             <div v-else class="space-y-3">
               <div v-if="!telemetryStatus.virtual_key_exists" class="card bg-amber-900/20 border border-amber-700/40 text-sm text-amber-300">
                 {{ $t('adminSetup.telemetry.needsVkey') }}
@@ -873,6 +886,7 @@ const STEP_DONE_KEY = {
   oauth:       'oauth',
   vehicles:    'vehicles',
   virtualkey:  'virtualkey',
+  telemetry:   'telemetry',
   vapid:       'vapid',
   telegram:    'telegram',
   electricity: 'electricity',

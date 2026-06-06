@@ -1,6 +1,11 @@
 <template>
   <div class="min-h-screen bg-tesla-dark flex flex-col">
     <DemoBanner />
+    <!-- System-Notices: One-Shot-Banner fuer wichtige Aenderungen seit dem
+         letzten Update (z.B. Tesla-API-Status 2026). Liest /api/notices,
+         zeigt pro nicht-dismissed Notice einen ein-/ausklappbaren Banner.
+         Admin kann dismissen, danach fuer den Tenant weg. -->
+    <NoticesBanner v-if="authStore.isAuthenticated" />
     <!-- Nevs-Edition: technischer Status-Streifen ueber der NavBar.
          Nur sichtbar wenn data-design="editorial" und eingeloggt. -->
     <EditorialStatusBar v-if="authStore.isAuthenticated" />
@@ -59,6 +64,7 @@ import LegalAcceptanceModal  from './components/LegalAcceptanceModal.vue';
 import InstallPrompt         from './components/InstallPrompt.vue';
 import MaintenanceOverlay    from './components/MaintenanceOverlay.vue';
 import DemoBanner            from './components/DemoBanner.vue';
+import NoticesBanner         from './components/NoticesBanner.vue';
 import SettingsWizard        from './components/SettingsWizard.vue';
 import EditorialStatusBar    from './components/EditorialStatusBar.vue';
 import MobileTabBar          from './components/MobileTabBar.vue';

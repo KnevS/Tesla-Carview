@@ -7,6 +7,21 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.5.5] - 2026-06-06
+
+### Behoben
+
+- **Wizard-Schritte 5 + 6 (Virtual Key, Telemetry) im Owner-Mode ehrlich**: Bisher zeigten beide Schritte im Owner-API-Modus entweder „Lade…" oder eine leere Setup-Form — beides nutzlos, weil ohne Fleet API ja gar nichts aktivierbar ist. Jetzt: bei Owner-Mode wird der Step-Content durch eine ehrliche Erklärungs-Box ersetzt („Virtual Key/Telemetry sind Teil der Fleet API — im Owner-Modus nicht aktivierbar — überspringen oder nach Fleet-API-Approval Modus umschalten"). Done-Banner oben sagt nicht mehr „eingerichtet" sondern „benötigt Tesla Fleet API — überspringbar". Telemetry-Step bekommt im Backend `wizard-prefill` jetzt auch `done: true` im Owner-Mode (analog zu virtualkey).
+
+### Hinzugefügt
+
+- **System-Notices: One-Shot-Banner für Update-Hinweise**: Neuer Mechanismus für „seit deinem letzten Update hat sich was Wichtiges geändert"-Benachrichtigungen. Bei jedem Login werden noch nicht dismissed Notices als ein-/ausklappbare Banner direkt unter der NavBar angezeigt. Default-Notice ab dieser Version: **tesla_api_2026** — erklärt was die Owner-API-Schließung bedeutet, nennt OwnTracks + manuelle Anlage als Auswege, verlinkt auf den Wizard.
+  - Backend: hartkodierte `NOTICES`-Liste in `routes/notices.js`, persistierte Dismissal pro Tenant via `tenant_settings.notices.<id>.dismissed_at`. Admin-Klick auf „Verstanden" macht Notice für den ganzen Tenant unsichtbar. Nicht-Admin-Nutzer sehen den Notice aber können nicht dismissen.
+  - Frontend: neue Komponente `NoticesBanner.vue` direkt nach `DemoBanner` in `App.vue` → auf JEDER Route sichtbar wenn pending Notice existiert. Init-State expanded (User soll den Inhalt sofort sehen). Severity-Stufen (info/warn/critical) mit unterschiedlichen Farben.
+  - Erweiterbarkeit: weitere Notices durch Hinzufügen eines Eintrags in `NOTICES`-Array — keine UI-Änderung nötig.
+
+---
+
 ## [v3.5.4] - 2026-06-06
 
 ### Behoben

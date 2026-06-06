@@ -7,6 +7,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.5.5] - 2026-06-06
+
+### Fixed
+
+- **Wizard steps 5 + 6 (Virtual Key, Telemetry) honest in owner mode**: Previously both steps showed either "Loading…" or an empty setup form in Owner-API mode — both useless because without Fleet API nothing is activatable anyway. Now in owner mode the step content is replaced with an honest explanation box ("Virtual Key/Telemetry are part of the Fleet API — not available in owner mode — skip or switch mode after Fleet API approval"). The done-banner at the top no longer says "configured" but "requires Tesla Fleet API — can be skipped". Telemetry step also gets `done: true` from the backend `wizard-prefill` in owner mode (analogous to virtualkey).
+
+### Added
+
+- **System notices: one-shot banner for update hints**: New mechanism for "since your last update something important changed" notifications. At every login, undismissed notices are shown as expandable/collapsible banners directly below the navbar. Default notice as of this version: **tesla_api_2026** — explains what the Owner API closure means, names OwnTracks + manual entry as escape routes, links to the wizard.
+  - Backend: hard-coded `NOTICES` list in `routes/notices.js`, dismissal persisted per tenant via `tenant_settings.notices.<id>.dismissed_at`. Admin click on "Got it" hides the notice for the whole tenant. Non-admin users see the notice but can't dismiss.
+  - Frontend: new component `NoticesBanner.vue` right after `DemoBanner` in `App.vue` → visible on every route if a pending notice exists. Initial state expanded (users should see the content immediately). Severity levels (info/warn/critical) with different colors.
+  - Extensibility: more notices by adding entries to the `NOTICES` array — no UI changes needed.
+
+---
+
 ## [v3.5.4] - 2026-06-06
 
 ### Fixed

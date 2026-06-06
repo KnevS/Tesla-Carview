@@ -1200,9 +1200,13 @@ router.get('/wizard-prefill', requireAuth, requireAdmin, async (req, res) => {
       oauth:       { done: haveTeslaAuthRefresh, mode: authMode },
       vehicles:    { done: vehicleCount > 0, count: vehicleCount },
       virtualkey:  { done: authMode === 'owner' || haveVirtualKey, ownerSkip: authMode === 'owner' },
+      // telemetry.done analog zu virtualkey: im Owner-Mode unnötig, also
+      // als „done" markieren damit der Skip-Banner sichtbar wird. ready
+      // bleibt false — interne Anzeige weiß damit dass Telemetry NICHT
+      // aktiv ist (z.B. für System-Health-Check).
       // Telemetry hängt am Virtual Key + mind. einem Fahrzeug — Status wird
       // weiterhin live über /telemetry/status geprüft. Hier nur Vor-Indikator.
-      telemetry:   { ready: authMode !== 'owner' && haveVirtualKey && vehicleCount > 0, ownerSkip: authMode === 'owner' },
+      telemetry:   { done: authMode === 'owner', ready: authMode !== 'owner' && haveVirtualKey && vehicleCount > 0, ownerSkip: authMode === 'owner' },
       vapid:       { done: haveVapid, auto: haveVapid && !cfg['vapid.contact'] },
       telegram:    { done: haveTelegram, optional: true },
       electricity: { done: electricitySet, optional: true },
