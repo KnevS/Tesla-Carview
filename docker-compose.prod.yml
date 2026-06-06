@@ -117,9 +117,12 @@ services:
     image: ollama/ollama:latest
     container_name: tesla-carview-ollama
     restart: unless-stopped
-    # `lite`-Profile deaktiviert Ollama (z.B. fuer 2-GB-Hosts).
-    # Default (kein Profile gesetzt) = Ollama laeuft.
-    profiles: ["", "ai-local"]
+    # Default-ON: kein `profiles:`-Key, Service laeuft immer.
+    # Auf 2-GB-Hosts deaktivieren: docker-compose.override.yml anlegen mit
+    #   services:
+    #     ollama:
+    #       profiles: [disabled]
+    # Dann startet Ollama nur noch mit `COMPOSE_PROFILES=disabled` — also nie.
     volumes:
       - ollama_models:/root/.ollama
     networks:

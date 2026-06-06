@@ -23,7 +23,8 @@ services:
     image: ollama/ollama:latest
     container_name: tesla-carview-ollama
     restart: unless-stopped
-    profiles: ["", "ai-local"]
+    # Default-ON: kein `profiles:`-Key, Service laeuft immer.
+    # Opt-out per Override-File (siehe Kommentar in docker-compose.prod.yml).
     volumes:
       - ollama_models:/root/.ollama
     environment:

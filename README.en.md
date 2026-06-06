@@ -158,7 +158,13 @@ If you want to use the data-sovereign local AI chat (Ollama, on by default):
 | VPS / workstation (16 GB+) | `llama3:8b` | ~6.5 GB | 5–8 | very good, a bit slower |
 | GPU (8+ GB VRAM) | `llama3:8b` or similar | per model | 30–80+ | enterprise-grade |
 
-**Disable Ollama** if your hardware can't run it: `COMPOSE_PROFILES=lite docker compose up -d` (or in the wizard `AI provider = Off`). Cloud alternative: `AI provider = Grok` (xAI API key required, data goes to the cloud).
+**Disable Ollama** if your hardware can't run it — create a `docker-compose.override.yml` with:
+```yaml
+services:
+  ollama:
+    profiles: [disabled]
+```
+Then `docker compose up -d` without Ollama. Or simpler: in the wizard set `AI provider = Off`. Cloud alternative: `AI provider = Grok` (xAI API key required, data goes to the cloud).
 
 ## Quickstart
 

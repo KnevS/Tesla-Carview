@@ -158,7 +158,13 @@ Falls du den datensouveränen lokalen KI-Chat (Ollama, default-aktiv) nutzen wil
 | VPS/Workstation (16 GB+) | `llama3:8b` | ~6.5 GB | 5–8 | sehr gut, etwas langsamer |
 | GPU (8+ GB VRAM) | `llama3:8b` o.ä. | je Modell | 30–80+ | enterprise-grade |
 
-**Ollama deaktivieren** wenn deine Hardware nicht reicht: `COMPOSE_PROFILES=lite docker compose up -d` (oder im Wizard `KI-Provider = Aus`). Cloud-Alternative: `KI-Provider = Grok` (xAI API-Key nötig, Daten gehen in die Cloud).
+**Ollama deaktivieren** wenn deine Hardware nicht reicht — `docker-compose.override.yml` anlegen mit:
+```yaml
+services:
+  ollama:
+    profiles: [disabled]
+```
+Danach `docker compose up -d` ohne Ollama. Oder einfacher: im Wizard `KI-Provider = Aus`. Cloud-Alternative: `KI-Provider = Grok` (xAI API-Key nötig, Daten gehen in die Cloud).
 
 ## Schnellstart
 
