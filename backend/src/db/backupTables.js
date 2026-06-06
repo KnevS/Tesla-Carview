@@ -11,6 +11,6 @@ export const BACKUP_TABLES = [
   'mfa_backup_codes', 'audit_logs',
   'tokens', 'tenant_settings', 'virtual_key',
   'user_invites', 'legal_acceptance',
-  'service_intervals', 'trip_changes',
+  'service_intervals', 'service_records', 'trip_changes',
   'billing_periods', 'tesla_api_usage', 'tesla_usage_events',
 ];
