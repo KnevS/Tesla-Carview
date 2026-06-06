@@ -123,17 +123,25 @@ jobs:
             sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d backend frontend
 
             # Ollama (gebundelter lokaler LLM-Runtime, ab v3.5.0). Idempotent:
-            # wenn schon up → no-op, sonst starten. Wird hier NICHT recreated,
-            # weil ollama/ollama:latest sich nur beim manuellen `docker pull`
-            # aktualisiert; Auto-Update wuerde grosse Downloads bei jedem
-            # Tesla-Carview-Deploy triggern.
-            # Auf Hosts ohne Ollama-Wunsch:
-            # docker-compose.override.yml mit
-            #   services: ollama: { profiles: [disabled] }
-            # anlegen — dieses up-Kommando ueberspringt den Service dann.
-            echo "==> Ollama sicherstellen (idempotent) …"
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d ollama || \
-              echo "Ollama-Service nicht gestartet (vermutlich per Override deaktiviert) — OK"
+            # wenn schon up → no-op, sonst starten.
+            #
+            # Wichtig: explizites Service-Argument bei `compose up` overridet
+            # die Profile-Filter (Docker-Compose-Quirk). Damit das per
+            # `services.ollama.profiles: [disabled]` Override tatsaechlich
+            # respektiert wird (siehe README — Hosts mit < 4 GB RAM), pruefen
+            # wir zuerst ob ollama im disabled-Profile steckt.
+            #
+            # `compose --profile disabled config --services` listet die
+            # Services die im disabled-Profile sind. Erscheint ollama dort,
+            # ist der Service per Override abgeschaltet — skip.
+            if sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml \
+                 --profile disabled config --services 2>/dev/null | grep -q '^ollama$'; then
+              echo "==> Ollama per disabled-Profile abgeschaltet — skip"
+            else
+              echo "==> Ollama sicherstellen (idempotent) …"
+              sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d ollama || \
+                echo "Ollama-Service nicht gestartet — OK"
+            fi
 
             sudo docker logout ghcr.io
             # Sicherstellen dass nginx in beiden erforderlichen Netzwerken läuft.
