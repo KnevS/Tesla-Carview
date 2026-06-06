@@ -11,7 +11,8 @@ import {
 } from '../services/userService.js';
 import { verifyTotp, verifyBackupCode, decryptMfaSecret } from '../services/mfaService.js';
 import { auditLog } from '../services/auditService.js';
-import { getAuthUrl, getOwnerAuthUrl, exchangeCode, exchangeOwnerCode, getAccessToken, connectOwnerToken, getAuthMode } from '../services/teslaApi.js';
+import { getAuthUrl, getOwnerAuthUrl, exchangeCode, exchangeOwnerCode, getAccessToken, connectOwnerToken, getAuthMode, isOwnerApiPaused } from '../services/teslaApi.js';
+import { setTenantSetting } from '../services/configService.js';
 import { getMasterDb, getDb, getTenantBySlug, getTenantByPseudonym, getAllTenants, getTenantById } from '../db/database.js';
 
 const router = Router();
@@ -305,13 +306,16 @@ router.get('/callback', async (req, res) => {
 });
 
 router.get('/tesla/status', requireAuth, async (req, res) => {
-  try {
-    await getAccessToken(req.db);
-    const mode = getAuthMode(req.db);
-    res.json({ connected: true, mode });
-  } catch {
-    res.json({ connected: false, mode: 'fleet' });
+  // Lese den Token-Status direkt aus der DB statt getAccessToken() —
+  // getAccessToken wirft jetzt im pausierten Owner-Modus, soll aber
+  // im Status-Endpoint genau das beschreibbar machen.
+  const haveToken = !!req.db.prepare('SELECT 1 FROM tokens LIMIT 1').get();
+  if (!haveToken) {
+    return res.json({ connected: false, mode: 'fleet', paused: false });
   }
+  const mode = getAuthMode(req.db);
+  const paused = mode === 'owner' && isOwnerApiPaused(req.db);
+  res.json({ connected: true, mode, paused });
 });
 
 // POST /api/auth/tesla/connect-owner-token
@@ -322,11 +326,29 @@ router.post('/tesla/connect-owner-token', requireAuth, async (req, res) => {
   }
   try {
     await connectOwnerToken(req.db, refresh_token.trim());
+    // Beim Connect immer aktivieren — falls zuvor manuell pausiert.
+    setTenantSetting(req.db, 'tesla.owner_api_paused', 'false');
     res.json({ success: true });
   } catch (err) {
     console.error('[Auth] Owner-Token-Connect fehlgeschlagen:', err.response?.data || err.message);
     res.status(400).json({ error: 'Token ungültig oder abgelaufen. Bitte neuen Token generieren.' });
   }
+});
+
+// Owner API pausieren/wieder aktivieren ohne Tokens zu loeschen.
+// Sinnvoll wenn Tesla die ownerapi-Tokens an Fleet API ablehnt — wir
+// behalten die Konfiguration fuer den Fall dass Tesla wieder oeffnet
+// oder spaeter Fleet OAuth eingerichtet wird.
+router.post('/tesla/owner-api/pause', requireAuth, async (req, res) => {
+  if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Nur für Administratoren' });
+  setTenantSetting(req.db, 'tesla.owner_api_paused', 'true');
+  res.json({ ok: true, paused: true });
+});
+
+router.post('/tesla/owner-api/resume', requireAuth, async (req, res) => {
+  if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Nur für Administratoren' });
+  setTenantSetting(req.db, 'tesla.owner_api_paused', 'false');
+  res.json({ ok: true, paused: false });
 });
 
 export default router;

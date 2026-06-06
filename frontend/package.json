@@ -1,6 +1,6 @@
 {
   "name": "tesla-carview-frontend",
-  "version": "3.4.22",
+  "version": "3.4.23",
   "type": "module",
   "scripts": {
     "dev": "vite",

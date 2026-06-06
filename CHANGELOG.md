@@ -7,6 +7,18 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.4.23] - 2026-06-06
+
+### Behoben
+
+- **Owner-API-Wahrheit im UI**: Post-Deploy-Verifikation von v3.4.22 zeigte: Tesla stellt zwar Token mit `audience: <fleet-api-url>` korrekt aus (Refresh OK), aber die Fleet API lehnt diese Token mit `HTTP 401 "invalid bearer token"` ab. Die beiden API-Ökosysteme sind seit 2026 komplett getrennt — der Community-Workaround „ownerapi → Fleet API URL" funktioniert nicht mehr. Konsequenz im UI: das grüne „✅ Owner API verbunden — Verbindung aktiv" wurde durch ein ehrliches „⚠️ Owner API verbunden, aber Tesla blockiert Vehicle-Daten" mit Erklärungstext ersetzt. System-Health-Banner zeigt jetzt einen neuen Check `tesla_api_mode`, der den Zustand sichtbar macht.
+
+### Hinzugefügt
+
+- **Owner API Pause/Resume-Toggle**: Admin-Wizard und Settings-Wizard haben jetzt einen Knopf, um die Owner-API-Verbindung zu pausieren ohne die Tokens zu löschen. Hintergedanke: falls Tesla die Owner API später wieder für Vehicle-Daten öffnet — oder falls jemand parallel Fleet OAuth einrichtet — kann die gespeicherte Konfiguration mit einem Klick reaktiviert werden. Neue Endpoints: `POST /api/auth/tesla/owner-api/pause`, `POST /api/auth/tesla/owner-api/resume`. Neue tenant_setting: `tesla.owner_api_paused` (default `false`). Im pausierten Zustand wirft `getAccessToken()` einen `OWNER_API_PAUSED`-Fehler, damit Poller und API-Routen sauber abbrechen statt unsinnig Tesla zu kontaktieren.
+
+---
+
 ## [v3.4.22] - 2026-06-05
 
 ### Behoben

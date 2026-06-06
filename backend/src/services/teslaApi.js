@@ -31,6 +31,17 @@ function getAuthMode(db) {
   return getTenantSetting(db, 'tesla.auth_mode', null) || 'fleet';
 }
 
+// Owner API kann vom Admin pausiert werden, ohne die gespeicherten Tokens
+// zu loeschen — z.B. wenn Tesla wieder einen Workaround zulaesst, kann
+// die Verbindung mit einem Klick wieder aktiviert werden.
+export function isOwnerApiPaused(db) {
+  return getTenantSetting(db, 'tesla.owner_api_paused', null) === 'true';
+}
+
+// Sentinel-Fehler: signalisiert Aufrufern (Poller, Routen), dass der
+// Token-Zugriff bewusst pausiert ist und kein Bug vorliegt.
+export const OWNER_API_PAUSED_ERROR = 'OWNER_API_PAUSED';
+
 export function getAuthUrl(tenantId) {
   const codeVerifier  = randomBytes(32).toString('base64url');
   const codeChallenge = createHash('sha256').update(codeVerifier).digest('base64url');
@@ -172,6 +183,9 @@ function saveTokens(db, data) {
 }
 
 export async function getAccessToken(db) {
+  if (getAuthMode(db) === 'owner' && isOwnerApiPaused(db)) {
+    throw new Error(OWNER_API_PAUSED_ERROR);
+  }
   const row = db.prepare('SELECT access_token, expires_at FROM tokens ORDER BY id DESC LIMIT 1').get();
   if (!row) throw new Error('Nicht authentifiziert. Bitte zuerst Tesla verbinden.');
   if (Date.now() > row.expires_at - 60000) return refreshTokens(db);

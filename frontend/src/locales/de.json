@@ -1867,11 +1867,17 @@
       "connectedHint": "Du kannst zum nächsten Schritt weitergehen.",
       "tabFleet": "Fleet OAuth",
       "tabOwner": "Owner API",
-      "ownerInfo": "Kein Fleet API-Zugang nötig. Klick verbinden → Tesla-Login → fertig.",
+      "ownerInfo": "Klick verbinden → Tesla-Login → Tokens werden gespeichert. Hinweis: Tesla lehnt derzeit Owner-API-Tokens an der Fleet API ab — der Verbindungs-Status wird nach dem Connect angezeigt.",
       "ownerConnected": "Owner API verbunden",
       "ownerActiveHint": "Verbindung aktiv — kein Fleet API-Zugang erforderlich.",
       "ownerConnectBtn": "Mit Owner API verbinden",
-      "ownerOpening": "Öffne Tesla-Login …"
+      "ownerOpening": "Öffne Tesla-Login …",
+      "ownerBlockedTitle": "Owner API verbunden, aber Tesla blockiert Vehicle-Daten",
+      "ownerBlockedHint": "Tesla hat die Owner API für Fahrzeug-Endpoints geschlossen — der Token wird mit HTTP 401 abgelehnt. Tokens bleiben gespeichert (falls Tesla wieder öffnet). Für Vehicle-Daten brauchst du Fleet OAuth via developer.tesla.com.\n\nAlternative: Smartphone-GPS-Tracking via OwnTracks (in Einrichtung) — funktioniert ohne jede Tesla-API.",
+      "ownerPausedTitle": "Owner API verbunden, pausiert",
+      "ownerPausedHint": "Tokens sind gespeichert, aber das Backend macht keine Tesla-API-Calls. Sinnvoll bis Tesla die Owner API wieder öffnet oder du Fleet OAuth einrichtest.",
+      "ownerPauseBtn": "⏸ Owner API pausieren",
+      "ownerResumeBtn": "▶ Owner API wieder aktivieren"
     },
     "sVehicles": {
       "title": "Fahrzeuge",
@@ -2219,11 +2225,17 @@
       "activeHint": "Verbindung aktiv. Fahrzeugdaten werden geladen.",
       "tabFleet": "Fleet OAuth",
       "tabOwner": "Owner API",
-      "ownerInfo": "Kein Fleet API-Zugang nötig. Klick verbinden → Tesla-Login → fertig.",
+      "ownerInfo": "Klick verbinden → Tesla-Login → Tokens werden gespeichert. Hinweis: Tesla lehnt derzeit Owner-API-Tokens an der Fleet API ab — der Verbindungs-Status wird nach dem Connect angezeigt.",
       "ownerConnected": "Owner API verbunden",
       "ownerActiveHint": "Verbindung aktiv — kein Fleet API-Zugang erforderlich.",
       "ownerConnectBtn": "Mit Owner API verbinden",
       "ownerOpening": "Öffne Tesla-Login …",
+      "ownerBlockedTitle": "Owner API verbunden, aber Tesla blockiert Vehicle-Daten",
+      "ownerBlockedHint": "Tesla hat die Owner API für Fahrzeug-Endpoints geschlossen — der Token wird mit HTTP 401 abgelehnt. Tokens bleiben gespeichert (falls Tesla wieder öffnet). Für Vehicle-Daten brauchst du Fleet OAuth via developer.tesla.com.\n\nAlternative: Smartphone-GPS-Tracking via OwnTracks (in Einrichtung) — funktioniert ohne jede Tesla-API.",
+      "ownerPausedTitle": "Owner API verbunden, pausiert",
+      "ownerPausedHint": "Tokens sind gespeichert, aber das Backend macht keine Tesla-API-Calls. Sinnvoll bis Tesla die Owner API wieder öffnet oder du Fleet OAuth einrichtest.",
+      "ownerPauseBtn": "⏸ Owner API pausieren",
+      "ownerResumeBtn": "▶ Owner API wieder aktivieren",
       "refresh": "↻"
     },
     "vehicles": {

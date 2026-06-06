@@ -106,12 +106,26 @@
               <div class="bg-blue-900/20 border border-blue-700/40 rounded-lg px-3 py-2 text-xs text-blue-300">
                 <p>{{ $t('wizard.sOauth.ownerInfo') }}</p>
               </div>
-              <div v-if="oauthStatus === 'connected' && oauthMode === 'owner'" class="flex items-center gap-3">
-                <span class="text-2xl">✅</span>
-                <div>
-                  <p class="text-sm font-semibold text-white">{{ $t('wizard.sOauth.ownerConnected') }}</p>
-                  <p class="text-xs text-gray-400">{{ $t('wizard.sOauth.ownerActiveHint') }}</p>
+              <div v-if="oauthStatus === 'connected' && oauthMode === 'owner'" class="space-y-3">
+                <div class="flex items-start gap-3">
+                  <span class="text-2xl shrink-0">{{ ownerPaused ? '⏸️' : '⚠️' }}</span>
+                  <div class="flex-1">
+                    <p class="text-sm font-semibold text-white">
+                      {{ ownerPaused ? $t('wizard.sOauth.ownerPausedTitle') : $t('wizard.sOauth.ownerBlockedTitle') }}
+                    </p>
+                    <p class="text-xs text-gray-400 mt-1 whitespace-pre-line">
+                      {{ ownerPaused ? $t('wizard.sOauth.ownerPausedHint') : $t('wizard.sOauth.ownerBlockedHint') }}
+                    </p>
+                  </div>
                 </div>
+                <button v-if="!ownerPaused" @click="pauseOwnerApi" :disabled="ownerToggling"
+                  class="w-full btn-secondary text-sm py-2">
+                  {{ ownerToggling ? '…' : $t('wizard.sOauth.ownerPauseBtn') }}
+                </button>
+                <button v-else @click="resumeOwnerApi" :disabled="ownerToggling"
+                  class="w-full btn-primary text-sm py-2">
+                  {{ ownerToggling ? '…' : $t('wizard.sOauth.ownerResumeBtn') }}
+                </button>
               </div>
               <template v-else>
                 <button @click="openOwnerOauth" :disabled="ownerOauthOpening"
@@ -667,6 +681,8 @@ const oauthMode        = ref('fleet');
 const ownerApiTab      = ref(false);
 const ownerOauthOpening = ref(false);
 const ownerApiError    = ref('');
+const ownerPaused      = ref(false);
+const ownerToggling    = ref(false);
 
 async function checkOauthStatus() {
   oauthStatus.value = 'checking';
@@ -674,10 +690,22 @@ async function checkOauthStatus() {
     const { data } = await api.get('/auth/tesla/status');
     oauthStatus.value = data.connected ? 'connected' : 'disconnected';
     oauthMode.value = data.mode || 'fleet';
+    ownerPaused.value = !!data.paused;
     if (data.mode === 'owner') ownerApiTab.value = true;
   } catch {
     oauthStatus.value = 'disconnected';
   }
+}
+
+async function pauseOwnerApi() {
+  ownerToggling.value = true;
+  try { await api.post('/auth/tesla/owner-api/pause'); await checkOauthStatus(); }
+  finally { ownerToggling.value = false; }
+}
+async function resumeOwnerApi() {
+  ownerToggling.value = true;
+  try { await api.post('/auth/tesla/owner-api/resume'); await checkOauthStatus(); }
+  finally { ownerToggling.value = false; }
 }
 
 async function openOwnerOauth() {

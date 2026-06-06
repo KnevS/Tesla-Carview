@@ -144,6 +144,24 @@ router.get('/health', requireAuth, async (req, res) => {
     checks.push({ key: 'tesla_token', label: 'Tesla OAuth-Token', status: 'unknown', message: e.message });
   }
 
+  // 1b. Tesla API-Modus — surface Owner-API-Limitierung sichtbar:
+  //     ownerapi-Tokens werden seit 2026 von der Fleet API mit HTTP 401
+  //     abgelehnt (siehe CHANGELOG v3.4.23). Wir behalten den Modus aber
+  //     bei, damit Admins ihn pausieren statt loeschen koennen.
+  if (authMode === 'owner') {
+    const paused = (() => {
+      try { return db.prepare("SELECT value FROM tenant_settings WHERE key='tesla.owner_api_paused'").get()?.value === 'true'; }
+      catch { return false; }
+    })();
+    if (paused) {
+      checks.push({ key: 'tesla_api_mode', label: 'Tesla API-Modus', status: 'info',
+        message: 'Owner API verbunden, pausiert (Tokens behalten)' });
+    } else {
+      checks.push({ key: 'tesla_api_mode', label: 'Tesla API-Modus', status: 'warn',
+        message: 'Owner API: Tesla blockiert Vehicle-Daten (HTTP 401). Bitte Fleet OAuth nutzen oder Owner API pausieren.' });
+    }
+  }
+
   // 2. Virtual Key
   try {
     if (authMode === 'owner') {
