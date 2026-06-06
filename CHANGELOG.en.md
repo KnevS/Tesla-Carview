@@ -7,6 +7,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.5.3] - 2026-06-06
+
+### Added
+
+- **Manual vehicle creation without Tesla API**: The previous wizard step "Vehicles" called `POST /api/vehicles/sync` exclusively, which required a working Tesla connection. Without Fleet API approval the wizard got stuck here. As of v3.5.3 the step offers two equal paths side by side: "☁ Tesla sync (cloud)" as before AND "✍ Manual entry" with a form for label, license plate, optional VIN (synthetic if empty), model, initial odometer.
+  - New endpoint `POST /api/vehicles/manual` (admin or `can_add_vehicles`): creates a vehicle row with `tesla_id="manual-<uuid>"` and an optional synthetic VIN `MANUAL<...>`. Adds the creating user to `vehicle_users` so the new vehicle is immediately visible in `/vehicles` for them and they can register an OwnTracks device against it.
+  - Initial odometer is written both to `vehicles.initial_odometer_km` (for TCO calculation) and `vehicles.odometer_km` (for display) — so odometer values make sense from day one.
+  - Wizard intro banner explains openly: Tesla sync requires approval, manual entry works immediately. Existing vehicles now show a "· manual" indicator if created via synthetic ID.
+
+---
+
 ## [v3.5.2] - 2026-06-06
 
 ### Added

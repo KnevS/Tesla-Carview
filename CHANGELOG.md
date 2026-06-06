@@ -7,6 +7,17 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.5.3] - 2026-06-06
+
+### Hinzugefügt
+
+- **Manuelle Fahrzeug-Anlage ohne Tesla-API**: Der bisherige Wizard-Schritt „Fahrzeuge" rief ausschließlich `POST /api/vehicles/sync` auf, was eine funktionierende Tesla-Verbindung voraussetzte. Ohne Fleet-API-Approval blieb der Wizard hier hängen. Ab v3.5.3 stehen im Step zwei gleichberechtigte Wege nebeneinander: „☁ Tesla-Sync (Cloud)" wie bisher UND „✍ Manuell anlegen" mit Form für Bezeichnung, Kennzeichen, VIN (optional, sonst synthetisch), Modell, Initial-Kilometerstand.
+  - Neuer Endpoint `POST /api/vehicles/manual` (Admin oder `can_add_vehicles`): legt eine vehicle-Row mit `tesla_id="manual-<uuid>"` und ggf. synthetischer VIN `MANUAL<...>` an. Trägt den anlegenden User direkt als Fahrer in `vehicle_users` ein, damit das neue Fahrzeug sofort in `/vehicles` für ihn sichtbar ist und er ein OwnTracks-Device darauf registrieren kann.
+  - Initial-Kilometerstand wird sowohl in `vehicles.initial_odometer_km` (für TCO-Berechnung) als auch in `vehicles.odometer_km` (für die Anzeige) gesetzt — damit Odometer-Werte ab Tag 1 sinnvoll sind.
+  - Wizard-Intro-Banner erklärt offen: Tesla-Sync braucht Approval, manuell geht sofort. Bestehende Fahrzeuge zeigen jetzt einen „· manuell"-Indikator falls per Synthetic-ID angelegt.
+
+---
+
 ## [v3.5.2] - 2026-06-06
 
 ### Hinzugefügt

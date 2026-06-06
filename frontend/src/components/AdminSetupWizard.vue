@@ -178,29 +178,98 @@
             </div>
           </template>
 
-          <!-- STEP: vehicles -->
+          <!-- STEP: vehicles — Tesla-Sync ODER manuell anlegen -->
           <template v-else-if="currentId === 'vehicles'">
             <StepHeader :title="$t('adminSetup.vehicles.title')" :question="$t('adminSetup.vehicles.question')" />
-            <div class="card space-y-3">
-              <div v-if="vehicles.length === 0" class="text-center py-4 space-y-3">
-                <p class="text-sm text-gray-400">{{ $t('adminSetup.vehicles.none') }}</p>
-                <button @click="syncVehicles" :disabled="vehicleSyncing" class="btn-primary text-sm">
-                  {{ vehicleSyncing ? '…' : $t('adminSetup.vehicles.syncBtn') }}
-                </button>
+            <div class="card space-y-4">
+              <!-- Erklärung: zwei Wege -->
+              <div class="bg-blue-900/20 border border-blue-700/40 rounded-lg px-3 py-2 text-xs text-blue-100 whitespace-pre-line">
+                {{ $t('adminSetup.vehicles.intro') }}
               </div>
-              <div v-else class="space-y-2">
+
+              <!-- Bestehende Fahrzeuge -->
+              <div v-if="vehicles.length > 0" class="space-y-2">
                 <div v-for="v in vehicles" :key="v.id" class="flex items-center gap-3 bg-gray-800 rounded-xl px-4 py-3">
                   <span class="text-xl">🚗</span>
                   <div class="flex-1">
                     <p class="text-sm font-semibold text-white">{{ v.display_name || v.vin }}</p>
-                    <p class="text-xs text-gray-400 font-mono">{{ v.vin }}</p>
+                    <p class="text-xs text-gray-400 font-mono">{{ v.vin }}{{ v.tesla_id?.startsWith('manual-') ? ' · manuell' : '' }}</p>
                   </div>
                   <span class="text-xs text-green-400">✓</span>
                 </div>
-                <button @click="syncVehicles" :disabled="vehicleSyncing" class="w-full btn-secondary text-sm py-2">
-                  {{ vehicleSyncing ? '…' : $t('adminSetup.vehicles.resyncBtn') }}
-                </button>
               </div>
+              <p v-else class="text-sm text-gray-400 text-center py-2">{{ $t('adminSetup.vehicles.none') }}</p>
+
+              <!-- Zwei-Spalten-Karte: Sync vs Manuell -->
+              <div class="grid sm:grid-cols-2 gap-3">
+                <!-- A: Tesla-Sync -->
+                <div class="border border-gray-700 rounded-lg p-3 space-y-2">
+                  <p class="text-sm font-semibold text-white">☁ {{ $t('adminSetup.vehicles.syncTitle') }}</p>
+                  <p class="text-[11px] text-gray-400">{{ $t('adminSetup.vehicles.syncHint') }}</p>
+                  <button @click="syncVehicles" :disabled="vehicleSyncing"
+                          class="w-full btn-primary text-xs py-1.5">
+                    {{ vehicleSyncing ? '…' : (vehicles.length ? $t('adminSetup.vehicles.resyncBtn') : $t('adminSetup.vehicles.syncBtn')) }}
+                  </button>
+                </div>
+
+                <!-- B: Manuell anlegen -->
+                <div class="border border-gray-700 rounded-lg p-3 space-y-2">
+                  <p class="text-sm font-semibold text-white">✍ {{ $t('adminSetup.vehicles.manualTitle') }}</p>
+                  <p class="text-[11px] text-gray-400">{{ $t('adminSetup.vehicles.manualHint') }}</p>
+                  <button v-if="!manualVehicleForm" @click="manualVehicleForm = { display_name:'', vin:'', model:'', license_plate:'', initial_odometer_km:null }"
+                          class="w-full btn-secondary text-xs py-1.5">
+                    + {{ $t('adminSetup.vehicles.manualBtn') }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Manuelles Formular wenn aktiv -->
+              <div v-if="manualVehicleForm" class="card bg-gray-800/40 p-4 space-y-3">
+                <h4 class="text-sm font-semibold">{{ $t('adminSetup.vehicles.manualFormTitle') }}</h4>
+                <div class="grid sm:grid-cols-2 gap-3">
+                  <label class="block text-xs">
+                    <span class="text-gray-400">{{ $t('adminSetup.vehicles.fName') }} *</span>
+                    <input v-model="manualVehicleForm.display_name" required
+                           :placeholder="$t('adminSetup.vehicles.fNamePlaceholder')"
+                           class="mt-1 w-full bg-gray-700 rounded px-2 py-1 text-sm" />
+                  </label>
+                  <label class="block text-xs">
+                    <span class="text-gray-400">{{ $t('adminSetup.vehicles.fPlate') }}</span>
+                    <input v-model="manualVehicleForm.license_plate"
+                           placeholder="z.B. M-AB 1234"
+                           class="mt-1 w-full bg-gray-700 rounded px-2 py-1 text-sm" />
+                  </label>
+                  <label class="block text-xs">
+                    <span class="text-gray-400">{{ $t('adminSetup.vehicles.fVin') }}</span>
+                    <input v-model="manualVehicleForm.vin" maxlength="17"
+                           :placeholder="$t('adminSetup.vehicles.fVinPlaceholder')"
+                           class="mt-1 w-full bg-gray-700 rounded px-2 py-1 text-sm font-mono" />
+                    <span class="text-[10px] text-gray-500">{{ $t('adminSetup.vehicles.fVinHint') }}</span>
+                  </label>
+                  <label class="block text-xs">
+                    <span class="text-gray-400">{{ $t('adminSetup.vehicles.fModel') }}</span>
+                    <input v-model="manualVehicleForm.model"
+                           placeholder="z.B. Model Y Long Range"
+                           class="mt-1 w-full bg-gray-700 rounded px-2 py-1 text-sm" />
+                  </label>
+                  <label class="block text-xs col-span-2">
+                    <span class="text-gray-400">{{ $t('adminSetup.vehicles.fInitialKm') }}</span>
+                    <input v-model.number="manualVehicleForm.initial_odometer_km" type="number" step="1"
+                           placeholder="0"
+                           class="mt-1 w-full bg-gray-700 rounded px-2 py-1 text-sm" />
+                    <span class="text-[10px] text-gray-500">{{ $t('adminSetup.vehicles.fInitialKmHint') }}</span>
+                  </label>
+                </div>
+                <div class="flex gap-2 justify-end">
+                  <button @click="manualVehicleForm = null" class="btn-secondary text-xs px-3 py-1">{{ $t('common.cancel') }}</button>
+                  <button @click="submitManualVehicle"
+                          :disabled="!manualVehicleForm.display_name?.trim() || manualVehicleSaving"
+                          class="btn-primary text-xs px-3 py-1">
+                    {{ manualVehicleSaving ? '…' : $t('adminSetup.vehicles.manualSave') }}
+                  </button>
+                </div>
+              </div>
+
               <p v-if="vehicleSyncError" class="text-xs text-red-400">{{ vehicleSyncError }}</p>
             </div>
           </template>
@@ -1089,6 +1158,32 @@ async function syncVehicles() {
   try { await api.post('/vehicles/sync'); await loadVehicles(); }
   catch (e) { vehicleSyncError.value = e.response?.data?.error || e.message; }
   finally { vehicleSyncing.value = false; }
+}
+
+// Manuelle Fahrzeug-Anlage (Fallback wenn Tesla-API nicht verfuegbar)
+const manualVehicleForm   = ref(null);
+const manualVehicleSaving = ref(false);
+
+async function submitManualVehicle() {
+  if (!manualVehicleForm.value?.display_name?.trim()) return;
+  manualVehicleSaving.value = true; vehicleSyncError.value = '';
+  try {
+    const payload = {
+      display_name:        manualVehicleForm.value.display_name.trim(),
+      vin:                 manualVehicleForm.value.vin?.trim() || undefined,
+      model:               manualVehicleForm.value.model?.trim() || undefined,
+      license_plate:       manualVehicleForm.value.license_plate?.trim() || undefined,
+      initial_odometer_km: manualVehicleForm.value.initial_odometer_km != null && manualVehicleForm.value.initial_odometer_km !== ''
+                           ? Number(manualVehicleForm.value.initial_odometer_km) : undefined,
+    };
+    await api.post('/vehicles/manual', payload);
+    manualVehicleForm.value = null;
+    await loadVehicles();
+  } catch (e) {
+    vehicleSyncError.value = e.response?.data?.error || e.message;
+  } finally {
+    manualVehicleSaving.value = false;
+  }
 }
 
 // ─── Virtual Key + Telemetry ───────────────────────────────────────────────

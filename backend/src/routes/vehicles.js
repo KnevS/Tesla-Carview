@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { randomUUID } from 'crypto';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import { requireCanEditVehicles, requireCanAddVehicles } from '../middleware/auth.js';
@@ -143,6 +144,53 @@ router.put('/:vehicleId', requireCanEditVehicles, validate(patchSchema), (req, r
           abrp_token ?? null,
           req.params.vehicleId);
     res.json(db.prepare('SELECT * FROM vehicles WHERE id=?').get(req.params.vehicleId));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/vehicles/manual — Fahrzeug ohne Tesla-API anlegen.
+//
+// Hintergrund: Tesla hat 2026 die Owner API geschlossen, Fleet-API-
+// Approval dauert Wochen-Monate. Wer Tesla-API-frei betreibt (OwnTracks-
+// basiertes Fahrtenbuch) braucht trotzdem Fahrzeug-Einträge in der DB —
+// als Anker für owntracks_devices, vehicle_users-Zuordnungen, TCO etc.
+//
+// tesla_id + vin sind in vehicles NOT NULL UNIQUE. Bei manueller Anlage
+// generieren wir Synthetic-Werte mit "manual-"-Prefix, damit der echte
+// Tesla-Sync (falls Approval später kommt) auf einen separaten Datensatz
+// gehen würde und nicht versehentlich diesen überschreibt.
+router.post('/manual', requireCanAddVehicles, (req, res) => {
+  try {
+    const { display_name, vin, model, license_plate, color, initial_odometer_km } = req.body || {};
+    const lab = String(display_name || '').slice(0, 80).trim();
+    if (!lab) return res.status(400).json({ error: 'display_name erforderlich' });
+
+    const syntheticId  = `manual-${randomUUID()}`;
+    const effectiveVin = (typeof vin === 'string' && vin.trim().length >= 11)
+      ? vin.trim().toUpperCase()
+      : `MANUAL${randomUUID().replace(/-/g, '').slice(0, 11).toUpperCase()}`;
+
+    const db = req.db;
+    const info = db.prepare(
+      `INSERT INTO vehicles (tesla_id, vin, display_name, model, license_plate, color, initial_odometer_km, odometer_km)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(syntheticId, effectiveVin, lab,
+          model        ? String(model).slice(0, 40)         : null,
+          license_plate ? String(license_plate).slice(0, 20) : null,
+          color        ? String(color).slice(0, 30)         : null,
+          initial_odometer_km != null ? Number(initial_odometer_km) : null,
+          initial_odometer_km != null ? Number(initial_odometer_km) : null);
+
+    // Den anlegenden User direkt als Fahrer für dieses Fahrzeug eintragen,
+    // damit sein /vehicles-Endpoint das neue Auto sofort sieht und er
+    // OwnTracks-Devices darauf registrieren kann.
+    db.prepare(
+      'INSERT OR IGNORE INTO vehicle_users (vehicle_id, user_id) VALUES (?, ?)'
+    ).run(info.lastInsertRowid, req.user.sub);
+
+    registerVin(effectiveVin, req.tenantId);
+    res.status(201).json(db.prepare('SELECT * FROM vehicles WHERE id=?').get(info.lastInsertRowid));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
