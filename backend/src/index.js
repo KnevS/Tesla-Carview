@@ -59,6 +59,7 @@ import firmwareRoutes          from './routes/firmware.js';
 import hvacRoutes              from './routes/hvac.js';
 import communityRoutes         from './routes/community.js';
 import telegramRoutes          from './routes/telegram.js';
+import owntracksRoutes         from './routes/owntracks.js';
 import { initTelegramBot }     from './services/telegramBot.js';
 import { runAutoInitForAllTenants } from './services/autoInit.js';
 
@@ -109,6 +110,7 @@ app.use('/api/user-invites', userInviteRoutes);            // /:token/validate (
 app.use('/api/demo',        demoRoutes);                    // signup + status — public, only active when DEMO_ENABLED=true
 app.use('/api/pair',       pairRoutes);                     // QR-Pair-Login: init + poll + info + confirm — public
 app.use('/api/telegram',   telegramRoutes);                 // Webhook öffentlich; Link/Status benötigt Auth intern
+app.use('/api/owntracks',  owntracksRoutes);                // /webhook öffentlich (token in url), Geräte-Verwaltung admin-only
 
 // Alle weiteren Routen benötigen einen gültigen JWT + Mandanten-DB (req.db)
 app.use(requireAuth);

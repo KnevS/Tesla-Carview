@@ -110,3 +110,29 @@ CREATE TABLE IF NOT EXISTS user_push_subscriptions (
 CREATE INDEX IF NOT EXISTS idx_telegram_links_chat ON telegram_links(chat_id);
 CREATE INDEX IF NOT EXISTS idx_telegram_links_user ON telegram_links(tenant_id, user_id);
 CREATE INDEX IF NOT EXISTS idx_user_push_subs ON user_push_subscriptions(tenant_id, user_id);
+
+-- OwnTracks-Devices: ein Smartphone (eine OwnTracks-App-Installation) liegt
+-- 1:1 auf einem Fahrzeug + einem Fahrer. Der device_token authentifiziert
+-- eingehende Webhook-Pushes ohne JWT (Token in der URL, wie OwnTracks es
+-- vorgibt). Token-Lookup ist pre-auth, deshalb liegt die Tabelle in master.db
+-- (analog zu telegram_links).
+--   current_trip_id / stationary_since: State-Machine der Auto-Trip-Erkennung.
+--   default_trip_type: business | private | commute — Vorgabe für neu
+--     erzeugte Trips dieses Device (Fahrer kann jeden Trip nachträglich
+--     umklassifizieren).
+CREATE TABLE IF NOT EXISTS owntracks_devices (
+  id                 INTEGER PRIMARY KEY,
+  tenant_id          TEXT    NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  vehicle_id         INTEGER NOT NULL,
+  user_id            INTEGER NOT NULL,
+  device_token       TEXT    NOT NULL UNIQUE,
+  label              TEXT    NOT NULL,
+  default_trip_type  TEXT    NOT NULL DEFAULT 'business',
+  is_active          INTEGER NOT NULL DEFAULT 1,
+  current_trip_id    INTEGER,
+  stationary_since   INTEGER,
+  last_ping_at       INTEGER,
+  created_at         INTEGER DEFAULT (unixepoch())
+);
+CREATE INDEX IF NOT EXISTS idx_owntracks_token  ON owntracks_devices(device_token);
+CREATE INDEX IF NOT EXISTS idx_owntracks_tenant ON owntracks_devices(tenant_id);

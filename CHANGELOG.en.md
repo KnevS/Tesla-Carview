@@ -7,6 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.4.24] - 2026-06-06
+
+### Added
+
+- **OwnTracks integration (smartphone GPS as a Fleet-API alternative)**: Since 2026 Tesla blocks Owner API tokens at Fleet API with HTTP 401 and closes vehicle endpoints on owner-api.teslamotors.com with HTTP 412 — without Fleet API approval there is no way left to get vehicle GPS data. OwnTracks (https://owntracks.org) is an open-source iOS+Android app that pushes location directly to a self-hosted webhook — no third party, no cloud account. Implementation:
+  - New table `owntracks_devices` in master.db (analogous to telegram_links — pre-auth token lookup required). Fields: tenant_id, vehicle_id, user_id, device_token (32-byte base64url), label, default_trip_type, is_active, current_trip_id, stationary_since, last_ping_at.
+  - Webhook `POST /api/owntracks/webhook?token=<token>` (no JWT, token in URL). Auto-trip state machine: speed >5 km/h without open trip → new trip with `source='owntracks'` and virtual start odometer (from last trip or vehicles.odometer_km). Speed >5 km/h with open trip → append point to trip_points, reset stationary timer. Speed ≤5 km/h for more than 5 minutes → close trip, recompute distance via Haversine over all points, end_odometer_km = start_odometer + distance.
+  - Admin CRUD `GET/POST/PATCH/DELETE /api/owntracks/devices`. POST returns the token + full webhook URL one time only.
+  - New wizard step "Smartphone GPS (OwnTracks)" right after the Vehicles step in admin setup. Device list with pause/resume/delete buttons, form for new device (label, vehicle, driver, default trip type), clear explanatory text describing what OwnTracks is and why it's needed.
+  - Full i18n in DE+EN.
+
+---
+
 ## [v3.4.23] - 2026-06-06
 
 ### Fixed

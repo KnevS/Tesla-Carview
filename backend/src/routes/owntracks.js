@@ -1,0 +1,263 @@
+/**
+ * /api/owntracks — Smartphone-GPS-Tracking via OwnTracks-App.
+ *
+ * Hintergrund: Tesla blockiert seit 2026 sowohl Owner-API-Tokens an Fleet
+ * API (HTTP 401) als auch viele Vehicle-Endpoints an owner-api.teslamotors.com
+ * (HTTP 412). Ohne Fleet-API-Approval gibt es keinen Weg zu GPS-Daten aus
+ * dem Fahrzeug. OwnTracks (https://owntracks.org) ist eine Open-Source-App
+ * für iOS+Android, die Location-Daten direkt an einen selbst-gehosteten
+ * Endpoint pushed — ohne Drittanbieter, ohne Cloud, ohne Login.
+ *
+ * Architektur:
+ *   • owntracks_devices liegt in master.db (pre-auth-Lookup per Token nötig)
+ *   • Trips landen in der tenant-DB als source='owntracks'
+ *   • Webhook-Auth nur über den device_token in der URL — kein JWT
+ *   • Auto-Trip-State-Machine pro Device:
+ *       moving (Speed > 5 km/h) + kein offener Trip  → Trip starten
+ *       moving + offener Trip                        → Punkt anhängen
+ *       stationär + offener Trip + >5 min            → Trip abschließen
+ *
+ * GET    /api/owntracks/devices         (admin) Geräte-Liste
+ * POST   /api/owntracks/devices         (admin) Neues Gerät, gibt token+url zurück
+ * PATCH  /api/owntracks/devices/:id     (admin) is_active/default_trip_type/label
+ * DELETE /api/owntracks/devices/:id     (admin)
+ * POST   /api/owntracks/webhook?token=… (kein Auth, OwnTracks-App-Format)
+ */
+
+import { Router }      from 'express';
+import { randomBytes } from 'crypto';
+import { getMasterDb, getDb } from '../db/database.js';
+
+const router = Router();
+
+// Schwellen für die State-Machine — bewusst konservativ.
+const MOVING_THRESHOLD_KMH = 5;
+const STATIONARY_GRACE_S   = 5 * 60;
+
+// Haversine-Distanz zwischen zwei GPS-Punkten in km.
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// Virtueller Odometer: letzter end_odometer_km vom Fahrzeug, sonst der
+// aktuelle Wert auf vehicles.odometer_km, sonst 0. OwnTracks kennt den
+// Fahrzeug-Kilometerstand nicht — wir schätzen ihn über die GPS-Distanz.
+function getVirtualOdometerKm(db, vehicleId) {
+  const last = db.prepare(
+    `SELECT end_odometer_km FROM trips
+     WHERE vehicle_id=? AND end_odometer_km IS NOT NULL
+     ORDER BY id DESC LIMIT 1`
+  ).get(vehicleId);
+  if (last?.end_odometer_km != null) return last.end_odometer_km;
+
+  const v = db.prepare('SELECT odometer_km FROM vehicles WHERE id=?').get(vehicleId);
+  return v?.odometer_km ?? 0;
+}
+
+// Distanz eines Trips aus den gespeicherten Track-Punkten neu berechnen.
+function calcGpsDistanceKm(db, tripId) {
+  const pts = db.prepare(
+    'SELECT lat, lon FROM trip_points WHERE trip_id=? ORDER BY timestamp ASC'
+  ).all(tripId);
+  let km = 0;
+  for (let i = 1; i < pts.length; i++) {
+    km += haversineKm(pts[i - 1].lat, pts[i - 1].lon, pts[i].lat, pts[i].lon);
+  }
+  return Math.round(km * 10) / 10;
+}
+
+// ── Webhook (kein Auth — Token in der Query) ─────────────────────────────────
+//
+// OwnTracks-App-Konfiguration:
+//   URL: https://teslaview.example/api/owntracks/webhook?token=<device_token>
+//   Method: POST
+//   Auth: none (Token liegt in der URL)
+//
+// Antwortet immer mit `[]` — OwnTracks erwartet einen JSON-Array als
+// "transitions to apply". Wir applizieren keine Transitions.
+router.post('/webhook', (req, res) => {
+  const token = String(req.query.token || '');
+  if (!token || token.length < 16) return res.status(401).json([]);
+
+  const master = getMasterDb();
+  const device = master.prepare(
+    `SELECT id, tenant_id, vehicle_id, user_id, default_trip_type,
+            current_trip_id, stationary_since
+     FROM owntracks_devices WHERE device_token=? AND is_active=1`
+  ).get(token);
+  if (!device) return res.status(401).json([]);
+
+  const body = req.body || {};
+  // last-ping immer stempeln — auch bei nicht-location-events.
+  master.prepare('UPDATE owntracks_devices SET last_ping_at=unixepoch() WHERE id=?')
+    .run(device.id);
+
+  if (body._type !== 'location') return res.json([]);
+  const lat = Number(body.lat), lon = Number(body.lon), vel = Number(body.vel || 0);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+    return res.json([]);
+  }
+  const ts = Number(body.tst) || Math.floor(Date.now() / 1000);
+  const isMoving = vel > MOVING_THRESHOLD_KMH;
+
+  let db;
+  try { db = getDb(device.tenant_id); }
+  catch (e) { console.error('[OwnTracks] tenant db error:', e.message); return res.json([]); }
+
+  // ── State Machine ──────────────────────────────────────────────────────────
+  if (isMoving) {
+    if (!device.current_trip_id) {
+      // Trip eröffnen
+      const startOdo = getVirtualOdometerKm(db, device.vehicle_id);
+      const info = db.prepare(
+        `INSERT INTO trips
+           (vehicle_id, start_time, start_lat, start_lon, start_odometer_km,
+            source, trip_type, driver_id, is_manual)
+         VALUES (?, ?, ?, ?, ?, 'owntracks', ?, ?, 0)`
+      ).run(device.vehicle_id, ts, lat, lon, startOdo, device.default_trip_type, device.user_id);
+      const tripId = info.lastInsertRowid;
+      db.prepare(
+        `INSERT INTO trip_points (trip_id, timestamp, lat, lon, speed_kmh)
+         VALUES (?, ?, ?, ?, ?)`
+      ).run(tripId, ts, lat, lon, vel);
+      master.prepare(
+        `UPDATE owntracks_devices
+            SET current_trip_id=?, stationary_since=NULL WHERE id=?`
+      ).run(tripId, device.id);
+    } else {
+      // Punkt anhängen + Stationär-Timer resetten
+      db.prepare(
+        `INSERT INTO trip_points (trip_id, timestamp, lat, lon, speed_kmh)
+         VALUES (?, ?, ?, ?, ?)`
+      ).run(device.current_trip_id, ts, lat, lon, vel);
+      if (device.stationary_since) {
+        master.prepare('UPDATE owntracks_devices SET stationary_since=NULL WHERE id=?')
+          .run(device.id);
+      }
+    }
+    return res.json([]);
+  }
+
+  // Stillstand
+  if (!device.current_trip_id) return res.json([]);
+
+  if (!device.stationary_since) {
+    master.prepare('UPDATE owntracks_devices SET stationary_since=unixepoch() WHERE id=?')
+      .run(device.id);
+    return res.json([]);
+  }
+
+  const now = Math.floor(Date.now() / 1000);
+  if (now - device.stationary_since < STATIONARY_GRACE_S) return res.json([]);
+
+  // Grace-Period abgelaufen → Trip schließen.
+  const distKm = calcGpsDistanceKm(db, device.current_trip_id);
+  const trip = db.prepare(
+    'SELECT start_odometer_km FROM trips WHERE id=?'
+  ).get(device.current_trip_id);
+  const startOdo = trip?.start_odometer_km ?? 0;
+  db.prepare(
+    `UPDATE trips
+        SET end_time=?, end_lat=?, end_lon=?, end_odometer_km=?, distance_km=?
+      WHERE id=?`
+  ).run(now, lat, lon, startOdo + distKm, distKm, device.current_trip_id);
+
+  // Fahrzeug-Odometer-Schätzung nachziehen (best effort).
+  try {
+    db.prepare('UPDATE vehicles SET odometer_km=? WHERE id=?')
+      .run(startOdo + distKm, device.vehicle_id);
+  } catch { /* ignore */ }
+
+  master.prepare(
+    `UPDATE owntracks_devices
+        SET current_trip_id=NULL, stationary_since=NULL WHERE id=?`
+  ).run(device.id);
+
+  return res.json([]);
+});
+
+// ── Admin: Devices verwalten ─────────────────────────────────────────────────
+
+import { requireAuth } from '../middleware/auth.js';
+
+function requireAdmin(req, res, next) {
+  if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Nur für Administratoren' });
+  next();
+}
+
+router.get('/devices', requireAuth, requireAdmin, (req, res) => {
+  const master = getMasterDb();
+  const rows = master.prepare(
+    `SELECT id, vehicle_id, user_id, label, default_trip_type, is_active,
+            current_trip_id, last_ping_at, created_at
+     FROM owntracks_devices WHERE tenant_id=? ORDER BY created_at DESC`
+  ).all(req.user.tenantId);
+  res.json(rows);
+});
+
+router.post('/devices', requireAuth, requireAdmin, (req, res) => {
+  const { vehicle_id, user_id, label, default_trip_type } = req.body || {};
+  const vid = Number(vehicle_id), uid = Number(user_id);
+  const lab = String(label || '').slice(0, 80).trim();
+  const tt  = ['business', 'private', 'commute'].includes(default_trip_type) ? default_trip_type : 'business';
+  if (!vid || !uid || !lab) return res.status(400).json({ error: 'vehicle_id, user_id, label erforderlich' });
+
+  // Vorhandensein prüfen (verhindert Foreign-Key-Verletzungen)
+  const v = req.db.prepare('SELECT 1 FROM vehicles WHERE id=?').get(vid);
+  if (!v) return res.status(400).json({ error: 'Fahrzeug nicht gefunden' });
+  const u = req.db.prepare('SELECT 1 FROM users WHERE id=?').get(uid);
+  if (!u) return res.status(400).json({ error: 'Benutzer nicht gefunden' });
+
+  const token = randomBytes(32).toString('base64url');
+  const master = getMasterDb();
+  master.prepare(
+    `INSERT INTO owntracks_devices
+       (tenant_id, vehicle_id, user_id, device_token, label, default_trip_type)
+     VALUES (?, ?, ?, ?, ?, ?)`
+  ).run(req.user.tenantId, vid, uid, token, lab, tt);
+
+  const base = process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
+  res.json({
+    token,
+    webhook_url: `${base}/api/owntracks/webhook?token=${token}`,
+  });
+});
+
+router.patch('/devices/:id', requireAuth, requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  const { is_active, default_trip_type, label } = req.body || {};
+  const updates = [];
+  const args    = [];
+  if (typeof is_active === 'boolean') { updates.push('is_active=?');         args.push(is_active ? 1 : 0); }
+  if (['business', 'private', 'commute'].includes(default_trip_type)) {
+    updates.push('default_trip_type=?'); args.push(default_trip_type);
+  }
+  if (typeof label === 'string' && label.trim().length > 0) {
+    updates.push('label=?'); args.push(label.slice(0, 80).trim());
+  }
+  if (!updates.length) return res.status(400).json({ error: 'Nichts zu ändern' });
+  args.push(req.user.tenantId, id);
+  const master = getMasterDb();
+  const r = master.prepare(
+    `UPDATE owntracks_devices SET ${updates.join(', ')} WHERE tenant_id=? AND id=?`
+  ).run(...args);
+  if (r.changes === 0) return res.status(404).json({ error: 'Gerät nicht gefunden' });
+  res.json({ ok: true });
+});
+
+router.delete('/devices/:id', requireAuth, requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  const master = getMasterDb();
+  const r = master.prepare(
+    'DELETE FROM owntracks_devices WHERE tenant_id=? AND id=?'
+  ).run(req.user.tenantId, id);
+  if (r.changes === 0) return res.status(404).json({ error: 'Gerät nicht gefunden' });
+  res.json({ ok: true });
+});
+
+export default router;

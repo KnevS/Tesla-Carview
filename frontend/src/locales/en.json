@@ -2246,6 +2246,39 @@
       "syncBtn": "🔄 Fetch vehicles",
       "resyncBtn": "🔄 Refetch"
     },
+    "owntracks": {
+      "title": "Smartphone GPS (OwnTracks)",
+      "question": "GPS tracking without the Tesla API — the OwnTracks phone app pushes location directly to your server.",
+      "intro": "Recommended when Tesla blocks the Fleet API or the Owner API is dead.\n\nHow it works: each driver installs the free OwnTracks app (iOS+Android), enters your webhook URL, done. As soon as someone starts driving (>5 km/h), a trip starts automatically. 5 minutes of standstill = trip ends. Data goes only to your server — no OwnTracks cloud, no account, no third party.\n\nLimitation: GPS, speed, distance only — no battery/charging data (those require the Fleet API).",
+      "devicesHeading": "Registered devices",
+      "noDevices": "No devices registered yet.",
+      "addBtn": "Add new device",
+      "skipHint": "This step is optional — skip if not needed. More info about the OwnTracks app:",
+      "createBtn": "Create device & generate webhook URL",
+      "createdTitle": "✓ Device created",
+      "createdHint": "Enter this URL into the OwnTracks app (Settings → Connection → HTTP Mode → URL). The URL is shown only once — create a new device if lost.",
+      "confirmDelete": "Delete device \"{label}\"? GPS tracking from this device stops immediately.",
+      "lastPing": "Last ping: {time}",
+      "neverPinged": "Never contacted",
+      "justNow": "just now",
+      "minsAgo": "{mins} min ago",
+      "hoursAgo": "{hours} h ago",
+      "daysAgo": "{days} days ago",
+      "form": {
+        "label": "Label",
+        "labelPlaceholder": "e.g. \"Sven's iPhone\" or \"Lisa's Pixel\"",
+        "vehicle": "Vehicle",
+        "noVehicles": "Sync vehicles in the previous step first.",
+        "driver": "Driver (Driveo user)",
+        "tripType": "Default trip type for new trips",
+        "tripTypeHint": "Can be reclassified per trip later."
+      },
+      "tripTypes": {
+        "business": "Business",
+        "private":  "Private",
+        "commute":  "Commute"
+      }
+    },
     "virtualKey": {
       "title": "Virtual Key",
       "question": "Vehicle commands (climate, charging, etc.) require a Virtual Key.",

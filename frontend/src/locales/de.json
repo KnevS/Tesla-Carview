@@ -2245,6 +2245,39 @@
       "syncBtn": "🔄 Fahrzeuge abrufen",
       "resyncBtn": "🔄 Erneut abrufen"
     },
+    "owntracks": {
+      "title": "Smartphone-GPS (OwnTracks)",
+      "question": "GPS-Tracking ohne Tesla-API — die Telefon-App OwnTracks pushed Position direkt auf deinen Server.",
+      "intro": "Empfehlung wenn Tesla Fleet API blockiert oder Owner API tot ist.\n\nWie es funktioniert: Jeder Fahrer installiert die kostenlose OwnTracks-App (iOS+Android), trägt deine Webhook-URL ein, fertig. Sobald jemand losfährt (>5 km/h), startet automatisch eine Fahrt. 5 Minuten Stillstand = Fahrt beendet. Daten gehen ausschließlich an deinen Server — kein OwnTracks-Cloud, kein Account, kein Drittanbieter.\n\nEinschränkung: nur GPS, Speed, Distanz — keine Akku-/Lade-Daten (die kommen nur über Fleet API).",
+      "devicesHeading": "Registrierte Geräte",
+      "noDevices": "Noch keine Geräte registriert.",
+      "addBtn": "Neues Gerät anlegen",
+      "skipHint": "Dieser Schritt ist optional — überspringen wenn nicht benötigt. Mehr Infos zur OwnTracks-App:",
+      "createBtn": "Gerät anlegen & Webhook-URL generieren",
+      "createdTitle": "✓ Gerät angelegt",
+      "createdHint": "Trage diese URL in der OwnTracks-App ein (Settings → Connection → HTTP Mode → URL). Du siehst die URL nur jetzt — bei Verlust ein neues Gerät anlegen.",
+      "confirmDelete": "Gerät „{label}\" löschen? Damit stoppt sofort jegliche GPS-Aufzeichnung dieses Geräts.",
+      "lastPing": "Letzter Ping: {time}",
+      "neverPinged": "Noch nie kontaktiert",
+      "justNow": "gerade eben",
+      "minsAgo": "vor {mins} Min",
+      "hoursAgo": "vor {hours} Std",
+      "daysAgo": "vor {days} Tagen",
+      "form": {
+        "label": "Bezeichnung",
+        "labelPlaceholder": "z.B. „iPhone Sven\" oder „Pixel Lisa\"",
+        "vehicle": "Fahrzeug",
+        "noVehicles": "Erst Fahrzeuge im vorherigen Schritt synchronisieren.",
+        "driver": "Fahrer (Driveo-Benutzer)",
+        "tripType": "Standard-Fahrtart neuer Trips",
+        "tripTypeHint": "Kann pro Trip nachträglich umklassifiziert werden."
+      },
+      "tripTypes": {
+        "business": "Dienstlich",
+        "private":  "Privat",
+        "commute":  "Pendelfahrt"
+      }
+    },
     "virtualKey": {
       "title": "Virtual Key",
       "question": "Für Fahrzeugbefehle (Klimaanlage, Laden etc.) ist ein Virtual Key erforderlich.",

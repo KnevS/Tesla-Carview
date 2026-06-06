@@ -205,6 +205,118 @@
             </div>
           </template>
 
+          <!-- STEP: owntracks — Smartphone-GPS-Tracking als Fleet-API-Alternative -->
+          <template v-else-if="currentId === 'owntracks'">
+            <StepHeader :title="$t('adminSetup.owntracks.title')" :question="$t('adminSetup.owntracks.question')" />
+            <div class="card space-y-4">
+              <div class="bg-amber-900/20 border border-amber-700/40 rounded-lg px-3 py-2 text-xs text-amber-200 whitespace-pre-line">
+                {{ $t('adminSetup.owntracks.intro') }}
+              </div>
+
+              <!-- Geräte-Liste -->
+              <div v-if="owntracksDevices.length > 0" class="space-y-2">
+                <p class="text-xs font-medium text-gray-400">{{ $t('adminSetup.owntracks.devicesHeading') }}</p>
+                <div v-for="d in owntracksDevices" :key="d.id"
+                     class="bg-gray-800 rounded-lg p-3 flex items-start gap-3 text-xs">
+                  <span class="text-xl shrink-0">{{ d.is_active ? '📱' : '⏸' }}</span>
+                  <div class="flex-1 min-w-0">
+                    <p class="font-semibold text-white">{{ d.label }}</p>
+                    <p class="text-gray-400 mt-0.5">
+                      🚗 {{ owntracksVehicleLabel(d.vehicle_id) }} ·
+                      👤 {{ owntracksUserLabel(d.user_id) }} ·
+                      📁 {{ $t('adminSetup.owntracks.tripTypes.' + d.default_trip_type) }}
+                    </p>
+                    <p class="text-gray-500 text-[10px] mt-0.5">
+                      {{ d.last_ping_at ? $t('adminSetup.owntracks.lastPing', { time: owntracksRelative(d.last_ping_at) }) : $t('adminSetup.owntracks.neverPinged') }}
+                    </p>
+                  </div>
+                  <div class="flex flex-col gap-1 shrink-0">
+                    <button @click="toggleOwntracksDevice(d)"
+                            class="text-xs px-2 py-1 rounded bg-gray-700 hover:bg-gray-600 text-white">
+                      {{ d.is_active ? '⏸' : '▶' }}
+                    </button>
+                    <button @click="deleteOwntracksDevice(d)"
+                            class="text-xs px-2 py-1 rounded text-red-400 hover:bg-red-900/40">✕</button>
+                  </div>
+                </div>
+              </div>
+              <p v-else-if="!owntracksShowForm && !owntracksCreated" class="text-xs text-gray-500">
+                {{ $t('adminSetup.owntracks.noDevices') }}
+              </p>
+
+              <!-- Webhook-URL einmalig nach Create -->
+              <div v-if="owntracksCreated" class="bg-emerald-900/20 border border-emerald-700/40 rounded-lg p-3 space-y-2">
+                <p class="text-xs font-semibold text-emerald-300">{{ $t('adminSetup.owntracks.createdTitle') }}</p>
+                <p class="text-xs text-emerald-200 whitespace-pre-line">{{ $t('adminSetup.owntracks.createdHint') }}</p>
+                <div class="flex gap-2 items-center">
+                  <code class="flex-1 bg-gray-950 rounded px-2 py-1.5 font-mono text-[10px] select-all break-all">{{ owntracksCreated.webhook_url }}</code>
+                  <button @click="copyOwntracksUrl"
+                          class="text-xs px-3 py-1 rounded bg-emerald-700 hover:bg-emerald-600 text-white shrink-0">
+                    {{ owntracksCopied ? '✓' : $t('common.copy') }}
+                  </button>
+                </div>
+                <button @click="owntracksCreated = null"
+                        class="text-xs text-gray-400 hover:text-white">
+                  {{ $t('common.close') }}
+                </button>
+              </div>
+
+              <!-- Form -->
+              <div v-if="owntracksShowForm" class="bg-gray-800/50 border border-gray-700 rounded-lg p-4 space-y-3">
+                <label class="block">
+                  <span class="text-xs font-medium text-gray-400">{{ $t('adminSetup.owntracks.form.label') }}</span>
+                  <input v-model="owntracksForm.label" required
+                         class="mt-1 input text-sm w-full"
+                         :placeholder="$t('adminSetup.owntracks.form.labelPlaceholder')" />
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-gray-400">{{ $t('adminSetup.owntracks.form.vehicle') }}</span>
+                  <select v-model="owntracksForm.vehicle_id" class="mt-1 input text-sm w-full">
+                    <option v-for="v in vehicles" :key="v.id" :value="v.id">
+                      {{ v.display_name || v.vin }}
+                    </option>
+                  </select>
+                  <p v-if="vehicles.length === 0" class="text-[11px] text-amber-400 mt-1">{{ $t('adminSetup.owntracks.form.noVehicles') }}</p>
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-gray-400">{{ $t('adminSetup.owntracks.form.driver') }}</span>
+                  <select v-model="owntracksForm.user_id" class="mt-1 input text-sm w-full">
+                    <option v-for="u in owntracksUsers" :key="u.id" :value="u.id">{{ u.username }}</option>
+                  </select>
+                </label>
+                <label class="block">
+                  <span class="text-xs font-medium text-gray-400">{{ $t('adminSetup.owntracks.form.tripType') }}</span>
+                  <select v-model="owntracksForm.default_trip_type" class="mt-1 input text-sm w-full">
+                    <option value="business">{{ $t('adminSetup.owntracks.tripTypes.business') }}</option>
+                    <option value="private">{{ $t('adminSetup.owntracks.tripTypes.private') }}</option>
+                    <option value="commute">{{ $t('adminSetup.owntracks.tripTypes.commute') }}</option>
+                  </select>
+                  <p class="text-[11px] text-gray-500 mt-1">{{ $t('adminSetup.owntracks.form.tripTypeHint') }}</p>
+                </label>
+                <div class="flex gap-2">
+                  <button @click="createOwntracksDevice"
+                          :disabled="!canCreateOwntracksDevice || owntracksCreating"
+                          class="flex-1 btn-primary text-sm">
+                    {{ owntracksCreating ? '…' : $t('adminSetup.owntracks.createBtn') }}
+                  </button>
+                  <button @click="owntracksShowForm = false" class="btn-secondary text-sm px-4">
+                    {{ $t('common.cancel') }}
+                  </button>
+                </div>
+              </div>
+              <button v-else @click="openOwntracksForm"
+                      class="w-full btn-primary text-sm py-2">
+                + {{ $t('adminSetup.owntracks.addBtn') }}
+              </button>
+
+              <p v-if="owntracksError" class="text-xs text-red-400">{{ owntracksError }}</p>
+              <p class="text-[11px] text-gray-500">
+                {{ $t('adminSetup.owntracks.skipHint') }}
+                <a href="https://owntracks.org" target="_blank" rel="noopener" class="text-blue-400 hover:underline">owntracks.org ↗</a>
+              </p>
+            </div>
+          </template>
+
           <!-- STEP: virtualkey -->
           <template v-else-if="currentId === 'virtualkey'">
             <StepHeader :title="$t('adminSetup.virtualKey.title')" :question="$t('adminSetup.virtualKey.question')" />
@@ -618,7 +730,7 @@ async function triggerRestart() {
 onUnmounted(() => { if (restartTimer) clearInterval(restartTimer); });
 
 const STEPS = [
-  'welcome', 'credentials', 'oauth', 'vehicles', 'virtualkey', 'telemetry',
+  'welcome', 'credentials', 'oauth', 'vehicles', 'owntracks', 'virtualkey', 'telemetry',
   'vapid', 'telegram', 'electricity', 'external', 'monitoring', 'summary'
 ];
 
@@ -690,6 +802,101 @@ async function resumeOwnerApi() {
   ownerToggling.value = true;
   try { await api.post('/auth/tesla/owner-api/resume'); await checkOauthStatus(); }
   finally { ownerToggling.value = false; }
+}
+
+// ─── OwnTracks (Smartphone-GPS) ────────────────────────────────────────────
+const owntracksDevices  = ref([]);
+const owntracksUsers    = ref([]);
+const owntracksShowForm = ref(false);
+const owntracksForm     = reactive({
+  label: '', vehicle_id: null, user_id: null, default_trip_type: 'business',
+});
+const owntracksCreated  = ref(null);
+const owntracksCopied   = ref(false);
+const owntracksCreating = ref(false);
+const owntracksError    = ref('');
+
+const canCreateOwntracksDevice = computed(() =>
+  !!(owntracksForm.label?.trim() && owntracksForm.vehicle_id && owntracksForm.user_id)
+);
+
+async function loadOwntracks() {
+  try {
+    const [devs, users] = await Promise.all([
+      api.get('/owntracks/devices').then(r => r.data),
+      api.get('/users').then(r => r.data).catch(() => []),
+    ]);
+    owntracksDevices.value = devs || [];
+    owntracksUsers.value   = users || [];
+  } catch (e) {
+    owntracksError.value = e.response?.data?.error || e.message;
+  }
+}
+
+function openOwntracksForm() {
+  owntracksShowForm.value = true;
+  owntracksCreated.value  = null;
+  owntracksError.value    = '';
+  if (!owntracksForm.vehicle_id && vehicles.value[0]) owntracksForm.vehicle_id = vehicles.value[0].id;
+  if (!owntracksForm.user_id    && owntracksUsers.value[0]) owntracksForm.user_id = owntracksUsers.value[0].id;
+}
+
+async function createOwntracksDevice() {
+  owntracksCreating.value = true; owntracksError.value = '';
+  try {
+    const { data } = await api.post('/owntracks/devices', {
+      label:             owntracksForm.label.trim(),
+      vehicle_id:        owntracksForm.vehicle_id,
+      user_id:           owntracksForm.user_id,
+      default_trip_type: owntracksForm.default_trip_type,
+    });
+    owntracksCreated.value  = data;
+    owntracksShowForm.value = false;
+    owntracksForm.label     = '';
+    await loadOwntracks();
+  } catch (e) {
+    owntracksError.value = e.response?.data?.error || e.message;
+  } finally {
+    owntracksCreating.value = false;
+  }
+}
+
+async function toggleOwntracksDevice(d) {
+  try {
+    await api.patch(`/owntracks/devices/${d.id}`, { is_active: !d.is_active });
+    await loadOwntracks();
+  } catch (e) { owntracksError.value = e.response?.data?.error || e.message; }
+}
+
+async function deleteOwntracksDevice(d) {
+  if (!confirm(t('adminSetup.owntracks.confirmDelete', { label: d.label }))) return;
+  try {
+    await api.delete(`/owntracks/devices/${d.id}`);
+    await loadOwntracks();
+  } catch (e) { owntracksError.value = e.response?.data?.error || e.message; }
+}
+
+async function copyOwntracksUrl() {
+  if (!owntracksCreated.value) return;
+  await navigator.clipboard.writeText(owntracksCreated.value.webhook_url);
+  owntracksCopied.value = true;
+  setTimeout(() => { owntracksCopied.value = false; }, 2000);
+}
+
+function owntracksVehicleLabel(id) {
+  const v = vehicles.value.find(x => x.id === id);
+  return v?.display_name || v?.vin || `#${id}`;
+}
+function owntracksUserLabel(id) {
+  const u = owntracksUsers.value.find(x => x.id === id);
+  return u?.username || `#${id}`;
+}
+function owntracksRelative(unixSec) {
+  const mins = Math.round((Date.now() / 1000 - unixSec) / 60);
+  if (mins < 1)    return t('adminSetup.owntracks.justNow');
+  if (mins < 60)   return t('adminSetup.owntracks.minsAgo',  { mins });
+  if (mins < 1440) return t('adminSetup.owntracks.hoursAgo', { hours: Math.round(mins / 60) });
+  return t('adminSetup.owntracks.daysAgo', { days: Math.round(mins / 1440) });
 }
 
 async function openOwnerOauth() {
@@ -926,6 +1133,7 @@ onMounted(async () => {
     loadCredsCfg(),
     checkOauthStatus(),
     loadVehicles(),
+    loadOwntracks(),
     loadTelemetryStatus(),
     loadVapidCfg(),
     loadTelegramCfg(),
