@@ -7,6 +7,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.5.0] - 2026-06-06
+
+### Added — Major: Data-sovereign AI chat by default
+
+- **Ollama bundled as a service in the compose stack**: Starting with v3.5.0 every TeslaView installation automatically ships a local LLM runtime — the AI chat works fully offline, data NEVER leaves the instance. No external cloud account required.
+  - New `ollama` service (`ollama/ollama:latest`) in `docker-compose.prod.yml` + `docker-compose.yml`. No host port mapping — only backend-internal via `tesla-net`.
+  - Persistent named volume `ollama_models` (1–20 GB per pulled model).
+  - Conservative memory limit **2 GB default** (override via `OLLAMA_MEMORY_LIMIT` ENV), CPU 1.5 cores (`OLLAMA_CPU_LIMIT`). Models unload after 5 min idle (`OLLAMA_KEEP_ALIVE=5m`) to free RAM on small hosts.
+  - Backend gets `OLLAMA_URL=http://ollama:11434` as ENV default — wizard tenant_setting `ai.ollama_url` takes precedence if external Ollama is preferred.
+  - **Disable** on hosts with too little RAM (< 4 GB): `COMPOSE_PROFILES=lite docker compose up -d` — service stays off, stack stays lean. Or in the wizard `AI provider = Off`.
+
+- **Wizard integration: one-click model install**: In the "External APIs" step → Ollama card, a new "Install model" section appears after a successful connection test. Admin picks from a curated list with per-entry hardware hints (RAM, disk, speed, hardware class), clicks "⬇ Install", and sees a **live progress bar with MB/MB + percent** while the pull runs. Pull is SSE-streamed — works even for multi-GB models on slow connections (1h timeout).
+  - New routes: `GET /api/grok/ollama-recommended` (curated list), `POST /api/grok/ollama-pull` (SSE pull with progress).
+  - Curated models: `llama3.2:1b` (Pi 4 4 GB), `qwen2.5:1.5b` (Pi 4 8 GB), `qwen2.5:3b` (Pi 5/VPS — recommended), `phi3:3.8b`, `llama3:8b`, `qwen2.5:7b`.
+
+- **README with honest hardware table**: New "System requirements" section with minimum/recommended hardware PLUS a separate "AI-mode hardware table" for Ollama with realistic tok/s expectations per hardware class (Pi 4/5, VPS, GPU). Clear instructions on how to disable Ollama if the hardware can't handle it. DE+EN.
+
+### Background
+
+Until v3.4.27 AI chat was only possible via xAI Grok — cloud, every question goes to US servers. Violates TeslaView's data-sovereignty principle. With v3.5.0 AI runs **locally by default**, cloud mode (Grok) remains an optional alternative for power users with performance demands.
+
+---
+
 ## [v3.4.27] - 2026-06-06
 
 ### Added

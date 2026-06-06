@@ -9,10 +9,26 @@ services:
       - '3000:3000'
     env_file:
       - ./backend/.env
+    environment:
+      OLLAMA_URL: "http://ollama:11434"
     volumes:
       - ./data:/app/data
     extra_hosts:
       - "host.docker.internal:host-gateway"
+
+  # Ollama — lokaler LLM-Runtime (default-aktiv). Siehe README "System-
+  # Voraussetzungen" für Hardware-Empfehlungen. Im Dev-Stack mit
+  # COMPOSE_PROFILES=lite docker compose up  deaktivierbar.
+  ollama:
+    image: ollama/ollama:latest
+    container_name: tesla-carview-ollama
+    restart: unless-stopped
+    profiles: ["", "ai-local"]
+    volumes:
+      - ollama_models:/root/.ollama
+    environment:
+      OLLAMA_HOST: "0.0.0.0:11434"
+      OLLAMA_KEEP_ALIVE: "5m"
     # Memory limits are managed dynamically by /opt/monitoring/bin/heal.sh
     # (backend: 30% RAM, frontend/nginx: 5% RAM each) and reapplied every 15 min
     # via docker update — no hardcoded values needed here.
@@ -40,3 +56,4 @@ services:
 
 volumes:
   data:
+  ollama_models:

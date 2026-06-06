@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v3.4.27-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.5.0-E31937?style=flat-square)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.en.md)
 
@@ -134,6 +134,31 @@ Since v2.0 Tesla Carview supports **multiple tenants** with full data isolation:
 - **Version bump on legal pages** automatically writes today's date into the "Stand:" line before incrementing
 
 ---
+
+## System requirements
+
+| Component | Minimum | Recommended | Note |
+|---|---|---|---|
+| **CPU** | 1 core | 2+ cores | Pi 5 / VPS / x86 — ARM64 + AMD64 supported |
+| **RAM** | 2 GB | 4+ GB | with Ollama: 4+ GB required (1B model), 8+ GB for 3B models |
+| **Disk** | 2 GB | 10+ GB | with Ollama: extra 1–20 GB per model |
+| **OS** | Docker-capable | Debian/Ubuntu/Pi OS | systemd-based recommended |
+| **Internet** | no | DSL+ | for Tesla API + GHCR image pulls + Ollama model downloads |
+
+### AI-mode hardware table (Ollama local)
+
+If you want to use the data-sovereign local AI chat (Ollama, on by default):
+
+| Hardware | Recommended model | RAM | tok/s (inference) | Usable for |
+|---|---|---|---|---|
+| Pi 4 (4 GB) | `llama3.2:1b` | ~1.5 GB | 4–6 | simple Q&A, latency noticeable |
+| Pi 4 (8 GB) | `qwen2.5:1.5b` | ~1.8 GB | 3–5 | better, still slow |
+| Pi 5 (8 GB) | `qwen2.5:3b` | ~3 GB | 4–6 | recommended default |
+| VPS (4 vCPU / 8 GB) | `qwen2.5:3b` | ~3 GB | 8–12 | comfortable |
+| VPS / workstation (16 GB+) | `llama3:8b` | ~6.5 GB | 5–8 | very good, a bit slower |
+| GPU (8+ GB VRAM) | `llama3:8b` or similar | per model | 30–80+ | enterprise-grade |
+
+**Disable Ollama** if your hardware can't run it: `COMPOSE_PROFILES=lite docker compose up -d` (or in the wizard `AI provider = Off`). Cloud alternative: `AI provider = Grok` (xAI API key required, data goes to the cloud).
 
 ## Quickstart
 

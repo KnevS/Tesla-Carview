@@ -7,6 +7,29 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.5.0] - 2026-06-06
+
+### Hinzugefügt — Major: Datensouveräner KI-Chat by Default
+
+- **Ollama als gebündelter Service im Compose-Stack**: Jede TeslaView-Installation enthält ab v3.5.0 automatisch einen lokalen LLM-Runtime — der KI-Chat funktioniert vollständig offline, Daten verlassen die eigene Instanz NIE. Kein externes Cloud-Konto mehr nötig.
+  - Neuer Service `ollama` (`ollama/ollama:latest`) in `docker-compose.prod.yml` + `docker-compose.yml`. Kein Host-Port-Mapping — nur Backend-intern via `tesla-net` erreichbar.
+  - Persistentes Named Volume `ollama_models` (1–20 GB je nach gepulltem Modell).
+  - Konservatives Memory-Limit **2 GB Default** (anpassbar via `OLLAMA_MEMORY_LIMIT` ENV), CPU 1.5 Cores (`OLLAMA_CPU_LIMIT`). Modelle werden nach 5 Min Idle entladen (`OLLAMA_KEEP_ALIVE=5m`) um RAM auf kleinen Hosts freizugeben.
+  - Backend bekommt `OLLAMA_URL=http://ollama:11434` als ENV-Default — Wizard-tenant_setting `ai.ollama_url` hat Vorrang falls externe Ollama-Instanz gewünscht.
+  - **Deaktivieren** auf Hosts mit zu wenig RAM (< 4 GB): `COMPOSE_PROFILES=lite docker compose up -d` — Service wird nicht gestartet, Stack bleibt schlank. Oder im Wizard `KI-Provider = Aus`.
+
+- **Wizard-Integration: Modell-Installation mit einem Klick**: Im Schritt „Externe APIs" → Ollama-Card erscheint nach erfolgreichem Verbindungs-Test eine neue Sektion „Modell installieren". Admin wählt aus kuratierter Liste mit Hardware-Empfehlungen je Eintrag (RAM, Disk, Geschwindigkeit, Hardware-Klasse), klickt „⬇ Installieren", sieht **live Progress-Bar mit MB/MB + Prozent** während der Pull läuft. Pull ist SSE-gestreamt — funktioniert auch bei Multi-GB-Modellen über langsame Verbindungen (Timeout 1h).
+  - Neue Routes: `GET /api/grok/ollama-recommended` (kuratierte Liste), `POST /api/grok/ollama-pull` (SSE-Pull mit Progress).
+  - Kuratierte Modelle: `llama3.2:1b` (Pi 4 4 GB), `qwen2.5:1.5b` (Pi 4 8 GB), `qwen2.5:3b` (Pi 5/VPS — empfohlen), `phi3:3.8b`, `llama3:8b`, `qwen2.5:7b`.
+
+- **README mit ehrlicher Hardware-Tabelle**: Neue Sektion „System-Voraussetzungen" mit minimaler/empfohlener Hardware UND einer separaten „KI-Modus-Hardware-Tabelle" für Ollama mit realistischen tok/s-Erwartungen je Hardware-Klasse (Pi 4/5, VPS, GPU). Klare Anleitung wie Ollama deaktiviert wird falls Hardware nicht reicht. DE+EN.
+
+### Hintergrund
+
+Bis v3.4.27 war der KI-Chat ausschließlich über xAI Grok möglich — Cloud, jede Frage geht an US-Server. Verletzt das Datensouveränitäts-Prinzip von TeslaView. Mit v3.5.0 läuft KI **standardmäßig lokal**, Cloud-Mode (Grok) bleibt als optionale Alternative für Power-User mit Performance-Anspruch verfügbar.
+
+---
+
 ## [v3.4.27] - 2026-06-06
 
 ### Hinzugefügt

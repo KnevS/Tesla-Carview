@@ -23,6 +23,11 @@ services:
     restart: unless-stopped
     env_file:
       - ./backend/.env
+    environment:
+      # Default-URL fuer den im Stack gebundelten Ollama-Service.
+      # Wird vom Admin im Wizard ueberschrieben wenn externer Ollama
+      # verwendet werden soll (tenant_setting ai.ollama_url hat Vorrang).
+      OLLAMA_URL: "http://ollama:11434"
     volumes:
       - tesla_data:/app/data
       # system.js: enthaelt /container-restart Endpoint + generateVAPIDKeys-Fix.
@@ -100,6 +105,44 @@ services:
   # ohne Aenderung weiterfunktioniert. Kein Host-Port-Mapping noetig —
   # nur der Backend-Container muss ihn erreichen koennen.
   # Benoetigt User 988 (tesla-proxy auf dem Host) fuer Lese-Zugriff auf Keys.
+  # Ollama — lokaler LLM-Runtime für den datensouveraenen KI-Chat.
+  # Default aktiv; Memory- und CPU-Limits konservativ (passt auf VPS ab
+  # ~4 GB RAM; auf 2-GB-Hosts wird ein 1B-Modell mit OLLAMA_MEMORY_LIMIT=1500M
+  # gerade noch laufen, oder den Service mit
+  #   COMPOSE_PROFILES=lite docker compose up
+  # komplett deaktivieren). Volumen: Modelle werden persistent in
+  # `ollama_models` gespeichert (1-20 GB je nach gepulltem Modell).
+  # Sicherheit: KEIN Host-Port-Mapping — nur Backend ueber tesla-net.
+  ollama:
+    image: ollama/ollama:latest
+    container_name: tesla-carview-ollama
+    restart: unless-stopped
+    # `lite`-Profile deaktiviert Ollama (z.B. fuer 2-GB-Hosts).
+    # Default (kein Profile gesetzt) = Ollama laeuft.
+    profiles: ["", "ai-local"]
+    volumes:
+      - ollama_models:/root/.ollama
+    networks:
+      - tesla-net
+    environment:
+      # Hoert auf allen Interfaces, aber tesla-net ist intern — nicht extern.
+      OLLAMA_HOST: "0.0.0.0:11434"
+      # Modelle nach 5 Min Idle entladen (RAM freigeben auf kleinen Hosts).
+      OLLAMA_KEEP_ALIVE: "5m"
+    deploy:
+      resources:
+        limits:
+          memory: ${OLLAMA_MEMORY_LIMIT:-2048M}
+          cpus: ${OLLAMA_CPU_LIMIT:-1.5}
+        reservations:
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
   tesla-proxy:
     image: tesla/vehicle-command:latest
     container_name: tesla-carview-proxy
@@ -132,6 +175,7 @@ services:
 
 volumes:
   tesla_data:
+  ollama_models:    # ~1-20 GB je nach gepulltem Modell
 
 networks:
   tesla-net:

@@ -545,6 +545,43 @@
                       {{ $t('adminSetup.external.ollamaInstalled') }}: {{ aiOllamaHealth.models.join(', ') }}
                     </p>
                   </div>
+
+                  <!-- Modell-Installation: nur sichtbar wenn Ollama erreichbar -->
+                  <div v-if="aiOllamaHealth?.ok" class="border-t border-gray-700 pt-3 mt-3 space-y-2">
+                    <p class="text-xs font-medium text-white">{{ $t('adminSetup.external.ollamaPullTitle') }}</p>
+                    <p class="text-[11px] text-gray-400 whitespace-pre-line">{{ $t('adminSetup.external.ollamaPullHint') }}</p>
+                    <div class="flex gap-2 items-stretch">
+                      <select v-model="aiPullModel" class="flex-1 bg-gray-700 rounded text-xs px-2 py-1.5">
+                        <option value="">— {{ $t('adminSetup.external.ollamaPullSelect') }} —</option>
+                        <option v-for="m in aiRecommendedModels" :key="m.name" :value="m.name">
+                          {{ m.name }} · {{ m.disk_mb }} MB · {{ m.for_hardware }} · {{ m.speed }}
+                        </option>
+                      </select>
+                      <button @click="pullOllamaModel(aiPullModel)"
+                              :disabled="!aiPullModel || (aiPullProgress && !aiPullProgress.status?.match(/done|error/))"
+                              type="button"
+                              class="text-xs bg-tesla-red hover:bg-tesla-red/80 text-white rounded px-3 py-1.5 disabled:opacity-50 shrink-0">
+                        ⬇ {{ $t('adminSetup.external.ollamaPullBtn') }}
+                      </button>
+                    </div>
+                    <div v-if="aiPullProgress" class="space-y-1">
+                      <div class="flex justify-between text-[10px] text-gray-400">
+                        <span>{{ aiPullProgress.status }}</span>
+                        <span v-if="aiPullProgress.percent !== null && aiPullProgress.percent !== undefined">
+                          {{ aiPullProgress.percent }}% ·
+                          {{ aiPullProgress.completed_mb }} / {{ aiPullProgress.total_mb }} MB
+                        </span>
+                      </div>
+                      <div class="h-1.5 bg-gray-700 rounded-full overflow-hidden">
+                        <div class="h-full bg-tesla-red transition-all"
+                             :style="{ width: (aiPullProgress.percent ?? 5) + '%' }"></div>
+                      </div>
+                      <p v-if="aiPullProgress.status === 'done'" class="text-xs text-green-400">
+                        ✓ {{ aiPullModel }} {{ $t('adminSetup.external.ollamaPullDone') }}
+                      </p>
+                    </div>
+                    <p v-if="aiPullError" class="text-xs text-red-400">✗ {{ aiPullError }}</p>
+                  </div>
                 </div>
               </div>
 
@@ -1117,10 +1154,63 @@ const draftAdmin  = ref({ ocm_key: '', here_key: '', xai_key: '', abrp_key: '',
 const aiConfig = ref({ provider: 'none', grok_configured: false, ollama_url: 'http://localhost:11434', ollama_model: 'qwen2.5:3b' });
 const aiOllamaHealth = ref(null);
 const aiOllamaTesting = ref(false);
+const aiRecommendedModels = ref([]);
+const aiPullModel    = ref('');
+const aiPullProgress = ref(null);  // { status, percent, completed_mb, total_mb }
+const aiPullError    = ref('');
 
 async function loadAiConfig() {
   try { aiConfig.value = (await api.get('/grok/ai-config')).data; }
   catch { /* ignore — Endpoint kommt aus v3.4.27 */ }
+  try { aiRecommendedModels.value = (await api.get('/grok/ollama-recommended')).data; }
+  catch { /* ignore — Endpoint kommt aus v3.5.0 */ }
+}
+
+// SSE-basierter Modell-Pull. Frontend macht das per fetch+ReadableStream
+// statt EventSource, weil EventSource keinen POST-Body kann.
+async function pullOllamaModel(modelName) {
+  if (!modelName) return;
+  aiPullProgress.value = { status: 'starting', percent: null };
+  aiPullError.value    = '';
+  try {
+    const tokenStore = (await import('../store/auth.js')).useAuthStore();
+    const r = await fetch('/api/grok/ollama-pull', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tokenStore.accessToken}` },
+      body:    JSON.stringify({ model: modelName }),
+    });
+    if (!r.ok) {
+      aiPullError.value = `Pull fehlgeschlagen: HTTP ${r.status}`;
+      aiPullProgress.value = null; return;
+    }
+    const reader = r.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const events = buffer.split('\n\n');
+      buffer = events.pop();
+      for (const evt of events) {
+        const line = evt.split('\n').find(l => l.startsWith('data: '));
+        if (!line) continue;
+        try {
+          const payload = JSON.parse(line.slice(6));
+          if (payload.error) { aiPullError.value = payload.error; continue; }
+          if (payload.done)  {
+            aiPullProgress.value = { status: 'done', percent: 100 };
+            await testOllamaHealth();   // refresh installed list
+            return;
+          }
+          aiPullProgress.value = payload;
+        } catch { /* skip */ }
+      }
+    }
+  } catch (e) {
+    aiPullError.value = e.message;
+    aiPullProgress.value = null;
+  }
 }
 
 async function testOllamaHealth() {

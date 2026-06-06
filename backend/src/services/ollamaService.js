@@ -19,7 +19,10 @@
 
 import { getTenantSetting } from './configService.js';
 
-const DEFAULT_URL   = 'http://localhost:11434';
+// Default-URL: Process-ENV (gesetzt im docker-compose.prod.yml auf
+// http://ollama:11434) > Container-Default localhost:11434. tenant_setting
+// `ai.ollama_url` hat immer Vorrang vor beidem.
+const DEFAULT_URL   = process.env.OLLAMA_URL || 'http://localhost:11434';
 const DEFAULT_MODEL = 'qwen2.5:3b';
 const HEALTH_TIMEOUT_MS = 3_000;
 const STREAM_TIMEOUT_MS = 120_000;  // 2 min — kleinere Modelle koennen langsam sein
@@ -52,6 +55,96 @@ export async function healthCheck(db) {
   } catch (e) {
     return { ok: false, error: e.message, url };
   }
+}
+
+/**
+ * Streamt den Pull eines Modells als SSE an `res`.
+ * Ollama liefert NDJSON mit { status, digest, total, completed } pro Layer.
+ * Wir aggregieren das auf einen Gesamt-Fortschritt und schicken sparsame
+ * SSE-Events: { status, percent, completed_mb, total_mb }.
+ */
+export async function streamPull(db, model, res) {
+  const { url } = getConfig(db);
+
+  let upstream;
+  try {
+    upstream = await fetch(`${url}/api/pull`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ name: model, stream: true }),
+      // Pulls koennen GBs sein und auf Pi 4 ueber DSL > 30 Min dauern
+      signal: AbortSignal.timeout(60 * 60 * 1000),
+    });
+  } catch (err) {
+    res.write(`data: ${JSON.stringify({ error: `Ollama nicht erreichbar (${url}): ${err.message}` })}\n\n`);
+    res.end();
+    return;
+  }
+
+  if (!upstream.ok) {
+    const body = await upstream.text();
+    res.write(`data: ${JSON.stringify({ error: `Pull fehlgeschlagen (${upstream.status}): ${body.slice(0, 200)}` })}\n\n`);
+    res.end();
+    return;
+  }
+
+  const reader  = upstream.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer    = '';
+  let lastStatus = '';
+  let lastPercent = -1;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        const s = line.trim();
+        if (!s) continue;
+        try {
+          const c = JSON.parse(s);
+          // Status-Strings: "pulling manifest", "downloading <digest>", "verifying sha", "success" …
+          const status = c.status || '';
+          const total      = c.total      || 0;
+          const completed  = c.completed  || 0;
+          const percent    = total > 0 ? Math.floor(completed / total * 100) : null;
+
+          // Nur emittieren wenn sich Status oder %-Stand wirklich aendert
+          // (sonst flutet Ollama 50 Updates/s).
+          if (status !== lastStatus || percent !== lastPercent) {
+            res.write(`data: ${JSON.stringify({
+              status,
+              percent,
+              completed_mb: completed ? Math.round(completed / 1024 / 1024) : null,
+              total_mb:     total     ? Math.round(total     / 1024 / 1024) : null,
+            })}\n\n`);
+            lastStatus  = status;
+            lastPercent = percent;
+          }
+
+          if (status === 'success') {
+            res.write(`data: ${JSON.stringify({ done: true, model })}\n\n`);
+            res.end();
+            return;
+          }
+          if (c.error) {
+            res.write(`data: ${JSON.stringify({ error: c.error })}\n\n`);
+            res.end();
+            return;
+          }
+        } catch { /* skip mal-formed */ }
+      }
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  // Stream zu Ende ohne success — sicherheitshalber done emittieren.
+  res.write(`data: ${JSON.stringify({ done: true, model })}\n\n`);
+  res.end();
 }
 
 /**

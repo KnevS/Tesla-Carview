@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v3.4.27-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.5.0-E31937?style=flat-square)](CHANGELOG.md)
 [![Lizenz](https://img.shields.io/badge/Lizenz-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.md)
 
@@ -134,6 +134,31 @@ Seit v2.0 unterstützt Tesla Carview **mehrere Mandanten** mit vollständiger Da
 - **Versionsbump auf Legal-Seiten** schreibt automatisch das aktuelle Datum in die „Stand:"-Zeile, bevor versioniert wird
 
 ---
+
+## System-Voraussetzungen
+
+| Komponente | Mindest | Empfohlen | Hinweis |
+|---|---|---|---|
+| **CPU** | 1 Kern | 2+ Kerne | Pi 5 / VPS / x86 — alles ARM64 + AMD64 |
+| **RAM** | 2 GB | 4+ GB | mit Ollama: 4+ GB Pflicht (1B-Modell), 8+ GB für 3B-Modelle |
+| **Disk** | 2 GB | 10+ GB | mit Ollama: zusätzlich 1–20 GB pro Modell |
+| **OS** | Docker-fähig | Debian/Ubuntu/Pi OS | systemd-basiert empfohlen |
+| **Internet** | nein | DSL+ | für Tesla-API + GHCR-Image-Pulls + Ollama-Modell-Downloads |
+
+### KI-Modus-Hardware-Tabelle (Ollama lokal)
+
+Falls du den datensouveränen lokalen KI-Chat (Ollama, default-aktiv) nutzen willst:
+
+| Hardware | Empfohlenes Modell | RAM-Bedarf | tok/s (Inferenz) | Brauchbar für |
+|---|---|---|---|---|
+| Pi 4 (4 GB) | `llama3.2:1b` | ~1.5 GB | 4–6 | einfache Q&A, Wartezeit spürbar |
+| Pi 4 (8 GB) | `qwen2.5:1.5b` | ~1.8 GB | 3–5 | besser, immer noch langsam |
+| Pi 5 (8 GB) | `qwen2.5:3b` | ~3 GB | 4–6 | empfohlener Standard |
+| VPS (4 vCPU/8 GB) | `qwen2.5:3b` | ~3 GB | 8–12 | komfortabel |
+| VPS/Workstation (16 GB+) | `llama3:8b` | ~6.5 GB | 5–8 | sehr gut, etwas langsamer |
+| GPU (8+ GB VRAM) | `llama3:8b` o.ä. | je Modell | 30–80+ | enterprise-grade |
+
+**Ollama deaktivieren** wenn deine Hardware nicht reicht: `COMPOSE_PROFILES=lite docker compose up -d` (oder im Wizard `KI-Provider = Aus`). Cloud-Alternative: `KI-Provider = Grok` (xAI API-Key nötig, Daten gehen in die Cloud).
 
 ## Schnellstart
 

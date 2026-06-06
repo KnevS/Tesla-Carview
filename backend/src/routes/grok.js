@@ -12,7 +12,19 @@ import { getTenantSetting, setTenantSetting } from '../services/configService.js
 import { getTodayUsage } from '../services/grokService.js';
 // Provider-Wahl macht der Dispatcher; Routen kennen Grok/Ollama nicht direkt.
 import { buildContext, checkBudget, streamChat, getActiveProvider, healthCheck } from '../services/aiService.js';
-import { healthCheck as ollamaHealth } from '../services/ollamaService.js';
+import { healthCheck as ollamaHealth, streamPull as ollamaPull } from '../services/ollamaService.js';
+
+// Kuratierte Modell-Empfehlungen nach Hardware-Klasse — wird vom
+// Wizard zur Auto-Auswahl angezeigt. Reihenfolge: kleiner -> groesser.
+// disk_mb ≈ Q4-quantisierte Modellgroesse, ram_mb ≈ benoetigter Inferenz-RAM.
+const RECOMMENDED_MODELS = [
+  { name: 'llama3.2:1b',  disk_mb: 1300, ram_mb: 1500, for_hardware: 'Pi 4 (4 GB)',           speed: 'schnell, einfache Antworten' },
+  { name: 'qwen2.5:1.5b', disk_mb: 1000, ram_mb: 1800, for_hardware: 'Pi 4 (8 GB)',           speed: 'schnell, bessere Qualitaet als llama3.2:1b' },
+  { name: 'qwen2.5:3b',   disk_mb: 2000, ram_mb: 3000, for_hardware: 'Pi 5, VPS ab 4 GB',     speed: 'empfohlener Standard' },
+  { name: 'phi3:3.8b',    disk_mb: 2300, ram_mb: 3500, for_hardware: 'Pi 5, VPS ab 4 GB',     speed: 'staerker bei Logik/Code' },
+  { name: 'llama3:8b',    disk_mb: 4700, ram_mb: 6500, for_hardware: 'VPS ab 8 GB, GPU',       speed: 'sehr gut, langsamer' },
+  { name: 'qwen2.5:7b',   disk_mb: 4400, ram_mb: 6000, for_hardware: 'VPS ab 8 GB, GPU',       speed: 'sehr gut, langsamer' },
+];
 
 const router = Router();
 
@@ -213,6 +225,27 @@ router.get('/ai-health', requireAuth, async (req, res) => {
 //   damit Admin bei Provider-Wahl im UI vorab pruefen kann ob Ollama laeuft
 router.get('/ollama-health', requireAuth, async (req, res) => {
   res.json(await ollamaHealth(req.db));
+});
+
+// GET /api/grok/ollama-recommended — kuratierte Modell-Vorschlaege fuer
+// die Wizard-Auswahl. Statische Liste; bewusst nicht aus Ollama-Library
+// gezogen, damit wir verlaesslich nur getestete Modelle anbieten.
+router.get('/ollama-recommended', requireAuth, (_req, res) => {
+  res.json(RECOMMENDED_MODELS);
+});
+
+// POST /api/grok/ollama-pull — Modell installieren (Admin), SSE-Progress
+router.post('/ollama-pull', requireAuth, requireAdmin, async (req, res) => {
+  const model = String(req.body?.model || '').trim();
+  if (!model || !/^[a-zA-Z0-9_.:-]+$/.test(model)) {
+    return res.status(400).json({ error: 'Ungueltiger Modellname' });
+  }
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.flushHeaders();
+  await ollamaPull(req.db, model, res);
 });
 
 export default router;
