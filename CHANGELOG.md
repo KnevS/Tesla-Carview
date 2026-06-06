@@ -7,6 +7,24 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.5.1] - 2026-06-06
+
+### Hinzugefügt
+
+- **OwnTracks-App-Setup per QR-Code**: Statt URL/DeviceID/TrackerID manuell in der App eintippen, scannt der Endnutzer einen QR-Code mit der nativen iPhone-Kamera. Workflow: Kamera-App → QR-Code → „In OwnTracks öffnen" → Konfiguration importieren bestätigen → fertig. Im Wizard nach Device-Anlage wird der QR direkt angezeigt (420×420 px), darunter eingeklappt der manuelle Fallback (Webhook-URL + .otrc-Download).
+  - Neue Routes (Token-basiert, kein JWT — Token in URL ist die Auth wie beim Webhook):
+    - `GET /api/owntracks/config.otrc?token=<device_token>` — liefert die `_type: configuration`-JSON für die OwnTracks-App
+    - `GET /api/owntracks/qr.png?token=<device_token>` — PNG mit `owntracks:///config?url=…`-Deep-Link, scannbar mit iOS/Android-Kamera
+  - Konfiguration wird mit Hardware-tauglichen Defaults vorbelegt: `mode: 3` (HTTP), `monitoring: 1` (significant changes — akku-schonend), `locatorDisplacement: 200` (alle 200 m ein Punkt), `ignoreInaccurateLocations: 100` (GPS-Spikes >100 m verwerfen), `pubExtendedData: true` (Speed/Heading mitsenden).
+
+### Geändert
+
+- **Telemetry-View „Noch keine Daten"-Banner ist jetzt ehrlich**: Vorher zeigte die Telemetry-Seite "Telemetry läuft erst wenn der Poller das erste Mal vom Tesla antwortet bekommt" — was im Owner-API-Modus seit Tesla's 2026-Sperre eine falsche Hoffnung war (es kommt eben nie eine Antwort). Neuer Banner für Owner-Mode-Instanzen: erklärt die Tesla-Änderung, benennt beide Auswege (OwnTracks sofort verfügbar, Fleet API langfristig), verlinkt direkt auf den Einrichtungs-Assistenten und developer.tesla.com.
+
+- **README mit Tesla-API-Status-Sektion**: Neuer Block ganz oben (DE+EN) erklärt offen den 2026er-Stand: Owner API tot, Fleet API einziger offizieller Weg (Wartezeit + Kosten), OwnTracks als kostenlose Sofort-Alternative für Fahrtenbuch-Use-Case. Tabelle mit allen Anbindungs-Optionen + was sie liefern. Keine falschen Erwartungen mehr für neue Selbsthoster.
+
+---
+
 ## [v3.5.0] - 2026-06-06
 
 ### Hinzugefügt — Major: Datensouveräner KI-Chat by Default

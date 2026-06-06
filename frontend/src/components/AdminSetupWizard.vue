@@ -244,17 +244,37 @@
                 {{ $t('adminSetup.owntracks.noDevices') }}
               </p>
 
-              <!-- Webhook-URL einmalig nach Create -->
-              <div v-if="owntracksCreated" class="bg-emerald-900/20 border border-emerald-700/40 rounded-lg p-3 space-y-2">
-                <p class="text-xs font-semibold text-emerald-300">{{ $t('adminSetup.owntracks.createdTitle') }}</p>
-                <p class="text-xs text-emerald-200 whitespace-pre-line">{{ $t('adminSetup.owntracks.createdHint') }}</p>
-                <div class="flex gap-2 items-center">
-                  <code class="flex-1 bg-gray-950 rounded px-2 py-1.5 font-mono text-[10px] select-all break-all">{{ owntracksCreated.webhook_url }}</code>
-                  <button @click="copyOwntracksUrl"
-                          class="text-xs px-3 py-1 rounded bg-emerald-700 hover:bg-emerald-600 text-white shrink-0">
-                    {{ owntracksCopied ? '✓' : $t('common.copy') }}
-                  </button>
+              <!-- Webhook-URL einmalig nach Create — mit QR-Code für 1-Tap-Setup -->
+              <div v-if="owntracksCreated" class="bg-emerald-900/20 border border-emerald-700/40 rounded-lg p-4 space-y-3">
+                <p class="text-sm font-semibold text-emerald-300">{{ $t('adminSetup.owntracks.createdTitle') }}</p>
+
+                <!-- Primärer Weg: QR-Code scannen mit iPhone-Kamera -->
+                <div class="bg-white rounded-lg p-3 inline-block">
+                  <img :src="owntracksQrUrl" alt="OwnTracks QR-Code" class="w-56 h-56 block" />
                 </div>
+                <p class="text-xs text-emerald-100 whitespace-pre-line">{{ $t('adminSetup.owntracks.qrInstructions') }}</p>
+
+                <!-- Backup: manueller Setup mit Webhook-URL -->
+                <details class="text-xs">
+                  <summary class="cursor-pointer text-emerald-300/80 hover:text-emerald-200">
+                    {{ $t('adminSetup.owntracks.manualSetup') }}
+                  </summary>
+                  <div class="mt-2 space-y-2">
+                    <p class="text-emerald-100 whitespace-pre-line">{{ $t('adminSetup.owntracks.createdHint') }}</p>
+                    <div class="flex gap-2 items-center">
+                      <code class="flex-1 bg-gray-950 rounded px-2 py-1.5 font-mono text-[10px] select-all break-all">{{ owntracksCreated.webhook_url }}</code>
+                      <button @click="copyOwntracksUrl"
+                              class="text-xs px-3 py-1 rounded bg-emerald-700 hover:bg-emerald-600 text-white shrink-0">
+                        {{ owntracksCopied ? '✓' : $t('common.copy') }}
+                      </button>
+                    </div>
+                    <a :href="owntracksOtrcUrl" target="_blank" rel="noopener"
+                       class="inline-block text-emerald-300 hover:underline">
+                      ⬇ {{ $t('adminSetup.owntracks.downloadOtrc') }}
+                    </a>
+                  </div>
+                </details>
+
                 <button @click="owntracksCreated = null"
                         class="text-xs text-gray-400 hover:text-white">
                   {{ $t('common.close') }}
@@ -919,6 +939,20 @@ const owntracksError    = ref('');
 
 const canCreateOwntracksDevice = computed(() =>
   !!(owntracksForm.label?.trim() && owntracksForm.vehicle_id && owntracksForm.user_id)
+);
+
+// Token-basierte URLs fuer Selbst-Setup nach Device-Erstellung.
+// Werden vom Backend an /api/owntracks/qr.png + /config.otrc bedient,
+// brauchen kein JWT (Token in der URL ist die Auth).
+const owntracksQrUrl   = computed(() =>
+  owntracksCreated.value
+    ? `/api/owntracks/qr.png?token=${encodeURIComponent(owntracksCreated.value.token)}`
+    : ''
+);
+const owntracksOtrcUrl = computed(() =>
+  owntracksCreated.value
+    ? `/api/owntracks/config.otrc?token=${encodeURIComponent(owntracksCreated.value.token)}`
+    : ''
 );
 
 async function loadOwntracks() {

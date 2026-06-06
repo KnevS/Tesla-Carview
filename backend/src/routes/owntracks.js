@@ -26,6 +26,7 @@
 
 import { Router }      from 'express';
 import { randomBytes } from 'crypto';
+import QRCode          from 'qrcode';
 import { getMasterDb, getDb } from '../db/database.js';
 
 const router = Router();
@@ -179,6 +180,87 @@ router.post('/webhook', (req, res) => {
   ).run(device.id);
 
   return res.json([]);
+});
+
+// ── Self-Service-Setup: .otrc-Config + QR-Code (Token-basiert) ───────────
+//
+// Die OwnTracks-App (iOS+Android) kann ihre komplette Konfiguration aus
+// einer JSON-Datei im "remoteconfig"-Format laden. Wir generieren die
+// Datei pro Device dynamisch — der Token in der URL ist die Auth.
+//
+// Workflow fuer den Endnutzer:
+//   1. iPhone-Kamera auf den QR-Code im Wizard halten
+//   2. iOS erkennt den owntracks://config?url=… Deep-Link
+//   3. Tippt auf "In OwnTracks oeffnen" → App importiert Konfiguration
+//   4. Standortberechtigung auf "Immer" stellen, fertig
+//
+// Format-Doku: https://owntracks.org/booklet/features/remoteconfig/
+
+function deviceFromToken(token) {
+  if (!token || token.length < 16) return null;
+  return getMasterDb().prepare(
+    'SELECT id, label, device_token FROM owntracks_devices WHERE device_token=? AND is_active=1'
+  ).get(token);
+}
+
+function publicBase(req) {
+  return process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
+}
+
+// Sicheres "device id" Slug-Mapping aus Label (max 16 Zeichen, ASCII).
+function slugify(s) {
+  return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 16) || 'phone';
+}
+
+// GET /api/owntracks/config.otrc?token=<device_token>
+// Liefert die JSON-Datei die OwnTracks ueber den Deep-Link importiert.
+router.get('/config.otrc', (req, res) => {
+  const device = deviceFromToken(req.query.token);
+  if (!device) return res.status(401).json({ error: 'Token ungueltig oder Device deaktiviert' });
+
+  const base = publicBase(req);
+  const config = {
+    _type:                'configuration',
+    mode:                 3,                                       // 3 = HTTP-Mode
+    url:                  `${base}/api/owntracks/webhook?token=${device.device_token}`,
+    deviceId:             slugify(device.label),
+    tid:                  slugify(device.label).slice(-2).toUpperCase() || 'TV',
+    monitoring:           1,                                       // 1 = significant changes (akku-schonend)
+    locatorInterval:      0,                                       // 0 = pure significant-changes
+    locatorDisplacement:  200,                                     // alle 200 m ein Punkt
+    auth:                 false,
+    cmd:                  false,
+    pubExtendedData:      true,                                    // erweiterte Telemetry (Speed, Heading, etc.)
+    ignoreInaccurateLocations: 100,                                // GPS-Spikes >100m ignorieren
+  };
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="teslaview-${slugify(device.label)}.otrc"`);
+  res.json(config);
+});
+
+// GET /api/owntracks/qr.png?token=<device_token>
+// QR-Code mit dem owntracks://-Deep-Link, scannbar mit der Kamera-App.
+router.get('/qr.png', async (req, res) => {
+  const device = deviceFromToken(req.query.token);
+  if (!device) return res.status(401).end();
+
+  const base = publicBase(req);
+  const configUrl = `${base}/api/owntracks/config.otrc?token=${device.device_token}`;
+  const deepLink  = `owntracks:///config?url=${encodeURIComponent(configUrl)}`;
+
+  try {
+    const png = await QRCode.toBuffer(deepLink, {
+      width:           420,
+      margin:          2,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#000000', light: '#ffffff' },
+    });
+    res.setHeader('Content-Type',  'image/png');
+    res.setHeader('Cache-Control', 'no-store');
+    res.send(png);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // ── Admin: Devices verwalten ─────────────────────────────────────────────────

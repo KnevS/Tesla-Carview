@@ -173,6 +173,50 @@
       </p>
     </div>
 
+    <!-- Owner-Mode ist 2026 in der Praxis tot:
+         Tesla hat die Owner-API-Vehicle-Endpoints geschlossen; ownerapi-
+         Tokens werden von Fleet API mit HTTP 401 abgelehnt. Egal ob der
+         Admin pausiert hat oder noch hofft — Live-Daten kommen nicht.
+         Ehrlicher Hinweis statt falscher „Polling laeuft gleich"-Hoffnung. -->
+    <div v-else-if="!loading && !offline && teslaStatus.mode === 'owner'"
+         class="card text-center py-8 space-y-3 border border-amber-700/40 bg-amber-900/10">
+      <p class="text-amber-200 font-semibold flex items-center justify-center gap-2">
+        <AppIcon name="alert" :size="20" />
+        Tesla-Daten nicht erreichbar
+      </p>
+      <p v-if="teslaStatus.paused" class="text-sm text-gray-300 max-w-xl mx-auto">
+        Owner API ist pausiert.
+      </p>
+      <p v-else class="text-sm text-gray-300 max-w-xl mx-auto">
+        Tesla blockiert seit 2026 Owner-API-Tokens an der Fleet API mit HTTP 401 —
+        Live-Telemetry ist über den Owner-Pfad nicht mehr möglich, egal ob aktiv oder pausiert.
+      </p>
+      <p class="text-sm text-gray-300 max-w-xl mx-auto pt-2">Es gibt zwei Wege, an Daten zu kommen:</p>
+      <div class="max-w-xl mx-auto text-left space-y-3 text-sm">
+        <div class="bg-gray-800/40 rounded px-4 py-3">
+          <p class="text-white font-semibold">🚗 Sofort verfügbar — Smartphone-GPS via OwnTracks</p>
+          <p class="text-gray-400 text-xs mt-1">
+            GPS-Track, Fahrten und Distanz für alle Fahrzeuge.
+            Keine Akku- oder Klima-Daten — die brauchen Fleet API.
+          </p>
+        </div>
+        <div class="bg-gray-800/40 rounded px-4 py-3">
+          <p class="text-white font-semibold">⏳ Langfristig — Fleet API bei developer.tesla.com beantragen</p>
+          <p class="text-gray-400 text-xs mt-1">
+            Wartezeit Wochen bis Monate, ~10 €/Monat. Liefert dann alle Daten (Akku, Klima, TPMS, Telemetry).
+          </p>
+        </div>
+      </div>
+      <div class="flex gap-2 justify-center flex-wrap pt-2">
+        <RouterLink to="/settings" class="btn-primary inline-block text-sm">
+          🛠 Einrichtungs-Assistent → OwnTracks
+        </RouterLink>
+        <a href="https://developer.tesla.com" target="_blank" rel="noopener" class="btn-secondary inline-block text-sm">
+          ↗ Fleet API beantragen
+        </a>
+      </div>
+    </div>
+
     <!-- Default: Fahrzeug vorhanden, online erwartet, aber noch nichts geladen -->
     <div v-else-if="!loading && !offline" class="card text-center py-12 text-gray-400">
       Noch keine Daten — Telemetry läuft erst, wenn der Poller das erste Mal vom Tesla antwortet bekommt.
@@ -220,6 +264,10 @@ const offline    = ref(false);
 // abgelaufen ist. Spezifischer als 'offline', damit der User weiss
 // dass er handeln muss (neu verbinden) und nicht nur warten.
 const authError  = ref(false);
+// teslaStatus = { connected, mode, paused } aus /api/auth/tesla/status.
+// Wenn mode='owner' und paused=true: Tesla-Daten sind explizit aus —
+// ehrlicher Banner statt false Hoffnung "Polling laeuft, warte einen Moment".
+const teslaStatus = ref({ connected: false, mode: 'fleet', paused: false });
 let   timer      = null;
 let   leafletMap = null;
 let   posMarker  = null;
@@ -281,7 +329,12 @@ async function refresh() {
   } finally { loading.value = false; }
 }
 
-onMounted(() => { refresh(); timer = setInterval(refresh, 30000); });
+async function loadTeslaStatus() {
+  try { teslaStatus.value = (await api.get('/auth/tesla/status')).data; }
+  catch { /* ignore — Status ist nice-to-have, nicht kritisch */ }
+}
+
+onMounted(() => { loadTeslaStatus(); refresh(); timer = setInterval(refresh, 30000); });
 onUnmounted(() => { clearInterval(timer); if (leafletMap) { leafletMap.remove(); leafletMap = null; } });
 watch(() => vehicle.value?.id, () => { if (leafletMap) { leafletMap.remove(); leafletMap = null; posMarker = null; } refresh(); });
 </script>

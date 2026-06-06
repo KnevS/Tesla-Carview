@@ -7,6 +7,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.5.1] - 2026-06-06
+
+### Added
+
+- **OwnTracks app setup via QR code**: Instead of manually typing URL/DeviceID/TrackerID into the app, the end user scans a QR code with the native iPhone camera. Workflow: Camera app → QR code → "Open in OwnTracks" → confirm configuration import → done. After device creation in the wizard, the QR is shown directly (420×420 px); the manual fallback (webhook URL + .otrc download) is collapsed below.
+  - New routes (token-based, no JWT — token in URL is the auth, same model as the webhook):
+    - `GET /api/owntracks/config.otrc?token=<device_token>` — returns the `_type: configuration` JSON for the OwnTracks app
+    - `GET /api/owntracks/qr.png?token=<device_token>` — PNG with an `owntracks:///config?url=…` deep link, scannable by iOS/Android camera
+  - Configuration is pre-populated with sensible defaults: `mode: 3` (HTTP), `monitoring: 1` (significant changes — battery-friendly), `locatorDisplacement: 200` (one point every 200 m), `ignoreInaccurateLocations: 100` (drop GPS spikes >100 m), `pubExtendedData: true` (send speed/heading too).
+
+### Changed
+
+- **Telemetry view "no data yet" banner is now honest**: The Telemetry page used to say "Telemetry will start once the poller gets its first response from Tesla" — which was a false hope in owner-API mode after Tesla's 2026 lockdown (the response never comes). New banner for owner-mode instances: explains the Tesla change, names both escape routes (OwnTracks immediately, Fleet API long-term), links directly to the setup wizard and developer.tesla.com.
+
+- **README with Tesla API status section**: New top-level block (DE+EN) is upfront about the 2026 state: Owner API dead, Fleet API the only official path (waiting time + cost), OwnTracks as a free immediate alternative for the logbook use case. Table with all connection options and what they deliver. No more false expectations for new self-hosters.
+
+---
+
 ## [v3.5.0] - 2026-06-06
 
 ### Added — Major: Data-sovereign AI chat by default

@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v3.5.0-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.5.1-E31937?style=flat-square)](CHANGELOG.md)
 [![Lizenz](https://img.shields.io/badge/Lizenz-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.md)
 
@@ -20,6 +20,26 @@ Läuft auf: **Linux-Server** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), lok
      ueber frontend/.env (siehe frontend/.env.example) einsetzen.
      Self-hosters can configure their own footer contact via the .env. -->
 
+
+---
+
+## ⚠ Wichtig — Tesla-API-Anbindung Stand 2026
+
+Tesla hat zwischen Mai und Juni 2026 die **inoffizielle Owner API** für Fahrzeug-Endpoints geschlossen. Bisher gängige Community-Workarounds (eingelogt mit dem Tesla-Account-Refresh-Token, Aufruf von `/api/1/vehicles/{id}/vehicle_data`) liefern jetzt **HTTP 401 „invalid bearer token"** — der Workaround ist tot, kein Patch kann ihn wiederbeleben.
+
+Für Live-Vehicle-Daten (Akku, Klima, TPMS, Telemetry-Stream) gibt es **nur einen offiziellen Weg**: Tesla **Fleet API** mit App-Approval bei [developer.tesla.com](https://developer.tesla.com/). Wartezeit aktuell **Wochen bis Monate**, ~10 €/Monat laufende Kosten.
+
+**Was TeslaView trotz fehlender Fleet-API liefert:**
+
+| Anbindung | Datenquelle | Was du bekommst | Setup |
+|---|---|---|---|
+| **OwnTracks** (empfohlen, sofort) | Smartphone der Fahrer | Fahrten, GPS-Track, Distanz, Geschwindigkeit | Wizard-Schritt 5, ~5 Min |
+| **Tesla Fleet OAuth** | Tesla Cloud | Akku, Klima, TPMS, alles via Polling | Fleet-API-Approval nötig |
+| **Tesla Fleet Telemetry** | Tesla → Push-WebSocket | Live-Stream | Fleet-API + Virtual Key + Eintrag bei Tesla |
+| **Tesla Owner API** | Tesla Cloud | ❌ **2026 blockiert** | — |
+| **Monta-Integration** | Monta Cloud | Heimlade-Kosten für Dienstwagen-Abrechnung | API-Key in Wizard |
+
+**Konkret für neue Installationen ohne Fleet-Approval:** OwnTracks aktivieren — du bekommst rechtssicheres GPS-basiertes Fahrtenbuch, Trip-Heatmap, Distanz-Tracking, automatische Fahrer-Zuordnung. Die fehlenden Akku-/Klima-Werte sind für ein klassisches Dienst-Fahrtenbuch nicht zwingend nötig.
 
 ---
 

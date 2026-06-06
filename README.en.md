@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v3.5.0-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.5.1-E31937?style=flat-square)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.en.md)
 
@@ -20,6 +20,26 @@ Runs on: **Linux servers** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), local
      ueber frontend/.env (siehe frontend/.env.example) einsetzen.
      Self-hosters can configure their own footer contact via the .env. -->
 
+
+---
+
+## ⚠ Important — Tesla API status as of 2026
+
+Tesla closed the **unofficial Owner API** for vehicle endpoints between May and June 2026. The previously common community workaround (signing in with a Tesla account refresh token, calling `/api/1/vehicles/{id}/vehicle_data`) now returns **HTTP 401 "invalid bearer token"** — the workaround is dead and no patch can revive it.
+
+For live vehicle data (battery, climate, TPMS, telemetry stream) there is **only one official path**: the Tesla **Fleet API** with app approval via [developer.tesla.com](https://developer.tesla.com/). Current waiting time is **weeks to months**, ~€10/month running cost.
+
+**What TeslaView still delivers without Fleet API approval:**
+
+| Connection | Data source | What you get | Setup |
+|---|---|---|---|
+| **OwnTracks** (recommended, immediate) | Driver's smartphone | Trips, GPS track, distance, speed | Wizard step 5, ~5 min |
+| **Tesla Fleet OAuth** | Tesla cloud | Battery, climate, TPMS, all via polling | Fleet API approval required |
+| **Tesla Fleet Telemetry** | Tesla → push WebSocket | Live stream | Fleet API + Virtual Key + Tesla registration |
+| **Tesla Owner API** | Tesla cloud | ❌ **blocked in 2026** | — |
+| **Monta integration** | Monta cloud | Home-charging cost for company-car billing | API key in wizard |
+
+**Concretely for new installs without Fleet approval:** enable OwnTracks — you get a legally compliant GPS-based logbook, trip heatmap, distance tracking, automatic driver assignment. The missing battery/climate values are not strictly required for a classic business logbook.
 
 ---
 

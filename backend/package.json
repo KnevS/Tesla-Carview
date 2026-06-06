@@ -1,6 +1,6 @@
 {
   "name": "tesla-carview-backend",
-  "version": "3.5.0",
+  "version": "3.5.1",
   "description": "Car Usability Management – Backend API",
   "main": "src/index.js",
   "type": "module",
