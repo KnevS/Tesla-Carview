@@ -39,7 +39,7 @@ Tesla hat im Mai/Juni 2026 die inoffizielle Owner API für Fahrzeug-Endpoints ge
 
 | Quelle | Was du bekommst | Setup-Aufwand | Kosten |
 | --- | --- | --- | --- |
-| **Tesla Fleet API** | Akku, Klima, GPS-Live, TPMS, Befehle | App-Approval bei [developer.tesla.com](https://developer.tesla.com), Wartezeit Wochen–Monate | ~10 €/Monat bei Tesla |
+| **Tesla Fleet API** | Akku, Klima, GPS-Live, TPMS, Befehle | App-Approval bei [developer.tesla.com](https://developer.tesla.com), Wartezeit Wochen–Monate | meist 0 €/Monat — Tesla gewährt $10 Freikontingent/Account, deckt typischen Privat-Use mit einem Auto + Streaming-Telemetrie. Darüber pay-per-use. |
 | **OwnTracks** (Smartphone) | GPS-Track, Trip-Erkennung, Distanz | ~5 Min im Wizard + App-Install | kostenlos |
 | **Manuelle Anlage** | Stammdaten ohne API (Fahrtenbuch funktioniert) | < 1 Min im Wizard | kostenlos |
 
@@ -371,7 +371,20 @@ Thank you
 
 ### API-Kosten verstehen
 
-Tesla rechnet jeden `/vehicle_data`-Call ab (≈ 0,005 €/Aufruf). Ohne Fleet Telemetry pollt die App im Hintergrund:
+**Wichtig zuerst:** Tesla gewährt **$10 Freikontingent pro Account und Monat** (Stand 2026, [developer.tesla.com](https://developer.tesla.com)) — das reicht für **einen Wagen mit Fleet-Telemetry + ein paar Commands/Wakes pro Tag**. Im typischen Privat-Use liegt die Fleet-API-Rechnung damit bei **0 €**.
+
+Darüber hinaus pay-per-use (alle Preise in USD, $1 ≈ 0,92 €):
+
+| Aktion | Preis |
+|--------|-------|
+| Streaming Signals | 150.000 Signale = $1 |
+| Commands (Klima, Türen, Schlüssel) | 1.000 = $1 |
+| Vehicle-Data-Polling | 500 Requests = $1 |
+| **Wake-Up** (teuerste Aktion) | 50 = $1 (= $0,02/Wake) |
+| Fleet Telemetry (Streaming) | ~$0,0067/Std/Auto |
+| Vehicle Data (Polling) | ~$0,12/Std/Auto (≈ 18× teurer als Streaming) |
+
+Deshalb: **Fleet Telemetry konfigurieren** statt zu pollen — drastischer Kostenunterschied bei gleichem Datenumfang. Ohne Fleet Telemetry pollt die App im Hintergrund:
 
 | Zustand | Intervall | Calls/Tag |
 |---------|-----------|-----------|
@@ -382,9 +395,12 @@ Tesla rechnet jeden `/vehicle_data`-Call ab (≈ 0,005 €/Aufruf). Ohne Fleet T
 
 **Tages-Cap:** Standardmäßig max. 30 Calls/Fahrzeug/Tag (konfigurierbar via `TESLA_DAILY_CAP`), danach Pause bis Mitternacht. **Monats-Cap:** Standardmäßig max. 400 Calls/Fahrzeug/Monat (konfigurierbar via `TESLA_MONTHLY_CAP`). Beide Caps sind DB-persistent und werden durch Container-Neustarts nicht zurückgesetzt.
 
-**Kosten senken:**
-- Fleet Telemetry einrichten → reduziert auf ~24 Calls/Tag (~3,60 €/Monat)
+**Kosten senken (falls nötig):**
+- Fleet Telemetry einrichten → Streaming statt Polling, ~$5/Monat ohne Free-Tier, $0 mit Free-Tier
 - In Einstellungen → Tesla-Verbindung: Monatslimit + Hard-Stop aktivieren
+- Daily/Monthly Caps in `TESLA_DAILY_CAP` und `TESLA_MONTHLY_CAP` belassen
+
+**Fazit:** Bei einem Auto + Streaming-Telemetry + maßvollen Commands kostet die Fleet-API faktisch nichts. Erst Multi-Auto-Setups oder aggressives Polling können den Free-Tier sprengen.
 
 ## 🔌 Monta-Integration (Heimladen & Abrechnung) {#monta}
 

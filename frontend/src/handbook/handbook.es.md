@@ -39,7 +39,7 @@ En mayo/junio de 2026, Tesla cerró la Owner API no oficial para los endpoints d
 
 | Fuente | Lo que obtienes | Esfuerzo de configuración | Coste |
 | --- | --- | --- | --- |
-| **Tesla Fleet API** | Batería, clima, GPS en vivo, TPMS, comandos | Aprobación de app en [developer.tesla.com](https://developer.tesla.com), espera semanas–meses | ~10 €/mes en Tesla |
+| **Tesla Fleet API** | Batería, clima, GPS en vivo, TPMS, comandos | Aprobación de app en [developer.tesla.com](https://developer.tesla.com), espera semanas–meses | normalmente 0 €/mes — Tesla concede 10 $ de crédito gratuito por cuenta, cubre el uso privado típico con un coche + telemetría streaming. Por encima, pago por uso. |
 | **OwnTracks** (smartphone) | Trayectoria GPS, detección de viajes, distancia | ~5 min en el asistente + instalación de la app | gratis |
 | **Entrada manual** | Datos base sin API (el libro de viajes funciona) | < 1 min en el asistente | gratis |
 
@@ -371,7 +371,7 @@ Thank you
 
 ### Entender los costes de la API
 
-Tesla factura cada llamada `/vehicle_data` (≈ 0,005 €/llamada). Sin Fleet Telemetry la app consulta en segundo plano:
+**Importante antes:** Tesla concede **10 $ de crédito gratuito por cuenta al mes** (estado 2026) — suficiente para **un vehículo con Fleet Telemetry + algunos comandos/wakes al día**. En uso privado típico la factura Fleet API queda en **0 €**. Por encima, pago por uso: Streaming 150.000 señales = 1 $, Comandos 1.000 = 1 $, Polling 500 requests = 1 $, Wakes 50 = 1 $ (la acción más cara). Sin Fleet Telemetry la app consulta en segundo plano:
 
 | Estado | Intervalo | Llamadas/día |
 |--------|-----------|--------------|
@@ -382,7 +382,7 @@ Tesla factura cada llamada `/vehicle_data` (≈ 0,005 €/llamada). Sin Fleet Te
 
 **Límite diario:** máx. 80 llamadas/vehículo/día por defecto, luego pausa hasta medianoche.
 
-**Reducir costes:** configurar Fleet Telemetry (→ ~3,60 €/mes), activar límite mensual en Ajustes → Conexión Tesla.
+**Reducir costes:** configurar Fleet Telemetry (streaming en lugar de polling, ~5 $/mes fuera del crédito gratuito, 0 $ con crédito), activar límite mensual en Ajustes → Conexión Tesla. **En la práctica: un vehículo + telemetría streaming = Fleet API prácticamente gratis.**
 
 ## 🔌 Integración con Monta (carga doméstica y facturación) {#monta}
 

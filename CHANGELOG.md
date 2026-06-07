@@ -7,6 +7,23 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.6.1] - 2026-06-07
+
+### Korrigiert — Doku: Fleet-API-Kosten-Aussage
+
+Bisher stand in Handbuch und Marketing-Site `~10 €/Monat` als Fleet-API-Kosten — das war die alte Worst-Case-Schätzung und hat viele Nutzer abgeschreckt. **Tatsächlich:** Tesla gewährt **$10 Freikontingent pro Account und Monat** (Stand 2026), das einen typischen Privat-Use-Case (1 Auto + Streaming-Telemetry + alltägliche Commands) **vollständig abdeckt → 0 €/Monat**.
+
+Klargestellt in:
+- Tabelle der drei Datenquellen (alle 6 Handbücher)
+- API-Kosten-Sektion mit echten Tesla-Preisen: Streaming 150.000 Signale = $1, Commands 1.000 = $1, Polling 500 Requests = $1, Wake-Ups 50 = $1
+- Streaming-Telemetry kostet ~$0,0067/h, Polling ~$0,12/h — Streaming bevorzugen wird begründbar
+- Marketing-Site `api_fleet_p` und `api_fleet_caveat` (DE+EN) komplett neu formuliert
+- Marketing-Site `index.html`-Defaults synchron
+
+Quelle: [Tesla Developer — Billing and Limits](https://developer.tesla.com/docs/fleet-api/billing-and-limits).
+
+---
+
 ## [v3.6.0] - 2026-06-07
 
 ### Hinzugefügt — Companion Phase 1: Battery-Health-Dashboard
