@@ -7,6 +7,49 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.6.0] - 2026-06-07
+
+### Added — Companion Phase 1: Battery health dashboard
+
+Four new sections on `/battery`, **statistics only**, no AI, no cloud — everything from your own data:
+
+- **Charging curve** — aggregate across SOC bands (0-20 %, 20-50 %, 50-80 %, 80-100 %) + scatter kW vs start SOC. Makes tapering above 80 % visible and surfaces BMS quirks in the middle zone.
+- **Efficiency vs outside temp** — kWh/100 km in 5-°C buckets from your trips. The winter penalty is finally tangible.
+- **Phantom drain** — SOC loss per hour while parked, properly filtered to exclude trip and charge windows. Median, average, and top-10 events as a table.
+- **Anomalies** — SOC jumps ≥10 % without trip/charge, range jumps ≥30 km, efficiency outliers (>35 or <7 kWh/100km).
+
+### Backend
+
+New endpoints in `backend/src/routes/battery.js`:
+- `GET /battery/charging-curve` — sessions + band aggregate
+- `GET /battery/efficiency-by-temp` — temperature buckets
+- `GET /battery/phantom-drain` — idle events with median/avg
+- `GET /battery/anomalies` — outliers by type
+- `GET /battery/health-summary` — data volume + core KPIs
+
+All robust against empty/partial data, all filterable per vehicle.
+
+### Frontend
+
+`Battery.vue` extended with 4 sortable sections. `usePageLayout` automatically appends the new sections to existing user layouts. Charts: Line (existing), Scatter (charging curve), Bar (temp efficiency). Tooltips + info text on every new KPI (usability requirement).
+
+### Docs
+
+- Handbook gained the `{#battery-health}` section in all 6 languages (DE/EN/FR/ES/TR/EL)
+- Bullet refresh in every handbook overview
+- 33 new i18n keys × 6 languages
+
+### Data concept
+
+Sources: `battery_snapshots`, `trips`, `charging_sessions` — all from your own SQLite. No external calls, no cloud, no model. Fully data-sovereign.
+
+### Roadmap
+
+- **Phase 2** (planned): push notifications for anomalies, preconditioning suggestions
+- **Phase 3** (planned): deep companion chat via Ollama — stays local
+
+---
+
 ## [v3.5.8] - 2026-06-07
 
 ### Changed

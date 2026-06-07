@@ -14,7 +14,7 @@ Tesla Carview ist eine **selbst gehostete** Datenlogger-App für Tesla-Fahrzeuge
 
 - 🚗 **Fahrtenbuch** — GPS-Tracks, Verbrauch, Fahrttyp-Kategorisierung
 - ⚡ **Laden** — Ladesessions mit Kosten, GPS-Standort-Erkennung
-- 🔋 **Batterie** — Degradations-Tracking, Reichweiten-Verlauf
+- 🔋 **Batterie** — Degradations-Tracking, Reichweiten-Verlauf, Ladekurve, Effizienz vs. Temperatur, Phantom-Drain, Anomalie-Erkennung (Companion Phase 1, rein statistisch, lokal)
 - 📊 **Dashboard** — Statistiken, monatliche Übersicht, letzte Aktivitäten
 - 🎮 **Steuerung** — Klimaanlage, Türen, Licht – direkt aus der App
 - 📝 **Betriebsbuch** — Wartungen, Reparaturen, Kosten mit Datum
@@ -91,6 +91,23 @@ Jeder eingeloggte Nutzer hat unter `/my-tracking` („📱 Mein GPS" in der Navi
 - Liste der **eigenen** OwnTracks-Geräte (Fahrer sieht nur seine, Admin alle)
 - QR-Code für Direkt-Setup, jederzeit erneut abrufbar (kein Verlust-Problem mehr)
 - Fahrzeug-Auswahl gefiltert auf Fahrzeuge mit Zugriffsrechten — kein versehentliches GPS-Pushen auf fremde Autos
+
+## 🔋 Battery-Health-Dashboard (Companion Phase 1) {#battery-health}
+
+Unter `/battery` findest du seit v3.6.0 sechs Sektionen, die dir ehrliche Antworten auf die wichtigsten Akku-Fragen geben — **rein statistisch, ohne KI, ohne Datenabfluss**:
+
+1. **Reichweite (Verlauf)** — gleitender Verlauf der maximalen rated_range über Zeit.
+2. **Degradation** — Differenz zwischen erster und letzter Messung, farbcodiert (grün <5 %, gelb <10 %, rot ≥10 %).
+3. **Ladekurve** — durchschnittliche Spitzenleistung gruppiert in vier SOC-Bändern (0–20 %, 20–50 %, 50–80 %, 80–100 %) sowie Scatter-Plot kW vs. Start-SOC. Tiefe Werte oberhalb 80 % sind normal (Tapering); Auffälligkeiten in 20–50 % können auf BMS-Probleme deuten.
+4. **Effizienz vs. Außentemperatur** — kWh/100 km in 5-°C-Buckets aus deinen Trip-Daten. Macht den Kältewinter-Mehrverbrauch sichtbar.
+5. **Phantom-Drain** — SOC-Verlust pro Stunde im Stillstand. Filtert Lade- und Trip-Intervalle heraus. Median und Mittelwert oben, Top-10-Ereignisse als Tabelle. >1 %/h ist auffällig (Sentry-Mode, Updates, Vorklimatisierung).
+6. **Anomalien** — SOC-Sprünge >10 % ohne Trip/Lade, Range-Sprünge >30 km, Effizienz-Ausreißer (>35 oder <7 kWh/100km).
+
+**Datenquellen**: `battery_snapshots`, `trips`, `charging_sessions` — alles aus deiner eigenen SQLite. Kein externer Aufruf, keine Cloud, kein Modell. Die Berechnung läuft serverseitig in `backend/src/routes/battery.js`.
+
+**Vehicle-Selector**: alle Sektionen reagieren auf den aktuell gewählten Wagen.
+
+**Phase 2 (Roadmap)**: Anomalie-Push-Benachrichtigungen, Vorklimatisierungs-Empfehlungen. **Phase 3**: tiefer Companion-Chat über Ollama — alles weiterhin lokal.
 
 ## 📋 Voraussetzungen {#requirements}
 

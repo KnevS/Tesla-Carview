@@ -14,7 +14,7 @@ Tesla Carview est une application **auto-hébergée** d'enregistrement de donné
 
 - 🚗 **Carnet de bord** — Trajets GPS, consommation, catégorisation des trajets
 - ⚡ **Recharge** — Sessions de recharge avec coûts, détection de l'emplacement par GPS
-- 🔋 **Batterie** — Suivi de la dégradation, historique d'autonomie
+- 🔋 **Batterie** — Suivi de la dégradation, historique d'autonomie, courbe de charge, efficacité vs température, décharge fantôme, détection d'anomalies (Companion Phase 1, statistique pure, local)
 - 📊 **Tableau de bord** — Statistiques, vue mensuelle, dernières activités
 - 🎮 **Commandes** — Climatisation, portes, lumières — directement depuis l'application
 - 📝 **Carnet d'entretien** — Entretiens, réparations, coûts avec date
@@ -91,6 +91,23 @@ Chaque utilisateur connecté a sa propre page sur `/my-tracking` (« 📱 Mon GP
 - Liste des appareils OwnTracks **propres** (le conducteur ne voit que les siens, l'admin tous)
 - Code QR pour la configuration directe, récupérable à tout moment (plus de problème de token perdu)
 - Sélection de véhicule filtrée sur les véhicules avec droits d'accès — pas d'envoi GPS accidentel vers d'autres voitures
+
+## 🔋 Tableau santé batterie (Companion Phase 1) {#battery-health}
+
+Depuis v3.6.0, `/battery` propose six sections qui répondent honnêtement aux questions clés sur la batterie — **pure statistique, sans IA, sans fuite de données** :
+
+1. **Historique d'autonomie** — courbe glissante du rated_range max.
+2. **Dégradation** — écart entre première et dernière mesure, codé couleur (vert <5 %, jaune <10 %, rouge ≥10 %).
+3. **Courbe de charge** — puissance moyenne de pic groupée en quatre plages de SOC (0-20 %, 20-50 %, 50-80 %, 80-100 %) et nuage kW vs SOC de départ. Des valeurs plus faibles au-dessus de 80 % sont normales (tapering) ; les anomalies entre 20-50 % peuvent évoquer un problème BMS.
+4. **Efficacité vs température extérieure** — kWh/100 km par tranches de 5 °C, à partir de vos trajets. Rend visible la pénalité hivernale.
+5. **Décharge fantôme** — perte de SOC par heure à l'arrêt. Exclut les fenêtres de trajet et de charge. Médiane + moyenne en haut, top-10 d'événements en tableau. >1 %/h est notable (sentry, mises à jour, préconditionnement).
+6. **Anomalies** — sauts SOC >10 % hors trajet/charge, sauts d'autonomie >30 km, efficacité hors normes (>35 ou <7 kWh/100km).
+
+**Sources** : `battery_snapshots`, `trips`, `charging_sessions` — tout dans votre SQLite. Aucun appel externe, aucun cloud, aucun modèle. Le calcul tourne côté serveur dans `backend/src/routes/battery.js`.
+
+**Sélecteur de véhicule** : toutes les sections réagissent au véhicule sélectionné.
+
+**Phase 2 (feuille de route)** : notifications push d'anomalies, suggestions de préconditionnement. **Phase 3** : chat companion approfondi via Ollama — toujours local.
 
 ## 📋 Prérequis {#requirements}
 

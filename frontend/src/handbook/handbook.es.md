@@ -14,7 +14,7 @@ Tesla Carview es una aplicación **auto-alojada** de registro de datos para veh�
 
 - 🚗 **Libro de viajes** — Tracks GPS, consumo, categorización del tipo de viaje
 - ⚡ **Carga** — Sesiones de carga con costes, detección de ubicación por GPS
-- 🔋 **Batería** — Seguimiento de la degradación, historial de autonomía
+- 🔋 **Batería** — Seguimiento de la degradación, historial de autonomía, curva de carga, eficiencia vs temperatura, descarga fantasma, detección de anomalías (Companion Fase 1, estadística pura, local)
 - 📊 **Panel** — Estadísticas, vista mensual, últimas actividades
 - 🎮 **Control** — Climatización, puertas, luces, directamente desde la aplicación
 - 📝 **Libro de mantenimiento** — Mantenimientos, reparaciones, costes con fecha
@@ -91,6 +91,23 @@ Cada usuario autenticado tiene su propia página en `/my-tracking` («📱 Mi GP
 - Lista de los dispositivos OwnTracks **propios** (el conductor ve solo los suyos, el admin todos)
 - Código QR para configuración directa, recuperable en cualquier momento (sin más problema de token perdido)
 - Selección de vehículo filtrada a vehículos con derechos de acceso — sin envío GPS accidental a otros coches
+
+## 🔋 Panel salud de batería (Companion Fase 1) {#battery-health}
+
+Desde v3.6.0, `/battery` ofrece seis secciones que responden honestamente a las preguntas clave sobre la batería — **solo estadística, sin IA, sin salida de datos**:
+
+1. **Historial de autonomía** — curva móvil del rated_range máx.
+2. **Degradación** — diferencia entre primera y última medición, codificada por color (verde <5 %, amarillo <10 %, rojo ≥10 %).
+3. **Curva de carga** — potencia máxima media agrupada en cuatro bandas de SOC (0-20 %, 20-50 %, 50-80 %, 80-100 %) y dispersión kW vs SOC inicial. Valores más bajos por encima del 80 % son normales (tapering); las anomalías en 20-50 % pueden indicar problemas BMS.
+4. **Eficiencia vs temperatura exterior** — kWh/100 km en intervalos de 5 °C a partir de tus trayectos. Hace visible el coste invernal.
+5. **Descarga fantasma** — pérdida de SOC por hora en parado. Excluye ventanas de trayecto y carga. Mediana + media arriba, top-10 eventos en tabla. >1 %/h es destacable (sentry, updates, preacondicionamiento).
+6. **Anomalías** — saltos SOC >10 % sin trayecto/carga, saltos de autonomía >30 km, eficiencia atípica (>35 o <7 kWh/100km).
+
+**Fuentes**: `battery_snapshots`, `trips`, `charging_sessions` — todo desde tu propia SQLite. Sin llamadas externas, sin nube, sin modelo. El cálculo se ejecuta en el servidor en `backend/src/routes/battery.js`.
+
+**Selector de vehículo**: todas las secciones reaccionan al vehículo seleccionado.
+
+**Fase 2 (hoja de ruta)**: notificaciones push de anomalías, sugerencias de preacondicionamiento. **Fase 3**: chat companion profundo a través de Ollama — sigue siendo local.
 
 ## 📋 Requisitos {#requirements}
 

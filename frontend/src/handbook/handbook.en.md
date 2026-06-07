@@ -14,7 +14,7 @@ Tesla Carview is a **self-hosted** data-logger app for Tesla vehicles. All data 
 
 - 🚗 **Trip log** — GPS tracks, energy consumption, trip-type categorisation
 - ⚡ **Charging** — Charging sessions with costs, GPS-based location detection
-- 🔋 **Battery** — Degradation tracking, range history
+- 🔋 **Battery** — Degradation tracking, range history, charging curve, efficiency vs. temperature, phantom drain, anomaly detection (Companion Phase 1, statistical only, local)
 - 📊 **Dashboard** — Statistics, monthly overview, recent activity
 - 🎮 **Controls** — Climate, doors, lights — directly from the app
 - 📝 **Service log** — Maintenance, repairs, costs with date
@@ -91,6 +91,23 @@ Every signed-in user has their own page at `/my-tracking` ("📱 My GPS" in the 
 - List of **own** OwnTracks devices (driver sees only theirs, admin sees all)
 - QR code for direct setup, retrievable at any time (no more lost-token problem)
 - Vehicle selection filtered to vehicles with access rights — no accidental GPS push to other cars
+
+## 🔋 Battery health dashboard (Companion Phase 1) {#battery-health}
+
+`/battery` ships six sections since v3.6.0 that give you honest answers on the key battery questions — **statistics only, no AI, no data leaving the box**:
+
+1. **Range history** — rolling max rated_range over time.
+2. **Degradation** — diff between first and last measurement, color-coded (green <5 %, yellow <10 %, red ≥10 %).
+3. **Charging curve** — average peak power grouped in four SOC bands (0-20 %, 20-50 %, 50-80 %, 80-100 %) plus scatter kW vs start SOC. Lower values above 80 % are normal (tapering); outliers in 20-50 % can hint at BMS issues.
+4. **Efficiency vs outside temp** — kWh/100 km in 5-°C buckets from your trips. Makes the cold-winter penalty visible.
+5. **Phantom drain** — SOC loss per hour while parked. Filters out trip and charge windows. Median + average up top, top-10 events as a table. >1 %/h is notable (sentry, updates, preconditioning).
+6. **Anomalies** — SOC jumps >10 % without trip/charge, range jumps >30 km, efficiency outliers (>35 or <7 kWh/100km).
+
+**Data sources**: `battery_snapshots`, `trips`, `charging_sessions` — all from your own SQLite. No external calls, no cloud, no model. Computation runs server-side in `backend/src/routes/battery.js`.
+
+**Vehicle selector**: all sections react to the currently selected vehicle.
+
+**Phase 2 (roadmap)**: anomaly push notifications, preconditioning suggestions. **Phase 3**: deep companion chat over Ollama — still local.
 
 ## 📋 Requirements {#requirements}
 

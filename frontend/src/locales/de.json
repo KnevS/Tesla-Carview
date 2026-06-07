@@ -364,7 +364,40 @@
     "range30": "Kurzzeit-Trend der letzten 30 Tage – zeigt akute Schwankungen",
     "range90": "Quartals-Trend der letzten 3 Monate – standardmäßige Ansicht",
     "range180": "Halbjahres-Trend – zeigt saisonale Schwankungen (Winter vs. Sommer)",
-    "range365": "Jahres-Trend – zuverlässigste Aussage über die Batterie-Alterung"
+    "range365": "Jahres-Trend – zuverlässigste Aussage über die Batterie-Alterung",
+    "chargingCurve": "Ladekurve",
+    "chargingCurveHint": "Durchschnittliche Maximalleistung beim Laden, gruppiert nach SOC-Bereich. Niedrige Werte oberhalb 80 % sind normal (Tapering).",
+    "chargingCurveTooltip": "Aus deinen Ladevorgängen errechnet — je SOC-Band die durchschnittliche Spitzenleistung. Anomalien hier können auf BMS-Probleme hinweisen.",
+    "sessionsShort": "Sitz.",
+    "noChargingData": "Noch keine Ladedaten — sobald Ladevorgänge erfasst sind, erscheint die Kurve hier.",
+    "maxKwLabel": "Max. Leistung (kW) bei Start-SOC",
+    "startSoc": "Start-SOC (%)",
+    "efficiencyTemp": "Effizienz vs. Außentemperatur",
+    "efficiencyTempHint": "kWh pro 100 km in 5-°C-Buckets — zeigt, wie stark der Verbrauch bei Kälte steigt.",
+    "efficiencyTempTooltip": "Basis: deine Trip-Daten mit erfasster Außentemperatur. Reine Statistik, keine KI.",
+    "noTempData": "Noch keine Trips mit Außentemperatur-Daten.",
+    "basedOnTrips": "Basis: {n} Trips",
+    "phantomDrain": "Phantom-Drain",
+    "phantomDrainHint": "SOC-Verlust pro Stunde im Stillstand — nur Zeiträume ohne Fahrt und ohne Laden.",
+    "phantomDrainTooltip": "Aus aufeinanderfolgenden Battery-Snapshots im Stillstand. >1 %/h ist auffällig (Sentry-Mode, Updates, Vorklimatisierung).",
+    "events": "Ereignisse",
+    "medianLoss": "Median-Verlust",
+    "avgLoss": "Mittel-Verlust",
+    "when": "Wann",
+    "duration": "Dauer",
+    "lossSoc": "Δ SOC",
+    "lossRate": "Rate",
+    "noPhantomData": "Noch nicht genug Snapshots im Stillstand.",
+    "anomalies": "Anomalien",
+    "anomaliesHint": "Sprünge in SOC oder Range, sowie auffällige Trip-Effizienz.",
+    "anomaliesTooltip": "Statistische Ausreißer aus Snapshots und Trips. Erklärbar durch Updates, Vorklimatisierung oder echte Diagnose-Hinweise.",
+    "foundAnomalies": "{n} Anomalien in den letzten 90 Tagen",
+    "noAnomalies": "Keine Anomalien im Beobachtungszeitraum — alles ruhig.",
+    "kind": "Art",
+    "detail": "Detail",
+    "anom_soc_jump": "SOC-Sprung",
+    "anom_range_jump": "Reichweite-Sprung",
+    "anom_efficiency_outlier": "Effizienz-Ausreißer"
   },
   "control": {
     "title": "Fahrzeugsteuerung",
@@ -685,8 +718,8 @@
     },
     "tripTypes": {
       "business": "Dienstlich",
-      "private":  "Privat",
-      "commute":  "Pendelfahrt"
+      "private": "Privat",
+      "commute": "Pendelfahrt"
     }
   },
   "notices": {
@@ -2400,8 +2433,8 @@
       },
       "tripTypes": {
         "business": "Dienstlich",
-        "private":  "Privat",
-        "commute":  "Pendelfahrt"
+        "private": "Privat",
+        "commute": "Pendelfahrt"
       }
     },
     "virtualKey": {

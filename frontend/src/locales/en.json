@@ -364,7 +364,40 @@
     "range30": "Short-term trend of the last 30 days – shows acute fluctuations",
     "range90": "Quarterly trend over the last 3 months – default view",
     "range180": "Half-year trend – shows seasonal variations (winter vs. summer)",
-    "range365": "Yearly trend – most reliable indicator of battery aging"
+    "range365": "Yearly trend – most reliable indicator of battery aging",
+    "chargingCurve": "Charging curve",
+    "chargingCurveHint": "Average peak power while charging, grouped by SOC band. Lower values above 80 % are normal (tapering).",
+    "chargingCurveTooltip": "Computed from your charging sessions — per SOC band the average peak. Anomalies here can hint at BMS issues.",
+    "sessionsShort": "sess.",
+    "noChargingData": "No charging data yet — once sessions are recorded, the curve appears here.",
+    "maxKwLabel": "Peak power (kW) at start SOC",
+    "startSoc": "Start SOC (%)",
+    "efficiencyTemp": "Efficiency vs outside temp",
+    "efficiencyTempHint": "kWh per 100 km in 5-°C buckets — shows how consumption rises in the cold.",
+    "efficiencyTempTooltip": "Based on your trips with recorded outside temperature. Pure statistics, no AI.",
+    "noTempData": "No trips with outside temperature data yet.",
+    "basedOnTrips": "Based on {n} trips",
+    "phantomDrain": "Phantom drain",
+    "phantomDrainHint": "SOC loss per hour while parked — only intervals without driving or charging.",
+    "phantomDrainTooltip": "From consecutive battery snapshots while parked. >1 %/h is notable (sentry, updates, preconditioning).",
+    "events": "events",
+    "medianLoss": "median loss",
+    "avgLoss": "avg loss",
+    "when": "When",
+    "duration": "Duration",
+    "lossSoc": "Δ SOC",
+    "lossRate": "Rate",
+    "noPhantomData": "Not enough idle snapshots yet.",
+    "anomalies": "Anomalies",
+    "anomaliesHint": "Jumps in SOC or range, plus unusual trip efficiency.",
+    "anomaliesTooltip": "Statistical outliers from snapshots and trips. Explained by updates, preconditioning, or genuine diagnostic signals.",
+    "foundAnomalies": "{n} anomalies in the last 90 days",
+    "noAnomalies": "No anomalies in window — all quiet.",
+    "kind": "Kind",
+    "detail": "Detail",
+    "anom_soc_jump": "SOC jump",
+    "anom_range_jump": "Range jump",
+    "anom_efficiency_outlier": "Efficiency outlier"
   },
   "control": {
     "title": "🎮 Vehicle control",
@@ -685,8 +718,8 @@
     },
     "tripTypes": {
       "business": "Business",
-      "private":  "Private",
-      "commute":  "Commute"
+      "private": "Private",
+      "commute": "Commute"
     }
   },
   "notices": {
@@ -2401,8 +2434,8 @@
       },
       "tripTypes": {
         "business": "Business",
-        "private":  "Private",
-        "commute":  "Commute"
+        "private": "Private",
+        "commute": "Commute"
       }
     },
     "virtualKey": {

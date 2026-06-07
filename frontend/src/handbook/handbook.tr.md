@@ -14,7 +14,7 @@ Tesla Carview, Tesla araçlar için **kendi sunucunda barındırılan** bir veri
 
 - 🚗 **Yol defteri** — GPS rotaları, tüketim, sürüş türü kategorizasyonu
 - ⚡ **Şarj** — Maliyetli şarj seansları, GPS ile konum tespiti
-- 🔋 **Batarya** — Aşınma takibi, menzil geçmişi
+- 🔋 **Batarya** — Aşınma takibi, menzil geçmişi, şarj eğrisi, sıcaklığa karşı verimlilik, hayalet boşalma, anomali tespiti (Companion Aşama 1, salt istatistik, yerel)
 - 📊 **Pano** — İstatistikler, aylık özet, son etkinlikler
 - 🎮 **Kontrol** — Klima, kapılar, ışıklar — doğrudan uygulamadan
 - 📝 **Servis defteri** — Bakım, onarım, tarihli maliyetler
@@ -91,6 +91,23 @@ Oturum açmış her kullanıcının `/my-tracking` ("📱 Benim GPS'im" navigasy
 - **Kendi** OwnTracks cihazlarının listesi (sürücü sadece kendisini, yönetici hepsini görür)
 - Doğrudan kurulum için QR kodu, herhangi bir zamanda yeniden alınabilir (artık kayıp-token sorunu yok)
 - Erişim hakları olan araçlara göre filtrelenmiş araç seçimi — diğer arabalara yanlışlıkla GPS gönderimi yok
+
+## 🔋 Batarya sağlık paneli (Companion Aşama 1) {#battery-health}
+
+v3.6.0 itibarıyla `/battery` altı bölüm sunuyor; temel batarya sorularına dürüst yanıtlar — **sadece istatistik, yapay zeka yok, veri kaçağı yok**:
+
+1. **Menzil geçmişi** — maks. rated_range zaman içinde.
+2. **Bozulma** — ilk ve son ölçüm arası fark, renk kodlu (yeşil <%5, sarı <%10, kırmızı ≥%10).
+3. **Şarj eğrisi** — dört SOC bandına gruplandırılmış ortalama tepe güç (%0-20, %20-50, %50-80, %80-100) ve başlangıç SOC'una karşı kW dağılım grafiği. %80 üzerinde düşük değerler normaldir (tapering); %20-50 aralığındaki anomaliler BMS sorunlarına işaret edebilir.
+4. **Verimlilik vs dış sıcaklık** — yolculuklardan 5 °C kovalarda 100 km başına kWh. Soğuk kış cezasını görünür kılar.
+5. **Hayalet boşalma** — park halinde saatlik SOC kaybı. Sürüş ve şarj pencerelerini hariç tutar. Üstte medyan + ortalama, ilk 10 olay tabloda. >%1/saat dikkate değer (sentry, güncellemeler, ön iklimlendirme).
+6. **Anomaliler** — sürüş/şarj olmaksızın >%10 SOC sıçramaları, >30 km menzil sıçramaları, aykırı verimlilik (>35 veya <7 kWh/100km).
+
+**Veri kaynakları**: `battery_snapshots`, `trips`, `charging_sessions` — hepsi kendi SQLite'ınızdan. Dış çağrı, bulut veya model yok. Hesaplama sunucu tarafında `backend/src/routes/battery.js`'de çalışır.
+
+**Araç seçici**: tüm bölümler seçili araca tepki verir.
+
+**Aşama 2 (yol haritası)**: anomali push bildirimleri, ön iklimlendirme önerileri. **Aşama 3**: Ollama üzerinden derin companion sohbet — hâlâ yerel.
 
 ## 📋 Gereksinimler {#requirements}
 

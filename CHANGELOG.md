@@ -7,6 +7,49 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.6.0] - 2026-06-07
+
+### Hinzugefügt — Companion Phase 1: Battery-Health-Dashboard
+
+Vier neue Sektionen auf `/battery`, **rein statistisch**, ohne KI, ohne Cloud — alles aus den eigenen Daten:
+
+- **Ladekurve** — Aggregat über SOC-Bänder (0-20 %, 20-50 %, 50-80 %, 80-100 %) + Scatter-Plot kW vs Start-SOC. Macht Tapering oberhalb 80 % sichtbar und enttarnt BMS-Auffälligkeiten in der mittleren Zone.
+- **Effizienz vs. Außentemperatur** — kWh/100 km in 5-°C-Buckets aus den Trip-Daten. Der Winter-Mehrverbrauch ist endlich greifbar.
+- **Phantom-Drain** — SOC-Verlust pro Stunde im Stillstand, sauber von Trip- und Lade-Intervallen befreit. Median, Mittel und Top-10-Ereignisse als Tabelle.
+- **Anomalien** — SOC-Sprünge ≥10 % ohne Trip/Charge, Range-Sprünge ≥30 km, Effizienz-Ausreißer (>35 oder <7 kWh/100km).
+
+### Backend
+
+Neue Endpoints in `backend/src/routes/battery.js`:
+- `GET /battery/charging-curve` — Sessions + Band-Aggregat
+- `GET /battery/efficiency-by-temp` — Temperatur-Buckets
+- `GET /battery/phantom-drain` — Stillstands-Events mit Median/Avg
+- `GET /battery/anomalies` — Outlier nach Typ
+- `GET /battery/health-summary` — Daten-Volumen + Kern-KPIs
+
+Alle robust gegen leere/teildaten, alle pro Vehicle filterbar.
+
+### Frontend
+
+`Battery.vue` um 4 SortableSections erweitert. `usePageLayout` hängt die neuen Sections automatisch an bestehende User-Layouts an. Charts: Line (bestehend), Scatter (Ladekurve), Bar (Temp-Effizienz). Tooltips + Info-Texte auf allen neuen KPIs (Usability-Pflicht).
+
+### Doku
+
+- Handbuch um Sektion `{#battery-health}` in allen 6 Sprachen (DE/EN/FR/ES/TR/EL)
+- Bullet-Update im Überblick aller Handbücher
+- 33 neue i18n-Keys × 6 Sprachen
+
+### Datenkonzept
+
+Quellen: `battery_snapshots`, `trips`, `charging_sessions` — alles aus eigener SQLite. Kein externer Aufruf, keine Cloud, kein Modell. Vollkommen datensouverän.
+
+### Roadmap
+
+- **Phase 2** (geplant): Push-Notifications bei Anomalien, Vorklimatisierungs-Empfehlungen
+- **Phase 3** (geplant): tiefer Companion-Chat über Ollama — bleibt lokal
+
+---
+
 ## [v3.5.8] - 2026-06-07
 
 ### Geändert
