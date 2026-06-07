@@ -300,8 +300,11 @@ router.get('/devices', requireAuth, (req, res) => {
 router.post('/devices', requireAuth, (req, res) => {
   const { vehicle_id, user_id, label, default_trip_type } = req.body || {};
   const vid = Number(vehicle_id);
-  // Fahrer kann nur fuer sich selbst anlegen; Admin frei
-  const uid = isAdmin(req) ? Number(user_id) : req.user.sub;
+  // Fahrer kann nur fuer sich selbst anlegen; Admin frei.
+  // Fallback: wenn Admin keine user_id mitschickt (z.B. Self-Service
+  // ueber MyTracking.vue), gilt der eingeloggte User — sonst muss ein
+  // Admin sich beim eigenen Device explizit selbst auswaehlen.
+  const uid = isAdmin(req) && user_id ? Number(user_id) : req.user.sub;
   const lab = String(label || '').slice(0, 80).trim();
   const tt  = ['business', 'private', 'commute'].includes(default_trip_type) ? default_trip_type : 'business';
   if (!vid || !uid || !lab) return res.status(400).json({ error: 'vehicle_id, user_id, label erforderlich' });

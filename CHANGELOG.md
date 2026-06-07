@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.6.2] - 2026-06-07
+
+### Behoben
+
+- **OwnTracks-Device-Anlage über „Mein GPS" funktionierte für Admins nicht**: Backend forderte explizit `user_id` im Request, das Frontend `MyTracking.vue` sendet diese aber nicht (es ist Self-Service — der eingeloggte User legt für sich selbst an). Fehlermeldung „✗ vehicle_id, user_id, label erforderlich". **Fix:** Wenn ein Admin keine `user_id` mitschickt, gilt sein eigener User als Fallback. Mit expliziter `user_id` (AdminSetupWizard) bleibt das Verhalten unverändert.
+
+---
+
 ## [v3.6.1] - 2026-06-07
 
 ### Korrigiert — Doku: Fleet-API-Kosten-Aussage
