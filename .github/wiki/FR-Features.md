@@ -91,6 +91,26 @@ Générez des factures PDF pour remboursement (**Facturation → Créer une fact
 
 ---
 
+## 🔋 Batterie — Tableau santé (Companion)
+
+Six sections sur `/battery`, **entièrement local et purement statistique** (pas d'IA, pas de cloud sauf une seule requête météo pour le préconditionnement) :
+
+**Phase 1 (à partir de v3.6.0) :**
+- Historique d'autonomie (rated_range max glissant)
+- Dégradation (première vs. dernière mesure, codée couleur)
+- Courbe de charge (agrégat par plage SOC + nuage kW vs SOC initial)
+- Efficacité vs. température extérieure (kWh/100 km par tranches de 5 °C)
+- Décharge fantôme (perte de SOC/h à l'arrêt, filtrée autour des trajets/charges)
+- Anomalies (live : sauts SOC/autonomie, efficacité aberrante)
+
+**Phase 2 (à partir de v3.7.0) :**
+- **Alertes Companion** — anomalies persistantes avec notification push unique et actions « Marquer comme vu / Rejeter »
+- **Suggestion de préconditionnement** — push si température prévue <5 °C ou >30 °C à votre heure habituelle de départ, apprise des 30 derniers jours
+
+Sources : `battery_snapshots`, `trips`, `charging_sessions`, plus un appel Open-Meteo unique pour le préconditionnement. Persistance dans `battery_anomalies` et `precondition_suggestions` avec contraintes UNIQUE (idempotent). Le moteur Companion tourne chaque nuit + toutes les 6 heures.
+
+---
+
 ## 🗺️ Planificateur d'itinéraire
 
 Planifiez vos trajets à l'avance et envoyez-les directement à la navigation Tesla :

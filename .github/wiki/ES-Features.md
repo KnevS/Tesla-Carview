@@ -83,6 +83,26 @@ Genera facturas PDF para reembolso (**Facturación → Crear factura**) — comp
 
 ---
 
+## 🔋 Batería — Panel de salud (Companion)
+
+Seis secciones en `/battery`, **totalmente local y solo estadística** (sin IA, sin nube salvo una única consulta meteo para preacondicionamiento):
+
+**Fase 1 (desde v3.6.0):**
+- Historial de autonomía (rated_range máx. móvil)
+- Degradación (primera vs. última medición, codificada por color)
+- Curva de carga (agregado por banda de SOC + dispersión kW vs. SOC inicial)
+- Eficiencia vs. temperatura exterior (kWh/100 km en intervalos de 5 °C)
+- Descarga fantasma (pérdida de SOC/h en parado, filtrada alrededor de trayectos/cargas)
+- Anomalías (en vivo: saltos SOC/autonomía, eficiencia atípica)
+
+**Fase 2 (desde v3.7.0):**
+- **Alertas Companion** — anomalías persistentes con notificación push única y acciones «Marcar como vista / Descartar»
+- **Sugerencia de preacondicionamiento** — push cuando se espera temperatura <5 °C o >30 °C a su hora habitual de salida, aprendida de los últimos 30 días
+
+Fuentes: `battery_snapshots`, `trips`, `charging_sessions`, más una llamada Open-Meteo única para preacondicionamiento. Persistencia en `battery_anomalies` y `precondition_suggestions` con restricciones UNIQUE (idempotente). El motor Companion se ejecuta cada noche + cada 6 horas.
+
+---
+
 ## 🗺️ Planificador de ruta
 
 Planifica rutas con antelación y envíalas directamente a la navegación del Tesla:

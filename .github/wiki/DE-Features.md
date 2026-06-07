@@ -86,13 +86,23 @@ PDF-Rechnungen für die Erstattung (z. B. durch den Arbeitgeber) unter **Abrechn
 
 ---
 
-## 🔋 Akku
+## 🔋 Akku — Battery-Health-Dashboard (Companion)
 
-Akkugesundheit im Zeitverlauf:
-- Degradationskurve (geschätzte vs. Nenn-Reichweite)
-- Ladezyklus-Zähler
-- Historische Ladestandsdaten
-- Reichweitenvergleich bei verschiedenen Temperaturen
+Sechs Sektionen auf `/battery`, alles **rein lokal und statistisch** (keine KI, keine Cloud außer einem einzigen Wetter-Lookup für Vorklim):
+
+**Phase 1 (ab v3.6.0):**
+- Reichweiten-Verlauf (gleitende max rated_range)
+- Degradation (erste vs. letzte Messung, farbcodiert)
+- Ladekurve (SOC-Band-Aggregat + Scatter kW vs. Start-SOC)
+- Effizienz vs. Außentemperatur (kWh/100 km in 5-°C-Buckets)
+- Phantom-Drain (SOC-Verlust/h im Stillstand, gefiltert um Trips/Charges)
+- Anomalien (Live-Calc: SOC-/Range-Sprünge, Effizienz-Ausreißer)
+
+**Phase 2 (ab v3.7.0):**
+- **Companion-Alerts** — persistierte Anomalien mit Push-Benachrichtigung (1× pro Vorfall) und „Als gesehen / Verwerfen"-Aktionen
+- **Vorklimatisierungs-Empfehlung** — Push bei <5 °C oder >30 °C zur typischen Abfahrtszeit, abgeleitet aus den letzten 30 Tagen Trip-Daten
+
+Quellen: `battery_snapshots`, `trips`, `charging_sessions`, plus eine externe Open-Meteo-Anfrage nur für Vorklim. Persistierung in `battery_anomalies` und `precondition_suggestions` mit UNIQUE-Constraint (idempotent). Companion-Engine läuft nightly + alle 6 Stunden.
 
 ---
 

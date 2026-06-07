@@ -7,6 +7,47 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.7.0] - 2026-06-07
+
+### Added — Companion Phase 2: persistent anomalies + preconditioning suggestions
+
+Two new sections on `/battery`, everything from existing data plus a single external weather lookup:
+
+- **Companion alerts** — persistent anomalies (`battery_anomalies` table). The detection engine (`backend/src/services/companionEngine.js`) runs nightly (hooked into `nightlyMaintenance`) and every 6 hours (`companionScheduler.js`). Each new anomaly is pushed **once** via Web Push + Telegram. UI exposes "✓ Mark as seen" and "✕ Dismiss". Anomaly types: SOC jump, range jump, phantom-drain spike, efficiency outlier. Deduped via UNIQUE(vehicle_id, hash).
+- **Preconditioning suggestion** — `precondition_suggestions` table. From Open-Meteo forecast + the most-frequent departure-time buckets of the last 30 days. Push when tomorrow's expected temperature is <5 °C or >30 °C. UNIQUE(vehicle_id, for_date) prevents duplicates.
+
+### Backend
+
+New endpoints in `backend/src/routes/battery.js`:
+- `GET  /battery/anomalies-persisted` (with status filter)
+- `POST /battery/anomalies-persisted/:id/seen`
+- `POST /battery/anomalies-persisted/:id/dismiss`
+- `GET  /battery/precondition-suggestions`
+- `POST /battery/precondition-suggestions/:id/dismiss`
+
+New services:
+- `companionEngine.js` — detection logic + persistence + push dispatch
+- `companionScheduler.js` — 6 h cycle for anomalies (no weather calls)
+
+Migrations: `battery_anomalies` and `precondition_suggestions` are added automatically to existing tenant DBs (see `runTenantMigrations`).
+
+### Frontend
+
+`Battery.vue` extended with 2 sortable sections (`companionAlerts`, `precondition`). Action buttons with tooltip. `usePageLayout` appends them to existing layouts.
+
+### Docs
+
+- Handbook gained `{#companion-phase-2}` section in all 6 languages
+- Wiki Features page (DE/EN/FR/ES/TR/EL) extended: Phase 1+2 overview
+- 14 new i18n keys × 6 languages
+- i18n hygiene: dropped orphan `routes.chargeToTip` from EN/FR/ES/TR/EL
+
+### Data concept
+
+All companion computation runs locally in the tenant SQLite. **Only external call**: Open-Meteo forecast (lat/lon only, no account, no API key). Data sovereignty preserved.
+
+---
+
 ## [v3.6.2] - 2026-06-07
 
 ### Fixed

@@ -11,6 +11,7 @@ import { startPoller, resetTelemetryHeartbeat } from './services/poller.js';
 import { startServiceReminderScheduler } from './services/serviceReminders.js';
 import { startDemoLifecycle } from './services/demoLifecycle.js';
 import { startNightlyMaintenance } from './services/nightlyMaintenance.js';
+import { startCompanionScheduler } from './services/companionScheduler.js';
 import { startAutoBackupScheduler } from './services/autoBackupService.js';
 import demoRoutes from './routes/demo.js';
 import { ensureDemoTenant } from './db/database.js';
@@ -214,6 +215,7 @@ server.listen(PORT, async () => {
   // Naechtliche Hygiene (~03:30 Europe/Berlin) — sichere App-interne
   // Wartung. Auto-Update aus Git ist opt-in via AUTO_UPDATE_ENABLED=true.
   startNightlyMaintenance();
+  startCompanionScheduler();
   startAutoBackupScheduler();
   // Telegram Bot initialisieren (nur wenn TELEGRAM_BOT_TOKEN gesetzt).
   initTelegramBot().catch(err => console.error('[Telegram] Init fehlgeschlagen:', err.message));

@@ -107,7 +107,16 @@ v3.6.0 itibarıyla `/battery` altı bölüm sunuyor; temel batarya sorularına d
 
 **Araç seçici**: tüm bölümler seçili araca tepki verir.
 
-**Aşama 2 (yol haritası)**: anomali push bildirimleri, ön iklimlendirme önerileri. **Aşama 3**: Ollama üzerinden derin companion sohbet — hâlâ yerel.
+### Companion Aşama 2 (v3.7.0'den itibaren) {#companion-phase-2}
+
+`/battery` üzerinde, mevcut verilerinizden iki yeni bölüm:
+
+- **Companion uyarıları**: kalıcı anomaliler. Companion motoru gecelik (içinde `nightlyMaintenance` hijyeninin) ve her 6 saatte bir çalışır — her yeni anomali bir kez bildirilir (Web Push + bağlıysa Telegram). Her uyarıda "✓ Görüldü olarak işaretle" ve "✕ Kapat" eylemleri vardır.
+- **Ön iklimlendirme önerisi**: yarın tipik kalkış saatinizde (son 30 günün yolculuklarından öğrenilir) beklenen sıcaklık 5 °C altında veya 30 °C üzerinde ise, somut nedenle bir push önerisi gelir. Hava kaynağı: [Open-Meteo](https://open-meteo.com/) — ücretsiz, hesap gerektirmez.
+
+**Veri akışı tamamen yerel**: hava çağrısı tek dış istektir (yalnızca lat/lon, hesap yok). Anomaliler ve öneriler iki yeni tabloya gider: `battery_anomalies` ve `precondition_suggestions` (UNIQUE kısıtıyla idempotent).
+
+**Aşama 3 (yol haritası)**: Ollama üzerinden derin companion sohbet — hâlâ yerel.
 
 ## 📋 Gereksinimler {#requirements}
 

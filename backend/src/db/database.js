@@ -913,6 +913,40 @@ function runTenantMigrations(db) {
   db.exec('CREATE INDEX IF NOT EXISTS idx_audit_logs         ON audit_logs(user_id, created_at DESC)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_telemetry_vehicle  ON telemetry_points(vehicle_id, timestamp DESC)');
   db.exec('CREATE INDEX IF NOT EXISTS idx_telemetry_trip     ON telemetry_points(trip_id, timestamp)');
+
+  // Companion Phase 2: Anomalien-Persistenz
+  db.exec(`CREATE TABLE IF NOT EXISTS battery_anomalies (
+    id INTEGER PRIMARY KEY,
+    vehicle_id INTEGER NOT NULL REFERENCES vehicles(id),
+    hash TEXT NOT NULL,
+    type TEXT NOT NULL,
+    occurred_at INTEGER NOT NULL,
+    detected_at INTEGER NOT NULL DEFAULT (unixepoch()),
+    details_json TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'new',
+    notified_at INTEGER,
+    seen_at INTEGER,
+    dismissed_at INTEGER,
+    UNIQUE(vehicle_id, hash)
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_battery_anomalies_vehicle ON battery_anomalies(vehicle_id, occurred_at DESC)');
+
+  // Companion Phase 2: Vorklimatisierungs-Empfehlungen
+  db.exec(`CREATE TABLE IF NOT EXISTS precondition_suggestions (
+    id INTEGER PRIMARY KEY,
+    vehicle_id INTEGER NOT NULL REFERENCES vehicles(id),
+    for_date TEXT NOT NULL,
+    suggested_at INTEGER NOT NULL DEFAULT (unixepoch()),
+    expected_temp_c REAL,
+    expected_departure_hhmm TEXT,
+    reason_code TEXT NOT NULL,
+    details_json TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'open',
+    acknowledged_at INTEGER,
+    dismissed_at INTEGER,
+    UNIQUE(vehicle_id, for_date)
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_precondition_vehicle ON precondition_suggestions(vehicle_id, for_date DESC)');
 }
 
 // Alias für Abwärtskompatibilität

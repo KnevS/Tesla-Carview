@@ -124,6 +124,39 @@ CREATE TABLE IF NOT EXISTS battery_snapshots (
   created_at INTEGER DEFAULT (unixepoch())
 );
 
+-- Companion Phase 2: persistierte Anomalien
+CREATE TABLE IF NOT EXISTS battery_anomalies (
+  id INTEGER PRIMARY KEY,
+  vehicle_id INTEGER NOT NULL REFERENCES vehicles(id),
+  hash TEXT NOT NULL,
+  type TEXT NOT NULL,
+  occurred_at INTEGER NOT NULL,
+  detected_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  details_json TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'new',
+  notified_at INTEGER,
+  seen_at INTEGER,
+  dismissed_at INTEGER,
+  UNIQUE(vehicle_id, hash)
+);
+CREATE INDEX IF NOT EXISTS idx_battery_anomalies_vehicle ON battery_anomalies(vehicle_id, occurred_at DESC);
+
+-- Companion Phase 2: Vorklimatisierungs-Empfehlungen
+CREATE TABLE IF NOT EXISTS precondition_suggestions (
+  id INTEGER PRIMARY KEY,
+  vehicle_id INTEGER NOT NULL REFERENCES vehicles(id),
+  for_date TEXT NOT NULL,
+  suggested_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  expected_temp_c REAL,
+  expected_departure_hhmm TEXT,
+  reason_code TEXT NOT NULL,
+  details_json TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'open',
+  acknowledged_at INTEGER,
+  dismissed_at INTEGER,
+  UNIQUE(vehicle_id, for_date)
+);
+
 -- Betriebsbuch
 CREATE TABLE IF NOT EXISTS logbook_entries (
   id INTEGER PRIMARY KEY,

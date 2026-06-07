@@ -154,6 +154,70 @@
       <p v-else-if="!anomalies?.total" class="text-green-400 text-sm">{{ $t('battery.noAnomalies') }}</p>
     </SortableSection>
 
+    <SortableSection v-if="sid === 'companionAlerts'" page-id="battery" section-id="companionAlerts"
+      :title="$t('battery.companionAlerts')" icon="🛎️"
+      :collapsed="isCollapsed('companionAlerts')" @toggle="toggle('companionAlerts')" @move="(f,t,p) => moveSection(f,t,p)">
+      <p class="text-gray-400 text-xs mb-3" v-tooltip="$t('battery.companionAlertsTooltip')">
+        {{ $t('battery.companionAlertsHint') }}
+      </p>
+      <div v-if="companionAlerts?.length" class="space-y-2">
+        <div v-for="a in companionAlerts" :key="a.id"
+          class="bg-gray-800 rounded-lg p-3 flex items-start gap-3"
+          :class="a.status === 'seen' ? 'opacity-60' : ''">
+          <span class="text-2xl">{{ alertIcon(a.type) }}</span>
+          <div class="flex-1">
+            <p class="font-semibold">{{ $t('battery.anom_' + a.type) }} · {{ a.display_name }}</p>
+            <p class="text-gray-400 text-xs">{{ fmtDate(a.occurred_at) }}</p>
+            <p class="text-sm text-gray-300">
+              <span v-if="a.type === 'soc_jump'">{{ a.details.soc_from }} % → {{ a.details.soc_to }} % ({{ a.details.window_min }} min)</span>
+              <span v-else-if="a.type === 'range_jump'">{{ a.details.range_from }} → {{ a.details.range_to }} km</span>
+              <span v-else-if="a.type === 'phantom_spike'">{{ a.details.soc_loss }} % in {{ a.details.hours }} h ({{ a.details.pct_per_hour }} %/h)</span>
+              <span v-else-if="a.type === 'efficiency_outlier'">{{ a.details.kwh_per_100km }} kWh/100km auf {{ a.details.distance_km }} km</span>
+            </p>
+          </div>
+          <div class="flex flex-col gap-1">
+            <button v-if="a.status !== 'seen'" @click="markSeen(a.id)"
+              v-tooltip="$t('battery.markSeen')"
+              class="text-xs bg-gray-700 hover:bg-gray-600 rounded px-2 py-1">✓</button>
+            <button @click="dismissAlert(a.id)"
+              v-tooltip="$t('battery.dismiss')"
+              class="text-xs bg-gray-700 hover:bg-red-700 rounded px-2 py-1">✕</button>
+          </div>
+        </div>
+      </div>
+      <p v-else class="text-green-400 text-sm">{{ $t('battery.noCompanionAlerts') }}</p>
+    </SortableSection>
+
+    <SortableSection v-if="sid === 'precondition'" page-id="battery" section-id="precondition"
+      :title="$t('battery.precondition')" icon="🌡️"
+      :collapsed="isCollapsed('precondition')" @toggle="toggle('precondition')" @move="(f,t,p) => moveSection(f,t,p)">
+      <p class="text-gray-400 text-xs mb-3" v-tooltip="$t('battery.preconditionTooltip')">
+        {{ $t('battery.preconditionHint') }}
+      </p>
+      <div v-if="preconditionSuggestions?.length" class="space-y-2">
+        <div v-for="s in preconditionSuggestions" :key="s.id"
+          class="bg-gray-800 rounded-lg p-3 flex items-start gap-3">
+          <span class="text-2xl">{{ s.reason_code === 'cold' ? '❄️' : '☀️' }}</span>
+          <div class="flex-1">
+            <p class="font-semibold">{{ s.details.vehicle_label }} · {{ s.for_date }}</p>
+            <p class="text-sm text-gray-300">
+              {{ $t('battery.preconditionAt', {
+                temp: s.expected_temp_c.toFixed(1),
+                time: s.expected_departure_hhmm,
+              }) }}
+            </p>
+            <p class="text-gray-400 text-xs">
+              {{ s.reason_code === 'cold' ? $t('battery.preconditionCold') : $t('battery.preconditionHot') }}
+            </p>
+          </div>
+          <button @click="dismissSuggestion(s.id)"
+            v-tooltip="$t('battery.dismiss')"
+            class="text-xs bg-gray-700 hover:bg-red-700 rounded px-2 py-1">✕</button>
+        </div>
+      </div>
+      <p v-else class="text-gray-400 text-sm">{{ $t('battery.noPreconditionSuggestions') }}</p>
+    </SortableSection>
+
     </template><!-- end v-for layoutOrder -->
   </div>
 </template>
@@ -175,7 +239,7 @@ const { t, locale } = useI18n();
 const appStore = useAppStore();
 const { fmtDistance } = useUnits();
 
-const BATTERY_SECTIONS = ['range', 'degradation', 'chargingCurve', 'efficiencyTemp', 'phantomDrain', 'anomalies'];
+const BATTERY_SECTIONS = ['range', 'degradation', 'chargingCurve', 'efficiencyTemp', 'phantomDrain', 'anomalies', 'companionAlerts', 'precondition'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('battery', BATTERY_SECTIONS);
 
 const days = ref(90);
@@ -185,6 +249,16 @@ const chargingCurve = ref(null);
 const efficiencyTemp = ref(null);
 const phantomDrain = ref(null);
 const anomalies = ref(null);
+const companionAlerts = ref([]);
+const preconditionSuggestions = ref([]);
+
+const ALERT_ICON = {
+  soc_jump: '⚡',
+  range_jump: '📏',
+  phantom_spike: '👻',
+  efficiency_outlier: '📊',
+};
+const alertIcon = (t) => ALERT_ICON[t] || '🔍';
 
 const fmt = (v, d = 0) => (+(v || 0)).toFixed(d);
 const fmtDate = (ts) => new Date(ts * 1000).toLocaleString(locale.value, {
@@ -265,12 +339,14 @@ async function load() {
   const vParam = vid ? { vehicle_id: vid } : {};
   const params = { days: days.value, ...vParam };
 
-  const [deg, curve, eff, phan, anom] = await Promise.all([
+  const [deg, curve, eff, phan, anom, persisted, preCond] = await Promise.all([
     api.get('/battery/degradation', { params }).catch(() => ({ data: [] })),
     api.get('/battery/charging-curve', { params: vParam }).catch(() => ({ data: null })),
     api.get('/battery/efficiency-by-temp', { params: vParam }).catch(() => ({ data: null })),
     api.get('/battery/phantom-drain', { params }).catch(() => ({ data: null })),
     api.get('/battery/anomalies', { params }).catch(() => ({ data: null })),
+    api.get('/battery/anomalies-persisted', { params: vParam }).catch(() => ({ data: [] })),
+    api.get('/battery/precondition-suggestions', { params: vParam }).catch(() => ({ data: [] })),
   ]);
 
   degradation.value = deg.data || [];
@@ -288,6 +364,28 @@ async function load() {
   efficiencyTemp.value = eff.data;
   phantomDrain.value = phan.data;
   anomalies.value = anom.data;
+  companionAlerts.value = (persisted.data || []).filter(a => a.status !== 'dismissed');
+  preconditionSuggestions.value = preCond.data || [];
+}
+
+async function markSeen(id) {
+  try {
+    await api.post(`/battery/anomalies-persisted/${id}/seen`);
+    const a = companionAlerts.value.find(x => x.id === id);
+    if (a) a.status = 'seen';
+  } catch { /* silent */ }
+}
+async function dismissAlert(id) {
+  try {
+    await api.post(`/battery/anomalies-persisted/${id}/dismiss`);
+    companionAlerts.value = companionAlerts.value.filter(x => x.id !== id);
+  } catch { /* silent */ }
+}
+async function dismissSuggestion(id) {
+  try {
+    await api.post(`/battery/precondition-suggestions/${id}/dismiss`);
+    preconditionSuggestions.value = preconditionSuggestions.value.filter(x => x.id !== id);
+  } catch { /* silent */ }
 }
 
 onMounted(load);

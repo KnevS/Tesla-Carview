@@ -107,7 +107,16 @@ Every signed-in user has their own page at `/my-tracking` ("📱 My GPS" in the 
 
 **Vehicle selector**: all sections react to the currently selected vehicle.
 
-**Phase 2 (roadmap)**: anomaly push notifications, preconditioning suggestions. **Phase 3**: deep companion chat over Ollama — still local.
+### Companion Phase 2 (from v3.7.0) {#companion-phase-2}
+
+Two new sections on `/battery`, both from your existing data:
+
+- **Companion alerts**: persistent anomalies. The companion engine runs nightly (inside the `nightlyMaintenance` hygiene) and every 6 hours — every new anomaly is pushed once (Web Push + Telegram if linked). Each alert has "✓ Mark as seen" and "✕ Dismiss".
+- **Preconditioning suggestion**: when tomorrow's expected temperature at your typical departure time (learned from the last 30 days of trips) is below 5 °C or above 30 °C, a push suggestion fires with the concrete reason. Weather source: [Open-Meteo](https://open-meteo.com/) — free, no account.
+
+**Data flow stays local**: the weather call is the only external request (just lat/lon, no account). Anomalies and suggestions land in two new tables `battery_anomalies` and `precondition_suggestions` (idempotent through UNIQUE constraint).
+
+**Phase 3 (roadmap)**: deep companion chat over Ollama — still local.
 
 ## 📋 Requirements {#requirements}
 

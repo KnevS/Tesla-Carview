@@ -81,6 +81,26 @@ Geri ödeme için PDF fatura (**Faturalama → Fatura Oluştur**) — tamamen is
 
 ---
 
+## 🔋 Batarya — Sağlık paneli (Companion)
+
+`/battery` üzerinde altı bölüm, **tamamen yerel ve yalnızca istatistik** (yapay zeka yok, ön iklimlendirme için tek bir hava çağrısı dışında bulut yok):
+
+**Aşama 1 (v3.6.0'dan itibaren):**
+- Menzil geçmişi (kayan maks. rated_range)
+- Bozulma (ilk vs. son ölçüm, renk kodlu)
+- Şarj eğrisi (SOC bandı agregası + başlangıç SOC'una karşı kW dağılımı)
+- Verimlilik vs. dış sıcaklık (5 °C kovalarda kWh/100 km)
+- Hayalet boşalma (park halinde saatlik SOC kaybı, sürüş/şarj etrafında filtrelenmiş)
+- Anomaliler (canlı: SOC/menzil sıçramaları, verimlilik aykırıları)
+
+**Aşama 2 (v3.7.0'dan itibaren):**
+- **Companion uyarıları** — kalıcı anomaliler, olay başına bir push bildirimi ve "Görüldü olarak işaretle / Kapat" eylemleri
+- **Ön iklimlendirme önerisi** — tipik kalkış saatinizde <5 °C veya >30 °C beklendiğinde push (son 30 günden öğrenilir)
+
+Kaynaklar: `battery_snapshots`, `trips`, `charging_sessions`, artı ön iklimlendirme için tek bir Open-Meteo çağrısı. UNIQUE kısıtlarıyla (idempotent) `battery_anomalies` ve `precondition_suggestions` tablolarında kalıcılık. Companion motoru gecelik + her 6 saatte bir çalışır.
+
+---
+
 ## 🗺️ Rota Planlayıcı
 
 Sürüşlerinizi önceden planlayın ve doğrudan Tesla navigasyonuna gönderin:

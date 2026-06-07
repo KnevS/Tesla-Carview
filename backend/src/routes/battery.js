@@ -248,6 +248,89 @@ router.get('/phantom-drain', (req, res) => {
   }
 });
 
+// Persistierte Anomalien (Companion Phase 2) — direkt aus DB statt Live-Calc
+router.get('/anomalies-persisted', (req, res) => {
+  const db = req.db;
+  const { vehicle_id, status, limit = 50 } = req.query;
+  try {
+    const where = ['1=1'];
+    const params = [];
+    if (vehicle_id) { where.push('a.vehicle_id=?'); params.push(vehicle_id); }
+    if (status)     { where.push('a.status=?');     params.push(status); }
+    const rows = db.prepare(
+      `SELECT a.id, a.vehicle_id, a.type, a.occurred_at, a.detected_at,
+              a.details_json, a.status, a.notified_at, a.seen_at, a.dismissed_at,
+              v.display_name
+       FROM battery_anomalies a
+       JOIN vehicles v ON v.id=a.vehicle_id
+       WHERE ${where.join(' AND ')}
+       ORDER BY a.occurred_at DESC
+       LIMIT ?`
+    ).all(...params, +limit);
+    res.json(rows.map(r => ({ ...r, details: JSON.parse(r.details_json), details_json: undefined })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/anomalies-persisted/:id/seen', (req, res) => {
+  try {
+    const r = req.db.prepare(
+      `UPDATE battery_anomalies SET status='seen', seen_at=unixepoch() WHERE id=? AND status!='dismissed'`
+    ).run(req.params.id);
+    res.json({ updated: r.changes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/anomalies-persisted/:id/dismiss', (req, res) => {
+  try {
+    const r = req.db.prepare(
+      `UPDATE battery_anomalies SET status='dismissed', dismissed_at=unixepoch() WHERE id=?`
+    ).run(req.params.id);
+    res.json({ updated: r.changes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Vorklim-Empfehlungen (Companion Phase 2)
+router.get('/precondition-suggestions', (req, res) => {
+  const db = req.db;
+  const { vehicle_id, status = 'open' } = req.query;
+  try {
+    const where = ['s.status=?'];
+    const params = [status];
+    if (vehicle_id) { where.push('s.vehicle_id=?'); params.push(vehicle_id); }
+    const rows = db.prepare(
+      `SELECT s.id, s.vehicle_id, s.for_date, s.expected_temp_c,
+              s.expected_departure_hhmm, s.reason_code, s.details_json,
+              s.status, s.acknowledged_at, s.dismissed_at,
+              v.display_name
+       FROM precondition_suggestions s
+       JOIN vehicles v ON v.id=s.vehicle_id
+       WHERE ${where.join(' AND ')}
+       ORDER BY s.for_date DESC
+       LIMIT 30`
+    ).all(...params);
+    res.json(rows.map(r => ({ ...r, details: JSON.parse(r.details_json), details_json: undefined })));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/precondition-suggestions/:id/dismiss', (req, res) => {
+  try {
+    const r = req.db.prepare(
+      `UPDATE precondition_suggestions SET status='dismissed', dismissed_at=unixepoch() WHERE id=?`
+    ).run(req.params.id);
+    res.json({ updated: r.changes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Anomalien: SOC-Sprünge, Range-Sprünge, ungewöhnliche Effizienz
 router.get('/anomalies', (req, res) => {
   const db = req.db;

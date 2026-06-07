@@ -397,7 +397,21 @@
     "detail": "Detail",
     "anom_soc_jump": "SOC-Sprung",
     "anom_range_jump": "Reichweite-Sprung",
-    "anom_efficiency_outlier": "Effizienz-Ausreißer"
+    "anom_efficiency_outlier": "Effizienz-Ausreißer",
+    "companionAlerts": "Companion-Alerts",
+    "companionAlertsHint": "Persistierte Anomalien aus dem nightly Companion-Lauf. Push-Benachrichtigung erfolgt automatisch.",
+    "companionAlertsTooltip": "Alle Anomalien werden gespeichert und 1× pro Vorfall gepusht. Hier kannst du sie als gesehen markieren oder verwerfen.",
+    "markSeen": "Als gesehen markieren",
+    "dismiss": "Verwerfen",
+    "noCompanionAlerts": "Keine offenen Alerts — alles ruhig.",
+    "anom_phantom_spike": "Phantom-Drain-Spike",
+    "precondition": "Vorklimatisierungs-Empfehlung",
+    "preconditionHint": "Wetter-basierte Empfehlung für morgen, abgestimmt auf deine typische Abfahrtszeit.",
+    "preconditionTooltip": "Aus Open-Meteo-Forecast + Trip-Mustern der letzten 30 Tage. Empfehlung bei <5 °C oder >30 °C.",
+    "preconditionAt": "{temp} °C um {time}",
+    "preconditionCold": "Akku rechtzeitig warm fahren spart Reichweite.",
+    "preconditionHot": "Innenraum vorab kühlen, Akku schont sich beim Tritt aufs Gas.",
+    "noPreconditionSuggestions": "Keine Vorklim-Empfehlung für morgen."
   },
   "control": {
     "title": "Fahrzeugsteuerung",

@@ -220,6 +220,14 @@ async function runOnce() {
     result.tasks.hygiene_error = e.message;
   }
 
+  // 3b. Companion Phase 2: Anomalien + Vorklim-Empfehlungen
+  try {
+    const { runCompanionCycle } = await import('./companionEngine.js');
+    result.tasks.companion = await runCompanionCycle();
+  } catch (e) {
+    result.tasks.companion_error = e.message;
+  }
+
   // 4. Optional: Auto-Update aus dem Git-Repo (opt-in)
   if (process.env.AUTO_UPDATE_ENABLED === 'true') {
     const repoDir = process.env.UPDATE_REPO_DIR || '/opt/tesla-carview';

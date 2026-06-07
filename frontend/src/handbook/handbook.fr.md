@@ -107,7 +107,16 @@ Depuis v3.6.0, `/battery` propose six sections qui répondent honnêtement aux q
 
 **Sélecteur de véhicule** : toutes les sections réagissent au véhicule sélectionné.
 
-**Phase 2 (feuille de route)** : notifications push d'anomalies, suggestions de préconditionnement. **Phase 3** : chat companion approfondi via Ollama — toujours local.
+### Companion Phase 2 (à partir de v3.7.0) {#companion-phase-2}
+
+Deux nouvelles sections sur `/battery`, toutes deux à partir de vos données existantes :
+
+- **Alertes Companion** : anomalies persistantes. Le moteur Companion tourne chaque nuit (dans l'hygiène `nightlyMaintenance`) et toutes les 6 heures — chaque nouvelle anomalie est notifiée une fois (Web Push + Telegram si lié). Chaque alerte propose « ✓ Marquer comme vu » et « ✕ Rejeter ».
+- **Suggestion de préconditionnement** : si la température prévue pour demain à votre heure de départ habituelle (apprise des trajets des 30 derniers jours) est inférieure à 5 °C ou supérieure à 30 °C, une suggestion push arrive avec la raison précise. Source météo : [Open-Meteo](https://open-meteo.com/) — gratuit, sans compte.
+
+**Flux de données entièrement local** : l'appel météo est la seule requête externe (uniquement lat/lon, pas de compte). Les anomalies et suggestions arrivent dans deux nouvelles tables `battery_anomalies` et `precondition_suggestions` (idempotent via contrainte UNIQUE).
+
+**Phase 3 (feuille de route)** : chat companion approfondi via Ollama — toujours local.
 
 ## 📋 Prérequis {#requirements}
 

@@ -7,6 +7,47 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.7.0] - 2026-06-07
+
+### Hinzugefügt — Companion Phase 2: Persistierte Anomalien + Vorklim-Empfehlung
+
+Zwei neue Sektionen auf `/battery`, alles aus vorhandenen Daten + einem einzigen externen Wetter-Lookup:
+
+- **Companion-Alerts** — persistierte Anomalien (`battery_anomalies`-Tabelle). Detection-Engine (`backend/src/services/companionEngine.js`) läuft nightly (eingehängt in `nightlyMaintenance`) und alle 6 Stunden (`companionScheduler.js`). Jede neue Anomalie wird **1× pro Vorfall** via Web Push + Telegram gemeldet. UI hat Aktionen „✓ Als gesehen markieren" und „✕ Verwerfen". Anomalietypen: SOC-Sprung, Range-Sprung, Phantom-Drain-Spike, Effizienz-Ausreißer. Dedup über UNIQUE(vehicle_id, hash).
+- **Vorklimatisierungs-Empfehlung** — `precondition_suggestions`-Tabelle. Aus Open-Meteo-Forecast + den häufigsten Abfahrtszeit-Buckets der letzten 30 Tage. Push wenn morgen <5 °C oder >30 °C erwartet wird. UNIQUE(vehicle_id, for_date) verhindert Mehrfach-Vorschläge.
+
+### Backend
+
+Neue Endpoints in `backend/src/routes/battery.js`:
+- `GET  /battery/anomalies-persisted` (mit Status-Filter)
+- `POST /battery/anomalies-persisted/:id/seen`
+- `POST /battery/anomalies-persisted/:id/dismiss`
+- `GET  /battery/precondition-suggestions`
+- `POST /battery/precondition-suggestions/:id/dismiss`
+
+Neue Services:
+- `companionEngine.js` — Detection-Logik + Persistenz + Push-Dispatch
+- `companionScheduler.js` — 6h-Cycle für Anomalien (ohne Wetter-Calls)
+
+Migrations: `battery_anomalies` + `precondition_suggestions` werden automatisch in bestehende Tenant-DBs eingepflegt (siehe `runTenantMigrations`).
+
+### Frontend
+
+`Battery.vue` um 2 SortableSections erweitert (`companionAlerts`, `precondition`). Action-Buttons mit Tooltip. `usePageLayout` hängt sie an bestehende Layouts.
+
+### Doku
+
+- Handbuch um Sektion `{#companion-phase-2}` in allen 6 Sprachen (DE/EN/FR/ES/TR/EL)
+- Wiki Features-Seite (DE/EN/FR/ES/TR/EL) erweitert: Phase-1+2-Übersicht
+- 14 neue i18n-Keys × 6 Sprachen
+- i18n-Hygiene: `routes.chargeToTip` aus EN/FR/ES/TR/EL entfernt (orphan)
+
+### Datenkonzept
+
+Alle Companion-Berechnungen lokal in der Tenant-SQLite. **Einziger externer Call**: Open-Meteo-Forecast (nur lat/lon, kein Account, kein API-Key). Datensouverän bleibt sicher.
+
+---
+
 ## [v3.6.2] - 2026-06-07
 
 ### Behoben

@@ -95,13 +95,23 @@ Generate PDF invoices for reimbursement (**Billing → Generate Invoice**). Sele
 
 ---
 
-## 🔋 Battery
+## 🔋 Battery — Health dashboard (Companion)
 
-Track your battery health over time:
-- Degradation curve (estimated vs. rated range)
-- Charge cycle counter
-- Historical charge level data
-- Range comparison across temperatures
+Six sections on `/battery`, **fully local and statistics-only** (no AI, no cloud except a single weather lookup for preconditioning):
+
+**Phase 1 (from v3.6.0):**
+- Range history (rolling max rated_range)
+- Degradation (first vs. last measurement, colour-coded)
+- Charging curve (SOC-band aggregate + scatter kW vs. start SOC)
+- Efficiency vs. outside temperature (kWh/100 km in 5 °C buckets)
+- Phantom drain (SOC loss per hour while parked, filtered around trips/charges)
+- Anomalies (live: SOC/range jumps, efficiency outliers)
+
+**Phase 2 (from v3.7.0):**
+- **Companion alerts** — persistent anomalies with one-shot push notification and "Mark as seen / Dismiss" actions
+- **Preconditioning suggestion** — push when temperature below 5 °C or above 30 °C is expected at your typical departure time, learned from the last 30 days of trips
+
+Sources: `battery_snapshots`, `trips`, `charging_sessions`, plus a single Open-Meteo call for preconditioning. Persistence in `battery_anomalies` and `precondition_suggestions` with UNIQUE constraints (idempotent). The companion engine runs nightly + every 6 hours.
 
 ---
 
