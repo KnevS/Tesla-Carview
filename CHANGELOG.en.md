@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.5.8] - 2026-06-07
+
+### Changed
+
+- **i18n completeness reached in 6 languages**: FR/ES/TR/EL were missing exactly 99 sub-keys relative to DE (in the areas `adminSetup.oauth.*`, `adminSetup.owntracks.*`, `adminSetup.external.*` for Ollama, `adminSetup.vehicles.*` for manual entry, `adminSetup.virtualKey.ownerSkipBody`, `adminSetup.telemetry.ownerSkipBody`, `adminSetup.done.ownerSkipBanner`, `wizard.sOauth.*`, `telemetry.refresh*`, `common.copy/optional`). These fell back to German via `fallbackLocale='de'` — functionally OK, but a hygiene smell. Now: fully translated in FR, ES, TR, EL. **All 6 languages are now 100 % parallel to the German reference** (1991 keys, 0 missing).
+
+---
+
 ## [v3.5.7] - 2026-06-06
 
 ### Added

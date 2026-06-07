@@ -31,7 +31,9 @@
     "donate": "Δωρεά",
     "sortNewestFirst": "Νεότερα πρώτα",
     "sortOldestFirst": "Παλαιότερα πρώτα",
-    "sortToggleTooltip": "Αντιστροφή σειράς ταξινόμησης"
+    "sortToggleTooltip": "Αντιστροφή σειράς ταξινόμησης",
+    "copy": "Αντιγραφή",
+    "optional": "προαιρετικό"
   },
   "lang": {
     "title": "Γλώσσα / Language",
@@ -645,7 +647,13 @@
     "locked": "Κλειδωμένο",
     "sentry": "Sentry",
     "software": "Λογισμικό",
-    "heading": "Κατεύθυνση"
+    "heading": "Κατεύθυνση",
+    "refreshHint": "Λήψη φρέσκων δεδομένων απευθείας από το όχημα — καταναλώνει 1 από το ημερήσιο όριο",
+    "refreshing": "Ανανέωση…",
+    "refreshed": "Ανανεώθηκε",
+    "refreshedCap": "Ανανεώθηκε ({day}/{dayMax} σήμερα)",
+    "refreshFailed": "Η ανανέωση απέτυχε",
+    "refreshCapReached": "Το ημερήσιο όριο επιτεύχθηκε ({day}/{dayMax}) — παύση μέχρι αύριο"
   },
   "settings": {
     "manualLink": "Άνοιγμα επίσημου εγχειριδίου",
@@ -1859,7 +1867,20 @@
       "hint": "Ανοίγει τη σύνδεση Tesla σε νέο παράθυρο.",
       "connectBtn": "Σύνδεση Tesla →",
       "refresh": "Έλεγχος κατάστασης",
-      "connectedHint": "Μπορείτε να προχωρήσετε στο επόμενο βήμα."
+      "connectedHint": "Μπορείτε να προχωρήσετε στο επόμενο βήμα.",
+      "tabFleet": "Fleet OAuth",
+      "tabOwner": "Owner API",
+      "ownerInfo": "Πατήστε σύνδεση → σύνδεση Tesla → τα tokens αποθηκεύονται. Σημείωση: Η Tesla απορρίπτει αυτή τη στιγμή tokens Owner-API στο Fleet API — η κατάσταση σύνδεσης εμφανίζεται μετά τη σύνδεση.",
+      "ownerConnected": "Owner API συνδέθηκε",
+      "ownerActiveHint": "Σύνδεση ενεργή — δεν απαιτείται πρόσβαση Fleet API.",
+      "ownerConnectBtn": "Σύνδεση μέσω Owner API",
+      "ownerOpening": "Άνοιγμα σύνδεσης Tesla …",
+      "ownerBlockedTitle": "Owner API συνδεδεμένη, αλλά η Tesla μπλοκάρει τα δεδομένα οχήματος",
+      "ownerBlockedHint": "Η Tesla έκλεισε την Owner API για endpoints οχήματος — το token απορρίπτεται με HTTP 401. Τα αποθηκευμένα tokens διατηρούνται (σε περίπτωση που η Tesla ανοίξει ξανά). Για δεδομένα οχήματος χρειάζεστε Fleet OAuth μέσω developer.tesla.com.\n\nΕναλλακτικά: παρακολούθηση GPS smartphone μέσω OwnTracks (στις ρυθμίσεις) — λειτουργεί χωρίς καθόλου Tesla API.",
+      "ownerPausedTitle": "Owner API συνδεδεμένη, σε παύση",
+      "ownerPausedHint": "Τα tokens είναι αποθηκευμένα, αλλά το backend δεν κάνει κλήσεις Tesla API. Χρήσιμο μέχρι η Tesla να ανοίξει ξανά την Owner API ή μέχρι να ρυθμίσετε Fleet OAuth.",
+      "ownerPauseBtn": "⏸ Παύση Owner API",
+      "ownerResumeBtn": "▶ Επανενεργοποίηση Owner API"
     },
     "sVehicles": {
       "title": "Οχήματα",
@@ -2204,14 +2225,45 @@
       "hint": "Ο λογαριασμός Tesla πρέπει να είναι συνδεδεμένος με τα διαπιστευτήρια Fleet API.",
       "connectBtn": "🔗 Σύνδεση με Tesla",
       "opening": "Άνοιγμα Tesla login …",
-      "activeHint": "Ενεργή σύνδεση. Φόρτωση δεδομένων οχήματος."
+      "activeHint": "Ενεργή σύνδεση. Φόρτωση δεδομένων οχήματος.",
+      "tabFleet": "Fleet OAuth",
+      "tabOwner": "Owner API",
+      "ownerInfo": "Πατήστε σύνδεση → σύνδεση Tesla → τα tokens αποθηκεύονται. Σημείωση: Η Tesla απορρίπτει αυτή τη στιγμή tokens Owner-API στο Fleet API — η κατάσταση σύνδεσης εμφανίζεται μετά τη σύνδεση.",
+      "ownerConnected": "Owner API συνδέθηκε",
+      "ownerActiveHint": "Σύνδεση ενεργή — δεν απαιτείται πρόσβαση Fleet API.",
+      "ownerConnectBtn": "Σύνδεση μέσω Owner API",
+      "ownerOpening": "Άνοιγμα σύνδεσης Tesla …",
+      "ownerBlockedTitle": "Owner API συνδεδεμένη, αλλά η Tesla μπλοκάρει τα δεδομένα οχήματος",
+      "ownerBlockedHint": "Η Tesla έκλεισε την Owner API για endpoints οχήματος — το token απορρίπτεται με HTTP 401. Τα αποθηκευμένα tokens διατηρούνται (σε περίπτωση που η Tesla ανοίξει ξανά). Για δεδομένα οχήματος χρειάζεστε Fleet OAuth μέσω developer.tesla.com.\n\nΕναλλακτικά: παρακολούθηση GPS smartphone μέσω OwnTracks (στις ρυθμίσεις) — λειτουργεί χωρίς καθόλου Tesla API.",
+      "ownerPausedTitle": "Owner API συνδεδεμένη, σε παύση",
+      "ownerPausedHint": "Τα tokens είναι αποθηκευμένα, αλλά το backend δεν κάνει κλήσεις Tesla API. Χρήσιμο μέχρι η Tesla να ανοίξει ξανά την Owner API ή μέχρι να ρυθμίσετε Fleet OAuth.",
+      "ownerPauseBtn": "⏸ Παύση Owner API",
+      "ownerResumeBtn": "▶ Επανενεργοποίηση Owner API",
+      "refresh": "↻"
     },
     "vehicles": {
       "title": "Οχήματα",
       "question": "Τα οχήματα Tesla σας εμφανίζονται εδώ. Συγχρονίστε αν χρειάζεται.",
       "none": "Δεν βρέθηκαν οχήματα. Συνδεθείτε πρώτα με Tesla.",
       "syncBtn": "🔄 Λήψη οχημάτων",
-      "resyncBtn": "🔄 Επαναλήψη"
+      "resyncBtn": "🔄 Επαναλήψη",
+      "intro": "Δύο τρόποι για να προσθέσετε ένα όχημα στο TeslaView:\n\n☁ Ο συγχρονισμός Tesla λειτουργεί μόνο με έγκριση Fleet API (αναμονή εβδομάδες-μήνες, ~10 €/μήνα).\n✍ Η χειροκίνητη καταχώρηση λειτουργεί αμέσως, χωρίς API — χρήσιμη για ρυθμίσεις μόνο με OwnTracks ή ως μετάβαση μέχρι να έρθει η έγκριση Fleet.",
+      "syncTitle": "Συγχρονισμός Tesla (cloud)",
+      "syncHint": "Λαμβάνει όνομα εμφάνισης, VIN, μοντέλο απευθείας από τον λογαριασμό Tesla. Απαιτεί συνδεδεμένο Fleet API.",
+      "manualTitle": "Χειροκίνητη καταχώρηση",
+      "manualHint": "Λειτουργεί χωρίς πρόσβαση στο Tesla API. Εισάγετε εσείς ετικέτα, πινακίδα και προαιρετικά VIN.",
+      "manualBtn": "Νέο όχημα",
+      "manualFormTitle": "Χειροκίνητη προσθήκη οχήματος",
+      "manualSave": "Προσθήκη",
+      "fName": "Ετικέτα",
+      "fNamePlaceholder": "π.χ. «Otto II» ή «Εταιρικό MY»",
+      "fPlate": "Πινακίδα κυκλοφορίας",
+      "fVin": "VIN (προαιρετικό)",
+      "fVinPlaceholder": "π.χ. XP7YGCEL0RB319320",
+      "fVinHint": "Κενό = συνθετικό «MANUAL…» VIN — όχι πρόβλημα για διαδρομές OwnTracks, αλλά μεταγενέστερος συγχρονισμός Tesla θα δημιουργήσει χωριστό νέο όχημα.",
+      "fModel": "Μοντέλο",
+      "fInitialKm": "Χιλιομετρητής κατά την εγγραφή",
+      "fInitialKmHint": "Χρησιμοποιείται ως βάση για την απόσταση που διανύθηκε (πιλοτήριο TCO)."
     },
     "virtualKey": {
       "title": "Virtual Key",
@@ -2225,7 +2277,8 @@
       "copyBtn": "Αντιγραφή URL",
       "copied": "Αντιγράφηκε ✓",
       "open": "↗ Άνοιγμα",
-      "recheck": "Επανέλεγχος"
+      "recheck": "Επανέλεγχος",
+      "ownerSkipBody": "Το Virtual Key είναι μέρος του Tesla Fleet API — επιτρέπει εντολές οχήματος (κλιματισμός, φόρτιση, πόρτες) απευθείας από το TeslaView μέσω κρυπτογραφημένου καναλιού.\n\nΣε λειτουργία Owner-API (η τρέχουσα διαμόρφωσή σας), αυτό δεν είναι διαθέσιμο. Μόλις έρθει η έγκριση Fleet API στο developer.tesla.com, μπορείτε να αλλάξετε λειτουργία στο βήμα «Σύνδεση Tesla» και να ρυθμίσετε εδώ το Virtual Key.\n\nΓια καθαρή ρύθμιση ημερολογίου με OwnTracks, το Virtual Key δεν είναι απαραίτητο — απλώς παραλείψτε αυτό το βήμα."
     },
     "telemetry": {
       "title": "Fleet Telemetry",
@@ -2238,7 +2291,8 @@
       "statusRegisteredIdle": "◎ Καταχωρημένο",
       "statusNotRegistered": "○ Μη καταχωρημένο",
       "statusApprovalMissing": "⚠ Λείπει έγκριση",
-      "statusError": "✕ Σφάλμα"
+      "statusError": "✕ Σφάλμα",
+      "ownerSkipBody": "Το Fleet Telemetry είναι το ρεύμα push πραγματικού χρόνου (WebSocket) του Tesla Fleet API — μπαταρία, GPS, TPMS, κλιματισμός που προωθούνται από την Tesla στο TeslaView κάθε δευτερόλεπτο.\n\nΣε λειτουργία Owner-API (η τρέχουσα διαμόρφωσή σας), αυτό δεν είναι διαθέσιμο. Θα απαιτούσε έγκριση Fleet API + Virtual Key + εγγραφή από την πλευρά της Tesla.\n\nΓια καθαρή ρύθμιση ημερολογίου με OwnTracks, το Telemetry δεν είναι απαραίτητο — απλώς παραλείψτε αυτό το βήμα."
     },
     "vapid": {
       "title": "Web Push (VAPID)",
@@ -2289,7 +2343,21 @@
       "grokPlaceholder": "Κλειδί xai-…",
       "abrpName": "⚡ Κλειδί εφαρμογής ABRP",
       "abrpHint": "Καθολικό κλειδί εφαρμογής για A Better Route Planner (api.iternio.com).",
-      "abrpPlaceholder": "Κλειδί API ABRP"
+      "abrpPlaceholder": "Κλειδί API ABRP",
+      "aiProvider": "Πάροχος AI",
+      "aiProviderHint": "Ποιος απαντά σε ερωτήσεις AI σχετικά με τα δεδομένα του οχήματός σας;\n\nΤο Ollama εκτελείται τοπικά στο δικό σας υλικό (Pi/VPS) — τα δεδομένα ΠΟΤΕ δεν φεύγουν από το instance.\nΤο Grok είναι xAI cloud — γρήγορο, αλλά κάθε ερώτηση πάει στο xAI στις ΗΠΑ.\nΤο Off απενεργοποιεί εντελώς τη συνομιλία AI.",
+      "aiOff": "Συνομιλία AI απενεργοποιημένη",
+      "ollamaUrl": "URL Ollama",
+      "ollamaModel": "Μοντέλο Ollama",
+      "ollamaModelHint": "Προτάσεις ανά υλικό:\n• Pi 4: llama3.2:1b (οικονομικό)\n• Pi 5: qwen2.5:3b (πρότυπο)\n• VPS/σταθμός εργασίας: llama3:8b ή qwen2.5:7b\nΠρώτα εγκαταστήστε ένα μοντέλο με: ollama pull <όνομα>",
+      "ollamaTest": "Δοκιμή σύνδεσης",
+      "ollamaOk": "Το Ollama είναι προσβάσιμο",
+      "ollamaInstalled": "Εγκατεστημένα μοντέλα",
+      "ollamaPullTitle": "Εγκατάσταση μοντέλου",
+      "ollamaPullHint": "Το μοντέλο κατεβαίνει απευθείας από το αποθετήριο Ollama — μία λειτουργία ανά μοντέλο, μετά όλα λειτουργούν εκτός σύνδεσης.\nΤο μέγεθος λήψης και η απαίτηση RAM εμφανίζονται ανά καταχώρηση. Εγκαταστήστε πολλά μοντέλα αν θέλετε — ο οδηγός χρησιμοποιεί πάντα αυτό στο πεδίο «Μοντέλο Ollama».",
+      "ollamaPullSelect": "Επιλέξτε προτεινόμενο μοντέλο",
+      "ollamaPullBtn": "Εγκατάσταση",
+      "ollamaPullDone": "εγκαταστάθηκε με επιτυχία"
     },
     "monitoring": {
       "title": "Παρακολούθηση & email",
@@ -2325,7 +2393,44 @@
     "msgSaved": "✓ Αποθηκεύτηκε",
     "msgError": "Σφάλμα",
     "done": {
-      "banner": "Αυτό το βήμα έχει ήδη ρυθμιστεί. Πατήστε «Επόμενο» για παράλειψη ή προσαρμόστε τις τιμές παρακάτω."
+      "banner": "Αυτό το βήμα έχει ήδη ρυθμιστεί. Πατήστε «Επόμενο» για παράλειψη ή προσαρμόστε τις τιμές παρακάτω.",
+      "ownerSkipBanner": "Αυτό το βήμα απαιτεί το Tesla Fleet API. Μη διαθέσιμο σε λειτουργία Owner-API — πατήστε «Επόμενο» για παράλειψη."
+    },
+    "owntracks": {
+      "title": "GPS smartphone (OwnTracks)",
+      "question": "Παρακολούθηση GPS χωρίς το Tesla API — η εφαρμογή τηλεφώνου OwnTracks στέλνει τη θέση απευθείας στον διακομιστή σας.",
+      "intro": "Συνιστάται όταν η Tesla μπλοκάρει το Fleet API ή η Owner API είναι νεκρή.\n\nΠώς λειτουργεί: Κάθε οδηγός εγκαθιστά τη δωρεάν εφαρμογή OwnTracks (iOS+Android), εισάγει το URL webhook σας, τέλος. Μόλις κάποιος αρχίζει να οδηγεί (>5 χλμ/ώρα), μια διαδρομή ξεκινά αυτόματα. 5 λεπτά ακινησίας = τέλος διαδρομής. Τα δεδομένα πηγαίνουν μόνο στον διακομιστή σας — όχι σε cloud OwnTracks, όχι σε λογαριασμό, όχι σε τρίτους.\n\nΠεριορισμός: μόνο GPS, ταχύτητα, απόσταση — όχι δεδομένα μπαταρίας/κλίματος (αυτά απαιτούν το Fleet API).",
+      "devicesHeading": "Καταχωρημένες συσκευές",
+      "noDevices": "Δεν έχουν καταχωρηθεί συσκευές ακόμη.",
+      "addBtn": "Νέα συσκευή",
+      "skipHint": "Αυτό το βήμα είναι προαιρετικό — παραλείψτε αν δεν χρειάζεται. Περισσότερες πληροφορίες για την εφαρμογή OwnTracks:",
+      "createBtn": "Δημιουργία συσκευής και URL webhook",
+      "createdTitle": "✓ Συσκευή δημιουργήθηκε — σαρώστε τώρα με την κάμερα του iPhone",
+      "qrInstructions": "📱 Πώς να ρυθμίσετε:\n1. Εγκαταστήστε την εφαρμογή OwnTracks από το App Store\n2. Στρέψτε την κάμερα του iPhone (ΟΧΙ την εφαρμογή!) προς τον κωδικό QR\n3. Πατήστε «Άνοιγμα στο OwnTracks»\n4. Επιβεβαιώστε την εισαγωγή ρυθμίσεων\n5. Ορίστε την πρόσβαση τοποθεσίας σε «Πάντα» — τέλος.\n\nΟ κωδικός QR περιέχει όλες τις ρυθμίσεις — δεν απαιτείται χειροκίνητη καταχώρηση.",
+      "manualSetup": "Χειροκίνητη ρύθμιση εάν ο κωδικός QR δεν λειτουργεί",
+      "downloadOtrc": "Λήψη αρχείου ρυθμίσεων (.otrc)",
+      "createdHint": "Εισάγετε αυτό το URL webhook στην εφαρμογή OwnTracks: Settings → Connection → HTTP Mode → URL. Το URL εμφανίζεται μόνο μία φορά — δημιουργήστε νέα συσκευή εάν χαθεί.",
+      "confirmDelete": "Διαγραφή συσκευής «{label}»; Η παρακολούθηση GPS από αυτή τη συσκευή σταματά αμέσως.",
+      "lastPing": "Τελευταίο ping: {time}",
+      "neverPinged": "Ποτέ δεν επικοινώνησε",
+      "justNow": "μόλις τώρα",
+      "minsAgo": "πριν από {mins} λεπτά",
+      "hoursAgo": "πριν από {hours} ώρες",
+      "daysAgo": "πριν από {days} ημέρες",
+      "form": {
+        "label": "Ετικέτα",
+        "labelPlaceholder": "π.χ. «iPhone του Sven» ή «Pixel της Lisa»",
+        "vehicle": "Όχημα",
+        "noVehicles": "Συγχρονίστε πρώτα τα οχήματα στο προηγούμενο βήμα.",
+        "driver": "Οδηγός (χρήστης Driveo)",
+        "tripType": "Προεπιλεγμένος τύπος διαδρομής για νέες διαδρομές",
+        "tripTypeHint": "Μπορεί να επαναταξινομηθεί ανά διαδρομή αργότερα."
+      },
+      "tripTypes": {
+        "business": "Επαγγελματικό",
+        "private": "Ιδιωτικό",
+        "commute": "Μετάβαση στη δουλειά"
+      }
     }
   },
   "myTracking": {

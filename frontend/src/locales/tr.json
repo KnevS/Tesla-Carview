@@ -31,7 +31,9 @@
     "donate": "Bağış yap",
     "sortNewestFirst": "Önce en yeniler",
     "sortOldestFirst": "Önce en eskiler",
-    "sortToggleTooltip": "Sıralama yönünü tersine çevir"
+    "sortToggleTooltip": "Sıralama yönünü tersine çevir",
+    "copy": "Kopyala",
+    "optional": "isteğe bağlı"
   },
   "lang": {
     "title": "Dil / Language",
@@ -645,7 +647,13 @@
     "locked": "Kilitli",
     "sentry": "Sentry",
     "software": "Yazılım",
-    "heading": "Yön"
+    "heading": "Yön",
+    "refreshHint": "Verileri doğrudan araçtan al — günlük kotadan 1 tüketir",
+    "refreshing": "Yenileniyor…",
+    "refreshed": "Yenilendi",
+    "refreshedCap": "Yenilendi ({day}/{dayMax} bugün)",
+    "refreshFailed": "Yenileme başarısız",
+    "refreshCapReached": "Günlük kota doldu ({day}/{dayMax}) — yarına kadar duraklat"
   },
   "settings": {
     "manualLink": "Resmi kılavuzu aç",
@@ -1859,7 +1867,20 @@
       "hint": "Tesla girişini yeni bir pencerede açar.",
       "connectBtn": "Tesla'yı bağla →",
       "refresh": "Durumu kontrol et",
-      "connectedHint": "Bir sonraki adıma geçebilirsiniz."
+      "connectedHint": "Bir sonraki adıma geçebilirsiniz.",
+      "tabFleet": "Fleet OAuth",
+      "tabOwner": "Owner API",
+      "ownerInfo": "Bağlan'a dokun → Tesla girişi → tokenlar kaydedilir. Not: Tesla şu anda Owner-API tokenlarını Fleet API'de reddediyor — bağlantı durumu bağlantıdan sonra gösterilir.",
+      "ownerConnected": "Owner API bağlandı",
+      "ownerActiveHint": "Bağlantı etkin — Fleet API erişimi gerekmez.",
+      "ownerConnectBtn": "Owner API üzerinden bağlan",
+      "ownerOpening": "Tesla girişi açılıyor …",
+      "ownerBlockedTitle": "Owner API bağlandı, ancak Tesla araç verilerini engelliyor",
+      "ownerBlockedHint": "Tesla, araç uç noktaları için Owner API'yi kapattı — token HTTP 401 ile reddediliyor. Depolanan tokenlar saklanır (Tesla yeniden açarsa diye). Araç verileri için developer.tesla.com üzerinden Fleet OAuth gerekir.\n\nAlternatif: OwnTracks ile akıllı telefon GPS takibi (kurulumda) — herhangi bir Tesla API olmadan çalışır.",
+      "ownerPausedTitle": "Owner API bağlandı, duraklatıldı",
+      "ownerPausedHint": "Tokenlar depolanır, ancak arka uç Tesla API çağrısı yapmaz. Tesla Owner API'yi yeniden açana veya Fleet OAuth kurana kadar kullanışlıdır.",
+      "ownerPauseBtn": "⏸ Owner API'yi duraklat",
+      "ownerResumeBtn": "▶ Owner API'yi yeniden etkinleştir"
     },
     "sVehicles": {
       "title": "Araçlar",
@@ -2204,14 +2225,45 @@
       "hint": "Tesla hesabı, Fleet API kimlik bilgilerinizle bağlantılı olmalı.",
       "connectBtn": "🔗 Tesla ile bağlan",
       "opening": "Tesla girişi açılıyor …",
-      "activeHint": "Bağlantı aktif. Araç verileri yükleniyor."
+      "activeHint": "Bağlantı aktif. Araç verileri yükleniyor.",
+      "tabFleet": "Fleet OAuth",
+      "tabOwner": "Owner API",
+      "ownerInfo": "Bağlan'a dokun → Tesla girişi → tokenlar kaydedilir. Not: Tesla şu anda Owner-API tokenlarını Fleet API'de reddediyor — bağlantı durumu bağlantıdan sonra gösterilir.",
+      "ownerConnected": "Owner API bağlandı",
+      "ownerActiveHint": "Bağlantı etkin — Fleet API erişimi gerekmez.",
+      "ownerConnectBtn": "Owner API üzerinden bağlan",
+      "ownerOpening": "Tesla girişi açılıyor …",
+      "ownerBlockedTitle": "Owner API bağlandı, ancak Tesla araç verilerini engelliyor",
+      "ownerBlockedHint": "Tesla, araç uç noktaları için Owner API'yi kapattı — token HTTP 401 ile reddediliyor. Depolanan tokenlar saklanır (Tesla yeniden açarsa diye). Araç verileri için developer.tesla.com üzerinden Fleet OAuth gerekir.\n\nAlternatif: OwnTracks ile akıllı telefon GPS takibi (kurulumda) — herhangi bir Tesla API olmadan çalışır.",
+      "ownerPausedTitle": "Owner API bağlandı, duraklatıldı",
+      "ownerPausedHint": "Tokenlar depolanır, ancak arka uç Tesla API çağrısı yapmaz. Tesla Owner API'yi yeniden açana veya Fleet OAuth kurana kadar kullanışlıdır.",
+      "ownerPauseBtn": "⏸ Owner API'yi duraklat",
+      "ownerResumeBtn": "▶ Owner API'yi yeniden etkinleştir",
+      "refresh": "↻"
     },
     "vehicles": {
       "title": "Araçlar",
       "question": "Tesla araçlarınız burada görünür. Gerekirse senkronize edin.",
       "none": "Araç bulunamadı. Önce Tesla'ya bağlanın.",
       "syncBtn": "🔄 Araçları getir",
-      "resyncBtn": "🔄 Yeniden getir"
+      "resyncBtn": "🔄 Yeniden getir",
+      "intro": "TeslaView'a araç eklemenin iki yolu:\n\n☁ Tesla senkronizasyonu yalnızca Fleet API onayı ile çalışır (bekleme süresi haftalar-aylar, ~10 €/ay).\n✍ Manuel giriş hemen, API olmadan çalışır — yalnızca OwnTracks kurulumları veya Fleet onayı gelene kadar geçiş olarak yararlıdır.",
+      "syncTitle": "Tesla senkronizasyonu (cloud)",
+      "syncHint": "Görünen ad, VIN, modeli doğrudan Tesla hesabından alır. Bağlı Fleet API gerektirir.",
+      "manualTitle": "Manuel giriş",
+      "manualHint": "Tesla API erişimi olmadan çalışır. Etiket, plaka ve isteğe bağlı olarak VIN'i kendiniz girersiniz.",
+      "manualBtn": "Yeni araç",
+      "manualFormTitle": "Aracı manuel olarak ekle",
+      "manualSave": "Ekle",
+      "fName": "Etiket",
+      "fNamePlaceholder": "örn. \"Otto II\" veya \"İş-MY\"",
+      "fPlate": "Plaka",
+      "fVin": "VIN (isteğe bağlı)",
+      "fVinPlaceholder": "örn. XP7YGCEL0RB319320",
+      "fVinHint": "Boş = sentetik \"MANUAL…\" VIN — OwnTracks seyahatleri için sorun yok, ancak daha sonra Tesla senkronizasyonu ayrı yeni bir araç oluşturur.",
+      "fModel": "Model",
+      "fInitialKm": "Kayıt anındaki kilometre",
+      "fInitialKmHint": "Katedilen mesafe için temel olarak kullanılır (TCO kokpiti)."
     },
     "virtualKey": {
       "title": "Virtual Key",
@@ -2225,7 +2277,8 @@
       "copyBtn": "URL'yi kopyala",
       "copied": "Kopyalandı ✓",
       "open": "↗ Aç",
-      "recheck": "Tekrar kontrol et"
+      "recheck": "Tekrar kontrol et",
+      "ownerSkipBody": "Virtual Key, Tesla Fleet API'nin bir parçasıdır — şifreli bir kanal aracılığıyla doğrudan TeslaView'dan araç komutlarına (iklim, şarj, kapılar) izin verir.\n\nOwner-API modunda (mevcut yapılandırmanız), bu kullanılamaz. developer.tesla.com'da Fleet API onayınız geldiğinde, modu \"Tesla bağlantısı\" adımında değiştirebilir ve Virtual Key'i burada yapılandırabilirsiniz.\n\nOwnTracks ile saf bir seyahat günlüğü kurulumu için Virtual Key gerekli değildir — bu adımı atlayın."
     },
     "telemetry": {
       "title": "Fleet Telemetry",
@@ -2238,7 +2291,8 @@
       "statusRegisteredIdle": "◎ Kayıtlı",
       "statusNotRegistered": "○ Kayıtlı değil",
       "statusApprovalMissing": "⚠ Onay eksik",
-      "statusError": "✕ Hata"
+      "statusError": "✕ Hata",
+      "ownerSkipBody": "Fleet Telemetry, Tesla Fleet API'nin gerçek zamanlı push akışıdır (WebSocket) — pil, GPS, TPMS, iklim her saniye Tesla'dan TeslaView'a aktarılır.\n\nOwner-API modunda (mevcut yapılandırmanız), bu kullanılamaz. Fleet API onayı + Virtual Key + Tesla tarafında kayıt gerekir.\n\nOwnTracks ile saf bir seyahat günlüğü kurulumu için Telemetry gerekli değildir — bu adımı atlayın."
     },
     "vapid": {
       "title": "Web Push (VAPID)",
@@ -2289,7 +2343,21 @@
       "grokPlaceholder": "xai-… anahtarı",
       "abrpName": "⚡ ABRP uygulama anahtarı",
       "abrpHint": "A Better Route Planner için genel uygulama anahtarı (api.iternio.com).",
-      "abrpPlaceholder": "ABRP API anahtarı"
+      "abrpPlaceholder": "ABRP API anahtarı",
+      "aiProvider": "Yapay zeka sağlayıcısı",
+      "aiProviderHint": "Araç verilerinize ilişkin yapay zeka sorularını kim yanıtlıyor?\n\nOllama kendi donanımınızda (Pi/VPS) yerel olarak çalışır — veriler örneği ASLA terk etmez.\nGrok xAI cloud — ucuz, hızlı, ancak her soru ABD'deki xAI'ye gider.\nKapalı, AI sohbetini tamamen devre dışı bırakır.",
+      "aiOff": "AI sohbeti kapalı",
+      "ollamaUrl": "Ollama URL",
+      "ollamaModel": "Ollama modeli",
+      "ollamaModelHint": "Donanıma göre öneriler:\n• Pi 4: llama3.2:1b (ekonomik)\n• Pi 5: qwen2.5:3b (standart)\n• VPS/iş istasyonu: llama3:8b veya qwen2.5:7b\nModeli önce şu komutla yükleyin: ollama pull <ad>",
+      "ollamaTest": "Bağlantıyı test et",
+      "ollamaOk": "Ollama erişilebilir",
+      "ollamaInstalled": "Yüklü modeller",
+      "ollamaPullTitle": "Model yükle",
+      "ollamaPullHint": "Model doğrudan Ollama deposundan indirilir — model başına tek seferlik işlem, sonrasında her şey çevrimdışı çalışır.\nİndirme boyutu ve RAM ihtiyacı her giriş başına gösterilir. İsterseniz birden fazla model yükleyin — sihirbaz her zaman \"Ollama modeli\" alanındakini kullanır.",
+      "ollamaPullSelect": "Önerilen modeli seç",
+      "ollamaPullBtn": "Yükle",
+      "ollamaPullDone": "başarıyla yüklendi"
     },
     "monitoring": {
       "title": "İzleme ve e-posta",
@@ -2325,7 +2393,44 @@
     "msgSaved": "✓ Kaydedildi",
     "msgError": "Hata",
     "done": {
-      "banner": "Bu adım zaten yapılandırıldı. Atlamak için \"İleri\"ye basın veya aşağıdaki değerleri ayarlayın."
+      "banner": "Bu adım zaten yapılandırıldı. Atlamak için \"İleri\"ye basın veya aşağıdaki değerleri ayarlayın.",
+      "ownerSkipBanner": "Bu adım Tesla Fleet API gerektirir. Owner-API modunda etkinleştirilemez — atlamak için \"İleri\"ye bas."
+    },
+    "owntracks": {
+      "title": "Akıllı telefon GPS (OwnTracks)",
+      "question": "Tesla API'siz GPS takibi — OwnTracks telefon uygulaması konumu doğrudan sunucunuza gönderir.",
+      "intro": "Tesla Fleet API engellendiğinde veya Owner API öldüğünde önerilir.\n\nNasıl çalışır: Her sürücü ücretsiz OwnTracks uygulamasını (iOS+Android) kurar, webhook URL'nizi girer, tamam. Birisi sürüş başladığında (>5 km/saat), bir seyahat otomatik olarak başlar. 5 dakika hareketsizlik = seyahat sonu. Veriler yalnızca sunucunuza gider — OwnTracks bulutu yok, hesap yok, üçüncü taraf yok.\n\nKısıtlama: yalnızca GPS, hız, mesafe — pil/iklim verisi yok (bunlar Fleet API gerektirir).",
+      "devicesHeading": "Kayıtlı cihazlar",
+      "noDevices": "Henüz kayıtlı cihaz yok.",
+      "addBtn": "Yeni cihaz",
+      "skipHint": "Bu adım isteğe bağlıdır — gerekli değilse atlayın. OwnTracks uygulaması hakkında daha fazla bilgi:",
+      "createBtn": "Cihaz oluştur ve webhook URL üret",
+      "createdTitle": "✓ Cihaz oluşturuldu — şimdi iPhone kamerası ile tara",
+      "qrInstructions": "📱 Nasıl kurulur:\n1. App Store'dan OwnTracks uygulamasını yükle\n2. iPhone kamerasını (uygulamayı DEĞİL!) QR koduna doğrult\n3. \"OwnTracks'te Aç\"a dokun\n4. Yapılandırma içe aktarımını onayla\n5. Konum erişimini \"Her Zaman\" yap — tamam.\n\nQR kodu tüm ayarları içerir — manuel giriş gerekmez.",
+      "manualSetup": "QR kod çalışmazsa manuel kurulum",
+      "downloadOtrc": "Yapılandırma dosyasını (.otrc) indir",
+      "createdHint": "Bu webhook URL'sini OwnTracks uygulamasına girin: Settings → Connection → HTTP Mode → URL. URL yalnızca bir kez gösterilir — kaybedilirse yeni bir cihaz oluşturun.",
+      "confirmDelete": "\"{label}\" cihazını sil? Bu cihazdan GPS takibi hemen durur.",
+      "lastPing": "Son ping: {time}",
+      "neverPinged": "Hiç iletişime geçilmedi",
+      "justNow": "şu anda",
+      "minsAgo": "{mins} dk önce",
+      "hoursAgo": "{hours} sa önce",
+      "daysAgo": "{days} gün önce",
+      "form": {
+        "label": "Etiket",
+        "labelPlaceholder": "örn. \"Sven'in iPhone'u\" veya \"Lisa'nın Pixel'i\"",
+        "vehicle": "Araç",
+        "noVehicles": "Önce önceki adımda araçları senkronize edin.",
+        "driver": "Sürücü (Driveo kullanıcısı)",
+        "tripType": "Yeni seyahatler için varsayılan tür",
+        "tripTypeHint": "Daha sonra her seyahat için yeniden sınıflandırılabilir."
+      },
+      "tripTypes": {
+        "business": "İş",
+        "private": "Özel",
+        "commute": "İşe gidiş-geliş"
+      }
     }
   },
   "myTracking": {

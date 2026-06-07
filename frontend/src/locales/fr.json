@@ -31,7 +31,9 @@
     "donate": "Faire un don",
     "sortNewestFirst": "Plus récents d'abord",
     "sortOldestFirst": "Plus anciens d'abord",
-    "sortToggleTooltip": "Inverser l'ordre de tri"
+    "sortToggleTooltip": "Inverser l'ordre de tri",
+    "copy": "Copier",
+    "optional": "optionnel"
   },
   "lang": {
     "title": "Langue / Language",
@@ -645,7 +647,13 @@
     "locked": "Verrouillé",
     "sentry": "Sentry",
     "software": "Logiciel",
-    "heading": "Cap"
+    "heading": "Cap",
+    "refreshHint": "Récupérer des données fraîches directement depuis le véhicule — consomme 1 du quota journalier",
+    "refreshing": "Actualisation…",
+    "refreshed": "Actualisé",
+    "refreshedCap": "Actualisé ({day}/{dayMax} aujourd'hui)",
+    "refreshFailed": "Échec de l'actualisation",
+    "refreshCapReached": "Quota journalier atteint ({day}/{dayMax}) — pause jusqu'à demain"
   },
   "settings": {
     "manualLink": "Ouvrir le manuel officiel",
@@ -1859,7 +1867,20 @@
       "hint": "Ouvre la connexion Tesla dans une nouvelle fenêtre.",
       "connectBtn": "Connecter Tesla →",
       "refresh": "Vérifier le statut",
-      "connectedHint": "Vous pouvez passer à l'étape suivante."
+      "connectedHint": "Vous pouvez passer à l'étape suivante.",
+      "tabFleet": "Fleet OAuth",
+      "tabOwner": "Owner API",
+      "ownerInfo": "Clique sur connecter → connexion Tesla → les tokens sont stockés. Remarque : Tesla rejette actuellement les tokens Owner-API sur la Fleet API — le statut de connexion s'affiche après la connexion.",
+      "ownerConnected": "Owner API connectée",
+      "ownerActiveHint": "Connexion active — aucun accès Fleet API requis.",
+      "ownerConnectBtn": "Se connecter via l'Owner API",
+      "ownerOpening": "Ouverture de la connexion Tesla …",
+      "ownerBlockedTitle": "Owner API connectée, mais Tesla bloque les données véhicule",
+      "ownerBlockedHint": "Tesla a fermé l'Owner API pour les endpoints véhicule — le token est rejeté avec HTTP 401. Les tokens stockés sont conservés (au cas où Tesla rouvrirait). Pour les données véhicule, tu as besoin de Fleet OAuth via developer.tesla.com.\n\nAlternative : suivi GPS smartphone via OwnTracks (en configuration) — fonctionne sans aucune API Tesla.",
+      "ownerPausedTitle": "Owner API connectée, en pause",
+      "ownerPausedHint": "Les tokens sont stockés, mais le backend ne fait aucun appel à l'API Tesla. Utile jusqu'à ce que Tesla rouvre l'Owner API ou que tu configures Fleet OAuth.",
+      "ownerPauseBtn": "⏸ Mettre en pause l'Owner API",
+      "ownerResumeBtn": "▶ Réactiver l'Owner API"
     },
     "sVehicles": {
       "title": "Véhicules",
@@ -2204,14 +2225,45 @@
       "hint": "Le compte Tesla doit être lié à vos identifiants Fleet API.",
       "connectBtn": "🔗 Connecter à Tesla",
       "opening": "Ouverture du login Tesla …",
-      "activeHint": "Connexion active. Les données véhicule se chargent."
+      "activeHint": "Connexion active. Les données véhicule se chargent.",
+      "tabFleet": "Fleet OAuth",
+      "tabOwner": "Owner API",
+      "ownerInfo": "Clique sur connecter → connexion Tesla → les tokens sont stockés. Remarque : Tesla rejette actuellement les tokens Owner-API sur la Fleet API — le statut de connexion s'affiche après la connexion.",
+      "ownerConnected": "Owner API connectée",
+      "ownerActiveHint": "Connexion active — aucun accès Fleet API requis.",
+      "ownerConnectBtn": "Se connecter via l'Owner API",
+      "ownerOpening": "Ouverture de la connexion Tesla …",
+      "ownerBlockedTitle": "Owner API connectée, mais Tesla bloque les données véhicule",
+      "ownerBlockedHint": "Tesla a fermé l'Owner API pour les endpoints véhicule — le token est rejeté avec HTTP 401. Les tokens stockés sont conservés (au cas où Tesla rouvrirait). Pour les données véhicule, tu as besoin de Fleet OAuth via developer.tesla.com.\n\nAlternative : suivi GPS smartphone via OwnTracks (en configuration) — fonctionne sans aucune API Tesla.",
+      "ownerPausedTitle": "Owner API connectée, en pause",
+      "ownerPausedHint": "Les tokens sont stockés, mais le backend ne fait aucun appel à l'API Tesla. Utile jusqu'à ce que Tesla rouvre l'Owner API ou que tu configures Fleet OAuth.",
+      "ownerPauseBtn": "⏸ Mettre en pause l'Owner API",
+      "ownerResumeBtn": "▶ Réactiver l'Owner API",
+      "refresh": "↻"
     },
     "vehicles": {
       "title": "Véhicules",
       "question": "Vos véhicules Tesla apparaissent ici. Synchronisez si nécessaire.",
       "none": "Aucun véhicule trouvé. Connectez-vous d'abord à Tesla.",
       "syncBtn": "🔄 Récupérer les véhicules",
-      "resyncBtn": "🔄 Recharger"
+      "resyncBtn": "🔄 Recharger",
+      "intro": "Deux façons d'ajouter un véhicule dans TeslaView :\n\n☁ La synchronisation Tesla ne fonctionne qu'avec l'approbation Fleet API de Tesla (attente semaines-mois, ~10 €/mois).\n✍ La saisie manuelle fonctionne immédiatement, sans API — utile pour les configurations OwnTracks uniquement ou comme transition en attendant l'approbation Fleet.",
+      "syncTitle": "Sync Tesla (cloud)",
+      "syncHint": "Récupère le nom d'affichage, le VIN, le modèle directement depuis le compte Tesla. Nécessite une Fleet API connectée.",
+      "manualTitle": "Saisie manuelle",
+      "manualHint": "Fonctionne sans API Tesla. Tu saisis toi-même l'étiquette, la plaque d'immatriculation, éventuellement le VIN.",
+      "manualBtn": "Nouveau véhicule",
+      "manualFormTitle": "Ajouter un véhicule manuellement",
+      "manualSave": "Créer",
+      "fName": "Étiquette",
+      "fNamePlaceholder": "ex. « Otto II » ou « MY de service »",
+      "fPlate": "Plaque d'immatriculation",
+      "fVin": "VIN (optionnel)",
+      "fVinPlaceholder": "ex. XP7YGCEL0RB319320",
+      "fVinHint": "Vide = VIN synthétique « MANUAL… » — pas de problème pour les trajets OwnTracks, mais une synchronisation Tesla ultérieure créerait un nouveau véhicule séparé.",
+      "fModel": "Modèle",
+      "fInitialKm": "Compteur kilométrique à la création",
+      "fInitialKmHint": "Utilisé comme base pour la distance parcourue (cockpit TCO)."
     },
     "virtualKey": {
       "title": "Virtual Key",
@@ -2225,7 +2277,8 @@
       "copyBtn": "Copier l'URL",
       "copied": "Copié ✓",
       "open": "↗ Ouvrir",
-      "recheck": "Revérifier"
+      "recheck": "Revérifier",
+      "ownerSkipBody": "Virtual Key fait partie de l'API Tesla Fleet — il permet les commandes véhicule (climatisation, charge, portes) directement depuis TeslaView via un canal chiffré.\n\nEn mode Owner-API (ta configuration actuelle), ce n'est pas disponible. Une fois ton approbation Fleet API obtenue sur developer.tesla.com, tu peux changer de mode dans l'étape « Connexion Tesla » et configurer Virtual Key ici.\n\nPour une configuration de carnet de bord pur avec OwnTracks, Virtual Key n'est pas nécessaire — passe simplement cette étape."
     },
     "telemetry": {
       "title": "Fleet Telemetry",
@@ -2238,7 +2291,8 @@
       "statusRegisteredIdle": "◎ Enregistré",
       "statusNotRegistered": "○ Non enregistré",
       "statusApprovalMissing": "⚠ Validation manquante",
-      "statusError": "✕ Erreur"
+      "statusError": "✕ Erreur",
+      "ownerSkipBody": "Fleet Telemetry est le flux push en temps réel (WebSocket) de l'API Tesla Fleet — batterie, GPS, TPMS, climat poussés depuis Tesla vers TeslaView chaque seconde.\n\nEn mode Owner-API (ta configuration actuelle), ce n'est pas disponible. Cela nécessiterait l'approbation Fleet API + Virtual Key + enregistrement côté Tesla.\n\nPour une configuration de carnet de bord pur avec OwnTracks, Telemetry n'est pas nécessaire — passe simplement cette étape."
     },
     "vapid": {
       "title": "Web Push (VAPID)",
@@ -2289,7 +2343,21 @@
       "grokPlaceholder": "Clé xai-…",
       "abrpName": "⚡ Clé app ABRP",
       "abrpHint": "Clé app globale pour A Better Route Planner (api.iternio.com).",
-      "abrpPlaceholder": "Clé API ABRP"
+      "abrpPlaceholder": "Clé API ABRP",
+      "aiProvider": "Fournisseur IA",
+      "aiProviderHint": "Qui répond aux questions IA sur tes données véhicule ?\n\nOllama tourne localement sur ton matériel (Pi/VPS) — les données ne quittent JAMAIS l'instance.\nGrok est xAI cloud — bon marché, rapide, mais chaque question va à xAI aux USA.\nOff désactive complètement le chat IA.",
+      "aiOff": "Chat IA désactivé",
+      "ollamaUrl": "URL Ollama",
+      "ollamaModel": "Modèle Ollama",
+      "ollamaModelHint": "Recommandations par matériel :\n• Pi 4 : llama3.2:1b (économe)\n• Pi 5 : qwen2.5:3b (standard)\n• VPS/station de travail : llama3:8b ou qwen2.5:7b\nInstalle d'abord un modèle avec : ollama pull <nom>",
+      "ollamaTest": "Tester la connexion",
+      "ollamaOk": "Ollama joignable",
+      "ollamaInstalled": "Modèles installés",
+      "ollamaPullTitle": "Installer un modèle",
+      "ollamaPullHint": "Le modèle est téléchargé directement depuis le dépôt Ollama — opération unique par modèle, ensuite tout fonctionne hors ligne.\nLa taille de téléchargement et le besoin en RAM sont indiqués par entrée. Installe plusieurs modèles si tu veux — l'assistant utilise toujours celui dans le champ « Modèle Ollama ».",
+      "ollamaPullSelect": "Choisir un modèle recommandé",
+      "ollamaPullBtn": "Installer",
+      "ollamaPullDone": "installé avec succès"
     },
     "monitoring": {
       "title": "Monitoring & e-mail",
@@ -2325,7 +2393,44 @@
     "msgSaved": "✓ Enregistré",
     "msgError": "Erreur",
     "done": {
-      "banner": "Cette étape est déjà configurée. Appuyez sur « Suivant » pour l'ignorer, ou ajustez les valeurs ci-dessous."
+      "banner": "Cette étape est déjà configurée. Appuyez sur « Suivant » pour l'ignorer, ou ajustez les valeurs ci-dessous.",
+      "ownerSkipBanner": "Cette étape nécessite l'API Tesla Fleet. Non disponible en mode Owner-API — appuie sur « Suivant » pour passer."
+    },
+    "owntracks": {
+      "title": "GPS smartphone (OwnTracks)",
+      "question": "Suivi GPS sans API Tesla — l'application OwnTracks pousse la position directement sur ton serveur.",
+      "intro": "Recommandé quand Tesla bloque la Fleet API ou que l'Owner API est morte.\n\nComment ça marche : chaque conducteur installe l'application OwnTracks gratuite (iOS+Android), saisit ton URL webhook, c'est tout. Dès que quelqu'un commence à conduire (>5 km/h), un trajet démarre automatiquement. 5 minutes d'arrêt = trajet terminé. Les données ne vont qu'à ton serveur — pas de cloud OwnTracks, pas de compte, pas de tiers.\n\nLimitation : GPS, vitesse, distance uniquement — pas de données batterie/climat (celles-ci nécessitent la Fleet API).",
+      "devicesHeading": "Appareils enregistrés",
+      "noDevices": "Aucun appareil enregistré pour le moment.",
+      "addBtn": "Nouvel appareil",
+      "skipHint": "Cette étape est optionnelle — passer si non nécessaire. Plus d'infos sur l'application OwnTracks :",
+      "createBtn": "Créer l'appareil & générer l'URL webhook",
+      "createdTitle": "✓ Appareil créé — scanne maintenant avec la caméra iPhone",
+      "qrInstructions": "📱 Comment configurer :\n1. Installe l'application OwnTracks depuis l'App Store\n2. Pointe la caméra de l'iPhone (PAS l'app !) vers le code QR\n3. Tape « Ouvrir dans OwnTracks »\n4. Confirme l'importation de la configuration\n5. Règle l'accès à la position sur « Toujours » — terminé.\n\nLe code QR contient tous les réglages — aucune saisie manuelle nécessaire.",
+      "manualSetup": "Configuration manuelle si le code QR ne fonctionne pas",
+      "downloadOtrc": "Télécharger le fichier de configuration (.otrc)",
+      "createdHint": "Entre cette URL webhook dans l'application OwnTracks : Settings → Connection → HTTP Mode → URL. L'URL n'est affichée qu'une fois — crée un nouvel appareil si tu la perds.",
+      "confirmDelete": "Supprimer l'appareil « {label} » ? Le suivi GPS depuis cet appareil s'arrête immédiatement.",
+      "lastPing": "Dernier ping : {time}",
+      "neverPinged": "Jamais contacté",
+      "justNow": "à l'instant",
+      "minsAgo": "il y a {mins} min",
+      "hoursAgo": "il y a {hours} h",
+      "daysAgo": "il y a {days} jours",
+      "form": {
+        "label": "Étiquette",
+        "labelPlaceholder": "ex. « iPhone de Sven » ou « Pixel de Lisa »",
+        "vehicle": "Véhicule",
+        "noVehicles": "Synchronise d'abord les véhicules à l'étape précédente.",
+        "driver": "Conducteur (utilisateur Driveo)",
+        "tripType": "Type de trajet par défaut",
+        "tripTypeHint": "Peut être reclassé par trajet plus tard."
+      },
+      "tripTypes": {
+        "business": "Professionnel",
+        "private": "Privé",
+        "commute": "Trajet domicile-travail"
+      }
     }
   },
   "myTracking": {
