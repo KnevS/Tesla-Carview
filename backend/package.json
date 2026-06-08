@@ -10,7 +10,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1057.0",
+    "@aws-sdk/client-s3": "^3.1063.0",
     "@simplewebauthn/server": "^13.3.1",
     "argon2": "^0.44.0",
     "axios": "^1.7.2",
@@ -27,7 +27,7 @@
     "multer": "^2.1.1",
     "nodemailer": "^8.0.10",
     "otpauth": "^9.3.3",
-    "protobufjs": "^8.5.0",
+    "protobufjs": "^8.6.1",
     "qrcode": "^1.5.3",
     "ssh2-sftp-client": "^12.1.1",
     "telegraf": "^4.16.3",
