@@ -212,6 +212,15 @@ Les lieux de recharge sont détectés automatiquement par GPS et associés à un
 
 Cas typique : recharge sur le lieu de travail, payée par l'employeur, qui ne doit pas figurer dans le décompte personnel. Le bouton *« ↩ payant »* permet d'annuler le marquage à tout moment.
 
+
+### Limite de charge automatique (à partir de v3.12.0)
+
+Chaque lieu peut porter une limite de charge souhaitée (p. ex. 80 %). À la fin du trajet, TeslaView vérifie si la position est dans le rayon :
+- Fleet API active → envoie immédiatement `set_charge_limit` à la voiture
+- Fleet API absente → notification push suggérant un réglage manuel
+
+Le bouton « 🔋 Appliquer maintenant » déclenche la commande manuellement. Tesla recommande 70-80 % pour la charge quotidienne, 50-60 % pour le stockage longue durée, 100 % uniquement pour les longs trajets.
+
 ## 🔐 Sécurité {#security}
 
 - 🔑 **Passkey / WebAuthn** — Connexion sans mot de passe avec empreinte digitale, Face ID ou clé matérielle

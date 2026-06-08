@@ -212,6 +212,15 @@ Los lugares de carga se detectan automáticamente por GPS y se vinculan a un pre
 
 Caso de uso típico: cargas en el lugar de trabajo pagadas por la empresa, que no deben formar parte de la cuenta privada. Con el botón *«↩ pagar»* la marca puede revertirse en cualquier momento.
 
+
+### Límite de carga automático (desde v3.12.0)
+
+Cada lugar puede llevar un límite de carga deseado (p. ej. 80 %). Al final del trayecto TeslaView comprueba si la posición está en el radio:
+- Fleet API activa → envía `set_charge_limit` al coche inmediatamente
+- Sin Fleet API → notificación push sugiriendo ajuste manual
+
+El botón «🔋 Aplicar ahora» dispara el comando manualmente. Tesla recomienda 70-80 % para carga diaria, 50-60 % para almacenamiento largo, 100 % solo para viajes largos.
+
 ## 🔐 Seguridad {#security}
 
 - 🔑 **Passkey / WebAuthn** — Inicio de sesión sin contraseña con huella digital, Face ID o llave hardware

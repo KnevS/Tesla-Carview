@@ -204,7 +204,13 @@ Ladeorte werden per GPS automatisch erkannt und mit einem Preis pro kWh verknüp
 
 **Automatische GPS-Erkennung** — Wenn ein Ladeort mit GPS-Koordinaten und Radius (Standard 200m) hinterlegt ist, wird beim Ladestart automatisch der passende Ort erkannt und der hinterlegte Preis/kWh angewendet.
 
-**Ladeort anlegen** — Unter **Laden → Ladeorte**: Name, Typ (Zuhause/Büro/Öffentlich), Preis/kWh, GPS-Koordinaten und Erkennungsradius eingeben.
+**Ladeort anlegen** — Unter `/charging-locations` (Nav „Ladeorte"): Name, Typ (Zuhause/Büro/Öffentlich), Preis/kWh, GPS-Koordinaten, Erkennungsradius und **automatisches Ladelimit** in % eingeben.
+
+**Automatisches Ladelimit (ab v3.12.0)** — Pro Ort lässt sich ein Wunsch-Ladelimit (z. B. 80 %) hinterlegen. Beim Trip-Ende prüft TeslaView, ob die Position innerhalb des Radius liegt. Wenn ja:
+- Mit aktiver Fleet-API → `set_charge_limit`-Befehl wird sofort ans Auto gesendet
+- Ohne Fleet-API → Push-Notification mit Vorschlag, das Limit manuell zu setzen
+
+Der „🔋 Jetzt setzen"-Button löst den Befehl auch manuell aus. Tesla empfiehlt 70-80 % für täglich, 50-60 % für lange Standzeiten, 100 % nur für Langstrecken.
 
 **Kosten manuell anpassen** — In der Ladeliste: Klick auf eine Session → Kosten bearbeiten. Kosten können auch auf 0 gesetzt werden (z.B. Gratis-Laden).
 

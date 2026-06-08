@@ -447,6 +447,7 @@ function runTenantMigrations(db) {
     db.exec('ALTER TABLE vehicles ADD COLUMN active_trip_owntracks_device_id INTEGER');
     db.exec('ALTER TABLE vehicles ADD COLUMN active_trip_locked_until INTEGER');
   }
+
   if (!vCols.includes('abrp_token')) {
     db.exec('ALTER TABLE vehicles ADD COLUMN abrp_token TEXT');
   }
@@ -588,6 +589,10 @@ function runTenantMigrations(db) {
   if (!clCols.includes('lat'))      db.exec('ALTER TABLE charging_locations ADD COLUMN lat REAL');
   if (!clCols.includes('lon'))      db.exec('ALTER TABLE charging_locations ADD COLUMN lon REAL');
   if (!clCols.includes('radius_m')) db.exec('ALTER TABLE charging_locations ADD COLUMN radius_m INTEGER DEFAULT 200');
+  // Location-Aktionen (v3.12.0): Charge-Limit pro Ladeort
+  if (!clCols.includes('default_charge_limit')) {
+    db.exec('ALTER TABLE charging_locations ADD COLUMN default_charge_limit INTEGER');
+  }
 
   // vehicle_users
   db.exec(`CREATE TABLE IF NOT EXISTS vehicle_users (

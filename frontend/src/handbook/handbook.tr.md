@@ -212,6 +212,15 @@ Araç komutları (kapı açma, klima vb.) için araca bir Virtual Key kaydedilme
 
 Tipik kullanım: işverenin sağladığı, özel hesaba dahil edilmemesi gereken iş yeri şarjı. *„↩ ücretli"* düğmesiyle işaret istediğin zaman geri alınabilir.
 
+
+### Otomatik şarj limiti (v3.12.0'dan itibaren)
+
+Her konum istenen bir şarj limiti taşıyabilir (örn. %80). Yolculuk sonunda TeslaView konumun yarıçapta olup olmadığını kontrol eder:
+- Fleet API aktif → arabaya hemen `set_charge_limit` gönderir
+- Fleet API yok → manuel ayarlama öneren push bildirimi
+
+"🔋 Şimdi uygula" düğmesi komutu manuel olarak tetikler. Tesla günlük şarj için %70-80, uzun süreli depolama için %50-60, sadece uzun yolculuklar için %100 önerir.
+
 ## 🔐 Güvenlik {#security}
 
 - 🔑 **Passkey / WebAuthn** — Parmak izi, Face ID veya donanım anahtarıyla parolasız giriş

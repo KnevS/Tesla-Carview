@@ -7,6 +7,48 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.12.0] - 2026-06-08
+
+### Hinzugefügt — Location-Aktionen: automatisches Ladelimit bei Ankunft
+
+Pro Ladeort (in `charging_locations`) lässt sich jetzt ein **default_charge_limit** in % konfigurieren. Wenn dein Tesla via OwnTracks-Trip-Ende innerhalb des Standort-Radius eintrifft, setzt TeslaView das Limit automatisch:
+
+- **Mit Fleet API aktiv**: TeslaView sendet sofort den `set_charge_limit`-Befehl an das Auto → Bestätigungs-Push „Ladelimit X % gesetzt".
+- **Ohne Fleet API**: Push-Notification „Limit X % manuell setzen" mit Deep-Link auf den Charging-View.
+- **Manueller Trigger**: „🔋 Jetzt setzen"-Button auf jedem Ladeort.
+
+### Hinzugefügt — Frontend-View für Ladeorte (`/charging-locations`)
+
+Bisher konnten Ladeorte nur via API gepflegt werden — keine UI. Jetzt:
+
+- **Tabellen-Ansicht** mit allen Ladeorten (Name, Adresse, GPS, Radius, Tarif, Limit)
+- **Edit-Inline-Form** pro Ort
+- **Anlage-Form** für neue Orte
+- **Nav-Eintrag** „🏠 Ladeorte" in der Planung-Gruppe
+
+### Backend
+
+Neuer Service `backend/src/services/locationActions.js`:
+- `applyLocationActionsOnArrival(db, tenantId, vehicleId, lat, lon)` — Haversine-Match gegen alle Ladeorte des Fahrzeugs, sendet Tesla-Befehl oder Push
+- Wird vom OwnTracks-Webhook beim Trip-Close fire-and-forget aufgerufen
+
+Routes erweitert in `backend/src/routes/charging-locations.js`:
+- `POST /charging-locations/:id/apply-charge-limit` — manueller Trigger
+
+Schema-Migration in `runTenantMigrations`: `charging_locations.default_charge_limit INTEGER` wird automatisch angelegt.
+
+### Doku
+
+- Handbuch-Sektion `{#charging-locations}` in allen 6 Sprachen um Charge-Limit-Block erweitert
+- 30 neue i18n-Keys × 6 Sprachen
+- Nav-Label „Ladeorte" + Tooltip 6-sprachig
+
+### Datenkonzept
+
+Match-Logik komplett lokal. Tesla-API-Call nur wenn Fleet API aktiv, sonst Fallback auf Push. Keine externen Dienste.
+
+---
+
 ## [v3.11.0] - 2026-06-08
 
 ### Hinzugefügt — OwnTracks-Validation (3 Schutzlinien)

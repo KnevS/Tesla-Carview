@@ -105,6 +105,10 @@
     "launcher": {
       "label": "App-Hub",
       "tooltip": "Kuratierte Web-Apps, die im Tesla-Browser laufen und Tesla nicht nativ bietet"
+    },
+    "chargingLocations": {
+      "label": "Ladeorte",
+      "tooltip": "Eigene Ladeorte verwalten — Tarif, Radius, automatisches Ladelimit bei Ankunft"
     }
   },
   "dashboard": {
@@ -2652,5 +2656,34 @@
     "disable": "Ausblenden",
     "hintTitle": "Hinweise",
     "hintBody": "Apps werden nicht gelöscht, nur ausgeblendet. Beim nächsten Update kommen neue Apps automatisch in den Katalog. Tesla-Native-Funktionen (Spotify, Apple Music, Spiele, Karten, Streaming) sind bewusst NIE im Katalog — diese kommen über Tesla selbst."
+  },
+  "chargingLocations": {
+    "title": "Ladeorte",
+    "subtitle": "Eigene Ladestandorte (Heim, Arbeit, häufig besucht) mit Tarif, Radius und automatischem Ladelimit bei Ankunft.",
+    "add": "Neu",
+    "addTitle": "Neuen Ladeort anlegen",
+    "empty": "Noch keine Ladeorte definiert. Lege deinen Heim-Standort an, damit Lade-Sessions automatisch dort zugeordnet werden.",
+    "default": "Standard",
+    "limitAutoApplied": "— wird bei Ankunft automatisch gesetzt",
+    "applyNow": "Jetzt setzen",
+    "applyNowTooltip": "Sendet sofort den Tesla-Befehl set_charge_limit (Fleet-API erforderlich).",
+    "hint": "Wenn dein Fahrzeug innerhalb des Radius an einem Ladeort eintrifft (über OwnTracks-Trip-Ende), wendet TeslaView das konfigurierte Ladelimit automatisch an. Ohne Fleet-API erhältst du eine Push-Erinnerung zum manuellen Setzen.",
+    "form": {
+      "name": "Name (z. B. \"Zuhause\", \"Arbeit\")",
+      "address": "Adresse (optional)",
+      "lat": "Breitengrad",
+      "lon": "Längengrad",
+      "radius": "Radius (m)",
+      "rate": "Strompreis (€/kWh)",
+      "limitLabel": "Automatisches Ladelimit (0-100, leer = aus)",
+      "limitPlaceholder": "z. B. 80",
+      "limitHint": "Wird beim Eintreffen am Ladeort automatisch gesetzt (Fleet-API) bzw. als Push vorgeschlagen.",
+      "isDefault": "Als Standard markieren (Auto-Match wenn kein GPS verfügbar)"
+    },
+    "type": {
+      "home": "🏠 Zuhause",
+      "work": "💼 Arbeit",
+      "public": "⚡ Öffentlich"
+    }
   }
 }

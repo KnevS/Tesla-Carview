@@ -219,6 +219,13 @@ router.post('/webhook', (req, res) => {
     .then(({ geocodeTrip }) => geocodeTrip(db, closedTripId))
     .catch(() => {});
 
+  // Fire-and-forget: Location-Aktion bei Ankunft (Charge-Limit aus
+  // charging_locations) — Best-Effort, scheitert wenn Fleet-API nicht
+  // verfuegbar.
+  import('../services/locationActions.js')
+    .then(({ applyLocationActionsOnArrival }) => applyLocationActionsOnArrival(db, device.tenant_id, device.vehicle_id, lat, lon))
+    .catch(() => {});
+
   return res.json([]);
 });
 

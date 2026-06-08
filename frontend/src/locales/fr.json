@@ -105,6 +105,10 @@
     "launcher": {
       "label": "Hub d'apps",
       "tooltip": "Apps web sélectionnées tournant dans le navigateur Tesla et que Tesla ne propose pas nativement"
+    },
+    "chargingLocations": {
+      "label": "Lieux de charge",
+      "tooltip": "Gérer vos lieux de charge — tarif, rayon, limite automatique à l'arrivée"
     }
   },
   "dashboard": {
@@ -2652,5 +2656,34 @@
     "disable": "Masquer",
     "hintTitle": "Notes",
     "hintBody": "Les apps ne sont pas supprimées, seulement masquées. La prochaine mise à jour peut ajouter automatiquement de nouvelles apps. Les fonctions natives Tesla (Spotify, Apple Music, jeux, cartes, streaming) ne sont JAMAIS dans le catalogue — elles viennent de Tesla."
+  },
+  "chargingLocations": {
+    "title": "Lieux de charge",
+    "subtitle": "Vos propres lieux de charge (domicile, travail, arrêts fréquents) avec tarif, rayon et limite de charge automatique à l'arrivée.",
+    "add": "Ajouter",
+    "addTitle": "Ajouter un lieu",
+    "empty": "Aucun lieu de charge défini. Ajoutez votre lieu domicile pour que les sessions de charge soient associées automatiquement.",
+    "default": "Par défaut",
+    "limitAutoApplied": "— appliqué automatiquement à l'arrivée",
+    "applyNow": "Appliquer maintenant",
+    "applyNowTooltip": "Envoie immédiatement la commande Tesla set_charge_limit (Fleet API requise).",
+    "hint": "À l'arrivée de votre véhicule dans le rayon d'un lieu (détecté à la fin du trajet OwnTracks), TeslaView applique automatiquement la limite configurée. Sans Fleet API, vous recevez une notification push pour la définir manuellement.",
+    "form": {
+      "name": "Nom (p. ex. « Maison », « Travail »)",
+      "address": "Adresse (facultatif)",
+      "lat": "Latitude",
+      "lon": "Longitude",
+      "radius": "Rayon (m)",
+      "rate": "Tarif électricité (€/kWh)",
+      "limitLabel": "Limite de charge automatique (0-100, vide = off)",
+      "limitPlaceholder": "p. ex. 80",
+      "limitHint": "Appliqué automatiquement à l'arrivée (Fleet API) ou poussé en suggestion.",
+      "isDefault": "Marquer comme défaut (correspondance automatique sans GPS)"
+    },
+    "type": {
+      "home": "🏠 Maison",
+      "work": "💼 Travail",
+      "public": "⚡ Public"
+    }
   }
 }

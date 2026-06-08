@@ -7,6 +7,48 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.12.0] - 2026-06-08
+
+### Added — Location actions: automatic charge limit on arrival
+
+Each charging location (in `charging_locations`) can now carry a **default_charge_limit** in %. When your Tesla arrives within the radius (detected at OwnTracks trip end), TeslaView applies the limit automatically:
+
+- **Fleet API active**: TeslaView sends the `set_charge_limit` command to the car immediately → confirmation push "charge limit X% applied".
+- **Without Fleet API**: push notification "set limit X% manually" with deep link to the charging view.
+- **Manual trigger**: "🔋 Apply now" button per location.
+
+### Added — Frontend view for charging locations (`/charging-locations`)
+
+Locations could only be managed via the API before — no UI. Now:
+
+- **Table view** with every location (name, address, GPS, radius, rate, limit)
+- **Inline edit form** per location
+- **New-location form**
+- **Nav entry** "🏠 Charging locations" in the planning group
+
+### Backend
+
+New service `backend/src/services/locationActions.js`:
+- `applyLocationActionsOnArrival(db, tenantId, vehicleId, lat, lon)` — Haversine match against all vehicle locations, dispatches the Tesla command or a push
+- Called fire-and-forget by the OwnTracks webhook on trip close
+
+Routes extended in `backend/src/routes/charging-locations.js`:
+- `POST /charging-locations/:id/apply-charge-limit` — manual trigger
+
+Schema migration in `runTenantMigrations`: `charging_locations.default_charge_limit INTEGER` is added automatically.
+
+### Docs
+
+- Handbook section `{#charging-locations}` extended with charge-limit block in all 6 languages
+- 30 new i18n keys × 6 languages
+- Nav label "Charging locations" + tooltip in all 6 languages
+
+### Data concept
+
+Match logic stays local. The Tesla API call only fires when Fleet API is active, otherwise falls back to push. No external services involved.
+
+---
+
 ## [v3.11.0] - 2026-06-08
 
 ### Added — OwnTracks validation (3 lines of defense)

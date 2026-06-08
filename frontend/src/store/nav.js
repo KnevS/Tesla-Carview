@@ -48,6 +48,7 @@ export const NAV_GROUPS = [
     items: [
       { key: 'routes',      to: '/routes',      icon: 'map',      emojiFallback: '🗺️', label: 'Routenplaner', tooltip: 'Routen planen, an Tesla senden, in ABRP öffnen und Lieblingsrouten speichern' },
       { key: 'chargers',    to: '/chargers',    icon: 'bolt',     emojiFallback: '🗺', label: 'Ladestationen', tooltip: 'Schnellladestationen in deiner Nähe suchen – OpenChargeMap-Daten' },
+      { key: 'chargingLocations', to: '/charging-locations', icon: 'bolt', emojiFallback: '🏠', label: 'Ladeorte', tooltip: 'Eigene Ladeorte verwalten — Tarif, Radius, automatisches Ladelimit bei Ankunft' },
       { key: 'automations', to: '/automations', icon: 'bolt',     emojiFallback: '⚡', label: 'Automationen',  tooltip: 'Push-Alarme und automatische Aktionen bei Ladestufe, Geofence u. m.' },
       { key: 'grok',        to: '/grok',        icon: 'sparkles', emojiFallback: '💬', label: 'Grok',          tooltip: 'Chat mit Grok KI — stelle Fragen zu deinen Fahrten, Ladedaten und deinem Tesla' },
       { key: 'launcher',    to: '/launcher',    icon: 'apps',     emojiFallback: '🚀', label: 'App-Hub',       tooltip: 'Kuratierte Web-Apps, die im Tesla-Browser laufen und Tesla nicht nativ bietet' },

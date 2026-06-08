@@ -105,6 +105,10 @@
     "launcher": {
       "label": "Hub de apps",
       "tooltip": "Apps web curadas que se ejecutan en el navegador Tesla y que Tesla no ofrece nativamente"
+    },
+    "chargingLocations": {
+      "label": "Lugares de carga",
+      "tooltip": "Gestionar tus lugares de carga — tarifa, radio, límite automático al llegar"
     }
   },
   "dashboard": {
@@ -2652,5 +2656,34 @@
     "disable": "Ocultar",
     "hintTitle": "Notas",
     "hintBody": "Las apps no se borran, solo se ocultan. La próxima actualización puede añadir nuevas apps al catálogo automáticamente. Las funciones nativas Tesla (Spotify, Apple Music, juegos, mapas, streaming) NUNCA están en el catálogo — vienen de Tesla."
+  },
+  "chargingLocations": {
+    "title": "Lugares de carga",
+    "subtitle": "Tus propios lugares de carga (casa, trabajo, paradas frecuentes) con tarifa, radio y límite de carga automático al llegar.",
+    "add": "Añadir",
+    "addTitle": "Añadir lugar nuevo",
+    "empty": "Aún no hay lugares de carga definidos. Añade tu casa para que las sesiones de carga se asocien automáticamente.",
+    "default": "Por defecto",
+    "limitAutoApplied": "— se aplica automáticamente al llegar",
+    "applyNow": "Aplicar ahora",
+    "applyNowTooltip": "Envía inmediatamente el comando Tesla set_charge_limit (Fleet API requerida).",
+    "hint": "Cuando tu vehículo llega a un lugar dentro de su radio (detectado al final del trayecto OwnTracks), TeslaView aplica el límite configurado automáticamente. Sin Fleet API recibes un recordatorio push para fijarlo manualmente.",
+    "form": {
+      "name": "Nombre (p. ej. «Casa», «Trabajo»)",
+      "address": "Dirección (opcional)",
+      "lat": "Latitud",
+      "lon": "Longitud",
+      "radius": "Radio (m)",
+      "rate": "Tarifa eléctrica (€/kWh)",
+      "limitLabel": "Límite de carga automático (0-100, vacío = off)",
+      "limitPlaceholder": "p. ej. 80",
+      "limitHint": "Se aplica automáticamente al llegar (Fleet API) o llega como sugerencia push.",
+      "isDefault": "Marcar como predeterminado (coincidencia automática sin GPS)"
+    },
+    "type": {
+      "home": "🏠 Casa",
+      "work": "💼 Trabajo",
+      "public": "⚡ Público"
+    }
   }
 }

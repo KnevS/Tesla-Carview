@@ -105,6 +105,10 @@
     "launcher": {
       "label": "Uygulama merkezi",
       "tooltip": "Tesla tarayıcısında çalışan ve Tesla'nın yerel olarak sunmadığı seçilmiş web uygulamaları"
+    },
+    "chargingLocations": {
+      "label": "Şarj konumları",
+      "tooltip": "Kendi şarj konumlarınızı yönetin — tarife, yarıçap, varışta otomatik limit"
     }
   },
   "dashboard": {
@@ -2652,5 +2656,34 @@
     "disable": "Gizle",
     "hintTitle": "Notlar",
     "hintBody": "Uygulamalar silinmez, sadece gizlenir. Bir sonraki güncelleme kataloğa otomatik olarak yeni uygulamalar ekleyebilir. Tesla yerel özellikleri (Spotify, Apple Music, oyunlar, haritalar, yayın) ASLA katalogda olmaz — onlar Tesla'dan gelir."
+  },
+  "chargingLocations": {
+    "title": "Şarj konumları",
+    "subtitle": "Kendi şarj noktalarınız (ev, iş, sık duraklar) — tarife, yarıçap ve varışta otomatik şarj limiti ile.",
+    "add": "Ekle",
+    "addTitle": "Yeni konum ekle",
+    "empty": "Henüz şarj konumu yok. Ev konumunuzu ekleyin, böylece şarj oturumları otomatik olarak eşleştirilsin.",
+    "default": "Varsayılan",
+    "limitAutoApplied": "— varışta otomatik uygulanır",
+    "applyNow": "Şimdi uygula",
+    "applyNowTooltip": "Tesla set_charge_limit komutunu hemen gönderir (Fleet API gerekir).",
+    "hint": "Aracınız bir konumun yarıçapına ulaştığında (OwnTracks yolculuk sonunda algılanır), TeslaView yapılandırılan şarj limitini otomatik uygular. Fleet API olmadan manuel ayarlamak için push hatırlatması alırsınız.",
+    "form": {
+      "name": "Ad (örn. \"Ev\", \"İş\")",
+      "address": "Adres (isteğe bağlı)",
+      "lat": "Enlem",
+      "lon": "Boylam",
+      "radius": "Yarıçap (m)",
+      "rate": "Elektrik tarifesi (€/kWh)",
+      "limitLabel": "Otomatik şarj limiti (0-100, boş = kapalı)",
+      "limitPlaceholder": "örn. 80",
+      "limitHint": "Konuma varışta otomatik uygulanır (Fleet API) veya push olarak önerilir.",
+      "isDefault": "Varsayılan olarak işaretle (GPS olmadığında otomatik eşleşme)"
+    },
+    "type": {
+      "home": "🏠 Ev",
+      "work": "💼 İş",
+      "public": "⚡ Halka açık"
+    }
   }
 }

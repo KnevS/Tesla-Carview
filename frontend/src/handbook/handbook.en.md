@@ -212,6 +212,15 @@ Charging locations are detected automatically via GPS and linked to a price per 
 
 Typical use case: charging at the workplace, paid by the employer, that should not be part of your private bill. The *"↩ paid"* button reverses the marking at any time.
 
+
+### Automatic charge limit (from v3.12.0)
+
+Each location can carry a desired charge limit (e.g. 80 %). At trip end TeslaView checks if the position is within the radius:
+- Fleet API active → sends `set_charge_limit` to the car immediately
+- Fleet API not active → push notification suggesting manual set
+
+The "🔋 Apply now" button can trigger the command manually. Tesla recommends 70-80 % for daily charging, 50-60 % for long-term storage, 100 % only for long trips.
+
 ## 🔐 Security {#security}
 
 - 🔑 **Passkey / WebAuthn** — Passwordless login with fingerprint, Face ID or hardware key

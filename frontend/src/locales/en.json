@@ -105,6 +105,10 @@
     "launcher": {
       "label": "App hub",
       "tooltip": "Curated web apps that run in the Tesla browser and that Tesla does not offer natively"
+    },
+    "chargingLocations": {
+      "label": "Charging locations",
+      "tooltip": "Manage your own charging spots — rate, radius, auto charge limit on arrival"
     }
   },
   "dashboard": {
@@ -2652,5 +2656,34 @@
     "disable": "Hide",
     "hintTitle": "Notes",
     "hintBody": "Apps are not deleted, only hidden. The next update may add new apps to the catalog automatically. Tesla-native features (Spotify, Apple Music, games, maps, streaming) are deliberately NEVER in the catalog — those come from Tesla itself."
+  },
+  "chargingLocations": {
+    "title": "Charging locations",
+    "subtitle": "Your own charging spots (home, work, frequent stops) with rate, radius and automatic charge limit on arrival.",
+    "add": "Add",
+    "addTitle": "Add new location",
+    "empty": "No charging locations defined yet. Add your home spot so charging sessions get matched automatically.",
+    "default": "Default",
+    "limitAutoApplied": "— applied automatically on arrival",
+    "applyNow": "Apply now",
+    "applyNowTooltip": "Sends the Tesla set_charge_limit command right now (Fleet API required).",
+    "hint": "When your vehicle arrives at a location within its radius (detected at OwnTracks trip end), TeslaView applies the configured charge limit automatically. Without Fleet API, you get a push reminder to set it manually.",
+    "form": {
+      "name": "Name (e.g. \"Home\", \"Work\")",
+      "address": "Address (optional)",
+      "lat": "Latitude",
+      "lon": "Longitude",
+      "radius": "Radius (m)",
+      "rate": "Electricity rate (€/kWh)",
+      "limitLabel": "Automatic charge limit (0-100, empty = off)",
+      "limitPlaceholder": "e.g. 80",
+      "limitHint": "Applied automatically when arriving at this location (Fleet API) or pushed as a suggestion.",
+      "isDefault": "Mark as default (auto-match when no GPS available)"
+    },
+    "type": {
+      "home": "🏠 Home",
+      "work": "💼 Work",
+      "public": "⚡ Public"
+    }
   }
 }
