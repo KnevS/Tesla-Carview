@@ -7,6 +7,34 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.21.0] - 2026-06-08
+
+### Added — Service-log entries are editable (with audit log)
+
+Until now, service-log entries could only be created and deleted. Corrections required "delete + recreate", losing the audit trail. Now:
+
+- **Edit button (✎)** next to every entry in the list
+- The form is reused (POST or PUT depending on `editingId`)
+- Header switches to "Edit entry" instead of "New entry"
+- A small blue `✎ edited` badge with tooltip "Last edited: …" appears when `updated_at > created_at`
+
+**Audit log for ALL logbook mutations:**
+- `logbook.create` → `{id, vehicle_id, title, category, entry_date, cost}`
+- `logbook.update` → `{id, vehicle_id, changes: {field: {before, after}}}` — only the actually changed fields, no spam on no-op save
+- `logbook.delete` → `{id, vehicle_id, snapshot: {…full entry data…}}` — allows manual restore from the log
+
+**Backend hardening:**
+- PUT checks existence (404 instead of silent no-op)
+- DELETE checks existence and writes a snapshot to the audit for restore
+- PUT returns the updated row (incl. `created_by_username`)
+
+**i18n (all 7 languages):**
+- New keys `maintenanceLog.editEntry`, `editTooltip`, `editedLabel`, `editedTooltip`
+
+Follows the consistency rule: every backend mutation audited, frontend invalidates immediately.
+
+---
+
 ## [v3.20.0] - 2026-06-08
 
 ### Added — TCO cockpit leasing extension

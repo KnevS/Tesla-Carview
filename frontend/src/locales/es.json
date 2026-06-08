@@ -638,7 +638,11 @@
     "cat_other": "Otros",
     "cat_other_tooltip": "Otros eventos que no encajan en ninguna categoría",
     "sectionIntervals": "Intervalos de mantenimiento",
-    "sectionEntries": "Libro de registro"
+    "sectionEntries": "Libro de registro",
+    "editEntry": "Editar entrada",
+    "editTooltip": "Editar esta entrada (el cambio se registra en el log de auditoría)",
+    "editedLabel": "editado",
+    "editedTooltip": "Última modificación: {time}"
   },
   "billing": {
     "title": "Facturación carga doméstica",

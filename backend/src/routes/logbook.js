@@ -1,9 +1,23 @@
 // © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import { Router } from 'express';
+import { auditLog } from '../services/auditService.js';
 
 const router = Router();
 
 const CATEGORIES = ['note', 'maintenance', 'repair', 'tire', 'inspection', 'accident', 'other'];
+
+// Felder, die wir im Audit-Diff vergleichen — alles was der Nutzer im UI editiert.
+const AUDIT_FIELDS = ['title', 'description', 'category', 'mileage_km', 'cost', 'currency', 'entry_date'];
+
+function diffEntry(before, after) {
+  const out = {};
+  for (const f of AUDIT_FIELDS) {
+    if ((before[f] ?? null) !== (after[f] ?? null)) {
+      out[f] = { before: before[f] ?? null, after: after[f] ?? null };
+    }
+  }
+  return out;
+}
 
 router.get('/', (req, res) => {
   const db = req.db;
@@ -50,7 +64,10 @@ router.post('/', (req, res) => {
       category, title, description, mileage_km, cost,
       currency || 'EUR', createdBy,
     );
-    res.status(201).json({ id: result.lastInsertRowid });
+    const id = result.lastInsertRowid;
+    auditLog(db, createdBy, 'logbook.create', req,
+      { id, vehicle_id, title, category, entry_date, cost });
+    res.status(201).json({ id });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -58,14 +75,36 @@ router.post('/', (req, res) => {
 
 router.put('/:id', (req, res) => {
   const db = req.db;
+  const id = Number(req.params.id);
   const { title, description, category, mileage_km, cost, entry_date } = req.body;
+  if (!title) return res.status(400).json({ error: 'title ist Pflichtfeld' });
+  if (category && !CATEGORIES.includes(category)) return res.status(400).json({ error: 'Ungültige Kategorie' });
   try {
+    // Vorzustand fuer Audit-Diff laden — wenn der Eintrag nicht existiert,
+    // antworten wir 404 statt stillschweigend zu mutieren.
+    const before = db.prepare('SELECT * FROM logbook_entries WHERE id=?').get(id);
+    if (!before) return res.status(404).json({ error: 'Eintrag nicht gefunden' });
+
     // Ersteller bleibt unveraendert — Edits aktualisieren nur updated_at.
     db.prepare(
       `UPDATE logbook_entries SET title=?, description=?, category=?, mileage_km=?, cost=?,
        entry_date=?, updated_at=unixepoch() WHERE id=?`
-    ).run(title, description, category, mileage_km, cost, entry_date, req.params.id);
-    res.json({ success: true });
+    ).run(title, description ?? null, category, mileage_km ?? null, cost ?? null, entry_date, id);
+
+    const after = db.prepare(`
+      SELECT le.*, u.username AS created_by_username
+        FROM logbook_entries le
+        LEFT JOIN users u ON u.id = le.created_by_user_id
+       WHERE le.id=?`).get(id);
+
+    const changes = diffEntry(before, after);
+    // Nur loggen wenn sich wirklich etwas geaendert hat — sonst spammt das
+    // Audit-Log bei jedem versehentlichen Speichern desselben Forms.
+    if (Object.keys(changes).length) {
+      auditLog(db, req.user?.sub ?? null, 'logbook.update', req,
+        { id, vehicle_id: before.vehicle_id, changes });
+    }
+    res.json(after);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -73,8 +112,18 @@ router.put('/:id', (req, res) => {
 
 router.delete('/:id', (req, res) => {
   const db = req.db;
+  const id = Number(req.params.id);
   try {
-    db.prepare('DELETE FROM logbook_entries WHERE id = ?').run(req.params.id);
+    // Snapshot vor dem Loeschen fuer das Audit — damit ein Restore (manuell
+    // aus dem Log) ueberhaupt moeglich ist.
+    const before = db.prepare('SELECT * FROM logbook_entries WHERE id=?').get(id);
+    if (!before) return res.status(404).json({ error: 'Eintrag nicht gefunden' });
+    db.prepare('DELETE FROM logbook_entries WHERE id = ?').run(id);
+    auditLog(db, req.user?.sub ?? null, 'logbook.delete', req,
+      { id, vehicle_id: before.vehicle_id, snapshot: {
+        title: before.title, category: before.category, entry_date: before.entry_date,
+        mileage_km: before.mileage_km, cost: before.cost, description: before.description,
+      } });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });

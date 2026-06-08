@@ -64,10 +64,19 @@
                     v-tooltip="$t('maintenanceLog.creatorUnknown')">
                 {{ $t('maintenanceLog.unknown') }}
               </span>
+              <span v-if="e.updated_at && e.updated_at !== e.created_at"
+                    class="text-blue-400/70 text-xs"
+                    v-tooltip="$t('maintenanceLog.editedTooltip', { time: fmtDateTime(e.updated_at) })">
+                ✎ {{ $t('maintenanceLog.editedLabel') }}
+              </span>
             </div>
           </div>
-          <button @click="deleteEntry(e.id)" class="text-gray-600 hover:text-red-400 transition ml-3"
-            v-tooltip="$t('maintenanceLog.deleteTooltip')">✕</button>
+          <div class="flex gap-1 ml-3">
+            <button @click="openEdit(e)" class="text-gray-500 hover:text-blue-400 transition px-2"
+              v-tooltip="$t('maintenanceLog.editTooltip')">✎</button>
+            <button @click="deleteEntry(e.id)" class="text-gray-600 hover:text-red-400 transition px-2"
+              v-tooltip="$t('maintenanceLog.deleteTooltip')">✕</button>
+          </div>
         </div>
       </div>
       </div><!-- end entries list -->
@@ -78,7 +87,7 @@
     <Teleport to="body">
     <div v-if="showForm" class="fixed inset-0 bg-black/70 flex items-center justify-center z-[1000] p-4">
       <div class="card w-full max-w-md space-y-4">
-        <h2 class="text-xl font-bold">{{ $t('maintenanceLog.newEntry') }}</h2>
+        <h2 class="text-xl font-bold">{{ editingId ? $t('maintenanceLog.editEntry') : $t('maintenanceLog.newEntry') }}</h2>
         <div>
           <label class="block text-sm text-gray-400 mb-1"
             v-tooltip="$t('maintenanceLog.entryTitleTooltip')">{{ $t('maintenanceLog.entryTitle') }}</label>
@@ -121,7 +130,7 @@
         </div>
         <div class="flex gap-3 pt-2">
           <button @click="submitForm" class="btn-primary flex-1">{{ $t('maintenanceLog.save') }}</button>
-          <button @click="showForm = false" class="btn-secondary flex-1">{{ $t('maintenanceLog.cancel') }}</button>
+          <button @click="() => { showForm = false; resetForm(); }" class="btn-secondary flex-1">{{ $t('maintenanceLog.cancel') }}</button>
         </div>
       </div>
     </div>
@@ -190,12 +199,38 @@ function nowLocal() {
 
 const form = ref({ title: '', category: 'note', description: '', mileage_km: null, cost: null,
                    entry_date_local: nowLocal() });
+// editingId: null = neuer Eintrag, sonst = Edit existierender ID.
+// Steuert sowohl Form-Header als auch POST vs PUT in submitForm().
+const editingId = ref(null);
+
+function resetForm() {
+  form.value = { title: '', category: 'note', description: '', mileage_km: null, cost: null,
+                 entry_date_local: nowLocal() };
+  editingId.value = null;
+}
 
 // Beim Öffnen des Formulars: entry_date_local frisch auf „jetzt“ setzen,
 // damit das Standardverhalten konsistent bleibt, auch wenn der Dialog
 // zwischendurch ohne Speichern geschlossen wurde.
 function openForm() {
-  form.value.entry_date_local = nowLocal();
+  resetForm();
+  showForm.value = true;
+}
+
+function openEdit(e) {
+  // Sekunden → datetime-local Format (lokale Zone, ohne Versatz-Tricks)
+  const d   = new Date(e.entry_date * 1000);
+  const off = d.getTimezoneOffset() * 60_000;
+  const local = new Date(d.getTime() - off).toISOString().slice(0, 16);
+  form.value = {
+    title:        e.title || '',
+    category:     e.category || 'note',
+    description:  e.description || '',
+    mileage_km:   e.mileage_km,
+    cost:         e.cost,
+    entry_date_local: local,
+  };
+  editingId.value = e.id;
   showForm.value = true;
 }
 
@@ -214,16 +249,21 @@ async function load() {
 
 async function submitForm() {
   if (!form.value.title) return;
-  const vid = appStore.selectedVehicle?.id;
-  if (!vid) return alert(t('maintenanceLog.noVehicle'));
   // datetime-local liefert YYYY-MM-DDTHH:MM ohne Zone; new Date(...) interpretiert es lokal.
   const ts = form.value.entry_date_local
     ? Math.floor(new Date(form.value.entry_date_local).getTime() / 1000)
     : Math.floor(Date.now() / 1000);
   const { entry_date_local, ...payload } = form.value;
-  await api.post('/logbook', { ...payload, vehicle_id: vid, entry_date: ts });
-  form.value = { title: '', category: 'note', description: '', mileage_km: null, cost: null,
-                 entry_date_local: nowLocal() };
+
+  if (editingId.value) {
+    // Edit-Pfad — vehicle_id ist immutable, nur Inhaltsfelder werden gesendet.
+    await api.put(`/logbook/${editingId.value}`, { ...payload, entry_date: ts });
+  } else {
+    const vid = appStore.selectedVehicle?.id;
+    if (!vid) return alert(t('maintenanceLog.noVehicle'));
+    await api.post('/logbook', { ...payload, vehicle_id: vid, entry_date: ts });
+  }
+  resetForm();
   showForm.value = false;
   await load();
 }

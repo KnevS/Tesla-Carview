@@ -638,7 +638,11 @@
     "cat_other": "Sonstiges",
     "cat_other_tooltip": "Andere Ereignisse, die in keine der Kategorien passen",
     "sectionIntervals": "Wartungsintervalle",
-    "sectionEntries": "Betriebsbuch"
+    "sectionEntries": "Betriebsbuch",
+    "editEntry": "Eintrag bearbeiten",
+    "editTooltip": "Diesen Eintrag bearbeiten (Änderung wird im Audit-Log dokumentiert)",
+    "editedLabel": "bearbeitet",
+    "editedTooltip": "Zuletzt geändert: {time}"
   },
   "billing": {
     "title": "Kostenabrechnung Heimladen",

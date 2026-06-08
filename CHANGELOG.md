@@ -7,6 +7,34 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.21.0] - 2026-06-08
+
+### Hinzugefügt — Betriebsbuch-Einträge editierbar (mit Audit-Log)
+
+Bisher konnten Betriebsbuch-Einträge nur angelegt und gelöscht werden. Korrekturen erforderten „löschen + neu anlegen", wodurch die Audit-Spur verlorenging. Jetzt:
+
+- **Edit-Button (✎)** neben jedem Eintrag in der Liste
+- Form wird wiederverwendet (POST oder PUT, abhängig von `editingId`)
+- Header zeigt „Eintrag bearbeiten" statt „Neuer Eintrag"
+- Im Eintrag sichtbar: kleines blaues `✎ bearbeitet`-Badge mit Tooltip „Zuletzt geändert: …" wenn `updated_at > created_at`
+
+**Audit-Log für ALLE Logbook-Mutations:**
+- `logbook.create` → `{id, vehicle_id, title, category, entry_date, cost}`
+- `logbook.update` → `{id, vehicle_id, changes: {field: {before, after}}}` — nur die tatsächlich geänderten Felder, kein Spam bei No-Op-Save
+- `logbook.delete` → `{id, vehicle_id, snapshot: {…volle Eintragsdaten…}}` — ermöglicht manuelles Restore aus dem Log
+
+**Backend-Härtung:**
+- PUT prüft Existenz (404 statt stiller No-Op)
+- DELETE prüft Existenz und liefert Snapshot im Audit für Restore
+- PUT liefert die aktualisierte Zeile zurück (inkl. `created_by_username`)
+
+**i18n (alle 7 Sprachen):**
+- Neue Keys `maintenanceLog.editEntry`, `editTooltip`, `editedLabel`, `editedTooltip`
+
+Folgt der Konsistenz-Pflicht: jede Backend-Mutation auditiert, Frontend invalidiert sofort.
+
+---
+
 ## [v3.20.0] - 2026-06-08
 
 ### Hinzugefügt — TCO-Cockpit Leasing-Erweiterung

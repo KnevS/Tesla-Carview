@@ -638,7 +638,11 @@
     "cat_other": "Diğer",
     "cat_other_tooltip": "Hiçbir kategoriye uymayan diğer olaylar",
     "sectionIntervals": "Bakım Aralıkları",
-    "sectionEntries": "Kayıtlar"
+    "sectionEntries": "Kayıtlar",
+    "editEntry": "Girişi düzenle",
+    "editTooltip": "Bu girişi düzenle (değişiklik denetim günlüğüne kaydedilir)",
+    "editedLabel": "düzenlendi",
+    "editedTooltip": "Son düzenleme: {time}"
   },
   "billing": {
     "title": "Ev şarjı faturalaması",

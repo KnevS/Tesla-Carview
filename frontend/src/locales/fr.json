@@ -638,7 +638,11 @@
     "cat_other": "Autre",
     "cat_other_tooltip": "Autres événements qui ne rentrent dans aucune catégorie",
     "sectionIntervals": "Intervalles de maintenance",
-    "sectionEntries": "Journal d’entretien"
+    "sectionEntries": "Journal d’entretien",
+    "editEntry": "Modifier l'entrée",
+    "editTooltip": "Modifier cette entrée (la modification est enregistrée dans le journal d'audit)",
+    "editedLabel": "modifié",
+    "editedTooltip": "Dernière modification : {time}"
   },
   "billing": {
     "title": "Remboursement recharge domicile",

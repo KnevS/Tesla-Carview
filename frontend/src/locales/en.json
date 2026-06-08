@@ -638,7 +638,11 @@
     "cat_other": "Other",
     "cat_other_tooltip": "Other events that don't fit any of the categories",
     "sectionIntervals": "Maintenance Intervals",
-    "sectionEntries": "Logbook Entries"
+    "sectionEntries": "Logbook Entries",
+    "editEntry": "Edit entry",
+    "editTooltip": "Edit this entry (change is recorded in the audit log)",
+    "editedLabel": "edited",
+    "editedTooltip": "Last edited: {time}"
   },
   "billing": {
     "title": "Home charging billing",
