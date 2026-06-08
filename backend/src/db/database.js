@@ -980,6 +980,9 @@ function runTenantMigrations(db) {
     UNIQUE(vehicle_id, for_date)
   )`);
   db.exec('CREATE INDEX IF NOT EXISTS idx_precondition_vehicle ON precondition_suggestions(vehicle_id, for_date DESC)');
+  // Hot-Path-Indexe fuer Notify-Loop (status-Filter)
+  db.exec('CREATE INDEX IF NOT EXISTS idx_battery_anomalies_status ON battery_anomalies(status)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_precondition_status ON precondition_suggestions(status, acknowledged_at)');
 
   // POI-Cache (Overpass-Lookup-Persistierung, Phase 4)
   db.exec(`CREATE TABLE IF NOT EXISTS poi_cache (

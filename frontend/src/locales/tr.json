@@ -2557,7 +2557,22 @@
       "s3": "\"Eylem ekle\" → \"URL\" arayın → \"URL içeriğini al\"'ı seçin",
       "s4": "Adım 1'deki URL'yi (yukarıda) yapıştırın → \"Hemen çalıştır\"'ı açın → \"Bitti\"",
       "s5": "\"Bluetooth ayrıldı\" için aynısı, adım 2'deki URL ile",
-      "qrHint": "İpucu: masaüstündeyseniz — sağdaki QR kodu iPhone kamerasıyla tarayın. URL panoya iner ve kısayola yapıştırılabilir."
+      "qrHint": "İpucu: masaüstündeyseniz — sağdaki QR kodu iPhone kamerasıyla tarayın. URL panoya iner ve kısayola yapıştırılabilir.",
+      "iosFindHint": "💡 \"URL içeriğini al\" arama kutusunda \"URL\" altında — küre simgesi. Önce \"Boş otomasyon oluştur\"u seçin, Apple önerilerini değil.",
+      "androidStepsTitle": "Android otomasyon uygulamasında",
+      "androidUntested": "Bu kılavuz Android'de canlı doğrulanmadı. Sorun varsa GitHub issue açın — metni iyileştireceğiz.",
+      "androidApp1": "Öneri: MacroDroid (ücretsiz sürüm yeterli)",
+      "amd1": "Play Store'dan MacroDroid kurun",
+      "amd2": "\"+ Yeni makro\" → Tetikleyici \"Bluetooth\" → \"Cihaza bağlandı\" → Tesla'yı seçin",
+      "amd3": "\"HTTP isteği\" eylemi → yöntem GET → adım 1'deki URL'yi yapıştırın",
+      "amd4": "\"Tesla bağlandı\" olarak kaydedin",
+      "amd5": "\"Bluetooth ayrıldı\" için aynı şekilde ikinci makro, adım 2'deki URL ile",
+      "androidAlternatives": "Alternatif uygulamalar",
+      "androidApp2": "Automate (Llamalab) — 30 bloğa kadar ücretsiz",
+      "automateDesc": "Görsel akış: Bluetooth bağlandı → HTTP isteği. MacroDroid'den temiz ama öğrenme eğrisi var.",
+      "androidApp3": "Tasker — 3,49 € bir defalık",
+      "taskerDesc": "Android otomasyon altın standartı. Profil \"Bluetooth bağlı\" → görev \"HTTP isteği\".",
+      "androidFeedback": "⓵ Çalışıyor mu? GitHub issue ile kısa geri bildirim lütfen — kılavuzu sürekli iyileştiriyoruz."
     }
   },
   "tco": {

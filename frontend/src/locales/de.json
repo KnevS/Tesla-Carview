@@ -780,7 +780,22 @@
       "s3": "„Aktion hinzufügen\" → suche „URL\" → wähle „Inhalte aus URL abrufen\"",
       "s4": "URL aus Schritt 1 (oben) einfügen → „Sofort ausführen\" aktivieren → „Fertig\"",
       "s5": "Gleiches Spiel für „Bluetooth getrennt\" mit URL aus Schritt 2",
-      "qrHint": "Tipp: Wenn du am Desktop bist — scanne den QR-Code rechts mit der iPhone-Kamera. Die URL landet im Clipboard und kann in den Kurzbefehl eingefügt werden."
+      "qrHint": "Tipp: Wenn du am Desktop bist — scanne den QR-Code rechts mit der iPhone-Kamera. Die URL landet im Clipboard und kann in den Kurzbefehl eingefügt werden.",
+      "iosFindHint": "💡 „Inhalte aus URL abrufen\" findest du im Suchfeld unter „URL\" — Globus-Symbol. Vorher musst du „Leere Automation erstellen\" wählen, nicht die Apple-Vorschläge.",
+      "androidStepsTitle": "In einer Android-Automatisierungs-App",
+      "androidUntested": "Diese Anleitung wurde nicht auf Android live verifiziert. Bei Problemen bitte GitHub-Issue öffnen — wir verbessern dann die Anleitung.",
+      "androidApp1": "Empfehlung: MacroDroid (kostenlose Version reicht)",
+      "amd1": "MacroDroid aus dem Play Store installieren",
+      "amd2": "„+ Neues Makro\" → Trigger „Bluetooth\" → „Verbunden mit Gerät\" → Tesla wählen",
+      "amd3": "Aktion „HTTP-Request\" hinzufügen → Methode GET → URL aus Schritt 1 (oben) einfügen",
+      "amd4": "Speichern als „Tesla connected\"",
+      "amd5": "Zweites Makro analog für „Bluetooth getrennt\" mit URL aus Schritt 2",
+      "androidAlternatives": "Alternative Apps",
+      "androidApp2": "Automate (Llamalab) — kostenlos bis 30 Blöcke",
+      "automateDesc": "Visueller Flow: Bluetooth-Verbinden → HTTP-Request. Sauberer als MacroDroid, aber Lernkurve.",
+      "androidApp3": "Tasker — 3,49 € einmalig",
+      "taskerDesc": "Goldstandard für Android-Automation. Profil „Bluetooth Connected\" → Task „HTTP Request\".",
+      "androidFeedback": "⓵ Funktioniert es? Bitte kurzes Feedback via GitHub-Issue — wir verbessern die Anleitung kontinuierlich."
     }
   },
   "notices": {

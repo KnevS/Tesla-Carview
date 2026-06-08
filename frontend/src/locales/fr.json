@@ -2557,7 +2557,22 @@
       "s3": "« Ajouter une action » → cherchez « URL » → choisissez « Obtenir le contenu de l'URL »",
       "s4": "Collez l'URL de l'étape 1 (ci-dessus) → activez « Exécuter immédiatement » → « Terminé »",
       "s5": "Idem pour « Bluetooth déconnecté » avec l'URL de l'étape 2",
-      "qrHint": "Astuce : si vous êtes au bureau — scannez le QR-code à droite avec l'appareil photo de l'iPhone. L'URL atterrit dans le presse-papiers et peut être collée dans le raccourci."
+      "qrHint": "Astuce : si vous êtes au bureau — scannez le QR-code à droite avec l'appareil photo de l'iPhone. L'URL atterrit dans le presse-papiers et peut être collée dans le raccourci.",
+      "iosFindHint": "💡 « Obtenir le contenu de l'URL » se trouve sous la recherche « URL » — icône globe. Choisissez d'abord « Créer une automatisation vide », pas les suggestions Apple.",
+      "androidStepsTitle": "Dans une app d'automatisation Android",
+      "androidUntested": "Ce guide n'a pas été vérifié sur Android. En cas de souci, ouvrez une issue GitHub — nous corrigerons le texte.",
+      "androidApp1": "Recommandation : MacroDroid (version gratuite suffit)",
+      "amd1": "Installer MacroDroid depuis le Play Store",
+      "amd2": "« + Nouvelle macro » → déclencheur « Bluetooth » → « Connecté à un appareil » → choisir la Tesla",
+      "amd3": "Action « Requête HTTP » → méthode GET → coller l'URL de l'étape 1 (ci-dessus)",
+      "amd4": "Enregistrer sous « Tesla connecté »",
+      "amd5": "Deuxième macro identique pour « Bluetooth déconnecté » avec l'URL de l'étape 2",
+      "androidAlternatives": "Apps alternatives",
+      "androidApp2": "Automate (Llamalab) — gratuit jusqu'à 30 blocs",
+      "automateDesc": "Flux visuel : connexion Bluetooth → requête HTTP. Plus propre que MacroDroid, mais courbe d'apprentissage.",
+      "androidApp3": "Tasker — 3,49 € en une fois",
+      "taskerDesc": "Standard de référence pour Android. Profil « Bluetooth connecté » → tâche « Requête HTTP ».",
+      "androidFeedback": "⓵ Cela fonctionne ? Un court feedback via issue GitHub svp — nous améliorons le guide en continu."
     }
   },
   "tco": {

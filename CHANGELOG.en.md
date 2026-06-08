@@ -7,6 +7,43 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.15.0] - 2026-06-08
+
+### Added — Android setup for Bluetooth validation
+
+Bluetooth setup tab in MyTracking now has a platform picker 📱 iOS / 🤖 Android. Auto-detected from the user agent, switchable manually.
+
+**Android walkthrough** for three apps:
+- **MacroDroid** (recommended, free version): Bluetooth trigger + HTTP GET request — step-by-step
+- **Automate** (Llamalab, free up to 30 blocks): visual flow
+- **Tasker** (€3.49 one-off): Android power-user gold standard
+
+Honest disclaimer: the guide has not been live-verified on Android — there is no Android device on the development side. Open a GitHub issue for fixes; we iterate.
+
+### Changed — iOS hint sharper
+
+`iosFindHint` adds a concrete pointer to where "Get Contents of URL" actually lives (search field "URL", globe icon) + reminder to pick "Create blank automation" instead of Apple's suggestions.
+
+### Changed — Performance (companion engine + location actions)
+
+Three push loops switched from sequential to parallel via `Promise.allSettled` — per anomaly / preconditioning suggestion / location action the Web Push round-trips to all eligible users now run in parallel. With 2-3 driver accounts that's ~200-600 ms saved per notification.
+
+### Changed — Database indexes
+
+Two new hot-path indexes:
+- `idx_battery_anomalies_status` — speeds up `notifyNewAnomalies` (`WHERE status='new'`)
+- `idx_precondition_status` — speeds up `notifyOpenSuggestions`
+
+Auto-migration in `runTenantMigrations`.
+
+### Docs
+
+- README + README.en gained a FAQ block "Why Telegram, not WhatsApp / Signal?" — table with per-messenger reasoning, made traceable
+- Wiki Features (DE + EN) carries the same explanation
+- Android setup walkthrough in all 6 i18n languages (`amd1`-`amd5`, `androidApp1/2/3`, `automateDesc`, `taskerDesc`, `androidFeedback`, `androidUntested`, `androidAlternatives`)
+
+---
+
 ## [v3.14.0] - 2026-06-08
 
 ### Changed — Bluetooth setup radically simplified

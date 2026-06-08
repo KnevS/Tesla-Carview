@@ -154,13 +154,13 @@ async function notifyNewAnomalies(db, tenantId) {
     const carLabel = r.display_name || (r.vin ? r.vin.slice(-6) : `#${r.vehicle_id}`);
     const { title, body } = buildAnomalyMessage(r.type, det, carLabel);
 
-    for (const u of users) {
-      await notify({
-        tenantId, userId: u.user_id, db,
-        title, body, url: '/battery',
-        emoji: '🔍', type: 'generic', vehicleId: r.vehicle_id,
-      }).catch(() => {});
-    }
+    // Push parallel an alle User des Fahrzeugs — User wartet nicht auf jeden
+    // einzelnen Web-Push-Round-Trip sequenziell.
+    await Promise.allSettled(users.map(u => notify({
+      tenantId, userId: u.user_id, db,
+      title, body, url: '/battery',
+      emoji: '🔍', type: 'generic', vehicleId: r.vehicle_id,
+    })));
 
     db.prepare(
       `UPDATE battery_anomalies SET status='notified', notified_at=unixepoch() WHERE id=?`
@@ -302,14 +302,13 @@ async function notifyOpenSuggestions(db, tenantId) {
       + (cold ? 'Akku rechtzeitig warm fahren spart Reichweite.'
               : 'Innenraum vorab kühlen, Akku schont sich beim Tritt aufs Gas.');
 
-    for (const u of users) {
-      await notify({
-        tenantId, userId: u.user_id, db,
-        title, body, url: '/battery',
-        emoji: cold ? '❄️' : '☀️',
-        type: 'generic', vehicleId: r.vehicle_id,
-      }).catch(() => {});
-    }
+    // Push parallel an alle User des Fahrzeugs
+    await Promise.allSettled(users.map(u => notify({
+      tenantId, userId: u.user_id, db,
+      title, body, url: '/battery',
+      emoji: cold ? '❄️' : '☀️',
+      type: 'generic', vehicleId: r.vehicle_id,
+    })));
     db.prepare(
       `UPDATE precondition_suggestions SET acknowledged_at=unixepoch() WHERE id=?`
     ).run(r.id);

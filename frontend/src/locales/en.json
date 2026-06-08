@@ -780,7 +780,22 @@
       "s3": "\"Add action\" → search \"URL\" → pick \"Get contents of URL\"",
       "s4": "Paste the URL from step 1 (above) → enable \"Run immediately\" → \"Done\"",
       "s5": "Same for \"Bluetooth disconnected\" with the URL from step 2",
-      "qrHint": "Tip: if you are on desktop — scan the QR code on the right with the iPhone camera. The URL lands in the clipboard and can be pasted into the shortcut."
+      "qrHint": "Tip: if you are on desktop — scan the QR code on the right with the iPhone camera. The URL lands in the clipboard and can be pasted into the shortcut.",
+      "iosFindHint": "💡 \"Get Contents of URL\" lives under the \"URL\" search — globe icon. Pick \"Create blank automation\" first, not the Apple suggestions.",
+      "androidStepsTitle": "In an Android automation app",
+      "androidUntested": "This guide has not been live-verified on Android. If something is off, please open a GitHub issue — we will fix the wording.",
+      "androidApp1": "Recommendation: MacroDroid (free version is enough)",
+      "amd1": "Install MacroDroid from the Play Store",
+      "amd2": "\"+ New macro\" → trigger \"Bluetooth\" → \"Connected to device\" → pick the Tesla",
+      "amd3": "Action \"HTTP request\" → method GET → paste the URL from step 1 (above)",
+      "amd4": "Save as \"Tesla connected\"",
+      "amd5": "Second macro the same way for \"Bluetooth disconnected\" with the URL from step 2",
+      "androidAlternatives": "Alternative apps",
+      "androidApp2": "Automate (Llamalab) — free up to 30 blocks",
+      "automateDesc": "Visual flow: Bluetooth connected → HTTP request. Cleaner than MacroDroid, but learning curve.",
+      "androidApp3": "Tasker — €3.49 one-off",
+      "taskerDesc": "Gold standard for Android automation. Profile \"Bluetooth connected\" → task \"HTTP request\".",
+      "androidFeedback": "⓵ Does it work? Quick GitHub-issue feedback please — we keep improving the guide."
     }
   },
   "notices": {

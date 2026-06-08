@@ -112,8 +112,23 @@
                 </div>
               </div>
 
+              <!-- Plattform-Tab -->
+              <div class="flex gap-2 mt-4">
+                <button @click="setupPlatform = 'ios'"
+                        class="text-xs px-3 py-1.5 rounded transition"
+                        :class="setupPlatform === 'ios' ? 'bg-tesla-red text-white' : 'bg-gray-700 text-gray-300'">
+                  📱 iOS (iPhone)
+                </button>
+                <button @click="setupPlatform = 'android'"
+                        class="text-xs px-3 py-1.5 rounded transition"
+                        :class="setupPlatform === 'android' ? 'bg-tesla-red text-white' : 'bg-gray-700 text-gray-300'">
+                  🤖 Android
+                </button>
+              </div>
+
               <!-- Schritt 3: iOS-Automation -->
-              <div class="bg-blue-900/20 border border-blue-700/40 rounded-lg p-3 text-blue-100 text-xs space-y-2">
+              <div v-if="setupPlatform === 'ios'"
+                   class="bg-blue-900/20 border border-blue-700/40 rounded-lg p-3 text-blue-100 text-xs space-y-2">
                 <p class="font-semibold">3️⃣ {{ $t('myTracking.bluetoothSetup.iosStepsTitle') }}</p>
                 <ol class="list-decimal list-inside space-y-1">
                   <li>{{ $t('myTracking.bluetoothSetup.s1') }}</li>
@@ -122,7 +137,45 @@
                   <li>{{ $t('myTracking.bluetoothSetup.s4') }}</li>
                   <li>{{ $t('myTracking.bluetoothSetup.s5') }}</li>
                 </ol>
-                <p class="italic text-blue-200/80 mt-2">{{ $t('myTracking.bluetoothSetup.qrHint') }}</p>
+                <p class="italic text-blue-200/80 mt-2">{{ $t('myTracking.bluetoothSetup.iosFindHint') }}</p>
+                <p class="italic text-blue-200/80">{{ $t('myTracking.bluetoothSetup.qrHint') }}</p>
+              </div>
+
+              <!-- Schritt 3: Android-Automation -->
+              <div v-else
+                   class="bg-emerald-900/20 border border-emerald-700/40 rounded-lg p-3 text-emerald-100 text-xs space-y-3">
+                <p class="font-semibold">3️⃣ {{ $t('myTracking.bluetoothSetup.androidStepsTitle') }}</p>
+
+                <div class="bg-amber-900/30 border border-amber-700/40 rounded p-2 text-amber-100 text-[11px]">
+                  ⚠ {{ $t('myTracking.bluetoothSetup.androidUntested') }}
+                </div>
+
+                <p class="font-semibold mt-2">{{ $t('myTracking.bluetoothSetup.androidApp1') }}:</p>
+                <ol class="list-decimal list-inside space-y-1 ml-2">
+                  <li>{{ $t('myTracking.bluetoothSetup.amd1') }}</li>
+                  <li>{{ $t('myTracking.bluetoothSetup.amd2') }}</li>
+                  <li>{{ $t('myTracking.bluetoothSetup.amd3') }}</li>
+                  <li>{{ $t('myTracking.bluetoothSetup.amd4') }}</li>
+                  <li>{{ $t('myTracking.bluetoothSetup.amd5') }}</li>
+                </ol>
+
+                <details class="mt-2">
+                  <summary class="cursor-pointer text-emerald-300/80 hover:text-emerald-200">
+                    {{ $t('myTracking.bluetoothSetup.androidAlternatives') }}
+                  </summary>
+                  <div class="mt-2 space-y-2 ml-2">
+                    <div>
+                      <p class="font-semibold">{{ $t('myTracking.bluetoothSetup.androidApp2') }}</p>
+                      <p>{{ $t('myTracking.bluetoothSetup.automateDesc') }}</p>
+                    </div>
+                    <div>
+                      <p class="font-semibold">{{ $t('myTracking.bluetoothSetup.androidApp3') }}</p>
+                      <p>{{ $t('myTracking.bluetoothSetup.taskerDesc') }}</p>
+                    </div>
+                  </div>
+                </details>
+
+                <p class="italic text-emerald-200/80 mt-2">{{ $t('myTracking.bluetoothSetup.androidFeedback') }}</p>
               </div>
             </div>
           </div>
@@ -232,6 +285,8 @@ const error         = ref('');
 const copiedId      = ref(null);
 const copiedKey     = ref(null);   // { [c|d + deviceId]: timestamp }
 const btForms       = reactive({});   // { [deviceId]: bluetooth_pairing_name draft }
+// Plattform-Auswahl im Setup-Tab — Auto-detect via UA, kann manuell umgeschaltet werden
+const setupPlatform = ref(/Android/i.test(navigator.userAgent) ? 'android' : 'ios');
 
 const canCreate = computed(() =>
   !!(form.label?.trim() && form.vehicle_id)

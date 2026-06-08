@@ -379,3 +379,14 @@ Details + Schritt-für-Schritt iOS-Setup im Handbuch unter `{#owntracks-validati
 ## 🔍 Adresse vor Koordinaten + Auto-Geocoding (v3.8.0 + v3.10.0)
 
 Alle Trip- und Lade-Listen zeigen Adressen statt nur GPS-Punkte. Trips mit GPS aber ohne Adresse werden automatisch via Nominatim/OSM aufgelöst (Live-Hook + nightly Backfill + Admin-Trigger). 24h lokal gecacht.
+
+## 💬 Warum Telegram und nicht WhatsApp / Signal?
+
+TeslaView nutzt **Telegram + Web Push** als Notification-Kanäle — beide kostenfrei, beide ToS-konform, beide funktionieren ohne Drittanbieter-Konto.
+
+**Nicht implementiert und warum:**
+- **WhatsApp**: nur über Meta Cloud API (Business-Konto + verifizierte Business-Nummer + Template-Approval). Privat-Use nicht vorgesehen; inoffizielle Libs sind ToS-Verstoß mit Account-Bann-Risiko.
+- **Signal**: keine offizielle Bot-API; selbst-betriebene Forks (signald) sind fragil.
+- **Threema**: offizielle API existiert, kostet aber ~50 €/Jahr — overkill für Privat-Use.
+
+Wer trotz dieser Einschränkungen WhatsApp will: Bridge-Bibliotheken wie *whatsapp-web.js* können Power-User selbst dazubauen. Wir empfehlen es nicht.

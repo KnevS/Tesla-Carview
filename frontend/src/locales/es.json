@@ -2557,7 +2557,22 @@
       "s3": "«Añadir acción» → buscar «URL» → elegir «Obtener contenidos de URL»",
       "s4": "Pega la URL del paso 1 (arriba) → activa «Ejecutar inmediatamente» → «Listo»",
       "s5": "Igual para «Bluetooth desconectado» con la URL del paso 2",
-      "qrHint": "Truco: si estás en el escritorio — escanea el QR a la derecha con la cámara del iPhone. La URL aterriza en el portapapeles y puede pegarse en el atajo."
+      "qrHint": "Truco: si estás en el escritorio — escanea el QR a la derecha con la cámara del iPhone. La URL aterriza en el portapapeles y puede pegarse en el atajo.",
+      "iosFindHint": "💡 «Obtener contenidos de URL» está bajo la búsqueda «URL» — icono globo. Primero elige «Crear automatización vacía», no las sugerencias de Apple.",
+      "androidStepsTitle": "En una app de automatización Android",
+      "androidUntested": "Esta guía no se ha verificado en Android. Si algo no encaja, abre un issue en GitHub — corregiremos el texto.",
+      "androidApp1": "Recomendación: MacroDroid (versión gratis suficiente)",
+      "amd1": "Instalar MacroDroid desde Play Store",
+      "amd2": "«+ Nueva macro» → trigger «Bluetooth» → «Conectado a dispositivo» → elegir el Tesla",
+      "amd3": "Acción «Petición HTTP» → método GET → pegar URL del paso 1 (arriba)",
+      "amd4": "Guardar como «Tesla conectado»",
+      "amd5": "Segunda macro igual para «Bluetooth desconectado» con la URL del paso 2",
+      "androidAlternatives": "Apps alternativas",
+      "androidApp2": "Automate (Llamalab) — gratis hasta 30 bloques",
+      "automateDesc": "Flujo visual: Bluetooth conectado → petición HTTP. Más limpio que MacroDroid, curva de aprendizaje.",
+      "androidApp3": "Tasker — 3,49 € único",
+      "taskerDesc": "Estándar de oro para automatización Android. Perfil «Bluetooth conectado» → tarea «Petición HTTP».",
+      "androidFeedback": "⓵ ¿Funciona? Breve feedback vía issue GitHub — mejoramos continuamente la guía."
     }
   },
   "tco": {

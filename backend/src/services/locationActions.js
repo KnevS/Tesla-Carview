@@ -74,16 +74,15 @@ export async function applyLocationActionsOnArrival(db, tenantId, vehicleId, lat
     ? `${carLabel} angekommen an „${match.name}" — Ladelimit auf ${match.default_charge_limit} % gestellt.`
     : `${carLabel} angekommen an „${match.name}" — Limit ${match.default_charge_limit} % manuell setzen (Fleet-API nicht aktiv).`;
 
-  for (const u of users) {
-    await notify({
-      tenantId,
-      userId: u.user_id,
-      db,
-      title, body,
-      url: '/charging',
-      emoji: applied ? '🔋' : '💡',
-      type: 'generic',
-      vehicleId,
-    }).catch(() => {});
-  }
+  // Push parallel an alle User des Fahrzeugs
+  await Promise.allSettled(users.map(u => notify({
+    tenantId,
+    userId: u.user_id,
+    db,
+    title, body,
+    url: '/charging',
+    emoji: applied ? '🔋' : '💡',
+    type: 'generic',
+    vehicleId,
+  })));
 }

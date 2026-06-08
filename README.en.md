@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v3.14.0-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.15.0-E31937?style=flat-square)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.en.md)
 
@@ -70,7 +70,7 @@ For live vehicle data (battery, climate, TPMS, telemetry stream) there is **only
 | **Dynamic tariff** | aWattar (DE/AT) and Tibber integration: 24h price curve on the dashboard, one-click schedule charging at the cheapest 4h window |
 | **PDF reimbursement** | Signable PDF for home-charging reimbursement (client-side, no cloud) |
 | **Notifications** | Web Push when charging finishes, plus maintenance reminders — fan-out to Telegram in parallel when linked |
-| **Telegram bot** | Full 1:1 bot with inline buttons: `/status` (with lock/climate/sentry/charge buttons + unlock confirm), `/battery`, `/range`, `/location` (Maps link), `/today`, `/trips`, `/classify` (label a trip), `/service`, `/firmware`, `/clean` — plus proactive push for charging-complete, sentry alerts, service reminders and new firmware versions. Audit log for every vehicle action |
+| **Telegram bot** | Full 1:1 bot with inline buttons: `/status` (with lock/climate/sentry/charge buttons + unlock confirm), `/battery`, `/range`, `/location` (Maps link), `/today`, `/trips`, `/classify` (label a trip), `/service`, `/firmware`, `/clean` — plus proactive push for charging-complete, sentry alerts, service reminders and new firmware versions. Audit log for every vehicle action. See ["Why Telegram, not WhatsApp / Signal?"](#why-telegram-not-whatsapp--signal) below |
 | **User handbook** | Complete guide readable directly inside the app |
 | **Design & themes** | 5 design styles (Glass, Cyber, Minimal, Sport, **Nevs-Edition**) + 6 accent colors, all stored locally; Nevs-Edition with its own Bricolage Grotesque typography and live status bar |
 | **Settings** | All sections collapsible and individually reorderable (drag-to-sort) |
@@ -139,6 +139,20 @@ Link your account under *Settings → Telegram* and use the bot directly on iPho
 Commands: `/status`, `/battery`, `/range`, `/location`, `/today`, `/trips`, `/classify`, `/service`, `/firmware`, `/clean`, `/help`, `/unlink`. Inline buttons under `/status` for lock/unlock (with confirm), climate, sentry, charging. Push notifications for charging-complete, sentry alerts, service reminders and software updates — in parallel with Web Push.
 
 [See all Telegram mockups ↗](https://www.teslaview.krische.com/#telegram)
+
+#### Why Telegram, not WhatsApp / Signal?
+
+We get this asked a lot — short summary:
+
+| Service | Self-hostable? | Private-bot API? | Used here |
+|---|---|---|---|
+| **Telegram** | Bot API fully open, BotFather is free, no account risk | ✅ Yes | ✅ **Yes, primary channel** |
+| **WhatsApp** | Only via Meta Cloud API (Business account + verified business number + template approval). Private use with your own number is **not provided for**. Unofficial libraries (whatsapp-web.js, baileys) are a **ToS violation** and lead to account bans. | ❌ Not for private users | ❌ **No** — deliberately not implemented |
+| **Signal** | No official bot server, no webhook API. Self-run forks (signald) are fragile and get blocked by Signal regularly. | ❌ No | ❌ **No** |
+| **Threema** | Official REST API for business — but paid (~€50/year gateway account) | ⚠ Yes, commercial | ❌ Not implemented (paid) |
+| **Web Push** (PWA) | Browser standard, runs directly on iPhone/Android, no account, no third-party server beyond the browser push service | ✅ Yes | ✅ **Yes, primary channel** |
+
+**Conclusion:** Telegram + Web Push together cover the most important channels — no third-party costs, no ToS violations, no tracking. WhatsApp would be technically possible, but the setup (business construct with Meta's approval process) contradicts the self-hosting nature of TeslaView. If you really want WhatsApp: bridge solutions like *whatsapp-web.js* can be added by power users themselves — we do not recommend it.
 
 ---
 

@@ -7,6 +7,43 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.15.0] - 2026-06-08
+
+### Hinzugefügt — Android-Setup für Bluetooth-Validierung
+
+Bluetooth-Setup-Tab in MyTracking jetzt mit Plattform-Auswahl 📱 iOS / 🤖 Android. Plattform wird per User-Agent automatisch vorausgewählt, kann manuell umgeschaltet werden.
+
+**Android-Anleitung** für drei Apps:
+- **MacroDroid** (empfohlen, kostenlose Version): Bluetooth-Trigger + HTTP-GET-Request — Schritt-für-Schritt-Anleitung
+- **Automate** (Llamalab, kostenlos bis 30 Blöcke): visueller Flow
+- **Tasker** (3,49 € einmalig): Android-Power-User-Goldstandard
+
+Ehrlicher Disclaimer: die Anleitung ist nicht auf Android live verifiziert — Sven hat kein Android-Gerät. Bei Problemen: GitHub-Issue → iterative Verbesserung.
+
+### Geändert — iOS-Anleitung präziser
+
+`iosFindHint` ergänzt: konkreter Hinweis wo „Inhalte aus URL abrufen" zu finden ist (Suchfeld „URL", Globus-Symbol) + „Leere Automation erstellen" muss explizit gewählt werden (nicht die Apple-Vorschläge).
+
+### Geändert — Performance (Companion-Engine + Location-Actions)
+
+Drei Push-Loops von sequenziell auf parallel via `Promise.allSettled` umgestellt — pro Anomalie/Vorklim-Suggestion/Location-Action laufen die Web-Push-Round-Trips an alle berechtigten User jetzt parallel. Bei einem Tesla mit 2-3 Fahrer-Accounts spart das ~200-600 ms pro Notification.
+
+### Geändert — Datenbank-Indexes
+
+Zwei neue Hot-Path-Indexe ergänzt:
+- `idx_battery_anomalies_status` — beschleunigt `notifyNewAnomalies`-Query (`WHERE status='new'`)
+- `idx_precondition_status` — beschleunigt `notifyOpenSuggestions`-Query
+
+Auto-Migration in `runTenantMigrations`.
+
+### Doku
+
+- README + README.en um FAQ-Block „Warum Telegram, nicht WhatsApp / Signal?" — Tabelle mit Begründung pro Messenger, nachvollziehbar dokumentiert
+- Wiki Features (DE + EN) gleiche Erklärung
+- Android-Setup-Anleitung in allen 6 i18n-Sprachen (`amd1`-`amd5`, `androidApp1/2/3`, `automateDesc`, `taskerDesc`, `androidFeedback`, `androidUntested`, `androidAlternatives`)
+
+---
+
 ## [v3.14.0] - 2026-06-08
 
 ### Geändert — Bluetooth-Setup radikal vereinfacht
