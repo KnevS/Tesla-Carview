@@ -2640,7 +2640,8 @@
       "initialKmPlaceholder": "ex. 12345",
       "initialKmHint": "Soustrait du compteur actuel pour calculer la distance parcourue pendant la possession.",
       "currentKm": "Compteur actuel"
-    }
+    },
+    "jumpToBase": "Ouvrir les données de base maintenant"
   },
   "notices": {
     "dismiss": "Compris, masquer",

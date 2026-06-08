@@ -866,7 +866,8 @@
       "initialKmPlaceholder": "z.B. 12345",
       "initialKmHint": "Wird vom aktuellen Kilometerstand abgezogen, um die zurückgelegte Strecke zu berechnen.",
       "currentKm": "Aktueller Kilometerstand"
-    }
+    },
+    "jumpToBase": "Stammdaten jetzt eintragen"
   },
   "settings": {
     "title": "Einstellungen",

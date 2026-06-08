@@ -256,5 +256,8 @@
       "openSource": "开源",
       "freeWithAccount": "注册后免费"
     }
+  },
+  "tco": {
+    "jumpToBase": "现在填写主数据"
   }
 }

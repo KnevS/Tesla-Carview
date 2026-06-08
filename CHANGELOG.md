@@ -7,6 +7,19 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.16.1] - 2026-06-08
+
+### Behoben — TCO-Cockpit: Direktlink zu den Stammdaten
+
+Wenn im TCO-Cockpit der Banner „Stammdaten unvollständig" erschien, musste der User den Stammdaten-Bereich selbst suchen. Jetzt:
+
+- Im Banner ein klickbarer **„✎ Stammdaten jetzt eintragen →"**-Button
+- Klick öffnet das Stammdaten-Formular **und** scrollt smooth dorthin (Anchor `#tco-base-form`)
+- i18n-Key `tco.jumpToBase` in allen 7 Sprachen
+- Folgt der Usability-Pflicht: jede Warnung soll auf einen Klick zur Handlungsaufforderung führen
+
+---
+
 ## [v3.16.0] - 2026-06-08
 
 ### Hinzugefügt — Chinesisch (zh) als 7. Sprache + KI-Übersetzungs-Transparenz

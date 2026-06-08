@@ -19,9 +19,13 @@
       <div v-if="!hasMinimalData"
            class="flex items-start gap-3 bg-amber-900/20 border border-amber-700/40 rounded-xl px-4 py-3 text-sm text-amber-100">
         <span class="text-lg leading-none mt-0.5">💡</span>
-        <div>
+        <div class="flex-1">
           <p class="font-semibold">{{ $t('tco.incompleteTitle') }}</p>
           <p class="mt-1 text-amber-200/90">{{ $t('tco.incompleteHint') }}</p>
+          <button @click="jumpToBaseForm"
+                  class="mt-2 inline-flex items-center gap-1 text-sm font-medium text-amber-200 hover:text-amber-50 underline underline-offset-2">
+            ✎ {{ $t('tco.jumpToBase') }} →
+          </button>
         </div>
       </div>
 
@@ -177,7 +181,7 @@
       </div>
 
       <!-- Stammdaten -->
-      <div class="card p-5">
+      <div id="tco-base-form" ref="baseFormCard" class="card p-5">
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-base font-semibold">{{ $t('tco.base.title') }}</h2>
           <button v-if="canEdit && !baseFormOpen" @click="openBaseForm" class="text-sm text-blue-400 hover:underline">
@@ -348,6 +352,15 @@ async function deleteRecord(r) {
 // ── Stammdaten-Form ───────────────────────────────────────────────────────
 const baseFormOpen = ref(false);
 const baseForm = ref({});
+const baseFormCard = ref(null);
+
+function jumpToBaseForm() {
+  openBaseForm();
+  // Nach Render scrollen — nextTick reicht in den meisten Faellen
+  setTimeout(() => {
+    baseFormCard.value?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 50);
+}
 
 function openBaseForm() {
   const v = data.value.vehicle;

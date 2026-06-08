@@ -7,6 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.16.1] - 2026-06-08
+
+### Fixed — TCO cockpit: direct link to master data
+
+When the TCO cockpit banner "Master data incomplete" appeared, the user had to find the master-data section manually. Now:
+
+- The banner has a clickable **"✎ Open master data now →"** button
+- Click opens the master-data form **and** smooth-scrolls to it (anchor `#tco-base-form`)
+- i18n key `tco.jumpToBase` in all 7 languages
+- Follows the usability rule: every warning must reach the actionable area in one click
+
+---
+
 ## [v3.16.0] - 2026-06-08
 
 ### Added — Chinese (zh) as 7th language + AI-translation transparency

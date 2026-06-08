@@ -2640,7 +2640,8 @@
       "initialKmPlaceholder": "p. ej. 12345",
       "initialKmHint": "Se resta del odómetro actual para calcular la distancia recorrida durante la propiedad.",
       "currentKm": "Odómetro actual"
-    }
+    },
+    "jumpToBase": "Abrir datos maestros ahora"
   },
   "notices": {
     "dismiss": "Entendido, ocultar",

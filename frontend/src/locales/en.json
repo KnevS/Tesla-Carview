@@ -866,7 +866,8 @@
       "initialKmPlaceholder": "e.g. 12345",
       "initialKmHint": "Subtracted from the current odometer to compute distance driven during ownership.",
       "currentKm": "Current odometer"
-    }
+    },
+    "jumpToBase": "Open master data now"
   },
   "settings": {
     "manualLink": "Open official manual",

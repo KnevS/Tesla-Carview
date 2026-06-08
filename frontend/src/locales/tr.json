@@ -2640,7 +2640,8 @@
       "initialKmPlaceholder": "örn. 12345",
       "initialKmHint": "Sahiplik sırasında katedilen mesafeyi hesaplamak için mevcut kilometre sayacından çıkarılır.",
       "currentKm": "Mevcut kilometre sayacı"
-    }
+    },
+    "jumpToBase": "Ana verileri şimdi açın"
   },
   "notices": {
     "dismiss": "Anladım, gizle",
