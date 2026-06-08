@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 /**
  * Companion-Scheduler: läuft alle 6h und nur die Anomalie-Detection.
  * Vorklim-Empfehlungen brauchen nur den nightly-Pass (1× am Tag reicht).

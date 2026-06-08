@@ -33,7 +33,8 @@
     "sortOldestFirst": "Plus anciens d'abord",
     "sortToggleTooltip": "Inverser l'ordre de tri",
     "copy": "Copier",
-    "optional": "optionnel"
+    "optional": "optionnel",
+    "copied": "copié"
   },
   "lang": {
     "title": "Langue / Language",
@@ -2535,8 +2536,8 @@
     "statusInVehicleUnknown": "🔵 Statut Tesla inconnu (en attente d'événement Bluetooth)",
     "statusLegacy": "🔵 Actif sans validation Bluetooth",
     "bluetoothSetup": {
-      "title": "Validation Bluetooth (évite les fausses données issues d'autres voitures)",
-      "intro": "Avec cette configuration, TeslaView n'accepte les données que si votre iPhone est réellement connecté au Bluetooth de la Tesla. Vous conduisez une autre voiture ou un vélo ? Le trajet est ignoré.",
+      "title": "Configuration Bluetooth rapide",
+      "intro": "TeslaView ignore vos données OwnTracks quand vous n'êtes pas dans la Tesla — une fois configuré. En 3 étapes :",
       "nameLabel": "Nom Bluetooth Tesla (exactement comme dans iOS → Réglages → Bluetooth)",
       "namePlaceholder": "p. ex. « Tesla 7SA5... » ou « Ma Model 3 »",
       "save": "💾 Enregistrer",
@@ -2546,7 +2547,17 @@
       "step3": "Ajouter l'action « Obtenir le contenu de l'URL » → coller l'URL (méthode HTTP POST). Pour la déconnexion, idem avec l'URL de fin.",
       "urlConnect": "✅ URL connexion (POST) :",
       "urlDisconnect": "🔌 URL déconnexion (POST) :",
-      "needToken": "Afficher le QR-code au moins une fois pour que le token devienne visible."
+      "needToken": "Afficher le QR-code au moins une fois pour que le token devienne visible.",
+      "activeBadge": "actif",
+      "connect": "URL pour « Bluetooth connecté » (= dans la Tesla)",
+      "disconnect": "URL pour « Bluetooth déconnecté » (= hors Tesla)",
+      "iosStepsTitle": "Dans l'app Raccourcis iOS",
+      "s1": "Onglet « Automatisation » → « + Nouvelle automatisation »",
+      "s2": "« Bluetooth » → « Lorsque connecté à » → choisir la Tesla",
+      "s3": "« Ajouter une action » → cherchez « URL » → choisissez « Obtenir le contenu de l'URL »",
+      "s4": "Collez l'URL de l'étape 1 (ci-dessus) → activez « Exécuter immédiatement » → « Terminé »",
+      "s5": "Idem pour « Bluetooth déconnecté » avec l'URL de l'étape 2",
+      "qrHint": "Astuce : si vous êtes au bureau — scannez le QR-code à droite avec l'appareil photo de l'iPhone. L'URL atterrit dans le presse-papiers et peut être collée dans le raccourci."
     }
   },
   "tco": {

@@ -33,7 +33,8 @@
     "sortOldestFirst": "Oldest first",
     "sortToggleTooltip": "Reverse sort order",
     "copy": "Copy",
-    "optional": "optional"
+    "optional": "optional",
+    "copied": "copied"
   },
   "lang": {
     "title": "Language / Sprache",
@@ -758,8 +759,8 @@
     "statusInVehicleUnknown": "🔵 In-Tesla status unknown (waiting for Bluetooth event)",
     "statusLegacy": "🔵 Running without Bluetooth validation",
     "bluetoothSetup": {
-      "title": "Bluetooth validation (prevents bogus data from other-car trips)",
-      "intro": "With this configuration, TeslaView only ingests data when your iPhone is actually connected to the Tesla Bluetooth. Driving a different car or biking? The trip is ignored.",
+      "title": "Bluetooth quick-setup",
+      "intro": "TeslaView ignores your OwnTracks data when you are not in the Tesla — as soon as this is set up. Three-step setup:",
       "nameLabel": "Tesla Bluetooth name (exactly as shown in iOS → Settings → Bluetooth)",
       "namePlaceholder": "e.g. \"Tesla 7SA5...\" or \"My Model 3\"",
       "save": "💾 Save",
@@ -769,7 +770,17 @@
       "step3": "Add action \"Get contents of URL\" → paste the URL (HTTP method POST). For disconnect, do the same with the end URL.",
       "urlConnect": "✅ Connect URL (POST):",
       "urlDisconnect": "🔌 Disconnect URL (POST):",
-      "needToken": "Show the QR code at least once so the token becomes visible."
+      "needToken": "Show the QR code at least once so the token becomes visible.",
+      "activeBadge": "active",
+      "connect": "URL for \"Bluetooth connected\" (= in the Tesla)",
+      "disconnect": "URL for \"Bluetooth disconnected\" (= out of the Tesla)",
+      "iosStepsTitle": "In the iOS Shortcuts app",
+      "s1": "Tab \"Automation\" → \"+ New Automation\"",
+      "s2": "\"Bluetooth\" → \"When connected to\" → pick the Tesla",
+      "s3": "\"Add action\" → search \"URL\" → pick \"Get contents of URL\"",
+      "s4": "Paste the URL from step 1 (above) → enable \"Run immediately\" → \"Done\"",
+      "s5": "Same for \"Bluetooth disconnected\" with the URL from step 2",
+      "qrHint": "Tip: if you are on desktop — scan the QR code on the right with the iPhone camera. The URL lands in the clipboard and can be pasted into the shortcut."
     }
   },
   "notices": {

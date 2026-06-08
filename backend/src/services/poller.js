@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import { getVehicleData, getVehicles } from './teslaApi.js';
 import { getAllTenants, getDb, registerVin } from '../db/database.js';
 import { syncVehicleState } from './dataSync.js';

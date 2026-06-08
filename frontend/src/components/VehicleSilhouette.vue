@@ -1,3 +1,4 @@
+<!-- © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview -->
 <template>
   <!-- Inline-SVG Silhouette pro Tesla-Modell. Selbst gezeichnete
        schematische Seitenansichten — keine Übernahme von Tesla-Logos

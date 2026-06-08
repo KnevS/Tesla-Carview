@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import { Router } from 'express';
 import { mkdirSync, existsSync, readFileSync, writeFileSync, statSync } from 'fs';
 import { join } from 'path';

@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 /**
  * Crypto-Service — verschluesselt sensible Daten at-rest in den SQLite-DBs.
  *

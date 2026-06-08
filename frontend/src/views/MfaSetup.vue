@@ -1,3 +1,4 @@
+<!-- © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview -->
 <template>
   <div class="max-w-lg mx-auto space-y-6 relative">
     <!-- Inline-Sprachschalter: MfaSetup ist Pflicht-Flow für neue User, daher

@@ -33,7 +33,8 @@
     "sortOldestFirst": "Älteste zuerst",
     "sortToggleTooltip": "Sortierreihenfolge umkehren",
     "copy": "Kopieren",
-    "optional": "optional"
+    "optional": "optional",
+    "copied": "kopiert"
   },
   "lang": {
     "title": "Sprache / Language",
@@ -758,8 +759,8 @@
     "statusInVehicleUnknown": "🔵 Im-Tesla-Status unbekannt (warte auf Bluetooth-Event)",
     "statusLegacy": "🔵 Ohne Bluetooth-Validierung aktiv",
     "bluetoothSetup": {
-      "title": "Bluetooth-Validierung (verhindert Falschdaten von Fremdauto-Fahrten)",
-      "intro": "Mit dieser Konfiguration nimmt TeslaView nur Daten an, wenn dein iPhone tatsächlich mit dem Tesla-Bluetooth verbunden ist. Fährst du mit einem anderen Auto oder Rad, werden Trips ignoriert.",
+      "title": "Bluetooth-Schnell-Setup",
+      "intro": "TeslaView ignoriert deine OwnTracks-Daten, wenn du gerade nicht im Tesla bist — sobald das hier eingerichtet ist. Setup in 3 Schritten:",
       "nameLabel": "Tesla-Bluetooth-Name (genau wie er in iOS → Einstellungen → Bluetooth steht)",
       "namePlaceholder": "z. B. \"Tesla 7SA5...\" oder \"Mein Model 3\"",
       "save": "💾 Speichern",
@@ -769,7 +770,17 @@
       "step3": "Aktion „Inhalte aus URL abrufen\" hinzufügen → URL einfügen (HTTP-Methode POST). Bei Trennen die End-URL analog.",
       "urlConnect": "✅ Verbinden-URL (POST):",
       "urlDisconnect": "🔌 Trennen-URL (POST):",
-      "needToken": "QR-Code mindestens einmal anzeigen, damit das Token sichtbar wird."
+      "needToken": "QR-Code mindestens einmal anzeigen, damit das Token sichtbar wird.",
+      "activeBadge": "aktiv",
+      "connect": "URL für „Bluetooth verbunden\" (= bist im Tesla)",
+      "disconnect": "URL für „Bluetooth getrennt\" (= bist ausgestiegen)",
+      "iosStepsTitle": "In der iOS-Kurzbefehle-App",
+      "s1": "Tab „Automation\" → „+ Neue Automation\"",
+      "s2": "„Bluetooth\" → „Wenn verbunden mit\" → Tesla wählen",
+      "s3": "„Aktion hinzufügen\" → suche „URL\" → wähle „Inhalte aus URL abrufen\"",
+      "s4": "URL aus Schritt 1 (oben) einfügen → „Sofort ausführen\" aktivieren → „Fertig\"",
+      "s5": "Gleiches Spiel für „Bluetooth getrennt\" mit URL aus Schritt 2",
+      "qrHint": "Tipp: Wenn du am Desktop bist — scanne den QR-Code rechts mit der iPhone-Kamera. Die URL landet im Clipboard und kann in den Kurzbefehl eingefügt werden."
     }
   },
   "notices": {

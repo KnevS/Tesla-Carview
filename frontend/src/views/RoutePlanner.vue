@@ -1,3 +1,4 @@
+<!-- © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview -->
 <template>
   <!-- Desktop: feste Höhe = Viewport minus Navbar (4rem) + py-6 (3rem).
        Mobile: natürliche Höhe, Seite scrollt normal. -->

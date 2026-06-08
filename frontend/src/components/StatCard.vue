@@ -1,3 +1,4 @@
+<!-- © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview -->
 <template>
   <!-- Wenn ein `to`-Prop gesetzt ist, rendert die Karte als RouterLink
        und führt mit einem Klick zur passenden Detail-Ansicht

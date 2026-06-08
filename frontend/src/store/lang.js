@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import { defineStore } from 'pinia';
 import { i18n, SUPPORTED_LOCALES } from '../plugins/i18n.js';
 import api from '../api.js';

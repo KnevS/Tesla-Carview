@@ -1,3 +1,4 @@
+<!-- © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview -->
 <template>
   <!-- Technischer Status-Streifen im Nevs-Edition Design.
        Nur sichtbar wenn data-design="editorial" aktiv.

@@ -1,3 +1,4 @@
+<!-- © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview -->
 <template>
   <div class="space-y-6">
     <div class="flex items-start justify-between flex-wrap gap-3">
@@ -52,36 +53,78 @@
           </div>
         </div>
 
-        <!-- Bluetooth-Validation-Setup -->
-        <details class="text-xs">
+        <!-- Bluetooth-Schnell-Setup -->
+        <details class="text-xs" :open="!d.bluetooth_first_seen_at && d.last_ping_at">
           <summary class="cursor-pointer text-amber-300/90 hover:text-amber-200">
             🔵 {{ $t('myTracking.bluetoothSetup.title') }}
-            <span v-if="d.bluetooth_pairing_name" class="text-emerald-400 ml-1">✓</span>
+            <span v-if="d.bluetooth_first_seen_at" class="text-emerald-400 ml-1 font-semibold">
+              ✓ {{ $t('myTracking.bluetoothSetup.activeBadge') }}
+            </span>
           </summary>
-          <div class="mt-3 space-y-3 bg-gray-900/40 rounded-lg p-3">
-            <p class="text-gray-300 whitespace-pre-line">{{ $t('myTracking.bluetoothSetup.intro') }}</p>
-            <label class="block text-xs">
-              <span class="text-gray-400">{{ $t('myTracking.bluetoothSetup.nameLabel') }}</span>
-              <input v-model="btForms[d.id]" type="text" :placeholder="$t('myTracking.bluetoothSetup.namePlaceholder')"
-                     class="mt-1 w-full bg-gray-800 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-500" />
-            </label>
-            <button @click="saveBluetooth(d)"
-                    class="text-xs btn-secondary px-3 py-1">
-              {{ $t('myTracking.bluetoothSetup.save') }}
+          <div class="mt-3 space-y-4 bg-gray-900/40 rounded-lg p-4">
+            <p class="text-gray-300">{{ $t('myTracking.bluetoothSetup.intro') }}</p>
+
+            <button v-if="!deviceTokens[d.id]" @click="loadToken(d)"
+                    class="btn-secondary text-xs px-3 py-1.5">
+              {{ $t('myTracking.bluetoothSetup.needToken') }}
             </button>
-            <div v-if="deviceTokens[d.id]" class="mt-3 space-y-2 text-gray-300">
-              <p class="font-semibold">{{ $t('myTracking.bluetoothSetup.shortcutTitle') }}</p>
-              <ol class="list-decimal list-inside space-y-1">
-                <li>{{ $t('myTracking.bluetoothSetup.step1') }}</li>
-                <li>{{ $t('myTracking.bluetoothSetup.step2') }}</li>
-                <li>{{ $t('myTracking.bluetoothSetup.step3') }}</li>
-              </ol>
-              <p class="font-semibold mt-2">{{ $t('myTracking.bluetoothSetup.urlConnect') }}</p>
-              <code class="block bg-gray-950 rounded px-2 py-1.5 font-mono text-[10px] select-all break-all">{{ inVehicleStartUrl(deviceTokens[d.id]) }}</code>
-              <p class="font-semibold mt-2">{{ $t('myTracking.bluetoothSetup.urlDisconnect') }}</p>
-              <code class="block bg-gray-950 rounded px-2 py-1.5 font-mono text-[10px] select-all break-all">{{ inVehicleEndUrl(deviceTokens[d.id]) }}</code>
+
+            <div v-if="deviceTokens[d.id]" class="space-y-4">
+              <!-- Schritt 1: Connect-URL -->
+              <div class="bg-gray-800 rounded-lg p-3">
+                <p class="text-sm font-semibold text-emerald-300 mb-2">
+                  1️⃣ {{ $t('myTracking.bluetoothSetup.connect') }}
+                </p>
+                <div class="grid grid-cols-[1fr_auto] gap-3 items-start">
+                  <div class="space-y-2 min-w-0">
+                    <code class="block bg-gray-950 rounded px-2 py-1.5 font-mono text-[10px] select-all break-all">
+                      {{ inVehicleStartUrl(deviceTokens[d.id]) }}
+                    </code>
+                    <button @click="copyText(inVehicleStartUrl(deviceTokens[d.id]), 'c'+d.id)"
+                            class="btn-secondary text-xs px-3 py-1">
+                      {{ copiedKey === 'c'+d.id ? '✓ ' + $t('common.copied') : '📋 ' + $t('common.copy') }}
+                    </button>
+                  </div>
+                  <img :src="qrTextUrl(inVehicleStartUrl(deviceTokens[d.id]))"
+                       :alt="$t('myTracking.bluetoothSetup.connect')"
+                       class="w-32 h-32 bg-white rounded p-1" />
+                </div>
+              </div>
+
+              <!-- Schritt 2: Disconnect-URL -->
+              <div class="bg-gray-800 rounded-lg p-3">
+                <p class="text-sm font-semibold text-amber-300 mb-2">
+                  2️⃣ {{ $t('myTracking.bluetoothSetup.disconnect') }}
+                </p>
+                <div class="grid grid-cols-[1fr_auto] gap-3 items-start">
+                  <div class="space-y-2 min-w-0">
+                    <code class="block bg-gray-950 rounded px-2 py-1.5 font-mono text-[10px] select-all break-all">
+                      {{ inVehicleEndUrl(deviceTokens[d.id]) }}
+                    </code>
+                    <button @click="copyText(inVehicleEndUrl(deviceTokens[d.id]), 'd'+d.id)"
+                            class="btn-secondary text-xs px-3 py-1">
+                      {{ copiedKey === 'd'+d.id ? '✓ ' + $t('common.copied') : '📋 ' + $t('common.copy') }}
+                    </button>
+                  </div>
+                  <img :src="qrTextUrl(inVehicleEndUrl(deviceTokens[d.id]))"
+                       :alt="$t('myTracking.bluetoothSetup.disconnect')"
+                       class="w-32 h-32 bg-white rounded p-1" />
+                </div>
+              </div>
+
+              <!-- Schritt 3: iOS-Automation -->
+              <div class="bg-blue-900/20 border border-blue-700/40 rounded-lg p-3 text-blue-100 text-xs space-y-2">
+                <p class="font-semibold">3️⃣ {{ $t('myTracking.bluetoothSetup.iosStepsTitle') }}</p>
+                <ol class="list-decimal list-inside space-y-1">
+                  <li>{{ $t('myTracking.bluetoothSetup.s1') }}</li>
+                  <li>{{ $t('myTracking.bluetoothSetup.s2') }}</li>
+                  <li>{{ $t('myTracking.bluetoothSetup.s3') }}</li>
+                  <li>{{ $t('myTracking.bluetoothSetup.s4') }}</li>
+                  <li>{{ $t('myTracking.bluetoothSetup.s5') }}</li>
+                </ol>
+                <p class="italic text-blue-200/80 mt-2">{{ $t('myTracking.bluetoothSetup.qrHint') }}</p>
+              </div>
             </div>
-            <p v-else class="text-gray-500 italic">{{ $t('myTracking.bluetoothSetup.needToken') }}</p>
           </div>
         </details>
 
@@ -187,6 +230,7 @@ const creating      = ref(false);
 const loading       = ref(false);
 const error         = ref('');
 const copiedId      = ref(null);
+const copiedKey     = ref(null);   // { [c|d + deviceId]: timestamp }
 const btForms       = reactive({});   // { [deviceId]: bluetooth_pairing_name draft }
 
 const canCreate = computed(() =>
@@ -300,6 +344,23 @@ function otrcUrl(token)    { return `/api/owntracks/config.otrc?token=${encodeUR
 function webhookUrl(token) { return `${location.origin}/api/owntracks/webhook?token=${token}`; }
 function inVehicleStartUrl(token) { return `${location.origin}/api/owntracks/in-vehicle/start/${token}`; }
 function inVehicleEndUrl(token)   { return `${location.origin}/api/owntracks/in-vehicle/end/${token}`; }
+// Generischer QR für beliebigen Text via api/qr-Endpoint
+function qrTextUrl(text)   { return `/api/owntracks/qr.png?text=${encodeURIComponent(text)}`; }
+
+async function loadToken(d) {
+  if (deviceTokens[d.id]) return;
+  try {
+    const { data } = await api.get(`/owntracks/devices/${d.id}/token`);
+    deviceTokens[d.id] = data.token;
+  } catch (e) { error.value = e.response?.data?.error || e.message; }
+}
+async function copyText(text, key) {
+  try {
+    await navigator.clipboard.writeText(text);
+    copiedKey.value = key;
+    setTimeout(() => { if (copiedKey.value === key) copiedKey.value = null; }, 2000);
+  } catch { /* ignore */ }
+}
 
 function deviceIcon(d) {
   if (!d.is_active) return '⏸';

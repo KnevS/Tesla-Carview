@@ -1,3 +1,4 @@
+<!-- © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview -->
 <template>
   <!-- Zentrale SVG-Icon-Component. Eigene Pfade im Lucide-Stil
        (24×24, stroke-width 2, rounded). Reine geometrische Primitive

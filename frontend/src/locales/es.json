@@ -33,7 +33,8 @@
     "sortOldestFirst": "Más antiguos primero",
     "sortToggleTooltip": "Invertir el orden",
     "copy": "Copiar",
-    "optional": "opcional"
+    "optional": "opcional",
+    "copied": "copiado"
   },
   "lang": {
     "title": "Idioma / Language",
@@ -2535,8 +2536,8 @@
     "statusInVehicleUnknown": "🔵 Estado Tesla desconocido (esperando evento Bluetooth)",
     "statusLegacy": "🔵 Activo sin validación Bluetooth",
     "bluetoothSetup": {
-      "title": "Validación Bluetooth (evita datos falsos de trayectos con otros coches)",
-      "intro": "Con esta configuración, TeslaView solo acepta datos cuando tu iPhone está realmente conectado al Bluetooth del Tesla. ¿Conduces otro coche o vas en bici? El trayecto se ignora.",
+      "title": "Configuración Bluetooth rápida",
+      "intro": "TeslaView ignora tus datos OwnTracks cuando no estás en el Tesla — una vez configurado. En 3 pasos:",
       "nameLabel": "Nombre Bluetooth Tesla (exactamente como aparece en iOS → Ajustes → Bluetooth)",
       "namePlaceholder": "p. ej. «Tesla 7SA5...» o «Mi Model 3»",
       "save": "💾 Guardar",
@@ -2546,7 +2547,17 @@
       "step3": "Añadir acción «Obtener contenidos de URL» → pegar la URL (método HTTP POST). Para desconexión, lo mismo con la URL final.",
       "urlConnect": "✅ URL conexión (POST):",
       "urlDisconnect": "🔌 URL desconexión (POST):",
-      "needToken": "Mostrar el código QR al menos una vez para que el token sea visible."
+      "needToken": "Mostrar el código QR al menos una vez para que el token sea visible.",
+      "activeBadge": "activo",
+      "connect": "URL para «Bluetooth conectado» (= en el Tesla)",
+      "disconnect": "URL para «Bluetooth desconectado» (= fuera del Tesla)",
+      "iosStepsTitle": "En la app Atajos iOS",
+      "s1": "Pestaña «Automatización» → «+ Nueva automatización»",
+      "s2": "«Bluetooth» → «Al conectar» → elegir el Tesla",
+      "s3": "«Añadir acción» → buscar «URL» → elegir «Obtener contenidos de URL»",
+      "s4": "Pega la URL del paso 1 (arriba) → activa «Ejecutar inmediatamente» → «Listo»",
+      "s5": "Igual para «Bluetooth desconectado» con la URL del paso 2",
+      "qrHint": "Truco: si estás en el escritorio — escanea el QR a la derecha con la cámara del iPhone. La URL aterriza en el portapapeles y puede pegarse en el atajo."
     }
   },
   "tco": {

@@ -1,3 +1,4 @@
+<!-- © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview -->
 <template>
   <div class="min-h-screen bg-tesla-dark flex items-center justify-center px-4">
     <div class="w-full max-w-md space-y-6">

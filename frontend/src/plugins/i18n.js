@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import { createI18n } from 'vue-i18n';
 import { registerMessageCompiler, compile } from '@intlify/core-base';
 import de from '../locales/de.json';

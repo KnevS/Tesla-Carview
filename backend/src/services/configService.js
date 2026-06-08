@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 /**
  * Tenant-config helpers: DB first, .env as fallback.
  * Keeps the same pattern established for OCM/HERE/SMTP keys.

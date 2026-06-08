@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import Database from 'better-sqlite3';
 import { readFileSync, mkdirSync, existsSync, copyFileSync } from 'fs';
 import { join, dirname } from 'path';
@@ -214,6 +215,12 @@ function runMasterMigrations(master) {
   }
   if (!otCols.includes('active_paused')) {
     master.exec('ALTER TABLE owntracks_devices ADD COLUMN active_paused INTEGER NOT NULL DEFAULT 0');
+  }
+  // v3.14.0: Bluetooth-Setup-Marker — wird beim allerersten in-vehicle/start
+  // gesetzt und bleibt für immer. Sobald gesetzt, gilt strikte Validierung
+  // (Trips nur bei in_vehicle=1). Ohne Marker = Legacy-Modus ohne Filter.
+  if (!otCols.includes('bluetooth_first_seen_at')) {
+    master.exec('ALTER TABLE owntracks_devices ADD COLUMN bluetooth_first_seen_at INTEGER');
   }
 }
 

@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 /* Default-Markdown-Inhalte für /legal/{imprint,privacy,terms}.
  *
  * Werden beim ersten Start in master.db.legal_content als Version 1

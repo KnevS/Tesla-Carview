@@ -1,3 +1,4 @@
+<!-- © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview -->
 <template>
   <div v-if="notices.length > 0" class="notices-banner-wrap">
     <div v-for="n in notices" :key="n.id"

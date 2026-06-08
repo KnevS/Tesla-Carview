@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v3.13.1-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.14.0-E31937?style=flat-square)](CHANGELOG.md)
 [![Lizenz](https://img.shields.io/badge/Lizenz-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.md)
 
@@ -417,6 +417,14 @@ Beiträge sind willkommen! Lies zuerst die [Contribution Guidelines](CONTRIBUTIN
 **Verboten:** Verkauf der Software, kostenpflichtiger Betrieb als Dienst (SaaS) für Dritte, kommerzielle Nutzung in jeglicher Form, Unterlizenzierung.
 
 Bei Weitergabe muss der vollständige Lizenztext und der Copyright-`Required Notice` mitgeliefert werden. Software wird „wie sie ist" bereitgestellt, ohne Gewährleistung — Details siehe [LICENSE](LICENSE).
+
+### 📜 Prior-Art-Disclosure
+
+Alle in diesem Repository dokumentierten technischen Verfahren — insbesondere **Battery-Health-Companion** (Phase 1+2), **OwnTracks-Validation via Bluetooth-Trigger** mit Trip-Lock pro Fahrzeug, **automatisches Ladelimit pro Geofence-Standort**, **Kuratierter Web-App-Hub für den Tesla-Browser**, **POI-Suche im Umfeld einer Lade-Session via OSM Overpass**, **Auto-Reverse-Geocoding mit lokalem Cache**, **Adress-First-UI-Strategie** und **multi-stufige Anomalie-Detection mit Push-Empfehlung** — sind zum Datum des jeweiligen Git-Commits öffentlich publiziert und gelten als „prior art" im Sinne des Patent- und Markenrechts.
+
+Diese Offenlegung soll spätere Schutzrechtsanmeldungen Dritter auf dieselben Verfahren verhindern.
+
+Git-Hashes + Commit-Datumsstempel sind kryptografisch verifizierbar und durch GitHub als unabhängiger Dritter zeitlich bestätigt.
 
 ---
 

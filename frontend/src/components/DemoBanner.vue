@@ -1,3 +1,4 @@
+<!-- © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview -->
 <template>
   <!-- Schmaler Banner ueber der NavBar — nur im Demo-Mandanten. Zeigt
        restliche Lebenszeit und macht klar, dass alle Daten Fake sind. -->

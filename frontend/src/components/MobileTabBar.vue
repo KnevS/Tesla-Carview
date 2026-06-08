@@ -1,3 +1,4 @@
+<!-- © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview -->
 <template>
   <!-- iOS-style Bottom Tab Bar — nur auf Mobile sichtbar (md:hidden).
        5 fixierte Haupt-Punkte + "Mehr"-Button der alle anderen Routen

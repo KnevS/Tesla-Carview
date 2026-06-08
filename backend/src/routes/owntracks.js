@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 /**
  * /api/owntracks — Smartphone-GPS-Tracking via OwnTracks-App.
  *
@@ -89,7 +90,8 @@ router.post('/webhook', (req, res) => {
   const device = master.prepare(
     `SELECT id, tenant_id, vehicle_id, user_id, default_trip_type,
             current_trip_id, stationary_since,
-            in_vehicle, in_vehicle_since, active_paused, bluetooth_pairing_name
+            in_vehicle, in_vehicle_since, active_paused, bluetooth_pairing_name,
+            bluetooth_first_seen_at
      FROM owntracks_devices WHERE device_token=? AND is_active=1`
   ).get(token);
   if (!device) return res.status(401).json([]);
@@ -116,11 +118,11 @@ router.post('/webhook', (req, res) => {
   // C) Manueller Pause-Toggle: User hat sein Device pausiert
   if (device.active_paused) return res.json([]);
 
-  // A) Bluetooth-Validation: wenn der User einen bluetooth_pairing_name
-  //    hinterlegt hat, muss in_vehicle=1 sein (gesetzt vom iOS-Shortcut
-  //    bei Bluetooth-Connect). Devices ohne pairing_name laufen wie bisher
-  //    (Opt-In, damit Bestandsuser nichts kaputt geht).
-  if (device.bluetooth_pairing_name && !device.in_vehicle) return res.json([]);
+  // A) Bluetooth-Validation: sobald das Device EINMAL via iOS-Automation
+  //    in_vehicle/start aufgerufen hat (bluetooth_first_seen_at gesetzt),
+  //    gilt strikte Validierung — Trips nur bei in_vehicle=1. Geräte ohne
+  //    je gestartetes Setup laufen im Legacy-Modus ohne Filter.
+  if (device.bluetooth_first_seen_at && !device.in_vehicle) return res.json([]);
 
   // B) Pro Fahrzeug nur ein Device — Trip-Lock auf vehicles
   const veh = db.prepare(
@@ -285,18 +287,23 @@ router.get('/config.otrc', (req, res) => {
   res.json(config);
 });
 
-// GET /api/owntracks/qr.png?token=<device_token>
-// QR-Code mit dem owntracks://-Deep-Link, scannbar mit der Kamera-App.
+// GET /api/owntracks/qr.png
+//   ?token=<device_token>  → OwnTracks-Config-Deep-Link
+//   ?text=<beliebiger Text> → frei codierbarer Text (z.B. Webhook-URL)
 router.get('/qr.png', async (req, res) => {
-  const device = deviceFromToken(req.query.token);
-  if (!device) return res.status(401).end();
-
-  const base = publicBase(req);
-  const configUrl = `${base}/api/owntracks/config.otrc?token=${device.device_token}`;
-  const deepLink  = `owntracks:///config?url=${encodeURIComponent(configUrl)}`;
+  let payload;
+  if (req.query.text) {
+    payload = String(req.query.text).slice(0, 2000);
+  } else {
+    const device = deviceFromToken(req.query.token);
+    if (!device) return res.status(401).end();
+    const base = publicBase(req);
+    const configUrl = `${base}/api/owntracks/config.otrc?token=${device.device_token}`;
+    payload = `owntracks:///config?url=${encodeURIComponent(configUrl)}`;
+  }
 
   try {
-    const png = await QRCode.toBuffer(deepLink, {
+    const png = await QRCode.toBuffer(payload, {
       width:           420,
       margin:          2,
       errorCorrectionLevel: 'M',
@@ -455,31 +462,41 @@ router.get('/devices/:id/token', requireAuth, (req, res) => {
 // Wird vom Kurzbefehle-Automation aufgerufen, sobald das Phone sich mit dem
 // Tesla-Bluetooth verbindet/trennt. Kein Cookie-Login — nur das Device-Token
 // in der URL.
-router.post('/in-vehicle/start/:token', (req, res) => {
-  const token = String(req.params.token || '');
-  if (!token || token.length < 16) return res.status(401).json({ error: 'invalid token' });
+function _setInVehicle(token, value) {
   const master = getMasterDb();
+  // Beim ALLERERSTEN Start setzen wir bluetooth_first_seen_at — ab dann
+  // gilt strikte Validierung (Webhook ignoriert Pings ohne in_vehicle=1).
   const r = master.prepare(
     `UPDATE owntracks_devices
-        SET in_vehicle=1, in_vehicle_since=unixepoch()
-      WHERE device_token=? AND is_active=1`
-  ).run(token);
-  if (r.changes === 0) return res.status(404).json({ error: 'unknown device' });
-  res.json({ ok: true, in_vehicle: true });
-});
+        SET in_vehicle = ?,
+            in_vehicle_since = CASE WHEN ? = 1 THEN unixepoch() ELSE NULL END,
+            bluetooth_first_seen_at = COALESCE(bluetooth_first_seen_at,
+                                              CASE WHEN ? = 1 THEN unixepoch() ELSE NULL END)
+      WHERE device_token = ? AND is_active = 1`
+  ).run(value, value, value, token);
+  return r.changes;
+}
 
-router.post('/in-vehicle/end/:token', (req, res) => {
+// POST + GET — beide gehen, damit der iOS-Kurzbefehl ohne Methoden-
+// Konfiguration auskommt („Inhalte aus URL abrufen" ist GET per Default).
+function handleStart(req, res) {
   const token = String(req.params.token || '');
   if (!token || token.length < 16) return res.status(401).json({ error: 'invalid token' });
-  const master = getMasterDb();
-  const r = master.prepare(
-    `UPDATE owntracks_devices
-        SET in_vehicle=0, in_vehicle_since=NULL
-      WHERE device_token=? AND is_active=1`
-  ).run(token);
-  if (r.changes === 0) return res.status(404).json({ error: 'unknown device' });
+  const changes = _setInVehicle(token, 1);
+  if (changes === 0) return res.status(404).json({ error: 'unknown device' });
+  res.json({ ok: true, in_vehicle: true });
+}
+function handleEnd(req, res) {
+  const token = String(req.params.token || '');
+  if (!token || token.length < 16) return res.status(401).json({ error: 'invalid token' });
+  const changes = _setInVehicle(token, 0);
+  if (changes === 0) return res.status(404).json({ error: 'unknown device' });
   res.json({ ok: true, in_vehicle: false });
-});
+}
+router.post('/in-vehicle/start/:token', handleStart);
+router.get('/in-vehicle/start/:token',  handleStart);
+router.post('/in-vehicle/end/:token',   handleEnd);
+router.get('/in-vehicle/end/:token',    handleEnd);
 
 // ── Manueller Pause-Toggle (Cookie-Auth) ─────────────────────────────────────
 router.post('/devices/:id/pause', requireAuth, (req, res) => {

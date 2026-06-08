@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import { WebSocketServer } from 'ws';
 import protobuf from 'protobufjs';
 import { getDb, getTenantByVin } from '../db/database.js';

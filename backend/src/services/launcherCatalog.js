@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 /**
  * App-Hub: kuratierter Katalog von Web-Apps, die im Tesla-Browser laufen
  * UND von Tesla nativ NICHT abgedeckt werden.

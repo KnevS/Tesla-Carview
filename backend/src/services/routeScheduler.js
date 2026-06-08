@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 /**
  * Routenplan-Scheduler: sendet geplante Routen 15 min vor Abfahrt an Tesla.
  * Läuft alle 60 Sekunden. Geht alle Tenants durch und prüft saved_routes

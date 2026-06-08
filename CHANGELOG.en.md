@@ -7,6 +7,45 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.14.0] - 2026-06-08
+
+### Changed — Bluetooth setup radically simplified
+
+Previously fiddly setup (note Bluetooth name in iOS, fill into TeslaView, configure POST method) → now **5-step process with copy-URL + QR code**:
+
+- **GET endpoints in addition** to POST: `/api/owntracks/in-vehicle/start|end/:token` now also reacts to GET. iOS Shortcuts action "Get contents of URL" works without method configuration.
+- **Bluetooth pairing name no longer required**: setup counts as active as soon as the first `in-vehicle/start` ping arrives. New column `owntracks_devices.bluetooth_first_seen_at` marks it. Before the first ping the device runs in legacy mode (no filter), after that strictly.
+- **Quick-setup UI in MyTracking** with copy buttons + QR codes per URL (for desktop→iPhone transfer) + live status badge "✓ active" after first ping.
+
+### Added — IP protection
+
+Three passive markers against commercial code takeover. **No telemetry**, no phone-home, no server call — only static watermarks:
+
+- **A) Copyright header** in all 198 first-party `.js`/`.vue` files under `backend/src` and `frontend/src`: `© 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0`
+- **B) Canary marker**: demo VIN prefix from `DEMO` → `DEMOKRSC` — a GitHub code search for `DEMOKRSC` reveals every fork. (Subtle, hard to remove without source refactoring.)
+- **D) Brand footer** in `AppFooter.vue`: "Powered by [TeslaView](github.com/KnevS/Tesla-Carview) · © Sven Krische · PolyForm Noncommercial" — visible on every page.
+- **F) Prior-art disclosure** in README.md + README.en.md: all technical procedures are explicitly declared as "prior art" as of the commit date. Prevents later patent filings by third parties on the same procedures.
+
+Privacy guarantee: third-party installations send **nothing** to anyone. Markers become visible only when YOU actively search GitHub for `DEMOKRSC`, the footer text, or a source snippet.
+
+### Backend
+
+- `owntracks_devices.bluetooth_first_seen_at` column + auto-migration in `runMasterMigrations`
+- `/qr.png` endpoint now supports `?text=` parameter for arbitrary URLs (in addition to the OwnTracks deep link)
+- Webhook filter logic: Bluetooth validation now kicks in after the first `in-vehicle/start` (instead of relying on the pairing name being set)
+
+### Frontend
+
+- `MyTracking.vue` Bluetooth section reworked: two large URL boxes with copy button + QR code per URL, 5-step iOS walkthrough, live status badge
+- 13 new i18n keys × 6 languages (setup walkthrough)
+
+### Docs
+
+- README + README.en gained a prior-art disclosure block
+- Setup description in the frontend itself (quick-setup disclosure widget)
+
+---
+
 ## [v3.13.1] - 2026-06-08
 
 ### Changed — Marketing & main-repo docs refresh

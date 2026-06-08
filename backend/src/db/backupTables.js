@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 /** Tabellen, die in einen vollstaendigen Tenant-Backup kommen.
  *  Wird von data-management.js (HTTP-Export) und autoBackupService.js
  *  (Scheduler) gemeinsam genutzt. */

@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 /**
  * Fake-Daten-Generator für den Demo-Mandanten.
  *
@@ -46,9 +47,9 @@ export function seedNewDemoUser(db, userId, username) {
   const startTs = now - 21 * 86400;
 
   // Eindeutige Fake-VIN, damit der globale vin_registry-Constraint
-  // (siehe master.db) nicht in die Quere kommt. „DEMO" gefolgt von
-  // 13 Zufalls-Alphanumerischen.
-  const vin = 'DEMO' + randomBytes(7).toString('hex').slice(0, 13).toUpperCase();
+  // (siehe master.db) nicht in die Quere kommt. „DEMOKRSC" gefolgt von
+  // 9 Zufalls-Alphanumerischen. „KRSC"-Marker = TeslaView-Originalsignatur.
+  const vin = 'DEMOKRSC' + randomBytes(5).toString('hex').slice(0, 9).toUpperCase();
 
   const carName = `${username}-Otto`;
   const r = db.prepare(

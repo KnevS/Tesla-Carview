@@ -33,7 +33,8 @@
     "sortOldestFirst": "Önce en eskiler",
     "sortToggleTooltip": "Sıralama yönünü tersine çevir",
     "copy": "Kopyala",
-    "optional": "isteğe bağlı"
+    "optional": "isteğe bağlı",
+    "copied": "kopyalandı"
   },
   "lang": {
     "title": "Dil / Language",
@@ -2535,8 +2536,8 @@
     "statusInVehicleUnknown": "🔵 Tesla durumu bilinmiyor (Bluetooth olayı bekleniyor)",
     "statusLegacy": "🔵 Bluetooth doğrulaması olmadan aktif",
     "bluetoothSetup": {
-      "title": "Bluetooth doğrulama (başka araç yolculuklarından gelen hatalı verileri önler)",
-      "intro": "Bu yapılandırmayla TeslaView yalnızca iPhone'unuz gerçekten Tesla Bluetooth'una bağlıyken veri alır. Başka bir araç veya bisiklet sürüyorsanız yolculuk yok sayılır.",
+      "title": "Bluetooth hızlı kurulum",
+      "intro": "TeslaView, Tesla'da olmadığınızda OwnTracks verilerinizi yok sayar — bu kurulduktan sonra. 3 adımda:",
       "nameLabel": "Tesla Bluetooth adı (iOS → Ayarlar → Bluetooth'da göründüğü gibi)",
       "namePlaceholder": "örn. \"Tesla 7SA5...\" veya \"Model 3'üm\"",
       "save": "💾 Kaydet",
@@ -2546,7 +2547,17 @@
       "step3": "\"URL içeriğini al\" eylemi ekleyin → URL'yi yapıştırın (HTTP yöntem POST). Bağlantı kesilince son URL ile aynısını yapın.",
       "urlConnect": "✅ Bağlanma URL'si (POST):",
       "urlDisconnect": "🔌 Bağlantıyı kesme URL'si (POST):",
-      "needToken": "Token görünür olması için QR kodunu en az bir kez gösterin."
+      "needToken": "Token görünür olması için QR kodunu en az bir kez gösterin.",
+      "activeBadge": "aktif",
+      "connect": "\"Bluetooth bağlandı\" için URL (= Tesla'dasınız)",
+      "disconnect": "\"Bluetooth ayrıldı\" için URL (= Tesla'dan indiniz)",
+      "iosStepsTitle": "iOS Kısayollar uygulamasında",
+      "s1": "\"Otomasyon\" sekmesi → \"+ Yeni otomasyon\"",
+      "s2": "\"Bluetooth\" → \"Bağlandığında\" → Tesla'yı seçin",
+      "s3": "\"Eylem ekle\" → \"URL\" arayın → \"URL içeriğini al\"'ı seçin",
+      "s4": "Adım 1'deki URL'yi (yukarıda) yapıştırın → \"Hemen çalıştır\"'ı açın → \"Bitti\"",
+      "s5": "\"Bluetooth ayrıldı\" için aynısı, adım 2'deki URL ile",
+      "qrHint": "İpucu: masaüstündeyseniz — sağdaki QR kodu iPhone kamerasıyla tarayın. URL panoya iner ve kısayola yapıştırılabilir."
     }
   },
   "tco": {

@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import bcrypt from 'bcryptjs';
 
 // Argon2id ist das bevorzugte Verfahren (OWASP 2024). Falls das Paket noch

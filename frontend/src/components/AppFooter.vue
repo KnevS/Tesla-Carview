@@ -1,3 +1,4 @@
+<!-- © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview -->
 <template>
   <footer class="app-footer">
     <div class="app-footer-inner">
@@ -30,6 +31,11 @@
       </ul>
       <p class="legal" v-if="showVersion">
         Tesla Carview · v{{ version }} · {{ buildHash }}
+      </p>
+      <p class="legal powered-by">
+        Powered by
+        <a href="https://github.com/KnevS/Tesla-Carview" target="_blank" rel="noopener">TeslaView</a>
+        · © Sven Krische · PolyForm Noncommercial
       </p>
     </div>
   </footer>

@@ -1,3 +1,4 @@
+// © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '../store/auth.js';
 import api from '../api.js';

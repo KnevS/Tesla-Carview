@@ -1,3 +1,4 @@
+<!-- © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview -->
 <template>
   <div class="flex items-center gap-2 flex-wrap">
     <select v-model.number="year" class="bg-gray-700 text-white text-sm rounded-lg px-3 py-1.5 border border-gray-600">
