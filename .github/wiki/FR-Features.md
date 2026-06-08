@@ -243,3 +243,15 @@ Trip detail: recovered kWh, recuperation share (%), net consumption after recupe
 ## 🔲 Control Layout Toggle
 
 Switch between tile layout and compact list view in Vehicle Control. Preference saved in `localStorage`.
+
+
+## 💬 Pourquoi Telegram et pas WhatsApp / Signal ?
+
+TeslaView utilise **Telegram + Web Push** comme canaux de notifications — gratuits, conformes aux ToS, sans compte tiers.
+
+**Non implémenté et pourquoi :**
+- **WhatsApp** : seulement via Meta Cloud API (compte Business + numéro pro vérifié + approbation de templates). Usage privé non prévu ; les bibliothèques non officielles sont une violation des ToS avec risque de bannissement.
+- **Signal** : pas d'API officielle pour bots ; les forks auto-hébergés (signald) sont fragiles.
+- **Threema** : API officielle existe, mais payante (~50 €/an).
+
+Pour les utilisateurs déterminés à utiliser WhatsApp : *whatsapp-web.js* peut être ajouté soi-même. Nous ne le recommandons pas.

@@ -487,6 +487,23 @@ Aynı Tesla'da OwnTracks'li iki kişi olursa, koruma olmadan her iki yolculuk ç
 
 `/my-tracking` içinde her cihazın bir ⏸ düğmesi var. Bir süre Tesla kullanmayacağınızı biliyorsanız (kiralık araçla tatil, bisiklet turu), cihazı manuel olarak duraklatın. Dönüşte tekrar aktive edin.
 
+### Android'de kurulum (iOS yerine)
+
+Android, iOS Kısayollarına yerel bir 1:1 alternatif sunmaz. Üç yol:
+
+**Önerilen: MacroDroid** (ücretsiz sürüm yeterli, ~10M indirme, güvenli)
+1. Play Store'dan kurun
+2. "+ Yeni makro" → tetikleyici "Bluetooth" → "Cihaza bağlandı" → Tesla'yı seçin
+3. Eylem "HTTP isteği" → yöntem GET → TeslaView'den bağlanma URL'sini yapıştırın
+4. "Tesla bağlandı" olarak kaydedin
+5. "Bluetooth ayrıldı" için aynısı, bağlantı kesme URL'si ile
+
+**Alternatifler:**
+- **Automate (Llamalab)** — 30 bloğa kadar ücretsiz, görsel akış (temiz ama öğrenme eğrisi)
+- **Tasker** — 3,49 € bir defalık, altın standart
+
+⚠ **Doğrulama notu:** Bu kılavuz Android'de canlı doğrulanmadı (geliştirici tarafı yalnız iOS). Sorun varsa GitHub issue açın.
+
 ### Durum göstergesi
 
 - 🟢 **Tesla'da** — aktif, yolculuklar kaydediliyor

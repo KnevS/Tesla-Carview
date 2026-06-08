@@ -483,6 +483,23 @@ Con varias personas en el mismo Tesla, los trayectos se duplicarían. TeslaView 
 
 En `/my-tracking` cada dispositivo tiene un botón ⏸. Si sabes que no conducirás el Tesla durante un tiempo (vacaciones con coche alquilado, ruta en bici), pausa el dispositivo. Reactívalo al volver.
 
+### Configuración en Android (en vez de iOS)
+
+Android no tiene un reemplazo nativo 1:1 para los Atajos de iOS. Tres caminos:
+
+**Recomendado: MacroDroid** (versión gratis suficiente, ~10M descargas, seguro)
+1. Instalar desde Play Store
+2. «+ Nueva macro» → trigger «Bluetooth» → «Conectado a dispositivo» → elegir el Tesla
+3. Acción «Petición HTTP» → método GET → pegar la URL de conexión de TeslaView
+4. Guardar como «Tesla conectado»
+5. Segunda macro igual para «Bluetooth desconectado» con la URL de desconexión
+
+**Alternativas:**
+- **Automate (Llamalab)** — gratis hasta 30 bloques, flujo visual (más limpio pero curva de aprendizaje)
+- **Tasker** — 3,49 € único, estándar de oro
+
+⚠ **Nota de verificación:** Esta guía no se ha verificado en vivo en Android (lado del desarrollador solo iOS). Si algo no encaja, abre un issue en GitHub.
+
 ### Indicador de estado
 
 - 🟢 **En el Tesla** — activo, trayectos registrados

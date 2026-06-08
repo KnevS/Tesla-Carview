@@ -483,6 +483,23 @@ Avec plusieurs personnes équipées d'OwnTracks dans la même Tesla, les trajets
 
 Dans `/my-tracking`, chaque device a un bouton ⏸. Si vous savez que vous ne conduirez pas la Tesla un certain temps (vacances avec voiture de location, balade à vélo), mettez le device en pause. Réactivez au retour.
 
+### Configuration sur Android (au lieu d'iOS)
+
+Android n'a pas de remplacement natif 1:1 pour les raccourcis iOS. Trois voies :
+
+**Recommandé : MacroDroid** (version gratuite suffit, ~10M de téléchargements, sûr)
+1. Installer depuis le Play Store
+2. « + Nouvelle macro » → déclencheur « Bluetooth » → « Connecté à un appareil » → choisir la Tesla
+3. Action « Requête HTTP » → méthode GET → coller l'URL connexion de TeslaView
+4. Enregistrer sous « Tesla connecté »
+5. Deuxième macro identique pour « Bluetooth déconnecté » avec l'URL de déconnexion
+
+**Alternatives :**
+- **Automate (Llamalab)** — gratuit jusqu'à 30 blocs, flux visuel (plus propre mais courbe d'apprentissage)
+- **Tasker** — 3,49 € en une fois, standard de référence
+
+⚠ **Note de vérification :** ce guide n'a pas été vérifié en direct sur Android (côté développeur uniquement iOS). En cas de souci, ouvrez une issue GitHub.
+
 ### Affichage du statut
 
 - 🟢 **Dans la Tesla** — actif, trajets enregistrés

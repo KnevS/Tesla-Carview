@@ -7,6 +7,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.15.1] - 2026-06-08
+
+### Changed — Hygiene catch-up for v3.15.0
+
+- **Handbook in all 6 languages** extended with `### Setup on Android (instead of iOS)` block inside the `{#owntracks-validation}` section — matches the in-app UI (MacroDroid/Automate/Tasker)
+- **Wiki Features (FR/ES/TR/EL)** got the messenger FAQ block (DE/EN already had it in v3.15.0)
+- Pure docs, no code change
+
+---
+
 ## [v3.15.0] - 2026-06-08
 
 ### Added — Android setup for Bluetooth validation

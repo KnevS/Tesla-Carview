@@ -501,6 +501,23 @@ If two people with OwnTracks devices sit in the same Tesla, without protection b
 
 In `/my-tracking` every device has a ⏸ button. When you know you will not be driving the Tesla for a while (vacation in a rental, bike tour), pause your device manually. Resume on the next ride.
 
+### Setup on Android (instead of iOS)
+
+Android has no native 1:1 replacement for iOS Shortcuts. Three ways:
+
+**Recommended: MacroDroid** (free version is enough, ~10M downloads, safe)
+1. Install from the Play Store
+2. "+ New macro" → trigger "Bluetooth" → "Connected to device" → pick the Tesla
+3. Action "HTTP request" → method GET → paste the connect URL from TeslaView
+4. Save as "Tesla connected"
+5. Second macro the same way for "Bluetooth disconnected" with the disconnect URL
+
+**Alternatives:**
+- **Automate (Llamalab)** — free up to 30 blocks, visual flow (cleaner but learning curve)
+- **Tasker** — €3.49 one-off, gold standard for Android automation
+
+⚠ **Verification note:** This guide has not been verified live on an Android device (developer side is iOS only). If something is off, please open a GitHub issue — we'll iterate.
+
 ### Status display
 
 In `/my-tracking` every device shows a clear status:

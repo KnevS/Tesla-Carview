@@ -226,3 +226,15 @@ Trip detail: recovered kWh, recuperation share (%), net consumption after recupe
 ## 🔲 Control Layout Toggle
 
 Switch between tile layout and compact list view in Vehicle Control. Preference saved in `localStorage`.
+
+
+## 💬 Neden Telegram, WhatsApp / Signal değil?
+
+TeslaView **Telegram + Web Push**'u bildirim kanalı olarak kullanır — ücretsiz, ToS uyumlu, üçüncü taraf hesabı gerektirmez.
+
+**Uygulanmadı ve neden:**
+- **WhatsApp**: yalnız Meta Cloud API üzerinden (Business hesabı + doğrulanmış iş numarası + şablon onayı). Özel kullanım öngörülmemiş; resmi olmayan kütüphaneler ToS ihlali ve hesap yasağı riski.
+- **Signal**: resmi bot API yok; kendi barındırılan forklar (signald) kırılgan.
+- **Threema**: resmi API var ama ücretli (~50 €/yıl).
+
+WhatsApp'ta ısrarcı olanlar için: *whatsapp-web.js* eklenebilir. Önermiyoruz.
