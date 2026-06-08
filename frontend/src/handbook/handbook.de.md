@@ -471,6 +471,18 @@ Liefert dein Tesla keine GPS-Daten (typisch bei XP7-VIN ohne aktive Fleet Teleme
 
 Jedes Eingabefeld trägt einen Mouse-over-Hinweis mit Kontext (was tut das Feld, wann brauche ich es, was passiert beim Speichern).
 
+### Automatische Adress-Auflösung ab v3.8.0 {#auto-geocode}
+
+Wenn ein Trip oder eine Lade-Session **GPS-Koordinaten aber keinen Adress-Text** hat, holt TeslaView die Adresse automatisch im Hintergrund:
+
+- **Live-Trigger**: Direkt nach jedem OwnTracks-Trip-Close und jedem Charging-Insert läuft ein fire-and-forget Reverse-Lookup.
+- **Nightly-Backfill**: Pro Nacht werden bis zu 60 ältere Datensätze pro Mandant nachgeholt.
+- **Admin-Sofort-Lauf**: `POST /api/system/geocode-backfill` (im Admin-Bereich) löst einen sofortigen Lauf mit konfigurierbarem `limit` aus.
+
+**Quelle**: [Nominatim/OpenStreetMap](https://nominatim.openstreetmap.org) — kostenlos, kein Account, kein API-Key. Datensouverän (OSM-Foundation, EU).
+
+**Lokaler Cache**: Jeder Lookup landet in `geocode_cache` (auf 4 Dezimalstellen ~11 m gerundet) und steht damit allen weiteren Trips/Sessions am selben Ort ohne erneuten externen Call zur Verfügung. Der Nominatim-Rate-Limit von 1 Request/Sekunde wird strikt eingehalten.
+
 ## 🎮 Erweiterte Fahrzeugsteuerung {#control-extended}
 
 Unter **Steuerung** ist die App mittlerweile sehr nah am Funktionsumfang der Tesla-Mobile-App:

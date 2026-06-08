@@ -457,6 +457,18 @@ Tesla'n GPS göndermiyorsa (Fleet Telemetry'siz XP7-VIN'lerde veya bağlantı ke
 
 Her düzenlenebilir alanda, ne işe yaradığını, ne zaman gerektiğini ve kaydedince ne olacağını açıklayan bir mouse-over ipucu vardır.
 
+### Otomatik adres çözünürlüğü v3.8.0'dan itibaren {#auto-geocode}
+
+Bir yolculuk veya şarj oturumunda **GPS koordinatları olup ama adres metni yoksa**, TeslaView adresi arka planda otomatik olarak doldurur:
+
+- **Canlı tetikleyici**: her OwnTracks yolculuk kapanışından ve her şarj eklenmesinden hemen sonra fire-and-forget ters arama çalışır.
+- **Gecelik geri doldurma**: her gece kiracı başına en fazla 60 eski kayıt işlenir.
+- **Yönetici talep üzerine**: `POST /api/system/geocode-backfill` (yönetici alanı) yapılandırılabilir bir `limit` ile anlık çalışma başlatır.
+
+**Kaynak**: [Nominatim/OpenStreetMap](https://nominatim.openstreetmap.org) — ücretsiz, hesap yok, API anahtarı yok. Veri egemen (OSM Vakfı, AB).
+
+**Yerel önbellek**: her arama `geocode_cache`'a iner (4 ondalık basamağa yuvarlanmış ~11 m) ve aynı konumdaki başka her yolculuk/oturum için yeni dış çağrı olmadan kullanılabilir. Nominatim'in saniyede 1 istek limiti sıkı uygulanır.
+
 ## 🎮 Genişletilmiş araç kontrolü {#control-extended}
 
 **Kontrol** sayfası artık Tesla mobil uygulamasının kapsamına oldukça yakındır:

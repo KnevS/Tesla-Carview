@@ -947,6 +947,15 @@ function runTenantMigrations(db) {
     UNIQUE(vehicle_id, for_date)
   )`);
   db.exec('CREATE INDEX IF NOT EXISTS idx_precondition_vehicle ON precondition_suggestions(vehicle_id, for_date DESC)');
+
+  // Geocoding-Cache (Nominatim-Lookup-Persistierung)
+  db.exec(`CREATE TABLE IF NOT EXISTS geocode_cache (
+    lat_key INTEGER NOT NULL,
+    lon_key INTEGER NOT NULL,
+    address TEXT NOT NULL,
+    fetched_at INTEGER NOT NULL DEFAULT (unixepoch()),
+    PRIMARY KEY (lat_key, lon_key)
+  )`);
 }
 
 // Alias für Abwärtskompatibilität

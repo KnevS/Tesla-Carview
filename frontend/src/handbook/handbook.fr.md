@@ -453,6 +453,18 @@ Si votre Tesla ne fournit pas de GPS (typique des VIN XP7 sans Fleet Telemetry, 
 
 Chaque champ modifiable comporte une infobulle expliquant à quoi il sert, quand l'utiliser et ce qui se passe à l'enregistrement.
 
+### Résolution automatique d'adresse à partir de v3.8.0 {#auto-geocode}
+
+Quand un trajet ou une session de charge a **des coordonnées GPS mais pas de texte d'adresse**, TeslaView remplit l'adresse automatiquement en arrière-plan :
+
+- **Déclencheur live** : juste après chaque fin de trajet OwnTracks et chaque insert de session de charge, un lookup inverse fire-and-forget s'exécute.
+- **Backfill nocturne** : jusqu'à 60 anciens enregistrements par locataire sont traités chaque nuit.
+- **À la demande admin** : `POST /api/system/geocode-backfill` (espace admin) déclenche un run immédiat avec une `limit` configurable.
+
+**Source** : [Nominatim/OpenStreetMap](https://nominatim.openstreetmap.org) — gratuit, sans compte, sans clé API. Souverain en données (OSM Foundation, UE).
+
+**Cache local** : chaque lookup atterrit dans `geocode_cache` (arrondi à 4 décimales ~11 m) et est ensuite disponible pour tout autre trajet/session au même endroit sans nouvel appel externe. La limite de 1 requête/seconde de Nominatim est strictement respectée.
+
 ## 🎮 Commande véhicule étendue {#control-extended}
 
 La page **Commande** est désormais proche du périmètre de l'application mobile Tesla :

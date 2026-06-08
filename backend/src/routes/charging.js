@@ -126,7 +126,14 @@ router.post('/', (req, res) => {
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(vehicle_id, start_time, end_time, location_name, lat, lon, charger_type,
       start_soc, end_soc, energy_added_kwh, max_power_kw, cost, currency || 'EUR');
-    res.status(201).json({ id: result.lastInsertRowid });
+    const sessionId = result.lastInsertRowid;
+    // Fire-and-forget: Reverse-Geocoding wenn location_name leer
+    if (!location_name && lat != null && lon != null) {
+      import('../services/geocodingService.js')
+        .then(({ geocodeCharge }) => geocodeCharge(req.db, sessionId))
+        .catch(() => {});
+    }
+    res.status(201).json({ id: sessionId });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

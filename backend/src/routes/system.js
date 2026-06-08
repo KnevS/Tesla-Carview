@@ -1216,4 +1216,19 @@ router.get('/wizard-prefill', requireAuth, requireAdmin, async (req, res) => {
   });
 });
 
+// Reverse-Geocode-Backfill für Trips/Charging-Sessions ohne Adresse.
+// Admin-only — pro Aufruf bis zu 60 Nominatim-Requests (Rate-Limit 1/s).
+router.post('/geocode-backfill', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { backfillAddresses } = await import('../services/geocodingService.js');
+    const limit = Math.min(+req.body?.limit || 60, 200);
+    const lang = String(req.body?.lang || 'de').slice(0, 5);
+    const result = await backfillAddresses(req.db, { limit, lang });
+    auditLog(req.db, req.user.sub, 'geocode_backfill', null, result);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;

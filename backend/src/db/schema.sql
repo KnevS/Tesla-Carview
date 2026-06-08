@@ -141,6 +141,17 @@ CREATE TABLE IF NOT EXISTS battery_anomalies (
 );
 CREATE INDEX IF NOT EXISTS idx_battery_anomalies_vehicle ON battery_anomalies(vehicle_id, occurred_at DESC);
 
+-- Geocoding-Cache: Nominatim-Reverse-Lookups persistieren
+-- (lat/lon werden auf 4 Dezimalstellen gerundet als Integer-Key gespeichert,
+--  das entspricht ~11 m Genauigkeit und vermeidet Float-Equality-Bugs).
+CREATE TABLE IF NOT EXISTS geocode_cache (
+  lat_key INTEGER NOT NULL,
+  lon_key INTEGER NOT NULL,
+  address TEXT NOT NULL,
+  fetched_at INTEGER NOT NULL DEFAULT (unixepoch()),
+  PRIMARY KEY (lat_key, lon_key)
+);
+
 -- Companion Phase 2: Vorklimatisierungs-Empfehlungen
 CREATE TABLE IF NOT EXISTS precondition_suggestions (
   id INTEGER PRIMARY KEY,

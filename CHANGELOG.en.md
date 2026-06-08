@@ -7,6 +7,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.8.0] - 2026-06-08
+
+### Added — Automatic address resolution from GPS
+
+Trips and charging sessions that have GPS coordinates but no address text are now resolved automatically via reverse geocoding:
+
+- **Live hooks**:
+  - OwnTracks trip close → `start_address` + `end_address` fill in the background
+  - Charging session insert → `location_name` fills when empty
+- **Nightly backfill** in the `nightlyMaintenance` run: up to 60 lookups per tenant
+- **Admin on-demand**: `POST /api/system/geocode-backfill` (admin only), e.g. for an initial backfill of historic data
+
+**Data source**: Nominatim (OpenStreetMap Foundation, EU) — free, no account, no API key, strictly enforcing the 1-request-per-second rate limit.
+
+**Persistent cache**: new table `geocode_cache` stores every lookup rounded to 4 decimal places (~11 m). Subsequent trips/sessions at the same location hit the cache — no second external call. Data-sovereign, all in the tenant SQLite.
+
+### Changed
+
+- Schema migration for existing tenants: `geocode_cache` table auto-added in `runTenantMigrations`.
+- Nightly maintenance report now includes `tasks.geocode` with lookup/update counts per tenant.
+
+---
+
 ## [v3.7.0] - 2026-06-07
 
 ### Added — Companion Phase 2: persistent anomalies + preconditioning suggestions

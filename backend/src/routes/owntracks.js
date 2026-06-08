@@ -157,16 +157,17 @@ router.post('/webhook', (req, res) => {
   if (now - device.stationary_since < STATIONARY_GRACE_S) return res.json([]);
 
   // Grace-Period abgelaufen → Trip schließen.
-  const distKm = calcGpsDistanceKm(db, device.current_trip_id);
+  const closedTripId = device.current_trip_id;
+  const distKm = calcGpsDistanceKm(db, closedTripId);
   const trip = db.prepare(
     'SELECT start_odometer_km FROM trips WHERE id=?'
-  ).get(device.current_trip_id);
+  ).get(closedTripId);
   const startOdo = trip?.start_odometer_km ?? 0;
   db.prepare(
     `UPDATE trips
         SET end_time=?, end_lat=?, end_lon=?, end_odometer_km=?, distance_km=?
       WHERE id=?`
-  ).run(now, lat, lon, startOdo + distKm, distKm, device.current_trip_id);
+  ).run(now, lat, lon, startOdo + distKm, distKm, closedTripId);
 
   // Fahrzeug-Odometer-Schätzung nachziehen (best effort).
   try {
@@ -178,6 +179,11 @@ router.post('/webhook', (req, res) => {
     `UPDATE owntracks_devices
         SET current_trip_id=NULL, stationary_since=NULL WHERE id=?`
   ).run(device.id);
+
+  // Fire-and-forget: Adressen aus GPS holen (Nominatim-throttled, gecacht)
+  import('../services/geocodingService.js')
+    .then(({ geocodeTrip }) => geocodeTrip(db, closedTripId))
+    .catch(() => {});
 
   return res.json([]);
 });

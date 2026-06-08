@@ -453,6 +453,18 @@ Si tu Tesla no entrega GPS (típico de VIN XP7 sin Fleet Telemetry, o durante ca
 
 Cada campo editable tiene un tooltip que explica qué hace, cuándo usarlo y qué ocurre al guardar.
 
+### Resolución automática de direcciones desde v3.8.0 {#auto-geocode}
+
+Cuando un trayecto o sesión de carga tiene **coordenadas GPS pero no texto de dirección**, TeslaView completa la dirección automáticamente en segundo plano:
+
+- **Trigger en vivo**: justo después de cada cierre de trayecto OwnTracks y cada inserción de carga, se ejecuta un lookup inverso fire-and-forget.
+- **Backfill nocturno**: hasta 60 registros antiguos por inquilino se procesan cada noche.
+- **Bajo demanda admin**: `POST /api/system/geocode-backfill` (área admin) dispara una ejecución inmediata con un `limit` configurable.
+
+**Fuente**: [Nominatim/OpenStreetMap](https://nominatim.openstreetmap.org) — gratis, sin cuenta, sin clave API. Soberanía de datos (Fundación OSM, UE).
+
+**Caché local**: cada lookup va a `geocode_cache` (redondeado a 4 decimales ~11 m) y queda disponible para cualquier otro trayecto/sesión en la misma ubicación sin otra llamada externa. El límite de 1 petición/segundo de Nominatim se respeta estrictamente.
+
 ## 🎮 Control de vehículo ampliado {#control-extended}
 
 La vista **Control** está ahora cerca de la paridad con la app móvil de Tesla:

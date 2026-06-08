@@ -228,6 +228,26 @@ async function runOnce() {
     result.tasks.companion_error = e.message;
   }
 
+  // 3c. Reverse-Geocode-Backfill (max. 60 Lookups pro Tenant — 1/s wegen Nominatim-ToS)
+  try {
+    const { backfillAddresses } = await import('./geocodingService.js');
+    const geoSummaries = [];
+    for (const tenant of getAllTenants()) {
+      if (tenant.status === 'suspended') continue;
+      let tdb;
+      try { tdb = getDb(tenant.id); } catch { continue; }
+      try {
+        const r = await backfillAddresses(tdb, { limit: 60, lang: 'de' });
+        geoSummaries.push({ tenant: tenant.slug, ...r });
+      } catch (e) {
+        geoSummaries.push({ tenant: tenant.slug, error: e.message });
+      }
+    }
+    result.tasks.geocode = geoSummaries;
+  } catch (e) {
+    result.tasks.geocode_error = e.message;
+  }
+
   // 4. Optional: Auto-Update aus dem Git-Repo (opt-in)
   if (process.env.AUTO_UPDATE_ENABLED === 'true') {
     const repoDir = process.env.UPDATE_REPO_DIR || '/opt/tesla-carview';

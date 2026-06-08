@@ -471,6 +471,18 @@ If your Tesla doesn't deliver GPS (typical for XP7-VIN cars without active Fleet
 
 Every editable field carries a mouse-over hint explaining what it does, when you need it and what happens on save.
 
+### Automatic address resolution from v3.8.0 {#auto-geocode}
+
+When a trip or charging session has **GPS coordinates but no address text**, TeslaView fills in the address automatically in the background:
+
+- **Live trigger**: Right after every OwnTracks trip close and every charging insert, a fire-and-forget reverse lookup runs.
+- **Nightly backfill**: Up to 60 older records per tenant are processed each night.
+- **Admin on-demand**: `POST /api/system/geocode-backfill` (admin area) triggers an immediate run with a configurable `limit`.
+
+**Source**: [Nominatim/OpenStreetMap](https://nominatim.openstreetmap.org) — free, no account, no API key. Data-sovereign (OSM Foundation, EU).
+
+**Local cache**: every lookup lands in `geocode_cache` (rounded to 4 decimal places ~11 m) and is then available to every other trip/session at the same location without another external call. Nominatim's 1-request-per-second rate limit is strictly enforced.
+
 ## 🎮 Extended vehicle control {#control-extended}
 
 The **Control** view is now close to feature parity with the Tesla mobile app:

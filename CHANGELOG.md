@@ -7,6 +7,29 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.8.0] - 2026-06-08
+
+### Hinzugefügt — Automatische Adress-Auflösung aus GPS
+
+Trips und Lade-Sessions, die GPS-Koordinaten aber keinen Adress-Text haben, werden ab sofort automatisch via Reverse-Geocoding aufgelöst:
+
+- **Live-Hooks**: 
+  - OwnTracks-Trip-Close → `start_address` + `end_address` werden im Hintergrund gefüllt
+  - Charging-Session-Insert → `location_name` wird gefüllt wenn leer
+- **Nightly-Backfill** im `nightlyMaintenance`-Lauf: max. 60 Lookups pro Tenant
+- **Admin-Sofort-Lauf**: `POST /api/system/geocode-backfill` (Admin-only), z.B. zum Initial-Backfill aller Altdaten
+
+**Datenquelle**: Nominatim (OpenStreetMap Foundation, EU) — kostenlos, kein Account, kein API-Key, einhaltend des 1-req/s-Rate-Limits.
+
+**Persistenter Cache**: neue Tabelle `geocode_cache` speichert jeden Lookup auf 4 Dezimalstellen (~11 m) gerundet. Weitere Trips/Sessions am selben Ort treffen den Cache — keine zweite externe Anfrage. Datensouverän, alles in der Tenant-SQLite.
+
+### Geändert
+
+- Schema-Migration für bestehende Tenants: `geocode_cache`-Tabelle wird automatisch in `runTenantMigrations` angelegt.
+- Nightly-Maintenance-Report enthält jetzt `tasks.geocode` mit Lookup-/Update-Zahlen pro Tenant.
+
+---
+
 ## [v3.7.0] - 2026-06-07
 
 ### Hinzugefügt — Companion Phase 2: Persistierte Anomalien + Vorklim-Empfehlung
