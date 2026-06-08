@@ -7,6 +7,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.15.2] - 2026-06-08
+
+### Added — App hub: TFF-Forum
+
+[**TFF-Forum**](https://tff-forum.de) joined the app hub — the largest German-speaking Tesla community with daily posts about range, charging, Tesla software updates, tips & tricks. No forced account, privacy-friendly, runs in the Tesla browser.
+
+Region: DE-tagged (visible to German-region tenants when the regional filter is on).
+
+---
+
 ## [v3.15.1] - 2026-06-08
 
 ### Changed — Hygiene catch-up for v3.15.0

@@ -70,6 +70,15 @@ export const LAUNCHER_CATALOG = [
     category: 'ev',
     note_i18n: 'launcher.note.freeWithAccount',
   },
+  {
+    slug: 'tff-forum',
+    label_i18n: 'launcher.app.tffForum',
+    icon: '💬',
+    url: 'https://tff-forum.de',
+    category: 'ev',
+    note_i18n: 'launcher.note.noAccount',
+    region: ['de'],
+  },
 
   // ── 💬 Messaging (Tesla hat kein Chat) ──────────────────────────────
   {
