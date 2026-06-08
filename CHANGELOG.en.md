@@ -7,15 +7,38 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.18.0] - 2026-06-08
+
+### Changed — Marketing site: language switcher as slide dropdown + UK replaces ZH
+
+The 7-button language toggle on the marketing site took too much space in the top nav. Now: compact single button with current flag + code that opens a slide dropdown with all 7 languages on click (outside-click and Escape close it).
+
+- **Slide dropdown** instead of a 7-button row — opacity + translateY transition (180 ms), chevron rotates 180° when open
+- Active language is subtly highlighted in red (`rgba(227,25,55,.14)` + `--r-300`)
+- ARIA: `role="listbox"`, `aria-haspopup`, `aria-expanded`, `data-open` attribute for CSS state
+- Outside-click + Escape key close the menu reliably
+
+### Changed — App + marketing: Chinese (zh) replaced with Ukrainian (uk)
+
+Chinese was withdrawn after reflection — Ukrainian fits TeslaView's self-hosted/open-source profile better (higher per-capita Tesla affinity in the Ukrainian diaspora plus a solidarity aspect).
+
+- **App frontend**: `frontend/src/locales/zh.json` replaced with `uk.json`. `SUPPORTED_LOCALES` and `AI_TRANSLATED_LOCALES` now contain `uk` instead of `zh`. `fallbackLocale: { uk: ['en', 'de'] }`. `LANGS` entry with flag 🇺🇦 and label `Українська`
+- **Marketing site**: `i18n.js` `zh:` block fully replaced with `uk:` block (160 keys translated). Browser auto-detect now reacts to `uk-*` instead of `zh-*`
+- AI disclaimer updated in all 7 languages: `FR/ES/TR/EL/UK` → `FR/ES/TR/EL/UK`
+- Locale map for `screens_updated` date formatting extended with `uk: "uk-UA"`
+- Stat sub for the language KPI: `DE · EN · FR · ES · TR · EL · UK`
+
+---
+
 ## [v3.17.0] - 2026-06-08
 
 ### Added — Marketing site in 7 languages + AI disclaimer
 
-The marketing site teslaview-web was DE+EN only. Now 7 languages matching the app: **DE + EN + FR + ES + TR + EL + ZH**.
+The marketing site teslaview-web was DE+EN only. Now 7 languages matching the app: **DE + EN + FR + ES + TR + EL + UK**.
 
 - Language toggle extended from 2 to 7 buttons (DE/EN/FR/ES/TR/EL/中)
 - Browser auto-detect now reacts to `zh-*`, `fr-*`, `es-*`, `tr-*`, `el-*`
-- AI disclaimer prominent in the footer: "🤖 Translations for FR/ES/TR/EL/ZH are AI-assisted from DE/EN. Corrections welcome via GitHub." shown in each native language
+- AI disclaimer prominent in the footer: "🤖 Translations for FR/ES/TR/EL/UK are AI-assisted from DE/EN. Corrections welcome via GitHub." shown in each native language
 - 155 marketing keys × 5 new languages = 775 new translations
 - Translations generated in parallel by 5 subagents in one sprint
 
@@ -59,7 +82,7 @@ When the TCO cockpit banner "Master data incomplete" appeared, the user had to f
 ### Added — AI translation transparency
 
 - New constant `AI_TRANSLATED_LOCALES = ['fr', 'es', 'tr', 'el', 'zh']`
-- **AppFooter** shows a discreet disclaimer for these locales: "🤖 Translations for FR/ES/TR/EL/ZH are AI-assisted from DE/EN. Corrections welcome via GitHub."
+- **AppFooter** shows a discreet disclaimer for these locales: "🤖 Translations for FR/ES/TR/EL/UK are AI-assisted from DE/EN. Corrections welcome via GitHub."
 - i18n key `footer.aiTranslation` in all 7 languages — every native speaker sees it in their own language
 - Memory pattern captured in `feedback_ai_translation_transparency.md` for all future multilingual projects
 
