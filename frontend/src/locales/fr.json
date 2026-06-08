@@ -101,7 +101,11 @@
     "group_admin": "Administration",
     "group_ai": "Assistant IA",
     "group_vehicle": "Véhicule",
-    "group_plan": "Planification"
+    "group_plan": "Planification",
+    "launcher": {
+      "label": "Hub d'apps",
+      "tooltip": "Apps web sélectionnées tournant dans le navigateur Tesla et que Tesla ne propose pas nativement"
+    }
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -2582,5 +2586,37 @@
   "notices": {
     "dismiss": "Compris, masquer",
     "adminOnly": "Seuls les administrateurs peuvent masquer cet avis."
+  },
+  "launcher": {
+    "title": "Hub d'apps",
+    "subtitle": "Apps web sélectionnées pour le navigateur Tesla — gratuites, respectueuses de la vie privée, sans doublon avec les fonctions natives Tesla.",
+    "empty": "Aucune app active. Demandez à votre admin ou vérifiez la configuration admin.",
+    "hintTitle": "Comment utiliser les apps",
+    "hintBody": "Ouvrez TeslaView dans le navigateur Tesla, puis touchez une tuile — l'app s'ouvre dans un nouvel onglet. Musique et appels passent via Bluetooth dans l'audio Tesla comme d'habitude (aucune configuration). Spotify, Apple Music, jeux et streaming sont déjà natifs dans Tesla — vous ne les trouverez pas ici.",
+    "adminLink": "Gérer les apps (admin)",
+    "category": {
+      "all": "Toutes",
+      "audio": "Audio",
+      "ev": "Monde VE",
+      "communication": "Messagerie",
+      "knowledge": "Savoir"
+    },
+    "app": {
+      "ardAudiothek": "ARD Audiothek",
+      "deutschlandfunk": "Deutschlandfunk en direct",
+      "goingelectric": "GoingElectric",
+      "electrive": "electrive",
+      "openChargeMap": "OpenChargeMap",
+      "abrp": "A Better Routeplanner",
+      "telegramWeb": "Telegram Web",
+      "signal": "Signal",
+      "wikipedia": "Wikipedia"
+    },
+    "note": {
+      "publicBroadcast": "Radiodiffuseur public",
+      "noAccount": "Aucun compte requis",
+      "openSource": "Open source",
+      "freeWithAccount": "Gratuit avec compte"
+    }
   }
 }

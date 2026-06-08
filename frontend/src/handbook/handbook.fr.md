@@ -444,6 +444,21 @@ Utilisez le **carnet d'entretien** pour documenter tout ce qui touche au fonctio
 
 Cela permet de retrouver plus tard qui a saisi quelle note ou quel entretien — utile dans les locataires comportant plusieurs utilisateurs actifs.
 
+## 🚀 Hub d'apps (à partir de v3.9.0) {#app-hub}
+
+`/launcher` propose une **liste sélectionnée d'apps web** qui tournent dans le navigateur Tesla et que Tesla ne propose PAS nativement :
+
+- **Audio (service public)** — ARD Audiothek, Deutschlandfunk en direct
+- **Monde VE** — GoingElectric, electrive, OpenChargeMap, A Better Routeplanner
+- **Messagerie** — Telegram Web, Signal (Tesla n'a pas de chat natif)
+- **Savoir** — Wikipedia
+
+**Critères d'inclusion** : gratuit, sécurisé (HTTPS), pas d'installation forcée depuis l'app store, respectueux de la vie privée, **pas de doublon natif Tesla** (Spotify, Apple Music, jeux, cartes, streaming sont volontairement absents — Tesla les propose déjà).
+
+**Audio dans les haut-parleurs Tesla** : transite par Bluetooth depuis votre téléphone comme d'habitude — pas de configuration.
+
+**Liste blanche admin** : sous `/admin?tab=launcher`, un admin peut masquer des apps par locataire, p. ex. si vous ne voulez pas afficher Telegram Web. La liste est persistée dans `tenant_settings` sous `launcher.disabled_slugs`.
+
 ## 📍 Saisie manuelle d'emplacement (sans GPS) {#manual-location}
 
 Si votre Tesla ne fournit pas de GPS (typique des VIN XP7 sans Fleet Telemetry, ou lors de coupures), vous pouvez saisir l'emplacement de charge et les adresses de trajet à la main :

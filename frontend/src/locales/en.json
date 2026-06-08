@@ -101,7 +101,11 @@
     "group_admin": "Administration",
     "group_ai": "AI Assistant",
     "group_vehicle": "Vehicle",
-    "group_plan": "Planning"
+    "group_plan": "Planning",
+    "launcher": {
+      "label": "App hub",
+      "tooltip": "Curated web apps that run in the Tesla browser and that Tesla does not offer natively"
+    }
   },
   "dashboard": {
     "title": "Dashboard",
@@ -2581,6 +2585,38 @@
     "done": {
       "banner": "This step is already configured. Press “Next” to skip it, or adjust the values below.",
       "ownerSkipBanner": "This step requires the Tesla Fleet API. Not available in Owner-API mode — press “Next” to skip."
+    }
+  },
+  "launcher": {
+    "title": "App hub",
+    "subtitle": "Curated web apps for the Tesla browser — free, privacy-friendly, no duplicates of Tesla-native features.",
+    "empty": "No apps active. Ask your admin or check the admin configuration.",
+    "hintTitle": "How to use the apps",
+    "hintBody": "Open TeslaView in the Tesla browser, then tap a tile — the app opens in a new tab. Music & calls run via Bluetooth into the Tesla audio as usual (no setup needed). Spotify, Apple Music, games and streaming services are already native in Tesla — you will not find those here.",
+    "adminLink": "Manage apps (admin)",
+    "category": {
+      "all": "All",
+      "audio": "Audio",
+      "ev": "EV world",
+      "communication": "Messaging",
+      "knowledge": "Knowledge"
+    },
+    "app": {
+      "ardAudiothek": "ARD Audiothek",
+      "deutschlandfunk": "Deutschlandfunk live",
+      "goingelectric": "GoingElectric",
+      "electrive": "electrive",
+      "openChargeMap": "OpenChargeMap",
+      "abrp": "A Better Routeplanner",
+      "telegramWeb": "Telegram Web",
+      "signal": "Signal",
+      "wikipedia": "Wikipedia"
+    },
+    "note": {
+      "publicBroadcast": "Public broadcaster",
+      "noAccount": "No account needed",
+      "openSource": "Open source",
+      "freeWithAccount": "Free with account"
     }
   }
 }

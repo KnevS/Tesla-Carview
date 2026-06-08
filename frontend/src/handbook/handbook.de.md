@@ -462,6 +462,21 @@ Im **Betriebsbuch** dokumentierst du alles rund um den Fahrzeugbetrieb: Wartung,
 
 Damit lässt sich später nachvollziehen, wer welche Notiz oder Wartung dokumentiert hat — wichtig in Mandanten mit mehreren aktiven Benutzern.
 
+## 🚀 App-Hub (ab v3.9.0) {#app-hub}
+
+Unter `/launcher` findest du eine **kuratierte Liste von Web-Apps**, die im Tesla-Browser laufen und die Tesla nativ NICHT anbietet:
+
+- **Audio (ÖR)** — ARD Audiothek, Deutschlandfunk Live
+- **EV-Welt** — GoingElectric, electrive, OpenChargeMap, A Better Routeplanner
+- **Messaging** — Telegram Web, Signal (Tesla hat keinen nativen Chat)
+- **Wissen** — Wikipedia
+
+**Aufnahme-Kriterien:** kostenfrei, sicher (HTTPS), keine zwingende App-Store-Installation, datenschutzfreundlich, **kein Tesla-Native-Duplikat** (Spotify, Apple Music, Spiele, Karten, Streaming-Dienste sind bewusst NICHT enthalten — die hat Tesla bereits).
+
+**Audio im Tesla-Lautsprecher:** läuft wie immer via Bluetooth vom Smartphone — keine Konfiguration nötig.
+
+**Admin-Whitelist:** unter `/admin?tab=launcher` kannst du als Admin einzelne Apps pro Mandant ausblenden, z.B. wenn du Telegram Web nicht anzeigen willst. Die Liste wird in `tenant_settings` unter `launcher.disabled_slugs` persistiert.
+
 ## 📍 Ort manuell eintragen (ohne GPS) {#manual-location}
 
 Liefert dein Tesla keine GPS-Daten (typisch bei XP7-VIN ohne aktive Fleet Telemetry oder bei Verbindungs-Aussetzern), kannst du den Ladeort und Trip-Adressen manuell pflegen:

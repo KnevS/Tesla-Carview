@@ -101,7 +101,11 @@
     "group_admin": "Verwaltung",
     "group_ai": "KI-Assistent",
     "group_vehicle": "Fahrzeug",
-    "group_plan": "Planung"
+    "group_plan": "Planung",
+    "launcher": {
+      "label": "App-Hub",
+      "tooltip": "Kuratierte Web-Apps, die im Tesla-Browser laufen und Tesla nicht nativ bietet"
+    }
   },
   "dashboard": {
     "title": "Dashboard",
@@ -2581,6 +2585,38 @@
     "done": {
       "banner": "Dieser Schritt ist bereits eingerichtet. Klick auf „Weiter\", um ihn zu überspringen, oder passe die Werte unten an.",
       "ownerSkipBanner": "Dieser Schritt benötigt Tesla Fleet API. Im Owner-API-Modus nicht aktivierbar — bitte mit „Weiter\" überspringen."
+    }
+  },
+  "launcher": {
+    "title": "App-Hub",
+    "subtitle": "Kuratierte Web-Apps für den Tesla-Browser — kostenfrei, datenschutzfreundlich, ohne Doppelung zu Tesla-nativen Funktionen.",
+    "empty": "Keine Apps aktiv. Frag deinen Admin oder schau in die Admin-Konfiguration.",
+    "hintTitle": "So nutzt du die Apps optimal",
+    "hintBody": "Öffne TeslaView im Tesla-Browser, dann tippe auf eine Kachel — die App öffnet in einem neuen Tab. Musik & Anrufe laufen wie gewohnt via Bluetooth ins Tesla-Audio (kein Eingriff nötig). Spotify, Apple Music, Spiele und Streaming-Dienste hat Tesla bereits nativ — die findest du hier deshalb nicht.",
+    "adminLink": "Apps verwalten (Admin)",
+    "category": {
+      "all": "Alle",
+      "audio": "Audio",
+      "ev": "EV-Welt",
+      "communication": "Messaging",
+      "knowledge": "Wissen"
+    },
+    "app": {
+      "ardAudiothek": "ARD Audiothek",
+      "deutschlandfunk": "Deutschlandfunk Live",
+      "goingelectric": "GoingElectric",
+      "electrive": "electrive",
+      "openChargeMap": "OpenChargeMap",
+      "abrp": "A Better Routeplanner",
+      "telegramWeb": "Telegram Web",
+      "signal": "Signal",
+      "wikipedia": "Wikipedia"
+    },
+    "note": {
+      "publicBroadcast": "Öffentlich-rechtlich (GEZ-finanziert)",
+      "noAccount": "Kein Account nötig",
+      "openSource": "Open Source",
+      "freeWithAccount": "Kostenfrei mit Account"
     }
   }
 }

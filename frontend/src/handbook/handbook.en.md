@@ -462,6 +462,21 @@ Use the **service log** to document everything around vehicle operation: mainten
 
 This makes it possible to trace later who recorded which note or maintenance — important in tenants with multiple active users.
 
+## 🚀 App hub (from v3.9.0) {#app-hub}
+
+`/launcher` ships a **curated list of web apps** that run in the Tesla browser and that Tesla does NOT offer natively:
+
+- **Audio (public broadcasters)** — ARD Audiothek, Deutschlandfunk live
+- **EV world** — GoingElectric, electrive, OpenChargeMap, A Better Routeplanner
+- **Messaging** — Telegram Web, Signal (Tesla has no native chat)
+- **Knowledge** — Wikipedia
+
+**Inclusion criteria:** free, secure (HTTPS), no forced app-store install, privacy-friendly, **no Tesla-native duplicates** (Spotify, Apple Music, games, maps, streaming services are intentionally NOT included — Tesla already offers them).
+
+**Audio through the Tesla speakers:** runs via Bluetooth from your phone as always — no setup needed.
+
+**Admin whitelist:** under `/admin?tab=launcher` an admin can hide individual apps per tenant, e.g. if you do not want to show Telegram Web. The list persists in `tenant_settings` under `launcher.disabled_slugs`.
+
 ## 📍 Manual location entry (no GPS) {#manual-location}
 
 If your Tesla doesn't deliver GPS (typical for XP7-VIN cars without active Fleet Telemetry, or during connection drops), you can keep the charging location and trip addresses by hand:

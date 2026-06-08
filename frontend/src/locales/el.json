@@ -101,7 +101,11 @@
     "group_admin": "Διαχείριση",
     "group_ai": "Βοηθός ΑΙ",
     "group_vehicle": "Όχημα",
-    "group_plan": "Σχεδιασμός"
+    "group_plan": "Σχεδιασμός",
+    "launcher": {
+      "label": "Κέντρο εφαρμογών",
+      "tooltip": "Επιμελημένες web εφαρμογές που τρέχουν στον περιηγητή Tesla και δεν προσφέρονται γηγενώς από την Tesla"
+    }
   },
   "dashboard": {
     "title": "Πίνακας ελέγχου",
@@ -2582,5 +2586,37 @@
   "notices": {
     "dismiss": "Κατανοητό, απόκρυψη",
     "adminOnly": "Μόνο οι διαχειριστές μπορούν να απορρίψουν αυτήν την ειδοποίηση."
+  },
+  "launcher": {
+    "title": "Κέντρο εφαρμογών",
+    "subtitle": "Επιμελημένες web εφαρμογές για τον περιηγητή Tesla — δωρεάν, φιλικές στην ιδιωτικότητα, χωρίς διπλασιασμό των γηγενών λειτουργιών Tesla.",
+    "empty": "Καμία εφαρμογή ενεργή. Ρωτήστε τον διαχειριστή σας ή ελέγξτε τη διαμόρφωση διαχειριστή.",
+    "hintTitle": "Πώς να χρησιμοποιήσετε τις εφαρμογές",
+    "hintBody": "Ανοίξτε το TeslaView στον περιηγητή Tesla, μετά πατήστε μια πλακίδα — η εφαρμογή ανοίγει σε νέα καρτέλα. Μουσική και κλήσεις λειτουργούν μέσω Bluetooth στον ήχο Tesla όπως συνήθως (καμία ρύθμιση). Spotify, Apple Music, παιχνίδια και υπηρεσίες streaming είναι ήδη γηγενείς στο Tesla — δεν θα τις βρείτε εδώ.",
+    "adminLink": "Διαχείριση εφαρμογών (διαχειριστής)",
+    "category": {
+      "all": "Όλες",
+      "audio": "Ήχος",
+      "ev": "Κόσμος EV",
+      "communication": "Μηνύματα",
+      "knowledge": "Γνώση"
+    },
+    "app": {
+      "ardAudiothek": "ARD Audiothek",
+      "deutschlandfunk": "Deutschlandfunk ζωντανά",
+      "goingelectric": "GoingElectric",
+      "electrive": "electrive",
+      "openChargeMap": "OpenChargeMap",
+      "abrp": "A Better Routeplanner",
+      "telegramWeb": "Telegram Web",
+      "signal": "Signal",
+      "wikipedia": "Wikipedia"
+    },
+    "note": {
+      "publicBroadcast": "Δημόσιος ραδιοτηλεοπτικός",
+      "noAccount": "Χωρίς λογαριασμό",
+      "openSource": "Ανοιχτού κώδικα",
+      "freeWithAccount": "Δωρεάν με λογαριασμό"
+    }
   }
 }

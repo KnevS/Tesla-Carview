@@ -7,6 +7,48 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.9.0] - 2026-06-08
+
+### Hinzugefügt — App-Hub (`/launcher`)
+
+Neue View mit **kuratiertem Katalog von Web-Apps**, die im Tesla-Browser laufen und die Tesla nativ NICHT anbietet:
+
+- **Audio (ÖR)**: ARD Audiothek, Deutschlandfunk Live
+- **EV-Welt**: GoingElectric, electrive, OpenChargeMap, A Better Routeplanner
+- **Messaging**: Telegram Web, Signal
+- **Wissen**: Wikipedia
+
+Aufnahme-Kriterien strikt: kostenfrei, sicher (HTTPS), keine zwingende App-Store-Installation, datenschutzfreundlich, **kein Tesla-Native-Duplikat** — Spotify, Apple Music, Spiele, Karten und Streaming-Dienste sind bewusst nicht enthalten, weil Tesla das schon liefert.
+
+### Backend
+
+- Neuer Service `launcherCatalog.js` mit statischem Katalog + Tenant-Whitelist via `tenant_settings['launcher.disabled_slugs']`
+- Routes:
+  - `GET  /api/launcher/apps` — gefilterter Katalog für den Tenant
+  - `GET  /api/launcher/admin` — voller Katalog mit `enabled`-Flag (Admin-only)
+  - `POST /api/launcher/admin/disable/:slug` — App ausblenden
+  - `POST /api/launcher/admin/enable/:slug` — App wieder einblenden
+- Beide Mutations schreiben Audit-Log
+
+### Frontend
+
+- Neue `Launcher.vue` mit Touch-optimiertem Tile-Grid (Tesla-Browser-friendly: große Buttons, dark mode, kein Bluetooth/Mikrofon nötig)
+- Category-Filter (Audio/EV/Messaging/Wissen)
+- Nav-Eintrag „App-Hub" 🚀 in der Planung-Gruppe
+- Hinweis-Sektion: erklärt warum Spotify/Apple Music/Spiele bewusst fehlen (Tesla-Native)
+
+### Doku
+
+- Sektion `{#app-hub}` in allen 6 Sprachen
+- 33 neue i18n-Keys × 6 Sprachen (App-Labels, Notes, Kategorien, Hilfetexte)
+- Nav-Label + Tooltip 6-sprachig
+
+### Datenkonzept
+
+Apps öffnen in neuem Tab — kein Proxy, kein TeslaView-Backend-Traffic. Sven's Audio läuft wie immer via Bluetooth ins Tesla-Audio (kein Software-Eingriff nötig).
+
+---
+
 ## [v3.8.0] - 2026-06-08
 
 ### Hinzugefügt — Automatische Adress-Auflösung aus GPS

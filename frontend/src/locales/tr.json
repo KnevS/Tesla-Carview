@@ -101,7 +101,11 @@
     "group_admin": "Yönetim",
     "group_ai": "Yapay Zeka",
     "group_vehicle": "Araç",
-    "group_plan": "Planlama"
+    "group_plan": "Planlama",
+    "launcher": {
+      "label": "Uygulama merkezi",
+      "tooltip": "Tesla tarayıcısında çalışan ve Tesla'nın yerel olarak sunmadığı seçilmiş web uygulamaları"
+    }
   },
   "dashboard": {
     "title": "Gösterge paneli",
@@ -2582,5 +2586,37 @@
   "notices": {
     "dismiss": "Anladım, gizle",
     "adminOnly": "Bu bildirimi yalnızca yöneticiler kapatabilir."
+  },
+  "launcher": {
+    "title": "Uygulama merkezi",
+    "subtitle": "Tesla tarayıcısı için seçilmiş web uygulamaları — ücretsiz, gizliliğe saygılı, Tesla yerel fonksiyonlarını çoğaltmaz.",
+    "empty": "Aktif uygulama yok. Yöneticinize sorun veya yönetici yapılandırmasını kontrol edin.",
+    "hintTitle": "Uygulamaları nasıl kullanırım",
+    "hintBody": "TeslaView'i Tesla tarayıcısında açın, sonra bir karoya dokunun — uygulama yeni sekmede açılır. Müzik ve aramalar her zamanki gibi Bluetooth üzerinden Tesla sesine gider (kurulum gerekmez). Spotify, Apple Music, oyunlar ve yayın hizmetleri zaten Tesla'da yerel — burada bulamazsınız.",
+    "adminLink": "Uygulamaları yönet (yönetici)",
+    "category": {
+      "all": "Tümü",
+      "audio": "Ses",
+      "ev": "EV dünyası",
+      "communication": "Mesajlaşma",
+      "knowledge": "Bilgi"
+    },
+    "app": {
+      "ardAudiothek": "ARD Audiothek",
+      "deutschlandfunk": "Deutschlandfunk canlı",
+      "goingelectric": "GoingElectric",
+      "electrive": "electrive",
+      "openChargeMap": "OpenChargeMap",
+      "abrp": "A Better Routeplanner",
+      "telegramWeb": "Telegram Web",
+      "signal": "Signal",
+      "wikipedia": "Wikipedia"
+    },
+    "note": {
+      "publicBroadcast": "Kamu yayıncısı",
+      "noAccount": "Hesap gerekmez",
+      "openSource": "Açık kaynak",
+      "freeWithAccount": "Hesapla ücretsiz"
+    }
   }
 }

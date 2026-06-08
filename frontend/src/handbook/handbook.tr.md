@@ -448,6 +448,21 @@ Araçta bir **Monta Charge-Point ID** yapılandırıldığında, senkronizasyond
 
 Bu sayede daha sonra hangi notu veya bakımı kimin kaydettiği takip edilebilir — birden fazla aktif kullanıcısı olan kiracılarda özellikle yararlıdır.
 
+## 🚀 Uygulama merkezi (v3.9.0'dan itibaren) {#app-hub}
+
+`/launcher` Tesla tarayıcısında çalışan ve Tesla'nın yerel olarak SUNMADIĞI **seçilmiş web uygulamaları listesi** sunar:
+
+- **Ses (kamu yayıncıları)** — ARD Audiothek, Deutschlandfunk canlı
+- **EV dünyası** — GoingElectric, electrive, OpenChargeMap, A Better Routeplanner
+- **Mesajlaşma** — Telegram Web, Signal (Tesla'da yerel sohbet yok)
+- **Bilgi** — Wikipedia
+
+**Dahil edilme kriterleri:** ücretsiz, güvenli (HTTPS), zorunlu uygulama mağazası kurulumu yok, gizliliğe saygılı, **Tesla yerel çoğaltması yok** (Spotify, Apple Music, oyunlar, haritalar, yayın hizmetleri kasıtlı olarak yok — Tesla zaten sunuyor).
+
+**Tesla hoparlörlerinden ses:** her zamanki gibi telefonunuzdan Bluetooth ile geçer — yapılandırma yok.
+
+**Yönetici beyaz listesi:** `/admin?tab=launcher` altında yönetici, kiracı başına uygulamaları gizleyebilir, örn. Telegram Web göstermek istemiyorsanız. Liste `tenant_settings` içinde `launcher.disabled_slugs` altında saklanır.
+
 ## 📍 Konumu manuel girme (GPS olmadan) {#manual-location}
 
 Tesla'n GPS göndermiyorsa (Fleet Telemetry'siz XP7-VIN'lerde veya bağlantı kesintilerinde tipik), şarj konumunu ve yolculuk adreslerini elle güncelleyebilirsin:
