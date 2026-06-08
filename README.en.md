@@ -31,7 +31,9 @@ Runs on: **Linux servers** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), local
 
 Tesla closed the **unofficial Owner API** for vehicle endpoints between May and June 2026. The previously common community workaround (signing in with a Tesla account refresh token, calling `/api/1/vehicles/{id}/vehicle_data`) now returns **HTTP 401 "invalid bearer token"** — the workaround is dead and no patch can revive it.
 
-For live vehicle data (battery, climate, TPMS, telemetry stream) there is **only one official path**: the Tesla **Fleet API** with app approval via [developer.tesla.com](https://developer.tesla.com/). Current waiting time is **weeks to months**, ~€10/month running cost.
+For live vehicle data (battery, climate, TPMS, telemetry stream) there is **only one official path**: the Tesla **Fleet API** with app approval via [developer.tesla.com](https://developer.tesla.com/). Current waiting time is **weeks to months**.
+
+**💡 Tesla free tier — typical private use costs €0/month:** Tesla grants **$10 of free credit per account per month** — enough to cover telemetry stream for one vehicle + daily commands. Beyond that it's pay-as-you-go (150,000 stream signals = $1, 1,000 commands = $1, 50 wake-ups = $1). TeslaView is fully wired up — the moment your app is approved, every feature is live instantly. The wait is purely on Tesla's side; TeslaView itself is always free.
 
 **What TeslaView still delivers without Fleet API approval:**
 

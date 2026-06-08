@@ -31,7 +31,9 @@ Funciona en: **servidores Linux** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7)
 
 Tesla cerró la **Owner API no oficial** para los endpoints de vehículos entre mayo y junio de 2026. El workaround habitual de la comunidad (iniciar sesión con un refresh token de cuenta de Tesla y llamar a `/api/1/vehicles/{id}/vehicle_data`) ahora devuelve **HTTP 401 "invalid bearer token"** — el truco ha muerto y ningún parche puede resucitarlo.
 
-Para los datos del vehículo en tiempo real (batería, climatización, TPMS, stream de telemetría) solo queda **una vía oficial**: la **Fleet API** de Tesla con aprobación de la aplicación a través de [developer.tesla.com](https://developer.tesla.com/). El tiempo de espera actual es de **semanas a meses**, con un coste operativo de ~10 €/mes.
+Para los datos del vehículo en tiempo real (batería, climatización, TPMS, stream de telemetría) solo queda **una vía oficial**: la **Fleet API** de Tesla con aprobación de la aplicación a través de [developer.tesla.com](https://developer.tesla.com/). El tiempo de espera actual es de **semanas a meses**.
+
+**💡 Crédito gratuito de Tesla — el uso privado típico cuesta 0 €/mes:** Tesla concede **10 USD de crédito gratuito por cuenta y mes** — habitualmente suficiente para cubrir el stream de telemetría de un vehículo y los comandos diarios. Por encima, se factura por uso (150 000 señales de stream = 1 USD, 1 000 comandos = 1 USD, 50 wake-ups = 1 USD). TeslaView ya está totalmente preparado — en el momento en que se apruebe tu aplicación, todas las funciones quedan activas al instante. La espera está exclusivamente del lado de Tesla; TeslaView siempre es gratuito.
 
 **Lo que TeslaView sigue ofreciendo sin aprobación de la Fleet API:**
 

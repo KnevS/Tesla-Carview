@@ -31,7 +31,9 @@ tüm araç verileriniz kendi sunucunuzda kalır.
 
 Tesla, **resmi olmayan Owner API**'nin araç uç noktalarını Mayıs ile Haziran 2026 arasında kapattı. Daha önce yaygın olarak kullanılan topluluk çözümü (bir Tesla hesabı refresh token ile oturum açıp `/api/1/vehicles/{id}/vehicle_data` çağrısı yapma) artık **HTTP 401 "invalid bearer token"** döndürüyor — bu yöntem öldü ve hiçbir yamayla yeniden canlandırılamaz.
 
-Canlı araç verileri (batarya, klima, TPMS, telemetri akışı) için **tek bir resmi yol** vardır: [developer.tesla.com](https://developer.tesla.com/) üzerinden uygulama onayıyla Tesla **Fleet API**. Güncel bekleme süresi **haftalar ile aylar** arasında, çalışma maliyeti ~10 €/ay.
+Canlı araç verileri (batarya, klima, TPMS, telemetri akışı) için **tek bir resmi yol** vardır: [developer.tesla.com](https://developer.tesla.com/) üzerinden uygulama onayıyla Tesla **Fleet API**. Güncel bekleme süresi **haftalar ile aylar** arasında.
+
+**💡 Tesla ücretsiz kotası — tipik özel kullanım 0 €/ay:** Tesla, **hesap başına ayda 10 USD ücretsiz kredi** sunuyor — bu genellikle bir araç için telemetri akışını ve günlük komutları tamamen karşılıyor. Bunun üzerinde pay-as-you-go (150.000 stream sinyali = 1 USD, 1.000 komut = 1 USD, 50 wake-up = 1 USD). TeslaView tamamen hazır — uygulamanız onaylandığı anda tüm özellikler hemen etkin olur. Bekleme tamamen Tesla tarafındadır; TeslaView her zaman ücretsiz kalır.
 
 **Fleet API onayı olmadan TeslaView'in hâlâ sunduğu özellikler:**
 
