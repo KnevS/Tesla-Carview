@@ -9,6 +9,8 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ## [v3.9.1] - 2026-06-08
 
+> Hinweis: der erste Deploy-Lauf scheiterte am Backend-Container-Stop-Race; ein Re-Trigger via Empty-Commit hat das aufgelöst.
+
 ### Behoben
 
 - **Signal aus App-Hub-Katalog entfernt**: Signal hat keine Web-App, `signal.org` ist nur die Marketing-Seite — im Tesla-Browser nutzlos. Eintrag wurde komplett aus dem Katalog gestrichen.
