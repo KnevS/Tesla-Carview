@@ -865,7 +865,27 @@
       "initialKm": "Odometer at purchase",
       "initialKmPlaceholder": "e.g. 12345",
       "initialKmHint": "Subtracted from the current odometer to compute distance driven during ownership.",
-      "currentKm": "Current odometer"
+      "currentKm": "Current odometer",
+      "purchaseType": {
+        "purchase": "Purchase",
+        "leasing": "Leasing"
+      },
+      "leasing": {
+        "startDate": "Lease start date",
+        "termMonths": "Term (months)",
+        "termPlaceholder": "e.g. 48",
+        "downPayment": "Down payment",
+        "monthlyRate": "Monthly rate",
+        "buyback": "Residual / buyback value",
+        "buybackPlaceholder": "empty if not bought",
+        "buybackHint": "Counted only after term ends (or upon early buyback).",
+        "includedKm": "Included km (total)",
+        "includedKmPlaceholder": "e.g. 60000",
+        "includedKmHint": "Total km over the full term. Prorated against months actually elapsed.",
+        "extraKmRate": "Extra-km rate",
+        "extraKmRatePlaceholder": "e.g. 0.12",
+        "extraKmCosts": "Extra-km cost (so far)"
+      }
     },
     "jumpToBase": "Open master data now"
   },

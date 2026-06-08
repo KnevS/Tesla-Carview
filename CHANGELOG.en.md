@@ -7,6 +7,42 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.20.0] - 2026-06-08
+
+### Added — TCO cockpit leasing extension
+
+Until now the TCO cockpit only modeled purchased vehicles cleanly. It now also supports leasing contracts with full cost breakdown.
+
+**Schema (vehicles table, new columns):**
+- `is_leasing` (0/1) — financing type
+- `leasing_down_payment_eur` — down payment
+- `leasing_monthly_rate_eur` — monthly rate
+- `leasing_term_months` — contract term
+- `leasing_buyback_eur` — residual/buyback price (counted only after term ends or on early buyback)
+- `leasing_included_km` — total included km
+- `leasing_extra_km_rate_eur` — €/km for extra distance
+
+**TCO computation under leasing:**
+- Depreciation cost = down payment + (months elapsed × monthly rate) + buyback (if term ended)
+- Extra-km cost = max(0, driven_km − prorated_expected_km) × rate
+- Purchase logic unchanged (`depreciation_kind: 'purchase' | 'leasing'`)
+
+**Tco.vue frontend:**
+- "💶 Purchase" / "📄 Leasing" toggle at the top of the master-data form
+- Under leasing: down payment, monthly rate, term, buyback, included km, extra-km rate (instead of purchase/sale price)
+- Read mode shows the financing type as a badge
+- Extra-km cost is shown in read mode as an amber warning once > 0
+
+**i18n (all 7 languages):**
+- New keys `tco.base.purchaseType.purchase` + `tco.base.purchaseType.leasing`
+- New subsection `tco.base.leasing.*` with 12 keys (startDate, termMonths, downPayment, monthlyRate, buyback, includedKm, extraKmRate, etc. + tooltips)
+
+### Fixed — Marketing site: bento cards 9-12 missing grid classes
+
+The cards App-Hub, Nearby, Charging-locations-with-auto-limit and OwnTracks-validation were only marked as `.b-card` without a `.b-N` class. That meant they fell out of the `repeat(12, 1fr)` grid and rendered "naked" stacked below each other. Fix: `.b-9` span 8, `.b-10` span 4, `.b-11` span 7, `.b-12` span 5; plus responsive steps for tablet and mobile.
+
+---
+
 ## [v3.19.0] - 2026-06-08
 
 ### Added — Full multilingual coverage (sprint "Complete 7-language coverage")

@@ -2639,7 +2639,27 @@
       "initialKm": "Odómetro en la compra",
       "initialKmPlaceholder": "p. ej. 12345",
       "initialKmHint": "Se resta del odómetro actual para calcular la distancia recorrida durante la propiedad.",
-      "currentKm": "Odómetro actual"
+      "currentKm": "Odómetro actual",
+      "purchaseType": {
+        "purchase": "Compra",
+        "leasing": "Leasing"
+      },
+      "leasing": {
+        "startDate": "Inicio del leasing",
+        "termMonths": "Plazo (meses)",
+        "termPlaceholder": "p. ej. 48",
+        "downPayment": "Entrada inicial",
+        "monthlyRate": "Cuota mensual",
+        "buyback": "Valor residual / recompra",
+        "buybackPlaceholder": "vacío si no se compra",
+        "buybackHint": "Solo se incluye al final del contrato (o al ejercer la recompra).",
+        "includedKm": "Kilómetros incluidos (total)",
+        "includedKmPlaceholder": "p. ej. 60000",
+        "includedKmHint": "Total de km durante toda la duración. Prorrateado por los meses transcurridos.",
+        "extraKmRate": "Tarifa de km adicionales",
+        "extraKmRatePlaceholder": "p. ej. 0,12",
+        "extraKmCosts": "Coste por km adicionales (hasta ahora)"
+      }
     },
     "jumpToBase": "Abrir datos maestros ahora"
   },

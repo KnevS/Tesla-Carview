@@ -189,24 +189,78 @@
           </button>
         </div>
         <div v-if="baseFormOpen" class="space-y-3">
+          <!-- Finanzierungs-Typ-Wahl: Kauf vs. Leasing -->
+          <div class="flex gap-2 text-xs">
+            <button type="button"
+                    @click="baseForm.is_leasing = false"
+                    :class="['flex-1 px-3 py-2 rounded border', !baseForm.is_leasing ? 'bg-blue-500/20 border-blue-500/60 text-blue-200' : 'border-gray-700 text-gray-400']">
+              💶 {{ $t('tco.base.purchaseType.purchase') }}
+            </button>
+            <button type="button"
+                    @click="baseForm.is_leasing = true"
+                    :class="['flex-1 px-3 py-2 rounded border', baseForm.is_leasing ? 'bg-blue-500/20 border-blue-500/60 text-blue-200' : 'border-gray-700 text-gray-400']">
+              📄 {{ $t('tco.base.purchaseType.leasing') }}
+            </button>
+          </div>
+
           <div class="grid grid-cols-2 gap-3">
-            <label class="block text-xs">
-              <span class="text-gray-400">{{ $t('tco.base.purchasePrice') }} (EUR)</span>
-              <input type="number" step="0.01" v-model="baseForm.purchase_price_eur" class="mt-1 input w-full" />
-            </label>
-            <label class="block text-xs">
-              <span class="text-gray-400">{{ $t('tco.base.purchaseDate') }}</span>
-              <input type="date" v-model="baseForm.purchase_date_str" class="mt-1 input w-full" />
-            </label>
-            <label class="block text-xs">
-              <span class="text-gray-400">{{ $t('tco.base.salePrice') }} (EUR)</span>
-              <input type="number" step="0.01" v-model="baseForm.sale_price_eur" class="mt-1 input w-full"
-                     :placeholder="$t('tco.base.salePricePlaceholder')" />
-            </label>
-            <label class="block text-xs">
-              <span class="text-gray-400">{{ $t('tco.base.saleDate') }}</span>
-              <input type="date" v-model="baseForm.sale_date_str" class="mt-1 input w-full" />
-            </label>
+            <template v-if="!baseForm.is_leasing">
+              <label class="block text-xs">
+                <span class="text-gray-400">{{ $t('tco.base.purchasePrice') }} (EUR)</span>
+                <input type="number" step="0.01" v-model="baseForm.purchase_price_eur" class="mt-1 input w-full" />
+              </label>
+              <label class="block text-xs">
+                <span class="text-gray-400">{{ $t('tco.base.purchaseDate') }}</span>
+                <input type="date" v-model="baseForm.purchase_date_str" class="mt-1 input w-full" />
+              </label>
+              <label class="block text-xs">
+                <span class="text-gray-400">{{ $t('tco.base.salePrice') }} (EUR)</span>
+                <input type="number" step="0.01" v-model="baseForm.sale_price_eur" class="mt-1 input w-full"
+                       :placeholder="$t('tco.base.salePricePlaceholder')" />
+              </label>
+              <label class="block text-xs">
+                <span class="text-gray-400">{{ $t('tco.base.saleDate') }}</span>
+                <input type="date" v-model="baseForm.sale_date_str" class="mt-1 input w-full" />
+              </label>
+            </template>
+
+            <template v-else>
+              <label class="block text-xs">
+                <span class="text-gray-400">{{ $t('tco.base.leasing.startDate') }}</span>
+                <input type="date" v-model="baseForm.purchase_date_str" class="mt-1 input w-full" />
+              </label>
+              <label class="block text-xs">
+                <span class="text-gray-400">{{ $t('tco.base.leasing.termMonths') }}</span>
+                <input type="number" step="1" v-model="baseForm.leasing_term_months" class="mt-1 input w-full"
+                       :placeholder="$t('tco.base.leasing.termPlaceholder')" />
+              </label>
+              <label class="block text-xs">
+                <span class="text-gray-400">{{ $t('tco.base.leasing.downPayment') }} (EUR)</span>
+                <input type="number" step="0.01" v-model="baseForm.leasing_down_payment_eur" class="mt-1 input w-full" />
+              </label>
+              <label class="block text-xs">
+                <span class="text-gray-400">{{ $t('tco.base.leasing.monthlyRate') }} (EUR)</span>
+                <input type="number" step="0.01" v-model="baseForm.leasing_monthly_rate_eur" class="mt-1 input w-full" />
+              </label>
+              <label class="block text-xs">
+                <span class="text-gray-400">{{ $t('tco.base.leasing.buyback') }} (EUR)</span>
+                <input type="number" step="0.01" v-model="baseForm.leasing_buyback_eur" class="mt-1 input w-full"
+                       :placeholder="$t('tco.base.leasing.buybackPlaceholder')" />
+                <span class="text-[11px] text-gray-500">{{ $t('tco.base.leasing.buybackHint') }}</span>
+              </label>
+              <label class="block text-xs">
+                <span class="text-gray-400">{{ $t('tco.base.leasing.includedKm') }}</span>
+                <input type="number" step="1000" v-model="baseForm.leasing_included_km" class="mt-1 input w-full"
+                       :placeholder="$t('tco.base.leasing.includedKmPlaceholder')" />
+                <span class="text-[11px] text-gray-500">{{ $t('tco.base.leasing.includedKmHint') }}</span>
+              </label>
+              <label class="block text-xs col-span-2">
+                <span class="text-gray-400">{{ $t('tco.base.leasing.extraKmRate') }} (EUR/km)</span>
+                <input type="number" step="0.001" v-model="baseForm.leasing_extra_km_rate_eur" class="mt-1 input w-full"
+                       :placeholder="$t('tco.base.leasing.extraKmRatePlaceholder')" />
+              </label>
+            </template>
+
             <label class="block text-xs">
               <span class="text-gray-400">{{ $t('tco.base.insurance') }} (EUR/{{ $t('tco.base.perYear') }})</span>
               <input type="number" step="0.01" v-model="baseForm.insurance_eur_year" class="mt-1 input w-full" />
@@ -228,14 +282,42 @@
           </div>
         </div>
         <dl v-else class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
-          <div><dt class="text-xs text-gray-500">{{ $t('tco.base.purchasePrice') }}</dt>
-               <dd class="font-medium">{{ fmtEurOrDash(data.vehicle.purchase_price_eur) }}</dd></div>
-          <div><dt class="text-xs text-gray-500">{{ $t('tco.base.purchaseDate') }}</dt>
-               <dd class="font-medium">{{ data.vehicle.purchase_date ? fmtDate(data.vehicle.purchase_date) : '—' }}</dd></div>
-          <div><dt class="text-xs text-gray-500">{{ $t('tco.base.salePrice') }}</dt>
-               <dd class="font-medium">{{ fmtEurOrDash(data.vehicle.sale_price_eur) }}</dd></div>
-          <div><dt class="text-xs text-gray-500">{{ $t('tco.base.saleDate') }}</dt>
-               <dd class="font-medium">{{ data.vehicle.sale_date ? fmtDate(data.vehicle.sale_date) : '—' }}</dd></div>
+          <div class="col-span-2 mb-1">
+            <span class="inline-block px-2 py-0.5 rounded text-[11px] font-semibold"
+                  :class="data.vehicle.is_leasing ? 'bg-purple-500/15 text-purple-300' : 'bg-blue-500/15 text-blue-300'">
+              {{ data.vehicle.is_leasing ? ('📄 ' + $t('tco.base.purchaseType.leasing')) : ('💶 ' + $t('tco.base.purchaseType.purchase')) }}
+            </span>
+          </div>
+          <template v-if="!data.vehicle.is_leasing">
+            <div><dt class="text-xs text-gray-500">{{ $t('tco.base.purchasePrice') }}</dt>
+                 <dd class="font-medium">{{ fmtEurOrDash(data.vehicle.purchase_price_eur) }}</dd></div>
+            <div><dt class="text-xs text-gray-500">{{ $t('tco.base.purchaseDate') }}</dt>
+                 <dd class="font-medium">{{ data.vehicle.purchase_date ? fmtDate(data.vehicle.purchase_date) : '—' }}</dd></div>
+            <div><dt class="text-xs text-gray-500">{{ $t('tco.base.salePrice') }}</dt>
+                 <dd class="font-medium">{{ fmtEurOrDash(data.vehicle.sale_price_eur) }}</dd></div>
+            <div><dt class="text-xs text-gray-500">{{ $t('tco.base.saleDate') }}</dt>
+                 <dd class="font-medium">{{ data.vehicle.sale_date ? fmtDate(data.vehicle.sale_date) : '—' }}</dd></div>
+          </template>
+          <template v-else>
+            <div><dt class="text-xs text-gray-500">{{ $t('tco.base.leasing.startDate') }}</dt>
+                 <dd class="font-medium">{{ data.vehicle.purchase_date ? fmtDate(data.vehicle.purchase_date) : '—' }}</dd></div>
+            <div><dt class="text-xs text-gray-500">{{ $t('tco.base.leasing.termMonths') }}</dt>
+                 <dd class="font-medium">{{ data.vehicle.leasing_term_months != null ? data.vehicle.leasing_term_months + ' Mon.' : '—' }}</dd></div>
+            <div><dt class="text-xs text-gray-500">{{ $t('tco.base.leasing.downPayment') }}</dt>
+                 <dd class="font-medium">{{ fmtEurOrDash(data.vehicle.leasing_down_payment_eur) }}</dd></div>
+            <div><dt class="text-xs text-gray-500">{{ $t('tco.base.leasing.monthlyRate') }}</dt>
+                 <dd class="font-medium">{{ fmtEurOrDash(data.vehicle.leasing_monthly_rate_eur) }}{{ data.vehicle.leasing_monthly_rate_eur != null ? ' / Mon.' : '' }}</dd></div>
+            <div><dt class="text-xs text-gray-500">{{ $t('tco.base.leasing.buyback') }}</dt>
+                 <dd class="font-medium">{{ fmtEurOrDash(data.vehicle.leasing_buyback_eur) }}</dd></div>
+            <div><dt class="text-xs text-gray-500">{{ $t('tco.base.leasing.includedKm') }}</dt>
+                 <dd class="font-medium">{{ data.vehicle.leasing_included_km != null ? fmtKm(data.vehicle.leasing_included_km) : '—' }}</dd></div>
+            <div><dt class="text-xs text-gray-500">{{ $t('tco.base.leasing.extraKmRate') }}</dt>
+                 <dd class="font-medium">{{ data.vehicle.leasing_extra_km_rate_eur != null ? (data.vehicle.leasing_extra_km_rate_eur.toFixed(3) + ' €/km') : '—' }}</dd></div>
+            <div v-if="data.summary.leasing_extra_km_eur != null && data.summary.leasing_extra_km_eur > 0">
+              <dt class="text-xs text-amber-400">{{ $t('tco.base.leasing.extraKmCosts') }}</dt>
+              <dd class="font-medium text-amber-300">{{ fmtEurOrDash(data.summary.leasing_extra_km_eur) }}</dd>
+            </div>
+          </template>
           <div><dt class="text-xs text-gray-500">{{ $t('tco.base.insurance') }}</dt>
                <dd class="font-medium">{{ fmtEurOrDash(data.vehicle.insurance_eur_year) }}{{ data.vehicle.insurance_eur_year != null ? ' / ' + $t('tco.base.perYear') : '' }}</dd></div>
           <div><dt class="text-xs text-gray-500">{{ $t('tco.base.tax') }}</dt>
@@ -270,9 +352,14 @@ const error   = ref('');
 
 const canEdit = computed(() => auth.user?.role === 'admin');
 
-const hasMinimalData = computed(() =>
-  !!(data.value?.vehicle?.purchase_price_eur && data.value?.vehicle?.purchase_date)
-);
+const hasMinimalData = computed(() => {
+  const v = data.value?.vehicle;
+  if (!v) return false;
+  // Leasing: Startdatum + Monatsrate reichen fuer eine sinnvolle TCO
+  if (v.is_leasing) return !!(v.purchase_date && v.leasing_monthly_rate_eur);
+  // Kauf: Anschaffungspreis + Datum
+  return !!(v.purchase_price_eur && v.purchase_date);
+});
 
 const breakdownRows = computed(() => {
   if (!data.value) return [];
@@ -365,6 +452,7 @@ function jumpToBaseForm() {
 function openBaseForm() {
   const v = data.value.vehicle;
   baseForm.value = {
+    is_leasing:          !!v.is_leasing,
     purchase_price_eur:  v.purchase_price_eur,
     purchase_date_str:   v.purchase_date  ? new Date(v.purchase_date  * 1000).toISOString().slice(0, 10) : '',
     sale_price_eur:      v.sale_price_eur,
@@ -372,6 +460,12 @@ function openBaseForm() {
     insurance_eur_year:  v.insurance_eur_year,
     tax_eur_year:        v.tax_eur_year,
     initial_odometer_km: v.initial_odometer_km,
+    leasing_down_payment_eur:  v.leasing_down_payment_eur,
+    leasing_monthly_rate_eur:  v.leasing_monthly_rate_eur,
+    leasing_term_months:       v.leasing_term_months,
+    leasing_buyback_eur:       v.leasing_buyback_eur,
+    leasing_included_km:       v.leasing_included_km,
+    leasing_extra_km_rate_eur: v.leasing_extra_km_rate_eur,
   };
   baseFormOpen.value = true;
 }
@@ -380,6 +474,7 @@ async function saveBase() {
   if (!data.value) return;
   const f = baseForm.value;
   const body = {
+    is_leasing:          !!f.is_leasing,
     purchase_price_eur:  f.purchase_price_eur === '' ? null : f.purchase_price_eur,
     purchase_date:       f.purchase_date_str ? Math.floor(new Date(f.purchase_date_str).getTime() / 1000) : null,
     sale_price_eur:      f.sale_price_eur === '' ? null : f.sale_price_eur,
@@ -387,6 +482,12 @@ async function saveBase() {
     insurance_eur_year:  f.insurance_eur_year === '' ? null : f.insurance_eur_year,
     tax_eur_year:        f.tax_eur_year === '' ? null : f.tax_eur_year,
     initial_odometer_km: f.initial_odometer_km === '' ? null : f.initial_odometer_km,
+    leasing_down_payment_eur:  f.leasing_down_payment_eur === '' ? null : f.leasing_down_payment_eur,
+    leasing_monthly_rate_eur:  f.leasing_monthly_rate_eur === '' ? null : f.leasing_monthly_rate_eur,
+    leasing_term_months:       f.leasing_term_months === '' ? null : f.leasing_term_months,
+    leasing_buyback_eur:       f.leasing_buyback_eur === '' ? null : f.leasing_buyback_eur,
+    leasing_included_km:       f.leasing_included_km === '' ? null : f.leasing_included_km,
+    leasing_extra_km_rate_eur: f.leasing_extra_km_rate_eur === '' ? null : f.leasing_extra_km_rate_eur,
   };
   try {
     const r = await api.patch(`/tco/vehicles/${data.value.vehicle.id}`, body);

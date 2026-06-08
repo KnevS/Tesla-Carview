@@ -2639,7 +2639,27 @@
       "initialKm": "Satın alımdaki kilometre sayacı",
       "initialKmPlaceholder": "örn. 12345",
       "initialKmHint": "Sahiplik sırasında katedilen mesafeyi hesaplamak için mevcut kilometre sayacından çıkarılır.",
-      "currentKm": "Mevcut kilometre sayacı"
+      "currentKm": "Mevcut kilometre sayacı",
+      "purchaseType": {
+        "purchase": "Satın alma",
+        "leasing": "Kiralama"
+      },
+      "leasing": {
+        "startDate": "Kiralama başlangıcı",
+        "termMonths": "Süre (ay)",
+        "termPlaceholder": "örn. 48",
+        "downPayment": "Peşinat",
+        "monthlyRate": "Aylık taksit",
+        "buyback": "Kalıntı değer / geri alım",
+        "buybackPlaceholder": "satın alınmadıysa boş",
+        "buybackHint": "Sadece sözleşme sonunda (veya geri alım sırasında) hesaba katılır.",
+        "includedKm": "Dahil edilen km (toplam)",
+        "includedKmPlaceholder": "örn. 60000",
+        "includedKmHint": "Tüm süre boyunca toplam km. Geçen aylara göre orantılı hesaplanır.",
+        "extraKmRate": "Ek km tarifesi",
+        "extraKmRatePlaceholder": "örn. 0,12",
+        "extraKmCosts": "Ek km maliyeti (şu ana kadar)"
+      }
     },
     "jumpToBase": "Ana verileri şimdi açın"
   },

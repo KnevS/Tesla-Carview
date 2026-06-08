@@ -2639,7 +2639,27 @@
       "initialKm": "Χιλιομετρητής κατά την αγορά",
       "initialKmPlaceholder": "π.χ. 12345",
       "initialKmHint": "Αφαιρείται από τον τρέχοντα χιλιομετρητή για τον υπολογισμό της απόστασης που διανύθηκε κατά την ιδιοκτησία.",
-      "currentKm": "Τρέχων χιλιομετρητής"
+      "currentKm": "Τρέχων χιλιομετρητής",
+      "purchaseType": {
+        "purchase": "Αγορά",
+        "leasing": "Leasing"
+      },
+      "leasing": {
+        "startDate": "Έναρξη leasing",
+        "termMonths": "Διάρκεια (μήνες)",
+        "termPlaceholder": "π.χ. 48",
+        "downPayment": "Προκαταβολή",
+        "monthlyRate": "Μηνιαία δόση",
+        "buyback": "Υπολειμματική αξία / εξαγορά",
+        "buybackPlaceholder": "κενό αν δεν αγοράζεται",
+        "buybackHint": "Λαμβάνεται υπόψη μόνο μετά τη λήξη του συμβολαίου (ή σε εξαγορά).",
+        "includedKm": "Συμπεριλαμβανόμενα km (σύνολο)",
+        "includedKmPlaceholder": "π.χ. 60000",
+        "includedKmHint": "Σύνολο km για όλη τη διάρκεια. Κατανέμεται αναλογικά στους μήνες που έχουν περάσει.",
+        "extraKmRate": "Χρέωση επιπλέον km",
+        "extraKmRatePlaceholder": "π.χ. 0,12",
+        "extraKmCosts": "Κόστος επιπλέον km (μέχρι τώρα)"
+      }
     },
     "jumpToBase": "Άνοιγμα κύριων δεδομένων τώρα"
   },

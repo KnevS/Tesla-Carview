@@ -2639,7 +2639,27 @@
       "initialKm": "Compteur à l'achat",
       "initialKmPlaceholder": "ex. 12345",
       "initialKmHint": "Soustrait du compteur actuel pour calculer la distance parcourue pendant la possession.",
-      "currentKm": "Compteur actuel"
+      "currentKm": "Compteur actuel",
+      "purchaseType": {
+        "purchase": "Achat",
+        "leasing": "Leasing"
+      },
+      "leasing": {
+        "startDate": "Début du leasing",
+        "termMonths": "Durée (mois)",
+        "termPlaceholder": "ex. 48",
+        "downPayment": "Apport",
+        "monthlyRate": "Mensualité",
+        "buyback": "Valeur résiduelle / rachat",
+        "buybackPlaceholder": "vide si non racheté",
+        "buybackHint": "Pris en compte seulement après la fin du contrat (ou en cas de rachat).",
+        "includedKm": "Kilomètres inclus (total)",
+        "includedKmPlaceholder": "ex. 60000",
+        "includedKmHint": "Total des km sur toute la durée. Réparti au prorata des mois écoulés.",
+        "extraKmRate": "Tarif km supplémentaire",
+        "extraKmRatePlaceholder": "ex. 0,12",
+        "extraKmCosts": "Coût des km supplémentaires (à ce jour)"
+      }
     },
     "jumpToBase": "Ouvrir les données de base maintenant"
   },

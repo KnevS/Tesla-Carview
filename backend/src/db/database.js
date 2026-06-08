@@ -521,6 +521,21 @@ function runTenantMigrations(db) {
     db.exec('ALTER TABLE vehicles ADD COLUMN initial_odometer_km REAL');
   }
 
+  // TCO-Leasing (v3.20.0): Leasing-Konditionen als alternative zum Kauf.
+  // is_leasing=1 → Wertverlust-Posten wird ersetzt durch:
+  //   Anzahlung + (vergangene_Monate * Monatsrate) + ggf. Rueckkaufpreis
+  //   + Mehrkilometer-Kosten wenn driven_km > anteilig erwartete_km.
+  // is_leasing=0 (default) → klassische Kauf-Logik bleibt unveraendert.
+  if (!vehiclesCols.includes('is_leasing')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN is_leasing INTEGER DEFAULT 0');
+    db.exec('ALTER TABLE vehicles ADD COLUMN leasing_down_payment_eur REAL');
+    db.exec('ALTER TABLE vehicles ADD COLUMN leasing_monthly_rate_eur REAL');
+    db.exec('ALTER TABLE vehicles ADD COLUMN leasing_term_months INTEGER');
+    db.exec('ALTER TABLE vehicles ADD COLUMN leasing_buyback_eur REAL');       // Restwert/Rueckkaufpreis am Vertragsende
+    db.exec('ALTER TABLE vehicles ADD COLUMN leasing_included_km INTEGER');     // Gesamt-Inklusivkilometer ueber Laufzeit
+    db.exec('ALTER TABLE vehicles ADD COLUMN leasing_extra_km_rate_eur REAL');  // €/km fuer Mehrkilometer
+  }
+
   // Service-/Reparatur-/Reifen-Records mit Einzelkosten.
   // Liefert die Detail-Aufschluesselung im TCO-Cockpit und kann beim
   // Anlegen optional einen `service_intervals.last_done_*`-Update triggern

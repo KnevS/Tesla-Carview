@@ -40,13 +40,49 @@ function estimateResidualEur(purchasePriceEur, purchaseDate, now = Math.floor(Da
   return Math.round((purchasePriceEur - linearLoss) * 100) / 100;
 }
 
+// ── Helper: Leasing-Kosten bis "now" berechnen ───────────────────────────
+// Liefert {leasingCostEur, leasingExtraKmEur, leasingPartsKnown}.
+// leasingPartsKnown=false bedeutet: Stammdaten unvollstaendig — Wertverlust=null.
+function computeLeasingCost(v, drivenKm, now) {
+  if (!v.is_leasing) return { leasingCostEur: null, leasingExtraKmEur: null, leasingPartsKnown: false };
+  // Pflichtfelder fuer eine sinnvolle Leasing-Berechnung
+  const haveCore = v.purchase_date != null && v.leasing_monthly_rate_eur != null;
+  if (!haveCore) return { leasingCostEur: null, leasingExtraKmEur: null, leasingPartsKnown: false };
+
+  const monthsElapsed = Math.max(0, (now - v.purchase_date) / (30.4375 * 86400));
+  const monthsForRate = (v.leasing_term_months != null)
+    ? Math.min(monthsElapsed, v.leasing_term_months)
+    : monthsElapsed;
+
+  const downPayment = v.leasing_down_payment_eur ?? 0;
+  const monthlyTotal = monthsForRate * v.leasing_monthly_rate_eur;
+
+  // Rueckkauf nur dann anrechnen wenn Laufzeit beendet (oder Fahrzeug verkauft/abgeloest)
+  const termEnded = v.leasing_term_months != null && monthsElapsed >= v.leasing_term_months;
+  const buyback = (termEnded && v.leasing_buyback_eur != null) ? v.leasing_buyback_eur : 0;
+
+  // Mehrkilometer: erwartete km anteilig = (monthsElapsed / term) * included_km
+  let extraKmEur = null;
+  if (v.leasing_included_km != null && v.leasing_term_months != null && v.leasing_extra_km_rate_eur != null) {
+    const expectedKm = (monthsForRate / v.leasing_term_months) * v.leasing_included_km;
+    const overKm = Math.max(0, drivenKm - expectedKm);
+    extraKmEur = Math.round(overKm * v.leasing_extra_km_rate_eur * 100) / 100;
+  }
+
+  const total = Math.round((downPayment + monthlyTotal + buyback + (extraKmEur ?? 0)) * 100) / 100;
+  return { leasingCostEur: total, leasingExtraKmEur: extraKmEur, leasingPartsKnown: true };
+}
+
 // ── Helper: TCO-Aggregat fuer ein Fahrzeug ───────────────────────────────
 function computeTco(db, vehicleId) {
   const v = db.prepare(`
     SELECT id, display_name, vin, category,
            purchase_price_eur, purchase_date, sale_price_eur, sale_date,
            insurance_eur_year, tax_eur_year,
-           initial_odometer_km, odometer_km
+           initial_odometer_km, odometer_km,
+           is_leasing, leasing_down_payment_eur, leasing_monthly_rate_eur,
+           leasing_term_months, leasing_buyback_eur,
+           leasing_included_km, leasing_extra_km_rate_eur
     FROM vehicles WHERE id=?
   `).get(vehicleId);
   if (!v) return null;
@@ -58,13 +94,28 @@ function computeTco(db, vehicleId) {
     ? Math.max(0, (endDate - startDate) / (365.25 * 86400))
     : null;
 
-  const residualEur = (v.sale_price_eur != null)
-    ? v.sale_price_eur
-    : estimateResidualEur(v.purchase_price_eur, v.purchase_date, now);
-
-  const depreciationEur = (v.purchase_price_eur != null && residualEur != null)
-    ? Math.round((v.purchase_price_eur - residualEur) * 100) / 100
-    : null;
+  // Wertverlust-Berechnung haengt von Finanzierungsart ab.
+  // Bei Leasing: Anzahlung + Raten (+ ggf. Rueckkauf) + Mehr-km;
+  // bei Kauf: klassisch Anschaffung - Restwert/Verkaufspreis.
+  let depreciationEur = null;
+  let residualEur = null;
+  let leasingExtraKmEur = null;
+  if (v.is_leasing) {
+    const startKmTmp = v.initial_odometer_km ?? 0;
+    const currKmTmp = v.odometer_km ?? startKmTmp;
+    const drivenKmTmp = Math.max(0, currKmTmp - startKmTmp);
+    const lc = computeLeasingCost(v, drivenKmTmp, now);
+    depreciationEur = lc.leasingCostEur;
+    leasingExtraKmEur = lc.leasingExtraKmEur;
+    // residualEur bleibt null bei Leasing — wir zeigen es nicht
+  } else {
+    residualEur = (v.sale_price_eur != null)
+      ? v.sale_price_eur
+      : estimateResidualEur(v.purchase_price_eur, v.purchase_date, now);
+    depreciationEur = (v.purchase_price_eur != null && residualEur != null)
+      ? Math.round((v.purchase_price_eur - residualEur) * 100) / 100
+      : null;
+  }
 
   const insuranceTotalEur = (v.insurance_eur_year != null && yearsOwned != null)
     ? Math.round(v.insurance_eur_year * yearsOwned * 100) / 100 : null;
@@ -112,13 +163,22 @@ function computeTco(db, vehicleId) {
       tax_eur_year:       v.tax_eur_year,
       initial_odometer_km: v.initial_odometer_km,
       odometer_km:        v.odometer_km,
+      is_leasing:                 !!v.is_leasing,
+      leasing_down_payment_eur:   v.leasing_down_payment_eur,
+      leasing_monthly_rate_eur:   v.leasing_monthly_rate_eur,
+      leasing_term_months:        v.leasing_term_months,
+      leasing_buyback_eur:        v.leasing_buyback_eur,
+      leasing_included_km:        v.leasing_included_km,
+      leasing_extra_km_rate_eur:  v.leasing_extra_km_rate_eur,
     },
     summary: {
       driven_km:        drivenKm,
       years_owned:      yearsOwned != null ? Math.round(yearsOwned * 100) / 100 : null,
       residual_eur:     residualEur,
-      residual_is_estimate: v.sale_price_eur == null,
+      residual_is_estimate: !v.is_leasing && v.sale_price_eur == null,
       depreciation_eur: depreciationEur,
+      depreciation_kind: v.is_leasing ? 'leasing' : 'purchase',
+      leasing_extra_km_eur: leasingExtraKmEur,
       insurance_eur:    insuranceTotalEur,
       tax_eur:          taxTotalEur,
       electricity_eur:  electricityEur,
@@ -143,13 +203,21 @@ router.patch('/vehicles/:id', (req, res) => {
   if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Nur für Administratoren' });
   const id = Number(req.params.id);
   const allowed = ['purchase_price_eur', 'purchase_date', 'sale_price_eur', 'sale_date',
-                   'insurance_eur_year', 'tax_eur_year', 'initial_odometer_km'];
+                   'insurance_eur_year', 'tax_eur_year', 'initial_odometer_km',
+                   'is_leasing', 'leasing_down_payment_eur', 'leasing_monthly_rate_eur',
+                   'leasing_term_months', 'leasing_buyback_eur',
+                   'leasing_included_km', 'leasing_extra_km_rate_eur'];
   const updates = []; const args = [];
   for (const k of allowed) {
     if (k in (req.body || {})) {
       const v = req.body[k];
       updates.push(`${k}=?`);
-      args.push(v === null || v === '' ? null : Number(v));
+      // is_leasing wird als 0/1 gespeichert (Bool akzeptiert)
+      if (k === 'is_leasing') {
+        args.push(v ? 1 : 0);
+      } else {
+        args.push(v === null || v === '' ? null : Number(v));
+      }
     }
   }
   if (!updates.length) return res.status(400).json({ error: 'Nichts zu ändern' });

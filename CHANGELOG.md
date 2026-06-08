@@ -7,6 +7,42 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.20.0] - 2026-06-08
+
+### Hinzugefügt — TCO-Cockpit Leasing-Erweiterung
+
+Bisher konnte das TCO-Cockpit nur Kauf-Fahrzeuge sauber abbilden. Jetzt unterstützt es zusätzlich Leasing-Verträge mit voller Kostenstellen-Aufschlüsselung.
+
+**Schema (vehicles-Tabelle, neue Spalten):**
+- `is_leasing` (0/1) — Finanzierungs-Art
+- `leasing_down_payment_eur` — Anzahlung
+- `leasing_monthly_rate_eur` — Monatsrate
+- `leasing_term_months` — Vertragslaufzeit
+- `leasing_buyback_eur` — Restwert/Rückkaufpreis (nur nach Vertragsende oder bei Übernahme angerechnet)
+- `leasing_included_km` — Inklusiv-km gesamt
+- `leasing_extra_km_rate_eur` — €/km für Mehrkilometer
+
+**TCO-Berechnung bei Leasing:**
+- Wertverlust-Posten = Anzahlung + (vergangene Monate × Monatsrate) + Rückkaufpreis (falls Laufzeit beendet)
+- Mehrkilometer-Kosten = max(0, gefahrene_km − anteilig_erwartete_km) × Tarif
+- Verlustberechnung bei Kauf bleibt unverändert (`depreciation_kind: 'purchase' | 'leasing'`)
+
+**Tco.vue Frontend:**
+- Toggle „💶 Kauf" / „📄 Leasing" am Anfang der Stammdaten-Form
+- Bei Leasing: Anzahlung, Monatsrate, Laufzeit, Restwert, Inklusiv-km, Mehrkilometer-Tarif (statt Anschaffungspreis/Verkaufspreis)
+- Lese-Modus zeigt Finanzierungs-Art als Badge an
+- Mehrkilometer-Kosten werden im Lese-Modus als Warnhinweis (amber) angezeigt sobald > 0
+
+**i18n (alle 7 Sprachen):**
+- Neue Keys `tco.base.purchaseType.purchase` + `tco.base.purchaseType.leasing`
+- Neue Subsection `tco.base.leasing.*` mit 12 Keys (startDate, termMonths, downPayment, monthlyRate, buyback, includedKm, extraKmRate, etc. + Tooltips)
+
+### Behoben — Marketing-Site Bento-Karten 9-12 ohne Grid-Klassen
+
+Die Karten App-Hub, In der Nähe, Ladeorte-Auto-Limit und OwnTracks-Validation waren nur als `.b-card` markiert ohne `.b-N`-Klasse. Damit fielen sie aus dem `repeat(12, 1fr)`-Grid raus und wurden „nackt" untereinander gerendert. Fix: `.b-9` span 8, `.b-10` span 4, `.b-11` span 7, `.b-12` span 5; plus responsive Stufen für Tablet und Mobil.
+
+---
+
 ## [v3.19.0] - 2026-06-08
 
 ### Hinzugefügt — Mehrsprachigkeit komplett (Sprint „Vollständige 7-Sprachen-Coverage")

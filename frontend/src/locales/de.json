@@ -865,7 +865,27 @@
       "initialKm": "Kilometerstand bei Kauf",
       "initialKmPlaceholder": "z.B. 12345",
       "initialKmHint": "Wird vom aktuellen Kilometerstand abgezogen, um die zurückgelegte Strecke zu berechnen.",
-      "currentKm": "Aktueller Kilometerstand"
+      "currentKm": "Aktueller Kilometerstand",
+      "purchaseType": {
+        "purchase": "Kauf",
+        "leasing": "Leasing"
+      },
+      "leasing": {
+        "startDate": "Leasing-Beginn",
+        "termMonths": "Laufzeit (Monate)",
+        "termPlaceholder": "z.B. 48",
+        "downPayment": "Anzahlung",
+        "monthlyRate": "Monatsrate",
+        "buyback": "Restwert / Rückkaufpreis",
+        "buybackPlaceholder": "leer wenn nicht übernommen",
+        "buybackHint": "Wird erst nach Vertragsende eingerechnet (oder bei Übernahme).",
+        "includedKm": "Inklusiv-Kilometer (gesamt)",
+        "includedKmPlaceholder": "z.B. 60000",
+        "includedKmHint": "Gesamtkilometer über die volle Laufzeit. Anteilig auf gefahrene Monate angerechnet.",
+        "extraKmRate": "Mehrkilometer-Tarif",
+        "extraKmRatePlaceholder": "z.B. 0.12",
+        "extraKmCosts": "Mehrkilometer-Kosten (bislang)"
+      }
     },
     "jumpToBase": "Stammdaten jetzt eintragen"
   },
