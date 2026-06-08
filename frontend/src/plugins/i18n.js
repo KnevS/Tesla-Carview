@@ -7,6 +7,7 @@ import fr from '../locales/fr.json';
 import es from '../locales/es.json';
 import tr from '../locales/tr.json';
 import el from '../locales/el.json';
+import zh from '../locales/zh.json';
 
 // Vue-i18n's Runtime-Build (durch Plugin: runtimeOnly:true) hat keinen
 // auto-installierten messageCompiler — ohne expliziten Aufruf gibt der
@@ -15,7 +16,11 @@ import el from '../locales/el.json';
 // direkt (keine eval/new Function-Pfade für AST-Eingaben → CSP bleibt sauber).
 registerMessageCompiler(compile);
 
-export const SUPPORTED_LOCALES = ['de', 'en', 'fr', 'es', 'tr', 'el'];
+export const SUPPORTED_LOCALES = ['de', 'en', 'fr', 'es', 'tr', 'el', 'zh'];
+
+// Sprachen, die KI-uebersetzt aus DE/EN entstanden sind. Wird vom
+// AiTranslationBanner verwendet um den Disclaimer einzublenden.
+export const AI_TRANSLATED_LOCALES = ['fr', 'es', 'tr', 'el', 'zh'];
 
 /**
  * Auflösung der initialen Sprache (höchste Priorität zuerst):
@@ -62,6 +67,8 @@ function applyGeoLocaleAsync() {
 export const i18n = createI18n({
   legacy: false,
   locale: resolveInitialLocale(),
-  fallbackLocale: 'de',
-  messages: { de, en, fr, es, tr, el },
+  // Fuer zh fallen fehlende Keys auf en, dann de. Andere nicht-Original-
+  // Sprachen fallen direkt auf de (das primaere Original).
+  fallbackLocale: { zh: ['en', 'de'], default: 'de' },
+  messages: { de, en, fr, es, tr, el, zh },
 });

@@ -10,6 +10,7 @@ export const LANGS = [
   { code: 'es', label: 'Español',    flag: '🇪🇸' },
   { code: 'tr', label: 'Türkçe',     flag: '🇹🇷' },
   { code: 'el', label: 'Ελληνικά',   flag: '🇬🇷' },
+  { code: 'zh', label: '中文',        flag: '🇨🇳' },
 ];
 
 /* Auflösungs-Hierarchie (höchste Priorität zuerst):

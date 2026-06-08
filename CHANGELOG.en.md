@@ -7,6 +7,36 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.16.0] - 2026-06-08
+
+### Added — Chinese (zh) as 7th language + AI-translation transparency
+
+**Languages extended from 6 to 7:** Chinese (Simplified, zh) added — China is one of the biggest EV/Tesla markets, this keeps multilingual coverage consistent.
+
+- `frontend/src/locales/zh.json` with ~220 core strings (10% of the ~2174 DE keys). Key sections fully translated: `common`, `nav`, `dashboard`, `trips`, `charging`, `battery`, `myTracking`, `footer`, `auth`, `notices`, `tripDetail`, `poi`, `nearby`, `launcher`, `lang`
+- Remaining strings fall back via `fallbackLocale: { zh: ['en', 'de'] }` to English (secondary) then German (tertiary)
+- `SUPPORTED_LOCALES = [..., 'zh']` + `LANGS` array extended (flag 🇨🇳, label `中文`)
+- Language switcher in `LangSwitcher.vue` automatically lists all 7 languages
+- Auto-detection via `navigator.language` now triggers on `zh-*` too
+
+### Added — AI translation transparency
+
+- New constant `AI_TRANSLATED_LOCALES = ['fr', 'es', 'tr', 'el', 'zh']`
+- **AppFooter** shows a discreet disclaimer for these locales: "🤖 Translations for FR/ES/TR/EL/ZH are AI-assisted from DE/EN. Corrections welcome via GitHub."
+- i18n key `footer.aiTranslation` in all 7 languages — every native speaker sees it in their own language
+- Memory pattern captured in `feedback_ai_translation_transparency.md` for all future multilingual projects
+
+### Data concept
+
+Disclaimer is a passive UI marker, no tracking, no phone-home. Native speakers can submit corrections via GitHub issues.
+
+### Roadmap
+
+- **v3.17.0**: GPS setup wizard (analog to `AdminSetupWizard`) — step-by-step through OwnTracks device creation + Bluetooth setup
+- **Marketing site separate sprint**: `teslaview-web/i18n.js` to 7 languages (~159 keys × 5 new = ~795 strings, own push)
+
+---
+
 ## [v3.15.2] - 2026-06-08
 
 ### Added — App hub: TFF-Forum

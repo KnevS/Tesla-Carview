@@ -7,6 +7,36 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.16.0] - 2026-06-08
+
+### Hinzugefügt — Chinesisch (zh) als 7. Sprache + KI-Übersetzungs-Transparenz
+
+**Sprachen ausgebaut von 6 auf 7:** Chinesisch (vereinfacht, zh) ergänzt — China ist einer der größten EV/Tesla-Märkte, konsequente Mehrsprachigkeit.
+
+- `frontend/src/locales/zh.json` mit ~220 zentralen Strings (10% Coverage der ~2174 DE-Keys). Wichtigste Sektionen voll übersetzt: `common`, `nav`, `dashboard`, `trips`, `charging`, `battery`, `myTracking`, `footer`, `auth`, `notices`, `tripDetail`, `poi`, `nearby`, `launcher`, `lang`
+- Restliche Strings fallen via `fallbackLocale: { zh: ['en', 'de'] }` auf Englisch (sekundär) und Deutsch (tertiär) zurück
+- `SUPPORTED_LOCALES = [..., 'zh']` + `LANGS`-Array um Chinesisch erweitert (Flagge 🇨🇳, Label `中文`)
+- Sprach-Toggle in `LangSwitcher.vue` zeigt automatisch alle 7 Sprachen
+- Auto-Erkennung via `navigator.language` greift jetzt auch bei `zh-*`
+
+### Hinzugefügt — KI-Übersetzungs-Transparenz
+
+- Neue Konstante `AI_TRANSLATED_LOCALES = ['fr', 'es', 'tr', 'el', 'zh']`
+- **AppFooter** zeigt bei diesen Sprachen einen dezenten Disclaimer: „🤖 Übersetzungen für FR/ES/TR/EL/ZH sind KI-unterstützt aus DE/EN. Korrekturen willkommen via GitHub."
+- i18n-Key `footer.aiTranslation` in allen 7 Sprachen — keine Mehrdeutigkeit, jeder Native-Speaker sieht es in seiner Sprache
+- Memory-Pattern festgehalten in `feedback_ai_translation_transparency.md` für alle künftigen mehrsprachigen Projekte
+
+### Datenkonzept
+
+Disclaimer = passive UI-Marker, kein Tracking, kein Phone-Home. Ein Native-Speaker kann via GitHub-Issue Korrekturen einreichen.
+
+### Roadmap
+
+- **v3.17.0**: GPS-Setup-Wizard (analog zu AdminSetupWizard) — Step-by-Step durch OwnTracks-Anlage + Bluetooth-Setup
+- **Marketing-Site separater Sprint**: i18n.js der teslaview-web auf 7 Sprachen erweitern (~159 Keys × 5 neue Sprachen = ~795 Strings, eigener Push)
+
+---
+
 ## [v3.15.2] - 2026-06-08
 
 ### Hinzugefügt — App-Hub: TFF-Forum

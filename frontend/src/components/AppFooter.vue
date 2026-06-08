@@ -37,6 +37,9 @@
         <a href="https://github.com/KnevS/Tesla-Carview" target="_blank" rel="noopener">TeslaView</a>
         · © Sven Krische · PolyForm Noncommercial
       </p>
+      <p v-if="isAiTranslated" class="legal" style="font-size: 10px; opacity: 0.65;">
+        {{ $t('footer.aiTranslation') }}
+      </p>
     </div>
   </footer>
 </template>
@@ -44,6 +47,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { AI_TRANSLATED_LOCALES } from '../plugins/i18n.js';
 
 defineProps({
   showVersion: { type: Boolean, default: false },
@@ -64,6 +68,7 @@ const ABOUT_EN     = import.meta.env.VITE_FOOTER_ABOUT_EN     || '';
 const LINKEDIN_URL = import.meta.env.VITE_FOOTER_LINKEDIN_URL || '';
 
 const aboutMeUrl = computed(() => locale.value === 'de' ? ABOUT_DE : ABOUT_EN);
+const isAiTranslated = computed(() => AI_TRANSLATED_LOCALES.includes(locale.value));
 </script>
 
 <style scoped>
