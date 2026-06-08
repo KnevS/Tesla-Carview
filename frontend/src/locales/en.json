@@ -2776,5 +2776,69 @@
       "charging": "Active charging session",
       "lastTrip": "Last trip end"
     }
+  },
+  "gpsSetup": {
+    "title": "GPS Setup Wizard",
+    "step": "Step {n} of {total}",
+    "finish": "Done",
+    "openBtn": "Setup wizard",
+    "openTooltip": "Step-by-step guide to set up OwnTracks on your smartphone",
+    "welcome": {
+      "title": "Set up smartphone GPS",
+      "body": "Since Tesla closed the Owner API, OwnTracks is the easiest way to a legally compliant GPS logbook — no extra hardware needed.\n\nThis wizard guides you through the full setup in 5 steps.",
+      "youGet": "What you get:",
+      "point1": "Automatic trip recording with start/end address",
+      "point2": "GPS track on map for every trip",
+      "point3": "Distance, speed, driver attribution",
+      "point4": "Optional: Bluetooth validation (prevents foreign trips in the log)",
+      "privacyNote": "🔒 OwnTracks only sends to your own server. No cloud, no third party."
+    },
+    "install": {
+      "title": "Install the OwnTracks app",
+      "body": "OwnTracks is a free open-source app. Pick your platform:",
+      "iosLink": "OwnTracks in the Apple App Store",
+      "iosHint": "Works on iOS 14+. On the first \"Allow background location\" prompt → Always allow.",
+      "playLink": "OwnTracks in the Google Play Store",
+      "fdroidLink": "OwnTracks on F-Droid (open-source store)",
+      "androidHint": "Recommended: F-Droid version (no ads, no Google tracking). Enable background location + disable battery optimization for OwnTracks.",
+      "cost": "Completely free and open source."
+    },
+    "device": {
+      "title": "Create device",
+      "noVehicles": "No vehicle available. Create a vehicle first (admin area) before continuing.",
+      "labelField": "Label",
+      "labelPlaceholder": "e.g. \"iPhone Sven\" or \"Pixel Anna\"",
+      "vehicleField": "Vehicle",
+      "tripTypeField": "Default trip type",
+      "tripTypeHint": "Auto-assigned to every trip. You can change it per trip in the logbook.",
+      "createBtn": "Create device + show QR",
+      "created": "✓ Device \"{label}\" created!",
+      "scanHint": "Open OwnTracks → Settings → Load configuration → Scan QR code.",
+      "alt": "Alternative: download the configuration file and import it in OwnTracks.",
+      "downloadOtrc": "Download config file (.otrc)"
+    },
+    "test": {
+      "title": "Test recording",
+      "body": "OwnTracks automatically sends your location every few minutes in the background.\n\nOpen the app once and walk a few steps — the first ping should appear below.",
+      "received": "✓ First ping received ({time})",
+      "waiting": "Waiting for first ping…",
+      "checkNow": "Check now",
+      "justNow": "just now",
+      "minsAgo": "{n} min ago",
+      "troubleshootTitle": "⚠ No ping after 1-2 minutes?",
+      "tip1": "OwnTracks: Settings → Mode = HTTP, check the URL is correct",
+      "tip2": "iOS: Settings → OwnTracks → Location → Always allow",
+      "tip3": "Android: disable battery optimization for OwnTracks"
+    },
+    "bluetooth": {
+      "title": "Bluetooth validation (optional)",
+      "body": "So trips only land in the logbook when you're actually inside the Tesla (not as a passenger in some other car), you can enable Bluetooth validation.\n\nOptional — everything still works without it, you'll just get more trips than you might want.",
+      "iosTitle": "iOS Shortcut",
+      "iosBody": "Apple shortcut \"When I connect to Tesla → send ping to TeslaView\" — the setup link appears in the device list after the first ping.",
+      "iosHint": "Detailed guide: in the device list expand the \"🔵 Bluetooth setup\" entry.",
+      "androidTitle": "Android — Tasker etc.",
+      "androidBody": "On Android you can trigger an HTTP call via Tasker or a similar automation app whenever Bluetooth connects to the Tesla. See wiki for the guide.",
+      "skipNote": "You can skip this step and come back anytime — device list → \"🔵 Bluetooth setup\"."
+    }
   }
 }

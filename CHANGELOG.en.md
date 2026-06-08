@@ -7,6 +7,29 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.22.0] - 2026-06-08
+
+### Added — GPS setup wizard for end users
+
+New 5-step wizard `GpsSetupWizard.vue` guiding non-admin users through OwnTracks setup. Until now users had to either open the AdminSetupWizard (admin-only, lots of irrelevant fields) or click through MyTracking manually — neither was great for first-run.
+
+**Steps:**
+1. **Welcome** — why OwnTracks (Owner API is dead), what you get, privacy note
+2. **Install app** — platform toggle (iOS/Android, initial via UA), store links (App Store, Play Store, F-Droid recommended), background-location hint
+3. **Create device** — label + vehicle + default trip type, then QR-code display + .otrc file download
+4. **Test recording** — live check whether first ping arrived, with "Check now" button and troubleshooting tips
+5. **Bluetooth validation (optional)** — iOS Shortcut hint or Android Tasker hint, with skip note
+
+**Trigger:**
+- "🧭 Setup wizard" button top-right on MyTracking.vue (visible to all users)
+- After wizard finish: `load()` of the devices list so the new device appears immediately
+
+**i18n:** New `gpsSetup` section with ~50 keys in all 7 languages (DE/EN/FR/ES/TR/EL/UK).
+
+Follows the usability rule: every first-run install should be doable without external docs.
+
+---
+
 ## [v3.21.0] - 2026-06-08
 
 ### Added — Service-log entries are editable (with audit log)

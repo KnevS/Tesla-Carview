@@ -2776,5 +2776,69 @@
       "charging": "Aktif şarj oturumu",
       "lastTrip": "Son yolculuk bitişi"
     }
+  },
+  "gpsSetup": {
+    "title": "GPS Kurulum Sihirbazı",
+    "step": "{total} adımdan {n}.",
+    "finish": "Bitti",
+    "openBtn": "Kurulum sihirbazı",
+    "openTooltip": "Akıllı telefonunuzda OwnTracks'i kurmak için adım adım kılavuz",
+    "welcome": {
+      "title": "Akıllı telefon GPS kurulumu",
+      "body": "Tesla, Owner API'sini kapattığı için, OwnTracks ek donanım olmadan yasal uyumlu bir GPS yol defterine ulaşmanın en kolay yoludur.\n\nBu sihirbaz sizi 5 adımda tüm kurulum boyunca yönlendirir.",
+      "youGet": "Neler elde edersiniz:",
+      "point1": "Başlangıç/varış adresiyle otomatik yolculuk kaydı",
+      "point2": "Her yolculuk için haritada GPS izi",
+      "point3": "Mesafe, hız, sürücü ataması",
+      "point4": "Opsiyonel: Bluetooth doğrulaması (günlüğe yabancı yolculukları engeller)",
+      "privacyNote": "🔒 OwnTracks yalnızca kendi sunucunuza gönderir. Bulut yok, üçüncü taraf yok."
+    },
+    "install": {
+      "title": "OwnTracks uygulamasını yükle",
+      "body": "OwnTracks ücretsiz açık kaynaklı bir uygulamadır. Platformunuzu seçin:",
+      "iosLink": "Apple App Store'da OwnTracks",
+      "iosHint": "iOS 14+ ile çalışır. İlk \"Arka planda konuma izin ver\" sorusunda → Her zaman izin ver.",
+      "playLink": "Google Play Store'da OwnTracks",
+      "fdroidLink": "F-Droid'de OwnTracks (açık kaynaklı mağaza)",
+      "androidHint": "Önerilen: F-Droid sürümü (reklamsız, Google takibi yok). OwnTracks için arka plan konumu etkinleştirin + pil optimizasyonunu devre dışı bırakın.",
+      "cost": "Tamamen ücretsiz ve açık kaynaklı."
+    },
+    "device": {
+      "title": "Cihaz oluştur",
+      "noVehicles": "Mevcut araç yok. Devam etmeden önce bir araç oluşturun (yönetici alanı).",
+      "labelField": "Etiket",
+      "labelPlaceholder": "örn. \"iPhone Sven\" veya \"Pixel Anna\"",
+      "vehicleField": "Araç",
+      "tripTypeField": "Varsayılan yolculuk türü",
+      "tripTypeHint": "Her yolculuğa otomatik atanır. Yol defterinde yolculuk başına değiştirebilirsiniz.",
+      "createBtn": "Cihazı oluştur + QR göster",
+      "created": "✓ \"{label}\" cihazı oluşturuldu!",
+      "scanHint": "OwnTracks → Ayarlar → Yapılandırmayı yükle → QR kodu tara.",
+      "alt": "Alternatif: yapılandırma dosyasını indirin ve OwnTracks'e içe aktarın.",
+      "downloadOtrc": "Yapılandırma dosyasını (.otrc) indir"
+    },
+    "test": {
+      "title": "Test kaydı",
+      "body": "OwnTracks arka planda her birkaç dakikada bir konumunuzu otomatik gönderir.\n\nUygulamayı bir kez açın ve birkaç adım yürüyün — ilk ping aşağıda görünmelidir.",
+      "received": "✓ İlk ping alındı ({time})",
+      "waiting": "İlk ping bekleniyor…",
+      "checkNow": "Şimdi kontrol et",
+      "justNow": "az önce",
+      "minsAgo": "{n} dk önce",
+      "troubleshootTitle": "⚠ 1-2 dakika sonra hâlâ ping yok mu?",
+      "tip1": "OwnTracks: Ayarlar → Mod = HTTP, URL'nin doğru olduğunu kontrol et",
+      "tip2": "iOS: Ayarlar → OwnTracks → Konum → Her zaman izin ver",
+      "tip3": "Android: OwnTracks için pil optimizasyonunu kapat"
+    },
+    "bluetooth": {
+      "title": "Bluetooth doğrulama (opsiyonel)",
+      "body": "Yolculukların yol defterine yalnızca gerçekten Tesla içindeyken (başka bir aracın yolcusu olarak değil) kaydedilmesi için Bluetooth doğrulamayı etkinleştirebilirsiniz.\n\nOpsiyonel — bu olmadan da her şey çalışır, sadece istediğinizden daha fazla yolculuk kaydedilir.",
+      "iosTitle": "iOS Kısayolu",
+      "iosBody": "Apple kısayolu \"Tesla'ya bağlandığımda → TeslaView'e ping gönder\" — kurulum bağlantısı ilk ping sonrasında cihaz listesinde görünür.",
+      "iosHint": "Detaylı kılavuz: cihaz listesinde \"🔵 Bluetooth kurulumu\" girdisini genişletin.",
+      "androidTitle": "Android — Tasker vb.",
+      "androidBody": "Android'de Tasker veya benzeri bir otomasyon uygulamasıyla Tesla Bluetooth bağlantısı sağlandığında bir HTTP çağrısı tetikleyebilirsiniz. Kılavuz wiki'de.",
+      "skipNote": "Bu adımı atlayıp istediğiniz zaman geri dönebilirsiniz — cihaz listesi → \"🔵 Bluetooth kurulumu\"."
+    }
   }
 }

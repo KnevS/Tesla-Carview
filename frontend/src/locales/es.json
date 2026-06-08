@@ -2776,5 +2776,69 @@
       "charging": "Sesión de carga activa",
       "lastTrip": "Fin del último trayecto"
     }
+  },
+  "gpsSetup": {
+    "title": "Asistente de configuración GPS",
+    "step": "Paso {n} de {total}",
+    "finish": "Listo",
+    "openBtn": "Asistente de configuración",
+    "openTooltip": "Guía paso a paso para configurar OwnTracks en tu smartphone",
+    "welcome": {
+      "title": "Configurar GPS de smartphone",
+      "body": "Como Tesla cerró la Owner API, OwnTracks es la vía más sencilla para un libro de viajes GPS jurídicamente válido — sin hardware extra.\n\nEste asistente te guía en 5 pasos por toda la configuración.",
+      "youGet": "Lo que obtienes:",
+      "point1": "Registro automático de viajes con dirección de origen/destino",
+      "point2": "Traza GPS en el mapa para cada viaje",
+      "point3": "Distancia, velocidad, asignación de conductor",
+      "point4": "Opcional: validación Bluetooth (evita viajes ajenos en el libro)",
+      "privacyNote": "🔒 OwnTracks envía exclusivamente a tu propio servidor. Sin nube, sin terceros."
+    },
+    "install": {
+      "title": "Instalar la app OwnTracks",
+      "body": "OwnTracks es una app open source gratuita. Elige tu plataforma:",
+      "iosLink": "OwnTracks en Apple App Store",
+      "iosHint": "Funciona desde iOS 14. En la primera pregunta «Permitir ubicación en segundo plano» → Permitir siempre.",
+      "playLink": "OwnTracks en Google Play Store",
+      "fdroidLink": "OwnTracks en F-Droid (tienda open source)",
+      "androidHint": "Recomendado: versión F-Droid (sin anuncios, sin tracking de Google). Activar ubicación en segundo plano + desactivar optimización de batería para OwnTracks.",
+      "cost": "Totalmente gratis y open source."
+    },
+    "device": {
+      "title": "Crear dispositivo",
+      "noVehicles": "No hay vehículo disponible. Crea primero un vehículo (área admin) antes de continuar.",
+      "labelField": "Etiqueta",
+      "labelPlaceholder": "p. ej. «iPhone Sven» o «Pixel Anna»",
+      "vehicleField": "Vehículo",
+      "tripTypeField": "Tipo de viaje por defecto",
+      "tripTypeHint": "Asignado automáticamente a cada viaje. Editable por viaje en el libro.",
+      "createBtn": "Crear dispositivo + mostrar QR",
+      "created": "✓ Dispositivo «{label}» creado.",
+      "scanHint": "Abre OwnTracks → Ajustes → Cargar configuración → Escanear código QR.",
+      "alt": "Alternativa: descarga el archivo de configuración e impórtalo en OwnTracks.",
+      "downloadOtrc": "Descargar archivo de config (.otrc)"
+    },
+    "test": {
+      "title": "Grabación de prueba",
+      "body": "OwnTracks envía tu ubicación automáticamente cada pocos minutos en segundo plano.\n\nAbre la app una vez y camina unos pasos — el primer ping debería aparecer abajo.",
+      "received": "✓ Primer ping recibido ({time})",
+      "waiting": "Esperando el primer ping…",
+      "checkNow": "Comprobar ahora",
+      "justNow": "ahora mismo",
+      "minsAgo": "hace {n} min",
+      "troubleshootTitle": "⚠ ¿Sin ping después de 1-2 minutos?",
+      "tip1": "OwnTracks: Ajustes → Modo = HTTP, comprueba que la URL es correcta",
+      "tip2": "iOS: Ajustes → OwnTracks → Ubicación → Permitir siempre",
+      "tip3": "Android: desactiva la optimización de batería para OwnTracks"
+    },
+    "bluetooth": {
+      "title": "Validación Bluetooth (opcional)",
+      "body": "Para que los viajes solo entren en el libro cuando realmente estás dentro del Tesla (no como copiloto en otro coche), puedes activar la validación Bluetooth.\n\nOpcional — todo funciona sin ella, simplemente recibirás más viajes de los que querrías.",
+      "iosTitle": "Atajo iOS",
+      "iosBody": "Atajo de Apple «Cuando me conecte a Tesla → enviar ping a TeslaView» — el enlace de configuración aparece en la lista de dispositivos tras el primer ping.",
+      "iosHint": "Guía detallada: en la lista de dispositivos, despliega «🔵 Configuración Bluetooth».",
+      "androidTitle": "Android — Tasker etc.",
+      "androidBody": "En Android puedes disparar una llamada HTTP vía Tasker o una app de automatización similar cuando se conecta el Bluetooth al Tesla. Guía en el wiki.",
+      "skipNote": "Puedes saltar este paso y volver en cualquier momento — lista de dispositivos → «🔵 Configuración Bluetooth»."
+    }
   }
 }

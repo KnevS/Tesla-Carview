@@ -6,7 +6,13 @@
         <h1 class="text-2xl font-bold">{{ $t('myTracking.title') }}</h1>
         <p class="text-gray-400 text-sm mt-0.5">{{ $t('myTracking.subtitle') }}</p>
       </div>
+      <button @click="showWizard = true" class="btn-secondary text-sm"
+              v-tooltip="$t('gpsSetup.openTooltip')">
+        🧭 {{ $t('gpsSetup.openBtn') }}
+      </button>
     </div>
+
+    <GpsSetupWizard v-if="showWizard" @close="showWizard = false" @finished="load" />
 
     <!-- Erklärung: was bringt das -->
     <div class="bg-blue-900/20 border border-blue-700/40 rounded-xl px-4 py-3 text-sm text-blue-100 whitespace-pre-line">
@@ -270,6 +276,9 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import api from '../api.js';
+import GpsSetupWizard from '../components/GpsSetupWizard.vue';
+
+const showWizard = ref(false);
 
 const { t } = useI18n();
 
