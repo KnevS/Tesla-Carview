@@ -47,6 +47,13 @@ updates:
         update-types:
           - minor
           - patch
+    # Major-Bumps fuer Express (4 -> 5 hat Breaking Changes: req.param weg,
+    # app.del weg, strengere Path-Matching-Regex, Async-Handler-Semantik
+    # geaendert). Sicher erst mit dediziertem Test-Sprint upgraden.
+    ignore:
+      - dependency-name: express
+        update-types:
+          - version-update:semver-major
 
   # ─── GitHub Actions ─────────────────────────────────────────────────────
   - package-ecosystem: github-actions
