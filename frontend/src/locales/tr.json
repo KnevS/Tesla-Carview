@@ -2609,7 +2609,6 @@
       "openChargeMap": "OpenChargeMap",
       "abrp": "A Better Routeplanner",
       "telegramWeb": "Telegram Web",
-      "signal": "Signal",
       "wikipedia": "Wikipedia"
     },
     "note": {
@@ -2618,5 +2617,16 @@
       "openSource": "Açık kaynak",
       "freeWithAccount": "Hesapla ücretsiz"
     }
+  },
+  "launcherAdmin": {
+    "title": "Uygulama merkezini yönet",
+    "subtitle": "Burada tüm uygulama merkezi karolarını görür ve her kiracı için açıp kapatabilirsiniz. Devre dışı uygulamalar /launcher görünümünden kaybolur.",
+    "noApps": "Katalogda uygulama yok.",
+    "statusEnabled": "Aktif",
+    "statusDisabled": "Kapalı",
+    "enable": "Tekrar göster",
+    "disable": "Gizle",
+    "hintTitle": "Notlar",
+    "hintBody": "Uygulamalar silinmez, sadece gizlenir. Bir sonraki güncelleme kataloğa otomatik olarak yeni uygulamalar ekleyebilir. Tesla yerel özellikleri (Spotify, Apple Music, oyunlar, haritalar, yayın) ASLA katalogda olmaz — onlar Tesla'dan gelir."
   }
 }

@@ -79,14 +79,6 @@ export const LAUNCHER_CATALOG = [
     category: 'communication',
     note_i18n: 'launcher.note.openSource',
   },
-  {
-    slug: 'signal',
-    label_i18n: 'launcher.app.signal',
-    icon: '🔐',
-    url: 'https://signal.org',
-    category: 'communication',
-    note_i18n: 'launcher.note.openSource',
-  },
 
   // ── 📚 Nachschlagewerk ──────────────────────────────────────────────
   {

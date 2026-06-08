@@ -82,6 +82,12 @@ const adminCards = [
     desc:  'Sicherheitsrelevante Ereignisse: Logins, Berechtigungsänderungen, Tesla-Befehle und Akzeptanzen.',
   },
   {
+    to:    '/admin/launcher',
+    icon:  '🚀',
+    title: 'App-Hub',
+    desc:  'Kuratierte Web-Apps für den Tesla-Browser ein-/ausblenden (Whitelist pro Mandant).',
+  },
+  {
     to:    '/system',
     icon:  '📈',
     title: 'System',

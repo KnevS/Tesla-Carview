@@ -2609,7 +2609,6 @@
       "openChargeMap": "OpenChargeMap",
       "abrp": "A Better Routeplanner",
       "telegramWeb": "Telegram Web",
-      "signal": "Signal",
       "wikipedia": "Wikipedia"
     },
     "note": {
@@ -2618,5 +2617,16 @@
       "openSource": "Open source",
       "freeWithAccount": "Gratuit avec compte"
     }
+  },
+  "launcherAdmin": {
+    "title": "Gérer le hub d'apps",
+    "subtitle": "Ici vous voyez toutes les tuiles du hub d'apps et pouvez les activer ou désactiver par locataire. Les apps désactivées disparaissent de la vue /launcher.",
+    "noApps": "Aucune app dans le catalogue.",
+    "statusEnabled": "Actif",
+    "statusDisabled": "Off",
+    "enable": "Réafficher",
+    "disable": "Masquer",
+    "hintTitle": "Notes",
+    "hintBody": "Les apps ne sont pas supprimées, seulement masquées. La prochaine mise à jour peut ajouter automatiquement de nouvelles apps. Les fonctions natives Tesla (Spotify, Apple Music, jeux, cartes, streaming) ne sont JAMAIS dans le catalogue — elles viennent de Tesla."
   }
 }

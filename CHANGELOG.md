@@ -7,6 +7,19 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.9.1] - 2026-06-08
+
+### Behoben
+
+- **Signal aus App-Hub-Katalog entfernt**: Signal hat keine Web-App, `signal.org` ist nur die Marketing-Seite — im Tesla-Browser nutzlos. Eintrag wurde komplett aus dem Katalog gestrichen.
+- **Admin-Link führte ins Leere**: Der Link „Apps verwalten (Admin)" in `/launcher` zeigte auf `/admin?tab=launcher`, eine Route die es nicht gab. Jetzt:
+  - Neue View `LauncherAdmin.vue` unter `/admin/launcher`
+  - AdminHub-Karte „🚀 App-Hub" hinzugefügt
+  - Toggle-Buttons pro App (Aktiv/Aus), schreibt direkt gegen die bestehenden `/api/launcher/admin/*`-Endpoints
+  - 18 neue i18n-Keys × 6 Sprachen für `launcherAdmin.*`
+
+---
+
 ## [v3.9.0] - 2026-06-08
 
 ### Hinzugefügt — App-Hub (`/launcher`)

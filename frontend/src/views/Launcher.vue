@@ -42,7 +42,7 @@
 
     <!-- Admin-Link -->
     <p v-if="isAdmin" class="text-xs">
-      <router-link to="/admin?tab=launcher" class="text-tesla-red hover:underline">
+      <router-link to="/admin/launcher" class="text-tesla-red hover:underline">
         {{ $t('launcher.adminLink') }}
       </router-link>
     </p>

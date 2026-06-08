@@ -2609,7 +2609,6 @@
       "openChargeMap": "OpenChargeMap",
       "abrp": "A Better Routeplanner",
       "telegramWeb": "Telegram Web",
-      "signal": "Signal",
       "wikipedia": "Wikipedia"
     },
     "note": {
@@ -2618,5 +2617,16 @@
       "openSource": "Ανοιχτού κώδικα",
       "freeWithAccount": "Δωρεάν με λογαριασμό"
     }
+  },
+  "launcherAdmin": {
+    "title": "Διαχείριση κέντρου εφαρμογών",
+    "subtitle": "Εδώ βλέπετε όλα τα πλακίδια του κέντρου εφαρμογών και μπορείτε να τα ενεργοποιήσετε ή να τα απενεργοποιήσετε ανά μισθωτή. Οι απενεργοποιημένες εφαρμογές εξαφανίζονται από την προβολή /launcher.",
+    "noApps": "Καμία εφαρμογή στον κατάλογο.",
+    "statusEnabled": "Ενεργή",
+    "statusDisabled": "Off",
+    "enable": "Εμφάνιση ξανά",
+    "disable": "Απόκρυψη",
+    "hintTitle": "Σημειώσεις",
+    "hintBody": "Οι εφαρμογές δεν διαγράφονται, μόνο αποκρύπτονται. Η επόμενη ενημέρωση μπορεί να προσθέσει νέες εφαρμογές αυτόματα. Οι γηγενείς λειτουργίες Tesla (Spotify, Apple Music, παιχνίδια, χάρτες, streaming) ΠΟΤΕ δεν είναι στον κατάλογο — έρχονται από την Tesla."
   }
 }

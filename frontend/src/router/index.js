@@ -46,6 +46,7 @@ const Privacy        = () => import('../views/legal/Privacy.vue');
 const Terms          = () => import('../views/legal/Terms.vue');
 const LegalAdmin     = () => import('../views/admin/LegalAdmin.vue');
 const AuditLog       = () => import('../views/admin/AuditLog.vue');
+const LauncherAdmin  = () => import('../views/admin/LauncherAdmin.vue');
 const PairLogin      = () => import('../views/PairLogin.vue');
 
 const routes = [
@@ -101,6 +102,7 @@ const routes = [
   { path: '/admin/data',    component: DataManagement, meta: { title: 'Datenverwaltung',    admin: true } },
   { path: '/admin/legal',   component: LegalAdmin,     meta: { title: 'Rechtliche Inhalte', admin: true } },
   { path: '/admin/audit',   component: AuditLog,       meta: { title: 'Audit-Log',          admin: true } },
+  { path: '/admin/launcher',component: LauncherAdmin,  meta: { title: 'App-Hub verwalten',   admin: true } },
 ];
 
 const router = createRouter({ history: createWebHistory(), routes });

@@ -2609,7 +2609,6 @@
       "openChargeMap": "OpenChargeMap",
       "abrp": "A Better Routeplanner",
       "telegramWeb": "Telegram Web",
-      "signal": "Signal",
       "wikipedia": "Wikipedia"
     },
     "note": {
@@ -2618,5 +2617,16 @@
       "openSource": "Open source",
       "freeWithAccount": "Free with account"
     }
+  },
+  "launcherAdmin": {
+    "title": "Manage app hub",
+    "subtitle": "Here you can see every app-hub tile and toggle them on or off per tenant. Disabled apps disappear from the /launcher view.",
+    "noApps": "No apps in the catalog.",
+    "statusEnabled": "Active",
+    "statusDisabled": "Off",
+    "enable": "Show again",
+    "disable": "Hide",
+    "hintTitle": "Notes",
+    "hintBody": "Apps are not deleted, only hidden. The next update may add new apps to the catalog automatically. Tesla-native features (Spotify, Apple Music, games, maps, streaming) are deliberately NEVER in the catalog — those come from Tesla itself."
   }
 }
