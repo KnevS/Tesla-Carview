@@ -19,7 +19,7 @@
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
-    "express": "^4.19.2",
+    "express": "^5.2.1",
     "express-rate-limit": "^8.5.2",
     "geoip-lite": "^2.0.2",
     "helmet": "^8.2.0",
