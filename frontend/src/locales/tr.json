@@ -109,6 +109,10 @@
     "chargingLocations": {
       "label": "Şarj konumları",
       "tooltip": "Kendi şarj konumlarınızı yönetin — tarife, yarıçap, varışta otomatik limit"
+    },
+    "nearby": {
+      "label": "Yakında",
+      "tooltip": "Güncel konumunuz veya şarj istasyonunuz çevresindeki POIlar"
     }
   },
   "dashboard": {
@@ -2684,6 +2688,40 @@
       "home": "🏠 Ev",
       "work": "💼 İş",
       "public": "⚡ Halka açık"
+    }
+  },
+  "poi": {
+    "heading": "{radius} km yarıçapındaki POIlar",
+    "loading": "Çevre OpenStreetMap'ten yükleniyor…",
+    "empty": "Yakında POI yok — daha büyük yarıçap veya başka konum deneyin.",
+    "unnamed": "(adsız)",
+    "attribution": "Veri: OpenStreetMap Overpass API · © OSM katkıcıları · hesap yok, API anahtarı yok, yerel önbellek 24s",
+    "type": {
+      "cafe": "Kafe",
+      "restaurant": "Restoran",
+      "fast_food": "Fast food",
+      "bakery": "Fırın",
+      "supermarket": "Süpermarket",
+      "toilets": "WC",
+      "drinking_water": "İçme suyu",
+      "playground": "Oyun alanı",
+      "park": "Park",
+      "picnic": "Piknik",
+      "viewpoint": "Manzara",
+      "atm": "ATM",
+      "pharmacy": "Eczane",
+      "geocache": "Geocache"
+    }
+  },
+  "nearby": {
+    "title": "Yakında",
+    "subtitle": "Arabanız, aktif şarj oturumunuz veya son yolculuk bitişiniz çevresindeki POIlar (kafe, WC, oyun alanı, geocache, manzara). Hızlı şarj molalarında kullanışlı.",
+    "source": "Konum",
+    "noSource": "Konum yok. GPS konumu olan bir araç seçin veya şarj/yolculuk yapın.",
+    "sources": {
+      "vehicle": "Aracın güncel konumu",
+      "charging": "Aktif şarj oturumu",
+      "lastTrip": "Son yolculuk bitişi"
     }
   }
 }

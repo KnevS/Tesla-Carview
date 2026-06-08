@@ -974,6 +974,18 @@ function runTenantMigrations(db) {
   )`);
   db.exec('CREATE INDEX IF NOT EXISTS idx_precondition_vehicle ON precondition_suggestions(vehicle_id, for_date DESC)');
 
+  // POI-Cache (Overpass-Lookup-Persistierung, Phase 4)
+  db.exec(`CREATE TABLE IF NOT EXISTS poi_cache (
+    lat_key INTEGER NOT NULL,
+    lon_key INTEGER NOT NULL,
+    radius_m INTEGER NOT NULL,
+    types_key TEXT NOT NULL,
+    pois_json TEXT NOT NULL,
+    fetched_at INTEGER NOT NULL DEFAULT (unixepoch()),
+    PRIMARY KEY (lat_key, lon_key, radius_m, types_key)
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_poi_cache_age ON poi_cache(fetched_at)');
+
   // Geocoding-Cache (Nominatim-Lookup-Persistierung)
   db.exec(`CREATE TABLE IF NOT EXISTS geocode_cache (
     lat_key INTEGER NOT NULL,

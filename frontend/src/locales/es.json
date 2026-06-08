@@ -109,6 +109,10 @@
     "chargingLocations": {
       "label": "Lugares de carga",
       "tooltip": "Gestionar tus lugares de carga — tarifa, radio, límite automático al llegar"
+    },
+    "nearby": {
+      "label": "Cerca",
+      "tooltip": "POIs alrededor de tu posición o estación de carga"
     }
   },
   "dashboard": {
@@ -2684,6 +2688,40 @@
       "home": "🏠 Casa",
       "work": "💼 Trabajo",
       "public": "⚡ Público"
+    }
+  },
+  "poi": {
+    "heading": "POIs en un radio de {radius} km",
+    "loading": "Cargando entorno desde OpenStreetMap…",
+    "empty": "No hay POIs cerca — prueba un radio mayor u otro lugar.",
+    "unnamed": "(sin nombre)",
+    "attribution": "Datos: OpenStreetMap Overpass API · © contribuyentes OSM · sin cuenta, sin clave API, caché local 24 h",
+    "type": {
+      "cafe": "Cafetería",
+      "restaurant": "Restaurante",
+      "fast_food": "Comida rápida",
+      "bakery": "Panadería",
+      "supermarket": "Supermercado",
+      "toilets": "Aseo",
+      "drinking_water": "Agua potable",
+      "playground": "Parque infantil",
+      "park": "Parque",
+      "picnic": "Pícnic",
+      "viewpoint": "Mirador",
+      "atm": "Cajero",
+      "pharmacy": "Farmacia",
+      "geocache": "Geocache"
+    }
+  },
+  "nearby": {
+    "title": "Cerca",
+    "subtitle": "POIs (cafetería, aseos, parque infantil, geocaches, miradores) alrededor de tu coche, sesión de carga activa o fin del último trayecto. Útil en paradas de carga rápida.",
+    "source": "Posición",
+    "noSource": "No hay posición disponible. Selecciona un vehículo con GPS actual o ejecuta una sesión de carga / trayecto.",
+    "sources": {
+      "vehicle": "Posición actual del vehículo",
+      "charging": "Sesión de carga activa",
+      "lastTrip": "Fin del último trayecto"
     }
   }
 }

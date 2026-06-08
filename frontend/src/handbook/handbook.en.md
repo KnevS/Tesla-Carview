@@ -511,6 +511,18 @@ In `/my-tracking` every device shows a clear status:
 - 🔵 **In-Tesla status unknown** — waiting for the first Bluetooth event after setup
 - 🔵 **Running without Bluetooth validation** — legacy mode, no Bluetooth name configured
 
+## 📍 Nearby (from v3.13.0) {#nearby}
+
+`/nearby` shows POIs (points of interest) around your car, your active charging session or your last trip end. Handy during fast-charge stops ("Where's the next toilet?", "Café around the corner?").
+
+**Categories:** café, restaurant, fast food, bakery, supermarket, toilets, drinking water, playground, park, picnic, viewpoint, ATM, pharmacy, **geocaches**.
+
+**Data source**: [OpenStreetMap Overpass API](https://overpass-api.de) — free, no account, no API key. Calls happen server-side and results are cached in `poi_cache` for 24 hours (rounded to 4 decimals → ~11 m). Minimal load on OSM.
+
+**Radius**: 500 m / 1.5 km / 3 km. Clicking a POI opens OpenStreetMap in the browser.
+
+**Filter**: every category as a toggle — e.g. show only geocaches for a treasure hunt during charging.
+
 ## 🚀 App hub (from v3.9.0) {#app-hub}
 
 `/launcher` ships a **curated list of web apps** that run in the Tesla browser and that Tesla does NOT offer natively:

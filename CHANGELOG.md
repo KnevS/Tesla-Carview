@@ -7,6 +7,50 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.13.0] - 2026-06-08
+
+### Hinzugefügt — Phase 4: In der Nähe (POIs + Geocaches)
+
+Neue View `/nearby` mit Points-of-Interest im Umfeld deines Autos, deiner aktiven Lade-Session oder des letzten Trip-Endpunkts. Sinnvoll bei Schnelllade-Stopps — „wo ist die nächste Toilette / das Café / der Spielplatz?".
+
+**Kategorien:** Café · Restaurant · Fast Food · Bäckerei · Supermarkt · WC · Trinkwasser · Spielplatz · Park · Picknick · Aussichtspunkt · Geldautomat · Apotheke · **Geocaches**.
+
+**Datenquelle**: OpenStreetMap Overpass-API (kostenlos, no-account, no-API-key). Server-seitiger Call, lokale Persistenz in `poi_cache` für 24 h. Datensouverän, keine Cloud-Drittpartei.
+
+**Radius**: 500 m / 1.5 km / 3 km. Klick auf POI öffnet OpenStreetMap.
+
+**Filter**: jede Kategorie als Toggle — z. B. nur Geocaches für eine Schatzsuche während des Ladens.
+
+### Backend
+
+- Neuer Service `backend/src/services/poiService.js` mit Overpass-Anbindung + Distance-Sort + Cache
+- Schema `poi_cache` (lat_key, lon_key, radius_m, types_key) — Auto-Migration in `runTenantMigrations`
+- Routes in `backend/src/routes/poi.js`:
+  - `GET /api/poi/types` — verfügbare Typen
+  - `GET /api/poi/nearby?lat&lon&radius&types`
+  - `GET /api/poi/nearby/charging/:sessionId` — POIs an einer Lade-Session
+- 15 Overpass-Filter (amenity/shop/leisure/tourism)
+- User-Agent gemäß Overpass-ToS, Timeout 15s, Fail-soft (alter Cache als Fallback)
+
+### Frontend
+
+- Neue Komponente `NearbyPOIs.vue` (wiederverwendbar)
+- Neue View `Nearby.vue` mit Source-Picker (Fahrzeug / aktive Lade-Session / letzter Trip-End)
+- Nav-Eintrag „📍 In der Nähe" in der Planung-Gruppe
+- Touch-optimiertes Tile-Layout, Filter-Toggles pro Kategorie
+
+### Doku
+
+- Handbuch-Sektion `{#nearby}` in allen 6 Sprachen
+- 25 neue i18n-Keys × 6 Sprachen (POI-Typen, Sources, Headings)
+- Nav-Label + Tooltip 6-sprachig
+
+### Datenkonzept
+
+Overpass-Calls laufen server-seitig, das Frontend sieht nur die aggregierten POI-Listen. Cache-TTL 24 h ist großzügig — POI-Daten ändern sich selten. Pro Position max. 1 Overpass-Call/Tag.
+
+---
+
 ## [v3.12.0] - 2026-06-08
 
 ### Hinzugefügt — Location-Aktionen: automatisches Ladelimit bei Ankunft

@@ -21,6 +21,7 @@ const Charging       = () => import('../views/Charging.vue');
 const Battery        = () => import('../views/Battery.vue');
 const Launcher       = () => import('../views/Launcher.vue');
 const ChargingLocations = () => import('../views/ChargingLocations.vue');
+const Nearby           = () => import('../views/Nearby.vue');
 const Logbook        = () => import('../views/Logbook.vue');
 const Export         = () => import('../views/Export.vue');
 const MfaVerify      = () => import('../views/MfaVerify.vue');
@@ -82,6 +83,7 @@ const routes = [
   { path: '/battery',       component: Battery,       meta: { title: 'Batterie' } },
   { path: '/launcher',      component: Launcher,      meta: { title: 'App-Hub' } },
   { path: '/charging-locations', component: ChargingLocations, meta: { title: 'Ladeorte' } },
+  { path: '/nearby',        component: Nearby,        meta: { title: 'In der Nähe' } },
   { path: '/logbook',       component: Logbook,       meta: { title: 'Betriebsbuch' } },
   { path: '/export',        component: Export,        meta: { title: 'Export' } },
   { path: '/mfa/setup',     component: MfaSetup,      meta: { title: 'MFA einrichten' } },

@@ -109,6 +109,10 @@
     "chargingLocations": {
       "label": "Charging locations",
       "tooltip": "Manage your own charging spots — rate, radius, auto charge limit on arrival"
+    },
+    "nearby": {
+      "label": "Nearby",
+      "tooltip": "POIs around your current position or charging station"
     }
   },
   "dashboard": {
@@ -2684,6 +2688,40 @@
       "home": "🏠 Home",
       "work": "💼 Work",
       "public": "⚡ Public"
+    }
+  },
+  "poi": {
+    "heading": "POIs within {radius} km",
+    "loading": "Loading surroundings from OpenStreetMap…",
+    "empty": "No POIs nearby — try a larger radius or another location.",
+    "unnamed": "(no name)",
+    "attribution": "Data: OpenStreetMap Overpass API · © OSM contributors · no account, no API key, cached locally (24 h TTL)",
+    "type": {
+      "cafe": "Café",
+      "restaurant": "Restaurant",
+      "fast_food": "Fast food",
+      "bakery": "Bakery",
+      "supermarket": "Supermarket",
+      "toilets": "Toilet",
+      "drinking_water": "Drinking water",
+      "playground": "Playground",
+      "park": "Park",
+      "picnic": "Picnic",
+      "viewpoint": "Viewpoint",
+      "atm": "ATM",
+      "pharmacy": "Pharmacy",
+      "geocache": "Geocache"
+    }
+  },
+  "nearby": {
+    "title": "Nearby",
+    "subtitle": "POIs (café, toilets, playground, geocaches, viewpoints) around your car, your active charging session or your last trip end. Handy during fast-charge stops.",
+    "source": "Position",
+    "noSource": "No position available. Pick a vehicle with a current GPS position, or run a charging session / trip first.",
+    "sources": {
+      "vehicle": "Current vehicle position",
+      "charging": "Active charging session",
+      "lastTrip": "Last trip end"
     }
   }
 }

@@ -495,6 +495,18 @@ Aynı Tesla'da OwnTracks'li iki kişi olursa, koruma olmadan her iki yolculuk ç
 - 🔵 **Durum bilinmiyor** — kurulumdan sonra ilk Bluetooth olayını bekliyor
 - 🔵 **Bluetooth doğrulaması olmadan aktif** — eski mod, Bluetooth adı yok
 
+## 📍 Yakında (v3.13.0'dan itibaren) {#nearby}
+
+`/nearby` arabanız, aktif şarj oturumunuz veya son yolculuk bitişiniz etrafındaki POIları (ilgi noktalarını) gösterir. Hızlı şarj molalarında kullanışlı.
+
+**Kategoriler**: kafe, restoran, fast food, fırın, süpermarket, WC, içme suyu, oyun alanı, park, piknik, manzara, ATM, eczane, **geocache**.
+
+**Veri kaynağı**: [OpenStreetMap Overpass API](https://overpass-api.de) — ücretsiz, hesap yok, API anahtarı yok. Çağrılar sunucu tarafında yapılır ve sonuçlar 24 saat `poi_cache`'da önbellenir (4 ondalık → ~11 m).
+
+**Yarıçap**: 500 m / 1.5 km / 3 km. POI tıklandığında OpenStreetMap açılır.
+
+**Filtre**: her kategori toggle — örn. şarj sırasında define avı için sadece geocache göster.
+
 ## 🚀 Uygulama merkezi (v3.9.0'dan itibaren) {#app-hub}
 
 `/launcher` Tesla tarayıcısında çalışan ve Tesla'nın yerel olarak SUNMADIĞI **seçilmiş web uygulamaları listesi** sunar:

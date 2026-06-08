@@ -109,6 +109,10 @@
     "chargingLocations": {
       "label": "Ladeorte",
       "tooltip": "Eigene Ladeorte verwalten — Tarif, Radius, automatisches Ladelimit bei Ankunft"
+    },
+    "nearby": {
+      "label": "In der Nähe",
+      "tooltip": "POIs im Umfeld deiner aktuellen Position oder Ladestation"
     }
   },
   "dashboard": {
@@ -2684,6 +2688,40 @@
       "home": "🏠 Zuhause",
       "work": "💼 Arbeit",
       "public": "⚡ Öffentlich"
+    }
+  },
+  "poi": {
+    "heading": "POIs im Umkreis {radius} km",
+    "loading": "Lade Umfeld-Daten von OpenStreetMap…",
+    "empty": "Keine POIs in der Nähe — Radius vergrößern oder anderen Standort wählen.",
+    "unnamed": "(ohne Name)",
+    "attribution": "Datenquelle: OpenStreetMap Overpass-API · © OSM-Mitwirkende · keine Anmeldung, kein API-Key, alles lokal gecacht (24 h TTL)",
+    "type": {
+      "cafe": "Café",
+      "restaurant": "Restaurant",
+      "fast_food": "Fast Food",
+      "bakery": "Bäckerei",
+      "supermarket": "Supermarkt",
+      "toilets": "WC",
+      "drinking_water": "Trinkwasser",
+      "playground": "Spielplatz",
+      "park": "Park",
+      "picnic": "Picknick",
+      "viewpoint": "Aussicht",
+      "atm": "Geldautomat",
+      "pharmacy": "Apotheke",
+      "geocache": "Geocache"
+    }
+  },
+  "nearby": {
+    "title": "In der Nähe",
+    "subtitle": "POIs (Café, WC, Spielplatz, Geocaches, Aussichten) rund um dein Auto, deine aktive Lade-Session oder den letzten Trip-Endpunkt. Nützlich bei Schnelllade-Stopps.",
+    "source": "Position",
+    "noSource": "Keine Position verfügbar. Wähle ein Fahrzeug mit aktueller GPS-Position oder mache eine Lade-Session bzw. einen Trip.",
+    "sources": {
+      "vehicle": "Aktuelle Fahrzeug-Position",
+      "charging": "Aktive Lade-Session",
+      "lastTrip": "Letzter Trip-Endpunkt"
     }
   }
 }

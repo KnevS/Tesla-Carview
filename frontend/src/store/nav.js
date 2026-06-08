@@ -52,6 +52,7 @@ export const NAV_GROUPS = [
       { key: 'automations', to: '/automations', icon: 'bolt',     emojiFallback: '⚡', label: 'Automationen',  tooltip: 'Push-Alarme und automatische Aktionen bei Ladestufe, Geofence u. m.' },
       { key: 'grok',        to: '/grok',        icon: 'sparkles', emojiFallback: '💬', label: 'Grok',          tooltip: 'Chat mit Grok KI — stelle Fragen zu deinen Fahrten, Ladedaten und deinem Tesla' },
       { key: 'launcher',    to: '/launcher',    icon: 'apps',     emojiFallback: '🚀', label: 'App-Hub',       tooltip: 'Kuratierte Web-Apps, die im Tesla-Browser laufen und Tesla nicht nativ bietet' },
+      { key: 'nearby',      to: '/nearby',      icon: 'map',      emojiFallback: '📍', label: 'In der Nähe',   tooltip: 'POIs (Café, WC, Spielplatz, Geocaches) im Umfeld deiner aktuellen Position oder Ladestation' },
     ],
   },
 

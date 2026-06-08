@@ -7,6 +7,50 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.13.0] - 2026-06-08
+
+### Added — Phase 4: Nearby (POIs + geocaches)
+
+New view `/nearby` shows points of interest around your car, your active charging session or your last trip end. Handy during fast-charge stops — "where's the next toilet / café / playground?".
+
+**Categories:** café · restaurant · fast food · bakery · supermarket · toilets · drinking water · playground · park · picnic · viewpoint · ATM · pharmacy · **geocaches**.
+
+**Data source**: OpenStreetMap Overpass API (free, no account, no API key). Server-side call, locally cached in `poi_cache` for 24 hours. Data-sovereign, no cloud third-party.
+
+**Radius**: 500 m / 1.5 km / 3 km. Clicking a POI opens OpenStreetMap.
+
+**Filter**: every category as a toggle — e.g. show only geocaches for a treasure hunt while charging.
+
+### Backend
+
+- New service `backend/src/services/poiService.js` with Overpass binding, distance sort and cache
+- Schema `poi_cache` (lat_key, lon_key, radius_m, types_key) — auto-migration in `runTenantMigrations`
+- Routes in `backend/src/routes/poi.js`:
+  - `GET /api/poi/types` — available types
+  - `GET /api/poi/nearby?lat&lon&radius&types`
+  - `GET /api/poi/nearby/charging/:sessionId` — POIs at a charging session
+- 15 Overpass filters (amenity/shop/leisure/tourism)
+- User-Agent per Overpass ToS, 15 s timeout, fail-soft (stale cache as fallback)
+
+### Frontend
+
+- New component `NearbyPOIs.vue` (reusable)
+- New view `Nearby.vue` with a source picker (vehicle / active charging session / last trip end)
+- Nav entry "📍 Nearby" in the planning group
+- Touch-optimized tile layout, per-category filter toggles
+
+### Docs
+
+- Handbook section `{#nearby}` in all 6 languages
+- 25 new i18n keys × 6 languages (POI types, sources, headings)
+- Nav label + tooltip in all 6 languages
+
+### Data concept
+
+Overpass calls happen server-side; the frontend only sees aggregated POI lists. 24-h cache TTL is generous — POI data rarely changes. Max one Overpass call per position per day.
+
+---
+
 ## [v3.12.0] - 2026-06-08
 
 ### Added — Location actions: automatic charge limit on arrival
