@@ -7,6 +7,30 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.17.0] - 2026-06-08
+
+### Hinzugefügt — Marketing-Site auf 7 Sprachen + KI-Disclaimer
+
+Die Marketing-Site teslaview-web war bisher nur DE+EN. Jetzt 7 Sprachen analog zur App: **DE + EN + FR + ES + TR + EL + ZH**.
+
+- Sprach-Toggle erweitert von 2 auf 7 Buttons (DE/EN/FR/ES/TR/EL/中)
+- Browser-Auto-Detect erkennt jetzt `zh-*`, `fr-*`, `es-*`, `tr-*`, `el-*` und schaltet automatisch
+- AI-Disclaimer prominent im Footer: „🤖 Übersetzungen für FR/ES/TR/EL/ZH sind KI-unterstützt aus DE/EN. Korrekturen willkommen via GitHub." in jeweils Native-Sprache
+- 155 Marketing-Keys × 5 neue Sprachen = 775 neue Übersetzungen
+- Übersetzungen wurden parallel von 5 Subagents in einem Sprint generiert
+
+### Geändert — MyTracking-Nav verschoben
+
+Bisher in der Rubrik „Auswertungen". Logisch falsch — MyTracking ist Setup/Konfiguration. Jetzt in der Rubrik „Planung" (`plan`-Gruppe) neben Ladeorten und Automationen.
+
+### Vorbereitung
+
+- **v3.18.0** = TCO-Cockpit Leasing-Erweiterung (Anzahlung, Monatsrate, Laufzeit, Restwert/Rückkauf, Inklusiv-km)
+- **v3.18.x** = GPS-Setup-Wizard für MyTracking
+- **v3.19.x** = App-zh.json komplett ausgebaut (statt 10 % Coverage → 100 %)
+
+---
+
 ## [v3.16.1] - 2026-06-08
 
 ### Behoben — TCO-Cockpit: Direktlink zu den Stammdaten
