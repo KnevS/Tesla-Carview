@@ -444,6 +444,44 @@ Usa el **libro de servicio** para documentar todo lo relativo al funcionamiento 
 
 Esto permite saber más adelante quién registró qué nota o mantenimiento, especialmente útil en inquilinos con varios usuarios activos.
 
+## 🔵 Validación OwnTracks (desde v3.11.0) {#owntracks-validation}
+
+**Problema resuelto:** OwnTracks empuja datos GPS desde tu móvil a TeslaView. Si conduces otro coche o vas de copiloto, aparecerían trayectos falsos como Tesla. Con varias personas usando OwnTracks en el mismo Tesla, los trayectos se duplicarían.
+
+TeslaView tiene tres líneas de defensa:
+
+### A) Validación Bluetooth (automática, recomendada)
+
+Tu iPhone sabe si está conectado al Bluetooth del Tesla. Un Atajo de iOS le dice a TeslaView «entré» / «salí».
+
+**Configuración (una vez, ~3 min):**
+
+1. **Anota el nombre Bluetooth del Tesla**: iOS → Ajustes → Bluetooth → la entrada de tu Tesla (p. ej. «Tesla 7SA5...»).
+2. **En TeslaView**: `/my-tracking` → despliega «🔵 Validación Bluetooth» → introduce el nombre → guardar.
+3. **App Atajos iOS** → «Automatización» → «+ Nueva automatización»:
+   - «Al conectar Bluetooth» → elige el Tesla
+   - Añade acción «Obtener contenidos de URL» → pega la **URL conexión** que muestra TeslaView, **método HTTP = POST**
+   - Guarda y activa «Ejecutar inmediatamente»
+4. **Segunda automatización** para «desconexión» → **URL desconexión**.
+
+Una vez guardado, TeslaView ignora cualquier posición OwnTracks donde el móvil **no** esté conectado al Tesla.
+
+### B) Bloqueo de trayecto (automático)
+
+Con varias personas en el mismo Tesla, los trayectos se duplicarían. TeslaView pone un **bloqueo en el primer dispositivo** en movimiento — los demás se ignoran durante el trayecto (liberación automática tras 15 min inactivos). Sin configuración del usuario.
+
+### C) Pausa manual (freno de emergencia)
+
+En `/my-tracking` cada dispositivo tiene un botón ⏸. Si sabes que no conducirás el Tesla durante un tiempo (vacaciones con coche alquilado, ruta en bici), pausa el dispositivo. Reactívalo al volver.
+
+### Indicador de estado
+
+- 🟢 **En el Tesla** — activo, trayectos registrados
+- 🟡 **No en el Tesla** — Bluetooth desconectado, trayectos ignorados
+- ⏸ **En pausa** — desactivado manualmente
+- 🔵 **Estado desconocido** — esperando primer evento Bluetooth tras configuración
+- 🔵 **Activo sin validación Bluetooth** — modo legado, sin nombre Bluetooth
+
 ## 🚀 Hub de apps (desde v3.9.0) {#app-hub}
 
 `/launcher` ofrece una **lista curada de apps web** que se ejecutan en el navegador Tesla y que Tesla NO ofrece nativamente:

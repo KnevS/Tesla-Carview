@@ -17,12 +17,15 @@
       <div v-for="d in devices" :key="d.id"
            class="card p-4 space-y-3">
         <div class="flex items-start gap-3 flex-wrap">
-          <span class="text-2xl shrink-0">{{ d.is_active ? '📱' : '⏸' }}</span>
+          <span class="text-2xl shrink-0">{{ deviceIcon(d) }}</span>
           <div class="flex-1 min-w-0">
             <p class="font-semibold text-white">{{ d.label }}</p>
             <p class="text-xs text-gray-400 mt-0.5">
               🚗 {{ vehicleLabel(d.vehicle_id) }} ·
               📁 {{ $t('myTracking.tripTypes.' + d.default_trip_type) }}
+            </p>
+            <p class="text-[11px] mt-0.5" :class="statusColor(d)">
+              {{ statusLabel(d) }}
             </p>
             <p class="text-[11px] text-gray-500 mt-0.5">
               {{ d.last_ping_at ? $t('myTracking.lastPing', { time: relativeTime(d.last_ping_at) }) : $t('myTracking.neverPinged') }}
@@ -32,6 +35,11 @@
             <button @click="toggleQr(d)"
                     class="text-xs btn-secondary px-3 py-1">
               {{ qrVisible.has(d.id) ? $t('myTracking.hideQr') : '📷 ' + $t('myTracking.showQr') }}
+            </button>
+            <button @click="togglePause(d)"
+                    v-tooltip="$t('myTracking.pauseTooltip')"
+                    class="text-xs btn-secondary px-3 py-1">
+              {{ d.active_paused ? '▶ ' + $t('myTracking.resume') : '⏸ ' + $t('myTracking.pause') }}
             </button>
             <button @click="toggleDevice(d)"
                     class="text-xs btn-secondary px-3 py-1">
@@ -43,6 +51,39 @@
             </button>
           </div>
         </div>
+
+        <!-- Bluetooth-Validation-Setup -->
+        <details class="text-xs">
+          <summary class="cursor-pointer text-amber-300/90 hover:text-amber-200">
+            🔵 {{ $t('myTracking.bluetoothSetup.title') }}
+            <span v-if="d.bluetooth_pairing_name" class="text-emerald-400 ml-1">✓</span>
+          </summary>
+          <div class="mt-3 space-y-3 bg-gray-900/40 rounded-lg p-3">
+            <p class="text-gray-300 whitespace-pre-line">{{ $t('myTracking.bluetoothSetup.intro') }}</p>
+            <label class="block text-xs">
+              <span class="text-gray-400">{{ $t('myTracking.bluetoothSetup.nameLabel') }}</span>
+              <input v-model="btForms[d.id]" type="text" :placeholder="$t('myTracking.bluetoothSetup.namePlaceholder')"
+                     class="mt-1 w-full bg-gray-800 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-500" />
+            </label>
+            <button @click="saveBluetooth(d)"
+                    class="text-xs btn-secondary px-3 py-1">
+              {{ $t('myTracking.bluetoothSetup.save') }}
+            </button>
+            <div v-if="deviceTokens[d.id]" class="mt-3 space-y-2 text-gray-300">
+              <p class="font-semibold">{{ $t('myTracking.bluetoothSetup.shortcutTitle') }}</p>
+              <ol class="list-decimal list-inside space-y-1">
+                <li>{{ $t('myTracking.bluetoothSetup.step1') }}</li>
+                <li>{{ $t('myTracking.bluetoothSetup.step2') }}</li>
+                <li>{{ $t('myTracking.bluetoothSetup.step3') }}</li>
+              </ol>
+              <p class="font-semibold mt-2">{{ $t('myTracking.bluetoothSetup.urlConnect') }}</p>
+              <code class="block bg-gray-950 rounded px-2 py-1.5 font-mono text-[10px] select-all break-all">{{ inVehicleStartUrl(deviceTokens[d.id]) }}</code>
+              <p class="font-semibold mt-2">{{ $t('myTracking.bluetoothSetup.urlDisconnect') }}</p>
+              <code class="block bg-gray-950 rounded px-2 py-1.5 font-mono text-[10px] select-all break-all">{{ inVehicleEndUrl(deviceTokens[d.id]) }}</code>
+            </div>
+            <p v-else class="text-gray-500 italic">{{ $t('myTracking.bluetoothSetup.needToken') }}</p>
+          </div>
+        </details>
 
         <!-- QR-Code, ein-/ausklappbar -->
         <div v-if="qrVisible.has(d.id) && deviceTokens[d.id]"
@@ -146,6 +187,7 @@ const creating      = ref(false);
 const loading       = ref(false);
 const error         = ref('');
 const copiedId      = ref(null);
+const btForms       = reactive({});   // { [deviceId]: bluetooth_pairing_name draft }
 
 const canCreate = computed(() =>
   !!(form.label?.trim() && form.vehicle_id)
@@ -256,6 +298,58 @@ function relativeTime(unixSec) {
 function qrUrl(token)      { return `/api/owntracks/qr.png?token=${encodeURIComponent(token)}`; }
 function otrcUrl(token)    { return `/api/owntracks/config.otrc?token=${encodeURIComponent(token)}`; }
 function webhookUrl(token) { return `${location.origin}/api/owntracks/webhook?token=${token}`; }
+function inVehicleStartUrl(token) { return `${location.origin}/api/owntracks/in-vehicle/start/${token}`; }
+function inVehicleEndUrl(token)   { return `${location.origin}/api/owntracks/in-vehicle/end/${token}`; }
 
-onMounted(load);
+function deviceIcon(d) {
+  if (!d.is_active) return '⏸';
+  if (d.active_paused) return '⏸';
+  if (d.bluetooth_pairing_name && !d.in_vehicle) return '🅿️'; // hat BT-Config, gerade nicht im Auto
+  if (d.in_vehicle) return '🚗';
+  return '📱';
+}
+function statusLabel(d) {
+  if (!d.is_active) return t('myTracking.statusInactive');
+  if (d.active_paused) return t('myTracking.statusPaused');
+  if (d.bluetooth_pairing_name && !d.in_vehicle) return t('myTracking.statusNotInVehicle');
+  if (d.in_vehicle) return t('myTracking.statusInVehicle');
+  if (d.bluetooth_pairing_name) return t('myTracking.statusInVehicleUnknown');
+  return t('myTracking.statusLegacy');
+}
+function statusColor(d) {
+  if (!d.is_active || d.active_paused) return 'text-gray-500';
+  if (d.in_vehicle) return 'text-emerald-400';
+  if (d.bluetooth_pairing_name && !d.in_vehicle) return 'text-yellow-400';
+  return 'text-blue-400';
+}
+
+async function togglePause(d) {
+  try {
+    const action = d.active_paused ? 'resume' : 'pause';
+    await api.post(`/owntracks/devices/${d.id}/${action}`);
+    await load();
+  } catch (e) { error.value = e.response?.data?.error || e.message; }
+}
+
+async function saveBluetooth(d) {
+  try {
+    await api.patch(`/owntracks/devices/${d.id}/bluetooth`, {
+      bluetooth_pairing_name: btForms[d.id] ?? null,
+    });
+    // Token nachladen für Shortcut-URLs
+    if (!deviceTokens[d.id]) {
+      try {
+        const { data } = await api.get(`/owntracks/devices/${d.id}/token`);
+        deviceTokens[d.id] = data.token;
+      } catch { /* ignore */ }
+    }
+    await load();
+  } catch (e) { error.value = e.response?.data?.error || e.message; }
+}
+
+onMounted(async () => {
+  await load();
+  // BT-Form-Drafts mit aktuellen Werten initialisieren
+  for (const d of devices.value) btForms[d.id] = d.bluetooth_pairing_name || '';
+});
 </script>

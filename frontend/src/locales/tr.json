@@ -2516,6 +2516,29 @@
       "business": "İş",
       "private": "Özel",
       "commute": "İşe gidiş-geliş"
+    },
+    "pause": "Duraklat",
+    "resume": "Devam et",
+    "pauseTooltip": "Cihazı geçici olarak duraklatır — Tesla'yı kullanmadığınızda (başka araç, yolcu) mükemmel.",
+    "statusInactive": "⏸ Cihaz devre dışı",
+    "statusPaused": "⏸ Duraklatıldı (manuel)",
+    "statusInVehicle": "🟢 Tesla'da",
+    "statusNotInVehicle": "🟡 Tesla'da değil (Bluetooth bağlı değil) — yolculuklar yok sayılır",
+    "statusInVehicleUnknown": "🔵 Tesla durumu bilinmiyor (Bluetooth olayı bekleniyor)",
+    "statusLegacy": "🔵 Bluetooth doğrulaması olmadan aktif",
+    "bluetoothSetup": {
+      "title": "Bluetooth doğrulama (başka araç yolculuklarından gelen hatalı verileri önler)",
+      "intro": "Bu yapılandırmayla TeslaView yalnızca iPhone'unuz gerçekten Tesla Bluetooth'una bağlıyken veri alır. Başka bir araç veya bisiklet sürüyorsanız yolculuk yok sayılır.",
+      "nameLabel": "Tesla Bluetooth adı (iOS → Ayarlar → Bluetooth'da göründüğü gibi)",
+      "namePlaceholder": "örn. \"Tesla 7SA5...\" veya \"Model 3'üm\"",
+      "save": "💾 Kaydet",
+      "shortcutTitle": "iOS Kısayolunu kur (bir kez, ~3 dakika):",
+      "step1": "Kısayollar uygulaması → \"Otomasyon\" → \"+ Yeni otomasyon\"",
+      "step2": "\"Bluetooth bağlandığında\" → yukarıda kayıtlı Tesla'yı seçin",
+      "step3": "\"URL içeriğini al\" eylemi ekleyin → URL'yi yapıştırın (HTTP yöntem POST). Bağlantı kesilince son URL ile aynısını yapın.",
+      "urlConnect": "✅ Bağlanma URL'si (POST):",
+      "urlDisconnect": "🔌 Bağlantıyı kesme URL'si (POST):",
+      "needToken": "Token görünür olması için QR kodunu en az bir kez gösterin."
     }
   },
   "tco": {

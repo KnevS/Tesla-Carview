@@ -2516,6 +2516,29 @@
       "business": "Professionnel",
       "private": "Privé",
       "commute": "Trajet domicile-travail"
+    },
+    "pause": "Pause",
+    "resume": "Activer",
+    "pauseTooltip": "Met le device en pause — parfait quand vous ne conduisez pas la Tesla (autre voiture, passager).",
+    "statusInactive": "⏸ Appareil désactivé",
+    "statusPaused": "⏸ En pause (manuel)",
+    "statusInVehicle": "🟢 Dans la Tesla",
+    "statusNotInVehicle": "🟡 Pas dans la Tesla (Bluetooth déconnecté) — trajets ignorés",
+    "statusInVehicleUnknown": "🔵 Statut Tesla inconnu (en attente d'événement Bluetooth)",
+    "statusLegacy": "🔵 Actif sans validation Bluetooth",
+    "bluetoothSetup": {
+      "title": "Validation Bluetooth (évite les fausses données issues d'autres voitures)",
+      "intro": "Avec cette configuration, TeslaView n'accepte les données que si votre iPhone est réellement connecté au Bluetooth de la Tesla. Vous conduisez une autre voiture ou un vélo ? Le trajet est ignoré.",
+      "nameLabel": "Nom Bluetooth Tesla (exactement comme dans iOS → Réglages → Bluetooth)",
+      "namePlaceholder": "p. ex. « Tesla 7SA5... » ou « Ma Model 3 »",
+      "save": "💾 Enregistrer",
+      "shortcutTitle": "Configurer le raccourci iOS (une fois, ~3 min) :",
+      "step1": "App Raccourcis → « Automatisation » → « + Nouvelle automatisation »",
+      "step2": "« Lorsque le Bluetooth se connecte » → choisir la Tesla enregistrée",
+      "step3": "Ajouter l'action « Obtenir le contenu de l'URL » → coller l'URL (méthode HTTP POST). Pour la déconnexion, idem avec l'URL de fin.",
+      "urlConnect": "✅ URL connexion (POST) :",
+      "urlDisconnect": "🔌 URL déconnexion (POST) :",
+      "needToken": "Afficher le QR-code au moins une fois pour que le token devienne visible."
     }
   },
   "tco": {

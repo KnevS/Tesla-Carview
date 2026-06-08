@@ -62,6 +62,14 @@ Das Fahrtenbuch erfüllt die Anforderungen des deutschen Finanzamts:
 ### GPS-Ortskorrektur
 Fehlende oder falsche Adressen lassen sich direkt in der Fahrtdetailansicht bearbeiten.
 
+### OwnTracks-Validation (v3.11.0)
+Wenn du OwnTracks für GPS nutzt, gibt es drei Schutzlinien gegen Falschdaten:
+- **Bluetooth-Validierung** — iOS-Kurzbefehl meldet „im Tesla" / „ausgestiegen", Trips außerhalb werden ignoriert
+- **Trip-Lock** — pro Tesla nur ein aktives Device, verhindert Doppelerfassung
+- **Manueller Pause-Toggle** — Notbremse für Mietwagen-Urlaub etc.
+
+Setup ist im Handbuch unter `{#owntracks-validation}` Schritt-für-Schritt erklärt.
+
 ---
 
 ## ⚡ Laden

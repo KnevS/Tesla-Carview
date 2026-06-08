@@ -462,6 +462,46 @@ Im **Betriebsbuch** dokumentierst du alles rund um den Fahrzeugbetrieb: Wartung,
 
 Damit lässt sich später nachvollziehen, wer welche Notiz oder Wartung dokumentiert hat — wichtig in Mandanten mit mehreren aktiven Benutzern.
 
+## 🔵 OwnTracks-Validation (ab v3.11.0) {#owntracks-validation}
+
+**Problem das wir lösen:** OwnTracks pushed GPS-Daten von deinem Smartphone an TeslaView. Wenn du aber mit einem Fremdauto fährst oder als Beifahrer mitfährst, würden falsche Trips als Tesla-Fahrten erscheinen. Bei mehreren Personen mit OwnTracks im selben Tesla gäbe es Doppelerfassung.
+
+TeslaView hat drei Schutzlinien:
+
+### A) Bluetooth-Validierung (automatisch, empfohlen)
+
+Dein iPhone weiß, ob es gerade mit dem Tesla-Bluetooth verbunden ist. Per iOS-Kurzbefehl meldet das Phone „eingestiegen" / „ausgestiegen" an TeslaView.
+
+**Setup (einmalig, ~3 Minuten):**
+
+1. **Tesla-Bluetooth-Name notieren**: iOS → Einstellungen → Bluetooth → der Eintrag deines Tesla (z. B. „Tesla 7SA5..."). Den exakten Namen merken.
+2. **In TeslaView**: `/my-tracking` → bei deinem Device „🔵 Bluetooth-Validierung" aufklappen → den Namen eintragen → speichern.
+3. **iOS-Kurzbefehle-App** öffnen → „Automation" → „+ Neue Automation":
+   - „Wenn Bluetooth-Gerät verbunden" → den Tesla wählen
+   - Aktion „Inhalte aus URL abrufen" hinzufügen → die in TeslaView angezeigte **Verbinden-URL** einfügen, **HTTP-Methode = POST**
+   - Speichern und „Sofort ausführen, ohne Nachfrage" aktivieren
+4. **Zweite Automation analog** für „Bluetooth-Gerät getrennt" → **Trennen-URL**.
+
+Sobald die Bluetooth-Konfiguration gespeichert ist, ignoriert TeslaView jede OwnTracks-Position, bei der das Phone **nicht** mit dem Tesla verbunden ist.
+
+### B) Trip-Lock (automatisch)
+
+Wenn zwei Personen mit OwnTracks-Devices im selben Tesla sitzen, würde ohne Schutz beide Trips doppelt erfasst. TeslaView setzt deshalb pro Fahrzeug einen **Trip-Lock auf das erste Device**, das losfährt — alle anderen werden für die Trip-Dauer ignoriert (Auto-Release nach 15 min Inaktivität). Kein User-Setup nötig.
+
+### C) Manueller Pause-Toggle (Notbremse)
+
+In `/my-tracking` hat jedes Device einen ⏸-Knopf. Wenn du weißt, dass du die nächsten Stunden NICHT mit dem Tesla fährst (Urlaub mit Mietwagen, Fahrradtour), kannst du dein Device manuell pausieren. Beim Wieder-Einsteigen reaktivierst du es.
+
+### Status-Anzeige
+
+In `/my-tracking` zeigt jedes Device einen klaren Status:
+
+- 🟢 **Im Tesla** — alles aktiv, Trips werden erfasst
+- 🟡 **Nicht im Tesla** — Bluetooth getrennt, Trips werden ignoriert
+- ⏸ **Pausiert** — manuell deaktiviert
+- 🔵 **Im-Tesla-Status unbekannt** — wartet auf erstes Bluetooth-Event nach Setup
+- 🔵 **Ohne Bluetooth-Validierung aktiv** — Legacy-Modus, kein Bluetooth-Name hinterlegt
+
 ## 🚀 App-Hub (ab v3.9.0) {#app-hub}
 
 Unter `/launcher` findest du eine **kuratierte Liste von Web-Apps**, die im Tesla-Browser laufen und die Tesla nativ NICHT anbietet:

@@ -7,6 +7,56 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.11.0] - 2026-06-08
+
+### Hinzugefügt — OwnTracks-Validation (3 Schutzlinien)
+
+**Problem das wir lösen**: OwnTracks pushed GPS-Daten vom Smartphone an TeslaView. Bei Fahrten mit Fremdauto oder als Beifahrer würden falsche Trips als Tesla-Fahrten erscheinen. Bei mehreren Personen mit OwnTracks im selben Tesla gäbe es Doppelerfassung.
+
+Drei kombinierte Schutzlinien:
+
+**A) Bluetooth-Validierung (automatisch, empfohlen)**
+- iOS-Kurzbefehl meldet via POST `/api/owntracks/in-vehicle/start|end/:token`, wann das Phone mit dem Tesla-Bluetooth verbunden ist
+- TeslaView verwirft jede OwnTracks-Position außerhalb dieser Phase
+- Opt-In: nur aktiv wenn `bluetooth_pairing_name` im Device gesetzt ist
+
+**B) Trip-Lock (automatisch)**
+- Erstes OwnTracks-Device das losfährt, beansprucht den Trip pro Fahrzeug
+- Andere Devices werden für die Trip-Dauer ignoriert
+- Auto-Release nach 15 min Inaktivität
+- Spalten `vehicles.active_trip_owntracks_device_id` + `active_trip_locked_until`
+
+**C) Manueller Pause-Toggle (Notbremse)**
+- ⏸-Knopf in `/my-tracking` pro Device
+- Persistiert in `owntracks_devices.active_paused`
+- Endpoints `POST /devices/:id/pause|resume`
+
+### Backend
+
+- Neue Spalten in `owntracks_devices` (master.db): `bluetooth_pairing_name`, `in_vehicle`, `in_vehicle_since`, `active_paused`
+- Neue Spalten in `vehicles` (Tenant-DB): `active_trip_owntracks_device_id`, `active_trip_locked_until`
+- Migrations in `runMasterMigrations` + `runTenantMigrations` — bestehende Datenbanken bekommen die Felder automatisch
+- `POST /api/owntracks/in-vehicle/start|end/:token` (Token-Auth für iOS-Shortcut)
+- `POST /api/owntracks/devices/:id/pause|resume` (Cookie-Auth)
+- `PATCH /api/owntracks/devices/:id/bluetooth` (für Bluetooth-Pairing-Name)
+- Webhook-Filter prüft alle drei Gates vor Trip-Aufzeichnung
+
+### Frontend
+
+- `MyTracking.vue`: Status-Indicator pro Device (🟢🟡🔵⏸), Pause-Toggle, Bluetooth-Setup-Aufklapper mit Schritt-für-Schritt-iOS-Shortcut-Anleitung inkl. einsetzbarer URLs
+
+### Doku
+
+- Handbuch-Sektion `{#owntracks-validation}` in allen 6 Sprachen mit ausführlicher iOS-Shortcut-Anleitung
+- Wiki Features (DE/EN/FR/ES/TR/EL) — Kurz-Eintrag mit Verweis aufs Handbuch
+- 24 neue i18n-Keys × 6 Sprachen
+
+### Datenkonzept
+
+Alles bleibt lokal — iOS-Shortcut spricht direkt mit deinem TeslaView-Backend. Kein externer Service.
+
+---
+
 ## [v3.10.0] - 2026-06-08
 
 ### Geändert — Adresse vor Koordinaten (überall)

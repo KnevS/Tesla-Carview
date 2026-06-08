@@ -7,6 +7,56 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.11.0] - 2026-06-08
+
+### Added — OwnTracks validation (3 lines of defense)
+
+**Problem solved**: OwnTracks pushes phone GPS data to TeslaView. Driving a different car or riding as a passenger would create false Tesla trips. Multiple OwnTracks devices in the same Tesla would record duplicate trips.
+
+Three combined defenses:
+
+**A) Bluetooth validation (automatic, recommended)**
+- iOS Shortcut calls `POST /api/owntracks/in-vehicle/start|end/:token` when the phone connects to or disconnects from the Tesla Bluetooth
+- TeslaView drops every OwnTracks position outside that window
+- Opt-in: only active when `bluetooth_pairing_name` is set on the device
+
+**B) Trip lock (automatic)**
+- The first OwnTracks device that starts moving claims the trip for that vehicle
+- Other devices are ignored for the trip duration
+- Auto-release after 15 min idle
+- New columns `vehicles.active_trip_owntracks_device_id` + `active_trip_locked_until`
+
+**C) Manual pause toggle (emergency brake)**
+- ⏸ button per device in `/my-tracking`
+- Persisted in `owntracks_devices.active_paused`
+- Endpoints `POST /devices/:id/pause|resume`
+
+### Backend
+
+- New columns in `owntracks_devices` (master.db): `bluetooth_pairing_name`, `in_vehicle`, `in_vehicle_since`, `active_paused`
+- New columns in `vehicles` (tenant DB): `active_trip_owntracks_device_id`, `active_trip_locked_until`
+- Migrations in `runMasterMigrations` + `runTenantMigrations` — existing databases get the fields automatically
+- `POST /api/owntracks/in-vehicle/start|end/:token` (token auth for iOS Shortcut)
+- `POST /api/owntracks/devices/:id/pause|resume` (cookie auth)
+- `PATCH /api/owntracks/devices/:id/bluetooth` (set Bluetooth pairing name)
+- Webhook filter checks all three gates before recording a trip
+
+### Frontend
+
+- `MyTracking.vue`: per-device status indicator (🟢🟡🔵⏸), pause toggle, Bluetooth setup disclosure with step-by-step iOS Shortcut instructions including copyable URLs
+
+### Docs
+
+- Handbook section `{#owntracks-validation}` in all 6 languages with detailed iOS Shortcut walkthrough
+- Wiki Features (DE/EN/FR/ES/TR/EL) — short entry with handbook reference
+- 24 new i18n keys × 6 languages
+
+### Data concept
+
+Everything stays local — the iOS Shortcut talks directly to your TeslaView backend. No external service.
+
+---
+
 ## [v3.10.0] - 2026-06-08
 
 ### Changed — Address before coordinates (everywhere)

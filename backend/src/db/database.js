@@ -199,6 +199,22 @@ function runMasterMigrations(master) {
     }
     console.log(`[pseudonym] ${missing.length} bestehende(r) Mandant(en) bekamen einen Login-Pseudonym`);
   }
+
+  // OwnTracks-Validation (v3.11.0): nur Daten aufnehmen wenn das Phone
+  // wirklich im Tesla ist und es pro Trip nur EIN aktives Device gibt.
+  const otCols = master.prepare('PRAGMA table_info(owntracks_devices)').all().map(c => c.name);
+  if (!otCols.includes('bluetooth_pairing_name')) {
+    master.exec('ALTER TABLE owntracks_devices ADD COLUMN bluetooth_pairing_name TEXT');
+  }
+  if (!otCols.includes('in_vehicle')) {
+    master.exec('ALTER TABLE owntracks_devices ADD COLUMN in_vehicle INTEGER NOT NULL DEFAULT 0');
+  }
+  if (!otCols.includes('in_vehicle_since')) {
+    master.exec('ALTER TABLE owntracks_devices ADD COLUMN in_vehicle_since INTEGER');
+  }
+  if (!otCols.includes('active_paused')) {
+    master.exec('ALTER TABLE owntracks_devices ADD COLUMN active_paused INTEGER NOT NULL DEFAULT 0');
+  }
 }
 
 /**
@@ -425,6 +441,11 @@ function runTenantMigrations(db) {
   }
   if (!vCols.includes('monta_client_id')) {
     db.exec('ALTER TABLE vehicles ADD COLUMN monta_client_id TEXT');
+  }
+  // OwnTracks-Trip-Lock (v3.11.0): pro Fahrzeug nur ein Device aktiv
+  if (!vCols.includes('active_trip_owntracks_device_id')) {
+    db.exec('ALTER TABLE vehicles ADD COLUMN active_trip_owntracks_device_id INTEGER');
+    db.exec('ALTER TABLE vehicles ADD COLUMN active_trip_locked_until INTEGER');
   }
   if (!vCols.includes('abrp_token')) {
     db.exec('ALTER TABLE vehicles ADD COLUMN abrp_token TEXT');

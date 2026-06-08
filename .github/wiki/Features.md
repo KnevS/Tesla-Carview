@@ -71,6 +71,14 @@ The trip logbook meets German tax office (Finanzamt/BMF) requirements:
 ### GPS location editing
 If a trip has a missing or wrong address, edit it directly in the trip detail view.
 
+### OwnTracks validation (v3.11.0)
+When you use OwnTracks for GPS, three lines of defense protect your data:
+- **Bluetooth validation** — iOS Shortcut reports "in the Tesla" / "got out", trips outside are ignored
+- **Trip lock** — only one active device per Tesla, prevents duplicate recording
+- **Manual pause toggle** — emergency brake for rental-car vacations etc.
+
+Setup is in the handbook under `{#owntracks-validation}`, step by step.
+
 ---
 
 ## ⚡ Charging

@@ -88,7 +88,8 @@ router.post('/webhook', (req, res) => {
   const master = getMasterDb();
   const device = master.prepare(
     `SELECT id, tenant_id, vehicle_id, user_id, default_trip_type,
-            current_trip_id, stationary_since
+            current_trip_id, stationary_since,
+            in_vehicle, in_vehicle_since, active_paused, bluetooth_pairing_name
      FROM owntracks_devices WHERE device_token=? AND is_active=1`
   ).get(token);
   if (!device) return res.status(401).json([]);
@@ -109,6 +110,40 @@ router.post('/webhook', (req, res) => {
   let db;
   try { db = getDb(device.tenant_id); }
   catch (e) { console.error('[OwnTracks] tenant db error:', e.message); return res.json([]); }
+
+  // ── Validation (v3.11.0): nur wenn wirklich im Tesla & einziger Driver ─────
+  //
+  // C) Manueller Pause-Toggle: User hat sein Device pausiert
+  if (device.active_paused) return res.json([]);
+
+  // A) Bluetooth-Validation: wenn der User einen bluetooth_pairing_name
+  //    hinterlegt hat, muss in_vehicle=1 sein (gesetzt vom iOS-Shortcut
+  //    bei Bluetooth-Connect). Devices ohne pairing_name laufen wie bisher
+  //    (Opt-In, damit Bestandsuser nichts kaputt geht).
+  if (device.bluetooth_pairing_name && !device.in_vehicle) return res.json([]);
+
+  // B) Pro Fahrzeug nur ein Device — Trip-Lock auf vehicles
+  const veh = db.prepare(
+    `SELECT active_trip_owntracks_device_id, active_trip_locked_until
+     FROM vehicles WHERE id=?`
+  ).get(device.vehicle_id);
+  const now = Math.floor(Date.now() / 1000);
+  const lockExpired = !veh?.active_trip_locked_until || veh.active_trip_locked_until < now;
+  if (veh?.active_trip_owntracks_device_id
+      && veh.active_trip_owntracks_device_id !== device.id
+      && !lockExpired) {
+    // Ein anderes Device hat den Trip aktuell — drop
+    return res.json([]);
+  }
+  // Lock auf MICH (oder erneuern) — auto-release nach 15 min Inaktivität
+  if (isMoving) {
+    db.prepare(
+      `UPDATE vehicles
+          SET active_trip_owntracks_device_id=?,
+              active_trip_locked_until=?
+        WHERE id=?`
+    ).run(device.id, now + 15 * 60, device.vehicle_id);
+  }
 
   // ── State Machine ──────────────────────────────────────────────────────────
   if (isMoving) {
@@ -153,7 +188,6 @@ router.post('/webhook', (req, res) => {
     return res.json([]);
   }
 
-  const now = Math.floor(Date.now() / 1000);
   if (now - device.stationary_since < STATIONARY_GRACE_S) return res.json([]);
 
   // Grace-Period abgelaufen → Trip schließen.
@@ -289,7 +323,8 @@ router.get('/devices', requireAuth, (req, res) => {
   if (isAdmin(req)) {
     const rows = master.prepare(
       `SELECT id, vehicle_id, user_id, label, default_trip_type, is_active,
-              current_trip_id, last_ping_at, created_at
+              current_trip_id, last_ping_at, created_at,
+              bluetooth_pairing_name, in_vehicle, in_vehicle_since, active_paused
        FROM owntracks_devices WHERE tenant_id=? ORDER BY created_at DESC`
     ).all(req.user.tenantId);
     return res.json(rows);
@@ -297,7 +332,8 @@ router.get('/devices', requireAuth, (req, res) => {
   // Fahrer: nur eigene Geraete
   const rows = master.prepare(
     `SELECT id, vehicle_id, user_id, label, default_trip_type, is_active,
-            current_trip_id, last_ping_at, created_at
+            current_trip_id, last_ping_at, created_at,
+            bluetooth_pairing_name, in_vehicle, in_vehicle_since, active_paused
      FROM owntracks_devices WHERE tenant_id=? AND user_id=? ORDER BY created_at DESC`
   ).all(req.user.tenantId, req.user.sub);
   res.json(rows);
@@ -405,6 +441,80 @@ router.get('/devices/:id/token', requireAuth, (req, res) => {
     token:       row.device_token,
     webhook_url: `${base}/api/owntracks/webhook?token=${row.device_token}`,
   });
+});
+
+// ── iOS-Shortcut-Endpoints: in-vehicle-Status setzen (Token-Auth) ─────────────
+//
+// Wird vom Kurzbefehle-Automation aufgerufen, sobald das Phone sich mit dem
+// Tesla-Bluetooth verbindet/trennt. Kein Cookie-Login — nur das Device-Token
+// in der URL.
+router.post('/in-vehicle/start/:token', (req, res) => {
+  const token = String(req.params.token || '');
+  if (!token || token.length < 16) return res.status(401).json({ error: 'invalid token' });
+  const master = getMasterDb();
+  const r = master.prepare(
+    `UPDATE owntracks_devices
+        SET in_vehicle=1, in_vehicle_since=unixepoch()
+      WHERE device_token=? AND is_active=1`
+  ).run(token);
+  if (r.changes === 0) return res.status(404).json({ error: 'unknown device' });
+  res.json({ ok: true, in_vehicle: true });
+});
+
+router.post('/in-vehicle/end/:token', (req, res) => {
+  const token = String(req.params.token || '');
+  if (!token || token.length < 16) return res.status(401).json({ error: 'invalid token' });
+  const master = getMasterDb();
+  const r = master.prepare(
+    `UPDATE owntracks_devices
+        SET in_vehicle=0, in_vehicle_since=NULL
+      WHERE device_token=? AND is_active=1`
+  ).run(token);
+  if (r.changes === 0) return res.status(404).json({ error: 'unknown device' });
+  res.json({ ok: true, in_vehicle: false });
+});
+
+// ── Manueller Pause-Toggle (Cookie-Auth) ─────────────────────────────────────
+router.post('/devices/:id/pause', requireAuth, (req, res) => {
+  try {
+    const master = getMasterDb();
+    const r = master.prepare(
+      `UPDATE owntracks_devices SET active_paused=1 WHERE id=? AND tenant_id=?
+       AND (user_id=? OR ? = 'admin')`
+    ).run(req.params.id, req.user.tenantId, req.user.sub, req.user.role);
+    res.json({ updated: r.changes, paused: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.post('/devices/:id/resume', requireAuth, (req, res) => {
+  try {
+    const master = getMasterDb();
+    const r = master.prepare(
+      `UPDATE owntracks_devices SET active_paused=0 WHERE id=? AND tenant_id=?
+       AND (user_id=? OR ? = 'admin')`
+    ).run(req.params.id, req.user.tenantId, req.user.sub, req.user.role);
+    res.json({ updated: r.changes, paused: false });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Bluetooth-Pairing-Name pflegen ───────────────────────────────────────────
+router.patch('/devices/:id/bluetooth', requireAuth, (req, res) => {
+  try {
+    const name = req.body?.bluetooth_pairing_name;
+    const trimmed = name ? String(name).slice(0, 80).trim() : null;
+    const master = getMasterDb();
+    const r = master.prepare(
+      `UPDATE owntracks_devices SET bluetooth_pairing_name=? WHERE id=? AND tenant_id=?
+       AND (user_id=? OR ? = 'admin')`
+    ).run(trimmed || null, req.params.id, req.user.tenantId, req.user.sub, req.user.role);
+    res.json({ updated: r.changes });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 export default router;

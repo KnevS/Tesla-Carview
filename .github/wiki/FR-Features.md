@@ -91,6 +91,16 @@ Générez des factures PDF pour remboursement (**Facturation → Créer une fact
 
 ---
 
+### Validation OwnTracks (v3.11.0)
+Si vous utilisez OwnTracks pour le GPS, trois lignes de défense protègent vos données :
+- **Validation Bluetooth** — un raccourci iOS signale « dans la Tesla » / « sortie », les trajets hors Tesla sont ignorés
+- **Verrouillage de trajet** — un seul device actif par Tesla, évite les doublons
+- **Pause manuelle** — frein d'urgence pour vacances en voiture de location, etc.
+
+Configuration pas à pas dans le manuel sous `{#owntracks-validation}`.
+
+---
+
 ## 🔋 Batterie — Tableau santé (Companion)
 
 Six sections sur `/battery`, **entièrement local et purement statistique** (pas d'IA, pas de cloud sauf une seule requête météo pour le préconditionnement) :

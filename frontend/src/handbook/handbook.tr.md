@@ -448,6 +448,44 @@ Araçta bir **Monta Charge-Point ID** yapılandırıldığında, senkronizasyond
 
 Bu sayede daha sonra hangi notu veya bakımı kimin kaydettiği takip edilebilir — birden fazla aktif kullanıcısı olan kiracılarda özellikle yararlıdır.
 
+## 🔵 OwnTracks doğrulama (v3.11.0'dan itibaren) {#owntracks-validation}
+
+**Çözülen sorun:** OwnTracks telefonunuzdan GPS verilerini TeslaView'a gönderir. Başka bir araç sürdüğünüzde veya yolcu olduğunuzda, yanlış yolculuklar Tesla yolculukları olarak görünür. Aynı Tesla'da birden fazla kişi OwnTracks kullanırsa yolculuklar çift kaydedilir.
+
+TeslaView'in üç savunma hattı var:
+
+### A) Bluetooth doğrulama (otomatik, önerilen)
+
+iPhone'unuz şu anda Tesla Bluetooth'una bağlı olup olmadığını bilir. iOS Kısayolu TeslaView'a "bindim" / "indim" der.
+
+**Kurulum (bir kez, ~3 dakika):**
+
+1. **Tesla Bluetooth adını not edin**: iOS → Ayarlar → Bluetooth → Tesla'nızın girdisi (örn. "Tesla 7SA5...").
+2. **TeslaView'de**: `/my-tracking` → cihazınızda "🔵 Bluetooth doğrulama" → adı girin → kaydedin.
+3. **iOS Kısayollar uygulaması** → "Otomasyon" → "+ Yeni otomasyon":
+   - "Bluetooth bağlandığında" → Tesla'yı seçin
+   - "URL içeriğini al" eylemi ekleyin → TeslaView'in gösterdiği **Bağlanma URL'sini** yapıştırın, **HTTP yöntemi = POST**
+   - Kaydedin ve "Sormadan çalıştır" seçeneğini açın
+4. **İkinci otomasyon** "Bluetooth bağlantı kesildiğinde" için → **Bağlantı kesme URL'si**.
+
+Bluetooth yapılandırması kaydedildikten sonra TeslaView, telefon Tesla'ya bağlı olmadığı her OwnTracks konumunu yok sayar.
+
+### B) Yolculuk kilidi (otomatik)
+
+Aynı Tesla'da OwnTracks'li iki kişi olursa, koruma olmadan her iki yolculuk çift kaydedilir. TeslaView bu nedenle **harekete geçen ilk cihaza yolculuk kilidi** koyar — diğerleri yolculuk süresince yok sayılır (15 dakika hareketsizlikten sonra otomatik bırakılır). Kullanıcı kurulumu gerekmez.
+
+### C) Manuel duraklatma (acil fren)
+
+`/my-tracking` içinde her cihazın bir ⏸ düğmesi var. Bir süre Tesla kullanmayacağınızı biliyorsanız (kiralık araçla tatil, bisiklet turu), cihazı manuel olarak duraklatın. Dönüşte tekrar aktive edin.
+
+### Durum göstergesi
+
+- 🟢 **Tesla'da** — aktif, yolculuklar kaydediliyor
+- 🟡 **Tesla'da değil** — Bluetooth bağlı değil, yolculuklar yok sayılır
+- ⏸ **Duraklatıldı** — manuel devre dışı
+- 🔵 **Durum bilinmiyor** — kurulumdan sonra ilk Bluetooth olayını bekliyor
+- 🔵 **Bluetooth doğrulaması olmadan aktif** — eski mod, Bluetooth adı yok
+
 ## 🚀 Uygulama merkezi (v3.9.0'dan itibaren) {#app-hub}
 
 `/launcher` Tesla tarayıcısında çalışan ve Tesla'nın yerel olarak SUNMADIĞI **seçilmiş web uygulamaları listesi** sunar:

@@ -81,6 +81,16 @@ Geri ödeme için PDF fatura (**Faturalama → Fatura Oluştur**) — tamamen is
 
 ---
 
+### OwnTracks doğrulama (v3.11.0)
+GPS için OwnTracks kullanıyorsanız, üç savunma hattı verilerinizi korur:
+- **Bluetooth doğrulama** — iOS Kısayolu "Tesla'da" / "indim" der, Tesla dışındaki yolculuklar yok sayılır
+- **Yolculuk kilidi** — Tesla başına yalnızca bir aktif cihaz, çift kaydı önler
+- **Manuel duraklatma** — kiralık araçla tatil vb. için acil fren
+
+Adım adım kurulum kılavuzda `{#owntracks-validation}` altında.
+
+---
+
 ## 🔋 Batarya — Sağlık paneli (Companion)
 
 `/battery` üzerinde altı bölüm, **tamamen yerel ve yalnızca istatistik** (yapay zeka yok, ön iklimlendirme için tek bir hava çağrısı dışında bulut yok):
