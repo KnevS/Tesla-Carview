@@ -4,7 +4,11 @@
 [![Lizenz](https://img.shields.io/badge/Lizenz-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.md)
 
-> 🇬🇧 [Read in English](README.en.md) · 📋 [Changelog](CHANGELOG.md) · 📚 [Dokumentation](docs/README.md)
+> 🇬🇧 [English](README.en.md) · 🇫🇷 [Français](README.fr.md) · 🇪🇸 [Español](README.es.md) · 🇹🇷 [Türkçe](README.tr.md) · 🇬🇷 [Ελληνικά](README.el.md) · 🇺🇦 [Українська](README.uk.md)
+>
+> 📋 [Changelog](CHANGELOG.md) · 📚 [Dokumentation](docs/README.md)
+>
+> 🤖 *Übersetzungen für FR/ES/TR/EL/UK sind KI-unterstützt aus DE/EN. Korrekturen via GitHub willkommen.*
 
 > **© 2026 Sven Krische** · Lizenz: [PolyForm Noncommercial 1.0.0](LICENSE) · [AUTHORS](AUTHORS) · [NOTICE](NOTICE.md)
 > Original-Entwurf, Architektur und Implementierung von Sven Krische ([@KnevS](https://github.com/KnevS)).

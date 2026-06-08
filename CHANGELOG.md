@@ -7,6 +7,45 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.19.0] - 2026-06-08
+
+### Hinzugefügt — Mehrsprachigkeit komplett (Sprint „Vollständige 7-Sprachen-Coverage")
+
+Alle Bereiche von TeslaView sind nun **vollumfänglich** in allen 7 Sprachen verfügbar:
+
+**App-Frontend (`frontend/src/locales/`):**
+- `uk.json` von 523 Keys (24 % Coverage) auf **2176 Keys (100 % Coverage)** ausgebaut — 35 fehlende Sections nachgezogen (adminSetup, wizard, control, settings, routes, handbook, system, setup, maintenanceLog, telemetry, energy, register, automations, mfa, users, billing, legal, chargers, sleep, webhooks, chargingLocations, annualReport, pair, climate, community, grok, invite, teslaUsage, exportPage, data, launcherAdmin, chargingHeatmap, logbook, locationHeatmap, drivers)
+- Andere AI-Sprachen (fr, es, tr, el): bereits 100 % Coverage bestätigt durch Audit
+- Übersetzung via 8 parallele KI-Subagents in einem Sprint
+
+**README (7 Sprachen):**
+- Neu: `README.fr.md`, `README.es.md`, `README.tr.md`, `README.el.md`, `README.uk.md`
+- Sprach-Cross-Link-Header in DE+EN auf alle 7 Sprachen erweitert
+- AI-Disclaimer in jeder Sprache nach Header
+
+**docs/* (16 Files × 7 Sprachen = 112 Files):**
+- Neu in FR/ES/TR/EL/UK je 16 Dateien: README, 01-quickstart, 02-deployment, 03-authentication, 04-tesla-api, 05-security-architecture, 06-fail2ban, 07-setup-wizard, 08-dokploy, 09-tesla-api-usage, 10-configuration, 11-operations, 12-high-availability, 13-roadmap-ideas, 14-network-access, 15-raspberry-pi-storage
+- AI-Disclaimer als Banner direkt nach H1
+
+**Wiki (`.github/wiki/`, 14 Seiten × 7 Sprachen = 98 Files):**
+- Neu in UK: alle 14 Wiki-Seiten (Backup-and-Restore, Configuration, Features, First-Login, Home, Installation, Legal-Content, License-and-Usage, Multi-Tenant, Network-Access, Raspberry-Pi-Storage, Security, Tesla-API-Setup, Troubleshooting)
+- EL von 2 auf 14 Seiten vervollständigt (12 neu)
+- Wiki-Sync-Workflow triggert automatisch auf `.github/wiki/**` Push
+
+**Marketing-Site (separates Repo, bereits in v3.18.0):**
+- Slide-Dropdown-Sprachumschalter mit allen 7 Sprachen
+- 160 Marketing-Keys vollständig in 7 Sprachen
+
+**Setup-Wizards (AdminSetupWizard + Wizard-Section):**
+- Vollständig in UK übersetzt (208 + 168 Keys), Konsistenz mit anderen 6 Sprachen
+
+### Roadmap
+
+- **v3.20.0**: TCO-Cockpit Leasing-Erweiterung
+- **v3.21.0**: GPS-Setup-Wizard
+
+---
+
 ## [v3.18.0] - 2026-06-08
 
 ### Geändert — Marketing-Site: Sprachumschalter als Slide-Dropdown + Sprache UK statt ZH

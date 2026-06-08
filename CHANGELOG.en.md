@@ -7,6 +7,45 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.19.0] - 2026-06-08
+
+### Added — Full multilingual coverage (sprint "Complete 7-language coverage")
+
+All parts of TeslaView now exist **in full** across all 7 languages:
+
+**App frontend (`frontend/src/locales/`):**
+- `uk.json` expanded from 523 keys (24 % coverage) to **2176 keys (100 % coverage)** — 35 missing sections filled in (adminSetup, wizard, control, settings, routes, handbook, system, setup, maintenanceLog, telemetry, energy, register, automations, mfa, users, billing, legal, chargers, sleep, webhooks, chargingLocations, annualReport, pair, climate, community, grok, invite, teslaUsage, exportPage, data, launcherAdmin, chargingHeatmap, logbook, locationHeatmap, drivers)
+- Other AI languages (fr, es, tr, el): already at 100 % coverage, confirmed via audit
+- Translated by 8 parallel AI subagents in one sprint
+
+**README (7 languages):**
+- New: `README.fr.md`, `README.es.md`, `README.tr.md`, `README.el.md`, `README.uk.md`
+- Cross-language header in DE+EN extended to all 7 languages
+- AI disclaimer in every language under the header
+
+**docs/* (16 files × 7 languages = 112 files):**
+- New in FR/ES/TR/EL/UK, 16 files each: README, 01-quickstart, 02-deployment, 03-authentication, 04-tesla-api, 05-security-architecture, 06-fail2ban, 07-setup-wizard, 08-dokploy, 09-tesla-api-usage, 10-configuration, 11-operations, 12-high-availability, 13-roadmap-ideas, 14-network-access, 15-raspberry-pi-storage
+- AI disclaimer as banner right under the H1
+
+**Wiki (`.github/wiki/`, 14 pages × 7 languages = 98 files):**
+- New in UK: all 14 wiki pages
+- EL completed from 2 to 14 pages (12 new)
+- Wiki sync workflow triggers automatically on `.github/wiki/**` push
+
+**Marketing site (separate repo, already in v3.18.0):**
+- Slide-dropdown language switcher with all 7 languages
+- 160 marketing keys translated to 7 languages
+
+**Setup wizards (AdminSetupWizard + Wizard section):**
+- Fully translated to UK (208 + 168 keys), consistent with the other 6 languages
+
+### Roadmap
+
+- **v3.20.0**: TCO cockpit leasing extension
+- **v3.21.0**: GPS setup wizard
+
+---
+
 ## [v3.18.0] - 2026-06-08
 
 ### Changed — Marketing site: language switcher as slide dropdown + UK replaces ZH
