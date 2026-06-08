@@ -349,3 +349,33 @@ Die Fahrzeugsteuerung bietet zwei Darstellungsmodi:
 - **Kachel-Layout** — großzügige Karten, ideal für Tablets und große Bildschirme
 - **Kompakte Liste** — dichte Übersicht, ideal für kleine Bildschirme oder Power-User
 - Umschalter im Header; Einstellung wird in `localStorage` gespeichert
+
+---
+
+## 🚀 App-Hub (v3.9.0)
+
+Kuratierte Web-Apps für den Tesla-Browser unter `/launcher` — nur was Tesla nativ NICHT anbietet:
+ARD Audiothek, Deutschlandfunk Live, GoingElectric, electrive, OpenChargeMap, ABRP, Telegram Web, Wikipedia. Admin-Whitelist pro Mandant unter `/admin/launcher`.
+
+## 📍 In der Nähe (v3.13.0)
+
+POIs (Café, WC, Spielplatz, Geocaches, Supermarkt, Aussichten…) im Umkreis deiner Auto-Position, der aktiven Lade-Session oder des letzten Trip-Endpunkts. Datenquelle OpenStreetMap Overpass — kostenlos, kein API-Key, 24h-Cache.
+
+## 🏠 Ladeorte mit automatischem Ladelimit (v3.12.0)
+
+Heim/Arbeit/häufige Lader pflegen mit Name, GPS, Radius, Tarif und **Wunsch-Ladelimit**. Bei Ankunft im Radius:
+- Mit Fleet-API: TeslaView sendet `set_charge_limit` an das Auto
+- Ohne Fleet-API: Push-Erinnerung zum manuellen Setzen
+
+## 🔵 OwnTracks-Validation (v3.11.0)
+
+Drei Schutzlinien gegen Falscherfassung:
+- Bluetooth-Validation via iOS-Kurzbefehl
+- Trip-Lock pro Fahrzeug (verhindert Doppelerfassung bei 2+ Devices)
+- Manueller Pause-Toggle
+
+Details + Schritt-für-Schritt iOS-Setup im Handbuch unter `{#owntracks-validation}`.
+
+## 🔍 Adresse vor Koordinaten + Auto-Geocoding (v3.8.0 + v3.10.0)
+
+Alle Trip- und Lade-Listen zeigen Adressen statt nur GPS-Punkte. Trips mit GPS aber ohne Adresse werden automatisch via Nominatim/OSM aufgelöst (Live-Hook + nightly Backfill + Admin-Trigger). 24h lokal gecacht.

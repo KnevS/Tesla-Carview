@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v3.13.0-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.13.1-E31937?style=flat-square)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/License-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.en.md)
 
@@ -51,7 +51,13 @@ For live vehicle data (battery, climate, TPMS, telemetry stream) there is **only
 | **Trips** | GPS track on map, consumption, speed, SoC over time |
 | **Charging** | Charging sessions with cost, GPS-based charging-location matching, free sessions can be flagged |
 | **Charging locations** | Definable spots with GPS radius, price/kWh, auto-detection |
-| **Battery** | Degradation tracking, range history over time |
+| **Battery / Battery-Health Companion** | Phase 1 (v3.6.0): range history, degradation, charging curve, efficiency vs outside temperature, phantom drain, anomalies — all pure statistics from your own data. Phase 2 (v3.7.0): persistent anomaly alerts via push + preconditioning suggestions on frost/heat (Open-Meteo) |
+| **App hub** (v3.9.0) | Curated web apps for the Tesla browser: ARD Audiothek, Deutschlandfunk Live, GoingElectric, OpenChargeMap, Telegram Web, Wikipedia, ABRP — free, no forced account, **deliberately no duplicates** of Tesla-native apps. Admin whitelist per tenant |
+| **Nearby** (v3.13.0) | POIs around you (café, toilets, playground, **geocaches**, supermarket, viewpoints…) via OpenStreetMap Overpass. Source picker: current vehicle position / active charging session / last trip. 24-hour local cache |
+| **Charging spots with auto limit** (v3.12.0) | Manage home/work/frequent chargers: name, GPS, radius, rate, desired charge limit. On arrival → Tesla `set_charge_limit` command (Fleet API) or push reminder as fallback |
+| **OwnTracks validation** (v3.11.0) | Three lines of defense against bogus records: Bluetooth validation via iOS Shortcut, per-vehicle trip lock, manual pause toggle — prevents car-sharing trips or duplicate recording with 2+ devices from polluting the logbook |
+| **Address before coordinates** (v3.10.0) | All lists and detail views prefer the address; lat/lon only as a fallback (4 decimal places, ~11 m) |
+| **Auto-geocoding** (v3.8.0) | Trips/charging sessions with GPS but no address are automatically resolved via Nominatim/OSM — live hook + nightly backfill + admin trigger, cached locally for 24 hours
 | **Tech** | Live telemetry: TPMS, power flow, climate, charging status |
 | **Controls** | Vehicle commands: climate, climate-keeper (dog/camp), seat heaters (5 seats × 4 levels), steering-wheel heater, doors, frunk/tailgate, windows, sentry mode, charging incl. amps slider and charge port, departure schedule, boombox, software update, navigation (Virtual Key required) |
 | **Route planner** | Interactive route planner with SoC-aware charging stops incl. charge time estimate; departure SoC (live or manual), target SoC and charging target configurable; weather (Open-Meteo), traffic (HERE Maps), speed cameras (OpenStreetMap) along the route; map view with tile proxy |

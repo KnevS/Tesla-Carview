@@ -7,6 +7,33 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.13.1] - 2026-06-08
+
+### Changed — Marketing & main-repo docs refresh
+
+Today's seven highlights were already documented in CHANGELOG + handbook, but the **marketing bento** and the **README feature table** still showed the old stack. Caught up:
+
+**README.md + README.en.md** — feature table extended with:
+- Battery-Health Companion (Phase 1 + 2 combined)
+- App hub (v3.9.0)
+- Nearby (v3.13.0)
+- Charging locations with auto charge limit (v3.12.0)
+- OwnTracks validation (v3.11.0)
+- Address before coordinates (v3.10.0)
+- Auto-geocoding (v3.8.0)
+
+**Marketing site teslaview-web** — new bento cards:
+- bento8 reworked: "Energy & climate" → "Battery-Health Companion"
+- bento9: 🚀 App hub
+- bento10: 📍 Nearby (POIs & geocaches)
+- bento11: 🏠 Charging spots with auto charge limit
+- bento12: 🔵 OwnTracks validation
+- Stat number 50+ → 60+ features
+
+**Wiki (.github/wiki + wiki repo)** — Features page (DE+EN) extended with the five new sections: App hub, Nearby, Charging locations + auto limit, OwnTracks validation, Address-first + auto-geocoding.
+
+---
+
 ## [v3.13.0] - 2026-06-08
 
 ### Added — Phase 4: Nearby (POIs + geocaches)

@@ -358,3 +358,33 @@ The Vehicle Control view lets users choose their preferred layout:
 - **Tile view** — spacious cards, ideal for tablets and large screens
 - **Compact list** — dense overview, ideal for small screens or power users
 - Toggle button in the header; preference saved in `localStorage`
+
+---
+
+## 🚀 App hub (v3.9.0)
+
+Curated web apps for the Tesla browser at `/launcher` — only things Tesla does NOT offer natively:
+ARD Audiothek, Deutschlandfunk Live, GoingElectric, electrive, OpenChargeMap, ABRP, Telegram Web, Wikipedia. Admin whitelist per tenant at `/admin/launcher`.
+
+## 📍 Nearby (v3.13.0)
+
+POIs (café, toilets, playground, geocaches, supermarket, viewpoints…) around the car's position, an active charging session, or the last trip end. Data via OpenStreetMap Overpass — free, no API key, 24-hour cache.
+
+## 🏠 Charging locations with automatic charge limit (v3.12.0)
+
+Manage home / work / frequent chargers with name, GPS, radius, rate and a **desired charge limit**. On arrival within the radius:
+- With Fleet API: TeslaView sends `set_charge_limit` to the car
+- Without Fleet API: push reminder to set it manually
+
+## 🔵 OwnTracks validation extended (v3.11.0)
+
+Three lines of defense against bogus records:
+- Bluetooth validation via iOS Shortcut
+- Per-vehicle trip lock (prevents duplicates with 2+ devices)
+- Manual pause toggle
+
+Details and step-by-step iOS setup in the handbook under `{#owntracks-validation}`.
+
+## 🔍 Address before coordinates + auto-geocoding (v3.8.0 + v3.10.0)
+
+Trip and charging lists show addresses instead of raw GPS. Trips with GPS but no address get resolved automatically via Nominatim/OSM (live hook + nightly backfill + admin trigger). Cached locally for 24 hours.

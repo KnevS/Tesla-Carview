@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v3.13.0-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v3.13.1-E31937?style=flat-square)](CHANGELOG.md)
 [![Lizenz](https://img.shields.io/badge/Lizenz-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.md)
 
@@ -51,7 +51,13 @@ Für Live-Vehicle-Daten (Akku, Klima, TPMS, Telemetry-Stream) gibt es **nur eine
 | **Fahrten** | GPS-Track auf Karte, Verbrauch, Geschwindigkeit, SoC-Verlauf |
 | **Laden** | Ladesessions mit Kosten, GPS-basierter Ladeort-Zuordnung, kostenlose Ladungen markierbar |
 | **Ladeorte** | Definierbare Standorte mit GPS-Radius, Preis/kWh, Auto-Erkennung |
-| **Batterie** | Degradations-Tracking, Reichweiten-Verlauf über Zeit |
+| **Batterie / Battery-Health-Companion** | Phase 1 (v3.6.0): Reichweiten-Verlauf, Degradation, Ladekurve, Effizienz vs. Außentemperatur, Phantom-Drain, Anomalien — alles rein statistisch aus eigenen Daten. Phase 2 (v3.7.0): persistierte Anomalie-Alerts via Push + Vorklimatisierungs-Vorschläge bei Frost/Hitze (Open-Meteo) |
+| **App-Hub** (v3.9.0) | Kuratierte Web-Apps für den Tesla-Browser: ARD Audiothek, Deutschlandfunk Live, GoingElectric, OpenChargeMap, Telegram Web, Wikipedia, ABRP — kostenfrei, ohne Account-Zwang, **bewusst keine Doppelung** zu Tesla-Native-Apps. Admin-Whitelist pro Mandant |
+| **In der Nähe** (v3.13.0) | POIs im Umfeld (Café, WC, Spielplatz, **Geocaches**, Supermarkt, Aussichten…) via OpenStreetMap Overpass. Quelle wählbar: aktuelle Fahrzeug-Position / aktive Lade-Session / letzter Trip. 24h lokaler Cache |
+| **Ladeorte mit Auto-Limit** (v3.12.0) | Heim/Arbeit/häufige Ladestationen pflegen: Name, GPS, Radius, Tarif, Wunsch-Ladelimit. Bei Ankunft → Tesla-Befehl `set_charge_limit` (Fleet API) oder Push-Erinnerung als Fallback |
+| **OwnTracks-Validation** (v3.11.0) | Drei Schutzlinien gegen Falsch-Erfassung: Bluetooth-Validierung via iOS-Kurzbefehl, Trip-Lock pro Fahrzeug, manueller Pause-Toggle — verhindert dass Carsharing-Fahrten oder Doppelerfassung bei 2+ Devices ins Fahrtenbuch fließen |
+| **Adresse vor Koordinaten** (v3.10.0) | In allen Listen und Detailansichten wird die Adresse bevorzugt angezeigt; lat/lon nur als Fallback (4 Dezimalstellen ~11 m) |
+| **Auto-Geocoding** (v3.8.0) | Trips/Lade-Sessions mit GPS aber ohne Adresse werden automatisch via Nominatim/OSM ergänzt — Live-Hook + nightly Backfill + Admin-Trigger, 24h lokal gecacht
 | **Technik** | Live-Telemetrie: TPMS, Leistungsfluss, Klimaanlage, Ladestatus; Fake-Daten für Demo-Fahrzeuge |
 | **Routenplaner** | Interaktiver Routenplaner mit SoC-aware Ladeplanung: automatische Ladestopps inkl. Ladezeit-Schätzung; Abfahrts-SoC (live oder manuell), Ziel-SoC und Ladeziel konfigurierbar; Wetter (Open-Meteo), Verkehr (HERE Maps), Blitzer (OpenStreetMap) entlang der Route; Kartendarstellung mit Tile-Proxy |
 | **Steuerung** | Fahrzeugbefehle: Klima, Climate-Keeper (Hund/Camp), Sitzheizung (5 Plätze × 4 Stufen), Lenkradheizung, Türen, Frunk/Heckklappe, Fenster, Sentry-Mode, Laden inkl. Ampere-Slider und Ladeklappe, Vorklim-Zeitplan, Boombox, Software-Update, Navigation (Virtual Key erforderlich) |
