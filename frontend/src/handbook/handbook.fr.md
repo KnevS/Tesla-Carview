@@ -470,6 +470,8 @@ Chaque champ modifiable comporte une infobulle expliquant à quoi il sert, quand
 
 ### Résolution automatique d'adresse à partir de v3.8.0 {#auto-geocode}
 
+**Adresse avant coordonnées à partir de v3.10.0** : chaque liste (carnet de bord, trajets, sessions de charge) et vue détaillée préfère l'adresse. Ce n'est qu'en l'absence d'adresse (ou si le backfill n'a pas encore tourné) que les lat/lon apparaissent en repli — formatées à 4 décimales (~11 m). Le lieu lisible est affiché autant que possible, pas « 54.1234, 9.5678 ».
+
 Quand un trajet ou une session de charge a **des coordonnées GPS mais pas de texte d'adresse**, TeslaView remplit l'adresse automatiquement en arrière-plan :
 
 - **Déclencheur live** : juste après chaque fin de trajet OwnTracks et chaque insert de session de charge, un lookup inverse fire-and-forget s'exécute.

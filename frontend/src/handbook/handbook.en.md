@@ -488,6 +488,8 @@ Every editable field carries a mouse-over hint explaining what it does, when you
 
 ### Automatic address resolution from v3.8.0 {#auto-geocode}
 
+**Address before coordinates from v3.10.0**: every list (logbook, trips, charging sessions) and detail view prefers the address. Only if no address is stored (or the backfill has not run yet) do lat/lon appear as a fallback — formatted to 4 decimal places (~11 m). Wherever possible the readable place is shown, not "54.1234, 9.5678".
+
 When a trip or charging session has **GPS coordinates but no address text**, TeslaView fills in the address automatically in the background:
 
 - **Live trigger**: Right after every OwnTracks trip close and every charging insert, a fire-and-forget reverse lookup runs.

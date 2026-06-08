@@ -7,6 +7,36 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.10.0] - 2026-06-08
+
+### Changed — Address before coordinates (everywhere)
+
+Wherever a place is shown, the **address takes precedence** over GPS coordinates. Only when no address is stored (or the geocoding backfill has not run yet) do lat/lon appear as a properly formatted fallback (4 decimal places, ~11 m).
+
+Specifically refactored:
+
+- **Trip list** (`/trips`): start → destination now show addresses or coordinates instead of just "start" / "destination"
+- **Trip detail** (`/trips/:id`): consistent i18n fallback string instead of raw coordinates
+- **Charging sessions** (`/charging`): location name or coordinates instead of just "Unknown location"
+- **Logbook** (`/fahrtenbuch`): `coordStr` helper now backed by the central `formatCoords`
+
+New helper `frontend/src/lib/location.js`:
+- `formatLocation({ address, lat, lon, fallback })` — address first, coordinates as fallback
+- `formatCoords(lat, lon)` — 4-decimal-place format
+- `coordTooltip(lat, lon)` — hover tooltip when an address is being shown
+- `hasAddress(address)` — predicate
+
+### Added
+
+- `tripDetail.noData` i18n key in 6 languages (centralizes the former hard-coded "— no data —")
+- Handbook note in 6 languages, appended to the `{#auto-geocode}` section
+
+### Foundation
+
+This consolidation is the foundation for **v3.11.0** (location-based actions such as per-location charge limit).
+
+---
+
 ## [v3.9.1] - 2026-06-08
 
 > Note: the first deploy run lost the race against the running backend container; an empty re-trigger commit recovered.

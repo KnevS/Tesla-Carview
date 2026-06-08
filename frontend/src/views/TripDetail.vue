@@ -81,12 +81,12 @@
         <div v-if="!editingRoute" class="grid grid-cols-2 gap-4 text-sm">
           <div>
             <p class="text-gray-400">Start</p>
-            <p>{{ trip.start_address || (trip.start_lat ? `${trip.start_lat}, ${trip.start_lon}` : '— keine Daten —') }}</p>
+            <p>{{ formatLocation({ address: trip.start_address, lat: trip.start_lat, lon: trip.start_lon, fallback: $t('tripDetail.noData') }) }}</p>
             <p class="text-gray-400 mt-1">{{ fmtDateTime(trip.start_time) }}</p>
           </div>
           <div>
             <p class="text-gray-400">Ziel</p>
-            <p>{{ trip.end_address || (trip.end_lat ? `${trip.end_lat}, ${trip.end_lon}` : '— keine Daten —') }}</p>
+            <p>{{ formatLocation({ address: trip.end_address, lat: trip.end_lat, lon: trip.end_lon, fallback: $t('tripDetail.noData') }) }}</p>
             <p class="text-gray-400 mt-1">{{ fmtDateTime(trip.end_time) }}</p>
           </div>
         </div>
@@ -265,6 +265,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import StatCard from '../components/StatCard.vue';
 import { useUnits } from '../store/prefs.js';
 import api from '../api.js';
+import { formatLocation } from '../lib/location.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip);
 

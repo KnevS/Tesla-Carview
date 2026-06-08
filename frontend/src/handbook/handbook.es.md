@@ -470,6 +470,8 @@ Cada campo editable tiene un tooltip que explica qué hace, cuándo usarlo y qu�
 
 ### Resolución automática de direcciones desde v3.8.0 {#auto-geocode}
 
+**Dirección antes que coordenadas desde v3.10.0**: cada lista (libro de mantenimiento, trayectos, sesiones de carga) y vista de detalle prefiere la dirección. Solo si no hay dirección almacenada (o el backfill aún no se ejecutó) aparecen lat/lon como reserva — con 4 decimales (~11 m). Siempre que sea posible se muestra el lugar legible, no «54.1234, 9.5678».
+
 Cuando un trayecto o sesión de carga tiene **coordenadas GPS pero no texto de dirección**, TeslaView completa la dirección automáticamente en segundo plano:
 
 - **Trigger en vivo**: justo después de cada cierre de trayecto OwnTracks y cada inserción de carga, se ejecuta un lookup inverso fire-and-forget.

@@ -281,7 +281,8 @@
     "endSoc": "End SoC",
     "totalEnergy": "Total energy used",
     "driver": "Driver",
-    "noDriverAssigned": "– no driver"
+    "noDriverAssigned": "– no driver",
+    "noData": "— no data —"
   },
   "logbook": {
     "title": "Trip Log",

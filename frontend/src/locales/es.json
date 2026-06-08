@@ -281,7 +281,8 @@
     "endSoc": "SoC final",
     "totalEnergy": "Energía total",
     "driver": "Conductor",
-    "noDriverAssigned": "– sin conductor"
+    "noDriverAssigned": "– sin conductor",
+    "noData": "— sin datos —"
   },
   "logbook": {
     "title": "Libro de viajes",

@@ -488,6 +488,8 @@ Jedes Eingabefeld trägt einen Mouse-over-Hinweis mit Kontext (was tut das Feld,
 
 ### Automatische Adress-Auflösung ab v3.8.0 {#auto-geocode}
 
+**Adresse vor Koordinaten ab v3.10.0**: In allen Listen (Fahrtenbuch, Trips, Lade-Sessions) und Detail-Ansichten wird die Adresse bevorzugt angezeigt. Nur wenn keine Adresse hinterlegt ist (oder das Backfill noch nicht durch war), erscheinen lat/lon als Fallback — auf 4 Dezimalstellen formatiert (~11 m). Wo möglich wird also der Klartext-Ort gezeigt, nicht „54.1234, 9.5678".
+
 Wenn ein Trip oder eine Lade-Session **GPS-Koordinaten aber keinen Adress-Text** hat, holt TeslaView die Adresse automatisch im Hintergrund:
 
 - **Live-Trigger**: Direkt nach jedem OwnTracks-Trip-Close und jedem Charging-Insert läuft ein fire-and-forget Reverse-Lookup.

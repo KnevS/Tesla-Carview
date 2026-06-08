@@ -61,7 +61,7 @@
                 @click="startEditLocation(s)"
                 class="font-semibold text-left hover:text-tesla-red transition"
                 v-tooltip="$t('charging.locationEditTooltip')">
-                {{ s.location_name || $t('charging.unknownLocation') }}
+                {{ formatLocation({ address: s.location_name, lat: s.lat, lon: s.lon, fallback: $t('charging.unknownLocation') }) }}
               </button>
               <!-- Heim-Wallbox: erkannt via Monta-Sync (chargePointId-Match) oder
                    ueber location_id auf einen home-Ort. Hilft beim raschen
@@ -192,6 +192,7 @@ import SortToggle from '../components/SortToggle.vue';
 import SortableSection from '../components/SortableSection.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
 import { useSortDirection } from '../composables/useSortDirection.js';
+import { formatLocation } from '../lib/location.js';
 import api from '../api.js';
 
 const { t, locale } = useI18n();

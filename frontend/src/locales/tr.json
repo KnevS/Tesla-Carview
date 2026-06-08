@@ -281,7 +281,8 @@
     "endSoc": "Bitiş SoC",
     "totalEnergy": "Toplam enerji",
     "driver": "Sürücü",
-    "noDriverAssigned": "– sürücü yok"
+    "noDriverAssigned": "– sürücü yok",
+    "noData": "— veri yok —"
   },
   "logbook": {
     "title": "Seyahat defteri",

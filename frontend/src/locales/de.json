@@ -281,7 +281,8 @@
     "endSoc": "End SoC",
     "totalEnergy": "Verbrauch gesamt",
     "driver": "Fahrer",
-    "noDriverAssigned": "– kein Fahrer"
+    "noDriverAssigned": "– kein Fahrer",
+    "noData": "— keine Daten —"
   },
   "logbook": {
     "title": "Fahrtenbuch",

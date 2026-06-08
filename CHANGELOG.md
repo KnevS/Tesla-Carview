@@ -7,6 +7,36 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.10.0] - 2026-06-08
+
+### Geändert — Adresse vor Koordinaten (überall)
+
+Wo immer ein Ort angezeigt wird, hat die **Adresse Vorrang** vor den GPS-Koordinaten. Erst wenn keine Adresse hinterlegt ist (oder das Geocoding-Backfill noch nicht durch war), erscheinen lat/lon als sauber formatierter Fallback (4 Dezimalstellen, ~11 m).
+
+Konkret umgestellt:
+
+- **Fahrtenliste** (`/trips`): Start → Ziel zeigen jetzt Adressen oder Koordinaten statt nur „Start" / „Ziel"
+- **Fahrtdetail** (`/trips/:id`): einheitlicher Fallback-String (i18n) statt Rohkoordinaten
+- **Lade-Sessions** (`/charging`): location_name oder Koordinaten statt nur „Unbekannter Ort"
+- **Fahrtenbuch** (`/fahrtenbuch`): `coordStr`-Helper jetzt über zentralen `formatCoords`
+
+Neuer Helper `frontend/src/lib/location.js`:
+- `formatLocation({ address, lat, lon, fallback })` — Adresse first, Koordinaten zweitrangig
+- `formatCoords(lat, lon)` — 4-Dezimalstellen-Format
+- `coordTooltip(lat, lon)` — als Hover-Tooltip wenn Adresse angezeigt wird
+- `hasAddress(address)` — Predicate
+
+### Hinzugefügt
+
+- `tripDetail.noData` i18n-Key in 6 Sprachen (zentralisiert ehemals hartkodiertes „— keine Daten —")
+- Handbuch-Notiz in 6 Sprachen, an die `{#auto-geocode}`-Sektion angehängt
+
+### Vorbereitung
+
+Diese Konsolidierung ist die Foundation für **v3.11.0** (Location-basierte Aktionen wie Charge-Limit pro Standort).
+
+---
+
 ## [v3.9.1] - 2026-06-08
 
 > Hinweis: der erste Deploy-Lauf scheiterte am Backend-Container-Stop-Race; ein Re-Trigger via Empty-Commit hat das aufgelöst.

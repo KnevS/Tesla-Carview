@@ -69,7 +69,9 @@
                 <span class="text-gray-400 text-sm">{{ fmtTime(trip.start_time) }}</span>
               </div>
               <p class="font-medium truncate mt-0.5">
-                {{ trip.start_address || $t('trips.start') }} → {{ trip.end_address || $t('trips.dest') }}
+                {{ formatLocation({ address: trip.start_address, lat: trip.start_lat, lon: trip.start_lon, fallback: $t('trips.start') }) }}
+                →
+                {{ formatLocation({ address: trip.end_address, lat: trip.end_lat, lon: trip.end_lon, fallback: $t('trips.dest') }) }}
               </p>
               <p v-if="trip.purpose" class="text-xs text-gray-400 truncate mt-0.5 italic">{{ trip.purpose }}</p>
             </div>
@@ -153,6 +155,7 @@ import { useUnits } from '../store/prefs.js';
 import StatCard from '../components/StatCard.vue';
 import SortToggle from '../components/SortToggle.vue';
 import SortableSection from '../components/SortableSection.vue';
+import { formatLocation } from '../lib/location.js';
 import { useSortDirection } from '../composables/useSortDirection.js';
 import { usePageLayout } from '../composables/usePageLayout.js';
 import api from '../api.js';

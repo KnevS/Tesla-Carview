@@ -281,7 +281,8 @@
     "endSoc": "SoC τέλους",
     "totalEnergy": "Συνολική ενέργεια",
     "driver": "Οδηγός",
-    "noDriverAssigned": "– χωρίς οδηγό"
+    "noDriverAssigned": "– χωρίς οδηγό",
+    "noData": "— χωρίς δεδομένα —"
   },
   "logbook": {
     "title": "Ημερολόγιο ταξιδιών",

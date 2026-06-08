@@ -474,6 +474,8 @@ Her düzenlenebilir alanda, ne işe yaradığını, ne zaman gerektiğini ve kay
 
 ### Otomatik adres çözünürlüğü v3.8.0'dan itibaren {#auto-geocode}
 
+**v3.10.0'dan itibaren adres koordinatlardan önce**: her liste (servis defteri, yolculuklar, şarj oturumları) ve detay görünümü adresi tercih eder. Yalnızca adres yoksa (veya geri doldurma henüz çalışmadıysa) lat/lon yedek olarak görünür — 4 ondalık basamağa (~11 m) biçimlendirilmiş. Mümkün olduğunda okunabilir konum gösterilir, "54.1234, 9.5678" değil.
+
 Bir yolculuk veya şarj oturumunda **GPS koordinatları olup ama adres metni yoksa**, TeslaView adresi arka planda otomatik olarak doldurur:
 
 - **Canlı tetikleyici**: her OwnTracks yolculuk kapanışından ve her şarj eklenmesinden hemen sonra fire-and-forget ters arama çalışır.

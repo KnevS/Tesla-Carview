@@ -281,7 +281,8 @@
     "endSoc": "SoC arrivée",
     "totalEnergy": "Énergie totale",
     "driver": "Conducteur",
-    "noDriverAssigned": "– aucun conducteur"
+    "noDriverAssigned": "– aucun conducteur",
+    "noData": "— aucune donnée —"
   },
   "logbook": {
     "title": "Carnet de route",

@@ -492,6 +492,7 @@ import SortToggle from '../components/SortToggle.vue';
 import { useSortDirection } from '../composables/useSortDirection.js';
 import SortableSection from '../components/SortableSection.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
+import { formatLocation, formatCoords } from '../lib/location.js';
 
 const appStore  = useAppStore();
 const authStore = useAuthStore();
@@ -551,7 +552,7 @@ const fmtDate  = ts => new Date(ts * 1000).toLocaleDateString('de-DE');
 const fmtTime  = ts => new Date(ts * 1000).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 const fmtMonth = ym => { const [y, m] = ym.split('-'); return monthName(+m) + ' ' + y; };
 const monthName = m => ['', 'Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'][+m];
-const coordStr  = (lat, lon) => lat && lon ? `${(+lat).toFixed(4)}, ${(+lon).toFixed(4)}` : '–';
+const coordStr  = (lat, lon) => formatCoords(lat, lon) || '–';
 const typeLabel = t => ({ private: 'Privat', business: 'Dienstfahrt', commute: 'Arbeitsweg' }[t] ?? 'Privat');
 const typeBadge = t => ({
   private:  'bg-gray-600 text-gray-200 hover:bg-gray-500',
