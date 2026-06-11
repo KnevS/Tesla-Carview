@@ -15,7 +15,7 @@ An external security review on 2026-06-11 flagged two main risks for AI-assisted
 
 **CI workflows extended** (`.github/workflows/`):
 - `security.yml` → new jobs:
-  - **`semgrep` (SAST)** with OWASP-Top-10 + JS/TS + Secrets rule packs. Findings are blocking (`--error`), `--metrics=off` for data minimization.
+  - **`semgrep` (SAST)** with OWASP-Top-10 + JS/TS + Secrets rule packs, `--metrics=off` for data minimization. **Currently informational** (`continue-on-error: true`) — today's baseline produces 17 findings (Dockerfile-USER, nginx host-header, GCM-no-tag-length, express-traversal, tls-verification, h2c-smuggling). These will be triaged in follow-up PRs; the job will then flip to blocking.
   - **`sbom` (CycloneDX)** for backend and frontend as build artifact, 90-day retention. Generated ad-hoc via `npx @cyclonedx/cyclonedx-npm` — no new runtime dependency.
 - `ci.yml` → `npm ci` replaced with `npm ci --ignore-scripts` (backend + frontend). Blocks blind execution of `postinstall` hooks of external packages in the CI runner. Lint/build don't need native code; production Dockerfiles build native deps (`argon2`, `better-sqlite3`) in a separate step.
 

@@ -15,7 +15,7 @@ Externe Security-Review am 2026-06-11 hat zwei Hauptrisiken bei AI-assistierter 
 
 **CI-Workflows ergänzt** (`.github/workflows/`):
 - `security.yml` → neue Jobs:
-  - **`semgrep` (SAST)** mit OWASP-Top-10 + JS/TS + Secrets Rule-Packs. Findings sind blockierend (`--error`), `--metrics=off` für Datensparsamkeit.
+  - **`semgrep` (SAST)** mit OWASP-Top-10 + JS/TS + Secrets Rule-Packs, `--metrics=off` für Datensparsamkeit. **Aktuell informational** (`continue-on-error: true`) — die heutige Baseline hat 17 Findings (Dockerfile-USER, nginx host-header, GCM-no-tag-length, express-traversal, tls-verification, h2c-smuggling). Diese werden in eigenen Folge-PRs triagiert; danach wird der Job auf blockierend gestellt.
   - **`sbom` (CycloneDX)** für Backend und Frontend als Build-Artefakt, 90 Tage Retention. Per `npx @cyclonedx/cyclonedx-npm` ad-hoc generiert — keine neue runtime-Dependency.
 - `ci.yml` → `npm ci` durch `npm ci --ignore-scripts` ersetzt (Backend + Frontend). Blockt blindes Ausführen von `postinstall`-Hooks externer Pakete im CI-Runner. Lint/Build brauchen keinen Native-Code; Production-Dockerfiles bauen native Deps (`argon2`, `better-sqlite3`) in eigenem Schritt.
 
