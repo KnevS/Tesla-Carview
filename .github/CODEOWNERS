@@ -1,0 +1,79 @@
+# CODEOWNERS — Tesla-Carview
+#
+# Sensible Pfade: jede Änderung muss von @KnevS reviewed werden.
+# Diese Gates schützen gegen versehentlich gemergten AI-generierten
+# Code in Bereichen, die PII, Auth, Crypto, Audit oder Migrationen
+# berühren.
+#
+# Reihenfolge: spätere Patterns überschreiben frühere.
+# Doku: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-security/customizing-your-repository/about-code-owners
+
+# Fallback — alles gehört Sven, aber sensible Pfade unten
+# verlangen ebenfalls Sven-Review (explizit, damit es nicht durch
+# eventuelle spätere Team-Owner überschrieben wird).
+*                                       @KnevS
+
+# === Auth & Identity ===
+/backend/src/middleware/auth.js         @KnevS
+/backend/src/middleware/security.js     @KnevS
+/backend/src/middleware/vehicleAccess.js @KnevS
+/backend/src/routes/auth.js             @KnevS
+/backend/src/routes/mfa.js              @KnevS
+/backend/src/routes/passkey.js          @KnevS
+/backend/src/routes/password-reset.js   @KnevS
+/backend/src/routes/register.js         @KnevS
+/backend/src/routes/invites.js          @KnevS
+/backend/src/routes/userInvites.js      @KnevS
+/backend/src/services/mfaService.js     @KnevS
+/backend/src/services/userService.js    @KnevS
+
+# === Crypto & Secrets ===
+/backend/src/services/cryptoService.js  @KnevS
+/backend/src/services/virtualKey.js     @KnevS
+/backend/src/services/pseudonymService.js @KnevS
+
+# === DB-Schema, Migrationen, Backups ===
+/backend/src/db/                        @KnevS
+/backend/src/services/autoBackupService.js @KnevS
+/backend/src/services/dataSync.js       @KnevS
+/backend/src/services/autoInit.js       @KnevS
+
+# === Audit & Compliance ===
+/backend/src/routes/audit.js            @KnevS
+/backend/src/services/auditService.js   @KnevS
+/backend/src/services/tripAudit.js      @KnevS
+
+# === PII-führende Routen (Personendaten / Fahrzeugdaten) ===
+/backend/src/routes/users.js            @KnevS
+/backend/src/routes/drivers.js          @KnevS
+/backend/src/routes/community.js        @KnevS
+/backend/src/routes/telegram.js         @KnevS
+/backend/src/routes/data-management.js  @KnevS
+/backend/src/routes/setup.js            @KnevS
+/backend/src/routes/legal.js            @KnevS
+
+# === Externe API-Integrationen (Tesla, ABRP, Telegram, Grok) ===
+/backend/src/services/teslaApi.js       @KnevS
+/backend/src/services/telegramBot.js    @KnevS
+/backend/src/services/grokService.js    @KnevS
+/backend/src/services/abrpService.js    @KnevS
+
+# === CI/CD und Security-Konfiguration ===
+/.github/                               @KnevS
+/.gitleaks.toml                         @KnevS
+/SECURITY.md                            @KnevS
+/SECURITY.en.md                         @KnevS
+
+# === Build- und Deploy-Skripte ===
+/scripts/                               @KnevS
+/deploy/                                @KnevS
+/Dockerfile                             @KnevS
+/backend/Dockerfile                     @KnevS
+/docker-compose.yml                     @KnevS
+/docker-compose.prod.yml                @KnevS
+
+# === Lockfiles (Supply-Chain-relevant) ===
+/backend/package-lock.json              @KnevS
+/frontend/package-lock.json             @KnevS
+/backend/package.json                   @KnevS
+/frontend/package.json                  @KnevS
