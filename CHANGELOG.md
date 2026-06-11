@@ -7,6 +7,23 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.23.0] - 2026-06-11
+
+### Security — Supply-Chain-Hardening
+
+Externe Security-Review am 2026-06-11 hat zwei Hauptrisiken bei AI-assistierter Entwicklung benannt: AI-Slop in PII/Auth/Crypto-Bereichen und blindes Hinzufügen von NPM-Dependencies. Dieser Release schließt die noch offenen Lücken in der CI-Pipeline:
+
+**CI-Workflows ergänzt** (`.github/workflows/`):
+- `security.yml` → neue Jobs:
+  - **`semgrep` (SAST)** mit OWASP-Top-10 + JS/TS + Secrets Rule-Packs. Findings sind blockierend (`--error`), `--metrics=off` für Datensparsamkeit.
+  - **`sbom` (CycloneDX)** für Backend und Frontend als Build-Artefakt, 90 Tage Retention. Per `npx @cyclonedx/cyclonedx-npm` ad-hoc generiert — keine neue runtime-Dependency.
+- `ci.yml` → `npm ci` durch `npm ci --ignore-scripts` ersetzt (Backend + Frontend). Blockt blindes Ausführen von `postinstall`-Hooks externer Pakete im CI-Runner. Lint/Build brauchen keinen Native-Code; Production-Dockerfiles bauen native Deps (`argon2`, `better-sqlite3`) in eigenem Schritt.
+
+**Was vorher schon stand und unverändert bleibt:** gitleaks (Secret-Scan über volle Historie), trivy fs (Lockfiles + Dockerfile-Basisimages), npm audit (Backend + Frontend, prod-only blockierend, wöchentlich Mo 06:00 UTC), CODEOWNERS für sensible Pfade (Auth, Crypto, DB, Audit, externe APIs, Lockfiles).
+
+**Geltungsbereich:** keine Code-Pfad-Änderung an Backend oder Frontend, kein Production-Deploy-Risiko. Reine CI-Erweiterung.
+
+
 ## [v3.22.0] - 2026-06-08
 
 ### Hinzugefügt — GPS-Setup-Assistent für Endnutzer
