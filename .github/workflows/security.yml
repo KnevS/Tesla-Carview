@@ -108,23 +108,18 @@ jobs:
 
       # p/owasp-top-ten + p/javascript + p/typescript decken die
       # haeufigsten Auth/Injection/XSS-Muster ab. p/secrets ergaenzt
-      # gitleaks um Patterns aus dem aktuellen Semgrep-Catalog. --error
-      # macht Findings blockierend, --metrics=off schickt keine Daten
-      # an semgrep.dev.
+      # gitleaks um Patterns aus dem aktuellen Semgrep-Catalog.
+      # `semgrep scan --error` failed bei findings blockierend;
+      # --metrics=off schickt keine Daten an semgrep.dev.
       - name: semgrep scan
         run: |
-          semgrep ci \
+          semgrep scan \
             --config p/owasp-top-ten \
             --config p/javascript \
             --config p/typescript \
             --config p/secrets \
             --error \
             --metrics=off
-        env:
-          # Optional: managed-rules wenn SEMGREP_APP_TOKEN gesetzt ist.
-          # Ohne Token laeuft semgrep im OSS-Modus mit den oben
-          # konfigurierten Public-Rule-Packs.
-          SEMGREP_APP_TOKEN: ${{ secrets.SEMGREP_APP_TOKEN }}
 
   sbom:
     name: SBOM · CycloneDX
