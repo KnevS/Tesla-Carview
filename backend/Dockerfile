@@ -1,5 +1,5 @@
 # Multi-Arch: linux/amd64 · linux/arm64 (Pi 4/5) · linux/arm/v7 (Pi 3)
-FROM node:22-alpine
+FROM node:26-alpine
 ARG GIT_HASH=unknown
 ARG GIT_BRANCH=unknown
 ARG BUILD_DATE
