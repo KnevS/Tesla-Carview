@@ -4,6 +4,9 @@ name: Security
 # (gitleaks.yml) und den Syntax-CI (ci.yml) hinausgehen:
 #
 #  - npm audit fuer Backend + Frontend, fail auf high / critical
+#  - trivy fs (Lockfiles + Dockerfile-Basisimages)
+#  - semgrep SAST (OWASP-Top-10 + JS/TS + Secrets)
+#  - CycloneDX-SBOM als Build-Artefakt (Audit/Forensik)
 #  - Wochentliche Vollausfuehrung (Mo 06:00 UTC) selbst ohne Code-
 #    Aenderung — neue CVEs koennen jederzeit gegen unveraenderten
 #    Code auftauchen.
@@ -24,6 +27,7 @@ on:
 
 permissions:
   contents: read
+  security-events: write   # fuer SARIF-Uploads (semgrep)
 
 jobs:
   npm-audit-backend:
@@ -40,8 +44,9 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
 
-      # Produktive Abhaengigkeiten zaehlen — dev-deps koennen auch
-      # auffaellig sein, brechen aber nicht den Live-Betrieb.
+      # npm audit braucht nur package-lock.json, kein npm ci — Aufruf
+      # ist damit von vornherein script-frei. Wir setzen trotzdem
+      # explizit auf --omit=dev fuer den blockierenden Check.
       - name: Audit (production only)
         run: npm audit --omit=dev --audit-level=high
 
@@ -92,3 +97,69 @@ jobs:
           exit-code: '1'
           ignore-unfixed: true
           # SARIF-Upload sparen wir uns hier (private code, simple repo).
+
+  semgrep:
+    name: semgrep · SAST
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep:latest
+    steps:
+      - uses: actions/checkout@v6
+
+      # p/owasp-top-ten + p/javascript + p/typescript decken die
+      # haeufigsten Auth/Injection/XSS-Muster ab. p/secrets ergaenzt
+      # gitleaks um Patterns aus dem aktuellen Semgrep-Catalog.
+      # `--metrics=off` schickt keine Daten an semgrep.dev.
+      #
+      # WICHTIG: Erste Einfuehrung — `continue-on-error: true` macht
+      # den Job INFORMATIONAL. Die heutige Triagier-Baseline hat 17
+      # Findings (Dockerfile-USER, nginx host-header, GCM-no-tag-
+      # length, express-traversal, tls-verification). Bevor diese
+      # Findings als blockierend gestellt werden, muessen sie in
+      # eigenen PRs triagiert werden (echter Fix oder dokumentierte
+      # nosemgrep-Suppression mit Begruendung).
+      # TODO: nach Triage `continue-on-error` entfernen und
+      # `--error` als blockierend wieder einschalten.
+      - name: semgrep scan (informational)
+        continue-on-error: true
+        run: |
+          semgrep scan \
+            --config p/owasp-top-ten \
+            --config p/javascript \
+            --config p/typescript \
+            --config p/secrets \
+            --metrics=off
+
+  sbom:
+    name: SBOM · CycloneDX
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        component: [backend, frontend]
+    defaults:
+      run:
+        working-directory: ${{ matrix.component }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: ${{ matrix.component }}/package-lock.json
+
+      # --ignore-scripts hier ausreichend: SBOM braucht keinen Native-
+      # Build, nur den aufgeloesten Dependency-Graph.
+      - name: Install (no postinstall scripts)
+        run: npm ci --ignore-scripts
+
+      # CycloneDX-SBOM als Build-Artefakt. Laesst sich gegen den
+      # Live-Stand des Repos verifizieren und in Audits referenzieren.
+      - name: Generate CycloneDX SBOM
+        run: npx --yes @cyclonedx/cyclonedx-npm@latest --output-file sbom.cdx.json --output-format json
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: sbom-${{ matrix.component }}
+          path: ${{ matrix.component }}/sbom.cdx.json
+          retention-days: 90

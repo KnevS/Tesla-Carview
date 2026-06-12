@@ -72,6 +72,11 @@ Rückmeldung erfolgt innerhalb von 72 Stunden.
 
 Sicherheit ist kein Zustand, sondern ein Prozess — wir verifizieren das vorhandene Setup regelmäßig automatisiert:
 
-- **Pro Commit / Pull-Request**: `gitleaks` (Secret-Scan, `.github/workflows/gitleaks.yml`) und `npm audit` + `trivy fs` (`.github/workflows/security.yml`).
+- **Pro Commit / Pull-Request**:
+  - `gitleaks` über die volle Historie (`.github/workflows/gitleaks.yml`).
+  - `npm audit` (prod-only, blockierend bei high/critical), `trivy fs`, **`semgrep`** (OWASP-Top-10 + JS/TS + Secrets) und **CycloneDX-SBOM** als Artefakt (`.github/workflows/security.yml`).
+  - `ci.yml` installiert Dependencies mit `npm ci --ignore-scripts` — keine automatische Ausführung von `postinstall`-Hooks externer Pakete im CI-Runner.
 - **Wöchentlich (Mo 06:00 UTC)**: `security.yml` läuft zusätzlich per Cron, damit neue CVEs gegen unveränderten Code rechtzeitig auffallen.
+- **Strukturell**: `.github/CODEOWNERS` erzwingt Sven-Review für alle sensiblen Pfade (Auth, Crypto, DB-Schema, Audit-Service, externe API-Integrationen, Lockfiles, CI/CD).
+- **Auto-Update**: Dependabot überwacht npm Backend+Frontend, GitHub-Actions und Docker-Basisimages wöchentlich (Mo 06:00 Europe/Berlin). Patch- und Minor-Updates werden bei grünem CI über `.github/workflows/dependabot-auto-merge.yml` automatisch gemerged; Major-Bumps werden gelabelt und warten auf manuellen Review.
 - **Operator-seitig** (auf dem Live-Host): zwei Cron-Jobs prüfen Container-Health, TLS-Cert-Restlaufzeit, fail2ban, Auth-Anomalien, Disk und Tesla-API-Status (`security-check.sh` täglich) sowie npm audit, certbot-Renew, fail2ban-Banlist (`security-audit.sh` wöchentlich). Diese Skripte sind betriebsintern und nicht Teil des Repos.

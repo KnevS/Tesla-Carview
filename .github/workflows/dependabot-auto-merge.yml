@@ -1,0 +1,57 @@
+name: Dependabot Auto-Merge
+
+# Auto-Mergt Dependabot-PRs sobald alle Required-CI-Gates gruen sind —
+# fuer Patch- und Minor-Bumps. Major-Bumps werden gelabelt und warten
+# auf manuellen Sven-Review (siehe Memory `feedback_supply_chain_ai_security`).
+#
+# Sicherheitsnetz:
+#   - Nur Dependabot-Authored PRs werden hier verarbeitet
+#     (`github.actor == 'dependabot[bot]'`).
+#   - `gh pr merge --auto` wartet auf alle Required-Checks (ci.yml,
+#     security.yml, gitleaks.yml) bevor gemerged wird.
+#   - --squash haelt die main-History sauber.
+#
+# Voraussetzungen in den GitHub-Repo-Settings (einmalig):
+#   - Settings -> General -> "Allow auto-merge" aktivieren.
+#   - Branch protection auf `main`: required status checks enabled
+#     (Backend lint, Frontend build, npm audit, trivy, gitleaks, SBOM),
+#     aber KEINE required reviews fuer dependabot[bot] — sonst kann
+#     der bot nicht durch.
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    name: auto-merge non-major
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: Fetch dependabot metadata
+        id: meta
+        uses: dependabot/fetch-metadata@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge (patch + minor)
+        # Major-Bumps NICHT auto-mergen — sie koennen breaking changes
+        # mitbringen, die CI-gruen aber Runtime-broken sind.
+        if: |
+          steps.meta.outputs.update-type == 'version-update:semver-patch' ||
+          steps.meta.outputs.update-type == 'version-update:semver-minor'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Label major bumps
+        if: steps.meta.outputs.update-type == 'version-update:semver-major'
+        run: gh pr edit "$PR_URL" --add-label "major-bump" --add-label "needs-review"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

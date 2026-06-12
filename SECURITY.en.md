@@ -72,6 +72,11 @@ You will receive an acknowledgement within 72 hours.
 
 Security is a process, not a state — the existing setup is verified automatically on a recurring basis:
 
-- **Per commit / pull request**: `gitleaks` (secret scan, `.github/workflows/gitleaks.yml`) and `npm audit` + `trivy fs` (`.github/workflows/security.yml`).
+- **Per commit / pull request**:
+  - `gitleaks` over the full history (`.github/workflows/gitleaks.yml`).
+  - `npm audit` (prod-only, blocking on high/critical), `trivy fs`, **`semgrep`** (OWASP-Top-10 + JS/TS + Secrets) and **CycloneDX SBOM** as an artifact (`.github/workflows/security.yml`).
+  - `ci.yml` installs dependencies with `npm ci --ignore-scripts` — no automatic execution of `postinstall` hooks from external packages on the CI runner.
 - **Weekly (Mon 06:00 UTC)**: `security.yml` also runs on cron so that new CVEs against unchanged code are caught promptly.
+- **Structural**: `.github/CODEOWNERS` enforces Sven review for every sensitive path (auth, crypto, DB schema, audit service, external API integrations, lockfiles, CI/CD).
+- **Auto-update**: Dependabot watches npm backend+frontend, GitHub Actions and Docker base images weekly (Mon 06:00 Europe/Berlin). Patch and minor updates are auto-merged on green CI via `.github/workflows/dependabot-auto-merge.yml`; major bumps are labelled and wait for manual review.
 - **Operator side** (on the live host): two cron jobs check container health, TLS cert remaining lifetime, fail2ban, auth anomalies, disk and Tesla API status (`security-check.sh` daily) plus npm audit, certbot renew, fail2ban banlist (`security-audit.sh` weekly). These scripts are operational and not part of the repository.
