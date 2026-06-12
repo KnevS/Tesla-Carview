@@ -7,6 +7,28 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.23.0] - 2026-06-11
+
+### Security — supply-chain hardening
+
+An external security review on 2026-06-11 flagged two main risks for AI-assisted development: AI-slop in PII/auth/crypto code paths, and blind addition of NPM dependencies. This release closes the remaining gaps in the CI pipeline:
+
+**CI workflows extended** (`.github/workflows/`):
+- `security.yml` → new jobs:
+  - **`semgrep` (SAST)** with OWASP-Top-10 + JS/TS + Secrets rule packs, `--metrics=off` for data minimization. **Currently informational** (`continue-on-error: true`) — today's baseline produces 17 findings (Dockerfile-USER, nginx host-header, GCM-no-tag-length, express-traversal, tls-verification, h2c-smuggling). These will be triaged in follow-up PRs; the job will then flip to blocking.
+  - **`sbom` (CycloneDX)** for backend and frontend as build artifact, 90-day retention. Generated ad-hoc via `npx @cyclonedx/cyclonedx-npm` — no new runtime dependency.
+- `ci.yml` → `npm ci` replaced with `npm ci --ignore-scripts` (backend + frontend). Blocks blind execution of `postinstall` hooks of external packages in the CI runner. Lint/build don't need native code; production Dockerfiles build native deps (`argon2`, `better-sqlite3`) in a separate step.
+
+**What was already in place and stays unchanged:** gitleaks (full-history secret scan), trivy fs (lockfiles + Dockerfile base images), npm audit (backend + frontend, prod-only blocking, weekly Mon 06:00 UTC), CODEOWNERS for sensitive paths (auth, crypto, DB, audit, external APIs, lockfiles).
+
+**Auto-update (NEW):**
+- `dependabot.yml` extended with `package-ecosystem: docker` for the backend and frontend Dockerfiles. GitHub-Actions schedule synchronised to weekly Mon 06:00 Europe/Berlin; every ecosystem groups minor+patch.
+- **`.github/workflows/dependabot-auto-merge.yml`** — new workflow that auto-merges Dependabot PRs for `patch` and `minor` once all CI gates are green (`gh pr merge --auto --squash`). Major bumps are labelled `major-bump` + `needs-review`.
+- **Prerequisite in the GitHub repo settings**: enable "Allow auto-merge" at repo level; branch protection on `main` must not require reviews from `dependabot[bot]` (required checks stay enabled).
+
+**Scope:** no code-path changes in backend or frontend, no production deploy risk. CI-only expansion.
+
+
 ## [v3.22.0] - 2026-06-08
 
 ### Added — GPS setup wizard for end users
