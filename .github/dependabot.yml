@@ -1,9 +1,17 @@
 version: 2
 
-# Dependabot überwacht beide npm-Arbeitsbereiche und GitHub Actions.
-# Automatisch geöffnete PRs werden durch CI geprüft (npm audit + Bundle-Check).
-# Sicherheits-Updates haben höchste Priorität (security: true) und
-# werden in einem separaten Rhythmus geöffnet.
+# Dependabot überwacht beide npm-Arbeitsbereiche, GitHub Actions und
+# die Docker-Basisimages. Automatisch geöffnete PRs werden durch CI
+# geprüft (ci.yml: lint+audit+bundle, security.yml: npm audit +
+# trivy fs + semgrep + SBOM, gitleaks.yml).
+#
+# Sicherheits-Updates öffnet Dependabot per Default sofort
+# (unabhängig vom Schedule der regulären Updates).
+#
+# Auto-Merge für minor+patch erfolgt über
+# `.github/workflows/dependabot-auto-merge.yml` — sobald alle CI-Gates
+# grün sind, mergt der Workflow den PR via `gh pr merge --auto`.
+# Major-Bumps bleiben manuell.
 
 updates:
   # ─── Frontend-Dependencies ─────────────────────────────────────────────
@@ -59,9 +67,49 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: monthly
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
     labels:
       - dependencies
       - ci
     commit-message:
       prefix: "ci(deps)"
+    groups:
+      action-updates:
+        update-types:
+          - minor
+          - patch
+
+  # ─── Docker-Basisimages: Backend ───────────────────────────────────────
+  # Wachsam gegen veraltete node:22-alpine-Tags und CVEs in Basisimages,
+  # die `trivy fs` nicht im npm-Lockfile findet.
+  - package-ecosystem: docker
+    directory: /backend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    labels:
+      - dependencies
+      - docker
+    commit-message:
+      prefix: "chore(docker)"
+
+  # ─── Docker-Basisimages: Frontend ──────────────────────────────────────
+  # Frontend nutzt zwei Stages: node:20-bookworm-slim (builder) und
+  # nginx:alpine (runtime). Beide werden ueberwacht.
+  - package-ecosystem: docker
+    directory: /frontend
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
+    labels:
+      - dependencies
+      - docker
+    commit-message:
+      prefix: "chore(docker)"

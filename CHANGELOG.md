@@ -21,6 +21,11 @@ Externe Security-Review am 2026-06-11 hat zwei Hauptrisiken bei AI-assistierter 
 
 **Was vorher schon stand und unverändert bleibt:** gitleaks (Secret-Scan über volle Historie), trivy fs (Lockfiles + Dockerfile-Basisimages), npm audit (Backend + Frontend, prod-only blockierend, wöchentlich Mo 06:00 UTC), CODEOWNERS für sensible Pfade (Auth, Crypto, DB, Audit, externe APIs, Lockfiles).
 
+**Auto-Update (NEU):**
+- `dependabot.yml` erweitert um `package-ecosystem: docker` für Backend und Frontend Dockerfiles. GitHub-Actions-Schedule auf wöchentlich Mo 06:00 Europe/Berlin synchronisiert; alle Ökosysteme gruppieren minor+patch.
+- **`.github/workflows/dependabot-auto-merge.yml`** — neuer Workflow, der Dependabot-PRs für `patch` und `minor` automatisch mergt, sobald alle CI-Gates grün sind (`gh pr merge --auto --squash`). Major-Bumps werden mit `major-bump` + `needs-review` gelabelt.
+- **Voraussetzung in GitHub-Settings**: „Allow auto-merge" auf Repo-Level aktivieren; Branch-Protection auf `main` darf keine Required-Reviews für `dependabot[bot]` erzwingen (Required-Checks bleiben aktiv).
+
 **Geltungsbereich:** keine Code-Pfad-Änderung an Backend oder Frontend, kein Production-Deploy-Risiko. Reine CI-Erweiterung.
 
 
