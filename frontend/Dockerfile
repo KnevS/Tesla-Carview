@@ -4,7 +4,7 @@
 # Vite 8 nutzt rolldown, und rolldown veroeffentlicht KEIN
 # @rolldown/binding-linux-arm-musleabihf — nur die gnueabihf-Variante.
 # Der Runtime-Layer bleibt nginx:alpine (kleines Image, kein Node noetig).
-FROM node:20-bookworm-slim AS builder
+FROM node:26-bookworm-slim AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
