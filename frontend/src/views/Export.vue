@@ -23,6 +23,12 @@
               v-tooltip="'JSON-Format inklusive aller GPS-Punkte je Fahrt. Ideal für eigene Auswertungen, Skripte oder Datenmigration.'">
               {{ downloading['trips.json'] ? 'Lädt…' : 'JSON' }}
             </button>
+            <button @click="download('trips.pdf', 'fahrtenbuch.pdf', 'application/pdf')" :disabled="downloading['trips.pdf']"
+              class="btn-secondary flex-1"
+              v-tooltip="'PDF-Fahrtenbuch: tabellarische Übersicht mit Datum, Strecke, Verbrauch und SoC. Druckfertig.'">
+              <AppIcon name="download" :size="14" class="inline mr-1" />
+              {{ downloading['trips.pdf'] ? 'Lädt…' : 'PDF' }}
+            </button>
           </div>
         </div>
         <div class="space-y-3">
