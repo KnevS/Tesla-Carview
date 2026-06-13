@@ -181,11 +181,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build & push frontend (amd64 + arm64 + arm/v7)
+      # arm/v7 entfernt: node:26 stellt kein linux/arm/v7 Image bereit.
+      - name: Build & push frontend (amd64 + arm64)
         uses: docker/build-push-action@v7
         with:
           context: ./frontend
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           push: true
           tags: ghcr.io/knevs/tesla-carview/frontend:main
           build-args: |
