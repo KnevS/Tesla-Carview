@@ -18,8 +18,8 @@ Tesla Carview, Tesla araçlar için **kendi sunucunda barındırılan** bir veri
 - 📊 **Pano** — İstatistikler, aylık özet, son etkinlikler
 - 🎮 **Kontrol** — Klima, kapılar, ışıklar — doğrudan uygulamadan
 - 📝 **Servis defteri** — Bakım, onarım, tarihli maliyetler
-- 📤 **Dışa aktarma** — Tüm veriler için CSV/JSON, ZIP olarak tam yedek
-- 🔔 **Push bildirimleri** — Şarj bitişi, Sentry alarmı, düşük batarya ve daha fazlası için tarayıcı bildirimleri; eylem düğmeleri (klima başlat, şarj bul, ertele), etiket gruplama (tekrarlayan şarj güncellemeleri birbirinin yerine geçer) ve iPhone/Apple Watch'a otomatik yansıma
+- 📤 **Dışa aktarma** — Sürüşler için CSV/JSON/**PDF**, şarj için CSV, ZIP olarak tam yedek; tarih, mesafe, enerji ve SOC ile baskıya hazır PDF seyahat günlüğü
+- 🔔 **Bildirimler** — paralel üç kanal: Web Push (tarayıcı/PWA), Telegram botu ve **e-posta** (SMTP). Tetikleyiciler: şarj bitişi, Sentry alarmı, düşük batarya, bakım vadesi, coğrafi sınır ve daha fazlası. Eylem düğmeli push (klima başlat, şarj bul, ertele), etiket gruplama ve iPhone/Apple Watch'a yansıma
 - 📱 **Mobil için optimize** — iPhone/iPad (Safari), Android ve masaüstünde tam kullanılabilir
 
 ## 🔀 Sıralama yönü {#sort-order}
@@ -268,7 +268,7 @@ Yöneticiler bu üç hakka örtük olarak sahiptir — kutucuklar yönetici hesa
 
 ## 💾 Yedekleme {#backup}
 
-**Manuel dışa aktarma** — **Dışa aktarma** altında: Sürüşler ve şarj seansları için CSV veya JSON, ayrıca ZIP olarak tam yedek.
+**Manuel dışa aktarma** — **Dışa aktarma** altında: Sürüşler için CSV, JSON veya **PDF** (tablo, özet ve sayfa atlamalı PDF seyahat günlüğü), şarj seansları için CSV, ayrıca ZIP olarak tam yedek.
 
 **Otomatik yedek (sunucu)** — SQLite veritabanları, `./data` bind-mount dizinindedir (Compose dosyasına göre, genellikle `/opt/tesla-carview/data`). Sunucuda otomatik yedekleme için:
 
