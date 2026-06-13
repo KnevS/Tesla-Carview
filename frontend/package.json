@@ -39,6 +39,9 @@
     "name": "Sven Krische",
     "url": "https://github.com/KnevS"
   },
+  "overrides": {
+    "esbuild": ">=0.28.1"
+  },
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
     "type": "git",
