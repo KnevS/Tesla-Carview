@@ -18,8 +18,8 @@ Tesla Carview est une application **auto-hébergée** d'enregistrement de donné
 - 📊 **Tableau de bord** — Statistiques, vue mensuelle, dernières activités
 - 🎮 **Commandes** — Climatisation, portes, lumières — directement depuis l'application
 - 📝 **Carnet d'entretien** — Entretiens, réparations, coûts avec date
-- 📤 **Export** — CSV/JSON pour toutes les données, sauvegarde complète au format ZIP
-- 🔔 **Notifications push** — Notifications navigateur pour la fin de recharge, l'alarme Sentry, la batterie faible, etc. ; avec boutons d'action (démarrer la clim, trouver une borne, plus tard), regroupement par tag (les mises à jour de charge se remplacent) et miroir automatique vers iPhone/Apple Watch
+- 📤 **Export** — CSV/JSON/**PDF** pour les trajets, CSV pour la recharge, sauvegarde complète au format ZIP ; carnet de bord PDF prêt à imprimer avec date, distance, énergie et SOC
+- 🔔 **Notifications** — trois canaux en parallèle : Web Push (navigateur/PWA), bot Telegram et **e-mail** (SMTP). Déclencheurs : recharge terminée, alarme Sentry, batterie faible, maintenance due, geofence, etc. Push avec boutons d'action (démarrer la clim, trouver une borne, plus tard), regroupement par tag et miroir vers iPhone/Apple Watch
 - 📱 **Optimisé mobile** — Pleinement utilisable sur iPhone/iPad (Safari), Android et bureau
 
 ## 🔀 Ordre de tri {#sort-order}
@@ -268,7 +268,7 @@ Les administrateurs disposent implicitement de ces trois droits — les cases à
 
 ## 💾 Sauvegarde {#backup}
 
-**Export manuel** — Sous **Export** : CSV ou JSON pour les trajets et sessions de recharge, ainsi qu'une sauvegarde complète au format ZIP.
+**Export manuel** — Sous **Export** : CSV, JSON ou **PDF** pour les trajets (carnet de bord PDF avec tableau, résumé et sauts de page), CSV pour les sessions de recharge, ainsi qu'une sauvegarde complète au format ZIP.
 
 **Sauvegarde automatique (serveur)** — Les bases SQLite se trouvent dans le répertoire bind-mount `./data` (relatif au fichier Compose, normalement `/opt/tesla-carview/data`). Pour des sauvegardes automatiques côté serveur :
 
