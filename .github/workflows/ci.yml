@@ -66,9 +66,16 @@ jobs:
       - run: npm ci --ignore-scripts
 
       # Security Audit Frontend
-      - name: Security Audit (npm audit)
-        run: npm audit --audit-level=high
+      # Produktions-Abhängigkeiten (kein --omit=dev → blockierend, identisch zu
+      # security.yml). Dev-Deps (z. B. Vite-Plugins) können unfixbare Advisories
+      # gegen Build-Tools enthalten (GHSA-gv7w-rqvm-qjhr / esbuild) — diese
+      # blockieren nicht den Merge, sind aber im Log sichtbar.
+      - name: Security Audit – production deps (blocking)
+        run: npm audit --omit=dev --audit-level=high
         continue-on-error: false
+      - name: Security Audit – dev deps (informational)
+        if: always()
+        run: npm audit --audit-level=high || true
 
       # ESLint mit no-undef faengt undefinierte Bezeichner in JS + Vue-SFCs
       # ab (fehlende Imports, Tippfehler) — der vite build sieht diese nicht.
