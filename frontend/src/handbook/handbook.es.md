@@ -18,8 +18,8 @@ Tesla Carview es una aplicación **auto-alojada** de registro de datos para veh�
 - 📊 **Panel** — Estadísticas, vista mensual, últimas actividades
 - 🎮 **Control** — Climatización, puertas, luces, directamente desde la aplicación
 - 📝 **Libro de mantenimiento** — Mantenimientos, reparaciones, costes con fecha
-- 📤 **Exportación** — CSV/JSON para todos los datos, copia completa como ZIP
-- 🔔 **Notificaciones push** — Notificaciones del navegador al finalizar la carga, alarma Sentry, batería baja y más; con botones de acción (iniciar climatización, buscar cargador, posponer), agrupación por tag (actualizaciones de carga repetidas se reemplazan) y reflejo automático a iPhone/Apple Watch
+- 📤 **Exportación** — CSV/JSON/**PDF** para viajes, CSV para carga, copia completa como ZIP; libro de viajes PDF listo para imprimir con fecha, distancia, energía y SOC
+- 🔔 **Notificaciones** — tres canales en paralelo: Web Push (navegador/PWA), bot de Telegram y **email** (SMTP). Disparadores: carga terminada, alarma Sentry, batería baja, mantenimiento, geocerca y más. Push con botones de acción (iniciar climatización, buscar cargador, posponer), agrupación por tag y reflejo a iPhone/Apple Watch
 - 📱 **Optimizado para móvil** — Totalmente usable en iPhone/iPad (Safari), Android y escritorio
 
 ## 🔀 Orden de clasificación {#sort-order}
@@ -268,7 +268,7 @@ Los administradores tienen estos tres derechos de forma implícita: las casillas
 
 ## 💾 Copia de seguridad {#backup}
 
-**Exportación manual** — En **Exportación**: CSV o JSON para viajes y sesiones de carga, además de copia completa como ZIP.
+**Exportación manual** — En **Exportación**: CSV, JSON o **PDF** para viajes (libro de viajes PDF con tabla, resumen y saltos de página), CSV para sesiones de carga, además de copia completa como ZIP.
 
 **Copia automática (servidor)** — Las bases de datos SQLite se encuentran en el directorio bind-mount `./data` (relativo al archivo Compose, normalmente `/opt/tesla-carview/data`). Para copias automáticas en el servidor:
 
