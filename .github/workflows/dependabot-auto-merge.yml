@@ -25,6 +25,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  issues: write
 
 jobs:
   auto-merge:
@@ -51,7 +52,10 @@ jobs:
 
       - name: Label major bumps
         if: steps.meta.outputs.update-type == 'version-update:semver-major'
-        run: gh pr edit "$PR_URL" --add-label "major-bump" --add-label "needs-review"
+        run: |
+          gh label create "major-bump" --color "d93f0b" --description "Major version bump – needs manual review" --force
+          gh label create "needs-review" --color "e4e669" --description "Needs review before merge" --force
+          gh pr edit "$PR_URL" --add-label "major-bump" --add-label "needs-review"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
