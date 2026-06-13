@@ -27,6 +27,7 @@
     "multer": "^2.1.1",
     "nodemailer": "^8.0.11",
     "otpauth": "^9.3.3",
+    "pdfkit": "^0.19.1",
     "protobufjs": "^8.6.3",
     "qrcode": "^1.5.3",
     "ssh2-sftp-client": "^12.1.1",

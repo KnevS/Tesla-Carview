@@ -5,6 +5,7 @@
  * Sendet eine Nachricht über ALLE konfigurierten Kanäle eines Nutzers:
  *   • Web Push (VAPID, Service Worker)
  *   • Telegram Bot
+ *   • E-Mail (nodemailer, SMTP aus tenant_settings)
  *
  * Alle Fehler werden isoliert behandelt — ein Fehler in einem Kanal
  * blockiert nicht die anderen. Fehlende Konfiguration wird still ignoriert.
@@ -16,6 +17,7 @@
 
 import { getMasterDb, getAllTenants, getDb } from '../db/database.js';
 import { buildPayload } from './pushPayloads.js';
+import nodemailer from 'nodemailer';
 
 // Liest die im User-Profil gewählte Sprache aus der Tenant-DB. Wird für
 // Action-Labels in Web-Push-Notifications benötigt — der Service-Worker
@@ -112,6 +114,49 @@ async function sendWebPush(masterDb, tenantDb, tenantId, userId, payload) {
   );
 }
 
+// ── E-Mail ────────────────────────────────────────────────────────────────────
+
+function readSmtpConfig(db) {
+  if (!db) return null;
+  try {
+    const rows = db.prepare(
+      "SELECT key, value FROM tenant_settings WHERE key IN ('smtp.host','smtp.port','smtp.user','smtp.password','smtp.from')"
+    ).all();
+    const cfg = Object.fromEntries(rows.map(r => [r.key, r.value]));
+    if (!cfg['smtp.host'] || !cfg['smtp.user'] || !cfg['smtp.password']) return null;
+    return {
+      host: cfg['smtp.host'],
+      port: parseInt(cfg['smtp.port'] || '587', 10),
+      auth: { user: cfg['smtp.user'], pass: cfg['smtp.password'] },
+      from: cfg['smtp.from'] || cfg['smtp.user'],
+    };
+  } catch { return null; }
+}
+
+async function sendEmail(tenantDb, masterDb, tenantId, userId, title, body) {
+  try {
+    const smtp = readSmtpConfig(tenantDb);
+    if (!smtp) return;
+    const user = masterDb.prepare(
+      'SELECT email FROM users WHERE id=? AND tenant_id=? AND email IS NOT NULL AND email != ?'
+    ).get(userId, tenantId, '');
+    if (!user?.email) return;
+    const transport = nodemailer.createTransport({
+      host: smtp.host, port: smtp.port, secure: smtp.port === 465,
+      auth: smtp.auth,
+    });
+    await transport.sendMail({
+      from: smtp.from,
+      to: user.email,
+      subject: title,
+      text: body,
+      html: `<p>${body.replace(/\n/g, '<br>')}</p>`,
+    });
+  } catch {
+    // SMTP nicht konfiguriert oder Verbindungsfehler — still ignorieren
+  }
+}
+
 // ── Telegram ─────────────────────────────────────────────────────────────────
 
 async function sendTelegram(masterDb, tenantId, userId, text) {
@@ -158,6 +203,7 @@ export async function notify({
   await Promise.allSettled([
     sendWebPush(masterDb, db, tenantId, userId, pushPayload),
     sendTelegram(masterDb, tenantId, userId, tgText),
+    sendEmail(db, masterDb, tenantId, userId, title, body),
   ]);
 }
 
