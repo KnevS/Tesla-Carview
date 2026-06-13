@@ -70,12 +70,12 @@ Für Live-Vehicle-Daten (Akku, Klima, TPMS, Telemetry-Stream) gibt es **nur eine
 | **Fahrtenbuch** | Finanzamt-konform nach BMF-Schreiben: Klassifikation, Geschäftspartner, Reisezweck, Kilometerstände, lückenlose Nummerierung im PDF, Lock nach Export, manuelle Nachträge, Trip-Merge/Split |
 | **Abrechnung** | Heimladen-Sessions & Monta-Integration für alle Fahrzeuge; Kostenabrechnung (PDF, Erstattungsvorlage) für Dienstwagen |
 | **Betriebsbuch** | Wartungen, Reparaturen, Reifen, Inspektionen mit Kosten |
-| **Export** | CSV/JSON-Export für Fahrten & Laden, Vollbackup |
+| **Export** | CSV/JSON/**PDF**-Export für Fahrten & Laden, Vollbackup; PDF-Fahrtenbuch druckfertig mit Datum, Strecke, Verbrauch, SoC |
 | **Wartungsintervalle** | Pro Fahrzeug konfigurierbare Service-Aufgaben (TÜV, Reifen, Bremsflüssigkeit, …) mit Zeit- und km-Intervall + tägliche Push-Erinnerung |
 | **Audit-Log** | Admin-Viewer für sicherheitsrelevante Ereignisse mit Filter und CSV-Export (DSGVO-konform) |
 | **Dynamischer Stromtarif** | aWattar (DE/AT) und Tibber-Integration: 24h-Preiskurve im Dashboard, Auto-Set des günstigsten 4h-Lade-Fensters |
 | **PDF-Abrechnung** | Unterschriftsreife PDF für Heimladen-Erstattung (clientseitig, keine Cloud) |
-| **Benachrichtigungen** | Web Push bei Ladeende, plus Wartungserinnerungen — parallel an Telegram, wenn verknüpft |
+| **Benachrichtigungen** | Web Push + Telegram + **E-Mail** bei Ladeende, SOC-Schwellwerten, Geofence-Events und Wartungserinnerungen — alle Kanäle parallel, jeder einzeln konfigurierbar |
 | **Telegram-Bot** | Vollständiger 1:1-Bot mit Inline-Buttons: `/status` (mit Lock/Klima/Sentry/Charge-Buttons + Unlock-Confirm), `/battery`, `/range`, `/location` (Maps-Link), `/today`, `/trips`, `/classify` (Fahrt klassifizieren), `/service`, `/firmware`, `/clean` — plus proaktive Push für Ladung-Ende, Sentry-Alarm, Service-Reminder, neue Firmware-Versionen. Audit-Log für jede Vehicle-Action |
 | **Benutzerhandbuch** | Vollständige Anleitung direkt in der App lesbar |
 | **Design & Themes** | 5 Design-Stile (Glass, Cyber, Minimal, Sport, **Nevs-Edition**) + 6 Akzentfarben, alles lokal gespeichert; Nevs-Edition mit eigener Bricolage-Grotesque-Typographie und Live-Status-Streifen |
