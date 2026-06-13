@@ -104,6 +104,18 @@ body {
   background-attachment: fixed;
 }
 
+/* ─── Spotlight: folgt der Maus als weicher Lichtkreis ──────────────
+ * Position via CSS-Variablen --mx / --my, gesetzt in App.vue onMounted.
+ * Opacity 0 → 1 bei body:hover; verschwindet wenn die Maus den Browser verlässt. */
+.spotlight {
+  position: fixed; inset: 0;
+  pointer-events: none; z-index: 0;
+  background: radial-gradient(600px circle at var(--mx, 50%) var(--my, 30%), rgba(227,25,55,0.10), transparent 60%);
+  transition: opacity 0.4s ease;
+  opacity: 0;
+}
+body:hover .spotlight { opacity: 1; }
+
 /* ─── Kompakt-Card (Control-View Compact-Modus) ─────────────────────
  * Flachere Variante der .card — gleicher Look, weniger Padding/Radius
  * für dichte Listenansichten wie Fahrzeugsteuerung im Compact-Modus.
@@ -321,6 +333,7 @@ body {
  * Alle hier definierten Animationen werden auf einfache Opacity-
  * Uebergaenge reduziert; pulsierende Indikatoren ruhen ganz. */
 @media (prefers-reduced-motion: reduce) {
+  .spotlight { display: none; }
   .card, .card-interactive, .btn-primary, .btn-secondary, .input {
     transition: none;
   }
