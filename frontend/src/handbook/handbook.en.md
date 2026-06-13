@@ -18,8 +18,8 @@ Tesla Carview is a **self-hosted** data-logger app for Tesla vehicles. All data 
 - 📊 **Dashboard** — Statistics, monthly overview, recent activity
 - 🎮 **Controls** — Climate, doors, lights — directly from the app
 - 📝 **Service log** — Maintenance, repairs, costs with date
-- 📤 **Export** — CSV/JSON for all data, full backup as ZIP
-- 🔔 **Push notifications** — Browser notifications for charging done, sentry alerts, low battery and more; with action buttons (start climate, find charger, snooze), tag grouping (repeated charging updates replace each other) and automatic mirroring to iPhone/Apple Watch
+- 📤 **Export** — CSV/JSON/**PDF** for trips, CSV for charging, full backup as ZIP; PDF trip log print-ready with date, distance, energy and SOC
+- 🔔 **Notifications** — three channels in parallel: Web Push (browser/PWA), Telegram bot and **email** (SMTP). Triggers: charging done, sentry alerts, low battery, service due, geofence and more. Push with action buttons (start climate, find charger, snooze), tag grouping, and mirroring to iPhone/Apple Watch
 - 📱 **Mobile-optimised** — Fully usable on iPhone/iPad (Safari), Android and desktop
 
 ## 🔀 Sort order {#sort-order}
@@ -268,7 +268,7 @@ Administrators implicitly hold all three rights — the checkboxes are hidden fo
 
 ## 💾 Backup {#backup}
 
-**Manual export** — Under **Export**: CSV or JSON for trips and charging sessions, plus a full backup as ZIP.
+**Manual export** — Under **Export**: CSV, JSON or **PDF** for trips (PDF trip log with table, summary and page breaks), CSV for charging sessions, plus a full backup as ZIP.
 
 **Automatic backup (server)** — The SQLite databases live in the bind-mount directory `./data` (relative to the Compose file, normally `/opt/tesla-carview/data`). For automatic server-side backups:
 
