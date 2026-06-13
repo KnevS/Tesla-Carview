@@ -18,8 +18,8 @@ Tesla Carview ist eine **selbst gehostete** Datenlogger-App für Tesla-Fahrzeuge
 - 📊 **Dashboard** — Statistiken, monatliche Übersicht, letzte Aktivitäten
 - 🎮 **Steuerung** — Klimaanlage, Türen, Licht – direkt aus der App
 - 📝 **Betriebsbuch** — Wartungen, Reparaturen, Kosten mit Datum
-- 📤 **Export** — CSV/JSON für alle Daten, Vollbackup als ZIP
-- 🔔 **Push-Nachrichten** — Browser-Benachrichtigung bei Ladeende, Wächter-Alarm, niedrigem Akku u. a.; mit Action-Buttons (Klima starten, Ladestation finden, später erinnern), Tag-Grouping (mehrfache Ladestände ersetzen sich gegenseitig) und automatischer Spiegelung auf iPhone/Apple Watch
+- 📤 **Export** — CSV/JSON/**PDF** für Fahrten, CSV für Ladungen, Vollbackup als ZIP; PDF-Fahrtenbuch druckfertig mit Datum, Strecke, Verbrauch und SoC
+- 🔔 **Benachrichtigungen** — über drei Kanäle parallel: Web Push (Browser/PWA), Telegram-Bot und **E-Mail** (SMTP). Trigger: Ladeende, Wächter-Alarm, niedriger Akku, Wartungsfälligkeit, Geofence u. a. Push mit Action-Buttons (Klima starten, Ladestation finden, später erinnern), Tag-Grouping und Spiegelung auf iPhone/Apple Watch
 - 📱 **Mobile-optimiert** — Vollständig nutzbar auf iPhone/iPad (Safari), Android und Desktop
 
 ## 🔀 Sortierreihenfolge {#sort-order}
@@ -265,7 +265,7 @@ Administratoren haben diese Rechte implizit — die Häkchen sind bei Admin-Kont
 
 ## 💾 Datensicherung {#backup}
 
-**Manueller Export** — Unter **Export**: CSV oder JSON für Fahrten und Ladesessions, sowie Vollbackup als ZIP.
+**Manueller Export** — Unter **Export**: CSV, JSON oder **PDF** für Fahrten (PDF-Fahrtenbuch mit Tabelle, Verbrauchssumme und Seitenumbrüchen), CSV für Ladesessions, sowie Vollbackup als ZIP.
 
 **Automatisches Backup (Server)** — Die SQLite-Datenbanken liegen im Bind-Mount-Verzeichnis `./data` (relativ zum Compose-File, standardmäßig `/opt/tesla-carview/data`). Für automatische Backups auf dem Server:
 
