@@ -1,6 +1,7 @@
 <!-- © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview -->
 <template>
   <div class="min-h-screen bg-tesla-dark flex flex-col">
+    <div class="spotlight" aria-hidden="true"></div>
     <DemoBanner />
     <!-- System-Notices: One-Shot-Banner fuer wichtige Aenderungen seit dem
          letzten Update (z.B. Tesla-API-Status 2026). Liest /api/notices,
@@ -58,7 +59,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import NavBar    from './components/NavBar.vue';
 import AppFooter from './components/AppFooter.vue';
 import LegalAcceptanceModal  from './components/LegalAcceptanceModal.vue';
@@ -80,6 +81,19 @@ const showWizard  = ref(false);
 
 // Globale Event-Bus-Funktion zum Starten des Wizards (z.B. aus Settings.vue)
 window.__launchWizard = () => { showWizard.value = true; };
+
+// Spotlight: Mausbewegung → CSS-Variablen --mx / --my → radial-gradient folgt Cursor
+let _raf = null;
+function _onPointerMove(e) {
+  if (_raf) return;
+  _raf = requestAnimationFrame(() => {
+    document.body.style.setProperty('--mx', e.clientX + 'px');
+    document.body.style.setProperty('--my', e.clientY + 'px');
+    _raf = null;
+  });
+}
+onMounted(() => document.addEventListener('pointermove', _onPointerMove));
+onUnmounted(() => document.removeEventListener('pointermove', _onPointerMove));
 
 watch(() => authStore.isAuthenticated, async (authenticated) => {
   if (!authenticated) { versionInfo.value = null; showWizard.value = false; return; }
