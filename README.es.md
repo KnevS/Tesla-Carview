@@ -70,19 +70,20 @@ Para los datos del vehículo en tiempo real (batería, climatización, TPMS, str
 | **Libro de ruta** | Fahrtenbuch electrónico conforme a BMF: clasificación, contraparte comercial, propósito, columnas de cuentakilómetros, numeración consecutiva en PDF, bloqueo tras exportación, entrada manual, fusión/división de viajes |
 | **Facturación** | Sesiones de carga doméstica e integración con Monta para todos los vehículos; informe de costes (PDF, plantilla de reembolso) para coches de empresa |
 | **Registro de servicio** | Mantenimientos, reparaciones, neumáticos, inspecciones con coste |
-| **Exportación** | Exportación CSV/JSON de viajes y cargas, copia de seguridad completa |
+| **Exportación** | Exportación CSV/JSON/**PDF** de viajes y cargas, copia de seguridad completa; libro de viajes PDF listo para imprimir con fecha, distancia, energía, SOC |
 | **Intervalos de servicio** | Tareas de servicio recurrentes por vehículo (ITV, neumáticos, líquido de frenos, …) con intervalos por tiempo y por km + recordatorios push diarios |
 | **Audit log** | Visor de administración para eventos de seguridad con filtros y exportación CSV (compatible con RGPD) |
 | **Tarifa dinámica** | Integración con aWattar (DE/AT) y Tibber: curva de precios de 24 h en el dashboard, programación de carga con un clic en la ventana de 4 h más barata |
 | **Reembolso en PDF** | PDF firmable para el reembolso de la carga doméstica (lado cliente, sin nube) |
-| **Notificaciones** | Web Push al terminar la carga, además de recordatorios de mantenimiento — reenvío en paralelo a Telegram cuando está vinculado |
+| **Notificaciones** | Web Push + Telegram + **email** en paralelo al terminar carga, umbrales SOC, geocercas y recordatorios de mantenimiento — cada canal configurable individualmente |
 | **Bot de Telegram** | Bot 1:1 completo con botones inline: `/status` (con botones de bloqueo/climatización/centinela/carga + confirmación de desbloqueo), `/battery`, `/range`, `/location` (enlace a Maps), `/today`, `/trips`, `/classify` (etiquetar un viaje), `/service`, `/firmware`, `/clean` — además de push proactivo para fin de carga, alertas de centinela, recordatorios de servicio y nuevas versiones de firmware. Audit log para cada acción sobre el vehículo. Ver más abajo ["¿Por qué Telegram y no WhatsApp / Signal?"](#por-qué-telegram-y-no-whatsapp--signal) |
 | **Manual de usuario** | Guía completa legible directamente dentro de la app |
 | **Diseño y temas** | 5 estilos de diseño (Glass, Cyber, Minimal, Sport, **Nevs-Edition**) + 6 colores de acento, todo almacenado localmente; Nevs-Edition con su propia tipografía Bricolage Grotesque y barra de estado en vivo |
 | **Ajustes** | Todas las secciones plegables y reordenables individualmente (arrastrar para ordenar) |
 | **Navegación** | Entradas de navegación ordenables y ocultables individualmente |
 | **Móvil / Tesla** | PWA instalable para iPhone/iPad (Safari), Android, el navegador del Tesla y el escritorio. Barra de pestañas inferior estilo iOS (4 pestañas rápidas + bottom sheet "Más"). Vista de tarjetas compactas en el libro de ruta en pantallas estrechas. |
-| **Comparativa CO₂** | CO₂ del Tesla frente al equivalente diésel, toneladas ahorradas, factor de mix eléctrico (0,38 kg/kWh DE) — por semana en el Informe de Energía |
+| **Balance CO₂** | Página dedicada que compara el CO₂ ahorrado frente a un vehículo de combustión equivalente (6,5 l/100 km), equivalentes en árboles/año y vuelos ida y vuelta Fráncfort–Mallorca, metodología transparente. También semanal en el Informe de Energía. |
+| **Resumen semanal** | Cada lunes a las 07:00 automático: km, consumo, coste de carga, tendencia vs. semana anterior — por push, Telegram y email |
 | **Consumo según meteorología** | Correlación del consumo por franja de temperatura (< −10 °C a > 30 °C) en el Informe de Energía — muestra cómo el frío y el calor afectan a la autonomía |
 | **Estadísticas climáticas** | Uso diario del aire acondicionado (horas), calefacción de asientos, contador de preacondicionamiento, día más frío/cálido |
 | **Tracker de firmware** | Registra automáticamente cada nueva versión de software del vehículo con histórico y días instalados |
