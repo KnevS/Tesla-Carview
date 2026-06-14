@@ -70,19 +70,20 @@ Canlı araç verileri (batarya, klima, TPMS, telemetri akışı) için **tek bir
 | **Seyir defteri** | BMF uyumlu elektronik Fahrtenbuch: sınıflandırma, iş ortağı, amaç, kilometre saati sütunları, PDF'te ardışık numaralandırma, dışa aktarım sonrası kilit, manuel giriş, yolculuk birleştirme/ayırma |
 | **Faturalandırma** | Tüm araçlar için ev şarjı oturumları ve Monta entegrasyonu; şirket araçları için maliyet dökümü (PDF, geri ödeme şablonu) |
 | **Servis günlüğü** | Maliyetiyle birlikte bakım, onarım, lastik ve muayene kayıtları |
-| **Dışa aktarım** | Yolculuklar ve şarj için CSV/JSON dışa aktarımı, tam yedekleme |
+| **Dışa aktarım** | Yolculuklar ve şarj için CSV/JSON/**PDF** dışa aktarımı, tam yedekleme; tarih, mesafe, enerji ve SOC ile baskıya hazır PDF seyahat günlüğü |
 | **Servis aralıkları** | Araç başına yinelenen servis görevleri (MOT, lastikler, fren hidroliği, …) zaman ve km aralıkları + günlük push hatırlatıcılar ile |
 | **Denetim günlüğü (audit log)** | Güvenlik olayları için filtrelerle ve CSV dışa aktarımıyla yönetici görüntüleyicisi (GDPR dostu) |
 | **Dinamik tarife** | aWattar (DE/AT) ve Tibber entegrasyonu: panoda 24 saatlik fiyat eğrisi, en ucuz 4 saatlik pencerede tek tıkla şarj programı |
 | **PDF geri ödeme** | Ev şarjı geri ödemesi için imzalanabilir PDF (istemci tarafı, bulut yok) |
-| **Bildirimler** | Şarj tamamlandığında Web Push ve bakım hatırlatmaları — bağlıyken Telegram'a paralel olarak iletilir |
+| **Bildirimler** | Şarj tamamlandığında, SOC eşikleri, coğrafi sınır olayları ve bakım hatırlatmaları için Web Push + Telegram + **e-posta** paralel — her kanal ayrı yapılandırılabilir |
 | **Telegram bot** | Inline butonlu tam 1:1 bot: `/status` (kilit/klima/sentry/şarj butonlarıyla + kilit açma onayı), `/battery`, `/range`, `/location` (Haritalar bağlantısı), `/today`, `/trips`, `/classify` (yolculuk etiketleme), `/service`, `/firmware`, `/clean` — ayrıca şarj tamamlama, sentry uyarıları, servis hatırlatmaları ve yeni firmware sürümleri için proaktif push. Her araç eylemi için denetim günlüğü. Aşağıdaki ["Neden Telegram, neden WhatsApp / Signal değil?"](#neden-telegram-neden-whatsapp--signal-değil) bölümüne bakın |
 | **Kullanıcı el kitabı** | Doğrudan uygulama içinde okunabilen eksiksiz kılavuz |
 | **Tasarım ve temalar** | 5 tasarım stili (Glass, Cyber, Minimal, Sport, **Nevs-Edition**) + 6 vurgu rengi, tümü yerel olarak saklanır; Nevs-Edition kendi Bricolage Grotesque tipografisi ve canlı durum çubuğu ile birlikte gelir |
 | **Ayarlar** | Tüm bölümler katlanabilir ve tek tek yeniden sıralanabilir (sürükle-bırak) |
 | **Navigasyon** | Sıralanabilir, tek tek gizlenebilir navigasyon girdileri |
 | **Mobil / Tesla** | iPhone/iPad (Safari), Android, Tesla araç içi tarayıcı ve masaüstü için kurulabilir PWA. iOS tarzı alt sekme çubuğu (4 hızlı sekme + "Daha fazla" alt sayfası). Dar ekranlarda seyir defteri için kompakt kart görünümü. |
-| **CO₂ karşılaştırması** | Tesla CO₂'sine karşı dizel eşdeğeri, tasarruf edilen ton, şebeke karışım faktörü (DE için 0,38 kg/kWh) — Enerji Raporunda haftalık |
+| **CO₂ Bilançosu** | Eşdeğer benzinli araca kıyasla tasarruf edilen CO₂'yi gösteren özel sayfa (6,5 l/100 km), ağaç/yıl ve gidiş-dönüş Frankfurt–Mallorca uçuş eşdeğerleri, şeffaf metodoloji. Ayrıca Enerji Raporunda haftalık. |
+| **Haftalık seyahat özeti** | Her Pazartesi 07:00 otomatik: km, tüketim, şarj maliyeti, önceki haftaya kıyasla eğilim — push, Telegram ve e-posta ile |
 | **Hava durumu tüketimi** | Enerji Raporunda sıcaklık aralığına (< −10 °C ile > 30 °C arası) göre tüketim korelasyonu — soğuk ve sıcağın menzili nasıl etkilediğini gösterir |
 | **Klima istatistikleri** | Günlük klima kullanımı (saat), koltuk ısıtması, ön koşullandırma sayısı, en soğuk/en sıcak gün |
 | **Firmware takipçisi** | Geçmiş ve yüklü gün sayısıyla birlikte her yeni araç yazılımı sürümünü otomatik olarak kaydeder |
