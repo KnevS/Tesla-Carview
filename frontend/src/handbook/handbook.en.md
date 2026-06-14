@@ -20,6 +20,8 @@ Tesla Carview is a **self-hosted** data-logger app for Tesla vehicles. All data 
 - 📝 **Service log** — Maintenance, repairs, costs with date
 - 📤 **Export** — CSV/JSON/**PDF** for trips, CSV for charging, full backup as ZIP; PDF trip log print-ready with date, distance, energy and SOC
 - 🔔 **Notifications** — three channels in parallel: Web Push (browser/PWA), Telegram bot and **email** (SMTP). Triggers: charging done, sentry alerts, low battery, service due, geofence and more. Push with action buttons (start climate, find charger, snooze), tag grouping, and mirroring to iPhone/Apple Watch
+- 📊 **Weekly trip summary** — every Monday at 07:00 local time, automatic via push/Telegram/email: weekly km, energy consumption, charging cost and trend vs. previous week
+- 🌱 **CO₂ balance** — dedicated page calculating CO₂ saved vs. an equivalent ICE vehicle (DE grid mix vs. 6.5 l gasoline/100 km); equivalents in trees/year and round-trip flights Frankfurt–Mallorca
 - 📱 **Mobile-optimised** — Fully usable on iPhone/iPad (Safari), Android and desktop
 
 ## 🔀 Sort order {#sort-order}
