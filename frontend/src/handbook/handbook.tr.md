@@ -20,6 +20,8 @@ Tesla Carview, Tesla araçlar için **kendi sunucunda barındırılan** bir veri
 - 📝 **Servis defteri** — Bakım, onarım, tarihli maliyetler
 - 📤 **Dışa aktarma** — Sürüşler için CSV/JSON/**PDF**, şarj için CSV, ZIP olarak tam yedek; tarih, mesafe, enerji ve SOC ile baskıya hazır PDF seyahat günlüğü
 - 🔔 **Bildirimler** — paralel üç kanal: Web Push (tarayıcı/PWA), Telegram botu ve **e-posta** (SMTP). Tetikleyiciler: şarj bitişi, Sentry alarmı, düşük batarya, bakım vadesi, coğrafi sınır ve daha fazlası. Eylem düğmeli push (klima başlat, şarj bul, ertele), etiket gruplama ve iPhone/Apple Watch'a yansıma
+- 📊 **Haftalık seyahat özeti** — her Pazartesi yerel saatle 07:00'de push/Telegram/e-posta ile otomatik: haftanın km'si, enerji tüketimi, şarj maliyeti ve önceki haftaya kıyasla eğilim
+- 🌱 **CO₂ bilançosu** — eşdeğer benzinli araca kıyasla tasarruf edilen CO₂'yi hesaplayan özel sayfa (DE şebeke karışımı vs 6,5 l benzin/100 km); ağaç/yıl ve gidiş-dönüş Frankfurt–Mallorca uçuşları cinsinden eşdeğerler
 - 📱 **Mobil için optimize** — iPhone/iPad (Safari), Android ve masaüstünde tam kullanılabilir
 
 ## 🔀 Sıralama yönü {#sort-order}
