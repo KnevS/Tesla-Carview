@@ -20,6 +20,8 @@ Tesla Carview est une application **auto-hébergée** d'enregistrement de donné
 - 📝 **Carnet d'entretien** — Entretiens, réparations, coûts avec date
 - 📤 **Export** — CSV/JSON/**PDF** pour les trajets, CSV pour la recharge, sauvegarde complète au format ZIP ; carnet de bord PDF prêt à imprimer avec date, distance, énergie et SOC
 - 🔔 **Notifications** — trois canaux en parallèle : Web Push (navigateur/PWA), bot Telegram et **e-mail** (SMTP). Déclencheurs : recharge terminée, alarme Sentry, batterie faible, maintenance due, geofence, etc. Push avec boutons d'action (démarrer la clim, trouver une borne, plus tard), regroupement par tag et miroir vers iPhone/Apple Watch
+- 📊 **Rapport hebdomadaire** — chaque lundi à 07:00 heure locale, automatique par push/Telegram/e-mail : km de la semaine, consommation, coût de recharge et tendance par rapport à la semaine précédente
+- 🌱 **Bilan CO₂** — page dédiée calculant le CO₂ économisé par rapport à un véhicule thermique équivalent (mix réseau DE vs 6,5 l essence/100 km) ; équivalents en arbres/an et allers-retours Francfort–Majorque
 - 📱 **Optimisé mobile** — Pleinement utilisable sur iPhone/iPad (Safari), Android et bureau
 
 ## 🔀 Ordre de tri {#sort-order}
