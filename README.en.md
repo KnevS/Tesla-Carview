@@ -70,19 +70,20 @@ For live vehicle data (battery, climate, TPMS, telemetry stream) there is **only
 | **Logbook** | BMF-compliant electronic Fahrtenbuch: classification, business partner, purpose, odometer columns, consecutive numbering in PDF, post-export lock, manual entry, trip merge/split |
 | **Billing** | Home-charging sessions & Monta integration for all vehicles; cost statement (PDF, reimbursement template) for company cars |
 | **Service log** | Maintenance, repairs, tires, inspections with cost |
-| **Export** | CSV/JSON export for trips & charging, full backup |
+| **Export** | CSV/JSON/**PDF** export for trips & charging, full backup; print-ready PDF trip log with date, distance, energy, SOC |
 | **Service intervals** | Per-vehicle recurring service tasks (MOT, tyres, brake fluid, …) with time- and km-intervals + daily push reminders |
 | **Audit log** | Admin viewer for security events with filters and CSV export (GDPR-friendly) |
 | **Dynamic tariff** | aWattar (DE/AT) and Tibber integration: 24h price curve on the dashboard, one-click schedule charging at the cheapest 4h window |
 | **PDF reimbursement** | Signable PDF for home-charging reimbursement (client-side, no cloud) |
-| **Notifications** | Web Push when charging finishes, plus maintenance reminders — fan-out to Telegram in parallel when linked |
+| **Notifications** | Web Push + Telegram + **email** in parallel on charging finished, SOC thresholds, geofence events and maintenance reminders — each channel individually configurable |
 | **Telegram bot** | Full 1:1 bot with inline buttons: `/status` (with lock/climate/sentry/charge buttons + unlock confirm), `/battery`, `/range`, `/location` (Maps link), `/today`, `/trips`, `/classify` (label a trip), `/service`, `/firmware`, `/clean` — plus proactive push for charging-complete, sentry alerts, service reminders and new firmware versions. Audit log for every vehicle action. See ["Why Telegram, not WhatsApp / Signal?"](#why-telegram-not-whatsapp--signal) below |
 | **User handbook** | Complete guide readable directly inside the app |
 | **Design & themes** | 5 design styles (Glass, Cyber, Minimal, Sport, **Nevs-Edition**) + 6 accent colors, all stored locally; Nevs-Edition with its own Bricolage Grotesque typography and live status bar |
 | **Settings** | All sections collapsible and individually reorderable (drag-to-sort) |
 | **Navigation** | Sortable, individually hideable navigation entries |
 | **Mobile / Tesla** | Installable PWA for iPhone/iPad (Safari), Android, the Tesla in-car browser and desktop. iOS-style bottom tab bar (4 quick tabs + "More" bottom sheet). Compact card view in the logbook on narrow screens. |
-| **CO₂ comparison** | Tesla CO₂ vs. diesel equivalent, tonnes saved, grid-mix factor (0.38 kg/kWh DE) — per week in the Energy Report |
+| **CO₂ balance** | Dedicated page comparing CO₂ saved vs. an equivalent ICE vehicle (6.5 l/100 km), equivalents in trees/year and round-trip flights Frankfurt–Mallorca, transparent methodology. Also weekly in the Energy Report. |
+| **Weekly trip summary** | Every Monday at 07:00 automatic: weekly km, energy, charging cost, trend vs. previous week — via push, Telegram and email |
 | **Weather consumption** | Consumption correlation by temperature bucket (< −10 °C to > 30 °C) in the Energy Report — shows how cold and heat affect range |
 | **Climate statistics** | Daily AC usage (hours), seat heating, preconditioning count, coldest/hottest day |
 | **Firmware tracker** | Automatically records every new vehicle software version with history and days installed |
