@@ -2840,5 +2840,24 @@
       "androidBody": "Auf Android kannst du via Tasker oder einer ähnlichen Automation-App einen HTTP-Call auslösen, wenn die Bluetooth-Verbindung zum Tesla aktiv wird. Anleitung siehe Wiki.",
       "skipNote": "Du kannst diesen Schritt überspringen und später jederzeit nachholen — Geräte-Liste → „🔵 Bluetooth-Setup\"."
     }
+  },
+  "co2": {
+    "title": "CO₂-Bilanz",
+    "subtitle": "Eingespartes CO₂ vs. fiktiver Verbrenner",
+    "days": "Tage",
+    "loading": "Lädt …",
+    "noData": "Keine Daten verfügbar",
+    "saved": "CO₂ eingespart",
+    "trips": "Fahrten",
+    "teslaEmission": "Tesla — Stromproduktion",
+    "teslaNote": "Verbrauch × Strommix DE",
+    "iceEmission": "Fiktiver Verbrenner",
+    "iceNote": "6,5 l Benzin / 100 km",
+    "equivTitle": "Vergleichbar mit",
+    "treesEquiv": "Bäume binden so viel CO₂ pro Jahr",
+    "flightsEquiv": "Hin- und Rückflug Frankfurt–Mallorca",
+    "methodology": "Annahmen & Methodik",
+    "assumption1": "Stromnetz Deutschland:",
+    "assumption2": "Vergleichs-Benziner:"
   }
 }

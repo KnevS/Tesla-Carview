@@ -32,6 +32,7 @@ export const NAV_GROUPS = [
       { key: 'fahrtenbuch', to: '/fahrtenbuch',      icon: 'logbook',     emojiFallback: '📋', label: 'Fahrtenbuch',      tooltip: 'Fahrten klassifizieren und Auswertung nach Privat/Dienst/Arbeitsweg' },
       { key: 'charging',    to: '/charging',         icon: 'bolt',        emojiFallback: '🔋', label: 'Laden',            tooltip: 'Alle Ladevorgänge mit Ladekurven, Kosten und Aufschlüsselung nach Ladertyp' },
       { key: 'energy',      to: '/energy',           icon: 'sparkles',    emojiFallback: '🌿', label: 'Energiebericht',   tooltip: 'Wöchentliche Effizienztrends, kWh/100 km und Eco-Score' },
+      { key: 'co2',         to: '/co2',              icon: 'leaf',        emojiFallback: '🌱', label: 'CO₂-Bilanz',       tooltip: 'Eingespartes CO₂ im Vergleich zu einem fiktiven Verbrenner' },
       { key: 'sleep',       to: '/sleep',            icon: 'moon',        emojiFallback: '😴', label: 'Schlaf-Monitor',   tooltip: 'Wann schläft das Auto – und wie viel Energie verliert es im Stand?' },
       { key: 'climate',     to: '/climate',          icon: 'thermometer', emojiFallback: '❄️', label: 'Klimastatistiken', tooltip: 'Klimaanlagen- und Sitzheizungsnutzung nach Tag – inkl. Vorklimatisierungen' },
       { key: 'logbook',     to: '/logbook',          icon: 'tool',        emojiFallback: '📓', label: 'Betriebsbuch',     tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },

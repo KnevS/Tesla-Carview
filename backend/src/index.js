@@ -10,6 +10,7 @@ import { securityHeaders, apiRateLimit } from './middleware/security.js';
 import { requireAuth } from './middleware/auth.js';
 import { startPoller, resetTelemetryHeartbeat } from './services/poller.js';
 import { startServiceReminderScheduler } from './services/serviceReminders.js';
+import { startWeeklySummaryScheduler }   from './services/weeklySummary.js';
 import { startDemoLifecycle } from './services/demoLifecycle.js';
 import { startNightlyMaintenance } from './services/nightlyMaintenance.js';
 import { startCompanionScheduler } from './services/companionScheduler.js';
@@ -57,6 +58,7 @@ import routingRoutes, { tileRouter } from './routes/routing.js';
 import { startRouteScheduler } from './services/routeScheduler.js';
 import pairRoutes from './routes/pair.js';
 import energyReportRoutes     from './routes/energyReport.js';
+import co2Routes               from './routes/co2.js';
 import notificationRulesRoutes from './routes/notificationRules.js';
 import sleepRoutes             from './routes/sleep.js';
 import firmwareRoutes          from './routes/firmware.js';
@@ -155,6 +157,7 @@ app.use('/api/grok',               grokRoutes);
 app.use('/api/saved-routes',        savedRoutesRoutes);
 app.use('/api/routing',            routingRoutes);
 app.use('/api/energy',             energyReportRoutes);
+app.use('/api/co2',                co2Routes);
 app.use('/api/notification-rules', notificationRulesRoutes);
 app.use('/api/sleep',              sleepRoutes);
 app.use('/api/firmware',           firmwareRoutes);
@@ -216,6 +219,7 @@ server.listen(PORT, async () => {
     startPoller().catch(err => console.error('[Poller] Start fehlgeschlagen:', err.message));
   }
   startServiceReminderScheduler();
+  startWeeklySummaryScheduler();
   startRouteScheduler();
   // Naechtliche Hygiene (~03:30 Europe/Berlin) — sichere App-interne
   // Wartung. Auto-Update aus Git ist opt-in via AUTO_UPDATE_ENABLED=true.
