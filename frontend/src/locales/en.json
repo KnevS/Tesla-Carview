@@ -2840,5 +2840,24 @@
       "androidBody": "On Android you can trigger an HTTP call via Tasker or a similar automation app whenever Bluetooth connects to the Tesla. See wiki for the guide.",
       "skipNote": "You can skip this step and come back anytime — device list → \"🔵 Bluetooth setup\"."
     }
+  },
+  "co2": {
+    "title": "CO₂ Balance",
+    "subtitle": "CO₂ saved vs. equivalent ICE vehicle",
+    "days": "days",
+    "loading": "Loading …",
+    "noData": "No data available",
+    "saved": "CO₂ saved",
+    "trips": "trips",
+    "teslaEmission": "Tesla — grid electricity",
+    "teslaNote": "consumption × DE grid mix",
+    "iceEmission": "Reference ICE vehicle",
+    "iceNote": "6.5 l gasoline / 100 km",
+    "equivTitle": "Equivalent to",
+    "treesEquiv": "trees absorbing this CO₂ per year",
+    "flightsEquiv": "round-trip Frankfurt–Mallorca",
+    "methodology": "Assumptions & methodology",
+    "assumption1": "German grid:",
+    "assumption2": "Reference ICE:"
   }
 }

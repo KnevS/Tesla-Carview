@@ -2840,5 +2840,24 @@
       "androidBody": "Android'de Tasker veya benzeri bir otomasyon uygulamasıyla Tesla Bluetooth bağlantısı sağlandığında bir HTTP çağrısı tetikleyebilirsiniz. Kılavuz wiki'de.",
       "skipNote": "Bu adımı atlayıp istediğiniz zaman geri dönebilirsiniz — cihaz listesi → \"🔵 Bluetooth kurulumu\"."
     }
+  },
+  "co2": {
+    "title": "CO₂ Bilançosu",
+    "subtitle": "Eşdeğer içten yanmalı araca karşı kazanılan CO₂",
+    "days": "gün",
+    "loading": "Yükleniyor …",
+    "noData": "Veri yok",
+    "saved": "CO₂ tasarruf",
+    "trips": "yolculuk",
+    "teslaEmission": "Tesla — şebeke elektriği",
+    "teslaNote": "tüketim × DE şebeke karışımı",
+    "iceEmission": "Referans benzinli araç",
+    "iceNote": "6,5 l benzin / 100 km",
+    "equivTitle": "Şuna eşdeğer",
+    "treesEquiv": "ağacın yılda emdiği CO₂",
+    "flightsEquiv": "gidiş-dönüş Frankfurt–Mallorca",
+    "methodology": "Varsayımlar ve metodoloji",
+    "assumption1": "Alman şebekesi:",
+    "assumption2": "Referans benzinli:"
   }
 }

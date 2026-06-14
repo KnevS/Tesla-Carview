@@ -2840,5 +2840,24 @@
       "androidBody": "En Android puedes disparar una llamada HTTP vía Tasker o una app de automatización similar cuando se conecta el Bluetooth al Tesla. Guía en el wiki.",
       "skipNote": "Puedes saltar este paso y volver en cualquier momento — lista de dispositivos → «🔵 Configuración Bluetooth»."
     }
+  },
+  "co2": {
+    "title": "Balance CO₂",
+    "subtitle": "CO₂ ahorrado vs. vehículo de combustión equivalente",
+    "days": "días",
+    "loading": "Cargando …",
+    "noData": "Sin datos disponibles",
+    "saved": "CO₂ ahorrado",
+    "trips": "viajes",
+    "teslaEmission": "Tesla — electricidad de red",
+    "teslaNote": "consumo × mix DE",
+    "iceEmission": "Vehículo de combustión ref.",
+    "iceNote": "6,5 l gasolina / 100 km",
+    "equivTitle": "Equivalente a",
+    "treesEquiv": "árboles absorbiendo este CO₂ por año",
+    "flightsEquiv": "ida y vuelta Frankfurt–Mallorca",
+    "methodology": "Suposiciones y metodología",
+    "assumption1": "Red eléctrica alemana:",
+    "assumption2": "Vehículo de combustión ref.:"
   }
 }
