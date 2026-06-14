@@ -70,19 +70,20 @@ Pour les données véhicule en direct (batterie, climatisation, TPMS, flux de t�
 | **Carnet de bord** | Fahrtenbuch électronique conforme BMF : classification, partenaire commercial, motif, colonnes de compteur, numérotation continue dans le PDF, verrouillage après export, saisie manuelle, fusion/scission de trajets |
 | **Facturation** | Sessions de recharge à domicile et intégration Monta pour tous les véhicules ; relevé de coûts (PDF, modèle de remboursement) pour véhicules de fonction |
 | **Carnet d'entretien** | Maintenance, réparations, pneus, contrôles techniques avec coût |
-| **Export** | Export CSV/JSON pour trajets et recharges, sauvegarde complète |
+| **Export** | Export CSV/JSON/**PDF** pour trajets et recharges, sauvegarde complète ; carnet de bord PDF prêt à imprimer avec date, distance, énergie, SOC |
 | **Intervalles d'entretien** | Tâches d'entretien récurrentes par véhicule (contrôle technique, pneus, liquide de frein, …) avec intervalles temporels et kilométriques + rappels push quotidiens |
 | **Journal d'audit** | Visualiseur admin pour les événements de sécurité avec filtres et export CSV (compatible RGPD) |
 | **Tarif dynamique** | Intégration aWattar (DE/AT) et Tibber : courbe de prix sur 24 h sur le tableau de bord, planification de recharge en un clic sur la fenêtre de 4 h la moins chère |
 | **PDF de remboursement** | PDF signable pour le remboursement de la recharge à domicile (côté client, pas de cloud) |
-| **Notifications** | Web Push lorsque la recharge est terminée, ainsi que rappels de maintenance — diffusion parallèle vers Telegram lorsqu'il est lié |
+| **Notifications** | Web Push + Telegram + **e-mail** en parallèle lors de fin de recharge, seuils SOC, geofence et rappels d'entretien — chaque canal configurable individuellement |
 | **Bot Telegram** | Bot 1:1 complet avec boutons inline : `/status` (avec boutons lock/climatisation/sentinelle/recharge + confirmation déverrouillage), `/battery`, `/range`, `/location` (lien Maps), `/today`, `/trips`, `/classify` (étiqueter un trajet), `/service`, `/firmware`, `/clean` — plus push proactifs pour fin de recharge, alertes sentinelle, rappels d'entretien et nouvelles versions de firmware. Journal d'audit pour chaque action véhicule. Voir [« Pourquoi Telegram, pas WhatsApp / Signal ? »](#pourquoi-telegram-pas-whatsapp--signal) ci-dessous |
 | **Manuel utilisateur** | Guide complet lisible directement dans l'application |
 | **Design et thèmes** | 5 styles de design (Glass, Cyber, Minimal, Sport, **Nevs-Edition**) + 6 couleurs d'accent, le tout stocké localement ; Nevs-Edition avec sa propre typographie Bricolage Grotesque et barre de statut en direct |
 | **Paramètres** | Toutes les sections sont repliables et réordonnables individuellement (glisser-déposer) |
 | **Navigation** | Entrées de navigation triables et masquables individuellement |
 | **Mobile / Tesla** | PWA installable pour iPhone/iPad (Safari), Android, le navigateur embarqué Tesla et desktop. Barre d'onglets inférieure de style iOS (4 onglets rapides + bottom sheet « Plus »). Vue carte compacte dans le carnet de bord sur écrans étroits. |
-| **Comparaison CO₂** | CO₂ Tesla vs équivalent diesel, tonnes économisées, facteur du mix électrique (0,38 kg/kWh DE) — par semaine dans l'Energy Report |
+| **Bilan CO₂** | Page dédiée comparant le CO₂ économisé par rapport à un véhicule thermique équivalent (6,5 l/100 km), équivalents en arbres/an et allers-retours Francfort–Majorque, méthodologie transparente. Également hebdomadaire dans l'Energy Report. |
+| **Rapport hebdomadaire** | Chaque lundi à 07:00 automatique : km, consommation, coût de recharge, tendance vs semaine précédente — par push, Telegram et e-mail |
 | **Consommation selon météo** | Corrélation de consommation par tranche de température (< −10 °C à > 30 °C) dans l'Energy Report — montre comment le froid et la chaleur affectent l'autonomie |
 | **Statistiques climatiques** | Utilisation quotidienne de la clim (heures), chauffage des sièges, nombre de préconditionnements, jour le plus froid/le plus chaud |
 | **Suivi firmware** | Enregistre automatiquement chaque nouvelle version logicielle du véhicule avec historique et nombre de jours installés |
