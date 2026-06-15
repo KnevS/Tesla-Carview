@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.23.1] - 2026-06-15
+
+### Fixed
+
+- **Restart banner in admin settings was hidden during the restart it announced**: The "Server is restarting…" banner in `AdminSettings.vue` used `sticky top-2 z-50`, but `MaintenanceOverlay` (which covers the screen while the backend restarts) is `fixed inset-0 z-index:100`. The banner therefore disappeared exactly when it was needed — after clicking "Restart now" the admin only saw the maintenance page, no progress or success indication. Fix: banner switched to `fixed top-2 left-1/2 -translate-x-1/2 z-[200]` with responsive `w-[min(640px,calc(100vw-1rem))]`, so it floats centered above the overlay and the green success banner stays visible once the `app-up` event fires.
+
+---
+
 ## [v3.23.0] - 2026-06-11
 
 ### Security — supply-chain hardening

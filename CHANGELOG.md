@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.23.1] - 2026-06-15
+
+### Behoben
+
+- **Neustart-Banner in den Admin-Einstellungen war während des Neustarts unsichtbar**: Der "Server startet neu…"-Banner in `AdminSettings.vue` war mit `sticky top-2 z-50` positioniert, das `MaintenanceOverlay` (das den Bildschirm während des Backend-Neustarts abdeckt) liegt aber als `fixed inset-0 z-index:100`. Damit verschwand der Banner exakt in dem Moment, in dem er gebraucht wurde — nach dem Klick auf "Sofort neu starten" sah der Admin nur die Maintenance-Seite, keine Fortschritts- oder Erfolgsmeldung. Fix: Banner auf `fixed top-2 left-1/2 -translate-x-1/2 z-[200]` mit responsiver `w-[min(640px,calc(100vw-1rem))]` umgestellt, sodass er zentriert über dem Overlay schwebt und der grüne Erfolgs-Banner nach dem `app-up`-Event sichtbar bleibt.
+
+---
+
 ## [v3.23.0] - 2026-06-11
 
 ### Security — Supply-Chain-Hardening
