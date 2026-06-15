@@ -7,6 +7,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.23.2] - 2026-06-15
+
+### Security
+
+- **IDOR (authorization) on TCO read paths closed**: `GET /api/tco/vehicles/:id` and `GET /api/tco/vehicles/:id/service-records` returned data to any authenticated user who knew the `vehicle_id` — no ownership check. A driver account could therefore enumerate TCO figures and service history of other vehicles in the same tenant. Fix: new helper `assertVehicleAccess(req, vehicleId)` in `backend/src/routes/tco.js` with an admin bypass plus `SELECT 1 FROM vehicle_users WHERE vehicle_id=? AND user_id=?` for drivers; responds `403 'Kein Zugriff auf dieses Fahrzeug'` when not assigned. Pattern taken from `routes/owntracks.js`. The TCO write endpoints stay admin-only and were not affected.
+- **IDOR (authorization) on battery-anomaly mutations closed**: `POST /api/battery/anomalies-persisted/:id/seen`, `…/dismiss` and `POST /api/battery/precondition-suggestions/:id/dismiss` ran their `UPDATE` based only on the row `id`. A driver account could therefore mark foreign battery anomalies and preconditioning suggestions as seen/dismissed. Fix: each of the three `UPDATE` statements gets an additional `vehicle_id IN (SELECT vehicle_id FROM vehicle_users WHERE user_id=?)` clause with an admin bypass (`? = 1 OR …`); when `r.changes === 0` the endpoint responds with `404`, so neither the existence nor the access state of the foreign row is leaked.
+
+---
+
 ## [v3.23.1] - 2026-06-15
 
 ### Fixed

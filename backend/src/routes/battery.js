@@ -276,9 +276,15 @@ router.get('/anomalies-persisted', (req, res) => {
 
 router.post('/anomalies-persisted/:id/seen', (req, res) => {
   try {
+    const isAdmin = req.user?.role === 'admin' ? 1 : 0;
     const r = req.db.prepare(
-      `UPDATE battery_anomalies SET status='seen', seen_at=unixepoch() WHERE id=? AND status!='dismissed'`
-    ).run(req.params.id);
+      `UPDATE battery_anomalies SET status='seen', seen_at=unixepoch()
+       WHERE id=? AND status!='dismissed'
+         AND (? = 1 OR vehicle_id IN (
+           SELECT vehicle_id FROM vehicle_users WHERE user_id=?
+         ))`
+    ).run(req.params.id, isAdmin, req.user?.sub);
+    if (r.changes === 0) return res.status(404).json({ error: 'Anomalie nicht gefunden oder kein Zugriff' });
     res.json({ updated: r.changes });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -287,9 +293,15 @@ router.post('/anomalies-persisted/:id/seen', (req, res) => {
 
 router.post('/anomalies-persisted/:id/dismiss', (req, res) => {
   try {
+    const isAdmin = req.user?.role === 'admin' ? 1 : 0;
     const r = req.db.prepare(
-      `UPDATE battery_anomalies SET status='dismissed', dismissed_at=unixepoch() WHERE id=?`
-    ).run(req.params.id);
+      `UPDATE battery_anomalies SET status='dismissed', dismissed_at=unixepoch()
+       WHERE id=?
+         AND (? = 1 OR vehicle_id IN (
+           SELECT vehicle_id FROM vehicle_users WHERE user_id=?
+         ))`
+    ).run(req.params.id, isAdmin, req.user?.sub);
+    if (r.changes === 0) return res.status(404).json({ error: 'Anomalie nicht gefunden oder kein Zugriff' });
     res.json({ updated: r.changes });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -323,9 +335,15 @@ router.get('/precondition-suggestions', (req, res) => {
 
 router.post('/precondition-suggestions/:id/dismiss', (req, res) => {
   try {
+    const isAdmin = req.user?.role === 'admin' ? 1 : 0;
     const r = req.db.prepare(
-      `UPDATE precondition_suggestions SET status='dismissed', dismissed_at=unixepoch() WHERE id=?`
-    ).run(req.params.id);
+      `UPDATE precondition_suggestions SET status='dismissed', dismissed_at=unixepoch()
+       WHERE id=?
+         AND (? = 1 OR vehicle_id IN (
+           SELECT vehicle_id FROM vehicle_users WHERE user_id=?
+         ))`
+    ).run(req.params.id, isAdmin, req.user?.sub);
+    if (r.changes === 0) return res.status(404).json({ error: 'Vorschlag nicht gefunden oder kein Zugriff' });
     res.json({ updated: r.changes });
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -192,8 +192,20 @@ function computeTco(db, vehicleId) {
 
 // ── Routen ────────────────────────────────────────────────────────────────
 
+// Fahrer dürfen nur auf eigene Fahrzeuge (vehicle_users) zugreifen,
+// Admin sieht alles. Pattern aus routes/owntracks.js.
+function assertVehicleAccess(req, vehicleId) {
+  if (req.user?.role === 'admin') return null;
+  const ok = req.db.prepare(
+    'SELECT 1 FROM vehicle_users WHERE vehicle_id=? AND user_id=?'
+  ).get(vehicleId, req.user?.sub);
+  return ok ? null : { status: 403, body: { error: 'Kein Zugriff auf dieses Fahrzeug' } };
+}
+
 router.get('/vehicles/:id', (req, res) => {
   const id = Number(req.params.id);
+  const denied = assertVehicleAccess(req, id);
+  if (denied) return res.status(denied.status).json(denied.body);
   const result = computeTco(req.db, id);
   if (!result) return res.status(404).json({ error: 'Fahrzeug nicht gefunden' });
   res.json(result);
@@ -229,6 +241,8 @@ router.patch('/vehicles/:id', (req, res) => {
 
 router.get('/vehicles/:id/service-records', (req, res) => {
   const id = Number(req.params.id);
+  const denied = assertVehicleAccess(req, id);
+  if (denied) return res.status(denied.status).json(denied.body);
   const rows = req.db.prepare(`
     SELECT id, performed_at, odometer_km, category, label, cost_eur, vendor, notes
     FROM service_records WHERE vehicle_id=? ORDER BY performed_at DESC

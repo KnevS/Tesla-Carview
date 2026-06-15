@@ -7,6 +7,15 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.23.2] - 2026-06-15
+
+### Sicherheit
+
+- **IDOR (Authorization) auf TCO-Lesepfaden geschlossen**: `GET /api/tco/vehicles/:id` und `GET /api/tco/vehicles/:id/service-records` lieferten Daten an jeden eingeloggten Nutzer aus, der die `vehicle_id` kannte — kein Owner-Check. Damit konnte ein Fahrer-Account TCO-Kennzahlen und Service-Historie fremder Fahrzeuge desselben Mandanten enumerieren. Fix: neuer Helper `assertVehicleAccess(req, vehicleId)` in `backend/src/routes/tco.js` mit Admin-Bypass plus `SELECT 1 FROM vehicle_users WHERE vehicle_id=? AND user_id=?` für Fahrer, antwortet `403 'Kein Zugriff auf dieses Fahrzeug'` wenn nicht zugewiesen. Pattern aus `routes/owntracks.js` übernommen. Die schreibenden TCO-Endpoints sind unverändert admin-only und damit nicht betroffen.
+- **IDOR (Authorization) auf Battery-Anomaly-Mutationen geschlossen**: `POST /api/battery/anomalies-persisted/:id/seen`, `…/dismiss` und `POST /api/battery/precondition-suggestions/:id/dismiss` führten ihren `UPDATE` ausschließlich auf der `id` aus. Ein Fahrer-Account konnte damit fremde Battery-Anomalien und Vorklim-Vorschläge als gesehen/verworfen markieren. Fix: die drei `UPDATE`-Statements bekommen eine zusätzliche `vehicle_id IN (SELECT vehicle_id FROM vehicle_users WHERE user_id=?)`-Klausel mit Admin-Bypass (`? = 1 OR …`); wenn `r.changes === 0` antwortet der Endpoint mit `404`, sodass weder Existenz noch Zugriff der fremden Anomalie offengelegt werden.
+
+---
+
 ## [v3.23.1] - 2026-06-15
 
 ### Behoben
