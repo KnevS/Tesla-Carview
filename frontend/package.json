@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@simplewebauthn/browser": "^13.3.0",
-    "axios": "^1.7.2",
+    "axios": "^1.18.0",
     "chart.js": "^4.4.3",
     "dompurify": "^3.4.10",
     "jspdf": "^4.2.1",
