@@ -7,6 +7,15 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.23.3] - 2026-06-15
+
+### Sicherheit
+
+- **IDOR-Read-Pfade in Battery-Companion (anomalies-persisted, precondition-suggestions) geschlossen**: `GET /api/battery/anomalies-persisted` und `GET /api/battery/precondition-suggestions` filterten bisher nur über einen optionalen `vehicle_id`-Query-Parameter. Ein Fahrer-Account konnte damit Listen aller Battery-Anomalien und Vorklim-Vorschläge des Mandanten lesen (inkl. Display-Namen und Detail-JSON fremder Fahrzeuge) und durch wechselnde `vehicle_id`-Werte gezielt enumerieren. Fix: für Non-Admin wird die WHERE-Klausel um `vehicle_id IN (SELECT vehicle_id FROM vehicle_users WHERE user_id=?)` ergänzt, sodass Fahrer ausschließlich Rows zu ihnen zugewiesenen Fahrzeugen sehen; Admin-Sicht unverändert. Ergänzt den IDOR-Fix aus v3.23.2 auf den Write-Pfad.
+- **Bekannte verbleibende IDORs in `backend/src/routes/battery.js`**: `GET /snapshots`, `GET /degradation`, `GET /charging-curve`, `GET /efficiency-by-temp`, `GET /phantom-drain`, `GET /anomalies`, `GET /health-summary` und `POST /snapshot` filtern weiter ungeprüft auf einem User-übergebenen `vehicle_id`. Wird in einem separaten Sweep mit ESLint-Regel oder Middleware-Pattern adressiert, sobald die Frontend-Aufrufer auditiert sind.
+
+---
+
 ## [v3.23.2] - 2026-06-15
 
 ### Sicherheit

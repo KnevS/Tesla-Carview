@@ -258,6 +258,10 @@ router.get('/anomalies-persisted', (req, res) => {
     const params = [];
     if (vehicle_id) { where.push('a.vehicle_id=?'); params.push(vehicle_id); }
     if (status)     { where.push('a.status=?');     params.push(status); }
+    if (req.user?.role !== 'admin') {
+      where.push('a.vehicle_id IN (SELECT vehicle_id FROM vehicle_users WHERE user_id=?)');
+      params.push(req.user?.sub);
+    }
     const rows = db.prepare(
       `SELECT a.id, a.vehicle_id, a.type, a.occurred_at, a.detected_at,
               a.details_json, a.status, a.notified_at, a.seen_at, a.dismissed_at,
@@ -316,6 +320,10 @@ router.get('/precondition-suggestions', (req, res) => {
     const where = ['s.status=?'];
     const params = [status];
     if (vehicle_id) { where.push('s.vehicle_id=?'); params.push(vehicle_id); }
+    if (req.user?.role !== 'admin') {
+      where.push('s.vehicle_id IN (SELECT vehicle_id FROM vehicle_users WHERE user_id=?)');
+      params.push(req.user?.sub);
+    }
     const rows = db.prepare(
       `SELECT s.id, s.vehicle_id, s.for_date, s.expected_temp_c,
               s.expected_departure_hhmm, s.reason_code, s.details_json,
