@@ -45,17 +45,19 @@ jobs:
         if: |
           steps.meta.outputs.update-type == 'version-update:semver-patch' ||
           steps.meta.outputs.update-type == 'version-update:semver-minor'
-        run: gh pr merge --auto --squash "$PR_URL"
+        run: gh pr merge --auto --squash --repo "$REPO" "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
+          REPO: ${{ github.repository }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Label major bumps
         if: steps.meta.outputs.update-type == 'version-update:semver-major'
         run: |
-          gh label create "major-bump" --color "d93f0b" --description "Major version bump – needs manual review" --force
-          gh label create "needs-review" --color "e4e669" --description "Needs review before merge" --force
-          gh pr edit "$PR_URL" --add-label "major-bump" --add-label "needs-review"
+          gh label create "major-bump" --color "d93f0b" --description "Major version bump – needs manual review" --force --repo "$REPO"
+          gh label create "needs-review" --color "e4e669" --description "Needs review before merge" --force --repo "$REPO"
+          gh pr edit "$PR_URL" --add-label "major-bump" --add-label "needs-review" --repo "$REPO"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
+          REPO: ${{ github.repository }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
