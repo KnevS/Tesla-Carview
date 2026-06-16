@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   update-badge:
@@ -29,24 +30,29 @@ jobs:
           echo "version=v${VERSION}" >> "$GITHUB_OUTPUT"
           echo "Detected version: v${VERSION}"
 
-      - name: Update version badge in READMEs and CHANGELOG
+      - name: Update version badge in READMEs
         run: |
           V="${{ steps.ver.outputs.version }}"
           BADGE_FRAGMENT="version-${V}-E31937"
-
-          # Update README.md and README.en.md badge URLs
           sed -i "s|version-v[0-9.]*-E31937|${BADGE_FRAGMENT}|g" README.md README.en.md
-
           echo "Updated badge to ${V} in README.md and README.en.md"
 
-      - name: Commit if changed
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add README.md README.en.md
-          if git diff --cached --quiet; then
-            echo "No badge changes needed."
-          else
-            git commit -m "chore: update version badge to ${{ steps.ver.outputs.version }}"
-            git push
-          fi
+      - name: Open PR with badge update
+        # git push to main is blocked by branch protection (required status checks).
+        # create-pull-request opens a short-lived branch; CI runs there, then auto-merge lands it.
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update version badge to ${{ steps.ver.outputs.version }}"
+          branch: chore/version-badge-${{ steps.ver.outputs.version }}
+          delete-branch: true
+          title: "chore: update version badge to ${{ steps.ver.outputs.version }}"
+          body: "Automated badge update — no review needed."
+          base: main
+
+      - name: Enable auto-merge on badge PR
+        if: steps.cpr.outputs.pull-request-number
+        run: gh pr merge --auto --squash "${{ steps.cpr.outputs.pull-request-url }}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
