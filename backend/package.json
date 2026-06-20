@@ -24,7 +24,7 @@
     "geoip-lite": "^2.0.2",
     "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.2",
-    "multer": "^2.1.1",
+    "multer": "^2.2.0",
     "nodemailer": "^8.0.11",
     "otpauth": "^9.3.3",
     "pdfkit": "^0.19.1",
