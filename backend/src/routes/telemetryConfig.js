@@ -5,6 +5,7 @@ import { getPublicKeyPem } from '../services/virtualKey.js';
 import { apiProxyPost } from '../services/teslaApi.js';
 import { getAllTenants, getDb } from '../db/database.js';
 import { getTenantSetting, setTenantSetting } from '../services/configService.js';
+import { requireAuth, requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -29,7 +30,13 @@ router.get('/com.tesla.3p.public-key.pem', (_req, res) => {
 //   - status:           derived — green=live, yellow=registered-idle,
 //                       red=not-registered, gray=approval-missing
 // Frontend rendert den Status-Indikator pro VIN daraus.
-router.get('/telemetry/status', async (req, res) => {
+// WICHTIG: Dieser Router ist in index.js an ZWEI Stellen gemountet —
+// öffentlich unter /.well-known/appspecific (vor app.use(requireAuth), nötig
+// damit Tesla den Public-Key abrufen kann) UND unter /api/fleet (hinter
+// requireAuth). Damit die sensiblen Routen NICHT über den öffentlichen Mount
+// unauthentifiziert erreichbar sind, schützen sie sich jeweils selbst per
+// requireAuth/requireAdmin. Nur die Public-Key-GET-Route bleibt offen.
+router.get('/telemetry/status', requireAuth, async (req, res) => {
   const db       = req.db;
   const key      = db.prepare('SELECT created_at FROM virtual_key ORDER BY id DESC LIMIT 1').get();
   const vehicles = db.prepare(
@@ -73,26 +80,31 @@ router.get('/telemetry/status', async (req, res) => {
 // Token holen + POST /partner_accounts). Kein Terminal, kein curl.
 //
 // Sicherheits-Hygiene:
-//   • Die registrierte Domain MUSS die Domain sein, unter der diese Instanz
-//     läuft — Tesla verifiziert sie, indem es den Public-Key unter
-//     https://<domain>/.well-known/appspecific/com.tesla.3p.public-key.pem
-//     abruft. Deshalb gewinnt immer FRONTEND_URL (die echte Betriebs-Domain);
-//     der vom Client mitgeschickte `domain`-Wert dient nur als Fallback,
-//     falls FRONTEND_URL nicht gesetzt ist. So kann kein abweichender Wert
-//     aus dem Browser eine falsche Domain registrieren.
+//   • Admin-only (requireAuth + requireAdmin), weil dieser Router auch
+//     öffentlich unter /.well-known/appspecific gemountet ist (s. Hinweis bei
+//     /telemetry/status). Ohne diese Guards wäre die Registrierung
+//     unauthentifiziert auslösbar — mit den Operator-Credentials, die
+//     getTenantSetting sonst aus der .env zieht.
+//   • Die registrierte Domain wird AUSSCHLIESSLICH serverseitig bestimmt und
+//     NIE aus dem Request-Body übernommen: FRONTEND_URL (die echte Betriebs-
+//     Domain) gewinnt; nur falls die nicht gesetzt ist, dient der vom Server
+//     beobachtete Host-Header als Fallback. Tesla verifiziert die Domain
+//     ohnehin über den Public-Key unter
+//     https://<domain>/.well-known/appspecific/com.tesla.3p.public-key.pem —
+//     ein abweichender Wert kann so nie registriert werden.
 //   • Client-Secret verlässt nie den Server: es wird serverseitig aus der
 //     verschlüsselten tenant_settings gelesen und nur an Teslas Token-
 //     Endpoint geschickt — niemals an das Frontend zurückgegeben.
-router.post('/partner/register', async (req, res) => {
+router.post('/partner/register', requireAuth, requireAdmin, async (req, res) => {
   const clientId     = getTenantSetting(req.db, 'tesla.client_id', 'TESLA_CLIENT_ID');
   const clientSecret = getTenantSetting(req.db, 'tesla.client_secret', 'TESLA_CLIENT_SECRET');
   const audience     = getTenantSetting(req.db, 'tesla.audience', 'TESLA_AUDIENCE') || 'https://fleet-api.prd.eu.vn.cloud.tesla.com';
   const authBase     = getTenantSetting(req.db, 'tesla.auth_base', 'TESLA_AUTH_BASE') || 'https://auth.tesla.com/oauth2/v3';
 
-  // FRONTEND_URL (Betriebs-Domain) ist autoritativ; Client-`domain` nur Fallback.
-  const bodyDomain = typeof req.body?.domain === 'string' ? req.body.domain.trim() : '';
-  const domain = (process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || bodyDomain || '')
-    .replace(/\/.*$/, '')        // evtl. mitgesendeten Pfad abschneiden
+  // Domain rein serverseitig: FRONTEND_URL ist autoritativ, sonst der vom
+  // Server beobachtete Host-Header. Body wird bewusst NICHT gelesen.
+  const domain = (process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || req.headers.host || '')
+    .replace(/\/.*$/, '')        // evtl. Pfad abschneiden
     .replace(/:\d+$/, '')        // Port entfernen (Tesla erwartet reinen Hostnamen)
     .toLowerCase();
 
@@ -182,7 +194,7 @@ async function configureOne(db, v, domain) {
   }
 }
 
-router.post('/telemetry/configure', async (req, res) => {
+router.post('/telemetry/configure', requireAuth, requireAdmin, async (req, res) => {
   const db       = req.db;
   const vehicles = db.prepare('SELECT * FROM vehicles').all();
   const domain   = process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || '';
@@ -193,7 +205,7 @@ router.post('/telemetry/configure', async (req, res) => {
 
 /** Single-VIN-Variante. Wird vom Settings-UI pro Fahrzeug aufgerufen,
  *  damit der Admin pro Auto ein- und ausschalten kann. */
-router.post('/telemetry/configure/:vin', async (req, res) => {
+router.post('/telemetry/configure/:vin', requireAuth, requireAdmin, async (req, res) => {
   const db = req.db;
   const v  = db.prepare('SELECT * FROM vehicles WHERE vin = ?').get(req.params.vin);
   if (!v) return res.status(404).json({ error: 'Fahrzeug nicht gefunden' });

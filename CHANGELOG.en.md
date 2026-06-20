@@ -7,6 +7,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.23.6] - 2026-06-20
+
+### Security
+
+- **Partner registration & telemetry config hardened against unauthenticated access**: `backend/src/routes/telemetryConfig.js` is mounted twice in `index.js` — publicly under `/.well-known/appspecific` (before `app.use(requireAuth)`, so Tesla can fetch the public key) and under `/api/fleet` (behind auth). As a result `POST /partner/register`, `POST /telemetry/configure[/:vin]` and `GET /telemetry/status` were reachable **without authentication** via the public mount; since `getTenantSetting` falls back to `.env` when no tenant DB is present, an unauthenticated caller could have triggered a Tesla partner registration using the operator's credentials. Fix: the write routes now require `requireAuth + requireAdmin`, the status route requires `requireAuth`; only the public-key GET stays open.
+- **Registration domain no longer client-controllable**: in v3.23.5 `POST /partner/register` accepted an optional `domain` from the request body as a fallback. That body value is no longer read — the domain is determined entirely server-side (`FRONTEND_URL`, otherwise the server-observed `Host` header). Tesla verifies the domain via the public-key path anyway, so no divergent value can be registered.
+
+---
+
 ## [v3.23.5] - 2026-06-20
 
 ### Added

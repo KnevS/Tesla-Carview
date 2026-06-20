@@ -1026,7 +1026,9 @@ async function registerPartner({ skipSave = false } = {}) {
     if (!skipSave && (credsForm.value.client_id || credsForm.value.client_secret)) {
       await saveCredentials();
     }
-    const { data } = await api.post('/fleet/partner/register', { domain: regDomain.value || undefined });
+    // Domain bestimmt der Server (FRONTEND_URL / Host) — wir senden sie
+    // bewusst nicht mit; regDomain dient nur der Anzeige/Bestätigung.
+    const { data } = await api.post('/fleet/partner/register');
     regResult.value = { ok: true, domain: data.domain || regDomain.value };
     credsCfg.value.partner_registered_domain = data.domain || regDomain.value;
   } catch (e) {
