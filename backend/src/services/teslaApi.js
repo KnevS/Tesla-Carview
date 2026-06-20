@@ -85,6 +85,13 @@ export async function exchangeCode(db, code, state) {
     audience:      getFleetApiUrl(),
   }, { timeout: 15_000 });
   saveTokens(db, res.data);
+  // Spiegelbildlich zu exchangeOwnerCode: ein erfolgreicher Fleet-Login
+  // setzt den Modus zurueck auf 'fleet' und hebt eine evtl. zuvor gesetzte
+  // Owner-API-Pause auf. Sonst bleibt ein frueher auf 'owner' gesetzter
+  // Mandant nach Fleet-Re-Login in OWNER_API_PAUSED haengen (Fleet-Telemetry
+  // schlaegt fehl, obwohl gueltige Fleet-Tokens vorliegen).
+  setTenantSetting(db, 'tesla.auth_mode', 'fleet');
+  setTenantSetting(db, 'tesla.owner_api_paused', 'false');
   return res.data;
 }
 

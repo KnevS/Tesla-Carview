@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.23.4] - 2026-06-20
+
+### Behoben
+
+- **Fleet-Login blieb im pausierten Owner-Modus hängen (`OWNER_API_PAUSED`)**: Wer sein Tesla-Konto einmal im Owner-API-Modus verbunden hatte (`tesla.auth_mode='owner'`) und die Owner-API anschließend pausierte, blieb auch nach einem korrekten Fleet-OAuth-Login in diesem Zustand gefangen — denn `exchangeCode()` setzte den Modus nie zurück. Folge: Jeder Fleet-API-Aufruf (inkl. `fleet_telemetry_config`) warf intern den Sentinel `OWNER_API_PAUSED`, obwohl gültige Fleet-Tokens vorlagen; das Telemetry-Setup pro Fahrzeug scheiterte mit „Letzter Versuch fehlgeschlagen". Fix: Ein erfolgreicher Fleet-Login in `backend/src/services/teslaApi.js` setzt nun spiegelbildlich zu `exchangeOwnerCode()` `tesla.auth_mode='fleet'` und hebt `tesla.owner_api_paused` auf.
+
+---
+
 ## [v3.23.3] - 2026-06-15
 
 ### Sicherheit
