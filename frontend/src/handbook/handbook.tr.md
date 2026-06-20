@@ -135,6 +135,7 @@ v3.6.0 itibarıyla `/battery` altı bölüm sunuyor; temel batarya sorularına d
 - Uygulama oluştur → Client ID ve Client Secret'ı not et
 - Geri çağrı (Callback) URL'si: `https://<senin-domainin>/api/auth/callback`
 - Araç komutları için: Fleet API erişimi başvurusu (ücretsiz, 1–3 iş günü)
+- **Tesla'daki tek seferlik iş ortağı kaydını sihirbaz otomatik olarak halleder** (v3.23.5'ten itibaren) — yalnızca Client ID + Secret girersiniz, artık elle `curl` çağrısı gerekmez.
 
 ## 🚀 Kurulum {#installation}
 
@@ -171,6 +172,7 @@ curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/set
 | Adım | Açıklama |
 |------|----------|
 | **Dil** | Uygulama dilini seç |
+| **Tesla kimlik bilgileri** | Client ID + Secret girin — TeslaView ardından **uygulamayı Tesla'ya otomatik kaydeder** (tek tık, `curl` yok); algılanan alan adı bir kez onaylanır |
 | **Tesla OAuth** | Tesla hesabını bağla — buton, girişten sonra otomatik kapanan bir popup açar |
 | **Araçlar** | Tesla hesabından araçları senkronize et |
 | **Sanal Anahtar** | Akıllı telefon için kayıt bağlantısını göster ve kopyala |

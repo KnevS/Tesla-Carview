@@ -37,6 +37,52 @@ Ayarlar → ⚡ Tesla bağlantısı → 📡 Fleet Telemetry içinde.
 
 ---
 
+## İş ortağı kaydı — sihirbaz üzerinden otomatik (önerilir)
+
+**v3.23.5** sürümünden itibaren uygulamayı Tesla'ya **artık elle `curl` ile
+kaydetmeniz gerekmiyor**. Kurulum sihirbazı (Yönetim merkezi → 🛠️) bunu
+kendisi yapar:
+
+1. **«Tesla Fleet API kimlik bilgileri»** adımında Client ID + Client
+   Secret değerlerini girin ([Tesla geliştirici portalı](https://developer.tesla.com)).
+2. TeslaView, altında örneğinizin **algılanan alan adını** tek seferlik
+   onay için gösterir.
+3. **«🔑 Şimdi Tesla'ya kaydet»** düğmesine tıklayın — ya da yalnızca
+   «İleri» deyin, sihirbaz otomatik olarak kaydeder.
+
+Arka planda sunucu bir `client_credentials` belirteci alır ve alan adınızla
+`POST /api/1/partner_accounts` çağrısını yapar — bu, elle yapılan bir `curl`
+çağrısının yaptığının aynısıdır. Başarı hatırlanır (`✓ <alan adı> için
+kayıtlı`); alan adı değişikliğinden sonra sihirbaz yeniden kayıt önerir.
+
+> Uç nokta: `POST /api/fleet/partner/register`. Yönetim ayarları → ⚡ Tesla
+> bağlantısı üzerinden de erişilebilir.
+
+### Güvenlik hijyeni
+
+Otomasyon, hiçbir sırrın sızmaması ve hiçbir yanlış yapılandırmanın
+oluşmaması için bilinçli olarak şu şekilde kurulmuştur:
+
+- **Client Secret sunucudan asla ayrılmaz.** `tenant_settings` içinde
+  şifreli olarak saklanır (anahtar: `data/.encryption-key`), sunucu
+  tarafında okunur ve yalnızca Tesla'nın belirteç uç noktasına gönderilir —
+  asla tarayıcıya geri döndürülmez.
+- **Alan adı serbestçe seçilemez.** Her zaman işletim alan adı
+  (`FRONTEND_URL`) kaydedilir; tarayıcıdan gönderilen bir değer yalnızca
+  `FRONTEND_URL` eksikse yedektir. Bu, yanlışlıkla hatalı bir alan adının
+  kaydedilmesini önler — Tesla, alan adını zaten
+  `https://<alan adı>/.well-known/appspecific/com.tesla.3p.public-key.pem`
+  adresindeki açık anahtarı alarak doğrular.
+- **Yalnızca yöneticiler** kaydı tetikleyebilir.
+- **Bağımsız (idempotent).** Yeniden çağırmak zararsızdır — Tesla yalnızca
+  mevcut girişi günceller.
+
+> `.env` tercih ediyorsanız kimlik bilgilerini yine de orada
+> tanımlayabilirsiniz (aşağıya bakın) — sihirbaz bunları otomatik olarak
+> alır.
+
+---
+
 ## .env yapılandırması
 
 ```env

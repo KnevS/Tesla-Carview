@@ -135,6 +135,7 @@ Deux nouvelles sections sur `/battery`, toutes deux à partir de vos données ex
 - Créer une application → noter le Client ID et le Client Secret
 - URL de callback : `https://<votre-domaine>/api/auth/callback`
 - Pour les commandes véhicule : demander l'accès à la Fleet API (gratuit, 1 à 3 jours ouvrés)
+- **L'enregistrement partenaire unique chez Tesla est pris en charge automatiquement par l'assistant** (depuis la v3.23.5) — vous saisissez seulement Client ID + Secret, plus besoin d'appel `curl` manuel.
 
 ## 🚀 Installation {#installation}
 
@@ -171,6 +172,7 @@ Après la première connexion, l'**assistant de configuration** s'ouvre automati
 | Étape | Description |
 |-------|-------------|
 | **Langue** | Choisir la langue de l'app |
+| **Identifiants Tesla** | Saisir Client ID + Secret — TeslaView **enregistre alors l'app chez Tesla automatiquement** (1 clic, sans `curl`) ; le domaine détecté est confirmé une fois |
 | **Tesla OAuth** | Connecter le compte Tesla — bouton ouvre un popup qui se ferme après la connexion |
 | **Véhicules** | Synchroniser les véhicules depuis le compte Tesla |
 | **Clé virtuelle** | Afficher et copier le lien d'enregistrement pour le smartphone |

@@ -41,7 +41,7 @@ Para los datos del vehículo en tiempo real (batería, climatización, TPMS, str
 |---|---|---|---|
 | **OwnTracks** (recomendado, inmediato) | Smartphone del conductor | Viajes, traza GPS, distancia, velocidad | Paso 5 del asistente, ~5 min |
 | **Tesla Fleet OAuth** | Nube de Tesla | Batería, climatización, TPMS, todo mediante polling | Requiere aprobación de la Fleet API |
-| **Tesla Fleet Telemetry** | Tesla → push WebSocket | Stream en vivo | Fleet API + Virtual Key + registro en Tesla |
+| **Tesla Fleet Telemetry** | Tesla → push WebSocket | Stream en vivo | Fleet API + Virtual Key + **registro de la app con 1 clic en el asistente** (v3.23.5) |
 | **Tesla Owner API** | Nube de Tesla | ❌ **bloqueada en 2026** | — |
 | **Integración con Monta** | Nube de Monta | Coste de carga doméstica para liquidación de coches de empresa | Clave API en el asistente |
 
@@ -92,6 +92,7 @@ Para los datos del vehículo en tiempo real (batería, climatización, TPMS, str
 | **Mapa de calor de actividad** | Mapa de calor tipo calendario de todos los viajes (Año/Mes/Semana/Todo), un clic lleva a la lista de viajes de ese día |
 | **Pseudónimo de inquilino** | Privacidad: la página de inicio de sesión muestra un pseudónimo aleatorio `adjetivo-sustantivo` en lugar del nombre real del inquilino, regenerable por el admin |
 | **Fleet Telemetry primero** | Streaming WebSocket como fuente de datos preferida (requiere aprobación de Tesla). Cuando está activo → el poller cae a un heartbeat de 1×/h, ahorrando >95 % del presupuesto de API. En caso contrario, polling de API como respaldo |
+| **Registro de Tesla con 1 clic** (v3.23.5) | El asistente registra tu app con Tesla por sí mismo (`partner_accounts`) — sin terminal, sin `curl`. Introduce Client ID + Secret, confirma el dominio, registra. El secreto permanece en el servidor, el dominio = `FRONTEND_URL` (no falsificable). Requisito para Fleet Telemetry |
 | **Cifrado en reposo** | AES-256-GCM para los tokens OAuth de Tesla, el secreto MFA TOTP y la clave privada de Virtual Key. Hash + comparación timing-safe para tokens de restablecimiento de contraseña. Clave autogenerada en `data/.encryption-key` |
 | **PWA con autoactualización** | El service worker detecta despliegues y recarga automáticamente — no se requiere `Ctrl+Shift+R`, incluso en la PWA de iOS |
 

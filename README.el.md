@@ -41,7 +41,7 @@
 |---|---|---|---|
 | **OwnTracks** (συνιστάται, άμεσο) | Smartphone οδηγού | Διαδρομές, GPS track, απόσταση, ταχύτητα | Wizard βήμα 5, ~5 λεπτά |
 | **Tesla Fleet OAuth** | Tesla cloud | Μπαταρία, κλιματισμός, TPMS, όλα μέσω polling | Απαιτείται έγκριση Fleet API |
-| **Tesla Fleet Telemetry** | Tesla → push WebSocket | Ζωντανή ροή | Fleet API + Virtual Key + εγγραφή Tesla |
+| **Tesla Fleet Telemetry** | Tesla → push WebSocket | Ζωντανή ροή | Fleet API + Virtual Key + **εγγραφή εφαρμογής με 1 κλικ στον οδηγό** (v3.23.5) |
 | **Tesla Owner API** | Tesla cloud | ❌ **μπλοκαρισμένο το 2026** | — |
 | **Ενσωμάτωση Monta** | Monta cloud | Κόστος οικιακής φόρτισης για χρέωση εταιρικού αυτοκινήτου | API key στο wizard |
 
@@ -92,6 +92,7 @@
 | **Heatmap δραστηριότητας** | Heatmap ημερολογίου όλων των διαδρομών (Έτος/Μήνας/Εβδομάδα/Όλα), το κλικ πλοηγεί στη λίστα διαδρομών εκείνης της ημέρας |
 | **Ψευδώνυμο tenant** | Απόρρητο: η σελίδα σύνδεσης εμφανίζει τυχαίο ψευδώνυμο `επίθετο-ουσιαστικό` αντί του πραγματικού ονόματος tenant, αναγεννώμενο από admin |
 | **Fleet Telemetry first** | WebSocket streaming ως προτιμώμενη πηγή δεδομένων (απαιτείται έγκριση Tesla). Όταν είναι ενεργό → ο poller πέφτει σε heartbeat 1×/h, εξοικονομώντας >95 % του API budget. Διαφορετικά API polling ως εφεδρεία |
+| **Εγγραφή Tesla με 1 κλικ** (v3.23.5) | Ο οδηγός εγγράφει την εφαρμογή σας στην Tesla μόνος του (`partner_accounts`) — χωρίς terminal, χωρίς `curl`. Εισαγάγετε Client ID + Secret, επιβεβαιώστε τον τομέα, εγγραφή. Το secret παραμένει στον διακομιστή, ο τομέας = `FRONTEND_URL` (μη πλαστογραφήσιμος). Προϋπόθεση για Fleet Telemetry |
 | **Κρυπτογράφηση εν ηρεμία** | AES-256-GCM για Tesla OAuth tokens, μυστικό TOTP MFA, ιδιωτικό κλειδί Virtual-Key. Hash + timing-safe σύγκριση για tokens επαναφοράς κωδικού. Αυτόματα δημιουργημένο κλειδί στο `data/.encryption-key` |
 | **Αυτόματα ενημερωνόμενη PWA** | Ο service worker ανιχνεύει deploys και κάνει αυτόματη επαναφόρτωση — δεν απαιτείται `Ctrl+Shift+R`, συμπεριλαμβανομένης της iOS PWA |
 

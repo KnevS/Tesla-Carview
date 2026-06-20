@@ -41,7 +41,7 @@ Pour les données véhicule en direct (batterie, climatisation, TPMS, flux de t�
 |---|---|---|---|
 | **OwnTracks** (recommandé, immédiat) | Smartphone du conducteur | Trajets, trace GPS, distance, vitesse | Étape 5 de l'assistant, ~5 min |
 | **Tesla Fleet OAuth** | Cloud Tesla | Batterie, climatisation, TPMS, le tout via polling | Validation Fleet API requise |
-| **Tesla Fleet Telemetry** | Tesla → push WebSocket | Flux en direct | Fleet API + Virtual Key + enregistrement Tesla |
+| **Tesla Fleet Telemetry** | Tesla → push WebSocket | Flux en direct | Fleet API + Virtual Key + **enregistrement de l'app en 1 clic dans l'assistant** (v3.23.5) |
 | **Tesla Owner API** | Cloud Tesla | ❌ **bloquée en 2026** | — |
 | **Intégration Monta** | Cloud Monta | Coût de recharge à domicile pour la facturation de véhicules de fonction | Clé API dans l'assistant |
 
@@ -92,6 +92,7 @@ Pour les données véhicule en direct (batterie, climatisation, TPMS, flux de t�
 | **Heatmap d'activité** | Heatmap calendaire de tous les trajets (Année/Mois/Semaine/Tout), un clic mène à la liste des trajets du jour |
 | **Pseudonyme de tenant** | Confidentialité : la page de connexion affiche un pseudonyme aléatoire `adjectif-nom` à la place du vrai nom de tenant, régénérable par l'admin |
 | **Fleet Telemetry first** | Streaming WebSocket comme source de données préférée (validation Tesla requise). Lorsqu'il est actif → le poller passe à un heartbeat 1×/h, économisant >95 % du budget API. Sinon polling API en repli |
+| **Enregistrement Tesla en 1 clic** (v3.23.5) | L'assistant enregistre votre app chez Tesla lui-même (`partner_accounts`) — sans terminal, sans `curl`. Saisissez Client ID + Secret, confirmez le domaine, enregistrez. Le secret reste côté serveur, le domaine = `FRONTEND_URL` (infalsifiable). Prérequis pour Fleet Telemetry |
 | **Chiffrement au repos** | AES-256-GCM pour les tokens OAuth Tesla, le secret TOTP MFA, la clé privée Virtual Key. Hash + comparaison à temps constant pour les tokens de réinitialisation de mot de passe. Clé générée automatiquement dans `data/.encryption-key` |
 | **PWA auto-actualisée** | Le service worker détecte les déploiements et recharge automatiquement — pas besoin de `Ctrl+Shift+R`, y compris pour la PWA iOS |
 

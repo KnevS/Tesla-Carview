@@ -37,6 +37,52 @@ Ajustes → ⚡ Conexión Tesla → 📡 Fleet Telemetry.
 
 ---
 
+## Registro de socio — automático mediante el asistente (recomendado)
+
+Desde la **v3.23.5** ya **no tienes que registrar la app con Tesla a mano
+usando `curl`**. El asistente de configuración (Hub de administración → 🛠️)
+lo hace por ti:
+
+1. En el paso **«Credenciales de Tesla Fleet API»**, introduce el Client ID
+   + Client Secret (desde el [portal de desarrolladores de Tesla](https://developer.tesla.com)).
+2. TeslaView muestra debajo el **dominio detectado** de tu instancia, para
+   una confirmación única.
+3. Haz clic en **«🔑 Registrar con Tesla ahora»** — o simplemente en
+   «Siguiente», y el asistente registra automáticamente.
+
+En segundo plano, el servidor obtiene un token `client_credentials` y llama
+a `POST /api/1/partner_accounts` con tu dominio — exactamente lo que haría
+una llamada `curl` manual. El éxito se recuerda (`✓ Registrado para
+<dominio>`); tras un cambio de dominio, el asistente ofrece volver a
+registrar.
+
+> Endpoint: `POST /api/fleet/partner/register`. También accesible desde
+> Ajustes de administración → ⚡ Conexión Tesla.
+
+### Higiene de seguridad
+
+La automatización está construida deliberadamente para que no se filtren
+secretos ni se cuele ninguna mala configuración:
+
+- **El Client Secret nunca sale del servidor.** Se almacena cifrado en
+  `tenant_settings` (clave: `data/.encryption-key`), se lee en el servidor
+  y se envía únicamente al endpoint de tokens de Tesla — nunca se devuelve
+  al navegador.
+- **El dominio no es de libre elección.** Siempre se registra el dominio de
+  operación (`FRONTEND_URL`); un valor enviado por el navegador solo es un
+  respaldo si falta `FRONTEND_URL`. Esto evita registrar un dominio
+  incorrecto por accidente — Tesla lo verifica de todos modos obteniendo la
+  clave pública en
+  `https://<dominio>/.well-known/appspecific/com.tesla.3p.public-key.pem`.
+- **Solo administradores** pueden activar el registro.
+- **Idempotente.** Volver a llamarlo es inofensivo — Tesla simplemente
+  actualiza la entrada existente.
+
+> Si prefieres `.env`, puedes seguir definiendo ahí las credenciales (ver
+> abajo) — el asistente las toma automáticamente.
+
+---
+
 ## Configurar el .env
 
 ```env

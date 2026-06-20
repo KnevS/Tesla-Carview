@@ -41,7 +41,7 @@ Canlı araç verileri (batarya, klima, TPMS, telemetri akışı) için **tek bir
 |---|---|---|---|
 | **OwnTracks** (önerilir, hemen kullanılabilir) | Sürücünün akıllı telefonu | Yolculuklar, GPS izi, mesafe, hız | Sihirbaz adım 5, ~5 dk |
 | **Tesla Fleet OAuth** | Tesla bulutu | Batarya, klima, TPMS — tümü polling üzerinden | Fleet API onayı gerekir |
-| **Tesla Fleet Telemetry** | Tesla → push WebSocket | Canlı akış | Fleet API + Virtual Key + Tesla kaydı |
+| **Tesla Fleet Telemetry** | Tesla → push WebSocket | Canlı akış | Fleet API + Virtual Key + **sihirbazda tek tıkla uygulama kaydı** (v3.23.5) |
 | **Tesla Owner API** | Tesla bulutu | ❌ **2026'da engellendi** | — |
 | **Monta entegrasyonu** | Monta bulutu | Şirket aracı faturalandırması için ev şarjı maliyeti | Sihirbazda API anahtarı |
 
@@ -92,6 +92,7 @@ Canlı araç verileri (batarya, klima, TPMS, telemetri akışı) için **tek bir
 | **Etkinlik ısı haritası** | Tüm yolculukların takvim ısı haritası (Yıl/Ay/Hafta/Tümü), tıklayınca o günün yolculuk listesine gider |
 | **Kiracı takma adı** | Gizlilik: oturum açma sayfası gerçek kiracı adı yerine rastgele bir `sıfat-isim` takma adı gösterir, yönetici tarafından yeniden üretilebilir |
 | **Önce Fleet Telemetry** | Tercih edilen veri kaynağı olarak WebSocket akışı (Tesla onayı gerekir). Etkin olduğunda → poller saatte 1× heartbeat'e düşer ve API bütçesinin %95'inden fazlasını korur. Aksi halde yedek olarak API polling |
+| **Tek tıkla Tesla kaydı** (v3.23.5) | Sihirbaz uygulamanızı Tesla'ya kendisi kaydeder (`partner_accounts`) — terminal yok, `curl` yok. Client ID + Secret girin, alan adını onaylayın, kaydedin. Secret sunucuda kalır, alan adı = `FRONTEND_URL` (taklit edilemez). Fleet Telemetry için ön koşul |
 | **Diskte şifreleme (at rest)** | Tesla OAuth token'ları, TOTP MFA gizli anahtarı ve Virtual Key özel anahtarı için AES-256-GCM. Parola sıfırlama token'ları için hash + zamanlama güvenli karşılaştırma. `data/.encryption-key` konumunda otomatik üretilen anahtar |
 | **Kendiliğinden güncellenen PWA** | Service worker dağıtımları algılar ve otomatik yeniden yükler — `Ctrl+Shift+R` gerekmez, iOS PWA dahil |
 
