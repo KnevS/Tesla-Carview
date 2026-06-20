@@ -931,17 +931,26 @@ router.post('/smtp-test', requireAuth, requireAdmin, async (req, res) => {
 // ── Tesla Fleet-API Credentials ──────────────────────────────────────────────
 
 router.get('/tesla-credentials', requireAuth, requireAdmin, (req, res) => {
-  const keys = ['tesla.client_id', 'tesla.client_secret', 'tesla.audience', 'tesla.auth_base'];
+  const keys = ['tesla.client_id', 'tesla.client_secret', 'tesla.audience', 'tesla.auth_base', 'tesla.partner_registered_domain'];
   const rows = req.db.prepare(
     `SELECT key, value FROM tenant_settings WHERE key IN (${keys.map(() => '?').join(',')})`
   ).all(...keys);
   const cfg = Object.fromEntries(rows.map(r => [r.key, r.value]));
+  // Betriebs-Domain: FRONTEND_URL ist autoritativ, sonst der aktuelle Host —
+  // das ist die Domain, die TeslaView bei der Partner-Registrierung verwendet
+  // und die der Wizard zur einmaligen Bestätigung anzeigt.
+  const domain = (process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || (req.headers.host || ''))
+    .replace(/\/.*$/, '')
+    .replace(/:\d+$/, '')
+    .toLowerCase();
   res.json({
     client_id:   cfg['tesla.client_id']   || (process.env.TESLA_CLIENT_ID   ? '(aus .env)' : ''),
     client_secret_set: !!(cfg['tesla.client_secret'] || process.env.TESLA_CLIENT_SECRET),
     audience:    cfg['tesla.audience']    || process.env.TESLA_AUDIENCE    || '',
     auth_base:   cfg['tesla.auth_base']   || process.env.TESLA_AUTH_BASE   || '',
     from_env: !cfg['tesla.client_id'] && !!process.env.TESLA_CLIENT_ID,
+    domain,
+    partner_registered_domain: cfg['tesla.partner_registered_domain'] || '',
   });
 });
 

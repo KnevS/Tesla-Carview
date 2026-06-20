@@ -106,6 +106,35 @@
                 <p class="text-xs text-gray-500 mt-1">{{ $t('adminSetup.credentials.audienceHint') }}</p>
               </div>
             </div>
+
+            <!-- Königsklasse: Auto-Partner-Registrierung. TeslaView meldet die
+                 App selbst bei Tesla an — der Admin bestätigt nur einmal die
+                 Domain und klickt registrieren (oder „Weiter"). -->
+            <div class="border-t border-gray-700 pt-4 space-y-2">
+              <label class="label">{{ $t('adminSetup.credentials.registerTitle') }}</label>
+              <p class="text-xs text-gray-400 whitespace-pre-line">{{ $t('adminSetup.credentials.registerHint') }}</p>
+              <div class="bg-gray-950 rounded-lg px-3 py-2 flex items-center gap-2">
+                <span class="text-xs text-gray-500 shrink-0">{{ $t('adminSetup.credentials.domainLabel') }}</span>
+                <span class="text-xs font-mono text-amber-300 break-all flex-1">{{ regDomain || '—' }}</span>
+                <span v-if="isRegistered" class="text-xs text-green-400 shrink-0">✓</span>
+              </div>
+              <button @click="registerPartner()" :disabled="registering || !canRegister"
+                      class="w-full btn-primary text-sm py-2 disabled:opacity-50">
+                {{ registering ? $t('adminSetup.credentials.registering')
+                   : isRegistered ? $t('adminSetup.credentials.reRegisterBtn')
+                   : $t('adminSetup.credentials.registerBtn') }}
+              </button>
+              <p v-if="isRegistered && !regResult" class="text-xs text-green-400">
+                ✓ {{ $t('adminSetup.credentials.alreadyRegistered', { domain: credsCfg.partner_registered_domain }) }}
+              </p>
+              <p v-else-if="!canRegister && !registering" class="text-xs text-gray-500">
+                {{ $t('adminSetup.credentials.needCreds') }}
+              </p>
+              <p v-if="regResult" class="text-sm" :class="regResult.ok ? 'text-green-400' : 'text-red-400'">
+                {{ regResult.ok ? '✓ ' + $t('adminSetup.credentials.registerOk', { domain: regResult.domain }) : '✗ ' + regResult.error }}
+              </p>
+            </div>
+
             <p v-if="credsMsg" class="text-sm" :class="credsOk ? 'text-green-400' : 'text-red-400'">{{ credsMsg }}</p>
           </template>
 
@@ -947,10 +976,33 @@ const saving    = ref(false);
 const needsRestart = ref(false);
 
 // ─── Tesla Credentials ─────────────────────────────────────────────────────
-const credsCfg  = ref({ client_id: '', client_secret_set: false, from_env: false });
+const credsCfg  = ref({ client_id: '', client_secret_set: false, from_env: false, domain: '', partner_registered_domain: '' });
 const credsForm = ref({ client_id: '', client_secret: '', audience: '' });
 const credsMsg  = ref('');
 const credsOk   = ref(false);
+
+// ─── Auto-Partner-Registrierung („Königsklasse") ───────────────────────────
+// TeslaView registriert die App selbst bei Tesla. Der Admin bestätigt nur
+// einmal die Betriebs-Domain (regDomain) — diese kommt vom Backend und ist
+// die Domain, unter der die Instanz läuft; sie ist bewusst NICHT frei
+// editierbar, weil Tesla den Public-Key genau unter dieser Domain abruft.
+const regDomain   = ref('');
+const registering = ref(false);
+const regResult   = ref(null);
+
+// Registrieren geht nur mit vorhandenen Credentials (Form ODER bereits in DB)
+// und einer gültigen Domain.
+const canRegister = computed(() =>
+  !!regDomain.value
+  && !!(credsForm.value.client_id || credsCfg.value.client_id)
+  && !!(credsForm.value.client_secret || credsCfg.value.client_secret_set)
+);
+// „Schon registriert" gilt nur, wenn die gemerkte Domain zur aktuellen passt —
+// nach einem Domain-Wechsel ist eine Re-Registrierung nötig.
+const isRegistered = computed(() =>
+  !!credsCfg.value.partner_registered_domain
+  && credsCfg.value.partner_registered_domain === (regDomain.value || credsCfg.value.domain)
+);
 
 async function loadCredsCfg() {
   try {
@@ -958,7 +1010,30 @@ async function loadCredsCfg() {
     credsCfg.value = data;
     credsForm.value.client_id = data.client_id?.startsWith('(aus .env)') ? '' : (data.client_id || '');
     credsForm.value.audience  = data.audience  || '';
+    regDomain.value = data.domain || '';
   } catch { /* ignore */ }
+}
+
+// Ein Klick = komplette Tesla-App-Registrierung. Liest Credentials aus der
+// DB → Backend holt Client-Credentials-Token und meldet die Domain bei Tesla
+// an. `skipSave` nutzt der „Weiter"-Pfad, der die Credentials schon
+// gespeichert hat.
+async function registerPartner({ skipSave = false } = {}) {
+  if (!canRegister.value || registering.value) return;
+  registering.value = true;
+  regResult.value = null;
+  try {
+    if (!skipSave && (credsForm.value.client_id || credsForm.value.client_secret)) {
+      await saveCredentials();
+    }
+    const { data } = await api.post('/fleet/partner/register', { domain: regDomain.value || undefined });
+    regResult.value = { ok: true, domain: data.domain || regDomain.value };
+    credsCfg.value.partner_registered_domain = data.domain || regDomain.value;
+  } catch (e) {
+    regResult.value = { ok: false, error: e.response?.data?.error ?? e.message };
+  } finally {
+    registering.value = false;
+  }
 }
 
 async function saveCredentials() {
@@ -1400,6 +1475,11 @@ async function saveAndNext() {
   try {
     if (currentId.value === 'credentials') {
       await saveCredentials();
+      // Königsklasse: Partner-Registrierung automatisch nachziehen, sobald
+      // Credentials vorliegen und (für diese Domain) noch nicht registriert.
+      if (canRegister.value && !isRegistered.value) {
+        await registerPartner({ skipSave: true });
+      }
     } else if (currentId.value === 'vapid' && vapidForm.value.contact) {
       await api.put('/system/vapid-config', { contact: vapidForm.value.contact }).catch(() => {});
     } else if (currentId.value === 'telegram') {

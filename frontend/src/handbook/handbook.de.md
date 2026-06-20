@@ -135,6 +135,7 @@ Zwei neue Sektionen auf `/battery`, beide aus den vorhandenen Daten:
 - App anlegen → Client ID und Client Secret notieren
 - Callback-URL: `https://<deine-domain>/api/auth/callback`
 - Für Fahrzeugbefehle: Fleet API Access beantragen (kostenlos, 1–3 Werktage)
+- **Die einmalige Partner-Registrierung bei Tesla übernimmt der Wizard automatisch** (seit v3.23.5) — du trägst nur Client ID + Secret ein, kein manueller `curl`-Aufruf mehr nötig.
 
 ## 🚀 Installation {#installation}
 
@@ -171,6 +172,7 @@ Nach dem ersten Login öffnet sich automatisch der **Einstellungs-Assistent**. E
 | Schritt | Was passiert |
 |---------|-------------|
 | **Sprache** | App-Sprache wählen |
+| **Tesla Zugangsdaten** | Client ID + Secret eintragen — TeslaView **registriert die App dann automatisch bei Tesla** (1-Klick, kein `curl`); die erkannte Domain wird einmal bestätigt |
 | **Tesla OAuth** | Tesla-Konto verbinden — Button öffnet ein Popup, das sich nach dem Login automatisch schließt |
 | **Fahrzeuge** | Fahrzeuge aus dem Tesla-Konto synchronisieren |
 | **Virtual Key** | Registrierungs-Link anzeigen und für das Smartphone kopieren |

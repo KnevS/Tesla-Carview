@@ -35,6 +35,53 @@ Settings → ⚡ Tesla-Verbindung → 📡 Fleet Telemetrie.
 
 ---
 
+## Partner-Registrierung — automatisch über den Wizard (empfohlen)
+
+Seit **v3.23.5** musst du die App **nicht mehr von Hand per `curl` bei Tesla
+registrieren**. Der Einrichtungs-Assistent (Admin-Hub → 🛠️) erledigt das
+selbst:
+
+1. Im Schritt **„Tesla Fleet-API Zugangsdaten"** Client ID + Client Secret
+   eintragen (aus dem [Tesla Developer Portal](https://developer.tesla.com)).
+2. TeslaView zeigt darunter die **erkannte Domain** deiner Instanz zur
+   einmaligen Bestätigung an.
+3. Auf **„🔑 Jetzt bei Tesla registrieren"** klicken — oder einfach „Weiter",
+   dann registriert der Wizard automatisch.
+
+Im Hintergrund holt der Server ein `client_credentials`-Token und ruft
+`POST /api/1/partner_accounts` mit deiner Domain auf — exakt das, was sonst
+ein manueller `curl`-Aufruf täte. Erfolg wird gemerkt (》✓ Registriert für
+`<domain>`《); bei einem Domain-Wechsel bietet der Wizard eine erneute
+Registrierung an.
+
+> Endpoint: `POST /api/fleet/partner/register`. Auch über
+> Admin-Einstellungen → ⚡ Tesla-Verbindung erreichbar.
+
+### Sicherheits-Hygiene
+
+Die Automatik ist bewusst so gebaut, dass dabei keine Geheimnisse leaken
+oder Fehlkonfigurationen entstehen können:
+
+- **Das Client Secret verlässt nie den Server.** Es wird verschlüsselt in
+  `tenant_settings` gespeichert (Schlüssel: `data/.encryption-key`),
+  serverseitig gelesen und ausschließlich an Teslas Token-Endpoint
+  geschickt — niemals an den Browser zurückgegeben.
+- **Die Domain ist nicht frei wählbar.** Registriert wird immer die
+  Betriebs-Domain (`FRONTEND_URL`); ein vom Browser mitgeschickter Wert
+  dient nur als Fallback, falls `FRONTEND_URL` fehlt. Das verhindert, dass
+  versehentlich eine falsche Domain registriert wird — Tesla verifiziert
+  sie ohnehin, indem es den Public-Key unter
+  `https://<domain>/.well-known/appspecific/com.tesla.3p.public-key.pem`
+  abruft.
+- **Nur Admins** können die Registrierung auslösen.
+- **Idempotent.** Ein erneuter Aufruf ist gefahrlos — Tesla aktualisiert
+  einfach den vorhandenen Eintrag.
+
+> Wer lieber per `.env` arbeitet, kann die Credentials weiterhin dort setzen
+> (siehe unten) — der Wizard übernimmt sie dann automatisch.
+
+---
+
 ## .env konfigurieren
 
 ```env

@@ -7,6 +7,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.23.5] - 2026-06-20
+
+### Added
+
+- **Tesla app registration directly in the wizard ("flagship")**: Previously the one-time partner registration with Tesla (`POST /api/1/partner_accounts`) — a prerequisite for unlocking Fleet Telemetry (live GPS) at all — had to be done by hand with `curl`. Now the setup wizard (Admin hub → 🛠️) does it for you: enter Client ID + Secret, confirm the detected domain once, one click on "🔑 Register with Tesla now" (or simply "Next") — TeslaView fetches a `client_credentials` token in the background and registers the app with Tesla. Success is remembered and a re-registration is offered after a domain change. New fields in `GET /api/system/tesla-credentials` (`domain`, `partner_registered_domain`); `POST /api/fleet/partner/register` now accepts an optional `domain` (fallback when `FRONTEND_URL` is unset) and persists success in `tenant_settings`.
+
+### Security
+
+- **Security hygiene of the auto-registration**: The client secret never leaves the server (encrypted in `tenant_settings`, read server-side, sent only to Tesla's token endpoint — never to the browser). The registered domain is not freely choosable: `FRONTEND_URL` (the operating domain) is authoritative, a value sent by the client is only a fallback. This prevents a divergent browser value from registering a wrong domain; Tesla verifies the domain anyway via the public key at `/.well-known/appspecific/com.tesla.3p.public-key.pem`. Input is validated as a hostname; the route is admin-only.
+
+---
+
 ## [v3.23.4] - 2026-06-20
 
 ### Fixed

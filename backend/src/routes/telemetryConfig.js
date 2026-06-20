@@ -4,7 +4,7 @@ import axios from 'axios';
 import { getPublicKeyPem } from '../services/virtualKey.js';
 import { apiProxyPost } from '../services/teslaApi.js';
 import { getAllTenants, getDb } from '../db/database.js';
-import { getTenantSetting } from '../services/configService.js';
+import { getTenantSetting, setTenantSetting } from '../services/configService.js';
 
 const router = Router();
 
@@ -66,15 +66,41 @@ router.get('/telemetry/status', async (req, res) => {
 });
 
 // Einmalige Partner-Registrierung bei Tesla (benötigt für fleet_telemetry_config)
+//
+// „Königsklasse": Der Admin tippt im Wizard nur Client-ID/Secret ein und
+// bestätigt einmal die Domain — diesen Endpoint ruft TeslaView dann selbst
+// auf und erledigt die komplette Partner-Registrierung (Client-Credentials-
+// Token holen + POST /partner_accounts). Kein Terminal, kein curl.
+//
+// Sicherheits-Hygiene:
+//   • Die registrierte Domain MUSS die Domain sein, unter der diese Instanz
+//     läuft — Tesla verifiziert sie, indem es den Public-Key unter
+//     https://<domain>/.well-known/appspecific/com.tesla.3p.public-key.pem
+//     abruft. Deshalb gewinnt immer FRONTEND_URL (die echte Betriebs-Domain);
+//     der vom Client mitgeschickte `domain`-Wert dient nur als Fallback,
+//     falls FRONTEND_URL nicht gesetzt ist. So kann kein abweichender Wert
+//     aus dem Browser eine falsche Domain registrieren.
+//   • Client-Secret verlässt nie den Server: es wird serverseitig aus der
+//     verschlüsselten tenant_settings gelesen und nur an Teslas Token-
+//     Endpoint geschickt — niemals an das Frontend zurückgegeben.
 router.post('/partner/register', async (req, res) => {
   const clientId     = getTenantSetting(req.db, 'tesla.client_id', 'TESLA_CLIENT_ID');
   const clientSecret = getTenantSetting(req.db, 'tesla.client_secret', 'TESLA_CLIENT_SECRET');
   const audience     = getTenantSetting(req.db, 'tesla.audience', 'TESLA_AUDIENCE') || 'https://fleet-api.prd.eu.vn.cloud.tesla.com';
   const authBase     = getTenantSetting(req.db, 'tesla.auth_base', 'TESLA_AUTH_BASE') || 'https://auth.tesla.com/oauth2/v3';
-  const domain       = process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || '';
+
+  // FRONTEND_URL (Betriebs-Domain) ist autoritativ; Client-`domain` nur Fallback.
+  const bodyDomain = typeof req.body?.domain === 'string' ? req.body.domain.trim() : '';
+  const domain = (process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || bodyDomain || '')
+    .replace(/\/.*$/, '')        // evtl. mitgesendeten Pfad abschneiden
+    .replace(/:\d+$/, '')        // Port entfernen (Tesla erwartet reinen Hostnamen)
+    .toLowerCase();
 
   if (!clientId || !clientSecret) {
     return res.status(500).json({ error: 'TESLA_CLIENT_ID / TESLA_CLIENT_SECRET nicht konfiguriert' });
+  }
+  if (!/^[a-z0-9.-]+\.[a-z]{2,}$/.test(domain)) {
+    return res.status(400).json({ error: `Ungültige Domain für die Registrierung: "${domain || '(leer)'}". Setze FRONTEND_URL oder gib eine gültige Domain an.` });
   }
 
   try {
@@ -96,7 +122,12 @@ router.post('/partner/register', async (req, res) => {
       headers: { Authorization: `Bearer ${partnerToken}`, 'Content-Type': 'application/json' },
     });
 
-    res.json({ ok: true, response: regRes.data });
+    // Erfolg merken: das Wizard-/Settings-UI zeigt damit „✓ registriert für
+    // <domain>" und kann eine Re-Registrierung bei Domain-Wechsel anbieten.
+    setTenantSetting(req.db, 'tesla.partner_registered_domain', domain);
+    setTenantSetting(req.db, 'tesla.partner_registered_at', String(Math.floor(Date.now() / 1000)));
+
+    res.json({ ok: true, domain, response: regRes.data });
   } catch (err) {
     const status  = err.response?.status;
     const errData = err.response?.data;

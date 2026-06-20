@@ -2453,7 +2453,16 @@
       "secretSetPlaceholder": "(gesetzt — leer lassen zum Beibehalten)",
       "secretPlaceholder": "Secret eingeben",
       "audience": "Fleet API Audience",
-      "audienceHint": "EU: ...eu... | NA: ...na..."
+      "audienceHint": "EU: ...eu... | NA: ...na...",
+      "registerTitle": "App bei Tesla registrieren",
+      "registerHint": "TeslaView meldet deine App automatisch bei Tesla an — kein Terminal, kein curl. Bestätige nur die Domain und klicke registrieren. Nötig, damit Fleet Telemetry (Live-GPS) funktioniert.",
+      "domainLabel": "Domain:",
+      "registerBtn": "🔑 Jetzt bei Tesla registrieren",
+      "reRegisterBtn": "🔄 Erneut registrieren",
+      "registering": "Registriere bei Tesla …",
+      "registerOk": "App registriert für {domain} – jetzt pro Fahrzeug aktivieren",
+      "alreadyRegistered": "Registriert für {domain}",
+      "needCreds": "Erst Client ID + Secret eingeben, dann registrieren."
     },
     "oauth": {
       "title": "Tesla OAuth-Verbindung",

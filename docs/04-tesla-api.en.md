@@ -35,6 +35,49 @@ Settings → ⚡ Tesla connection → 📡 Fleet Telemetry.
 
 ---
 
+## Partner registration — automatic via the wizard (recommended)
+
+Since **v3.23.5** you **no longer have to register the app with Tesla by
+hand using `curl`**. The setup wizard (Admin hub → 🛠️) does it for you:
+
+1. In the **"Tesla Fleet API credentials"** step, enter Client ID + Client
+   Secret (from the [Tesla Developer Portal](https://developer.tesla.com)).
+2. TeslaView shows the **detected domain** of your instance below, for a
+   one-time confirmation.
+3. Click **"🔑 Register with Tesla now"** — or simply "Next", and the wizard
+   registers automatically.
+
+Behind the scenes the server fetches a `client_credentials` token and calls
+`POST /api/1/partner_accounts` with your domain — exactly what a manual
+`curl` call would do. Success is remembered (`✓ Registered for <domain>`);
+after a domain change the wizard offers to re-register.
+
+> Endpoint: `POST /api/fleet/partner/register`. Also reachable from
+> Admin settings → ⚡ Tesla connection.
+
+### Security hygiene
+
+The automation is deliberately built so that no secrets leak and no
+misconfiguration can creep in:
+
+- **The client secret never leaves the server.** It is stored encrypted in
+  `tenant_settings` (key: `data/.encryption-key`), read server-side and sent
+  only to Tesla's token endpoint — never returned to the browser.
+- **The domain is not freely choosable.** The operating domain
+  (`FRONTEND_URL`) is always registered; a value sent from the browser is
+  only a fallback for when `FRONTEND_URL` is unset. This prevents
+  registering a wrong domain by accident — Tesla verifies it anyway by
+  fetching the public key at
+  `https://<domain>/.well-known/appspecific/com.tesla.3p.public-key.pem`.
+- **Admins only** can trigger the registration.
+- **Idempotent.** Calling it again is harmless — Tesla simply updates the
+  existing entry.
+
+> If you prefer `.env`, you can still set the credentials there (see below) —
+> the wizard picks them up automatically.
+
+---
+
 ## Configure .env
 
 ```env

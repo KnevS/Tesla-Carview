@@ -41,7 +41,7 @@ Für Live-Vehicle-Daten (Akku, Klima, TPMS, Telemetry-Stream) gibt es **nur eine
 |---|---|---|---|
 | **OwnTracks** (empfohlen, sofort) | Smartphone der Fahrer | Fahrten, GPS-Track, Distanz, Geschwindigkeit | Wizard-Schritt 5, ~5 Min |
 | **Tesla Fleet OAuth** | Tesla Cloud | Akku, Klima, TPMS, alles via Polling | Fleet-API-Approval nötig |
-| **Tesla Fleet Telemetry** | Tesla → Push-WebSocket | Live-Stream | Fleet-API + Virtual Key + Eintrag bei Tesla |
+| **Tesla Fleet Telemetry** | Tesla → Push-WebSocket | Live-Stream | Fleet-API + Virtual Key + **1-Klick-App-Registrierung im Wizard** (v3.23.5) |
 | **Tesla Owner API** | Tesla Cloud | ❌ **2026 blockiert** | — |
 | **Monta-Integration** | Monta Cloud | Heimlade-Kosten für Dienstwagen-Abrechnung | API-Key in Wizard |
 
@@ -92,6 +92,7 @@ Für Live-Vehicle-Daten (Akku, Klima, TPMS, Telemetry-Stream) gibt es **nur eine
 | **Aktivitäts-Heatmap** | Kalender-Heatmap aller Fahrten (Jahr/Monat/Woche/Alle) im Fahrtenbuch, Klick führt zur Fahrtenliste des Tages |
 | **Mandanten-Pseudonym** | Datenschutz: Login-Seite zeigt zufälligen `adjective-noun`-Pseudonym statt Klarnamen, vom Admin neu generierbar |
 | **Fleet Telemetry primär** | WebSocket-Streaming als bevorzugte Datenquelle (Tesla-Approval-pflichtig). Wenn aktiv → Poller schaltet auf 1×/h-Heartbeat, spart >95 % API-Budget. Sonst API-Polling als Fallback |
+| **1-Klick-Tesla-Registrierung** (v3.23.5) | Der Wizard meldet deine App selbst bei Tesla an (`partner_accounts`) — kein Terminal, kein `curl`. Client ID + Secret eintragen, Domain bestätigen, registrieren. Secret bleibt serverseitig, Domain = `FRONTEND_URL` (nicht fälschbar). Voraussetzung für Fleet Telemetry |
 | **Encryption at rest** | AES-256-GCM für Tesla-OAuth-Tokens, TOTP MFA-Secret, Virtual-Key Private-Key. Hash + timing-safe Compare für Password-Reset-Tokens. Auto-generierter Key in `data/.encryption-key` |
 | **Auto-Update PWA** | Service-Worker erkennt Deploys und reloaded automatisch — kein `Strg+Shift+R` mehr nötig, auch iOS-PWA |
 

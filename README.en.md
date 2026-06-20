@@ -41,7 +41,7 @@ For live vehicle data (battery, climate, TPMS, telemetry stream) there is **only
 |---|---|---|---|
 | **OwnTracks** (recommended, immediate) | Driver's smartphone | Trips, GPS track, distance, speed | Wizard step 5, ~5 min |
 | **Tesla Fleet OAuth** | Tesla cloud | Battery, climate, TPMS, all via polling | Fleet API approval required |
-| **Tesla Fleet Telemetry** | Tesla → push WebSocket | Live stream | Fleet API + Virtual Key + Tesla registration |
+| **Tesla Fleet Telemetry** | Tesla → push WebSocket | Live stream | Fleet API + Virtual Key + **1-click app registration in the wizard** (v3.23.5) |
 | **Tesla Owner API** | Tesla cloud | ❌ **blocked in 2026** | — |
 | **Monta integration** | Monta cloud | Home-charging cost for company-car billing | API key in wizard |
 
@@ -92,6 +92,7 @@ For live vehicle data (battery, climate, TPMS, telemetry stream) there is **only
 | **Activity heatmap** | Calendar heatmap of all trips (Year/Month/Week/All), click navigates to that day's trip list |
 | **Tenant pseudonym** | Privacy: login page shows a random `adjective-noun` pseudonym instead of the real tenant name, regeneratable by admin |
 | **Fleet Telemetry first** | WebSocket streaming as the preferred data source (Tesla approval required). When active → poller falls back to 1×/h heartbeat, saving >95 % of API budget. Otherwise API polling as fallback |
+| **1-click Tesla registration** (v3.23.5) | The wizard registers your app with Tesla itself (`partner_accounts`) — no terminal, no `curl`. Enter Client ID + Secret, confirm the domain, register. The secret stays server-side, the domain is `FRONTEND_URL` (cannot be spoofed). Prerequisite for Fleet Telemetry |
 | **Encryption at rest** | AES-256-GCM for Tesla OAuth tokens, TOTP MFA secret, Virtual-Key private key. Hash + timing-safe compare for password-reset tokens. Auto-generated key at `data/.encryption-key` |
 | **Auto-updating PWA** | Service worker detects deploys and auto-reloads — no `Ctrl+Shift+R` required, including iOS PWA |
 
