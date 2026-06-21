@@ -378,7 +378,11 @@
     "detailCurveTitle": "Puissance et état de charge au fil du temps",
     "detailNoPoints": "Aucune progression n'a été enregistrée pour cette session.",
     "detailPowerAxis": "Puissance (kW)",
-    "detailSocAxis": "État de charge (%)"
+    "detailSocAxis": "État de charge (%)",
+    "costByLocation": "Coût par lieu",
+    "costByLocSessions": "{n} recharges",
+    "costByLocCostTooltip": "Coût total à ce lieu. Les recharges marquées gratuites comptent pour 0 €.",
+    "costByLocAvgTooltip": "Prix moyen : coût total divisé par les kWh rechargés à ce lieu."
   },
   "battery": {
     "title": "Batterie & Dégradation",

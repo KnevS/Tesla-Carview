@@ -378,7 +378,11 @@
     "detailCurveTitle": "Zaman içinde güç ve şarj durumu",
     "detailNoPoints": "Bu oturum için seyir kaydedilmedi.",
     "detailPowerAxis": "Güç (kW)",
-    "detailSocAxis": "Şarj durumu (%)"
+    "detailSocAxis": "Şarj durumu (%)",
+    "costByLocation": "Konuma göre maliyet",
+    "costByLocSessions": "{n} şarj",
+    "costByLocCostTooltip": "Bu konumdaki toplam maliyet. Ücretsiz işaretlenen şarjlar 0 € sayılır.",
+    "costByLocAvgTooltip": "Ortalama fiyat: toplam maliyet bölü bu konumda şarj edilen kWh."
   },
   "battery": {
     "title": "Batarya & Bozulma",

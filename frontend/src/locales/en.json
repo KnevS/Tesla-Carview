@@ -378,7 +378,11 @@
     "detailCurveTitle": "Power & state of charge over time",
     "detailNoPoints": "No timeline was recorded for this session.",
     "detailPowerAxis": "Power (kW)",
-    "detailSocAxis": "State of charge (%)"
+    "detailSocAxis": "State of charge (%)",
+    "costByLocation": "Cost by location",
+    "costByLocSessions": "{n} charges",
+    "costByLocCostTooltip": "Total cost at this location. Charges marked as free count as €0.",
+    "costByLocAvgTooltip": "Average price: total cost divided by kWh charged at this location."
   },
   "battery": {
     "title": "Battery & Degradation",

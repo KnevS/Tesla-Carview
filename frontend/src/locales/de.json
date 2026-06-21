@@ -378,7 +378,11 @@
     "detailCurveTitle": "Leistung & Ladestand über Zeit",
     "detailNoPoints": "Für diese Session wurde kein Verlauf aufgezeichnet.",
     "detailPowerAxis": "Leistung (kW)",
-    "detailSocAxis": "Ladestand (%)"
+    "detailSocAxis": "Ladestand (%)",
+    "costByLocation": "Kosten nach Ort",
+    "costByLocSessions": "{n} Ladungen",
+    "costByLocCostTooltip": "Summe der Kosten an diesem Ort. Als kostenlos markierte Ladungen zählen mit 0 €.",
+    "costByLocAvgTooltip": "Durchschnittspreis: Gesamtkosten geteilt durch geladene kWh an diesem Ort."
   },
   "battery": {
     "title": "Batterie & Degradation",

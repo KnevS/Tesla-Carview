@@ -37,6 +37,34 @@
       </div>
     </SortableSection>
 
+    <SortableSection v-if="sid === 'costbyloc' && costByLocation.length" page-id="charging" section-id="costbyloc"
+      :title="$t('charging.costByLocation')" icon="📍"
+      :collapsed="isCollapsed('costbyloc')" @toggle="toggle('costbyloc')" @move="(f,t,p) => moveSection(f,t,p)">
+      <div class="space-y-2">
+        <div v-for="loc in costByLocation" :key="loc.location_name || '∅'"
+          class="bg-gray-700/50 rounded-xl p-3 flex items-center justify-between gap-3">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-semibold truncate">{{ loc.location_name || $t('charging.unknownLocation') }}</span>
+              <span v-if="loc.any_home"
+                class="text-xs bg-green-900/40 text-green-300 px-2 py-0.5 rounded-full"
+                v-tooltip="$t('charging.homeBadgeTooltip')">{{ $t('charging.locationTypeHome') }}</span>
+              <span v-else class="text-xs bg-gray-700 text-gray-400 px-2 py-0.5 rounded-full">{{ $t('charging.locationTypeAway') }}</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-0.5">
+              {{ $t('charging.costByLocSessions', { n: loc.sessions }) }} · {{ fmt(loc.energy_kwh, 1) }} kWh
+            </p>
+          </div>
+          <div class="text-right shrink-0">
+            <p class="font-bold" v-tooltip="$t('charging.costByLocCostTooltip')">{{ fmt(loc.cost, 2) }} €</p>
+            <p class="text-xs text-gray-400" v-tooltip="$t('charging.costByLocAvgTooltip')">
+              ⌀ {{ loc.energy_kwh > 0 ? fmt(loc.cost / loc.energy_kwh, 3) : '–' }} €/kWh
+            </p>
+          </div>
+        </div>
+      </div>
+    </SortableSection>
+
     <SortableSection v-if="sid === 'heatmap'" page-id="charging" section-id="heatmap"
       :title="$t('charging.heatmapTitle')" icon="📅"
       :collapsed="isCollapsed('heatmap')" @toggle="toggle('heatmap')" @move="(f,t,p) => moveSection(f,t,p)">
@@ -208,11 +236,12 @@ import api from '../api.js';
 const { t, locale } = useI18n();
 const appStore = useAppStore();
 
-const CHARGING_SECTIONS = ['stats', 'bytype', 'heatmap', 'sessions'];
+const CHARGING_SECTIONS = ['stats', 'bytype', 'costbyloc', 'heatmap', 'sessions'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('charging', CHARGING_SECTIONS);
 
 const sessions = ref([]);
 const stats = ref({ byType: [] });
+const costByLocation = ref([]);
 const loading = ref(true);
 // Sortierreihenfolge pro View in localStorage. Default desc (Neueste oben).
 const { direction: sortDir } = useSortDirection('charging');
@@ -263,12 +292,14 @@ async function load() {
   const baseParams = vid ? { vehicle_id: vid } : {};
   // Sortier-Param nur an /charging — /charging/stats nutzt aggregierte
   // Daten unabhaengig von Reihenfolge.
-  const [s, st] = await Promise.all([
+  const [s, st, cbl] = await Promise.all([
     api.get('/charging', { params: { ...baseParams, sort: sortDir.value } }),
     api.get('/charging/stats', { params: baseParams }),
+    api.get('/charging/cost-by-location', { params: baseParams }),
   ]);
   sessions.value = s.data;
   stats.value = st.data;
+  costByLocation.value = cbl.data.rows || [];
   loading.value = false;
 }
 

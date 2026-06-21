@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.25.0] - 2026-06-21
+
+### Neu
+
+- **Kostenaufschlüsselung nach Ladeort (Roadmap-Drop 01)**: Neue Sektion „Kosten nach Ort" in der Laden-Ansicht zeigt je Ladeort die Anzahl Ladungen, geladene kWh, Gesamtkosten und den durchschnittlichen €/kWh-Preis — mit Heim-/Auswärts-Kennzeichnung. Als kostenlos markierte Ladungen zählen mit 0 €. Backend: neue aggregierende Route `GET /api/charging/cost-by-location` (reine SQL-Aggregation, nach Tenant/Fahrzeug gescoped, vor `/:id` gemountet). Lokalisiert in allen sieben Sprachen.
+
+---
+
 ## [v3.24.0] - 2026-06-21
 
 ### Neu

@@ -378,7 +378,11 @@
     "detailCurveTitle": "Potencia y estado de carga a lo largo del tiempo",
     "detailNoPoints": "No se registró ningún progreso para esta sesión.",
     "detailPowerAxis": "Potencia (kW)",
-    "detailSocAxis": "Estado de carga (%)"
+    "detailSocAxis": "Estado de carga (%)",
+    "costByLocation": "Coste por lugar",
+    "costByLocSessions": "{n} cargas",
+    "costByLocCostTooltip": "Coste total en este lugar. Las cargas marcadas como gratuitas cuentan como 0 €.",
+    "costByLocAvgTooltip": "Precio medio: coste total dividido por los kWh cargados en este lugar."
   },
   "battery": {
     "title": "Batería y Degradación",

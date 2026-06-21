@@ -101,6 +101,46 @@ router.get('/stats', (req, res) => {
   }
 });
 
+/** GET /api/charging/cost-by-location
+ *
+ *  Aggregiert die Ladungen je Ort (location_name). Liefert pro Ort:
+ *   - sessions:      Anzahl Ladungen
+ *   - energy_kwh:    Summe nachgeladene Energie
+ *   - cost:          Summe Kosten (kostenlose Ladungen zaehlen 0)
+ *   - free_sessions: davon als kostenlos markiert
+ *   - any_home:      1, wenn am Ort mind. einmal an der Heim-Wallbox geladen
+ *
+ *  €/kWh berechnet das Frontend (Division, robust gegen 0-Energie).
+ *  Aggregation komplett in SQL — keine JS-Schleife. */
+router.get('/cost-by-location', (req, res) => {
+  const { vehicle_id } = req.query;
+  try {
+    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
+    const conds  = [];
+    const params = [];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+    const where = conds.length || restrict.fragment
+      ? 'WHERE ' + (conds.length ? conds.join(' AND ') : '1=1') + restrict.fragment
+      : '';
+    params.push(...restrict.params);
+    const rows = req.db.prepare(
+      `SELECT location_name,
+              COUNT(*)                                              AS sessions,
+              COALESCE(SUM(energy_added_kwh), 0)                    AS energy_kwh,
+              COALESCE(SUM(CASE WHEN is_free = 1 THEN 0 ELSE cost END), 0) AS cost,
+              SUM(CASE WHEN is_free = 1 THEN 1 ELSE 0 END)          AS free_sessions,
+              MAX(COALESCE(is_home_charged, 0))                     AS any_home
+       FROM charging_sessions
+       ${where}
+       GROUP BY location_name
+       ORDER BY cost DESC, energy_kwh DESC`
+    ).all(...params);
+    res.json({ rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/:id', (req, res) => {
   if (guardAccess(res, () => assertChargingAccess(req.db, req.params.id, req.user))) return;
   try {

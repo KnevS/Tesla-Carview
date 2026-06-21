@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.25.0] - 2026-06-21
+
+### Added
+
+- **Cost breakdown by charging location (roadmap drop 01)**: a new "Cost by location" section in the charging view shows, per location, the number of charges, kWh added, total cost and the average €/kWh price — with a home/away marker. Charges marked as free count as €0. Backend: new aggregating route `GET /api/charging/cost-by-location` (pure SQL aggregation, scoped per tenant/vehicle, mounted before `/:id`). Localised in all seven languages.
+
+---
+
 ## [v3.24.0] - 2026-06-21
 
 ### Added
