@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.30.0] - 2026-06-21
+
+### Neu
+
+- **Proaktive Wochen-Insights (Roadmap-Drop 04)**: Neue Dashboard-Karte „Deine Woche" — der Assistent meldet sich von selbst mit kurzen Klartext-Hinweisen aus den letzten 7 Tagen: Fahrleistung, Verbrauch vs. deinem 90-Tage-Schnitt (inkl. datengetriebener Begründung „… vermutlich wegen Kälte" anhand der Wochentemperatur), Ladekosten und offene Auffälligkeiten. Neuer Service `backend/src/services/insightEngine.js` + Route `GET /api/insights/weekly` (user-gescoped über `vehicle_users`). **Reine Statistik, keine KI** — eine optionale LLM-Veredelung (lokal via Ollama) lässt sich später andocken, sobald ein KI-Provider aktiv ist; die Karte funktioniert ohne jeden Provider. Lokalisiert in allen sieben Sprachen.
+
+---
+
 ## [v3.29.0] - 2026-06-21
 
 ### Neu

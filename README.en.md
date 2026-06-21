@@ -84,6 +84,7 @@ For live vehicle data (battery, climate, TPMS, telemetry stream) there is **only
 | **Mobile / Tesla** | Installable PWA for iPhone/iPad (Safari), Android, the Tesla in-car browser and desktop. iOS-style bottom tab bar (4 quick tabs + "More" bottom sheet). Compact card view in the logbook on narrow screens. |
 | **CO₂ balance** | Dedicated page comparing CO₂ saved vs. an equivalent ICE vehicle (6.5 l/100 km), equivalents in trees/year and round-trip flights Frankfurt–Mallorca, transparent methodology. Also weekly in the Energy Report. |
 | **Weekly trip summary** | Every Monday at 07:00 automatic: weekly km, energy, charging cost, trend vs. previous week — via push, Telegram and email |
+| **Proactive weekly insights** (v3.30) | Dashboard card "Your week" with plain-text hints: mileage, consumption vs. 90-day average (incl. a cold-weather reason), charging cost, open anomalies. Pure statistics; optional local LLM polish (Ollama) can be added |
 | **Weather consumption** | Consumption correlation by temperature bucket (< −10 °C to > 30 °C) in the Energy Report — shows how cold and heat affect range |
 | **Climate statistics** | Daily AC usage (hours), seat heating, preconditioning count, coldest/hottest day |
 | **Firmware tracker** | Automatically records every new vehicle software version with history and days installed |

@@ -84,6 +84,7 @@ Für Live-Vehicle-Daten (Akku, Klima, TPMS, Telemetry-Stream) gibt es **nur eine
 | **Mobile / Tesla** | Installierbare PWA für iPhone/iPad (Safari), Android, Tesla-Fahrzeug-Browser und Desktop. iOS-style Tab Bar am unteren Bildschirmrand (4 Schnell-Tabs + „Mehr"-Bottom-Sheet). Kompakte Karten-Ansicht im Fahrtenbuch für schmale Bildschirme. |
 | **CO₂-Bilanz** | Eigene Seite mit eingespartem CO₂ vs. fiktiver Verbrenner (6,5 l/100 km), Vergleichswerte (Bäume/Jahr, Flüge FRA-PMI) und transparenter Methodik. Auch wöchentlich im Energiebericht. |
 | **Wöchentlicher Fahr-Report** | Jeden Montag 07:00 Uhr automatisch: km der Woche, Verbrauch, Ladekosten, Trend gegenüber Vorwoche — per Push, Telegram und E-Mail |
+| **Proaktive Wochen-Insights** (v3.30) | Dashboard-Karte „Deine Woche" mit Klartext-Hinweisen: Fahrleistung, Verbrauch vs. 90-Tage-Schnitt (inkl. Kälte-Begründung), Ladekosten, offene Auffälligkeiten. Reine Statistik; optionale lokale LLM-Veredelung (Ollama) nachrüstbar |
 | **Wetter-Verbrauch** | Verbrauchskorrelation nach Temperatur-Bucket (< −10 °C bis > 30 °C) im Energiebericht — sieht wie Kälte/Hitze den Verbrauch beeinflusst |
 | **Klimastatistiken** | Tägliche Klimaanlage-Nutzung (Stunden), Sitzheizung, Vorklimatisierungen, kältester/wärmster Tag |
 | **Firmware-Tracker** | Automatisches Aufzeichnen jeder neuen Fahrzeug-Softwareversion mit Verlauf und Installationsdauer |

@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.30.0] - 2026-06-21
+
+### Added
+
+- **Proactive weekly insights (roadmap drop 04)**: new dashboard card "Your week" — the assistant speaks up on its own with short plain-text hints from the last 7 days: mileage, consumption vs. your 90-day average (incl. a data-driven "… likely due to cold" reason based on the week's temperature), charging cost and open anomalies. New service `backend/src/services/insightEngine.js` + route `GET /api/insights/weekly` (user-scoped via `vehicle_users`). **Pure statistics, no AI** — an optional LLM polish (locally via Ollama) can be added later once an AI provider is active; the card works without any provider. Localised in all seven languages.
+
+---
+
 ## [v3.29.0] - 2026-06-21
 
 ### Added

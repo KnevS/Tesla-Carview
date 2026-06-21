@@ -31,6 +31,20 @@
           </div>
         </SortableSection>
 
+        <!-- weekly_insight -->
+        <SortableSection v-if="sid === 'weekly_insight' && show.weekly_insight && weeklyInsight && weeklyInsight.insights?.length"
+          page-id="dashboard" section-id="weekly_insight"
+          :title="$t('dashboard.weeklyInsight')" icon="📋"
+          :collapsed="isCollapsed('weekly_insight')" @toggle="toggle('weekly_insight')" @move="(f,t,p) => moveSection(f,t,p)">
+          <div class="space-y-2">
+            <div v-for="ins in weeklyInsight.insights" :key="ins.key"
+              class="flex items-start gap-2 text-sm rounded-lg px-3 py-2" :class="insightClass(ins.severity)">
+              <span class="mt-0.5">{{ insightIcon(ins.severity) }}</span>
+              <span>{{ insightText(ins) }}</span>
+            </div>
+          </div>
+        </SortableSection>
+
         <!-- service -->
         <SortableSection v-if="sid === 'service' && show.service && dueServices.length" page-id="dashboard" section-id="service"
           :title="$t('dashboard.serviceTitle')" icon="🔧"
@@ -117,11 +131,12 @@ const appStore = useAppStore();
 const prefs    = usePrefsStore();
 const { fmtDistance, fmtEfficiency } = useUnits();
 
-const DASH_SECTIONS = ['stats', 'service', 'last_trip', 'monthly_chart', 'tariff', 'tesla_usage'];
+const DASH_SECTIONS = ['stats', 'weekly_insight', 'service', 'last_trip', 'monthly_chart', 'tariff', 'tesla_usage'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('dashboard', DASH_SECTIONS);
 
 const show = computed(() => ({
   stats:         prefs.isDashboardCardVisible('stats'),
+  weekly_insight: prefs.isDashboardCardVisible('weekly_insight'),
   service:       prefs.isDashboardCardVisible('service'),
   last_trip:     prefs.isDashboardCardVisible('last_trip'),
   monthly_chart: prefs.isDashboardCardVisible('monthly_chart'),
@@ -146,6 +161,20 @@ const chartData = ref(null);
 // braucht — pending zeigen wir bewusst nicht im Dashboard, weil das
 // erste Anlegen den User nicht ueberfordern soll.
 const dueServices = ref([]);
+// Proaktive Wochen-Insights (Drop 04) — regelbasiert, user-gescoped.
+const weeklyInsight = ref(null);
+const INSIGHT_SEV = {
+  good: { cls: 'bg-green-900/30 text-green-200',  icon: '✓'  },
+  info: { cls: 'bg-gray-800 text-gray-300',       icon: '•'  },
+  warn: { cls: 'bg-yellow-900/30 text-yellow-200', icon: '⚠️' },
+};
+const insightClass = (s) => (INSIGHT_SEV[s] || INSIGHT_SEV.info).cls;
+const insightIcon  = (s) => (INSIGHT_SEV[s] || INSIGHT_SEV.info).icon;
+function insightText(ins) {
+  let key = 'dashboard.insight_' + ins.key;
+  if (ins.key === 'consumptionHigh' && ins.params?.colder) key = 'dashboard.insight_consumptionHighCold';
+  return t(key, ins.params || {});
+}
 
 const chartOptions = {
   responsive: true, maintainAspectRatio: false,
@@ -175,6 +204,10 @@ async function load() {
   api.get('/service-intervals', { params }).then(r => {
     dueServices.value = r.data.filter(s => ['overdue', 'soon'].includes(s.status));
   }).catch(() => { dueServices.value = []; });
+
+  // Wochen-Insights (user-gescoped, kein vehicle_id nötig) — nicht blockierend.
+  api.get('/insights/weekly').then(r => { weeklyInsight.value = r.data; })
+    .catch(() => { weeklyInsight.value = null; });
 
   const allTrips = (await api.get('/trips', { params: { ...params, limit: 500 } })).data;
   const monthly = {};
