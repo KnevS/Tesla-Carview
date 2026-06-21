@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.32.1] - 2026-06-21
+
+### Changed
+
+- **i18n catch-up for `TariffWidget` and `ServiceIntervalsCard`**: both components were hard-coded German and are now fully localised (electricity-price widget + service intervals incl. status labels, due/forecast texts, modal, buttons, alerts) — in all seven languages. Date, number and price formatting now follows the active language. Pure improvement, no behaviour change.
+
+---
+
 ## [v3.32.0] - 2026-06-21
 
 ### Added

@@ -4,25 +4,24 @@
     <div class="flex items-center justify-between flex-wrap gap-2">
       <h2 class="font-semibold flex items-center gap-2">
         <AppIcon name="wallet" :size="20" class="text-tesla-red" />
-        Strompreis ({{ providerLabel }})
+        {{ $t('tariffWidget.title', { provider: providerLabel }) }}
       </h2>
       <span v-if="current" class="text-2xl font-bold"
             :class="priceColor(current.ct_per_kwh)">
-        {{ current.ct_per_kwh.toFixed(1).replace('.', ',') }} ct/kWh
+        {{ fmtCt(current.ct_per_kwh) }} ct/kWh
       </span>
     </div>
 
     <p v-if="best4h" class="text-sm text-gray-300">
-      Günstigstes 4h-Fenster:
+      {{ $t('tariffWidget.cheapest4h') }}
       <span class="font-mono">{{ fmtTime(best4h.start) }}–{{ fmtTime(best4h.end) }}</span>
       <span class="text-gray-400">
-        · Ø {{ best4h.avg_ct_per_kwh.toFixed(1).replace('.', ',') }} ct/kWh
+        · Ø {{ fmtCt(best4h.avg_ct_per_kwh) }} ct/kWh
       </span>
       <span v-if="appliedHint" class="ml-2 text-green-400 text-xs">{{ appliedHint }}</span>
     </p>
 
-    <!-- Sparkline der naechsten 24h. Position des Slider-Cursors zeigt
-         die aktuelle Stunde, Hoehe der Balken den Preis. -->
+    <!-- Sparkline der naechsten 24h. Hoehe der Balken den Preis. -->
     <div v-if="upcoming.length" class="flex items-end gap-0.5 h-16">
       <div v-for="p in upcoming" :key="p.start"
            class="flex-1 rounded-t transition-all"
@@ -30,7 +29,7 @@
              height: barHeight(p.ct_per_kwh) + '%',
              background: barColor(p),
            }"
-           v-tooltip="`${fmtHour(p.start)}: ${p.ct_per_kwh.toFixed(1).replace('.', ',')} ct/kWh`">
+           v-tooltip="`${fmtHour(p.start)}: ${fmtCt(p.ct_per_kwh)} ct/kWh`">
       </div>
     </div>
 
@@ -39,9 +38,9 @@
     <div class="flex gap-2 flex-wrap">
       <button v-if="best4h && allowApply" @click="applyOffPeak"
               class="text-xs btn-secondary py-1 px-3 inline-flex items-center gap-1.5"
-              v-tooltip="'Setzt set_scheduled_charging im Auto auf den Beginn des günstigsten 4h-Fensters. Auto wartet bis zur Uhrzeit und lädt dann.'">
+              v-tooltip="$t('tariffWidget.applyTooltip')">
         <AppIcon name="steering" :size="14" />
-        Lade-Plan auf günstigstes Fenster
+        {{ $t('tariffWidget.applyBtn') }}
       </button>
     </div>
   </div>
@@ -49,6 +48,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
 import AppIcon from './AppIcon.vue';
@@ -59,6 +59,7 @@ defineProps({
   allowApply: { type: Boolean, default: true },
 });
 
+const { t, locale } = useI18n();
 const appStore = useAppStore();
 const configured = ref(false);
 const provider   = ref('');
@@ -68,8 +69,13 @@ const best4h     = ref(null);
 const error      = ref('');
 const appliedHint = ref('');
 
+// aWattar/Tibber sind Eigennamen und bleiben unübersetzt.
 const providerLabel = computed(() => provider.value === 'awattar' ? 'aWattar Spotmarkt'
   : provider.value === 'tibber' ? 'Tibber' : '');
+
+const LOCALE_TAG = { de: 'de-DE', en: 'en-US', fr: 'fr-FR', es: 'es-ES', tr: 'tr-TR', el: 'el-GR', uk: 'uk-UA' };
+const localeTag = () => LOCALE_TAG[locale.value] || 'de-DE';
+const fmtCt = v => Number(v).toLocaleString(localeTag(), { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
 const upcoming = computed(() => {
   const now = Math.floor(Date.now() / 1000);
@@ -98,9 +104,9 @@ function priceColor(ct) {
   return ct < 15 ? 'text-green-400' : ct < 30 ? 'text-yellow-400' : 'text-red-400';
 }
 
-const fmtTime = ts => new Date(ts * 1000).toLocaleTimeString('de-DE',
+const fmtTime = ts => new Date(ts * 1000).toLocaleTimeString(localeTag(),
   { hour: '2-digit', minute: '2-digit' });
-const fmtHour = ts => new Date(ts * 1000).toLocaleString('de-DE',
+const fmtHour = ts => new Date(ts * 1000).toLocaleString(localeTag(),
   { weekday: 'short', hour: '2-digit', minute: '2-digit' });
 
 async function load() {
@@ -126,10 +132,10 @@ async function applyOffPeak() {
   const minutes = d.getHours() * 60 + d.getMinutes();
   try {
     await api.post(`/commands/${vid}/set_scheduled_charging`, { enable: true, time: minutes });
-    appliedHint.value = `→ Lade-Start auf ${fmtTime(best4h.value.start)} gesetzt`;
+    appliedHint.value = t('tariffWidget.applied', { time: fmtTime(best4h.value.start) });
     setTimeout(() => { appliedHint.value = ''; }, 6000);
   } catch (err) {
-    error.value = err.response?.data?.error || 'Setzen fehlgeschlagen';
+    error.value = err.response?.data?.error || t('tariffWidget.applyFailed');
   }
 }
 

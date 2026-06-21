@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.32.1] - 2026-06-21
+
+### Geändert
+
+- **i18n-Nachzug für `TariffWidget` und `ServiceIntervalsCard`**: Beide Komponenten waren deutsch-hartkodiert und sind jetzt vollständig lokalisiert (Strompreis-Widget + Wartungsintervalle inkl. Status-Labels, Fällig-/Prognose-Texte, Modal, Buttons, Alerts) — in allen sieben Sprachen. Datums-, Zahlen- und Preisformatierung folgt jetzt der aktiven Sprache. Reine Verbesserung, keine Verhaltensänderung.
+
+---
+
 ## [v3.32.0] - 2026-06-21
 
 ### Neu
