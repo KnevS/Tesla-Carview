@@ -720,6 +720,8 @@ In **Nevs-Edition** design, the tab bar switches to petrol color.
 
 The Route Planner calculates driving routes and shows fast-charging stations along the way.
 
+**Personal range instead of WLTP (v3.29):** the projected arrival state of charge comes from your **own, temperature-dependent consumption** (from your trip history), not from the WLTP range. When the destination temperature is known from the weather, only trips within a ±7 °C window are used. It also shows a confidence band (expected variation of individual trips), the data basis (consumption at the destination temperature or your average) and a "could get tight" warning when the band reaches into the critical zone. Pure statistics, no AI; without enough trips it falls back to the previous WLTP estimate.
+
 **Calculate a route** — Enter start and destination. Use "+ Add stop" to insert as many waypoints as you like; drag to reorder them.
 
 **Avoidance options** — Three toggle chips next to the destination field:

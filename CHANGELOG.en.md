@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.29.0] - 2026-06-21
+
+### Added
+
+- **Personal range instead of WLTP (roadmap drop 03)**: the route planner now estimates the arrival state of charge from your **own, temperature-dependent consumption** instead of the WLTP range. New service `backend/src/services/consumptionModel.js` derives the expected kWh/100 km from your trip history; when the destination temperature is known, only trips within a ±7 °C window are used (cold/heat extra consumption, data-driven). The planner also shows a **confidence band** (expected single-trip variation), the data basis (consumption at X °C or personal average) and a **"could get tight" warning** when the band reaches into the critical zone. New route `GET /api/routing/consumption-model` (scoped per vehicle; also estimates usable capacity from rated range + WLTP model consumption). Pure statistics, no AI; falls back cleanly to the previous WLTP estimate without enough data. Localised in all seven languages.
+
+---
+
 ## [v3.28.0] - 2026-06-21
 
 ### Added

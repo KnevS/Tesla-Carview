@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.29.0] - 2026-06-21
+
+### Neu
+
+- **Persönliche Reichweite statt WLTP (Roadmap-Drop 03)**: Der Routenplaner schätzt den Ankunfts-Ladestand jetzt aus deinem **eigenen, temperatur-abhängigen Verbrauch** statt aus der WLTP-Reichweite. Neuer Service `backend/src/services/consumptionModel.js` bildet aus der Trip-Historie den erwarteten kWh/100-km-Verbrauch; ist die Ziel-Temperatur bekannt, zählen nur Fahrten aus einem ±7-°C-Fenster (Kälte-/Hitze-Mehrverbrauch datengetrieben). Der Planer zeigt zusätzlich ein **Vertrauensband** (erwartete Einzelfahrt-Schwankung), die Datenbasis (Verbrauch bei X °C bzw. persönlicher Schnitt) und eine **„Könnte knapp werden"-Warnung**, wenn das Band ins Kritische reicht. Neue Route `GET /api/routing/consumption-model` (nach Fahrzeug gescoped; schätzt zudem die nutzbare Kapazität aus rated range + WLTP-Modellverbrauch). Reine Statistik, keine KI; fällt ohne genügend Daten sauber auf die bisherige WLTP-Schätzung zurück. Lokalisiert in allen sieben Sprachen.
+
+---
+
 ## [v3.28.0] - 2026-06-21
 
 ### Neu

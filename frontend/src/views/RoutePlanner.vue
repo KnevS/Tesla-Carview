@@ -232,6 +232,18 @@
                 <div class="h-full rounded-full transition-all duration-500" :class="arrivalSocBarClass"
                   :style="{ width: Math.max(0, arrivalSoc ?? 0) + '%' }"></div>
               </div>
+              <div v-if="arrivalSocRange" class="flex items-center justify-between text-xs text-gray-400"
+                v-tooltip="$t('routes.consumptionModelTooltip')">
+                <span>{{ arrivalSocRange.low }}–{{ arrivalSocRange.high }}% · {{ $t('routes.confidenceShort', { pct: arrivalSocRange.confidence }) }}</span>
+                <span>{{ arrivalSocRange.basis === 'temp'
+                    ? $t('routes.consumptionAtTemp', { kwh: arrivalSocRange.kwh, temp: arrivalSocRange.tempC })
+                    : $t('routes.consumptionPersonal', { kwh: arrivalSocRange.kwh }) }}</span>
+              </div>
+              <div v-if="arrivalSocRange && arrivalSocRange.low < 10 && arrivalSoc != null && arrivalSoc >= 10"
+                class="rounded-xl bg-yellow-900/40 border border-yellow-700/60 px-3 py-2 text-xs text-yellow-200 flex items-start gap-2">
+                <span class="mt-0.5">🤔</span>
+                <span>{{ $t('routes.makeItRisk', { low: arrivalSocRange.low }) }}</span>
+              </div>
               <div v-if="arrivalSoc != null && arrivalSoc < 10"
                 class="rounded-xl bg-red-900/60 border border-red-700 px-3 py-2 text-xs text-red-200 flex items-start gap-2">
                 <span class="mt-0.5">⚠️</span>
@@ -719,6 +731,8 @@ const waypoints   = ref([]);
 const routeData    = ref(null);
 const routeLoading = ref(false);
 const routeStats   = ref({ soc: null, rated_range_km: null, avg_kwh_per_100km: null });
+// Persönliches, temperatur-sensitives Verbrauchsmodell (Drop 03). null = WLTP-Fallback.
+const consumptionModel = ref(null);
 
 // ── Ladeplan ──
 const chargingPlan       = ref(null);
@@ -933,6 +947,13 @@ async function loadWeather() {
       api.get('/routing/weather', { params: { lat: destPt.lat, lon: destPt.lon, time: arrTime } }).then(r => r.data).catch(() => null),
     ]);
     weatherData.value = { start: wStart, dest: wDest };
+    // Persönliches Verbrauchsmodell mit der erwarteten Ziel-Temperatur nachladen
+    const destTemp = wDest?.hourly?.temperature_2m ?? wDest?.current?.temperature_2m ?? null;
+    if (vehicle.value) {
+      api.get('/routing/consumption-model', { params: { vehicleId: vehicle.value.id, temp_c: destTemp ?? '' } })
+        .then(r => { consumptionModel.value = r.data; })
+        .catch(() => { consumptionModel.value = null; });
+    }
   } catch { /* silent */ }
   finally { weatherLoading.value = false; }
 }
@@ -953,12 +974,31 @@ async function loadTraffic() {
 
 // ── Reichweite ──
 const arrivalSoc = computed(() => {
-  if (!routeData.value || routeStats.value.soc == null || !routeStats.value.rated_range_km) return null;
-  const { distance_km } = routeData.value;
-  const { soc, rated_range_km } = routeStats.value;
-  if (rated_range_km <= 0) return null;
-  const val = Math.round((rated_range_km - distance_km) * soc / rated_range_km);
-  return Math.max(-99, val);
+  const rd = routeData.value, st = routeStats.value, cm = consumptionModel.value;
+  if (!rd) return null;
+  // Persönliches, temperatur-basiertes Modell bevorzugt (Drop 03)
+  if (cm?.estimate && cm.battery_kwh && st.soc != null) {
+    const drop = (rd.distance_km * cm.estimate.kwh_per_100km / 100) / cm.battery_kwh * 100;
+    return Math.max(-99, Math.round(st.soc - drop));
+  }
+  // Fallback: WLTP-Schätzung über die rated range
+  if (st.soc == null || !st.rated_range_km || st.rated_range_km <= 0) return null;
+  return Math.max(-99, Math.round((st.rated_range_km - rd.distance_km) * st.soc / st.rated_range_km));
+});
+
+// Vertrauensband + „Schaffe ich es?" — nur wenn ein persönliches Modell vorliegt.
+const arrivalSocRange = computed(() => {
+  const rd = routeData.value, st = routeStats.value, cm = consumptionModel.value;
+  if (!rd || !cm?.estimate || !cm.battery_kwh || st.soc == null) return null;
+  const socAt = (kwh) => Math.round(st.soc - (rd.distance_km * kwh / 100) / cm.battery_kwh * 100);
+  return {
+    low:  socAt(cm.estimate.kwh_upper),   // höherer Verbrauch → weniger Rest-SoC
+    high: socAt(cm.estimate.kwh_lower),
+    confidence: cm.estimate.confidence_pct,
+    basis: cm.estimate.basis,
+    tempC: cm.estimate.temp_c,
+    kwh: cm.estimate.kwh_per_100km,
+  };
 });
 
 const arrivalSocClass = computed(() => {

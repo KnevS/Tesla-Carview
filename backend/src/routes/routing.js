@@ -3,6 +3,8 @@ import { Router } from 'express';
 import { mkdirSync, existsSync, readFileSync, writeFileSync, statSync } from 'fs';
 import { join } from 'path';
 import { assertVehicleAccess, guardAccess } from '../middleware/vehicleAccess.js';
+import { estimateConsumption } from '../services/consumptionModel.js';
+import { wltpConsumption } from '../services/wltp.js';
 
 const router = Router();
 
@@ -222,6 +224,49 @@ router.get('/stats', (req, res) => {
     rated_range_km:    battery?.rated_range_km ?? null,
     avg_kwh_per_100km: consumption?.avg_kwh_per_100km ?? null,
     trip_count:        consumption?.trip_count  ?? 0,
+  });
+});
+
+// GET /api/routing/consumption-model?vehicleId=&temp_c=
+// Persönliches, temperatur-sensitives Verbrauchsmodell + geschätzte nutzbare
+// Kapazität — Basis für eine realistische Ankunfts-SoC-Prognose statt WLTP.
+// Reine Statistik, keine KI.
+router.get('/consumption-model', (req, res) => {
+  const vehicleId = Number(req.query.vehicleId);
+  if (!vehicleId) return res.status(400).json({ error: 'vehicleId erforderlich' });
+  if (guardAccess(res, () => assertVehicleAccess(req.db, vehicleId, req.user))) return;
+
+  const tempRaw = req.query.temp_c;
+  const tempC = tempRaw != null && tempRaw !== '' ? Number(tempRaw) : null;
+
+  const trips = req.db.prepare(`
+    SELECT distance_km, energy_used_kwh, outside_temp_avg_c
+    FROM trips
+    WHERE vehicle_id=? AND distance_km > 2 AND energy_used_kwh > 0
+      AND start_time > unixepoch() - 365*24*3600
+  `).all(vehicleId);
+
+  const estimate = estimateConsumption(trips, Number.isFinite(tempC) ? tempC : null);
+
+  const battery = req.db.prepare(
+    'SELECT soc, rated_range_km FROM battery_snapshots WHERE vehicle_id=? ORDER BY timestamp DESC LIMIT 1'
+  ).get(vehicleId);
+  const vehicle = req.db.prepare('SELECT model FROM vehicles WHERE id=?').get(vehicleId);
+
+  // Nutzbare Kapazität aus rated_range (bei aktuellem SoC) + WLTP-Modellverbrauch.
+  let battery_kwh = null;
+  if (battery?.rated_range_km && battery.soc > 0) {
+    const range100 = (battery.rated_range_km / battery.soc) * 100;
+    const wltp = wltpConsumption(vehicle?.model);
+    if (wltp) battery_kwh = Math.round((range100 * wltp / 100) * 10) / 10;
+  }
+
+  res.json({
+    estimate,
+    enough_data: estimate != null,
+    battery_kwh,
+    soc: battery?.soc ?? null,
+    rated_range_km: battery?.rated_range_km ?? null,
   });
 });
 

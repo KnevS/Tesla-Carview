@@ -717,6 +717,8 @@ Im **Nevs-Edition**-Design wechselt die Tab Bar zur Petrol-Farbgebung.
 
 Der Routenplaner unter **Routenplaner** berechnet Fahrrouten und zeigt Schnellladestationen entlang der Strecke an.
 
+**Persönliche Reichweite statt WLTP (v3.29):** Der prognostizierte Ankunfts-Ladestand kommt aus deinem **eigenen, temperatur-abhängigen Verbrauch** (aus der Trip-Historie), nicht aus der WLTP-Reichweite. Ist die Ziel-Temperatur aus dem Wetter bekannt, werden nur Fahrten aus einem ±7-°C-Fenster herangezogen. Angezeigt werden zusätzlich ein Vertrauensband (erwartete Schwankung einzelner Fahrten), die Datenbasis (Verbrauch bei der Zieltemperatur bzw. dein Schnitt) und eine „Könnte knapp werden"-Warnung, wenn das Band ins Kritische reicht. Reine Statistik, keine KI; ohne genügend Trips greift die bisherige WLTP-Schätzung.
+
 **Route berechnen** — Gib Start- und Zieladresse ein. Über „+ Zwischenstopp" lassen sich beliebig viele Wegpunkte einfügen und per Drag-and-drop umsortieren.
 
 **Vermeiden-Optionen** — Drei Toggle-Chips direkt am Zielfeld:
