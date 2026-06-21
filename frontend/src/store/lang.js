@@ -14,14 +14,15 @@ export const LANGS = [
 ];
 
 /* Auflösungs-Hierarchie (höchste Priorität zuerst):
- *   1. user.lang             (eingeloggt: pro Benutzer)
- *   2. tenantDefaultLocale   (Mandanten-Standard, beim Login mitgesendet)
+ *   1. user.lang             (eingeloggt: explizite Benutzer-Präferenz)
+ *   2. navigator.language    (Browser-Sprache — wird beim ersten Besuch in localStorage gespeichert)
  *   3. localStorage['locale']
- *   4. navigator.language
+ *   4. tenantDefaultLocale   (nur beim allerersten Besuch ohne Browser-Match)
  *   5. 'de'
  *
- * Beim Login wird applyFromUser() aufgerufen — es nimmt user.lang wenn
- * vorhanden, sonst tenantDefaultLocale, sonst den vorhandenen current.
+ * Beim Login wird applyFromUser() aufgerufen. Es wird NUR die explizite
+ * user.lang-Einstellung angewendet — tenantDefaultLocale überschreibt
+ * die Browser-Sprache nicht.
  */
 export const useLangStore = defineStore('lang', {
   state: () => ({ current: i18n.global.locale.value }),
@@ -36,15 +37,12 @@ export const useLangStore = defineStore('lang', {
         try { await api.patch('/users/me/lang', { lang: code }); } catch { /* 401/offline */ }
       }
     },
-    /** Beim Login: User-Preference > Tenant-Default > Browser-Auswahl beibehalten */
+    /** Beim Login: Nur explizite user.lang anwenden — Browser-Sprache bleibt erhalten */
     applyFromUser(user) {
-      const candidate =
-        (user?.lang && SUPPORTED_LOCALES.includes(user.lang) && user.lang) ||
-        (user?.tenantDefaultLocale && SUPPORTED_LOCALES.includes(user.tenantDefaultLocale) && user.tenantDefaultLocale) ||
-        this.current;
-      this.current = candidate;
-      i18n.global.locale.value = candidate;
-      try { localStorage.setItem('locale', candidate); } catch { /* egal */ }
+      if (!user?.lang || !SUPPORTED_LOCALES.includes(user.lang)) return;
+      this.current = user.lang;
+      i18n.global.locale.value = user.lang;
+      try { localStorage.setItem('locale', user.lang); } catch { /* egal */ }
     },
   },
 });

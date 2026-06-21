@@ -33,8 +33,9 @@ export const AI_TRANSLATED_LOCALES = ['fr', 'es', 'tr', 'el', 'uk'];
  * und wenn die Geo-Antwort kommt, wird die Sprache nachträglich gesetzt
  * und in localStorage persistiert (gilt ab dem nächsten Seitenaufruf direkt).
  *
- * User-Profil und Mandanten-Default werden NACH dem Login angewendet
- * (siehe store/lang.js → applyFromUser).
+ * Explizite User-Profil-Sprache (user.lang) wird NACH dem Login angewendet
+ * (siehe store/lang.js → applyFromUser) — tenantDefaultLocale überschreibt
+ * die Browser-Sprache nicht.
  */
 export function resolveInitialLocale() {
   try {
@@ -57,9 +58,12 @@ function applyGeoLocaleAsync() {
     .then(data => {
       const locale = data?.locale;
       if (!locale || !SUPPORTED_LOCALES.includes(locale) || locale === 'de') return;
-      // Sprache setzen und persistieren — beim nächsten Besuch greift Stufe 1
       i18n.global.locale.value = locale;
       try { localStorage.setItem('locale', locale); } catch { /* egal */ }
+      // Pinia-Store nachträglich aktualisieren (dynamisch um circular dep zu vermeiden)
+      import('../store/lang.js').then(({ useLangStore }) => {
+        useLangStore().current = locale;
+      }).catch(() => {});
     })
     .catch(() => { /* Geo-Fehler nie nach oben werfen */ });
 }

@@ -7,6 +7,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.23.8] - 2026-06-21
+
+### Changed
+
+- **Browser language now takes precedence over the tenant default**: the language resolution order was reworked. New order (highest priority first): explicit user preference (`user.lang`) → browser language (`navigator.language`, persisted to `localStorage` on first visit) → `localStorage` → tenant default (`tenantDefaultLocale`, only on the very first visit with no browser match) → `de`. Previously the tenant default overrode the browser-detected language after login. `applyFromUser()` now applies **only an explicitly set `user.lang`** and otherwise leaves the detected browser language untouched (`frontend/src/store/lang.js`).
+
+### Fixed
+
+- **Geo language detection now also updates the Pinia store**: when the geo response returns a different language, the language store (`useLangStore().current`) is now updated alongside `i18n.global.locale` and `localStorage`, so the language selector in the UI reflects the choice immediately — done via dynamic import to avoid a circular dependency (`frontend/src/plugins/i18n.js`).
+
+---
+
 ## [v3.23.7] - 2026-06-21
 
 ### Fixed

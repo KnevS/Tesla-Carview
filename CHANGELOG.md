@@ -7,6 +7,18 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.23.8] - 2026-06-21
+
+### Geändert
+
+- **Browser-Sprache hat Vorrang vor dem Mandanten-Default**: Die Sprach-Auflösung wurde umgestellt. Neue Reihenfolge (höchste Priorität zuerst): explizite Benutzer-Präferenz (`user.lang`) → Browser-Sprache (`navigator.language`, beim ersten Besuch in `localStorage` gemerkt) → `localStorage` → Mandanten-Standard (`tenantDefaultLocale`, nur beim allerersten Besuch ohne Browser-Match) → `de`. Bisher überschrieb der Mandanten-Default nach dem Login die vom Browser erkannte Sprache. `applyFromUser()` wendet jetzt **nur noch eine explizit gesetzte `user.lang`** an und lässt die erkannte Browser-Sprache sonst unangetastet (`frontend/src/store/lang.js`).
+
+### Behoben
+
+- **Geo-Spracherkennung aktualisiert jetzt auch den Pinia-Store**: Wenn die Geo-Antwort eine abweichende Sprache liefert, wird neben `i18n.global.locale` und `localStorage` nun auch der Sprach-Store (`useLangStore().current`) nachgezogen, sodass die Sprachauswahl in der UI sofort korrekt angezeigt wird — die Anpassung geschieht über dynamischen Import, um eine zirkuläre Abhängigkeit zu vermeiden (`frontend/src/plugins/i18n.js`).
+
+---
+
 ## [v3.23.7] - 2026-06-21
 
 ### Behoben
