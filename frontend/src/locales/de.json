@@ -479,7 +479,12 @@
     "forecastSeriesMeasured": "Messwerte",
     "forecastSeriesSmoothed": "Geglättet (7 T)",
     "forecastSeriesTrend": "Trend / Prognose",
-    "forecastSeriesBand": "Konfidenzband"
+    "forecastSeriesBand": "Konfidenzband",
+    "drainHigh": "Stark erhöhter Standby-Verlust.",
+    "drainElevated": "Erhöhter Standby-Verlust.",
+    "drainTrendNote": "Median 7 Tage: {recent} %/h (Basis 30 Tage: {base} %/h).",
+    "drainRising": "Tendenz steigend.",
+    "drainAssessmentTooltip": "Reine Statistik: Vergleich des mittleren Standby-Verlusts der letzten 7 Tage mit den 30 Tagen davor. Anhaltend >0,8 %/h gilt als erhöht, >1,5 %/h als stark. Prüfe Sentry-Modus, dauerverbundene Apps oder lasse das BMS checken."
   },
   "control": {
     "title": "Fahrzeugsteuerung",

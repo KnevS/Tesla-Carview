@@ -479,7 +479,12 @@
     "forecastSeriesMeasured": "Mesures",
     "forecastSeriesSmoothed": "Lissé (7 j)",
     "forecastSeriesTrend": "Tendance / prévision",
-    "forecastSeriesBand": "Bande de confiance"
+    "forecastSeriesBand": "Bande de confiance",
+    "drainHigh": "Décharge à l'arrêt fortement élevée.",
+    "drainElevated": "Décharge à l'arrêt élevée.",
+    "drainTrendNote": "Médiane 7 jours : {recent} %/h (référence 30 jours : {base} %/h).",
+    "drainRising": "Tendance à la hausse.",
+    "drainAssessmentTooltip": "Statistiques pures : compare la décharge moyenne à l'arrêt des 7 derniers jours aux 30 jours précédents. >0,8 %/h durable = élevée, >1,5 %/h = forte. Vérifiez le mode sentinelle, les applis toujours connectées, ou faites contrôler le BMS."
   },
   "control": {
     "title": "🎮 Contrôle du véhicule",

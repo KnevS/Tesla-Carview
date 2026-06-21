@@ -102,7 +102,8 @@ Unter `/battery` findest du seit v3.6.0 sechs Sektionen, die dir ehrliche Antwor
 2. **Degradation** — Differenz zwischen erster und letzter Messung, farbcodiert (grün <5 %, gelb <10 %, rot ≥10 %).
 3. **Ladekurve** — durchschnittliche Spitzenleistung gruppiert in vier SOC-Bändern (0–20 %, 20–50 %, 50–80 %, 80–100 %) sowie Scatter-Plot kW vs. Start-SOC. Tiefe Werte oberhalb 80 % sind normal (Tapering); Auffälligkeiten in 20–50 % können auf BMS-Probleme deuten.
 4. **Effizienz vs. Außentemperatur** — kWh/100 km in 5-°C-Buckets aus deinen Trip-Daten. Macht den Kältewinter-Mehrverbrauch sichtbar.
-5. **Phantom-Drain** — SOC-Verlust pro Stunde im Stillstand. Filtert Lade- und Trip-Intervalle heraus. Median und Mittelwert oben, Top-10-Ereignisse als Tabelle. >1 %/h ist auffällig (Sentry-Mode, Updates, Vorklimatisierung).
+5. **Phantom-Drain** — SOC-Verlust pro Stunde im Stillstand. Filtert Lade- und Trip-Intervalle heraus. Median und Mittelwert oben, Top-10-Ereignisse als Tabelle. >1 %/h ist auffällig (Sentry-Mode, Updates, Vorklimatisierung). **Trend-Warnung (v3.28):** Liegt der Median der letzten 7 Tage anhaltend über den 30 Tagen davor (bzw. dauerhaft >0,8 %/h), erscheint ein Hinweis-Banner.
+6. **Gesundheit & Prognose (v3.27)** — Lineare Hochrechnung der auf 100 % SoC normierten Reichweite mit 95-%-Konfidenzband: Degradationsrate (%/Jahr und km/Jahr), prognostizierte Reichweite in 3 Jahren und geschätzte Zeit bis 80 % des Startwerts. Erscheint ab 14 Messtagen. Reine Statistik, keine KI.
 6. **Anomalien** — SOC-Sprünge >10 % ohne Trip/Lade, Range-Sprünge >30 km, Effizienz-Ausreißer (>35 oder <7 kWh/100km).
 
 **Datenquellen**: `battery_snapshots`, `trips`, `charging_sessions` — alles aus deiner eigenen SQLite. Kein externer Aufruf, keine Cloud, kein Modell. Die Berechnung läuft serverseitig in `backend/src/routes/battery.js`.

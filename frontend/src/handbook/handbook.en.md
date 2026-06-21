@@ -102,7 +102,8 @@ Every signed-in user has their own page at `/my-tracking` ("📱 My GPS" in the 
 2. **Degradation** — diff between first and last measurement, color-coded (green <5 %, yellow <10 %, red ≥10 %).
 3. **Charging curve** — average peak power grouped in four SOC bands (0-20 %, 20-50 %, 50-80 %, 80-100 %) plus scatter kW vs start SOC. Lower values above 80 % are normal (tapering); outliers in 20-50 % can hint at BMS issues.
 4. **Efficiency vs outside temp** — kWh/100 km in 5-°C buckets from your trips. Makes the cold-winter penalty visible.
-5. **Phantom drain** — SOC loss per hour while parked. Filters out trip and charge windows. Median + average up top, top-10 events as a table. >1 %/h is notable (sentry, updates, preconditioning).
+5. **Phantom drain** — SOC loss per hour while parked. Filters out trip and charge windows. Median + average up top, top-10 events as a table. >1 %/h is notable (sentry, updates, preconditioning). **Trend warning (v3.28):** if the last 7 days' median stays above the 30 days before it (or sustained >0.8 %/h), a hint banner appears.
+6. **Health & forecast (v3.27)** — linear projection of the range normalised to 100 % SoC with a 95 % confidence band: degradation rate (%/year and km/year), projected range in 3 years and estimated time until 80 % of the starting value. Appears from 14 measurement days. Pure statistics, no AI.
 6. **Anomalies** — SOC jumps >10 % without trip/charge, range jumps >30 km, efficiency outliers (>35 or <7 kWh/100km).
 
 **Data sources**: `battery_snapshots`, `trips`, `charging_sessions` — all from your own SQLite. No external calls, no cloud, no model. Computation runs server-side in `backend/src/routes/battery.js`.

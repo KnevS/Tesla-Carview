@@ -263,9 +263,30 @@ router.get('/phantom-drain', (req, res) => {
     events.sort((a, b) => b.to_ts - a.to_ts);
     const recent = events.slice(0, 50);
 
-    const sorted = [...events].map(e => e.pct_per_hour).sort((a, b) => a - b);
-    const median = sorted.length ? sorted[Math.floor(sorted.length / 2)] : null;
-    const avg = sorted.length ? sorted.reduce((s, v) => s + v, 0) / sorted.length : null;
+    const medianOf = (evs) => {
+      const a = evs.map(e => e.pct_per_hour).sort((x, y) => x - y);
+      return a.length ? a[Math.floor(a.length / 2)] : null;
+    };
+    const median = medianOf(events);
+    const avg = events.length ? events.reduce((s, e) => s + e.pct_per_hour, 0) / events.length : null;
+
+    // Trend-Bewertung: Median der letzten 7 Tage gegen die 30 Tage davor.
+    // Reine Statistik — warnt bei DAUERHAFT erhoehter Rate (nicht nur Einzel-
+    // Spikes, die der Companion separat als Anomalie meldet).
+    const now = Math.floor(Date.now() / 1000);
+    const recent7   = events.filter(e => e.to_ts >= now - 7 * 86400);
+    const baseline30 = events.filter(e => e.to_ts < now - 7 * 86400 && e.to_ts >= now - 37 * 86400);
+    const recentMed = medianOf(recent7);
+    const baseMed   = medianOf(baseline30);
+    let trend = 'stable', severity = 'normal';
+    if (recentMed != null) {
+      if (baseMed != null) {
+        if (recentMed > baseMed * 1.5 && recentMed - baseMed > 0.2) trend = 'rising';
+        else if (recentMed < baseMed * 0.67) trend = 'falling';
+      }
+      if (recentMed >= 1.5) severity = 'high';
+      else if (recentMed >= 0.8 || (trend === 'rising' && recentMed >= 0.5)) severity = 'elevated';
+    }
 
     res.json({
       events: recent,
@@ -273,6 +294,13 @@ router.get('/phantom-drain', (req, res) => {
         count: events.length,
         median_pct_per_h: median != null ? +median.toFixed(3) : null,
         avg_pct_per_h: avg != null ? +avg.toFixed(3) : null
+      },
+      assessment: {
+        recent_median_pct_per_h: recentMed != null ? +recentMed.toFixed(3) : null,
+        baseline_median_pct_per_h: baseMed != null ? +baseMed.toFixed(3) : null,
+        recent_events: recent7.length,
+        trend,
+        severity
       }
     });
   } catch (err) {

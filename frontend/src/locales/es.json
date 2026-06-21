@@ -479,7 +479,12 @@
     "forecastSeriesMeasured": "Mediciones",
     "forecastSeriesSmoothed": "Suavizado (7 d)",
     "forecastSeriesTrend": "Tendencia / pronóstico",
-    "forecastSeriesBand": "Banda de confianza"
+    "forecastSeriesBand": "Banda de confianza",
+    "drainHigh": "Consumo en reposo muy elevado.",
+    "drainElevated": "Consumo en reposo elevado.",
+    "drainTrendNote": "Mediana 7 días: {recent} %/h (base 30 días: {base} %/h).",
+    "drainRising": "Tendencia al alza.",
+    "drainAssessmentTooltip": "Estadística pura: compara el consumo medio en reposo de los últimos 7 días con los 30 anteriores. >0,8 %/h sostenido = elevado, >1,5 %/h = alto. Revisa el modo centinela, apps siempre conectadas, o haz revisar el BMS."
   },
   "control": {
     "title": "🎮 Control del vehículo",

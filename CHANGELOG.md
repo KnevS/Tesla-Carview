@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.28.0] - 2026-06-21
+
+### Neu
+
+- **Standby-Drain-Trend-Warnung (Roadmap-Drop 02, Teil 2 — Drop 02 abgeschlossen)**: Die Phantom-Drain-Sektion warnt jetzt nicht mehr nur bei Einzel-Spikes, sondern erkennt einen **dauerhaft erhöhten** Standby-Verlust: Der Median der letzten 7 Tage wird gegen die 30 Tage davor verglichen. Bei anhaltend >0,8 %/h (erhöht) bzw. >1,5 %/h (stark) erscheint ein farbiger Hinweis-Banner mit Handlungsempfehlung (Sentry-Modus, dauerverbundene Apps, BMS prüfen). `GET /api/battery/phantom-drain` liefert dazu einen `assessment`-Block (recent-/baseline-Median, Trend, Severity). Reine Statistik, keine KI. Lokalisiert in allen sieben Sprachen; README + Handbuch (DE/EN) für Drop 02 ergänzt.
+
+---
+
 ## [v3.27.0] - 2026-06-21
 
 ### Neu

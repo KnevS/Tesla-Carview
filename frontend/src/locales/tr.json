@@ -479,7 +479,12 @@
     "forecastSeriesMeasured": "Ölçümler",
     "forecastSeriesSmoothed": "Düzleştirilmiş (7 g)",
     "forecastSeriesTrend": "Eğilim / tahmin",
-    "forecastSeriesBand": "Güven bandı"
+    "forecastSeriesBand": "Güven bandı",
+    "drainHigh": "Park halinde tüketim çok yüksek.",
+    "drainElevated": "Park halinde tüketim yüksek.",
+    "drainTrendNote": "7 gün medyan: %{recent}/sa (30 gün referans: %{base}/sa).",
+    "drainRising": "Eğilim yükseliyor.",
+    "drainAssessmentTooltip": "Saf istatistik: son 7 günün ortalama park tüketimini önceki 30 günle karşılaştırır. Sürekli >%0,8/sa yüksek, >%1,5/sa çok yüksek sayılır. Nöbet modunu, sürekli bağlı uygulamaları kontrol edin veya BMS'yi inceletin."
   },
   "control": {
     "title": "🎮 Araç kontrolü",

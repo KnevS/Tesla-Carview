@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.28.0] - 2026-06-21
+
+### Added
+
+- **Standby-drain trend warning (roadmap drop 02, part 2 — drop 02 complete)**: the phantom-drain section no longer warns only on individual spikes but detects a **sustained** elevated standby drain: the last 7 days' median is compared against the 30 days before. At sustained >0.8 %/h (elevated) or >1.5 %/h (high) a coloured hint banner with guidance appears (sentry mode, always-connected apps, have the BMS checked). `GET /api/battery/phantom-drain` now returns an `assessment` block (recent/baseline median, trend, severity). Pure statistics, no AI. Localised in all seven languages; README + handbook (DE/EN) updated for drop 02.
+
+---
+
 ## [v3.27.0] - 2026-06-21
 
 ### Added

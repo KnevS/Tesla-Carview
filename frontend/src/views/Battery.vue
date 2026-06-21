@@ -137,6 +137,20 @@
           <p class="text-xl font-bold">{{ phantomDrain.summary.avg_pct_per_h }}%/h</p>
         </div>
       </div>
+      <div v-if="phantomDrain?.assessment && phantomDrain.assessment.severity !== 'normal'"
+        class="rounded-lg p-3 mb-3 text-sm flex items-start gap-2"
+        :class="phantomDrain.assessment.severity === 'high' ? 'bg-red-900/40 text-red-200' : 'bg-yellow-900/40 text-yellow-200'"
+        v-tooltip="$t('battery.drainAssessmentTooltip')">
+        <span>{{ phantomDrain.assessment.severity === 'high' ? '🔴' : '⚠️' }}</span>
+        <span>
+          {{ phantomDrain.assessment.severity === 'high' ? $t('battery.drainHigh') : $t('battery.drainElevated') }}
+          {{ $t('battery.drainTrendNote', {
+              recent: phantomDrain.assessment.recent_median_pct_per_h ?? '–',
+              base: phantomDrain.assessment.baseline_median_pct_per_h ?? '–'
+          }) }}
+          <template v-if="phantomDrain.assessment.trend === 'rising'"> {{ $t('battery.drainRising') }}</template>
+        </span>
+      </div>
       <table v-if="phantomDrain?.events?.length" class="w-full text-sm">
         <thead><tr class="text-gray-400">
           <th class="text-left py-1">{{ $t('battery.when') }}</th>

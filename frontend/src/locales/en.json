@@ -479,7 +479,12 @@
     "forecastSeriesMeasured": "Measured",
     "forecastSeriesSmoothed": "Smoothed (7 d)",
     "forecastSeriesTrend": "Trend / forecast",
-    "forecastSeriesBand": "Confidence band"
+    "forecastSeriesBand": "Confidence band",
+    "drainHigh": "Strongly elevated standby drain.",
+    "drainElevated": "Elevated standby drain.",
+    "drainTrendNote": "7-day median: {recent} %/h (30-day baseline: {base} %/h).",
+    "drainRising": "Trend rising.",
+    "drainAssessmentTooltip": "Pure statistics: compares the average standby drain of the last 7 days with the 30 days before. Sustained >0.8 %/h counts as elevated, >1.5 %/h as high. Check sentry mode, always-connected apps, or have the BMS inspected."
   },
   "control": {
     "title": "🎮 Vehicle control",
