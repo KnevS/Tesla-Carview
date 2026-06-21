@@ -810,7 +810,9 @@ Automationen werden serverseitig ausgeführt und senden Browser-Push-Benachricht
 
 ## 🟢 System-Status (Admin) {#system-health}
 
-Unter **System** sieht der Admin oben eine farbige Ampel-Karte mit acht Checks:
+Ganz oben unter **System** liegt der **🛡️ Betriebs-Selbsttest** (v3.32): Auf „Jetzt prüfen" — und automatisch wöchentlich im nächtlichen Wartungslauf — prüft TeslaView Sicherheit und Backup-Integrität: MFA-Abdeckung, Verschlüsselungsschlüssel, kritische Secrets, Audit-Log-Aktivität, SQLite-Datenbank-Integrität sowie Aktualität und Inhalt des letzten Backups (Datei lesbar, alle Tabellen enthalten). Ergebnis ist eine Ampel je Prüfung; Auffälligkeiten landen zusätzlich im Audit-Log. Reine Diagnostik.
+
+Darunter sieht der Admin eine farbige Ampel-Karte mit acht Checks:
 
 - **Tesla OAuth-Token** — verbunden? Wann läuft er ab?
 - **Virtual Key** — erzeugt? (Pflicht für Fahrzeugbefehle)

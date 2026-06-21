@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.32.0] - 2026-06-21
+
+### Added
+
+- **Operational self-check (roadmap drop 06 — completes the value-drop roadmap)**: a new admin self-check under **System** verifies security and backup integrity on demand (and automatically every week in the nightly maintenance run): MFA coverage, encryption key, critical secrets, audit-log activity, **SQLite integrity check**, plus recency and **integrity of the last backup** (file present, size, valid JSON, all tables included) — as a traffic-light report. New service `backend/src/services/selfCheck.js` + routes `GET/POST /api/system/self-check[/run]` (requireAdmin), weekly run in `nightlyMaintenance`. Persisted via `tenant_settings` (no DB migration). Pure diagnostics, no AI. The existing system-health banner (Tesla API budget, poller latency, circuit breaker) stays alongside as the live operations overview.
+
+---
+
 ## [v3.31.0] - 2026-06-21
 
 ### Added

@@ -19,6 +19,7 @@ import {
 import { getFuzzingConfig, setFuzzingConfig } from '../services/gpsFuzzing.js';
 import { getTenantStatus as getCircuitStatus, CIRCUIT_THRESHOLD } from '../services/teslaCircuitBreaker.js';
 import { getBackupConfig, setBackupConfig, runBackupForTenant } from '../services/autoBackupService.js';
+import { runSelfCheck, getLastSelfCheck } from '../services/selfCheck.js';
 import https from 'https';
 
 const router = Router();
@@ -907,6 +908,22 @@ router.post('/backup-now', requireAuth, requireAdmin, async (req, res) => {
     } else {
       res.status(500).json({ error: result.error });
     }
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/system/self-check — letzter Betriebs-Selbsttest-Report (Admin)
+router.get('/self-check', requireAuth, requireAdmin, (req, res) => {
+  res.json(getLastSelfCheck(req.db) || { summary: null, checks: [], generated_at: null });
+});
+
+// POST /api/system/self-check/run — Selbsttest jetzt ausführen (Admin)
+router.post('/self-check/run', requireAuth, requireAdmin, (req, res) => {
+  try {
+    const report = runSelfCheck(req.db);
+    auditLog(req.db, req.user.sub, 'self_check_run', req, { summary: report.summary });
+    res.json(report);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

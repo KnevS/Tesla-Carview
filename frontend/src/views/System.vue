@@ -12,6 +12,39 @@
       </RouterLink>
     </div>
 
+    <!-- Betriebs-Selbsttest (Drop 06): Security- + Backup-Integritätsprüfungen.
+         Läuft wöchentlich automatisch, hier on-demand + letzter Report. -->
+    <div class="card space-y-3"
+         :class="selfCheck && selfCheck.summary === 'error' ? 'border border-red-700/50 bg-red-900/10'
+               : selfCheck && selfCheck.summary === 'warn'  ? 'border border-yellow-700/50 bg-yellow-900/10'
+               : selfCheck && selfCheck.summary === 'ok'    ? 'border border-green-700/40 bg-green-900/10' : ''">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <h2 class="font-semibold flex items-center gap-2">
+          <AppIcon :name="selfCheck && selfCheck.summary === 'error' ? 'alert' : selfCheck && selfCheck.summary === 'warn' ? 'info' : 'check'" :size="20"
+                   :class="selfCheck && selfCheck.summary === 'error' ? 'text-red-400' : selfCheck && selfCheck.summary === 'warn' ? 'text-yellow-400' : 'text-green-400'" />
+          🛡️ Betriebs-Selbsttest
+        </h2>
+        <button @click="runSelfCheckNow" :disabled="selfCheckBusy"
+          class="text-xs btn-secondary py-1 px-2 inline-flex items-center gap-1.5 disabled:opacity-40"
+          v-tooltip="'Sicherheits- und Backup-Prüfungen jetzt ausführen. Läuft sonst wöchentlich im nächtlichen Wartungslauf.'">
+          <AppIcon name="refresh" :size="14" />
+          {{ selfCheckBusy ? 'Läuft…' : 'Jetzt prüfen' }}
+        </button>
+      </div>
+      <div v-if="selfCheck && selfCheck.checks && selfCheck.checks.length" class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+        <div v-for="c in selfCheck.checks" :key="c.key"
+             class="bg-gray-800 rounded-lg p-2 flex items-start gap-2" :class="c.status === 'info' ? 'opacity-60' : ''">
+          <AppIcon :name="c.status === 'error' ? 'x' : c.status === 'warn' ? 'alert' : c.status === 'ok' ? 'check' : 'info'" :size="18"
+            :class="c.status === 'error' ? 'text-red-400' : c.status === 'warn' ? 'text-yellow-400' : c.status === 'ok' ? 'text-green-400' : 'text-gray-500'" />
+          <p class="text-xs text-gray-300 min-w-0 flex-1">{{ c.message }}</p>
+        </div>
+      </div>
+      <p v-else class="text-sm text-gray-400">Noch kein Selbsttest gelaufen — „Jetzt prüfen" startet ihn.</p>
+      <p v-if="selfCheck && selfCheck.generated_at" class="text-xs text-gray-500">
+        Zuletzt: {{ fmtTs(selfCheck.generated_at * 1000) }} · läuft wöchentlich automatisch
+      </p>
+    </div>
+
     <!-- System-Health-Karte (Admin-only). Schnelle Diagnose-Ampel
          fuer alle Subsysteme. -->
     <div v-if="health" class="card space-y-3"
@@ -577,6 +610,19 @@ async function loadHealth() {
   } catch { health.value = null; }
 }
 
+// Betriebs-Selbsttest (Security + Backup-Integrität) — Drop 06.
+const selfCheck = ref(null);
+const selfCheckBusy = ref(false);
+async function loadSelfCheck() {
+  try { selfCheck.value = (await api.get('/system/self-check')).data; } catch { selfCheck.value = null; }
+}
+async function runSelfCheckNow() {
+  selfCheckBusy.value = true;
+  try { selfCheck.value = (await api.post('/system/self-check/run')).data; }
+  catch { /* still */ }
+  finally { selfCheckBusy.value = false; }
+}
+
 // Naechtliche Wartung — Logbuch + manueller Trigger.
 const maintLog  = ref({ runs: [], auto_update_enabled: false });
 const maintBusy = ref(false);
@@ -738,6 +784,7 @@ onMounted(async () => {
   if (isAdmin.value) {
     await reloadStats();
     loadHealth();
+    loadSelfCheck();
     loadMaintenanceLog();
   }
 });

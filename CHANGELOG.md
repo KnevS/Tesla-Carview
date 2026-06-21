@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.32.0] - 2026-06-21
+
+### Neu
+
+- **Betriebs-Selbsttest (Roadmap-Drop 06 — Abschluss der Value-Drop-Roadmap)**: Neuer Admin-Selbsttest unter **System** prüft auf Knopfdruck (und automatisch wöchentlich im nächtlichen Wartungslauf) Sicherheit und Backup-Integrität: MFA-Abdeckung, Verschlüsselungsschlüssel, kritische Secrets, Audit-Log-Aktivität, **SQLite-Integritätsprüfung** sowie Aktualität und **Integrität des letzten Backups** (Datei vorhanden, Größe, JSON gültig, alle Tabellen enthalten) — als Ampel-Report. Neuer Service `backend/src/services/selfCheck.js` + Routen `GET/POST /api/system/self-check[/run]` (requireAdmin), Wochenlauf in `nightlyMaintenance`. Persistenz über `tenant_settings` (keine DB-Migration). Reine Diagnostik, keine KI. Das bestehende System-Health-Banner (Tesla-API-Budget, Poller-Latenz, Circuit-Breaker) bleibt als Live-Betriebsübersicht daneben.
+
+---
+
 ## [v3.31.0] - 2026-06-21
 
 ### Neu

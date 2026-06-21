@@ -29,6 +29,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { getMasterDb, getAllTenants, getDb } from '../db/database.js';
 import { auditLog } from './auditService.js';
+import { runSelfCheck, selfCheckDue } from './selfCheck.js';
 
 const TARGET_HOUR_DE   = 3;   // 03:30 Europe/Berlin
 const TARGET_MINUTE_DE = 30;
@@ -132,6 +133,18 @@ async function runOnce() {
         'DELETE FROM audit_logs WHERE created_at < ?'
       ).run(now - AUDIT_MAX_AGE_S);
       sum.audit_purged = audit.changes;
+
+      // Wöchentlicher Betriebs-Selbsttest (Security + Backup-Integrität).
+      // Darf den Wartungslauf nie abbrechen.
+      try {
+        if (selfCheckDue(db)) {
+          const r = runSelfCheck(db);
+          sum.self_check = r.summary;
+          if (r.summary === 'error' || r.summary === 'warn') {
+            auditLog(db, null, 'self_check_finding', null, { summary: r.summary });
+          }
+        }
+      } catch { /* Selbsttest-Fehler ignorieren */ }
 
       // Abgelaufene + verwendete User-Invites > 30 d → weg
       try {

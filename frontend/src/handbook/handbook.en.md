@@ -813,7 +813,9 @@ Automations run server-side and send browser push notifications (requires push p
 
 ## 🟢 System status (admin) {#system-health}
 
-Under **System** admins see a coloured traffic-light card at the top with eight checks:
+At the very top under **System** sits the **🛡️ Operational self-check** (v3.32): on "Run now" — and automatically every week in the nightly maintenance run — TeslaView verifies security and backup integrity: MFA coverage, encryption key, critical secrets, audit-log activity, SQLite database integrity, plus recency and contents of the last backup (file readable, all tables present). The result is a traffic light per check; findings are also written to the audit log. Pure diagnostics.
+
+Below it, admins see a coloured traffic-light card with eight checks:
 
 - **Tesla OAuth token** — connected? when does it expire?
 - **Virtual Key** — created? (required for signed commands)
