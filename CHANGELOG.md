@@ -7,6 +7,18 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.24.0] - 2026-06-21
+
+### Neu
+
+- **Ladeverlauf je Ladesession (Roadmap-Drop 01)**: In der Ladeliste öffnet „📈 Verlauf ansehen" eine Detailansicht der einzelnen Session. Sie zeigt die **Leistungs- und Ladestandskurve über die Zeit** (Doppelachse kW/%, aus den bereits erfassten `charging_points`), dazu Eckdaten: Dauer, Ladestand-Verlauf inkl. Δ, nachgeladene kWh, durchschnittliche und Spitzenleistung sowie Kosten und Tarif. Zusätzlich werden **Netzentnahme und Ladeverlust als klar gekennzeichnete Schätzung** ausgewiesen — Tesla meldet nur die batterieseitig nachgeladene Energie, daher wird mit einem je Ladetyp angenommenen Wirkungsgrad hochgerechnet (AC ~88 %, DC/Tesla ~94 %). Neue Komponente `frontend/src/components/ChargingSessionDetail.vue`, gespeist aus dem bestehenden `GET /api/charging/:id`; vollständig lokalisiert in allen sieben Sprachen.
+
+### Hinweise
+
+- Erster von sechs zweiwöchigen „Value-Drops" — die geplante Reihenfolge steht in `docs/roadmap.md`. Die aggregierte Ladekurve in „Batterie" (Ø-Spitzenleistung je SOC-Band über alle Sessions) bleibt unberührt; diese Ansicht zeigt bewusst den Verlauf **einer** Session.
+
+---
+
 ## [v3.23.8] - 2026-06-21
 
 ### Geändert

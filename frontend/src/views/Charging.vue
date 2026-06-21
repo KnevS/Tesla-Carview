@@ -138,6 +138,11 @@
                 v-tooltip="chargerTypeTooltip(s.charger_type)">{{ chargerTypeLabel(s.charger_type) }}</span>
               <span v-tooltip="$t('charging.socTooltip')">SoC {{ s.start_soc }}% → {{ s.end_soc }}%</span>
             </div>
+            <button @click="detailSessionId = s.id"
+              class="text-xs text-gray-400 hover:text-tesla-red transition mt-2 inline-flex items-center gap-1"
+              v-tooltip="$t('charging.detailOpenTooltip')">
+              📈 {{ $t('charging.detailOpen') }}
+            </button>
           </div>
           <div class="text-right space-y-1">
             <p class="text-2xl font-bold text-green-400"
@@ -179,6 +184,9 @@
     </SortableSection>
 
     </template><!-- end v-for layoutOrder -->
+
+    <ChargingSessionDetail v-if="detailSessionId" :session-id="detailSessionId"
+      @close="detailSessionId = null" />
   </div>
 </template>
 
@@ -189,6 +197,7 @@ import { useAppStore } from '../store/index.js';
 import StatCard from '../components/StatCard.vue';
 import AppIcon from '../components/AppIcon.vue';
 import ChargingHeatmap from '../components/ChargingHeatmap.vue';
+import ChargingSessionDetail from '../components/ChargingSessionDetail.vue';
 import SortToggle from '../components/SortToggle.vue';
 import SortableSection from '../components/SortableSection.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
@@ -209,6 +218,8 @@ const loading = ref(true);
 const { direction: sortDir } = useSortDirection('charging');
 const editingRateId = ref(null);
 const rateInput = ref('');
+// Geöffnete Session-Detailansicht (Ladeverlauf-Modal); null = geschlossen.
+const detailSessionId = ref(null);
 
 // Location-Editor State (Inline pro Session). chargingLocations einmal
 // beim Mount geladen, damit das Dropdown sofort gefuellt ist.

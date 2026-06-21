@@ -7,6 +7,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.24.0] - 2026-06-21
+
+### Added
+
+- **Per-session charge timeline (roadmap drop 01)**: in the charging list, "📈 View timeline" opens a detail view for the individual session. It shows the **power and state-of-charge curve over time** (dual axis kW/%, from the already-recorded `charging_points`), plus key figures: duration, state-of-charge progression incl. delta, energy added, average and peak power, and cost and rate. It also reports **grid draw and charging loss as a clearly labelled estimate** — Tesla only reports the energy added to the battery, so this is scaled up with an efficiency assumed per charger type (AC ~88%, DC/Tesla ~94%). New component `frontend/src/components/ChargingSessionDetail.vue`, fed by the existing `GET /api/charging/:id`; fully localised in all seven languages.
+
+### Notes
+
+- First of six bi-weekly value-drops — the planned order lives in `docs/roadmap.md`. The aggregated charging curve in "Battery" (avg peak power per SOC band across all sessions) is untouched; this view deliberately shows the timeline of a **single** session.
+
+---
+
 ## [v3.23.8] - 2026-06-21
 
 ### Changed
