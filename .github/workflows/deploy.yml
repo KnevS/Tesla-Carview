@@ -160,6 +160,28 @@ jobs:
             fi
             sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml \
               restart nginx
+
+            # Post-Deploy-Healthcheck (Lehre aus dem 502 vom 2026-06-21):
+            # Der Host-nginx-Edge proxyt teslaview.krische.com → 127.0.0.1:8080
+            # (Port-Mapping des nginx-Containers). Wenn das Mapping fehlt oder
+            # das Backend nicht hochkommt, antwortet :8080 nicht — der Deploy
+            # soll dann ROT werden statt still "success" zu melden.
+            echo "==> Healthcheck: http://localhost:8080/api/health …"
+            HEALTH_OK=""
+            for i in $(seq 1 12); do
+              sleep 3
+              if wget -q -O /dev/null -T 5 "http://localhost:8080/api/health"; then
+                HEALTH_OK="yes"; echo "Healthcheck OK nach ~$((i*3))s"; break
+              fi
+              echo "Versuch $i/12: Backend über :8080 noch nicht bereit …"
+            done
+            if [ -z "$HEALTH_OK" ]; then
+              echo "FEHLER: Backend antwortet nach dem Deploy nicht auf http://localhost:8080/api/health (Down/502)."
+              echo "Letzte Backend-Logs:"; sudo docker logs --tail 30 tesla-carview-backend 2>&1 || true
+              echo "nginx-Port-Mapping:"; sudo docker ps --filter name=tesla-carview-nginx --format '{{.Ports}}' || true
+              exit 1
+            fi
+
             sudo docker image prune -f
             GIT_HASH=$(sudo git rev-parse --short HEAD)
-            echo "Deployment erfolgreich: $(date) | $GIT_HASH"
+            echo "Deployment erfolgreich + Healthcheck OK: $(date) | $GIT_HASH"

@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.32.2] - 2026-06-21
+
+### Geändert
+
+- **Deploy-Healthcheck**: Der Deploy-Workflow prüft nach dem Hochziehen jetzt aktiv `http://localhost:8080/api/health` (bis zu 12× über ~36 s) und schlägt fehl, wenn das Backend über den Host-nginx-Port nicht antwortet — inklusive Ausgabe der letzten Backend-Logs und des nginx-Port-Mappings. Lehre aus dem 502-Ausfall vom 21.06., der zuvor unbemerkt als „success" durchlief.
+
+---
+
 ## [v3.32.1] - 2026-06-21
 
 ### Geändert

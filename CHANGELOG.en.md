@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.32.2] - 2026-06-21
+
+### Changed
+
+- **Deploy health check**: after bringing containers up, the deploy workflow now actively probes `http://localhost:8080/api/health` (up to 12× over ~36 s) and fails if the backend doesn't answer via the host-nginx port — printing the last backend logs and the nginx port mapping. Lesson from the 2026-06-21 502 outage that previously passed silently as "success".
+
+---
+
 ## [v3.32.1] - 2026-06-21
 
 ### Changed
