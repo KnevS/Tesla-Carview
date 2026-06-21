@@ -45,6 +45,41 @@
       <p v-else class="text-gray-400">{{ $t('battery.noDataLong') }}</p>
     </SortableSection>
 
+    <SortableSection v-if="sid === 'forecast'" page-id="battery" section-id="forecast"
+      :title="$t('battery.forecastTitle')" icon="🔮"
+      :collapsed="isCollapsed('forecast')" @toggle="toggle('forecast')" @move="(f,t,p) => moveSection(f,t,p)">
+      <p class="text-gray-400 text-xs mb-3" v-tooltip="$t('battery.forecastTooltip')">{{ $t('battery.forecastHint') }}</p>
+      <template v-if="forecast?.enough_data">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+          <div class="bg-gray-800 rounded-lg p-3 text-center" v-tooltip="$t('battery.forecastRateTooltip')">
+            <p class="text-gray-400 text-xs">{{ $t('battery.forecastRate') }}</p>
+            <p class="text-xl font-bold" :class="rateClass">{{ fmt(forecast.trend.rate_pct_per_year, 1) }} %/a</p>
+            <p class="text-gray-500 text-xs">−{{ fmtDistance(Math.abs(forecast.trend.rate_km_per_year), 0) }}/a</p>
+          </div>
+          <div class="bg-gray-800 rounded-lg p-3 text-center" v-tooltip="$t('battery.forecastCurrentTooltip')">
+            <p class="text-gray-400 text-xs">{{ $t('battery.forecastCurrent') }}</p>
+            <p class="text-xl font-bold">{{ fmtDistance(forecast.trend.current_soh_km, 0) }}</p>
+            <p class="text-gray-500 text-xs">@ 100 % SoC</p>
+          </div>
+          <div class="bg-gray-800 rounded-lg p-3 text-center" v-tooltip="$t('battery.forecastIn3yTooltip')">
+            <p class="text-gray-400 text-xs">{{ $t('battery.forecastIn3y') }}</p>
+            <p class="text-xl font-bold">{{ fmtDistance(forecast.estimates.in_3y.km, 0) }}</p>
+            <p class="text-gray-500 text-xs">{{ fmtDistance(forecast.estimates.in_3y.lower, 0) }}–{{ fmtDistance(forecast.estimates.in_3y.upper, 0) }}</p>
+          </div>
+          <div class="bg-gray-800 rounded-lg p-3 text-center" v-tooltip="$t('battery.forecastUntilTooltip', { pct: forecast.estimates.threshold_pct })">
+            <p class="text-gray-400 text-xs">{{ $t('battery.forecastUntil', { pct: forecast.estimates.threshold_pct }) }}</p>
+            <p class="text-xl font-bold">{{ forecast.estimates.years_until_threshold != null ? $t('battery.forecastYears', { n: fmt(forecast.estimates.years_until_threshold, 1) }) : '—' }}</p>
+            <p class="text-gray-500 text-xs">{{ forecast.estimates.date_threshold || $t('battery.forecastStable') }}</p>
+          </div>
+        </div>
+        <div style="height: clamp(180px, 28vh, 340px)">
+          <Line v-if="forecastChart" :data="forecastChart" :options="forecastOpts" />
+        </div>
+        <p class="text-gray-500 text-xs mt-2">{{ $t('battery.forecastR2', { r2: fmt(forecast.trend.r2 * 100, 0) }) }}</p>
+      </template>
+      <p v-else class="text-gray-400 text-sm">{{ $t('battery.forecastNoData', { n: forecast?.min_days || 14 }) }}</p>
+    </SortableSection>
+
     <SortableSection v-if="sid === 'chargingCurve'" page-id="battery" section-id="chargingCurve"
       :title="$t('battery.chargingCurve')" icon="⚡"
       :collapsed="isCollapsed('chargingCurve')" @toggle="toggle('chargingCurve')" @move="(f,t,p) => moveSection(f,t,p)">
@@ -240,11 +275,12 @@ const { t, locale } = useI18n();
 const appStore = useAppStore();
 const { fmtDistance } = useUnits();
 
-const BATTERY_SECTIONS = ['range', 'degradation', 'chargingCurve', 'efficiencyTemp', 'phantomDrain', 'anomalies', 'companionAlerts', 'precondition'];
+const BATTERY_SECTIONS = ['range', 'degradation', 'forecast', 'chargingCurve', 'efficiencyTemp', 'phantomDrain', 'anomalies', 'companionAlerts', 'precondition'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('battery', BATTERY_SECTIONS);
 
 const days = ref(90);
 const degradation = ref([]);
+const forecast = ref(null);
 const chartData = ref(null);
 const chargingCurve = ref(null);
 const efficiencyTemp = ref(null);
@@ -335,13 +371,50 @@ const effOpts = computed(() => ({
   },
 }));
 
+// Degradations-Rate aus der Prognose: >5 %/a kritisch, >3 % erhoeht, sonst ok.
+const rateClass = computed(() => {
+  const p = forecast.value?.trend?.rate_pct_per_year ?? 0;
+  return p > 5 ? 'text-red-400' : p > 3 ? 'text-yellow-400' : 'text-green-400';
+});
+
+// Historie (Punkte) + Glaettung + Prognose-Linie + Konfidenzband in einem
+// Chart. Die Band-Datasets (upper/lower) sind randlos; upper fuellt bis zum
+// naechsten Dataset (lower). Lege-Filter blendet die Hilfsserie aus.
+const forecastChart = computed(() => {
+  const c = forecast.value?.chart;
+  if (!c) return null;
+  return {
+    labels: c.labels,
+    datasets: [
+      { label: t('battery.forecastSeriesMeasured'), data: c.history, borderColor: '#10b981',
+        backgroundColor: '#10b981', showLine: false, pointRadius: 2 },
+      { label: t('battery.forecastSeriesSmoothed'), data: c.smoothed, borderColor: '#10b981',
+        borderWidth: 2, pointRadius: 0, fill: false, tension: 0.3, spanGaps: true },
+      { label: t('battery.forecastSeriesTrend'), data: c.trend, borderColor: '#f59e0b',
+        borderDash: [6, 4], borderWidth: 2, pointRadius: 0, fill: false, spanGaps: true },
+      { label: t('battery.forecastSeriesBand'), data: c.upper, borderColor: 'transparent',
+        backgroundColor: 'rgba(245,158,11,0.12)', pointRadius: 0, fill: '+1', spanGaps: true },
+      { label: '_lower', data: c.lower, borderColor: 'transparent', pointRadius: 0, fill: false, spanGaps: true },
+    ],
+  };
+});
+const forecastOpts = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { labels: { color: '#9ca3af', filter: (i) => i.text && !i.text.startsWith('_') } } },
+  scales: {
+    x: { ticks: { color: '#9ca3af', maxTicksLimit: 8 }, grid: { color: '#374151' } },
+    y: { ticks: { color: '#9ca3af' }, grid: { color: '#374151' } },
+  },
+};
+
 async function load() {
   const vid = appStore.selectedVehicle?.id;
   const vParam = vid ? { vehicle_id: vid } : {};
   const params = { days: days.value, ...vParam };
 
-  const [deg, curve, eff, phan, anom, persisted, preCond] = await Promise.all([
+  const [deg, fc, curve, eff, phan, anom, persisted, preCond] = await Promise.all([
     api.get('/battery/degradation', { params }).catch(() => ({ data: [] })),
+    api.get('/battery/forecast', { params: vParam }).catch(() => ({ data: null })),
     api.get('/battery/charging-curve', { params: vParam }).catch(() => ({ data: null })),
     api.get('/battery/efficiency-by-temp', { params: vParam }).catch(() => ({ data: null })),
     api.get('/battery/phantom-drain', { params }).catch(() => ({ data: null })),
@@ -351,6 +424,7 @@ async function load() {
   ]);
 
   degradation.value = deg.data || [];
+  forecast.value = fc.data;
   chartData.value = {
     labels: degradation.value.map(d => d.day),
     datasets: [{

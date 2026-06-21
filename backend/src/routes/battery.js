@@ -1,5 +1,7 @@
 // © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import { Router } from 'express';
+import { restrictToOwnVehicles } from '../middleware/vehicleAccess.js';
+import { computeForecast } from '../services/batteryForecast.js';
 
 const router = Router();
 
@@ -37,6 +39,35 @@ router.get('/degradation', (req, res) => {
        GROUP BY day ORDER BY day ASC`
     ).all(...params);
     res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/** GET /api/battery/forecast
+ *
+ *  Reine Statistik (keine KI): lineare Regression auf der je Tag auf 100 % SoC
+ *  normierten Reichweite, fortgeschrieben in die Zukunft mit Konfidenzband.
+ *  Liefert Degradationsrate, Punktschaetzungen (1/3/5 Jahre), Zeit bis zur
+ *  Schwelle (Default 80 %) und fertige Chart-Serien. Nach Fahrzeug/Tenant
+ *  gescoped (Admin sieht alle). */
+router.get('/forecast', (req, res) => {
+  const db = req.db;
+  const { vehicle_id, horizon_years = 5 } = req.query;
+  try {
+    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
+    const conds  = [];
+    const params = [];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+    const where = conds.length || restrict.fragment
+      ? 'WHERE ' + (conds.length ? conds.join(' AND ') : '1=1') + restrict.fragment
+      : '';
+    params.push(...restrict.params);
+    const snapshots = db.prepare(
+      `SELECT timestamp, soc, rated_range_km FROM battery_snapshots ${where} ORDER BY timestamp ASC`
+    ).all(...params);
+    const horizon = Math.min(10, Math.max(1, parseInt(horizon_years, 10) || 5));
+    res.json(computeForecast(snapshots, { horizonYears: horizon }));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

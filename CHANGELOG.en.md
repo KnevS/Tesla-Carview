@@ -7,6 +7,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.27.0] - 2026-06-21
+
+### Added
+
+- **Battery health with forecast (roadmap drop 02, part 1)**: a new "Health & forecast" section in the battery view. From the existing `battery_snapshots` it derives the daily range normalised to 100 % SoC, runs a least-squares regression on it and projects it into the future — with a 95 % confidence band. Shows the degradation rate (%/year and km/year), today's range at 100 %, the projected range in 3 years (incl. spread) and the estimated time until 80 % of the starting value; chart with measured points, 7-day smoothing, forecast line and band. **Pure statistics, no AI** — deliberately without an external maths library (supply-chain hygiene). New route `GET /api/battery/forecast` (scoped per vehicle/tenant via `vehicle_users`, admins see all) + service `backend/src/services/batteryForecast.js`. Localised in all seven languages.
+
+### Notes
+
+- Second roadmap drop (see `docs/roadmap.md`). The forecast appears only from ≥ 14 measurement days — until then an explanatory hint instead of an empty chart. The "100 %" reference is the starting value of each series (consistent with the existing degradation overview).
+
+---
+
 ## [v3.26.0] - 2026-06-21
 
 ### Added

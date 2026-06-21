@@ -7,6 +7,18 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.27.0] - 2026-06-21
+
+### Neu
+
+- **Batterie-Gesundheit mit Prognose (Roadmap-Drop 02, Teil 1)**: Neue Sektion „Gesundheit & Prognose" in der Batterie-Ansicht. Aus den vorhandenen `battery_snapshots` wird die je Tag auf 100 % SoC normierte Reichweite gebildet, darauf eine Kleinste-Quadrate-Regression gerechnet und in die Zukunft fortgeschrieben — mit 95-%-Konfidenzband. Zeigt Degradationsrate (%/Jahr und km/Jahr), heutige Reichweite bei 100 %, prognostizierte Reichweite in 3 Jahren (inkl. Spanne) und die geschätzte Zeit bis 80 % des Startwerts; Chart mit Messwerten, 7-Tage-Glättung, Prognoselinie und Band. **Reine Statistik, keine KI** — bewusst ohne externe Mathe-Bibliothek (Supply-Chain-Hygiene). Neue Route `GET /api/battery/forecast` (nach Fahrzeug/Tenant gescoped via `vehicle_users`, Admin sieht alle) + Service `backend/src/services/batteryForecast.js`. Lokalisiert in allen sieben Sprachen.
+
+### Hinweise
+
+- Zweiter Roadmap-Drop (siehe `docs/roadmap.md`). Die Prognose erscheint erst ab ≥ 14 Messtagen — bis dahin ein erklärender Hinweis statt eines leeren Charts. Referenz „100 %" ist der Startwert der jeweiligen Messreihe (konsistent mit der bestehenden Degradations-Übersicht).
+
+---
+
 ## [v3.26.0] - 2026-06-21
 
 ### Neu
