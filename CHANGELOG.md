@@ -7,6 +7,15 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.23.7] - 2026-06-21
+
+### Behoben
+
+- **CI: Versions-Badge bleibt nicht mehr veraltet hängen**: Der Workflow „Update Version Badge" hat nach jedem Versionssprung per `git push` direkt auf `main` geschrieben — das scheitert an der Branch-Protection (9 Pflicht-Checks müssen auf jedem neuen Commit grün sein), weshalb das README-Badge zuletzt auf `v3.22.0` festhing, obwohl der Code längst auf `v3.23.6` war. Der Workflow ist jetzt **ersatzlos entfernt**; stattdessen liest das Badge in `README.md`/`README.en.md` die Version über einen dynamischen [shields.io](https://shields.io)-Endpoint (`github/package-json/v`) direkt aus `backend/package.json` — es aktualisiert sich von selbst, ohne Commit, Push oder PAT.
+- **CI: Dependabot-Auto-Merge labelt Major-Bumps wieder korrekt**: Der Schritt „Label major bumps" rief `gh label create` ohne Repo-Kontext auf und scheiterte mit `fatal: not a git repository` (der Job hat bewusst keinen Checkout). Behoben durch ein Job-Level-`GH_REPO: ${{ github.repository }}`, das allen `gh`-Aufrufen den Repo-Bezug gibt. Patch-/Minor-Bumps wurden weiterhin sauber gemergt (deren `gh pr merge` leitet das Repo aus der vollen PR-URL ab).
+
+---
+
 ## [v3.23.6] - 2026-06-20
 
 ### Sicherheit
