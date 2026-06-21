@@ -382,7 +382,17 @@
     "costByLocation": "Konuma göre maliyet",
     "costByLocSessions": "{n} şarj",
     "costByLocCostTooltip": "Bu konumdaki toplam maliyet. Ücretsiz işaretlenen şarjlar 0 € sayılır.",
-    "costByLocAvgTooltip": "Ortalama fiyat: toplam maliyet bölü bu konumda şarj edilen kWh."
+    "costByLocAvgTooltip": "Ortalama fiyat: toplam maliyet bölü bu konumda şarj edilen kWh.",
+    "windowsTitle": "En uygun şarj zamanları",
+    "windowsNotConfigured": "Henüz elektrik fiyat sağlayıcısı ayarlanmadı — Ayarlar → Tarife altında aWattar veya Tibber bağlayın, en uygun şarj zamanları burada görünsün.",
+    "windowsCurrent": "Güncel fiyat",
+    "windowsBest4h": "En iyi 4 saatlik aralık",
+    "windowsBest8h": "En iyi 8 saatlik aralık",
+    "windowsBestTooltip": "Önümüzdeki 24 saatteki en ucuz kesintisiz şarj aralığı — başlangıç, bitiş ve ortalama fiyat.",
+    "windowsNext24h": "Önümüzdeki 24 saat",
+    "windowsUnit": "ct/kWh",
+    "windowsAvgPrice": "ort. {value} ct/kWh",
+    "windowsBarTooltip": "{time}: {value} ct/kWh"
   },
   "battery": {
     "title": "Batarya & Bozulma",

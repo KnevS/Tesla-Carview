@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.26.0] - 2026-06-21
+
+### Added
+
+- **Cheapest charging windows (roadmap drop 01, completes the charging trilogy)**: a new "Cheapest charging windows" section in the charging view. Shows the current electricity price, the cheapest **4-hour and 8-hour window** in the next 24 hours (start/end/avg price) and a labelled hourly grid with price-band colouring (green < 10 ct, yellow < 25 ct, red above; the cheapest 4h window highlighted green). Data comes from the existing `GET /api/tariff/prices` route (aWattar/Tibber). If no tariff provider is set up, an explanatory hint is shown instead of an error. New component `frontend/src/components/ChargingTariffWindows.vue` — unlike the compact dashboard `TariffWidget` it is fully localised in all seven languages.
+
+---
+
 ## [v3.25.0] - 2026-06-21
 
 ### Added

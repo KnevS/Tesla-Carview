@@ -71,6 +71,12 @@
       <ChargingHeatmap />
     </SortableSection>
 
+    <SortableSection v-if="sid === 'tariffwin'" page-id="charging" section-id="tariffwin"
+      :title="$t('charging.windowsTitle')" icon="💶"
+      :collapsed="isCollapsed('tariffwin')" @toggle="toggle('tariffwin')" @move="(f,t,p) => moveSection(f,t,p)">
+      <ChargingTariffWindows />
+    </SortableSection>
+
     <SortableSection v-if="sid === 'sessions'" page-id="charging" section-id="sessions"
       :title="$t('charging.sectionSessions')" icon="🔌"
       :collapsed="isCollapsed('sessions')" @toggle="toggle('sessions')" @move="(f,t,p) => moveSection(f,t,p)">
@@ -226,6 +232,7 @@ import StatCard from '../components/StatCard.vue';
 import AppIcon from '../components/AppIcon.vue';
 import ChargingHeatmap from '../components/ChargingHeatmap.vue';
 import ChargingSessionDetail from '../components/ChargingSessionDetail.vue';
+import ChargingTariffWindows from '../components/ChargingTariffWindows.vue';
 import SortToggle from '../components/SortToggle.vue';
 import SortableSection from '../components/SortableSection.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
@@ -236,7 +243,7 @@ import api from '../api.js';
 const { t, locale } = useI18n();
 const appStore = useAppStore();
 
-const CHARGING_SECTIONS = ['stats', 'bytype', 'costbyloc', 'heatmap', 'sessions'];
+const CHARGING_SECTIONS = ['stats', 'bytype', 'costbyloc', 'heatmap', 'tariffwin', 'sessions'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('charging', CHARGING_SECTIONS);
 
 const sessions = ref([]);

@@ -382,7 +382,17 @@
     "costByLocation": "Coste por lugar",
     "costByLocSessions": "{n} cargas",
     "costByLocCostTooltip": "Coste total en este lugar. Las cargas marcadas como gratuitas cuentan como 0 €.",
-    "costByLocAvgTooltip": "Precio medio: coste total dividido por los kWh cargados en este lugar."
+    "costByLocAvgTooltip": "Precio medio: coste total dividido por los kWh cargados en este lugar.",
+    "windowsTitle": "Mejores franjas de carga",
+    "windowsNotConfigured": "Aún no hay proveedor de precios de electricidad configurado — conecta aWattar o Tibber en Ajustes → Tarifa para ver aquí las franjas de carga más baratas.",
+    "windowsCurrent": "Precio actual",
+    "windowsBest4h": "Mejor franja de 4 h",
+    "windowsBest8h": "Mejor franja de 8 h",
+    "windowsBestTooltip": "Franja de carga continua más barata en las próximas 24 horas — inicio, fin y precio medio.",
+    "windowsNext24h": "Próximas 24 horas",
+    "windowsUnit": "ct/kWh",
+    "windowsAvgPrice": "med. {value} ct/kWh",
+    "windowsBarTooltip": "{time}: {value} ct/kWh"
   },
   "battery": {
     "title": "Batería y Degradación",

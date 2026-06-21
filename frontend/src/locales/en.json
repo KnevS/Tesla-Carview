@@ -382,7 +382,17 @@
     "costByLocation": "Cost by location",
     "costByLocSessions": "{n} charges",
     "costByLocCostTooltip": "Total cost at this location. Charges marked as free count as €0.",
-    "costByLocAvgTooltip": "Average price: total cost divided by kWh charged at this location."
+    "costByLocAvgTooltip": "Average price: total cost divided by kWh charged at this location.",
+    "windowsTitle": "Cheapest charging windows",
+    "windowsNotConfigured": "No electricity price provider set up yet — connect aWattar or Tibber under Settings → Tariff and the cheapest charging windows will appear here.",
+    "windowsCurrent": "Current price",
+    "windowsBest4h": "Best 4-hour window",
+    "windowsBest8h": "Best 8-hour window",
+    "windowsBestTooltip": "Cheapest contiguous charging window in the next 24 hours — start, end and average price.",
+    "windowsNext24h": "Next 24 hours",
+    "windowsUnit": "ct/kWh",
+    "windowsAvgPrice": "avg {value} ct/kWh",
+    "windowsBarTooltip": "{time}: {value} ct/kWh"
   },
   "battery": {
     "title": "Battery & Degradation",

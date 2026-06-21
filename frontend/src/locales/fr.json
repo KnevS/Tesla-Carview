@@ -382,7 +382,17 @@
     "costByLocation": "Coût par lieu",
     "costByLocSessions": "{n} recharges",
     "costByLocCostTooltip": "Coût total à ce lieu. Les recharges marquées gratuites comptent pour 0 €.",
-    "costByLocAvgTooltip": "Prix moyen : coût total divisé par les kWh rechargés à ce lieu."
+    "costByLocAvgTooltip": "Prix moyen : coût total divisé par les kWh rechargés à ce lieu.",
+    "windowsTitle": "Meilleurs créneaux de recharge",
+    "windowsNotConfigured": "Aucun fournisseur de prix de l'électricité configuré — connectez aWattar ou Tibber dans Paramètres → Tarif pour voir ici les créneaux de recharge les moins chers.",
+    "windowsCurrent": "Prix actuel",
+    "windowsBest4h": "Meilleur créneau de 4 h",
+    "windowsBest8h": "Meilleur créneau de 8 h",
+    "windowsBestTooltip": "Créneau de recharge continu le moins cher des 24 prochaines heures — début, fin et prix moyen.",
+    "windowsNext24h": "Prochaines 24 heures",
+    "windowsUnit": "ct/kWh",
+    "windowsAvgPrice": "moy. {value} ct/kWh",
+    "windowsBarTooltip": "{time} : {value} ct/kWh"
   },
   "battery": {
     "title": "Batterie & Dégradation",

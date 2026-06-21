@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.26.0] - 2026-06-21
+
+### Neu
+
+- **Günstige Ladefenster (Roadmap-Drop 01, Abschluss Lade-Trilogie)**: Neue Sektion „Günstige Ladefenster" in der Laden-Ansicht. Zeigt den aktuellen Strompreis, das günstigste **4-Stunden- und 8-Stunden-Fenster** der nächsten 24 Stunden (Start/Ende/Ø-Preis) sowie ein beschriftetes Stundenraster mit Preisklassen-Färbung (grün < 10 ct, gelb < 25 ct, rot darüber; das günstigste 4h-Fenster grün hervorgehoben). Datenquelle ist die bestehende Route `GET /api/tariff/prices` (aWattar/Tibber). Ist kein Tarif-Anbieter eingerichtet, erscheint ein erklärender Hinweis statt eines Fehlers. Neue Komponente `frontend/src/components/ChargingTariffWindows.vue` — anders als das kompakte Dashboard-`TariffWidget` vollständig lokalisiert in allen sieben Sprachen.
+
+---
+
 ## [v3.25.0] - 2026-06-21
 
 ### Neu

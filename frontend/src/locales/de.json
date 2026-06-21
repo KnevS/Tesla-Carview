@@ -382,7 +382,17 @@
     "costByLocation": "Kosten nach Ort",
     "costByLocSessions": "{n} Ladungen",
     "costByLocCostTooltip": "Summe der Kosten an diesem Ort. Als kostenlos markierte Ladungen zählen mit 0 €.",
-    "costByLocAvgTooltip": "Durchschnittspreis: Gesamtkosten geteilt durch geladene kWh an diesem Ort."
+    "costByLocAvgTooltip": "Durchschnittspreis: Gesamtkosten geteilt durch geladene kWh an diesem Ort.",
+    "windowsTitle": "Günstige Ladefenster",
+    "windowsNotConfigured": "Noch kein Strompreis-Anbieter eingerichtet — unter Einstellungen → Tarif lässt sich aWattar oder Tibber verbinden, dann erscheinen hier die günstigsten Ladefenster.",
+    "windowsCurrent": "Aktueller Preis",
+    "windowsBest4h": "Bestes 4-Std-Fenster",
+    "windowsBest8h": "Bestes 8-Std-Fenster",
+    "windowsBestTooltip": "Günstigstes zusammenhängendes Ladefenster in den nächsten 24 Stunden — Start, Ende und Durchschnittspreis.",
+    "windowsNext24h": "Nächste 24 Stunden",
+    "windowsUnit": "ct/kWh",
+    "windowsAvgPrice": "Ø {value} ct/kWh",
+    "windowsBarTooltip": "{time}: {value} ct/kWh"
   },
   "battery": {
     "title": "Batterie & Degradation",
