@@ -55,7 +55,7 @@ Für Live-Vehicle-Daten (Akku, Klima, TPMS, Telemetry-Stream) gibt es **nur eine
 |---|---|
 | **Dashboard** | Gesamtstatistiken, letzte Fahrt, monatliches Kilometerdiagramm |
 | **Fahrten** | GPS-Track auf Karte, Verbrauch, Geschwindigkeit, SoC-Verlauf |
-| **Laden** | Ladesessions mit Kosten, GPS-basierter Ladeort-Zuordnung, kostenlose Ladungen markierbar |
+| **Laden** | Ladesessions mit Kosten, GPS-basierter Ladeort-Zuordnung, kostenlose Ladungen markierbar; **Ladeverlauf je Session** (Leistungs-/Ladestandskurve), **Kosten nach Ort** und **günstige Ladefenster** aus dynamischem Strompreis (v3.24–v3.26) |
 | **Ladeorte** | Definierbare Standorte mit GPS-Radius, Preis/kWh, Auto-Erkennung |
 | **Batterie / Battery-Health-Companion** | Phase 1 (v3.6.0): Reichweiten-Verlauf, Degradation, Ladekurve, Effizienz vs. Außentemperatur, Phantom-Drain, Anomalien — alles rein statistisch aus eigenen Daten. Phase 2 (v3.7.0): persistierte Anomalie-Alerts via Push + Vorklimatisierungs-Vorschläge bei Frost/Hitze (Open-Meteo) |
 | **App-Hub** (v3.9.0) | Kuratierte Web-Apps für den Tesla-Browser: ARD Audiothek, Deutschlandfunk Live, GoingElectric, OpenChargeMap, Telegram Web, Wikipedia, ABRP — kostenfrei, ohne Account-Zwang, **bewusst keine Doppelung** zu Tesla-Native-Apps. Admin-Whitelist pro Mandant |

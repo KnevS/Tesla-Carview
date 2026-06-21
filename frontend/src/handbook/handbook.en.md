@@ -216,6 +216,8 @@ Charging locations are detected automatically via GPS and linked to a price per 
 
 Typical use case: charging at the workplace, paid by the employer, that should not be part of your private bill. The *"↩ paid"* button reverses the marking at any time.
 
+**Charge timeline, cost by location & cheapest windows (v3.24–v3.26)** — In the charging view, every session opens its **charge timeline** via *"📈 View timeline"*: power and state-of-charge curve over time plus key figures (duration, kWh added, avg/peak power, cost) and a clearly labelled estimate of grid draw and charging loss (efficiency assumed per charger type). The **"Cost by location"** section sums up, per location, the number of charges, kWh, total cost and average €/kWh — with a home/away marker. When an electricity price provider (aWattar/Tibber) is connected under Settings → Tariff, **"Cheapest charging windows"** shows the current price plus the cheapest 4- and 8-hour window over the next 24 hours, with an hourly grid.
+
 
 ### Automatic charge limit (from v3.12.0)
 

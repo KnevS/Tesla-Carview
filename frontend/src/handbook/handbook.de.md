@@ -222,6 +222,8 @@ Der „🔋 Jetzt setzen"-Button löst den Befehl auch manuell aus. Tesla empfie
 
 Typischer Anwendungsfall: Laden am Arbeitsplatz, das vom Arbeitgeber gestellt wird und nicht in die private Abrechnung einfließen soll. Mit dem Button *„↩ kostenpflichtig"* lässt sich die Markierung jederzeit rückgängig machen.
 
+**Ladeverlauf, Kosten nach Ort & günstige Ladefenster (v3.24–v3.26)** — In der Laden-Ansicht öffnet jede Session über *„📈 Verlauf ansehen"* ihren **Ladeverlauf**: Leistungs- und Ladestandskurve über die Zeit plus Eckdaten (Dauer, geladene kWh, Ø-/Spitzenleistung, Kosten) und eine klar gekennzeichnete Schätzung von Netzentnahme und Ladeverlust (Wirkungsgrad je Ladetyp). Die Sektion **„Kosten nach Ort"** fasst je Ladeort Anzahl, kWh, Gesamtkosten und Ø €/kWh zusammen — mit Heim-/Auswärts-Kennzeichnung. Ist unter Einstellungen → Tarif ein Strompreis-Anbieter (aWattar/Tibber) verbunden, zeigt **„Günstige Ladefenster"** den aktuellen Preis sowie das günstigste 4- und 8-Stunden-Fenster der nächsten 24 Stunden samt Stundenraster.
+
 ## 🔐 Sicherheit {#security}
 
 - 🔑 **Passkey / WebAuthn** — Passwortloser Login mit Fingerabdruck, Face ID oder Hardware-Key

@@ -55,7 +55,7 @@ For live vehicle data (battery, climate, TPMS, telemetry stream) there is **only
 |---|---|
 | **Dashboard** | Overall statistics, latest trip, monthly distance chart |
 | **Trips** | GPS track on map, consumption, speed, SoC over time |
-| **Charging** | Charging sessions with cost, GPS-based charging-location matching, free sessions can be flagged |
+| **Charging** | Charging sessions with cost, GPS-based charging-location matching, free sessions can be flagged; **per-session charge timeline** (power/SoC curve), **cost by location** and **cheapest charging windows** from dynamic electricity price (v3.24–v3.26) |
 | **Charging locations** | Definable spots with GPS radius, price/kWh, auto-detection |
 | **Battery / Battery-Health Companion** | Phase 1 (v3.6.0): range history, degradation, charging curve, efficiency vs outside temperature, phantom drain, anomalies — all pure statistics from your own data. Phase 2 (v3.7.0): persistent anomaly alerts via push + preconditioning suggestions on frost/heat (Open-Meteo) |
 | **App hub** (v3.9.0) | Curated web apps for the Tesla browser: ARD Audiothek, Deutschlandfunk Live, GoingElectric, OpenChargeMap, Telegram Web, Wikipedia, ABRP — free, no forced account, **deliberately no duplicates** of Tesla-native apps. Admin whitelist per tenant |
