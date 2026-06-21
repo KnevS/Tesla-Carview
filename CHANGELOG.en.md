@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.32.3] - 2026-06-21
+
+### Changed
+
+- **Handbook translations caught up (fr/es/tr/el)**: the four AI-language handbooks gain the v3.24–v3.32 drop paragraphs (charge timeline/cost/windows, battery forecast + standby drain, personal range, predictive maintenance + 12-month cost outlook, operational self-check) — all six handbooks are now on par. Closes the last documentation backlog of the value-drop series.
+
+---
+
 ## [v3.32.2] - 2026-06-21
 
 ### Changed

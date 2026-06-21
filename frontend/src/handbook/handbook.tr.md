@@ -96,6 +96,8 @@ Oturum açmış her kullanıcının `/my-tracking` ("📱 Benim GPS'im" navigasy
 
 ## 🔋 Batarya sağlık paneli (Companion Aşama 1) {#battery-health}
 
+**Sağlık ve tahmin (v3.27–v3.28):** %100 SoC’ye normalize edilmiş menzilin güven bandıyla doğrusal projeksiyonu (yıllık yıpranma, 3 yıl içindeki menzil, %80’e kalan süre), ayrıca kalıcı artışta park tüketimi uyarısı. Saf istatistik, yapay zeka yok.
+
 v3.6.0 itibarıyla `/battery` altı bölüm sunuyor; temel batarya sorularına dürüst yanıtlar — **sadece istatistik, yapay zeka yok, veri kaçağı yok**:
 
 1. **Menzil geçmişi** — maks. rated_range zaman içinde.
@@ -203,6 +205,8 @@ Araç komutları (kapı açma, klima vb.) için araca bir Virtual Key kaydedilme
 5. **Ayarlar → Araç bağlantısı → Virtual Key durumu** altından doğrula
 
 ## ⚡ Şarj noktaları ve maliyetler {#charging-locations}
+
+**Şarj seyri, konuma göre maliyet ve en uygun zamanlar (v3.24–v3.26):** her oturum « 📈 Seyri görüntüle » ile güç/şarj durumu eğrisini ve temel değerleri, ayrıca tahmini şebeke tüketimini gösterir. « Konuma göre maliyet » bölümü konuma göre toplar (şarj sayısı, kWh, toplam maliyet, ort. €/kWh). Ayarlar → Tarife altında bir fiyat sağlayıcısı (aWattar/Tibber) bağlıysa « En uygun şarj zamanları » güncel fiyatı ve önümüzdeki 24 saatin en iyi 4 sa/8 sa aralığını gösterir. Saf istatistik.
 
 Şarj noktaları GPS ile otomatik tanınır ve kWh başına bir fiyatla eşleştirilir.
 
@@ -596,6 +600,8 @@ Notlar:
 
 ## 🔧 Servis aralıkları {#service-intervals}
 
+**Vorausschau (v3.31):** km aralıkları için TeslaView, kilometrenize göre ne zaman dolacağını tahmin eder; TCO panosu ayrıca 12 aylık maliyet öngörüsü gösterir. Saf istatistik.
+
 **Ayarlar → Servis aralıkları** altında her araç için tekrar eden servis görevleri tanımlarsın (muayene, bakım, fren hidroliği, mevsimsel lastik değişimi, polen filtresi, silecekler, klima bakımı). Her kayıt **zaman aralığı** (ay), **km aralığı** veya her ikisini de kabul eder. „Standartları oluştur" Tesla için tipik bir listeyi önceden doldurur.
 
 Uygulama „X gün / Y km içinde vade" hesaplar ve süresi geçmiş ya da yakında dolacak öğeleri panelin üstünde gösterir. **Günlük push hatırlatması** (Web-Push), bir aralık < 30 gün veya < 1.000 km kalınca tetiklenir. Anti-spam: her push girişi „bildirildi" olarak işaretler; bir sonraki hatırlatma yalnızca „Tamam" damgası veya 30 günlük erteleme sonrası gelir. „Tamam" otomatik olarak bugünün tarihini ve mevcut kilometreyi atar.
@@ -709,6 +715,8 @@ iPhone ve diğer akıllı telefonlarda Tesla Carview, ekranın altında **iOS ta
 
 ## 🗺️ Rota planlayıcı {#route-planner}
 
+**WLTP yerine kişisel menzil (v3.29):** varış şarj durumu, sıcaklığa bağlı gerçek tüketiminize göre hesaplanır; güven bandı ve « sınırlı olabilir » uyarısı ile. Saf istatistik.
+
 Rota planlayıcı, sürüş güzergahları hesaplar ve yol boyunca hızlı şarj istasyonlarını gösterir.
 
 **Rota hesapla** — Başlangıç ve varış adreslerini gir. « + Ara durak » ile istediğin kadar waypoint ekleyebilir ve sürükle-bırak ile sıralayabilirsin.
@@ -727,6 +735,8 @@ Seçenekler tarayıcıda kaydedilir. Yönlendirme Valhalla (openstreetmap.de) ku
 **Şarj planlaması** — SoC planlaması etkinleştirildiğinde (pil seviyesini gir), planlayıcı zaman tahminiyle akıllı şarj durakları hesaplar ve her bölüm için menzil yeterli mi diye kontrol eder.
 
 ## 🟢 Sistem durumu (yönetici) {#system-health}
+
+**İşletim öz testi (v3.32):** istek üzerine ve her hafta TeslaView güvenliği ve yedek bütünlüğünü denetler (MFA kapsamı, şifreleme anahtarı, SQLite bütünlüğü, son yedeğin güncelliği ve bütünlüğü) — trafik ışığı raporu olarak. Saf tanılama.
 
 **System** altında yöneticiler sekiz kontrolle renkli trafik ışığı kartı görür:
 

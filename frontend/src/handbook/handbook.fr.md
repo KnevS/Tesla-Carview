@@ -96,6 +96,8 @@ Chaque utilisateur connecté a sa propre page sur `/my-tracking` (« 📱 Mon GP
 
 ## 🔋 Tableau santé batterie (Companion Phase 1) {#battery-health}
 
+**Santé & prévision (v3.27–v3.28) :** projection linéaire de l’autonomie normalisée à 100 % avec bande de confiance (dégradation par an, autonomie dans 3 ans, temps jusqu’à 80 %), plus une alerte de décharge à l’arrêt en cas de hausse durable. Statistiques pures, pas d’IA.
+
 Depuis v3.6.0, `/battery` propose six sections qui répondent honnêtement aux questions clés sur la batterie — **pure statistique, sans IA, sans fuite de données** :
 
 1. **Historique d'autonomie** — courbe glissante du rated_range max.
@@ -203,6 +205,8 @@ Pour les commandes véhicule (ouverture des portes, climatisation, etc.), une Vi
 5. Vérifiez sous **Paramètres → Connexion véhicule → Statut Virtual Key**
 
 ## ⚡ Lieux de recharge & coûts {#charging-locations}
+
+**Déroulé de charge, coûts par lieu & meilleurs créneaux (v3.24–v3.26) :** chaque session affiche via « 📈 Voir la progression » sa courbe de puissance/état de charge ainsi que les chiffres clés et une estimation du soutirage réseau. La section « Coût par lieu » agrège par lieu (recharges, kWh, coût total, prix moyen €/kWh). Avec un fournisseur de prix (aWattar/Tibber) connecté sous Paramètres → Tarif, « Meilleurs créneaux de recharge » indique le prix actuel et le meilleur créneau de 4 h/8 h des 24 prochaines heures. Statistiques pures.
 
 Les lieux de recharge sont détectés automatiquement par GPS et associés à un prix au kWh.
 
@@ -592,6 +596,8 @@ Sous **Admin → Contenus juridiques**, l'administrateur gère mentions légales
 
 ## 🔧 Intervalles d'entretien {#service-intervals}
 
+**Prévision (v3.31) :** pour les intervalles en km, TeslaView projette d’après votre kilométrage quand l’échéance arrivera ; le cockpit TCO affiche en plus une prévision de coûts sur 12 mois. Statistiques pures.
+
 Sous **Paramètres → Intervalles d'entretien** vous définissez par véhicule des tâches récurrentes (CT, révision, liquide de frein, changement de pneus saisonnier, filtre habitacle, balais d'essuie-glace, climatisation). Chaque entrée a un **intervalle de temps** (mois), un **intervalle km**, ou les deux. « Créer les valeurs par défaut » remplit une liste typique pour Tesla.
 
 L'app calcule « échéance dans X jours / Y km » et affiche les éléments en retard ou bientôt dus en haut du tableau de bord. Un **rappel push quotidien** (Web-Push) se déclenche lorsque l'échéance est < 30 jours ou < 1 000 km. Anti-spam : chaque push marque l'entrée comme notifiée ; un nouveau rappel n'arrive qu'après un « Fait » ou un report de 30 jours. « Fait » fixe automatiquement la date du jour et le kilométrage actuel.
@@ -695,6 +701,8 @@ Dans le design **Nevs-Edition**, la barre d'onglets adopte la teinte pétrole.
 
 ## 🗺️ Planificateur de route {#route-planner}
 
+**Autonomie personnelle au lieu du WLTP (v3.29) :** l’état de charge à l’arrivée est calculé d’après votre consommation réelle dépendante de la température, avec une bande de confiance et un avertissement « pourrait être juste ». Statistiques pures.
+
 Le planificateur calcule des itinéraires de conduite et affiche les bornes de recharge rapide en chemin.
 
 **Calculer un itinéraire** — Entrez les adresses de départ et d'arrivée. Via « + Arrêt intermédiaire », vous pouvez ajouter autant d'étapes que vous le souhaitez et les réorganiser par glisser-déposer.
@@ -713,6 +721,8 @@ Les options sont sauvegardées dans le navigateur. Le routage utilise Valhalla (
 **Planification de la recharge** — En activant la planification SoC (entrez le niveau de batterie), le planificateur calcule des arrêts de recharge optimaux avec estimation du temps et vérifie si l'autonomie est suffisante pour chaque tronçon.
 
 ## 🟢 État du système (admin) {#system-health}
+
+**Auto-test opérationnel (v3.32) :** sur demande et chaque semaine, TeslaView vérifie la sécurité et l’intégrité des sauvegardes (couverture MFA, clé de chiffrement, intégrité SQLite, fraîcheur et intégrité de la dernière sauvegarde) sous forme de rapport à feux tricolores. Diagnostic pur.
 
 Sous **System**, les administrateurs voient une carte en feux tricolores avec huit contrôles :
 

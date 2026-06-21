@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.32.3] - 2026-06-21
+
+### Geändert
+
+- **Handbuch-Übersetzungen nachgezogen (fr/es/tr/el)**: Die vier KI-Sprach-Handbücher erhalten die Drop-Absätze v3.24–v3.32 (Ladeverlauf/Kosten/Ladefenster, Batterie-Prognose + Standby-Drain, persönliche Reichweite, vorausschauende Wartung + 12-Monats-Kostenausblick, Betriebs-Selbsttest) — damit sind alle sechs Handbücher inhaltlich gleichauf. Schließt den letzten Doku-Backlog der Value-Drop-Reihe.
+
+---
+
 ## [v3.32.2] - 2026-06-21
 
 ### Geändert
