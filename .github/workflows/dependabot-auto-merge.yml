@@ -32,6 +32,13 @@ jobs:
     name: auto-merge non-major
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
+    # Dieser Job hat bewusst KEINEN actions/checkout-Schritt. Ohne Working Tree
+    # faellt `gh` auf `git remote get-url origin` zurueck, um owner/repo zu
+    # ermitteln — was mit "fatal: not a git repository" scheitert. Befehle mit
+    # einer vollen PR-URL (gh pr merge "$PR_URL") leiten das Repo aus der URL ab,
+    # aber `gh label create` hat keine URL und braucht daher GH_REPO explizit.
+    env:
+      GH_REPO: ${{ github.repository }}
     steps:
       - name: Fetch dependabot metadata
         id: meta

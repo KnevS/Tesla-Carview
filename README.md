@@ -1,6 +1,6 @@
 # ⚡ Tesla Carview
 
-[![Version](https://img.shields.io/badge/version-v3.22.0-E31937?style=flat-square)](CHANGELOG.md)
+[![Version](https://img.shields.io/github/package-json/v/KnevS/Tesla-Carview?filename=backend/package.json&style=flat-square&label=version&color=E31937)](CHANGELOG.md)
 [![Lizenz](https://img.shields.io/badge/Lizenz-PolyForm_Noncommercial-blue?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Raspberry_Pi_%7C_Linux_%7C_VPS-lightgrey?style=flat-square)](docs/02-deployment.md)
 

@@ -7,6 +7,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.23.7] - 2026-06-21
+
+### Fixed
+
+- **CI: version badge no longer gets stuck out of date**: The "Update Version Badge" workflow pushed straight to `main` via `git push` after every version bump — which fails against branch protection (9 required checks must pass on any new commit), so the README badge was stuck at `v3.22.0` while the code was already at `v3.23.6`. The workflow has been **removed entirely**; the badge in `README.md`/`README.en.md` now reads the version through a dynamic [shields.io](https://shields.io) endpoint (`github/package-json/v`) directly from `backend/package.json` — it updates itself, with no commit, push or PAT.
+- **CI: Dependabot auto-merge labels major bumps correctly again**: The "Label major bumps" step called `gh label create` without repo context and failed with `fatal: not a git repository` (the job deliberately has no checkout). Fixed with a job-level `GH_REPO: ${{ github.repository }}` that gives every `gh` call its repo context. Patch/minor bumps kept merging fine (their `gh pr merge` derives the repo from the full PR URL).
+
+---
+
 ## [v3.23.6] - 2026-06-20
 
 ### Security
