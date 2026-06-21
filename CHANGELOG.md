@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.31.0] - 2026-06-21
+
+### Neu
+
+- **Vorausschauende Wartung & 12-Monats-Kostenausblick (Roadmap-Drop 05)**: Die Wartungs-Intervalle zeigen jetzt neben „noch X km" eine **Zeitprognose** — aus deiner tatsächlichen Fahrleistung (Ø km/Tag der letzten 90 Tage) wird hochgerechnet, wann ein km-Intervall fällig wird („≈ in ~6 Wochen"). Das TCO-Cockpit bekommt einen **12-Monats-Kostenausblick** (Wartung + Strom aus den letzten 12 Monaten fortgeschrieben, plus Versicherung/Steuer). Der HU/TÜV-Termin läuft als reguläres Intervall mit Countdown mit. Backend: `computeStatus` um `predicted_days`/`km_per_day` erweitert, neue Route `GET /api/tco/vehicles/:id/forecast`. Reine Statistik, keine KI, keine DB-Migration. Lokalisiert in allen sieben Sprachen.
+
+---
+
 ## [v3.30.0] - 2026-06-21
 
 ### Neu

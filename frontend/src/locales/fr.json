@@ -2654,6 +2654,15 @@
     }
   },
   "tco": {
+    "forecast": {
+      "title": "Prévision de coûts sur 12 mois",
+      "subtitle": "Prévision pour les 12 prochains mois basée sur les 12 derniers.",
+      "service": "Entretien",
+      "electricity": "Électricité",
+      "insurance": "Assurance",
+      "tax": "Taxe",
+      "total": "Total (prévision)"
+    },
     "title": "Cockpit TCO",
     "subtitle": "Coût total de possession — combien ce véhicule te coûte vraiment ?",
     "incompleteTitle": "Données de base incomplètes",

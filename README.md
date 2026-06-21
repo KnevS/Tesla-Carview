@@ -71,7 +71,7 @@ Für Live-Vehicle-Daten (Akku, Klima, TPMS, Telemetry-Stream) gibt es **nur eine
 | **Abrechnung** | Heimladen-Sessions & Monta-Integration für alle Fahrzeuge; Kostenabrechnung (PDF, Erstattungsvorlage) für Dienstwagen |
 | **Betriebsbuch** | Wartungen, Reparaturen, Reifen, Inspektionen mit Kosten |
 | **Export** | CSV/JSON/**PDF**-Export für Fahrten & Laden, Vollbackup; PDF-Fahrtenbuch druckfertig mit Datum, Strecke, Verbrauch, SoC |
-| **Wartungsintervalle** | Pro Fahrzeug konfigurierbare Service-Aufgaben (TÜV, Reifen, Bremsflüssigkeit, …) mit Zeit- und km-Intervall + tägliche Push-Erinnerung |
+| **Wartungsintervalle** | Pro Fahrzeug konfigurierbare Service-Aufgaben (TÜV, Reifen, Bremsflüssigkeit, …) mit Zeit- und km-Intervall + tägliche Push-Erinnerung; **vorausschauende Zeitprognose aus der Fahrleistung + 12-Monats-Kostenausblick im TCO (v3.31)** |
 | **Audit-Log** | Admin-Viewer für sicherheitsrelevante Ereignisse mit Filter und CSV-Export (DSGVO-konform) |
 | **Dynamischer Stromtarif** | aWattar (DE/AT) und Tibber-Integration: 24h-Preiskurve im Dashboard, Auto-Set des günstigsten 4h-Lade-Fensters |
 | **PDF-Abrechnung** | Unterschriftsreife PDF für Heimladen-Erstattung (clientseitig, keine Cloud) |

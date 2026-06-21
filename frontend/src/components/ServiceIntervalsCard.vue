@@ -69,6 +69,11 @@
               <span v-if="s.km_until_due != null" class="ml-2">
                 · {{ s.km_until_due < 0 ? `${-s.km_until_due} km überfällig` : `noch ${s.km_until_due} km` }}
               </span>
+              <span v-if="s.km_until_due != null && s.km_until_due >= 0 && s.km_per_day && s.predicted_days != null && s.predicted_days >= 0"
+                class="ml-2 text-gray-500"
+                v-tooltip="`Vorausschau aus deiner Fahrleistung (Ø ${s.km_per_day} km/Tag, letzte 90 Tage). Reine Statistik.`">
+                · ≈ {{ predictText(s.predicted_days) }}
+              </span>
             </p>
           </div>
           <div class="flex gap-1 flex-wrap items-center">
@@ -181,6 +186,14 @@ const STATUS_CLASS = {
 };
 const statusLabel = s => STATUS_LABEL[s] || s;
 const statusClass = s => STATUS_CLASS[s] || 'bg-gray-700 text-gray-300';
+
+// Vorausschau: prognostizierte Tage bis Fälligkeit in grobe Wochen-/Monatsschritte.
+function predictText(days) {
+  if (days < 14)  return `in ${days} Tagen`;
+  if (days < 90)  return `in ~${Math.round(days / 7)} Wochen`;
+  if (days < 730) return `in ~${Math.round(days / 30)} Monaten`;
+  return `in ~${(days / 365).toFixed(1)} Jahren`;
+}
 const fmtDay = ts => ts ? new Date(ts * 1000).toLocaleDateString('de-DE') : '';
 
 async function load() {

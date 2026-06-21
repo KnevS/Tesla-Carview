@@ -2654,6 +2654,15 @@
     }
   },
   "tco": {
+    "forecast": {
+      "title": "12 aylık maliyet öngörüsü",
+      "subtitle": "Son 12 aya dayanarak önümüzdeki 12 ay için tahmin.",
+      "service": "Bakım",
+      "electricity": "Elektrik",
+      "insurance": "Sigorta",
+      "tax": "Vergi",
+      "total": "Toplam (tahmini)"
+    },
     "title": "TCO Kokpiti",
     "subtitle": "Toplam Sahip Olma Maliyeti — bu araç sana gerçekten ne kadara mal oluyor?",
     "incompleteTitle": "Temel veriler eksik",

@@ -617,6 +617,8 @@ Under **Admin → Legal content** the administrator maintains the imprint, priva
 
 Under **Service log** you'll find the "🔧 Service intervals" card right above the entry list. There you define recurring service tasks per vehicle (MOT/TÜV, inspection, brake fluid, seasonal tyre change, cabin filter, wiper blades, A/C service). Each entry can have a **time interval** (months), a **km interval**, or both. "Seed defaults" pre-fills a Tesla-typical list. The intervals sit next to the actual log entries (maintenance, tyres, inspection) on purpose — they belong together.
 
+**Forecast (v3.31):** for km-based intervals, TeslaView projects from your actual mileage (avg km/day over the last 90 days) when the interval is likely due ("≈ in ~6 weeks"). The MOT/TÜV date runs as a regular time interval with its countdown. In the TCO cockpit, a **12-month cost outlook** shows expected maintenance, electricity, insurance and tax costs for the next 12 months (projected from the last 12). Pure statistics.
+
 The app derives "due in X days / Y km" and surfaces overdue and soon-due items at the top of the dashboard. A **daily push reminder** (Web-Push) fires when an interval has < 30 days or < 1,000 km left. Anti-spam: each push marks the entry as notified; another reminder only fires after a "Done" stamp or a 30-day snooze. "Done" automatically sets today's date and the current odometer.
 
 ## 📋 Audit log {#audit-log}

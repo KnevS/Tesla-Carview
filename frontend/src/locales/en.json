@@ -875,6 +875,15 @@
     "adminOnly": "Only administrators can dismiss this notice."
   },
   "tco": {
+    "forecast": {
+      "title": "12-month cost outlook",
+      "subtitle": "Forecast for the next 12 months based on the last 12 months.",
+      "service": "Maintenance",
+      "electricity": "Electricity",
+      "insurance": "Insurance",
+      "tax": "Tax",
+      "total": "Total (forecast)"
+    },
     "title": "TCO Cockpit",
     "subtitle": "Total Cost of Ownership — what does this vehicle actually cost you?",
     "incompleteTitle": "Base data incomplete",

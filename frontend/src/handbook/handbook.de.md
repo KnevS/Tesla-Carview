@@ -614,6 +614,8 @@ Unter **Admin → Rechtliche Inhalte** pflegt der Administrator Impressum, Daten
 
 Unter **Betriebsbuch** findest du oberhalb der Eintrags-Liste die Karte „🔧 Wartungsintervalle". Dort definierst du pro Fahrzeug wiederkehrende Service-Aufgaben (TÜV, Inspektion, Bremsflüssigkeit, Reifenwechsel, Innenraumfilter, Wischblätter, Klimaservice). Pro Eintrag wählst du ein **Zeitintervall** (Monate), ein **km-Intervall**, oder beides. „Standards anlegen" füllt eine Tesla-typische Default-Liste vor. Die Intervalle sind eng mit den darunter angezeigten Betriebsbuch-Einträgen (Wartung, Reifen, Inspektion) verzahnt — beides am selben Ort gehört zusammen.
 
+**Vorausschau (v3.31):** Bei km-Intervallen rechnet TeslaView aus deiner tatsächlichen Fahrleistung (Ø km/Tag der letzten 90 Tage) hoch, wann das Intervall voraussichtlich fällig wird („≈ in ~6 Wochen"). Der HU/TÜV-Termin läuft als reguläres Zeit-Intervall mit Countdown mit. Im TCO-Cockpit zeigt ein **12-Monats-Kostenausblick** die erwarteten Wartungs-, Strom-, Versicherungs- und Steuerkosten der nächsten 12 Monate (fortgeschrieben aus den letzten 12 Monaten). Reine Statistik.
+
 Die App rechnet daraus „fällig in X Tagen / Y km" und zeigt überfällige bzw. bald-fällige Einträge oben auf dem Dashboard. Ein **täglicher Push-Reminder** (Web-Push) springt an, sobald ein Intervall < 30 Tage oder < 1.000 km Restweg übrig hat. Anti-Spam: pro Push wird der Eintrag markiert; eine erneute Erinnerung kommt erst nach „Erledigt"-Stempel oder einer 30-Tage-„Aufschieben"-Aktion. Mark-as-done setzt automatisch das heutige Datum und den aktuellen Kilometerstand.
 
 ## 📋 Audit-Log {#audit-log}

@@ -2654,6 +2654,15 @@
     }
   },
   "tco": {
+    "forecast": {
+      "title": "Previsión de costes a 12 meses",
+      "subtitle": "Previsión para los próximos 12 meses según los últimos 12.",
+      "service": "Mantenimiento",
+      "electricity": "Electricidad",
+      "insurance": "Seguro",
+      "tax": "Impuesto",
+      "total": "Total (previsión)"
+    },
     "title": "Cabina TCO",
     "subtitle": "Coste total de propiedad — ¿cuánto te cuesta realmente este vehículo?",
     "incompleteTitle": "Datos base incompletos",

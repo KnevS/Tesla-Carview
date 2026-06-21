@@ -875,6 +875,15 @@
     "adminOnly": "Nur Administratoren können diesen Hinweis ausblenden."
   },
   "tco": {
+    "forecast": {
+      "title": "12-Monats-Kostenausblick",
+      "subtitle": "Prognose für die nächsten 12 Monate auf Basis der letzten 12 Monate.",
+      "service": "Wartung",
+      "electricity": "Strom",
+      "insurance": "Versicherung",
+      "tax": "Steuer",
+      "total": "Summe (Prognose)"
+    },
     "title": "TCO-Cockpit",
     "subtitle": "Total Cost of Ownership — was kostet dich dieses Fahrzeug wirklich?",
     "incompleteTitle": "Stammdaten unvollständig",

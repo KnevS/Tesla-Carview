@@ -37,7 +37,16 @@ const DEFAULT_INTERVALS = [
  *  irrelevant; der Mensch plant in groberen Wochen-Schritten. */
 const MONTH_S = 30 * 24 * 3600;
 
-function computeStatus(row, vehicle, now) {
+// Tatsächliche Fahrleistung (km/Tag) der letzten `days` Tage — Basis für die
+// vorausschauende Fällig-Prognose. Reine Statistik.
+function kmPerDay(db, vehicleId, days = 90) {
+  const r = db.prepare(
+    'SELECT COALESCE(SUM(distance_km), 0) AS km FROM trips WHERE vehicle_id=? AND start_time > unixepoch() - ?*86400'
+  ).get(vehicleId, days);
+  return r.km > 0 ? r.km / days : 0;
+}
+
+function computeStatus(row, vehicle, now, dailyKm = 0) {
   const out = { ...row };
   // Zeitliche Faelligkeit
   if (row.last_done_at && row.interval_months) {
@@ -71,6 +80,20 @@ function computeStatus(row, vehicle, now) {
   else if (dDays <= 30 || dKm <= 1000) out.status = 'soon';
   else out.status = 'ok';
 
+  // Vorausschauende Fälligkeit: km-Intervalle über die tatsächliche
+  // Fahrleistung in eine Zeitschätzung umrechnen; zeitbasierte nutzen
+  // days_until_due direkt. Das frühere der beiden Ereignisse zählt.
+  let predicted = out.days_until_due ?? null;
+  if (out.km_until_due != null && dailyKm > 0) {
+    const kmDays = out.km_until_due / dailyKm;
+    predicted = predicted == null ? kmDays : Math.min(predicted, kmDays);
+  }
+  if (predicted != null) {
+    out.predicted_days = Math.round(predicted);
+    out.predicted_due_at = now + Math.round(predicted) * 86400;
+  }
+  out.km_per_day = dailyKm > 0 ? Math.round(dailyKm * 10) / 10 : null;
+
   return out;
 }
 
@@ -98,9 +121,14 @@ router.get('/', (req, res) => {
        ORDER BY si.is_active DESC, si.kind`
   ).all(...params);
   const now = Math.floor(Date.now() / 1000);
+  // km/Tag je Fahrzeug einmal berechnen (gecacht), dann an computeStatus geben.
+  const rate = {};
   // computeStatus erwartet `vehicle` separat — hier ist v.odometer_km bereits
   // im Row-Objekt aus dem JOIN, also reicht ein Pseudo-Vehicle.
-  res.json(rows.map(r => computeStatus(r, { odometer_km: r.odometer_km }, now)));
+  res.json(rows.map(r => {
+    if (rate[r.vehicle_id] === undefined) rate[r.vehicle_id] = kmPerDay(req.db, r.vehicle_id);
+    return computeStatus(r, { odometer_km: r.odometer_km }, now, rate[r.vehicle_id]);
+  }));
 });
 
 // POST /api/service-intervals — neues Intervall anlegen

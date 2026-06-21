@@ -91,6 +91,27 @@
         </table>
       </div>
 
+      <!-- 12-Monats-Kostenausblick -->
+      <div v-if="forecast && forecast.has_history" class="card p-5">
+        <h2 class="text-base font-semibold">{{ $t('tco.forecast.title') }}</h2>
+        <p class="text-gray-400 text-xs mt-0.5 mb-3">{{ $t('tco.forecast.subtitle') }}</p>
+        <table class="w-full text-sm">
+          <tbody class="divide-y divide-gray-700">
+            <tr v-for="row in forecastRows" :key="row.key">
+              <td class="py-2"><span class="mr-2">{{ row.icon }}</span>{{ $t('tco.forecast.' + row.key) }}</td>
+              <td class="py-2 text-right tabular-nums">
+                <span v-if="row.value == null" class="text-gray-500 italic">{{ $t('tco.breakdown.notSet') }}</span>
+                <template v-else>{{ fmtEur(row.value) }}</template>
+              </td>
+            </tr>
+            <tr class="font-semibold border-t-2 border-gray-600">
+              <td class="py-3">{{ $t('tco.forecast.total') }}</td>
+              <td class="py-3 text-right tabular-nums">{{ fmtEur(forecast.predicted.total_eur) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <!-- Service-Records mit Hinzufügen -->
       <div class="card p-5">
         <div class="flex items-center justify-between mb-3">
@@ -347,6 +368,7 @@ const CATEGORIES = ['service', 'tires', 'repair', 'inspection', 'tuv', 'accessor
 
 const data    = ref(null);
 const records = ref([]);
+const forecast = ref(null);
 const loading = ref(false);
 const error   = ref('');
 
@@ -371,6 +393,18 @@ const breakdownRows = computed(() => {
     { key: 'tax',          icon: '🏛',  value: s.tax_eur },
     { key: 'electricity',  icon: '⚡',  value: s.electricity_eur || null },
     { key: 'service',      icon: '🔧', value: s.service_eur || null },
+  ];
+});
+
+// 12-Monats-Kostenausblick (Drop 05) — Prognose aus den letzten 12 Monaten.
+const forecastRows = computed(() => {
+  if (!forecast.value?.predicted) return [];
+  const p = forecast.value.predicted;
+  return [
+    { key: 'service',     icon: '🔧', value: p.service_eur || null },
+    { key: 'electricity', icon: '⚡', value: p.electricity_eur || null },
+    { key: 'insurance',   icon: '🛡', value: p.insurance_eur },
+    { key: 'tax',         icon: '🏛', value: p.tax_eur },
   ];
 });
 
@@ -504,12 +538,14 @@ async function load() {
   if (!v) return;
   loading.value = true; error.value = '';
   try {
-    const [tco, recs] = await Promise.all([
+    const [tco, recs, fc] = await Promise.all([
       api.get(`/tco/vehicles/${v.id}`).then(r => r.data),
       api.get(`/tco/vehicles/${v.id}/service-records`).then(r => r.data),
+      api.get(`/tco/vehicles/${v.id}/forecast`).then(r => r.data).catch(() => null),
     ]);
     data.value    = tco;
     records.value = recs;
+    forecast.value = fc;
   } catch (e) {
     error.value = e.response?.data?.error || e.message;
   } finally {

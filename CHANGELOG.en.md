@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.31.0] - 2026-06-21
+
+### Added
+
+- **Predictive maintenance & 12-month cost outlook (roadmap drop 05)**: service intervals now show a **time forecast** alongside the "X km left" figure — based on your actual mileage (avg km/day over the last 90 days) it projects when a km-based interval will be due ("≈ in ~6 weeks"). The TCO cockpit gains a **12-month cost outlook** (maintenance + electricity from the last 12 months projected forward, plus insurance/tax). The HU/TÜV date runs as a regular interval with its countdown. Backend: `computeStatus` extended with `predicted_days`/`km_per_day`, new route `GET /api/tco/vehicles/:id/forecast`. Pure statistics, no AI, no DB migration. Localised in all seven languages.
+
+---
+
 ## [v3.30.0] - 2026-06-21
 
 ### Added

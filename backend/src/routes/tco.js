@@ -211,6 +211,43 @@ router.get('/vehicles/:id', (req, res) => {
   res.json(result);
 });
 
+// GET /api/tco/vehicles/:id/forecast — 12-Monats-Kostenausblick.
+// Ehrliche Heuristik: die tatsächlichen Kosten der letzten 12 Monate sind die
+// Erwartung für die nächsten 12 (Wartung + Strom), plus Versicherung/Steuer
+// aus den Stammdaten (jährlich). Reine Statistik.
+router.get('/vehicles/:id/forecast', (req, res) => {
+  const id = Number(req.params.id);
+  const denied = assertVehicleAccess(req, id);
+  if (denied) return res.status(denied.status).json(denied.body);
+  const v = req.db.prepare('SELECT insurance_eur_year, tax_eur_year FROM vehicles WHERE id=?').get(id);
+  if (!v) return res.status(404).json({ error: 'Fahrzeug nicht gefunden' });
+
+  const yearAgo = Math.floor(Date.now() / 1000) - 365 * 86400;
+  const svc = req.db.prepare(
+    'SELECT COALESCE(SUM(cost_eur), 0) AS s, COUNT(*) AS n FROM service_records WHERE vehicle_id=? AND performed_at > ?'
+  ).get(id, yearAgo);
+  const elec = req.db.prepare(
+    'SELECT COALESCE(SUM(cost), 0) AS s FROM charging_sessions WHERE vehicle_id=? AND start_time > ? AND cost > 0'
+  ).get(id, yearAgo);
+
+  const r2 = x => Math.round(x * 100) / 100;
+  const service     = r2(svc.s);
+  const electricity = r2(elec.s);
+  const insurance   = v.insurance_eur_year != null ? r2(v.insurance_eur_year) : null;
+  const tax         = v.tax_eur_year != null ? r2(v.tax_eur_year) : null;
+  const total = r2([service, electricity, insurance, tax].reduce((a, b) => a + (b || 0), 0));
+
+  res.json({
+    based_on_months: 12,
+    service_records_count: svc.n,
+    has_history: svc.n > 0 || elec.s > 0,
+    predicted: {
+      service_eur: service, electricity_eur: electricity,
+      insurance_eur: insurance, tax_eur: tax, total_eur: total,
+    },
+  });
+});
+
 router.patch('/vehicles/:id', (req, res) => {
   if (req.user?.role !== 'admin') return res.status(403).json({ error: 'Nur für Administratoren' });
   const id = Number(req.params.id);

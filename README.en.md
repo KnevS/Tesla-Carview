@@ -71,7 +71,7 @@ For live vehicle data (battery, climate, TPMS, telemetry stream) there is **only
 | **Billing** | Home-charging sessions & Monta integration for all vehicles; cost statement (PDF, reimbursement template) for company cars |
 | **Service log** | Maintenance, repairs, tires, inspections with cost |
 | **Export** | CSV/JSON/**PDF** export for trips & charging, full backup; print-ready PDF trip log with date, distance, energy, SOC |
-| **Service intervals** | Per-vehicle recurring service tasks (MOT, tyres, brake fluid, …) with time- and km-intervals + daily push reminders |
+| **Service intervals** | Per-vehicle recurring service tasks (MOT, tyres, brake fluid, …) with time- and km-intervals + daily push reminders; **predictive time forecast from mileage + 12-month cost outlook in TCO (v3.31)** |
 | **Audit log** | Admin viewer for security events with filters and CSV export (GDPR-friendly) |
 | **Dynamic tariff** | aWattar (DE/AT) and Tibber integration: 24h price curve on the dashboard, one-click schedule charging at the cheapest 4h window |
 | **PDF reimbursement** | Signable PDF for home-charging reimbursement (client-side, no cloud) |
