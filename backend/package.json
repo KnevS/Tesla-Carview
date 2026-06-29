@@ -10,25 +10,25 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1068.0",
-    "@simplewebauthn/server": "^13.3.1",
+    "@aws-sdk/client-s3": "^3.1075.0",
+    "@simplewebauthn/server": "^13.3.2",
     "argon2": "^0.44.0",
-    "axios": "^1.18.0",
+    "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.10.1",
+    "better-sqlite3": "^12.11.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^17.4.2",
     "express": "^4.19.2",
     "express-rate-limit": "^8.5.2",
-    "geoip-lite": "^2.0.2",
+    "geoip-lite": "^2.0.3",
     "helmet": "^8.2.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.1.1",
     "nodemailer": "^9.0.1",
     "otpauth": "^9.3.3",
     "pdfkit": "^0.19.1",
-    "protobufjs": "^8.6.3",
+    "protobufjs": "^8.6.5",
     "qrcode": "^1.5.3",
     "ssh2-sftp-client": "^12.1.1",
     "telegraf": "^4.16.3",
@@ -37,8 +37,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "eslint": "^10.5.0",
-    "globals": "^17.6.0",
+    "eslint": "^10.6.0",
+    "globals": "^17.7.0",
     "nodemon": "^3.1.4"
   },
   "author": {
