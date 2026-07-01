@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.32.6] - 2026-07-01
+
+### Behoben
+
+- **Setup schlug bei der Admin-Erstellung fehl (`Transaction function cannot return a promise`)** ([#170](https://github.com/KnevS/Tesla-Carview/issues/170)): Der `db.transaction()`-Callback in `/api/setup/init` war `async` — das lehnt better-sqlite3 ab. Der Callback ist jetzt synchron (der bcrypt-Hash lief ohnehin schon außerhalb der Transaktion). Frische Installationen können den Setup-Wizard (Schritt 2) wieder abschließen.
+
+---
+
 ## [v3.32.5] - 2026-07-01
 
 ### Behoben

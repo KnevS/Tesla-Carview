@@ -122,7 +122,11 @@ router.post('/init', setupRateLimit, setupTokenGate, async (req, res) => {
     // BEGIN IMMEDIATE locked die DB fuer schreibende Operationen. Wenn
     // zwei /init parallel ankommen, gewinnt nur einer; der zweite sieht
     // den Admin und bricht mit 409 ab.
-    const tx = db.transaction(async () => {
+    // WICHTIG: Der Callback MUSS synchron sein — better-sqlite3 wirft sonst
+    // "Transaction function cannot return a promise". Der async-Teil
+    // (createUser/bcrypt) laeuft daher bewusst UNTERHALB, ausserhalb der
+    // Transaktion (Issue #170).
+    const tx = db.transaction(() => {
       const exists = db.prepare("SELECT 1 FROM users WHERE role='admin' LIMIT 1").get();
       if (exists) {
         const err = new Error('Setup bereits abgeschlossen');
