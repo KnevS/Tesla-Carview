@@ -44,12 +44,11 @@ message Datum {
   Value value = 2;
 }
 
+// Innerer Protobuf-Payload aus dem FlatBuffers-Envelope: nur die Messwerte.
+// VIN + created_at kommen aus dem Envelope (FlatbuffersStream), deshalb hier
+// bewusst nur das data-Feld. Unbekannte Felder ueberspringt protobufjs.
 message Payload {
-  repeated Datum data       = 1;
-  int64          created_at = 2;
-  string         vin        = 3;
-  bool           is_resend  = 4;
-  string         txid       = 5;
+  repeated Datum data = 1;
 }
 `;
 
@@ -58,12 +57,61 @@ const FIELD = {
   Odometer:     5,
   PackVoltage:  6,
   PackCurrent:  7,
+  Soc:          8,   // Tesla-Field-Enum: Soc = 8 (früher fälschlich 12)
   Gear:         10,
-  Soc:          12,
   Location:     21,
 };
 
 const GEAR_MAP = { 0: null, 1: null, 2: 'P', 3: 'R', 4: 'N', 5: 'D', 6: null };
+
+// ── Minimaler FlatBuffers-Leser (Little-Endian) ──────────────────────────────
+// Tesla-Fahrzeuge senden die Telemetrie als FlatBuffers-Envelope; die
+// eigentlichen Messwerte stecken als Protobuf darin. Wir brauchen nur wenige
+// Felder, daher dieser schlanke Reader statt einer zusätzlichen Dependency.
+// Envelope-Slots:  Txid(4) Topic(6) MessageType(8) Message(10) MessageId(12)
+// FlatbuffersStream: CreatedAt(4,uint32) SenderId(6) Payload(8,[ubyte])
+//                    DeviceType(10) DeviceId(12)=VIN
+function fbFieldOffset(buf, tablePos, vtableSlot) {
+  const vtablePos  = tablePos - buf.readInt32LE(tablePos);
+  const vtableSize = buf.readUInt16LE(vtablePos);
+  if (vtableSlot >= vtableSize) return 0;
+  return buf.readUInt16LE(vtablePos + vtableSlot);   // 0 = Feld nicht gesetzt
+}
+function fbSubTable(buf, tablePos, vtableSlot) {
+  const o = fbFieldOffset(buf, tablePos, vtableSlot);
+  if (!o) return 0;
+  const p = tablePos + o;
+  return p + buf.readUInt32LE(p);                     // uoffset zur Sub-Tabelle
+}
+function fbByteVector(buf, tablePos, vtableSlot) {
+  const o = fbFieldOffset(buf, tablePos, vtableSlot);
+  if (!o) return null;
+  const p       = tablePos + o;
+  const dataPos = p + buf.readUInt32LE(p);            // uoffset zum Vektor-Header
+  const len     = buf.readUInt32LE(dataPos);
+  return buf.subarray(dataPos + 4, dataPos + 4 + len);
+}
+function fbUint32(buf, tablePos, vtableSlot) {
+  const o = fbFieldOffset(buf, tablePos, vtableSlot);
+  return o ? buf.readUInt32LE(tablePos + o) : 0;
+}
+
+// Entpackt den FlatBuffers-Envelope → { payload (Protobuf-Bytes), vin, createdAt }.
+// Liefert null für Nicht-Telemetrie (Acks/Steuernachrichten ohne Payload).
+function decodeEnvelope(buf) {
+  if (buf.length < 12) return null;
+  const envPos    = buf.readUInt32LE(0);               // Root-Tabelle
+  const streamPos = fbSubTable(buf, envPos, 10);        // Message → FlatbuffersStream
+  if (!streamPos) return null;
+  const payload = fbByteVector(buf, streamPos, 8);
+  if (!payload || !payload.length) return null;
+  const vinBytes = fbByteVector(buf, streamPos, 12);
+  return {
+    payload,
+    vin:       vinBytes ? Buffer.from(vinBytes).toString('utf8') : null,
+    createdAt: fbUint32(buf, streamPos, 4) || null,
+  };
+}
 
 let PayloadType = null;
 
@@ -92,34 +140,39 @@ export async function startFleetTelemetryServer(server) {
 
     ws.on('message', async (raw) => {
       try {
-        const payload = Payload.decode(raw);
-        const vin = payload.vin;
-        const ts  = payload.created_at
-          ? Number(payload.created_at) / 1000
-          : Math.floor(Date.now() / 1000);
+        const buf = Buffer.isBuffer(raw) ? raw : Buffer.from(raw);
 
-        const point = extractPoint(payload.data);
+        // Tesla verpackt die Telemetrie in einen FlatBuffers-Envelope; die
+        // Messwerte liegen als Protobuf-`Payload` im FlatbuffersStream.
+        const env = decodeEnvelope(buf);
+        if (!env) return;                          // Ack/Steuernachricht → ignorieren
+
+        const decoded = Payload.decode(env.payload);
+        if (!decoded.data?.length) return;
+
+        const vin = env.vin;
+        const ts  = env.createdAt || Math.floor(Date.now() / 1000);
+
+        const point = extractPoint(decoded.data);
         if (point && vin) storePoint(vin, ts, point);
 
         // Streaming-Signale zählen (1 Datum = 1 abrechenbarer Wert).
         // Plus: pro VIN den Zeitpunkt des letzten Signals merken — das
         // Settings-UI rendert daraus den live/idle-Status-Indikator.
-        if (vin && payload.data?.length) {
+        if (vin) {
           const tenant = getTenantByVin(vin);
           if (tenant) {
             try {
               const tdb = getDb(tenant.id);
-              recordCall(tdb, 'streaming_signal', 'fleet_telemetry', payload.data.length);
+              recordCall(tdb, 'streaming_signal', 'fleet_telemetry', decoded.data.length);
               tdb.prepare(
                 'UPDATE vehicles SET telemetry_last_signal_at = ? WHERE vin = ?'
               ).run(Math.floor(Date.now() / 1000), vin);
             } catch { /* Counter-Fehler dürfen den Stream nicht abreißen */ }
           }
         }
-
-        if (payload.txid) ws.send(JSON.stringify({ txid: payload.txid, status: 200 }));
       } catch (err) {
-        console.error('[FleetTelemetry] Parse-Fehler:', err.message);
+        console.error('[FleetTelemetry] Decode-Fehler:', err.message);
       }
     });
 

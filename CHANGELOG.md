@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.32.5] - 2026-07-01
+
+### Behoben
+
+- **Fleet-Telemetrie-Daten werden jetzt dekodiert.** Firmware 2026.20.3 sendet die Telemetrie als **FlatBuffers-Envelope mit eingebettetem Protobuf**, nicht als reines Protobuf — der bisherige Decoder scheiterte an jedem Paket (`invalid wire type 4`). Der Receiver (`fleetTelemetry.js`) entpackt den Envelope jetzt mit einem schlanken FlatBuffers-Reader (VIN, Timestamp, Payload) und dekodiert das eingebettete Protobuf. Zusätzlich `Field.Soc` von 12 auf **8** korrigiert (Tesla-Enum). Live verifiziert: PackVoltage/PackCurrent kommen mit plausiblen Werten an (≈391 V / −0,5 A), keine Decode-Fehler mehr. Damit ist die Fleet-Telemetry-Kette Ende-zu-Ende funktionsfähig.
+
+---
+
 ## [v3.32.4] - 2026-07-01
 
 ### Behoben
