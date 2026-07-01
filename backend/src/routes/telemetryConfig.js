@@ -1,6 +1,8 @@
 // © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import { Router } from 'express';
 import axios from 'axios';
+import tls from 'tls';
+import { readFileSync } from 'fs';
 import { getPublicKeyPem } from '../services/virtualKey.js';
 import { apiProxyPost } from '../services/teslaApi.js';
 import { getAllTenants, getDb } from '../db/database.js';
@@ -8,6 +10,68 @@ import { getTenantSetting, setTenantSetting } from '../services/configService.js
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
 
 const router = Router();
+
+// Ein Jahr abzüglich Puffer — Tesla lehnt exp > ~364 Tage ab
+// ("expiration should be … less than …"), deshalb bewusst 360 Tage.
+const TELEMETRY_EXP_SECONDS = 60 * 60 * 24 * 360;
+
+// Wandelt ein DER-Zertifikat (Buffer) in einen PEM-Block.
+function derToPem(raw) {
+  const b64 = raw.toString('base64').match(/.{1,64}/g).join('\n');
+  return `-----BEGIN CERTIFICATE-----\n${b64}\n-----END CERTIFICATE-----`;
+}
+
+// Ruft die vom eigenen Host präsentierte TLS-Kette live ab: Leaf →
+// Intermediate(s) → Root (Root stammt aus Nodes Trust-Store via
+// issuerCertificate). Genau diese Kette braucht das Fahrzeug, um der
+// TLS-Verbindung zum Telemetrie-Receiver zu vertrauen.
+function fetchServerCaChain(hostname, port = 443) {
+  return new Promise((resolve, reject) => {
+    const socket = tls.connect(
+      { host: hostname, port, servername: hostname, rejectUnauthorized: true },
+      () => {
+        const pems = [];
+        const seen = new Set();
+        let cert = socket.getPeerCertificate(true);
+        while (cert && cert.raw && !seen.has(cert.fingerprint256)) {
+          seen.add(cert.fingerprint256);
+          pems.push(derToPem(cert.raw));
+          const next = cert.issuerCertificate;
+          if (!next || next === cert || seen.has(next.fingerprint256)) break;
+          cert = next;
+        }
+        socket.end();
+        pems.length
+          ? resolve(pems.join('\n') + '\n')
+          : reject(new Error('TLS-Handshake lieferte keine Zertifikate'));
+      },
+    );
+    socket.once('error', reject);
+    socket.setTimeout(10_000, () => socket.destroy(new Error('Timeout beim TLS-CA-Abruf')));
+  });
+}
+
+// Ermittelt die CA-Kette für das `ca`-Feld der Fleet-Telemetry-Config.
+// Tesla verlangt hier gültiges PEM — ein leerer String wird mit
+// "ca is not a valid PEM" abgelehnt. Auflösungsreihenfolge:
+//   1. TELEMETRY_CA       — komplette PEM-Kette direkt aus der Umgebung
+//   2. TELEMETRY_CA_PATH  — Pfad zu einer PEM-Datei (z. B. gemountetes fullchain.pem)
+//   3. Live-Abruf per TLS-Handshake gegen die eigene Domain
+async function resolveTelemetryCa(hostname) {
+  if (process.env.TELEMETRY_CA?.includes('BEGIN CERTIFICATE')) return process.env.TELEMETRY_CA;
+  if (process.env.TELEMETRY_CA_PATH) return readFileSync(process.env.TELEMETRY_CA_PATH, 'utf8');
+  return fetchServerCaChain(hostname, 443);
+}
+
+// Normalisiert FRONTEND_URL/Host-Header zu einem reinen Hostnamen
+// (ohne Schema, Pfad, Port) — Tesla erwartet im config.hostname genau das.
+function normalizeDomain(raw) {
+  return (raw || '')
+    .replace(/^https?:\/\//, '')
+    .replace(/\/.*$/, '')
+    .replace(/:\d+$/, '')
+    .toLowerCase();
+}
 
 // Tesla-Pflicht: Public-Key des ersten Mandanten (gemeinsame Domain → ein Key)
 router.get('/com.tesla.3p.public-key.pem', (_req, res) => {
@@ -51,7 +115,7 @@ router.get('/telemetry/status', requireAuth, async (req, res) => {
   const SIGNAL_FRESH_S = 15 * 60; // 15 min ohne Signal => idle, sonst aktiv
 
   for (const v of vehicles) {
-    if (v.last_error && /(404|approval|not approved|not enrolled|fleet_telemetry)/i.test(v.last_error)) {
+    if (v.last_error && /(not approved|not enrolled|unauthorized client)/i.test(v.last_error)) {
       v.status = 'approval_missing';
     } else if (v.last_signal_at && (now - v.last_signal_at) <= SIGNAL_FRESH_S) {
       v.status = 'streaming';
@@ -154,10 +218,17 @@ router.post('/partner/register', requireAuth, requireAdmin, async (req, res) => 
  *  gesetzt ist, nur diese eine VIN; sonst alle Fahrzeuge des Mandanten.
  *  Ergebnis pro Fahrzeug landet im DB-Schema, damit das Frontend den
  *  Status-Indikator daraus speist. */
-async function configureOne(db, v, domain) {
+async function configureOne(db, v, domain, ca) {
+  // WICHTIG: Anlegen/Aktualisieren ist der Fleet-Level-Endpoint
+  //   POST /api/1/vehicles/fleet_telemetry_config   mit { vins:[…], config }.
+  // Der per-VIN-Pfad /api/1/vehicles/{vin}/fleet_telemetry_config existiert
+  // NUR für GET/DELETE; ein POST dorthin liefert einen Rails-HTML-404 (kein
+  // Tesla-Fehler) — das wurde früher fälschlich als „nicht freigeschaltet"
+  // interpretiert und schickte Nutzer grundlos in den Tesla-Support.
   const payload = {
+    vins: [v.vin],
     config: {
-      hostname: domain, port: 443, ca: '',
+      hostname: domain, port: 443, ca,
       fields: {
         Location:     { interval_seconds: 10 },
         VehicleSpeed: { interval_seconds: 5  },
@@ -167,12 +238,31 @@ async function configureOne(db, v, domain) {
         PackVoltage:  { interval_seconds: 10 },
         PackCurrent:  { interval_seconds: 10 },
       },
-      alert_types: ['service', 'autopilot', 'charging'],
-      exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 365,
+      // alert_types bewusst weggelassen: TeslaView wertet keine Alerts aus,
+      // und ungültige Werte (früher 'autopilot') lässt Tesla die ganze
+      // Config mit "alert_type … is invalid" ablehnen.
+      exp: Math.floor(Date.now() / 1000) + TELEMETRY_EXP_SECONDS,
     },
   };
   try {
-    const data = await apiProxyPost(db, `/api/1/vehicles/${v.vin}/fleet_telemetry_config`, payload, 90000);
+    const data = await apiProxyPost(db, `/api/1/vehicles/fleet_telemetry_config`, payload, 90000);
+
+    // Tesla akzeptiert den Request (200), meldet aber pro VIN nicht
+    // konfigurierbare Fahrzeuge in skipped_vehicles (fehlender Virtual Key,
+    // nicht unterstützte HW/Firmware, Config-Limit erreicht). Das ist für
+    // dieses Fahrzeug ein Fehler, kein Erfolg.
+    const skipped = data?.response?.skipped_vehicles;
+    const skipReasons = skipped
+      ? Object.entries(skipped)
+          .filter(([, vins]) => Array.isArray(vins) && vins.includes(v.vin))
+          .map(([reason]) => reason)
+      : [];
+    if (skipReasons.length) {
+      const msg = `Fahrzeug übersprungen: ${skipReasons.join(', ')}`;
+      db.prepare('UPDATE vehicles SET telemetry_last_error = ? WHERE id = ?').run(msg.slice(0, 500), v.id);
+      return { vin: v.vin, ok: false, error: msg };
+    }
+
     db.prepare(
       'UPDATE vehicles SET telemetry_configured_at = ?, telemetry_last_error = NULL WHERE id = ?'
     ).run(Math.floor(Date.now() / 1000), v.id);
@@ -180,16 +270,15 @@ async function configureOne(db, v, domain) {
   } catch (err) {
     const status  = err.response?.status;
     const errData = err.response?.data;
+    // Echten Tesla-Fehler durchreichen (keine erfundene Interpretation mehr).
     const msg = typeof errData === 'object' && errData !== null
       ? (errData.error || errData.message || JSON.stringify(errData))
-      : status === 404
-        ? `HTTP 404 – Fleet Telemetry nicht freigeschaltet (Partner-Zugang bei Tesla beantragen)`
-        : status
-          ? `HTTP ${status}`
-          : err.message;
+      : status
+        ? `HTTP ${status}`
+        : err.message;
     db.prepare(
       'UPDATE vehicles SET telemetry_last_error = ? WHERE id = ?'
-    ).run(msg.slice(0, 500), v.id);
+    ).run(String(msg).slice(0, 500), v.id);
     return { vin: v.vin, ok: false, error: msg };
   }
 }
@@ -197,9 +286,15 @@ async function configureOne(db, v, domain) {
 router.post('/telemetry/configure', requireAuth, requireAdmin, async (req, res) => {
   const db       = req.db;
   const vehicles = db.prepare('SELECT * FROM vehicles').all();
-  const domain   = process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || '';
+  const domain   = normalizeDomain(process.env.FRONTEND_URL);
+  let ca;
+  try {
+    ca = await resolveTelemetryCa(domain);
+  } catch (e) {
+    return res.status(500).json({ error: `CA-Kette konnte nicht ermittelt werden: ${e.message}. Alternativ TELEMETRY_CA_PATH oder TELEMETRY_CA setzen.` });
+  }
   const results  = [];
-  for (const v of vehicles) results.push(await configureOne(db, v, domain));
+  for (const v of vehicles) results.push(await configureOne(db, v, domain, ca));
   res.json({ results });
 });
 
@@ -209,8 +304,14 @@ router.post('/telemetry/configure/:vin', requireAuth, requireAdmin, async (req, 
   const db = req.db;
   const v  = db.prepare('SELECT * FROM vehicles WHERE vin = ?').get(req.params.vin);
   if (!v) return res.status(404).json({ error: 'Fahrzeug nicht gefunden' });
-  const domain = process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || '';
-  const result = await configureOne(db, v, domain);
+  const domain = normalizeDomain(process.env.FRONTEND_URL);
+  let ca;
+  try {
+    ca = await resolveTelemetryCa(domain);
+  } catch (e) {
+    return res.status(500).json({ error: `CA-Kette konnte nicht ermittelt werden: ${e.message}. Alternativ TELEMETRY_CA_PATH oder TELEMETRY_CA setzen.` });
+  }
+  const result = await configureOne(db, v, domain, ca);
   res.status(result.ok ? 200 : 502).json(result);
 });
 

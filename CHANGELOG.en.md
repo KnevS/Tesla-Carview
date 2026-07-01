@@ -7,6 +7,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.32.4] - 2026-07-01
+
+### Fixed
+
+- **Fleet Telemetry activation + streaming routing fixed — five bugs that prevented vehicles from establishing the stream at all.** `fleet_telemetry_config` always failed, and the error message pushed users into Tesla support ("request partner access") even though every Tesla prerequisite was already met. After these fixes Tesla accepts the config and the vehicle establishes the telemetry stream to the receiver (decoding the streamed packets to Tesla's current protobuf format is a separate follow-up):
+  - **Wrong endpoint/body**: creation goes through the fleet-level endpoint `POST /api/1/vehicles/fleet_telemetry_config` with `{ vins:[…], config }` — not the per-VIN path (which only supports GET/DELETE and returns a misleading HTML 404 on POST).
+  - **Misleading error text removed**: a 404 is no longer interpreted as "not enrolled"; the real Tesla error is surfaced. `skipped_vehicles` (missing virtual key / HW / firmware / limit) is now reported per vehicle.
+  - **Invalid `alert_types` removed** (`autopilot` is rejected by Tesla).
+  - **`exp` capped at 360 days** (Tesla rejects > ~364 days).
+  - **`ca` now carries a real certificate chain** instead of an empty string (which Tesla rejects with "ca is not a valid PEM") — resolved live via a TLS handshake against the own domain, overridable via `TELEMETRY_CA` / `TELEMETRY_CA_PATH`.
+- **WebSocket routing for the telemetry stream (`deploy/nginx-internal.conf`)**: Tesla vehicles (Hermes client) connect on the domain's root path `/`; such upgrade requests are now routed to the backend receiver instead of serving the frontend HTML. Without this, streaming data never arrived.
+
+---
+
 ## [v3.32.3] - 2026-06-21
 
 ### Changed

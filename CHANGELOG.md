@@ -7,6 +7,20 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.32.4] - 2026-07-01
+
+### Behoben
+
+- **Fleet-Telemetry-Aktivierung + Streaming-Routing repariert — fünf Fehler, die verhinderten, dass Fahrzeuge den Stream überhaupt aufbauen.** Bislang schlug `fleet_telemetry_config` immer fehl, und die Fehlermeldung schickte Nutzer grundlos in den Tesla-Support („Partner-Zugang beantragen"), obwohl alle Tesla-Voraussetzungen erfüllt waren. Nach diesen Fixes akzeptiert Tesla die Config und das Fahrzeug baut den Telemetrie-Stream zum Receiver auf (die Dekodierung der Streaming-Pakete an Teslas aktuelles Protobuf-Format folgt separat):
+  - **Falscher Endpoint/Body**: Das Anlegen läuft über den Fleet-Level-Endpoint `POST /api/1/vehicles/fleet_telemetry_config` mit `{ vins:[…], config }` — nicht über den per-VIN-Pfad (der kennt nur GET/DELETE und liefert bei POST einen irreführenden HTML-404).
+  - **Irreführender Fehlertext entfernt**: Ein 404 wird nicht mehr als „nicht freigeschaltet" interpretiert; der echte Tesla-Fehler wird durchgereicht. `skipped_vehicles` (fehlender Virtual Key / HW / Firmware / Limit) wird jetzt pro Fahrzeug ausgewiesen.
+  - **Ungültige `alert_types` entfernt** (`autopilot` wird von Tesla abgelehnt).
+  - **`exp` auf 360 Tage begrenzt** (Tesla lehnt > ~364 Tage ab).
+  - **`ca` enthält jetzt eine echte Zertifikatskette** statt eines leeren Strings (den Tesla mit „ca is not a valid PEM" ablehnt) — live per TLS-Handshake gegen die eigene Domain ermittelt, wahlweise via `TELEMETRY_CA` / `TELEMETRY_CA_PATH` überschreibbar.
+- **WebSocket-Routing für den Telemetrie-Stream (`deploy/nginx-internal.conf`)**: Tesla-Fahrzeuge (Hermes-Client) verbinden sich auf dem Root-Pfad `/` der Domain; solche Upgrade-Requests werden jetzt an den Backend-Receiver geroutet, statt die Frontend-HTML auszuliefern. Ohne diese Weiche kamen nie Streaming-Daten an.
+
+---
+
 ## [v3.32.3] - 2026-06-21
 
 ### Geändert
