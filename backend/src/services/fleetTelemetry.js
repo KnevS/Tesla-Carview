@@ -181,22 +181,55 @@ export async function startFleetTelemetryServer(server) {
   });
 }
 
+// Tesla streamt Zahlenwerte NICHT einheitlich als float — SoC/PackVoltage/
+// PackCurrent kommen oft als int_value oder string_value ("82.3"). Der bisherige
+// Reader las nur float/double, daher wurden SoC & Leistung NIE gespeichert
+// (0 von 15k Punkten). numVal liest alle Zahlen-Value-Typen robust.
+function numVal(v) {
+  if (v == null) return null;
+  if (v.double_value != null) return v.double_value;
+  if (v.float_value  != null) return v.float_value;
+  if (v.int_value    != null) return v.int_value;
+  if (v.long_value   != null) return Number(v.long_value);
+  if (v.string_value != null) {
+    const n = parseFloat(v.string_value);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
+// Selbst-begrenzte Diagnose: klärt einmalig, welchen Value-Typ Tesla für
+// SoC/Spannung/Strom sendet (bzw. ob sie überhaupt ankommen). Nach Bestätigung
+// wieder entfernen.
+let __telDiagCount = 0;
+const __TEL_DIAG_MAX = 24;
+
 function extractPoint(data) {
   if (!data?.length) return null;
   const point = {};
   for (const datum of data) {
     const v = datum.value;
+
+    if (__telDiagCount < __TEL_DIAG_MAX
+        && (datum.key === FIELD.Soc || datum.key === FIELD.PackVoltage || datum.key === FIELD.PackCurrent)) {
+      __telDiagCount++;
+      console.log(`[FleetTelemetry][diag] field=${datum.key} value=${JSON.stringify(v)}`);
+    }
+
     switch (datum.key) {
       case FIELD.Location:
         if (v?.location_value) { point.lat = v.location_value.latitude; point.lon = v.location_value.longitude; }
         break;
-      case FIELD.VehicleSpeed: point.speed_kmh   = v?.float_value ?? v?.double_value ?? null; break;
-      case FIELD.Gear:         point.gear         = GEAR_MAP[v?.shift_state_value] ?? null;   break;
-      case FIELD.PackVoltage:  point.voltage      = v?.float_value ?? v?.double_value ?? null; break;
-      case FIELD.PackCurrent:  point.current      = v?.float_value ?? v?.double_value ?? null; break;
-      case FIELD.Soc:          point.soc          = v?.float_value ?? v?.double_value ?? null; break;
-      case FIELD.Odometer:
-        point.odometer_km = v?.float_value != null ? v.float_value * 1.60934 : null; break;
+      case FIELD.VehicleSpeed: point.speed_kmh = numVal(v); break;
+      case FIELD.Gear:         point.gear      = GEAR_MAP[v?.shift_state_value] ?? null; break;
+      case FIELD.PackVoltage:  point.voltage   = numVal(v); break;
+      case FIELD.PackCurrent:  point.current   = numVal(v); break;
+      case FIELD.Soc:          point.soc       = numVal(v); break;
+      case FIELD.Odometer: {
+        const km = numVal(v);
+        point.odometer_km = km != null ? km * 1.60934 : null;
+        break;
+      }
     }
   }
   return Object.keys(point).length > 0 ? point : null;
