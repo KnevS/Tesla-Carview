@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.35.0] - 2026-07-02
+
+### Hinzugefügt
+
+- **Live-Ladekurve (S07)** ([#174](https://github.com/KnevS/Tesla-Carview/issues/174)): Neue Karte **„Live-Ladevorgang"** in der Laden-Ansicht zeigt die aktuell laufende Ladesession in Echtzeit — Leistung (kW) und Ladestand (%) über die Zeit, dazu Live-Eckdaten (aktuelle Leistung, SoC, geladene kWh, Dauer) und eine **Erwartungskurve** aus einer vergleichbaren, abgeschlossenen Session (soc→kW). So wird eine Drosselung (Tapering/Temperatur) sofort gegen den Normalverlauf sichtbar. Neuer Endpoint `GET /api/charging/current`; nutzt die vom Poller ohnehin geschriebenen `charging_points` — **kein zusätzlicher Tesla-API-Call**. 30-Sekunden-Poll, blendet sich automatisch aus, wenn keine Session läuft.
+
+---
+
 ## [v3.34.0] - 2026-07-02
 
 ### Hinzugefügt
