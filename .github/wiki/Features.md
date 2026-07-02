@@ -45,6 +45,7 @@ The dashboard is your central overview, showing:
 - **Dynamic tariff widget** — current electricity price (aWATTar DE/AT, Tibber) with 24 h price chart and auto-set charging window
 - **Service intervals** — upcoming maintenance reminders (TÜV, oil, brake fluid, etc.)
 - **System health** — Tesla API connection status, Fleet Telemetry, database size
+- **Your week (v3.30)** — a "Your week" card with plain-text hints on mileage, consumption vs. the 90-day average (incl. a cold-weather reason), charging cost and open anomalies. Pure statistics; optional local LLM polish.
 
 The dashboard is fully customisable: show, hide, and reorder cards in **Settings → Setup Wizard**.
 
@@ -101,6 +102,11 @@ Available for **all vehicles** — configure per vehicle in **Settings → Vehic
 ### Cost calculation & PDF invoice
 Generate PDF invoices for reimbursement (**Billing → Generate Invoice**). Select date range, include/exclude sessions — fully client-side. Billing features are available for **company car** vehicles only.
 
+### Charge timeline, cost by location & cheapest windows (v3.24–v3.26)
+- **Charge timeline** — every session opens *"📈 View timeline"*: power and state-of-charge curve over time, key figures (duration, kWh added, avg/peak power, cost) and a labelled estimate of grid draw and charging loss (efficiency assumed per charger type).
+- **Cost by location** — sums per location the number of charges, kWh, total cost and average €/kWh, with a home/away marker.
+- **Cheapest charging windows** — when an electricity price provider (aWattar/Tibber) is connected, shows the current price plus the cheapest 4 h and 8 h window over the next 24 hours, with an hourly grid.
+
 ---
 
 ## 🔋 Battery — Health dashboard (Companion)
@@ -118,6 +124,10 @@ Six sections on `/battery`, **fully local and statistics-only** (no AI, no cloud
 **Phase 2 (from v3.7.0):**
 - **Companion alerts** — persistent anomalies with one-shot push notification and "Mark as seen / Dismiss" actions
 - **Preconditioning suggestion** — push when temperature below 5 °C or above 30 °C is expected at your typical departure time, learned from the last 30 days of trips
+
+**Health & forecast (v3.27):** linear projection of the range normalised to 100 % SoC with a 95 % confidence band — degradation rate (%/year and km/year), projected range in 3 years and estimated time until 80 % of the starting value. Appears from 14 measurement days. Pure statistics, no AI.
+
+**Standby-drain trend warning (v3.28):** if the last 7 days' phantom-drain median stays above the 30 days before it (or is sustained above 0.8 %/h), a hint banner appears.
 
 Sources: `battery_snapshots`, `trips`, `charging_sessions`, plus a single Open-Meteo call for preconditioning. Persistence in `battery_anomalies` and `precondition_suggestions` with UNIQUE constraints (idempotent). The companion engine runs nightly + every 6 hours.
 
@@ -144,6 +154,7 @@ Plan routes before you drive and send them directly to your Tesla's navigation:
 - **Traffic alerts** — congestion warnings via HERE Maps (optional API key)
 - **Speed camera overlay** — radar/camera warnings from OpenStreetMap (legal note shown)
 - **Tile proxy** — all map tiles served through backend proxy (no CSP blocks, no rate limits)
+- **Personal range instead of WLTP (v3.29)** — the projected arrival SoC comes from your own, temperature-dependent consumption (from your trip history), not from the WLTP range. When the destination temperature is known, only trips within a ±7 °C window are used. Shows a confidence band, the data basis and a "could get tight" warning when the band reaches the critical zone. Pure statistics, no AI; falls back to the WLTP estimate without enough trips.
 
 ---
 
@@ -173,6 +184,9 @@ Log all maintenance events:
 
 ### Service intervals & reminders
 Configure recurring intervals (**Settings → Service Intervals**). The app sends Web Push notifications 30 days before and 1 000 km before each interval. The dashboard shows upcoming services as a preview card.
+
+### Predictive maintenance & 12-month cost outlook (v3.31)
+For km-based intervals, Tesla Carview projects from your actual mileage (avg km/day over the last 90 days) when an interval is likely due ("≈ in ~6 weeks"). In the TCO cockpit, a **12-month cost outlook** shows expected maintenance, electricity, insurance and tax costs for the next 12 months (projected from the last 12). Pure statistics.
 
 ---
 
@@ -388,6 +402,22 @@ Details and step-by-step iOS setup in the handbook under `{#owntracks-validation
 ## 🔍 Address before coordinates + auto-geocoding (v3.8.0 + v3.10.0)
 
 Trip and charging lists show addresses instead of raw GPS. Trips with GPS but no address get resolved automatically via Nominatim/OSM (live hook + nightly backfill + admin trigger). Cached locally for 24 hours.
+
+## 🛡️ Operational self-check (v3.32)
+
+At the top of **System** sits the **Operational self-check**. On "Run now" — and automatically every week in the nightly maintenance run — Tesla Carview verifies security and backup integrity: MFA coverage, encryption key, critical secrets, audit-log activity, SQLite database integrity, plus the recency and contents of the last backup (file readable, all tables present). The result is a traffic light per check; findings are also written to the audit log. Pure diagnostics.
+
+## 🛞 Tire-pressure trend & slow-leak warning (v3.33)
+
+Records tire pressure per wheel as a time series and detects slow, **temperature-compensated** pressure loss (no cold-weather false alarms). Warns via push/Telegram/email; TireMap shows a warning ring, badge and trend. Pure statistics, local.
+
+## 🍃 Driving score (v3.34)
+
+A dashboard card rating the last 30 days as a relative efficiency index against your own long-term average (0–100, traffic-light band), plus data-backed saving tips (cold, average speed, short-trip share). Pure statistics, local.
+
+## 🔌 Live charge curve (v3.35)
+
+Shows the running charging session in real time (power, state of charge) with an expected-curve overlay from a comparable session — throttling is visible instantly. No extra Tesla API call.
 
 ## 💬 Why Telegram, not WhatsApp / Signal?
 

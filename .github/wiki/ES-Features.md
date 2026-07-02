@@ -44,6 +44,7 @@ El panel es tu vista central:
 - **Estadísticas mensuales** — kilómetros, energía, costes de carga
 - **Widget de tarifa dinámica** — precio actual (aWATTar DE/AT, Tibber) con gráfico de 24 h y ventana de carga automática
 - **Intervalos de mantenimiento** — recordatorios de ITV, aceite, líquido de frenos, etc.
+- **Perspectivas semanales «Tu semana» (v3.30)** — tarjeta con indicaciones claras: kilometraje, consumo frente al promedio de 90 días (incl. motivo por frío), coste de carga y anomalías abiertas. Pura estadística, opcional refinada con LLM local.
 - **Salud del sistema** — estado de la API Tesla, Fleet Telemetry, tamaño de la base de datos
 
 El panel es totalmente personalizable en **Configuración → Iniciar asistente**.
@@ -73,6 +74,13 @@ Todas las sesiones de carga se registran automáticamente:
 - Ubicación, energía añadida (kWh), coste estimado, velocidad y duración
 - Indicador de carga en casa (🏠) via integración Monta
 
+### Historial por sesión, coste por lugar y mejores franjas (v3.24–v3.26)
+- **📈 Ver progreso** — cada sesión muestra su curva de potencia/estado de carga y las cifras clave, más una estimación del consumo de red.
+- **Coste por lugar** — agrega por ubicación (cargas, kWh, coste total, precio medio €/kWh).
+- **Mejores franjas de carga** — con un proveedor de precios conectado (aWattar/Tibber en Ajustes → Tarifa), muestra el precio actual y la mejor franja de 4 h/8 h de las próximas 24 h.
+
+Todo es estadística pura y local.
+
 Define tus puntos habituales en **Configuración → Ubicaciones de carga**.
 
 **Integración Monta** disponible para **todos los vehículos** — configurar por vehículo en **Configuración → Perfil del vehículo → Carga en casa**:
@@ -95,6 +103,9 @@ Configuración paso a paso en el manual bajo `{#owntracks-validation}`.
 
 ## 🔋 Batería — Panel de salud (Companion)
 
+### Salud y pronóstico (v3.27) + tendencia de descarga en reposo (v3.28)
+Proyección lineal de la autonomía normalizada al 100 % con banda de confianza (degradación anual, autonomía en 3 años, tiempo hasta el 80 %), más un aviso cuando el consumo en reposo muestra una tendencia al alza sostenida. Estadística pura, sin IA.
+
 Seis secciones en `/battery`, **totalmente local y solo estadística** (sin IA, sin nube salvo una única consulta meteo para preacondicionamiento):
 
 **Fase 1 (desde v3.6.0):**
@@ -114,6 +125,8 @@ Fuentes: `battery_snapshots`, `trips`, `charging_sessions`, más una llamada Ope
 ---
 
 ## 🗺️ Planificador de ruta
+
+**Autonomía personal en lugar del WLTP (v3.29):** el estado de carga a la llegada se calcula a partir de tu consumo real dependiente de la temperatura, con banda de confianza y aviso «podría quedar justo». Estadística pura.
 
 Planifica rutas con antelación y envíalas directamente a la navegación del Tesla:
 - **Punto de inicio** — desde el GPS del vehículo, del navegador o entrada manual
@@ -142,6 +155,8 @@ Planifica rutas con antelación y envíalas directamente a la navegación del Te
 Documenta todos los eventos de mantenimiento: fecha, categoría, coste, kilometraje, taller.
 
 Configura intervalos recurrentes en **Configuración → Intervalos de mantenimiento**. Se envían notificaciones push 30 días y 1 000 km antes de cada vencimiento.
+
+**Mantenimiento predictivo y perspectiva de costes (v3.31):** para los intervalos en km, TeslaView proyecta según tu kilometraje cuándo vencerá cada tarea; el panel TCO muestra además una previsión de costes a 12 meses. Estadística pura.
 
 ---
 
@@ -227,6 +242,31 @@ Trip detail: recovered kWh, recuperation share (%), net consumption after recupe
 
 Switch between tile layout and compact list view in Vehicle Control. Preference saved in `localStorage`.
 
+---
+
+## 🛡️ Autodiagnóstico operativo (v3.32)
+
+Bajo demanda y cada semana, TeslaView verifica la seguridad y la integridad de las copias (cobertura MFA, clave de cifrado, integridad SQLite, vigencia e integridad de la última copia) como informe tipo semáforo. Diagnóstico puro, sin IA.
+
+---
+
+## 🛞 Tendencia de presión de neumáticos (v3.33)
+
+Registra la presión por neumático como serie temporal y detecta pérdidas lentas **compensadas por temperatura** (sin falsas alarmas por frío). Avisa por push/Telegram/email; TireMap muestra un anillo de aviso, una insignia y la tendencia. Pura estadística, local.
+
+---
+
+## 🍃 Puntuación de conducción (v3.34)
+
+Tarjeta del panel que evalúa los últimos 30 días como índice de eficiencia relativo frente a tu propia media (0–100, banda tipo semáforo), más consejos basados en datos (frío, velocidad media, proporción de trayectos cortos). Pura estadística, local.
+
+---
+
+## 🔌 Curva de carga en vivo (v3.35)
+
+Muestra la sesión de carga en curso en tiempo real (potencia, estado de carga) junto con la curva esperada de una sesión comparable, de modo que una limitación es visible al instante. Sin llamada extra a la API de Tesla.
+
+---
 
 ## 💬 ¿Por qué Telegram y no WhatsApp / Signal?
 

@@ -128,6 +128,22 @@ Algunos vehículos nuevos no devuelven datos GPS por el endpoint REST estándar.
 
 ---
 
+## 🧭 El asistente de configuración falla al crear el administrador
+
+**Síntoma:** En una instalación nueva, el paso 2 del asistente (crear cuenta de administrador) falla con `Transaction function cannot return a promise`. Afecta a versiones hasta la v3.32.5 incluida.
+
+**Causa y solución:** Un error en `/api/setup/init` ([#170](https://github.com/KnevS/Tesla-Carview/issues/170)) — **corregido en v3.32.6**. Actualiza a la última versión y vuelve a abrir el asistente:
+
+```bash
+cd /opt/tesla-carview
+git pull
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Después podrás crear de nuevo la cuenta de administrador. Las instalaciones existentes no se ven afectadas.
+
+---
+
 ## 🔐 Problemas de inicio de sesión
 
 ### "Usuario o contraseña incorrectos" — pero estoy seguro de que son correctos

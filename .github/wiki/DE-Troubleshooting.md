@@ -128,6 +128,22 @@ Alle Tesla API-Aufrufe geben 403 zurück? Das bedeutet typischerweise, dass dein
 
 ---
 
+## 🧭 Setup-Assistent bricht bei der Admin-Erstellung ab
+
+**Symptom:** Bei einer frischen Installation schlägt Schritt 2 des Setup-Assistenten (Admin-Konto anlegen) fehl mit `Transaction function cannot return a promise`. Betrifft Versionen bis einschließlich v3.32.5.
+
+**Ursache & Lösung:** Ein Bug in `/api/setup/init` ([#170](https://github.com/KnevS/Tesla-Carview/issues/170)) — **behoben in v3.32.6**. Auf die aktuelle Version aktualisieren und den Assistenten erneut aufrufen:
+
+```bash
+cd /opt/tesla-carview
+git pull
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Danach lässt sich das Admin-Konto wieder anlegen. Bereits eingerichtete Installationen sind nicht betroffen.
+
+---
+
 ## Login-Probleme
 
 ### „Ungültiger Benutzername oder Passwort" — aber ich bin sicher, dass es stimmt
