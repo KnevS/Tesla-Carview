@@ -21,9 +21,9 @@
 
 Reihenfolge nach Nutzen × Aufwand — jederzeit umsortierbar.
 
-> **Status:** S01–S06 sind **ausgeliefert** (als Value-Drops v3.24–v3.32, Stand v3.32.6).
-> Die nächste Welle **S07–S09** baut auf der seit v3.32.5 **live funktionierenden
-> Fleet-Telemetrie** auf — Echtzeit zuerst, dann gesteuertes Laden, dann Dienstwagen/Werterhalt.
+> **Status:** S01–S07 sind **ausgeliefert** (S01–S06 als v3.24–v3.32, S07 als v3.33–v3.35).
+> Die nächsten Wellen **S08–S09** bauen weiter auf der seit v3.32.5 live funktionierenden
+> Fleet-Telemetrie auf — gesteuertes Laden, dann Dienstwagen/Werterhalt.
 
 ### S01 · Ladekosten, die sich selbst erklären — 23. Jun – 04. Jul
 *Nutzer · Aufwand M · Nutzen Hoch · baut auf `charging` · `tariff`*
@@ -84,14 +84,14 @@ Vieles läuft schon automatisch — dieser Drop macht es sichtbar, prüfbar und 
 
 ## Nächste Welle (nach v3.32)
 
-### S07 · Live-Telemetrie, endlich sichtbar — ab v3.33
+### S07 · Live-Telemetrie, endlich sichtbar — ✅ ausgeliefert (v3.33–v3.35)
 *Nutzer · Aufwand M · Nutzen Hoch · baut auf `fleetTelemetry` · `charging` · `battery`*
 
 Seit v3.32.5 kommt der Fleet-Telemetrie-Stream live an — dieser Drop macht ihn erlebbar, statt ihn nur zu loggen.
 
-- **Live-Ladekurve** — Leistung, Ladestand und Zelltemperatur in Echtzeit während des Ladens, mit Soll-Kurve und sofort sichtbarer Drosselung.
-- **Fahrstil- & Effizienz-Score** — aus Beschleunigung, Rekuperationsanteil und Tempo/Verbrauch ein Eco-Score mit Klartext-Spartipps. Rein statistisch, lokal.
-- **Reifendruck-Trend & Slow-Leak-Warnung** — TPMS über die Zeit: langsamer Druckverlust je Reifen wird früh erkannt und gemeldet (baut TireMap vom Momentwert zum Trend aus).
+- ✅ **Reifendruck-Trend & Slow-Leak-Warnung** (v3.33, #176) — temperaturbereinigte TPMS-Zeitreihe erkennt langsamen Druckverlust je Reifen und warnt früh (kein Kälte-Fehlalarm).
+- ✅ **Fahrstil- & Effizienz-Score** (v3.34, #175) — relativer Effizienz-Index gegen den eigenen Schnitt mit datenbelegten Spartipps. Rein statistisch, lokal.
+- ✅ **Live-Ladekurve** (v3.35, #174) — Leistung und Ladestand in Echtzeit während des Ladens, mit Erwartungskurve und sofort sichtbarer Drosselung.
 
 ### S08 · Laden, das sich selbst timt — ab v3.34
 *Nutzer + Betrieb · Aufwand L · Nutzen Hoch · baut auf `tariff` · `charging` · `chargeLocations`*
