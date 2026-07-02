@@ -431,10 +431,35 @@ router.get('/:id', (req, res) => {
 
 
     const pointsTable = trip.source === 'telemetry' ? 'telemetry_points' : 'trip_points';
-    const points = db.prepare(
+    const rawPoints = db.prepare(
       `SELECT timestamp, lat, lon, speed_kmh, power_kw, soc AS battery_level
        FROM ${pointsTable} WHERE trip_id = ? ORDER BY timestamp ASC`
     ).all(trip.id);
+
+    // Fleet Telemetry streamt jedes Feld in eigenem Takt (Location 10s, Speed 5s,
+    // Soc/PackVoltage 10s …), daher trägt jede Zeile nur einen Teil der Werte —
+    // viele Punkte haben kein lat/lon. Für die Kartenroute UND den Slider brauchen
+    // wir kohärente Trackpunkte: die letzten bekannten Messwerte fortschreiben (LOCF)
+    // und nur Punkte MIT Position behalten. Sonst reißt die Polylinie (null-Koordinaten)
+    // und der Slider landet auf Leerzeilen (unsinnige/fehlende technische Werte).
+    let lastSpeed = null, lastPower = null, lastSoc = null;
+    const points = [];
+    for (const p of rawPoints) {
+      if (p.speed_kmh     != null) lastSpeed = p.speed_kmh;
+      if (p.power_kw      != null) lastPower = p.power_kw;
+      if (p.battery_level != null) lastSoc   = p.battery_level;
+      if (p.lat == null || p.lon == null) continue;
+      const sp = p.speed_kmh ?? lastSpeed;
+      const pw = p.power_kw  ?? lastPower;
+      points.push({
+        timestamp: p.timestamp,
+        lat: p.lat,
+        lon: p.lon,
+        speed_kmh: sp != null ? Math.round(sp) : null,
+        power_kw:  pw != null ? Math.round(pw * 10) / 10 : null,
+        battery_level: p.battery_level ?? lastSoc,
+      });
+    }
 
     // Rekuperation: Summe aller negativen power_kw-Werte × Zeitdelta → kWh
     // Benutzt SQLite-Fensterfunktion LEAD (verfügbar ab SQLite 3.25 / 2018).

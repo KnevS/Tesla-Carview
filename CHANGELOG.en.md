@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.35.1] - 2026-07-02
+
+### Fixed
+
+- **Trip detail: GPS track invisible & nonsensical slider values on telemetry trips.** Fleet Telemetry streams each field on its own cadence, so every `telemetry_points` row carries only a subset of values — many points without lat/lon. The trip detail treated every point as a full GPS trackpoint: the route polyline broke on `null` coordinates (track invisible) and the slider landed on field-only rows (missing/"null" values). `GET /api/trips/:id` now returns **coherent trackpoints**: speed/power/SoC are carried forward (LOCF) and only points **with** a position are returned; power/speed are rounded (no more long decimals). The frontend shows missing power as "–" instead of "null". OwnTracks trips (always positioned) are unchanged.
+
+---
+
 ## [v3.35.0] - 2026-07-02
 
 ### Added

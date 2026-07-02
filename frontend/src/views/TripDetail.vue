@@ -40,7 +40,7 @@
               v-tooltip="'Motorleistung: positiv = Antrieb, negativ = Rekuperation (Energie zurückgewinnen beim Bremsen)'">
               <p class="text-gray-400 text-xs mb-1">Leistung</p>
               <p class="font-bold text-lg" :class="(sliderPt.power_kw ?? 0) >= 0 ? 'text-red-400' : 'text-green-400'">
-                {{ sliderPt.power_kw !== undefined ? (sliderPt.power_kw >= 0 ? '+' : '') + sliderPt.power_kw : '–' }}
+                {{ sliderPt.power_kw != null ? (sliderPt.power_kw >= 0 ? '+' : '') + sliderPt.power_kw : '–' }}
                 <span class="text-xs font-normal text-gray-400">kW</span>
               </p>
             </div>

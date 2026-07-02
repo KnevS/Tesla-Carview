@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.35.1] - 2026-07-02
+
+### Behoben
+
+- **Fahrt-Detail: GPS-Strecke unsichtbar & unsinnige Slider-Werte bei Telemetrie-Fahrten.** Fleet Telemetry streamt jedes Feld in eigenem Takt, daher trägt jede `telemetry_points`-Zeile nur einen Teil der Werte — viele Punkte ohne lat/lon. Die Fahrt-Detailansicht behandelte aber jeden Punkt als vollständigen GPS-Trackpunkt: die Route-Polylinie riss an `null`-Koordinaten (Strecke unsichtbar) und der Schieberegler landete auf Feld-nur-Zeilen (fehlende/„null"-Werte). `GET /api/trips/:id` liefert jetzt **kohärente Trackpunkte**: Geschwindigkeit/Leistung/SoC werden fortgeschrieben (LOCF) und nur Punkte **mit** Position zurückgegeben; Leistung/Geschwindigkeit werden gerundet (keine langen Dezimalen mehr). Frontend zeigt fehlende Leistung als „–" statt „null". OwnTracks-Fahrten (immer mit Position) sind unverändert.
+
+---
+
 ## [v3.35.0] - 2026-07-02
 
 ### Hinzugefügt
