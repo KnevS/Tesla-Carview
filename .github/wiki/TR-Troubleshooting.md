@@ -128,6 +128,22 @@ Tüm Tesla API çağrıları 403 döndürüyor mu? Bu genellikle **Tesla gelişt
 
 ---
 
+## 🧭 Kurulum sihirbazı yönetici oluşturmada başarısız oluyor
+
+**Belirti:** Yeni bir kurulumda sihirbazın 2. adımı (yönetici hesabı oluşturma) `Transaction function cannot return a promise` hatasıyla başarısız olur. v3.32.5 dahil önceki sürümleri etkiler.
+
+**Neden ve çözüm:** `/api/setup/init` içindeki bir hata ([#170](https://github.com/KnevS/Tesla-Carview/issues/170)) — **v3.32.6'da düzeltildi**. En son sürüme güncelleyin ve sihirbazı yeniden açın:
+
+```bash
+cd /opt/tesla-carview
+git pull
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+Ardından yönetici hesabı yeniden oluşturulabilir. Mevcut kurulumlar etkilenmez.
+
+---
+
 ## 🔐 Giriş sorunları
 
 ### "Geçersiz kullanıcı adı veya şifre" — ama doğru olduğundan eminim

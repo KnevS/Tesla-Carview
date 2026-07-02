@@ -46,6 +46,9 @@ Le tableau de bord est votre vue centrale :
 - **Intervalles de maintenance** — rappels TÜV, huile, liquide de frein, etc.
 - **Santé système** — état de l'API Tesla, Fleet Telemetry, taille de la base de données
 
+### Aperçus hebdomadaires « Votre semaine » (v3.30)
+Une carte proactive résume la semaine écoulée avec des indications claires : kilométrage, consommation comparée à votre moyenne sur 90 jours (avec justification liée au froid), coût de recharge et anomalies encore ouvertes. Purement statistique ; amélioration optionnelle par un LLM local (Ollama).
+
 Le tableau de bord est entièrement personnalisable via **Paramètres → Lancer l'assistant**.
 
 ---
@@ -89,6 +92,9 @@ Disponible pour **tous les véhicules** — à configurer par véhicule dans **P
 ### Facturation & facture PDF
 Générez des factures PDF pour remboursement (**Facturation → Créer une facture**) — entièrement côté client. Les fonctions de facturation sont réservées aux **véhicules de fonction**.
 
+### Historique de charge, coût par lieu & créneaux économiques (v3.24–v3.26)
+Chaque session affiche via « 📈 Voir la progression » sa courbe de puissance/état de charge, ses chiffres clés et une estimation du soutirage réseau. La section **« Coût par lieu »** agrège par lieu (recharges, kWh, coût total, prix moyen €/kWh). Avec un fournisseur de prix (aWattar/Tibber) connecté sous **Paramètres → Tarif**, **« Meilleurs créneaux de recharge »** indique le prix actuel et la meilleure fenêtre de 4 h/8 h des 24 prochaines heures. Statistiques pures.
+
 ---
 
 ### Validation OwnTracks (v3.11.0)
@@ -102,6 +108,9 @@ Configuration pas à pas dans le manuel sous `{#owntracks-validation}`.
 ---
 
 ## 🔋 Batterie — Tableau santé (Companion)
+
+### Santé & prévision (v3.27) + alerte de tendance de décharge (v3.28)
+Projection linéaire de l'autonomie normalisée à 100 % avec bande de confiance (dégradation par an, autonomie dans 3 ans, temps jusqu'à 80 %). S'y ajoute une **alerte de tendance de décharge à l'arrêt** en cas de hausse durable de la perte de SOC. Statistiques pures, pas d'IA.
 
 Six sections sur `/battery`, **entièrement local et purement statistique** (pas d'IA, pas de cloud sauf une seule requête météo pour le préconditionnement) :
 
@@ -122,6 +131,9 @@ Sources : `battery_snapshots`, `trips`, `charging_sessions`, plus un appel Open-
 ---
 
 ## 🗺️ Planificateur d'itinéraire
+
+### Autonomie personnelle au lieu du WLTP (v3.29)
+L'état de charge à l'arrivée est calculé d'après votre consommation réelle dépendante de la température, avec une bande de confiance et un avertissement « pourrait être juste ». Statistiques pures.
 
 Planifiez vos trajets à l'avance et envoyez-les directement à la navigation Tesla :
 - **Lieu de départ** — depuis le GPS du véhicule, du navigateur ou saisie manuelle
@@ -157,6 +169,9 @@ Documentez tous les événements de maintenance :
 
 ### Intervalles et rappels
 Configurez des intervalles récurrents (**Paramètres → Intervalles de maintenance**). Des notifications push sont envoyées 30 jours et 1 000 km avant chaque échéance.
+
+### Entretien prédictif & perspective de coûts (v3.31)
+Pour les intervalles en km, TeslaView projette d'après votre kilométrage la date d'échéance à venir. Le cockpit TCO affiche en plus une **prévision de coûts sur 12 mois**. Statistiques pures.
 
 ---
 
@@ -244,6 +259,31 @@ Trip detail: recovered kWh, recuperation share (%), net consumption after recupe
 
 Switch between tile layout and compact list view in Vehicle Control. Preference saved in `localStorage`.
 
+---
+
+## 🛡️ Auto-test opérationnel (v3.32)
+
+Sur demande et chaque semaine, TeslaView vérifie la sécurité et l'intégrité des sauvegardes (couverture MFA, clé de chiffrement, intégrité SQLite, fraîcheur et intégrité de la dernière sauvegarde) sous forme de rapport à feux tricolores. Diagnostic pur.
+
+---
+
+## 🛞 Tendance de pression des pneus (v3.33)
+
+TeslaView enregistre la pression de chaque pneu en série temporelle et détecte une perte lente **compensée en température** — pas de fausse alerte due au froid. En cas de fuite lente, une alerte part par push/Telegram/e-mail ; la TireMap affiche un anneau d'alerte, un badge et la tendance. Statistiques pures, local.
+
+---
+
+## 🍃 Score de conduite (v3.34)
+
+Une carte du tableau de bord évalue les 30 derniers jours comme **indice d'efficacité relatif** par rapport à votre propre moyenne (0–100, bande tricolore), avec des conseils fondés sur les données (froid, vitesse moyenne, part de trajets courts). Statistiques pures, local.
+
+---
+
+## 🔌 Courbe de charge en direct (v3.35)
+
+Affiche la session de recharge en cours en temps réel (puissance, état de charge) avec la courbe attendue d'une session comparable — une limitation devient visible instantanément. Sans appel API Tesla supplémentaire.
+
+---
 
 ## 💬 Pourquoi Telegram et pas WhatsApp / Signal ?
 

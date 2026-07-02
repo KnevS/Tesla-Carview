@@ -42,6 +42,7 @@ Tesla Carview, Tesla'nızın tüm yaşam döngüsünü kapsar — her sürüşü
 - **Son sürüşler** — mesafe ve tüketimle son 5 sürüş
 - **Aylık istatistikler** — kilometre, enerji, şarj maliyetleri
 - **Dinamik tarife widget'ı** — güncel fiyat (aWATTar DE/AT, Tibber), 24 saatlik grafik, otomatik şarj penceresi
+- **Proaktif haftalık içgörüler (v3.30)** — «Haftanız» kartı açık ipuçlarıyla: kat edilen yol, 90 günlük ortalamaya kıyasla tüketim (soğuk gerekçesi dahil), şarj maliyeti ve açık anormallikler. Salt istatistik, isteğe bağlı yerel LLM (Ollama).
 - **Bakım aralıkları** — muayene, yağ, fren sıvısı vb. hatırlatıcılar
 - **Sistem sağlığı** — Tesla API durumu, Fleet Telemetry, veritabanı boyutu
 
@@ -72,6 +73,9 @@ Tüm şarj oturumları otomatik kayıt:
 - Ev şarjı göstergesi (🏠) Monta entegrasyonu ile
 
 **Ayarlar → Şarj Konumları** altında sık kullanılan noktalar tanımlanabilir.
+
+### Şarj geçmişi, konuma göre maliyet ve ucuz pencereler (v3.24–v3.26)
+Her oturum « 📈 Seyri görüntüle » ile güç/şarj durumu eğrisini, temel değerleri ve tahmini şebeke tüketimini gösterir. « Konuma göre maliyet » bölümü şarjları konuma göre toplar (sayı, kWh, toplam maliyet, ort. €/kWh). Ayarlar → Tarife altında bir fiyat sağlayıcısı (aWATTar/Tibber) bağlıysa « En uygun şarj zamanları » güncel fiyatı ve önümüzdeki 24 saatin en iyi 4 sa / 8 sa aralığını gösterir. Salt istatistik.
 
 **Monta entegrasyonu** **tüm araçlar** için kullanılabilir — **Ayarlar → Araç profili → Ev şarjı** bölümünden araç başına yapılandırılır:
 - Özel araçlar: Monta oturumları ev şarjı olarak görünür (🏠 rozeti, otomatik tanıma).
@@ -109,9 +113,13 @@ Adım adım kurulum kılavuzda `{#owntracks-validation}` altında.
 
 Kaynaklar: `battery_snapshots`, `trips`, `charging_sessions`, artı ön iklimlendirme için tek bir Open-Meteo çağrısı. UNIQUE kısıtlarıyla (idempotent) `battery_anomalies` ve `precondition_suggestions` tablolarında kalıcılık. Companion motoru gecelik + her 6 saatte bir çalışır.
 
+**Sağlık ve tahmin (v3.27–v3.28):** %100 SoC'ye normalize edilmiş menzilin güven bandıyla doğrusal projeksiyonu (yıllık yıpranma, 3 yıl içindeki menzil, %80'e kalan süre), ayrıca park halindeki tüketimde kalıcı artış olursa bekleme boşalma trend uyarısı. Salt istatistik, yapay zeka yok.
+
 ---
 
 ## 🗺️ Rota Planlayıcı
+
+**WLTP yerine kişisel menzil (v3.29):** varış SoC'si, sıcaklığa bağlı gerçek tüketiminize göre hesaplanır — güven bandı ve « sınırlı olabilir » uyarısıyla. Salt istatistik.
 
 Sürüşlerinizi önceden planlayın ve doğrudan Tesla navigasyonuna gönderin:
 - **Başlangıç noktası** — araç GPS'i, tarayıcı GPS'i veya manuel giriş
@@ -136,6 +144,8 @@ Sürüşlerinizi önceden planlayın ve doğrudan Tesla navigasyonuna gönderin:
 ---
 
 ## 📝 Bakım Defteri
+
+**Öngörücü bakım + maliyet öngörüsü (v3.31):** km tabanlı aralıklar için TeslaView, kilometrenize göre vadeyi tahmin eder; TCO panosu ayrıca 12 aylık maliyet öngörüsü (TCO) gösterir. Salt istatistik.
 
 Tüm bakım olaylarını belgeleyin: tarih, kategori, maliyet, kilometre, servis adı.
 
@@ -227,6 +237,30 @@ Trip detail: recovered kWh, recuperation share (%), net consumption after recupe
 
 Switch between tile layout and compact list view in Vehicle Control. Preference saved in `localStorage`.
 
+
+## 🛡️ Operasyonel öz-denetim (v3.32)
+
+İstek üzerine ve her hafta TeslaView, güvenliği ve yedek bütünlüğünü denetler: MFA kapsamı, şifreleme anahtarı, SQLite bütünlüğü, son yedeğin güncelliği ve bütünlüğü — trafik ışığı raporu olarak. Salt tanılama.
+
+---
+
+## 🛞 Lastik basıncı eğilimi (v3.33)
+
+Lastik başına basıncı zaman serisi olarak kaydeder ve yavaş, **sıcaklık düzeltmeli** basınç kaybını algılar (soğuk kaynaklı yanlış alarm yok). Push / Telegram / e-posta ile uyarır; TireMap ilgili lastikte uyarı halkası, rozet ve eğilim gösterir. Salt istatistik, yerel.
+
+---
+
+## 🍃 Sürüş puanı (v3.34)
+
+Son 30 günü kendi uzun vadeli ortalamana göre göreli bir verimlilik endeksi olarak değerlendiren pano kartı (0–100, trafik ışığı bandı), artı veriye dayalı ipuçları (soğuk, ortalama hız, kısa mesafe oranı). Salt istatistik, yerel.
+
+---
+
+## 🔌 Canlı şarj eğrisi (v3.35)
+
+Devam eden şarj oturumunu gerçek zamanlı gösterir (güç, şarj durumu), karşılaştırılabilir bir oturumdan beklenen eğriyle birlikte; kısıtlama (throttling) anında görünür. Ek Tesla API çağrısı yok.
+
+---
 
 ## 💬 Neden Telegram, WhatsApp / Signal değil?
 

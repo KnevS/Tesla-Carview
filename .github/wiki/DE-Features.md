@@ -33,6 +33,7 @@ Das Dashboard ist deine zentrale Übersicht:
 - **Live-Fahrzeugstatus** — Akkustand, Reichweite, Standort, Ladestatus
 - **Letzte Fahrten** — die letzten 5 Fahrten mit Distanz und Verbrauch
 - **Monatsstatistiken** — Kilometer, verbrauchte Energie, Ladekosten
+- **Wochen-Insights „Deine Woche" (v3.30)** — proaktive Karte mit Klartext-Hinweisen zu Fahrleistung, Verbrauch vs. 90-Tage-Schnitt (inkl. Kälte-Begründung), Ladekosten und offenen Auffälligkeiten. Reine Statistik, optional lokale LLM-Veredelung (Ollama)
 - **Dynamisches Tarif-Widget** — aktueller Strompreis (aWATTar DE/AT, Tibber) mit 24-h-Preiskurve und Auto-Set-Ladefenster
 - **Wartungsintervalle** — anstehende Erinnerungen (TÜV, Öl, Bremsflüssigkeit, etc.)
 - **System-Health** — Tesla API-Status, Fleet Telemetry, Datenbankgröße
@@ -92,6 +93,11 @@ Steht für **alle Fahrzeuge** zur Verfügung — pro Fahrzeug unter **Einstellun
 ### Kostenabrechnung & PDF-Rechnung
 PDF-Rechnungen für die Erstattung (z. B. durch den Arbeitgeber) unter **Abrechnung → Rechnung erstellen** — vollständig clientseitig generiert. Abrechnungs-Funktionen sind ausschließlich für **Dienstwagen** verfügbar.
 
+### Ladeverlauf, Kosten nach Ort & günstige Ladefenster (v3.24–v3.26)
+- **Ladeverlauf je Session** — jede Session öffnet über *„📈 Verlauf ansehen"* ihre Leistungs- und Ladestandskurve über die Zeit, plus Eckdaten (Dauer, geladene kWh, Ø-/Spitzenleistung, Kosten) und eine klar gekennzeichnete Schätzung von Netzentnahme und Ladeverlust (Wirkungsgrad je Ladetyp).
+- **Kosten nach Ort** — je Ladeort zusammengefasst: Anzahl, kWh, Gesamtkosten und Ø €/kWh, mit Heim-/Auswärts-Kennzeichnung.
+- **Günstige Ladefenster** — bei verbundenem Strompreis-Anbieter (aWATTar/Tibber) der aktuelle Preis sowie das günstigste 4- und 8-Stunden-Fenster der nächsten 24 Stunden samt Stundenraster.
+
 ---
 
 ## 🔋 Akku — Battery-Health-Dashboard (Companion)
@@ -110,6 +116,12 @@ Sechs Sektionen auf `/battery`, alles **rein lokal und statistisch** (keine KI, 
 - **Companion-Alerts** — persistierte Anomalien mit Push-Benachrichtigung (1× pro Vorfall) und „Als gesehen / Verwerfen"-Aktionen
 - **Vorklimatisierungs-Empfehlung** — Push bei <5 °C oder >30 °C zur typischen Abfahrtszeit, abgeleitet aus den letzten 30 Tagen Trip-Daten
 
+**Gesundheit & Prognose (v3.27):**
+Lineare Hochrechnung der auf 100 % SoC normierten Reichweite mit 95-%-Konfidenzband: Degradationsrate (%/Jahr und km/Jahr), prognostizierte Reichweite in 3 Jahren und geschätzte Zeit bis 80 % des Startwerts. Erscheint ab 14 Messtagen. Reine Statistik, keine KI.
+
+**Standby-Drain-Trend-Warnung (v3.28):**
+Liegt der Median des Phantom-Drains (SOC-Verlust/h im Stillstand) der letzten 7 Tage anhaltend über den 30 Tagen davor (bzw. dauerhaft >0,8 %/h), erscheint ein Hinweis-Banner.
+
 Quellen: `battery_snapshots`, `trips`, `charging_sessions`, plus eine externe Open-Meteo-Anfrage nur für Vorklim. Persistierung in `battery_anomalies` und `precondition_suggestions` mit UNIQUE-Constraint (idempotent). Companion-Engine läuft nightly + alle 6 Stunden.
 
 ---
@@ -123,6 +135,7 @@ Routen im Voraus planen und direkt an die Tesla-Navigation senden:
 - **Bis zu 5 Zwischenstopps** — beliebige Zwischenpunkte hinzufügen
 - **OSRM-Routing** — Open-Source-Routenengine, kein Account erforderlich
 - **Ankunfts-SoC** — berechnet den Akkustand am Ziel basierend auf deinem echten Verbrauch
+- **Persönliche Reichweite statt WLTP (v3.29)** — der prognostizierte Ankunfts-Ladestand stammt aus deinem eigenen, temperatur-abhängigen Verbrauch (Trip-Historie), nicht aus der WLTP-Reichweite; bei bekannter Ziel-Temperatur werden nur Fahrten aus einem ±7-°C-Fenster herangezogen. Zusätzlich: Vertrauensband, Datenbasis-Angabe und „Könnte knapp werden"-Warnung. Reine Statistik; ohne genügend Trips greift die bisherige WLTP-Schätzung
 - **Ladestation-Overlay** — zeigt Schnellladestationen (CCS, CHAdeMO, Tesla) entlang der Route via OpenChargeMap
 - **An Tesla senden** — ein Tipp übermittelt das Ziel an die Fahrzeugnavigation
 - **Routen speichern & laden** — Lieblingsrouten für schnellen Zugriff speichern
@@ -164,6 +177,9 @@ Alle Wartungsereignisse dokumentieren:
 
 ### Wartungsintervalle & Erinnerungen
 Intervalle unter **Einstellungen → Wartungsintervalle** konfigurieren. Web-Push-Benachrichtigungen werden 30 Tage und 1 000 km vor Fälligkeit gesendet. Das Dashboard zeigt eine Vorschaukarte mit anstehenden Terminen.
+
+### Vorausschauende Wartung & 12-Monats-Kostenausblick (v3.31)
+Bei km-Intervallen rechnet TeslaView aus deiner tatsächlichen Fahrleistung (Ø km/Tag der letzten 90 Tage) hoch, wann das Intervall voraussichtlich fällig wird („≈ in ~6 Wochen"); der HU/TÜV-Termin läuft als reguläres Zeit-Intervall mit Countdown mit. Im TCO-Cockpit zeigt ein **12-Monats-Kostenausblick** die erwarteten Wartungs-, Strom-, Versicherungs- und Steuerkosten der nächsten 12 Monate (fortgeschrieben aus den letzten 12 Monaten). Reine Statistik.
 
 ---
 
@@ -379,6 +395,22 @@ Details + Schritt-für-Schritt iOS-Setup im Handbuch unter `{#owntracks-validati
 ## 🔍 Adresse vor Koordinaten + Auto-Geocoding (v3.8.0 + v3.10.0)
 
 Alle Trip- und Lade-Listen zeigen Adressen statt nur GPS-Punkte. Trips mit GPS aber ohne Adresse werden automatisch via Nominatim/OSM aufgelöst (Live-Hook + nightly Backfill + Admin-Trigger). 24h lokal gecacht.
+
+## 🛡️ Betriebs-Selbsttest (v3.32)
+
+Ganz oben unter **System** liegt der **🛡️ Betriebs-Selbsttest**. Auf „Jetzt prüfen" — und automatisch wöchentlich im nächtlichen Wartungslauf — prüft TeslaView Sicherheit und Backup-Integrität: MFA-Abdeckung, Verschlüsselungsschlüssel, kritische Secrets, Audit-Log-Aktivität, SQLite-Datenbank-Integrität sowie Aktualität und Inhalt des letzten Backups (Datei lesbar, alle Tabellen enthalten). Ergebnis ist eine Ampel je Prüfung; Auffälligkeiten landen zusätzlich im Audit-Log. Reine Diagnostik.
+
+## 🛞 Reifendruck-Trend & Slow-Leak-Warnung (v3.33)
+
+TeslaView zeichnet den Reifendruck je Reifen als Zeitreihe auf und erkennt langsamen, **temperaturbereinigten** Druckverlust — kein Kälte-Fehlalarm. Eine erkannte schleichende Undichtigkeit wird über die bestehenden Kanäle (Push / Telegram / E-Mail) gemeldet; die TireMap zeigt einen Warn-Ring, ein Badge und den Trend. Rein statistisch, lokal.
+
+## 🍃 Fahrstil-Score (v3.34)
+
+Eine Dashboard-Karte bewertet die Fahrweise der letzten 30 Tage als relativen Effizienz-Index gegen den eigenen Langzeit-Schnitt (0–100, Ampel-Band) und liefert datenbelegte Spartipps (Kälte, Durchschnittsgeschwindigkeit, Kurzstrecken-Anteil). Rein statistisch, lokal.
+
+## 🔌 Live-Ladekurve (v3.35)
+
+Zeigt die laufende Ladesession in Echtzeit (Leistung, Ladestand) zusammen mit einer Erwartungskurve aus einer vergleichbaren früheren Session — eine Drosselung ist sofort sichtbar. Ohne zusätzlichen Tesla-API-Call.
 
 ## 💬 Warum Telegram und nicht WhatsApp / Signal?
 

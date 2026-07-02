@@ -126,6 +126,22 @@ All Tesla API calls return 403? This typically means your **Tesla Developer acco
 
 ---
 
+## 🧭 Setup wizard fails at admin creation
+
+**Symptom:** On a fresh install, step 2 of the setup wizard (create admin account) fails with `Transaction function cannot return a promise`. Affects versions up to and including v3.32.5.
+
+**Cause & fix:** A bug in `/api/setup/init` ([#170](https://github.com/KnevS/Tesla-Carview/issues/170)) — **fixed in v3.32.6**. Update to the latest version and reopen the wizard:
+
+```bash
+cd /opt/tesla-carview
+git pull
+docker compose -f docker-compose.prod.yml up -d --build
+```
+
+The admin account can then be created again. Existing installations are not affected.
+
+---
+
 ## 🔐 Login problems
 
 ### "Invalid username or password" — but I'm sure it's right
