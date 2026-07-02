@@ -26,8 +26,9 @@
       </svg>
 
       <!-- Reifen: VL oben links -->
-      <div class="tire tire-fl" v-tooltip="tireTooltip('VL', tpms.fl)">
-        <div class="tire-rim" :style="tireStyle(tpms.fl)">
+      <div class="tire tire-fl" v-tooltip="tireTooltip('VL', tpms.fl, tireWarn('VL'))">
+        <div class="tire-rim" :style="tireStyle(tpms.fl)" :class="{ 'tire-leak': tireWarn('VL') }">
+          <span v-if="tireWarn('VL')" class="tire-leak-badge">⚠️</span>
           <span class="tire-val">{{ tpms.fl != null ? tpms.fl.toFixed(1) : '—' }}</span>
           <span class="tire-unit">bar</span>
         </div>
@@ -35,8 +36,9 @@
       </div>
 
       <!-- Reifen: VR oben rechts -->
-      <div class="tire tire-fr" v-tooltip="tireTooltip('VR', tpms.fr)">
-        <div class="tire-rim" :style="tireStyle(tpms.fr)">
+      <div class="tire tire-fr" v-tooltip="tireTooltip('VR', tpms.fr, tireWarn('VR'))">
+        <div class="tire-rim" :style="tireStyle(tpms.fr)" :class="{ 'tire-leak': tireWarn('VR') }">
+          <span v-if="tireWarn('VR')" class="tire-leak-badge">⚠️</span>
           <span class="tire-val">{{ tpms.fr != null ? tpms.fr.toFixed(1) : '—' }}</span>
           <span class="tire-unit">bar</span>
         </div>
@@ -44,8 +46,9 @@
       </div>
 
       <!-- Reifen: HL unten links -->
-      <div class="tire tire-rl" v-tooltip="tireTooltip('HL', tpms.rl)">
-        <div class="tire-rim" :style="tireStyle(tpms.rl)">
+      <div class="tire tire-rl" v-tooltip="tireTooltip('HL', tpms.rl, tireWarn('HL'))">
+        <div class="tire-rim" :style="tireStyle(tpms.rl)" :class="{ 'tire-leak': tireWarn('HL') }">
+          <span v-if="tireWarn('HL')" class="tire-leak-badge">⚠️</span>
           <span class="tire-val">{{ tpms.rl != null ? tpms.rl.toFixed(1) : '—' }}</span>
           <span class="tire-unit">bar</span>
         </div>
@@ -53,8 +56,9 @@
       </div>
 
       <!-- Reifen: HR unten rechts -->
-      <div class="tire tire-rr" v-tooltip="tireTooltip('HR', tpms.rr)">
-        <div class="tire-rim" :style="tireStyle(tpms.rr)">
+      <div class="tire tire-rr" v-tooltip="tireTooltip('HR', tpms.rr, tireWarn('HR'))">
+        <div class="tire-rim" :style="tireStyle(tpms.rr)" :class="{ 'tire-leak': tireWarn('HR') }">
+          <span v-if="tireWarn('HR')" class="tire-leak-badge">⚠️</span>
           <span class="tire-val">{{ tpms.rr != null ? tpms.rr.toFixed(1) : '—' }}</span>
           <span class="tire-unit">bar</span>
         </div>
@@ -67,14 +71,20 @@
       <span class="legend-ok">● OK (2.3–2.9 bar)</span>
       <span class="legend-warn">● Niedrig / Hoch</span>
       <span class="legend-crit">● Kritisch</span>
+      <span class="legend-leak">⚠️ Langsamer Druckverlust</span>
     </div>
   </div>
 </template>
 
 <script setup>
-defineProps({
+const props = defineProps({
   tpms: { type: Object, required: true },
+  // Offene Slow-Leak-Warnungen je Reifen, Key fl/fr/rl/rr: { drop_bar, days, from_bar, to_bar }
+  warnings: { type: Object, default: () => ({}) },
 });
+
+// Anzeige-Position (VL/VR/HL/HR) → interner Reifen-Key (fl/fr/rl/rr)
+const POS_KEY = { VL: 'fl', VR: 'fr', HL: 'rl', HR: 'rr' };
 
 function tireColor(val) {
   if (val == null) return { border: '#4b5563', glow: 'none', text: '#6b7280', bg: 'rgba(55,65,81,0.3)' };
@@ -93,13 +103,23 @@ function tireStyle(val) {
   };
 }
 
-function tireTooltip(pos, val) {
+function tireWarn(pos) {
+  return props.warnings?.[POS_KEY[pos]] || null;
+}
+
+function tireTooltip(pos, val, warn) {
   const labels = { VL: 'Vorderreifen links', VR: 'Vorderreifen rechts', HL: 'Hinterreifen links', HR: 'Hinterreifen rechts' };
   const name = labels[pos] ?? pos;
-  if (val == null) return `${name}: kein Signal`;
-  if (val < 1.8 || val > 3.4) return `${name}: ${val.toFixed(1)} bar — KRITISCH`;
-  if (val < 2.3 || val > 2.9) return `${name}: ${val.toFixed(1)} bar — außerhalb Empfehlung (2.3–2.9 bar)`;
-  return `${name}: ${val.toFixed(1)} bar — OK`;
+  let base;
+  if (val == null) base = `${name}: kein Signal`;
+  else if (val < 1.8 || val > 3.4) base = `${name}: ${val.toFixed(1)} bar — KRITISCH`;
+  else if (val < 2.3 || val > 2.9) base = `${name}: ${val.toFixed(1)} bar — außerhalb Empfehlung (2.3–2.9 bar)`;
+  else base = `${name}: ${val.toFixed(1)} bar — OK`;
+  if (warn) {
+    base += `\n⚠️ Langsamer Druckverlust: ${warn.from_bar} → ${warn.to_bar} bar über ${warn.days} Tage`
+          + ` (temperaturbereinigt, −${warn.drop_bar} bar) — auf Leck prüfen.`;
+  }
+  return base;
 }
 </script>
 
@@ -140,6 +160,7 @@ function tireTooltip(pos, val) {
 .tire-rr { bottom: 96px; right: 4px; }
 
 .tire-rim {
+  position: relative;
   width: 46px;
   height: 56px;
   border-radius: 10px;
@@ -150,6 +171,26 @@ function tireTooltip(pos, val) {
   justify-content: center;
   transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
   cursor: default;
+}
+
+/* Slow-Leak-Warnung: pulsierender Rahmen unabhängig vom Momentan-Farbwert */
+.tire-rim.tire-leak {
+  border-color: #f59e0b;
+  animation: tire-leak-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes tire-leak-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(245, 158, 11, 0.35); }
+  50%      { box-shadow: 0 0 14px rgba(245, 158, 11, 0.75); }
+}
+
+.tire-leak-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  font-size: 0.8rem;
+  line-height: 1;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
 .tire-val {
@@ -182,4 +223,5 @@ function tireTooltip(pos, val) {
 .legend-ok   { color: #86efac; }
 .legend-warn { color: #fcd34d; }
 .legend-crit { color: #fca5a5; }
+.legend-leak { color: #fbbf24; }
 </style>

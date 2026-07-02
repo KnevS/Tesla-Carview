@@ -98,7 +98,7 @@
       <SortableSection v-if="sid === 'tpms'" page-id="telemetry" section-id="tpms"
         title="Reifendruck (TPMS)" icon="🛞"
         :collapsed="isCollapsed('tpms')" @toggle="toggle('tpms')" @move="(f,t,p) => moveSection(f,t,p)">
-        <TireMap :tpms="data.vehicle.tpms" />
+        <TireMap :tpms="data.vehicle.tpms" :warnings="data.vehicle.tpms_warnings || {}" />
       </SortableSection>
 
       <!-- Climate -->

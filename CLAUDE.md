@@ -109,12 +109,13 @@ Workflow — keine PRs nötig. Aber **vor jedem Push**:
 
 ### Aktuell (Stand 2026-07-02)
 
-- **Version:** v3.32.6
+- **Version:** v3.33.0
 - **Zuletzt geliefert:**
-  - **Setup-Wizard-Fix (#170):** `db.transaction()`-Callback in `/api/setup/init` synchron gemacht (better-sqlite3 lehnt async-Callbacks ab); frische Installationen können Schritt 2 (Admin-Anlage) wieder abschließen.
-  - **Fleet-Telemetry Ende-zu-Ende funktionsfähig (v3.32.4/.5):** Receiver entpackt jetzt den FlatBuffers-Envelope (Firmware 2026.20.x) samt eingebettetem Protobuf; `fleet_telemetry_config` läuft über den Fleet-Level-Endpoint mit echter CA-Kette, WS-Root-Requests werden an den Backend-Receiver geroutet. Live verifiziert.
-  - **Betriebs-Selbsttest (v3.32.0):** `selfCheck.js` + `GET/POST /api/system/self-check`, Wochenlauf in `nightlyMaintenance`.
-- **Doku-Stand:** README (7 Sprachen), In-App-Handbuch (6 Sprachen), GitHub-Wiki (Features + Troubleshooting, 7 Sprachen) und Marketing-Site `teslaview-web` sind alle auf v3.32.6 synchronisiert.
+  - **Reifendruck-Trend & Slow-Leak-Warnung (S07, v3.33.0, #176):** TPMS-Zeitreihe (`tire_pressure_snapshots`, Poller-Write in `dataSync.js`) + temperaturbereinigte Trenderkennung in `companionEngine.js` (`findTireAnomalies`, stabiler Wochen-Hash gegen Alarm-Spam) → Warnung über die bestehenden Kanäle; `TireMap.vue` zeigt Warn-Ring/Badge + Trend-Tooltip; Endpoint `GET /api/telemetry/:id/tire-history`.
+  - **Setup-Wizard-Fix (#170):** `db.transaction()`-Callback in `/api/setup/init` synchron gemacht (better-sqlite3 lehnt async-Callbacks ab).
+  - **Fleet-Telemetry Ende-zu-Ende funktionsfähig (v3.32.4/.5):** Receiver entpackt FlatBuffers-Envelope + eingebettetes Protobuf; `fleet_telemetry_config` über den Fleet-Level-Endpoint mit echter CA-Kette. Live verifiziert.
+  - **Betriebs-Selbsttest (v3.32.0):** `selfCheck.js` + `GET/POST /api/system/self-check`.
+- **Doku-Stand:** README (7 Sprachen), In-App-Handbuch (6 Sprachen), GitHub-Wiki (7 Sprachen) und Marketing-Site `teslaview-web` auf v3.32.6 synchronisiert; Marketing-/Wiki-Bump auf v3.33.0 folgt im nächsten Sync.
 
 ### Architektur-Ankerpunkte (stabil — hier nachschlagen)
 

@@ -75,6 +75,33 @@ export async function syncVehicleState(db, vehicle, state, tenantId = null) {
     );
   }
 
+  // Reifendruck-Snapshot (alle 15 Min) — Basis für Slow-Leak-Trenderkennung.
+  // Werte kommen aus vehicle_state (tpms_pressure_*, bar); die Aussentemperatur
+  // wird mitgeschrieben, damit die Trenderkennung kaeltebedingte Schwankungen
+  // herausrechnen kann.
+  const tpmsPresent = vs
+    && (vs.tpms_pressure_fl != null || vs.tpms_pressure_fr != null
+        || vs.tpms_pressure_rl != null || vs.tpms_pressure_rr != null);
+  if (tpmsPresent) {
+    const lastTire = db.prepare(
+      'SELECT timestamp FROM tire_pressure_snapshots WHERE vehicle_id=? ORDER BY timestamp DESC LIMIT 1'
+    ).get(vehicle.id);
+    if (!lastTire || now - lastTire.timestamp >= BATTERY_SNAPSHOT_INTERVAL) {
+      db.prepare(
+        `INSERT INTO tire_pressure_snapshots
+         (vehicle_id, timestamp, pressure_fl, pressure_fr, pressure_rl, pressure_rr, outside_temp_c)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`
+      ).run(
+        vehicle.id, now,
+        vs.tpms_pressure_fl ?? null,
+        vs.tpms_pressure_fr ?? null,
+        vs.tpms_pressure_rl ?? null,
+        vs.tpms_pressure_rr ?? null,
+        outsideTempC,
+      );
+    }
+  }
+
   // GPS-basiertes Tracking (ältere Fahrzeuge mit drive_state inkl. Koordinaten).
   // Bei XP7-Modellen liefert Tesla manchmal shift_state, aber lat/lon = null —
   // dann ist drive_state nicht nutzbar und wir fallen unten auf den Odometer-Pfad.

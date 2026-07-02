@@ -23,6 +23,88 @@ function hashOf(parts) {
   return createHash('sha1').update(parts.join('|')).digest('hex').slice(0, 16);
 }
 
+// Reifendruck auf 20 °C normieren: absoluter Druck ∝ absolute Temperatur
+// (ideales Gasgesetz). Gauge→absolut (+1.013 bar), auf 293.15 K skalieren,
+// zurück auf Gauge. So schlagen Kältetage nicht als „Leck" durch.
+const TIRE_REF_K = 293.15;
+function tempCompensate(pressureBar, tempC) {
+  if (pressureBar == null || tempC == null) return null;
+  const abs = (pressureBar + 1.013) * (TIRE_REF_K / (tempC + 273.15));
+  return abs - 1.013;
+}
+
+// Least-squares-Steigung (bar/Tag) über [{x:Tage, y:bar}].
+function linregSlope(points) {
+  const n = points.length;
+  if (n < 2) return null;
+  const sx = points.reduce((a, p) => a + p.x, 0);
+  const sy = points.reduce((a, p) => a + p.y, 0);
+  const sxx = points.reduce((a, p) => a + p.x * p.x, 0);
+  const sxy = points.reduce((a, p) => a + p.x * p.y, 0);
+  const d = n * sxx - sx * sx;
+  if (d === 0) return null;
+  return (n * sxy - sx * sy) / d;
+}
+
+const TIRE_SLOPE_BAR_PER_DAY = -0.03;  // ≈ −0,2 bar/Woche
+const TIRE_MIN_DROP_BAR = 0.2;
+const TIRE_MIN_POINTS = 5;
+const TIRE_MIN_SPAN_DAYS = 3;
+
+/**
+ * Erkennt langsamen Druckverlust je Reifen aus der temperaturbereinigten
+ * Zeitreihe. Stabiler Hash (Reifen + 7-Tage-Fenster) ⇒ höchstens ein Alarm
+ * je Reifen und Woche, kein Spam bei jedem 6-h-Lauf.
+ */
+function findTireAnomalies(db, vehicleId, lookbackS) {
+  const since = Math.floor(Date.now() / 1000) - lookbackS;
+  const snaps = db.prepare(
+    `SELECT timestamp, pressure_fl, pressure_fr, pressure_rl, pressure_rr, outside_temp_c
+     FROM tire_pressure_snapshots
+     WHERE vehicle_id=? AND timestamp >= ?
+     ORDER BY timestamp ASC`
+  ).all(vehicleId, since);
+  if (snaps.length < TIRE_MIN_POINTS) return [];
+
+  const t0 = snaps[0].timestamp;
+  const tires = [['fl', 'pressure_fl'], ['fr', 'pressure_fr'], ['rl', 'pressure_rl'], ['rr', 'pressure_rr']];
+  const anomalies = [];
+
+  for (const [tire, col] of tires) {
+    const pts = [];
+    for (const s of snaps) {
+      const comp = tempCompensate(s[col], s.outside_temp_c);
+      if (comp == null) continue;
+      pts.push({ x: (s.timestamp - t0) / 86400, y: comp, ts: s.timestamp });
+    }
+    if (pts.length < TIRE_MIN_POINTS) continue;
+    const spanDays = pts[pts.length - 1].x - pts[0].x;
+    if (spanDays < TIRE_MIN_SPAN_DAYS) continue;
+
+    const m = linregSlope(pts);
+    if (m == null) continue;
+    const from = pts[0].y, to = pts[pts.length - 1].y;
+    const drop = from - to;
+    if (m <= TIRE_SLOPE_BAR_PER_DAY && drop >= TIRE_MIN_DROP_BAR) {
+      const occurred_at = pts[pts.length - 1].ts;
+      anomalies.push({
+        type: 'tire_slow_leak',
+        occurred_at,
+        hashKey: ['tire_slow_leak', tire, Math.floor(occurred_at / (7 * 86400))],
+        details: {
+          tire,
+          from_bar: +from.toFixed(2),
+          to_bar: +to.toFixed(2),
+          drop_bar: +drop.toFixed(2),
+          per_day_bar: +m.toFixed(3),
+          days: +spanDays.toFixed(1),
+        },
+      });
+    }
+  }
+  return anomalies;
+}
+
 /** Findet alle Anomalien eines Vehicles im Lookback-Fenster. */
 function findAnomaliesForVehicle(db, vehicleId, lookbackS) {
   const since = Math.floor(Date.now() / 1000) - lookbackS;
@@ -122,7 +204,11 @@ function persistAnomalies(db, vehicleId, found) {
   );
   let inserted = 0;
   for (const a of found) {
-    const h = hashOf([a.type, a.occurred_at, JSON.stringify(a.details)]);
+    // Manche Anomalien (z. B. Slow-Leak-Trend) liefern einen stabilen hashKey,
+    // damit ein andauerndes Ereignis nicht bei jedem Lauf neu alarmiert.
+    const h = a.hashKey
+      ? hashOf(a.hashKey)
+      : hashOf([a.type, a.occurred_at, JSON.stringify(a.details)]);
     const r = insert.run(vehicleId, h, a.type, a.occurred_at, JSON.stringify(a.details));
     if (r.changes > 0) inserted++;
   }
@@ -154,12 +240,15 @@ async function notifyNewAnomalies(db, tenantId) {
     const carLabel = r.display_name || (r.vin ? r.vin.slice(-6) : `#${r.vehicle_id}`);
     const { title, body } = buildAnomalyMessage(r.type, det, carLabel);
 
+    // Reifen-Anomalien führen zur Live-/Reifenansicht, Akku-Anomalien zur Batterie.
+    const isTire = r.type === 'tire_slow_leak';
+
     // Push parallel an alle User des Fahrzeugs — User wartet nicht auf jeden
     // einzelnen Web-Push-Round-Trip sequenziell.
     await Promise.allSettled(users.map(u => notify({
       tenantId, userId: u.user_id, db,
-      title, body, url: '/battery',
-      emoji: '🔍', type: 'generic', vehicleId: r.vehicle_id,
+      title, body, url: isTire ? '/telemetry' : '/battery',
+      emoji: isTire ? '🛞' : '🔍', type: 'generic', vehicleId: r.vehicle_id,
     })));
 
     db.prepare(
@@ -192,6 +281,13 @@ function buildAnomalyMessage(type, det, car) {
         title: `Effizienz-Ausreißer an ${car}`,
         body:  `${det.kwh_per_100km} kWh/100km auf ${det.distance_km} km — Wetter/Stau/Topographie prüfen.`,
       };
+    case 'tire_slow_leak': {
+      const names = { fl: 'vorne links', fr: 'vorne rechts', rl: 'hinten links', rr: 'hinten rechts' };
+      return {
+        title: `Reifendruck fällt an ${car}`,
+        body:  `Reifen ${names[det.tire] || det.tire}: ${det.from_bar} → ${det.to_bar} bar über ${det.days} Tage (temperaturbereinigt) — auf langsames Leck prüfen.`,
+      };
+    }
     default:
       return { title: `Anomalie an ${car}`, body: `Typ ${type}` };
   }
@@ -332,7 +428,8 @@ export async function runCompanionCycle({ skipPreconditions = false } = {}) {
       const lookbackS = ANOMALY_LOOKBACK_DAYS * 86400;
       for (const v of vehicles) {
         const found = findAnomaliesForVehicle(db, v.id, lookbackS);
-        summary.anomalies_found += persistAnomalies(db, v.id, found);
+        const tireFound = findTireAnomalies(db, v.id, lookbackS);
+        summary.anomalies_found += persistAnomalies(db, v.id, [...found, ...tireFound]);
 
         if (!skipPreconditions) {
           const sug = await generatePreconditionForVehicle(db, v.id);
