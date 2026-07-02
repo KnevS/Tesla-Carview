@@ -6,6 +6,9 @@
       <SortToggle v-model:direction="sortDir" />
     </div>
 
+    <!-- Live-Ladevorgang (S07): erscheint nur während einer laufenden Session -->
+    <ChargingLive :vehicle-id="appStore.selectedVehicle?.id" />
+
     <template v-for="sid in layoutOrder" :key="sid">
 
     <SortableSection v-if="sid === 'stats'" page-id="charging" section-id="stats"
@@ -232,6 +235,7 @@ import StatCard from '../components/StatCard.vue';
 import AppIcon from '../components/AppIcon.vue';
 import ChargingHeatmap from '../components/ChargingHeatmap.vue';
 import ChargingSessionDetail from '../components/ChargingSessionDetail.vue';
+import ChargingLive from '../components/ChargingLive.vue';
 import ChargingTariffWindows from '../components/ChargingTariffWindows.vue';
 import SortToggle from '../components/SortToggle.vue';
 import SortableSection from '../components/SortableSection.vue';

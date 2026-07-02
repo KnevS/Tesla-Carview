@@ -141,6 +141,46 @@ router.get('/cost-by-location', (req, res) => {
   }
 });
 
+// GET /charging/current?vehicle_id= — laufende (offene) Ladesession live.
+// Liefert die offene Session (end_time IS NULL) samt bisher erfassten Punkten
+// plus eine Referenz-/Erwartungskurve aus einer vergleichbaren, abgeschlossenen
+// Session (gleiches Fahrzeug + Ladetyp). Nutzt die vom Poller ohnehin
+// geschriebenen charging_points — kein zusätzlicher Tesla-API-Call.
+router.get('/current', (req, res) => {
+  const { vehicle_id } = req.query;
+  if (!vehicle_id) return res.json({ active: false });
+  if (guardAccess(res, () => assertVehicleAccess(req.db, vehicle_id, req.user))) return;
+  try {
+    const session = req.db.prepare(
+      'SELECT * FROM charging_sessions WHERE vehicle_id=? AND end_time IS NULL ORDER BY id DESC LIMIT 1'
+    ).get(vehicle_id);
+    if (!session) return res.json({ active: false });
+
+    const points = req.db.prepare(
+      'SELECT timestamp, soc, power_kw, voltage, current, energy_added_kwh FROM charging_points WHERE session_id=? ORDER BY timestamp ASC'
+    ).all(session.id);
+
+    // Erwartungskurve: jüngste abgeschlossene Session mit gleichem Ladetyp und
+    // genügend Punkten — als soc→kW-Referenz. Fehlt sie, bleibt expected leer.
+    const ref = req.db.prepare(
+      `SELECT id FROM charging_sessions
+       WHERE vehicle_id=? AND end_time IS NOT NULL AND id<>?
+         AND (charger_type IS ? OR ? IS NULL)
+       ORDER BY id DESC LIMIT 1`
+    ).get(session.vehicle_id, session.id, session.charger_type, session.charger_type);
+    let expected = [];
+    if (ref) {
+      expected = req.db.prepare(
+        'SELECT soc, power_kw FROM charging_points WHERE session_id=? AND soc IS NOT NULL AND power_kw IS NOT NULL ORDER BY soc ASC'
+      ).all(ref.id);
+    }
+
+    res.json({ active: true, session, points, expected });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/:id', (req, res) => {
   if (guardAccess(res, () => assertChargingAccess(req.db, req.params.id, req.user))) return;
   try {

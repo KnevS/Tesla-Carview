@@ -19,6 +19,7 @@ Tesla Carview is a **self-hosted** data-logger app for Tesla vehicles. All data 
 - 🗓️ **Weekly insights** — dashboard card "Your week" with plain-text hints on mileage, consumption vs. 90-day average (incl. a cold-weather reason), charging cost and open anomalies (v3.30, pure statistics; optional local LLM polish with Ollama)
 - 🛞 **Tire-pressure trend** — detects slow, temperature-compensated pressure loss per tire and warns early (v3.33)
 - 🍃 **Driving score** — rates your driving efficiency against your own average, with data-backed saving tips (v3.34, pure statistics)
+- 🔌 **Live charge curve** — the running charging session in real time with power, state of charge and an expected-curve overlay (v3.35)
 - 🎮 **Controls** — Climate, doors, lights — directly from the app
 - 📝 **Service log** — Maintenance, repairs, costs with date
 - 📤 **Export** — CSV/JSON/**PDF** for trips, CSV for charging, full backup as ZIP; PDF trip log print-ready with date, distance, energy and SOC

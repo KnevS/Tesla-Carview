@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.35.0] - 2026-07-02
+
+### Added
+
+- **Live charge curve (S07)** ([#174](https://github.com/KnevS/Tesla-Carview/issues/174)): a new **"Live charging"** card in the Charging view shows the currently running session in real time — power (kW) and state of charge (%) over time, plus live figures (current power, SoC, energy added, elapsed) and an **expected-curve overlay** from a comparable completed session (soc→kW). Throttling (tapering/temperature) becomes instantly visible against the normal curve. New endpoint `GET /api/charging/current`; reuses the `charging_points` the poller already writes — **no extra Tesla API call**. 30-second poll, auto-hides when no session is running.
+
+---
+
 ## [v3.34.0] - 2026-07-02
 
 ### Added
