@@ -4,7 +4,7 @@
 >
 > 📚 **New to Tesla Carview?** The **[GitHub Wiki](https://github.com/KnevS/Tesla-Carview/wiki)** offers a guided introduction: step-by-step instructions for installation, network access without a static IP (DynDNS, Cloudflare Tunnel, router setup), Raspberry Pi storage (SSD instead of SD card) and more — written for non-IT-experts.
 
-Version 2.1 · Self-Hosted · Multi-Tenant
+Self-Hosted · Multi-Tenant
 
 ## 🌟 Overview {#overview}
 

@@ -98,64 +98,39 @@ Workflow — keine PRs nötig. Aber **vor jedem Push**:
 
 ---
 
-## Aktueller Entwicklungsstand (Stand 2026-05-29, v3.4.1)
+## Aktueller Entwicklungsstand
 
-> Dieser Abschnitt wird von Sessions aktuell gehalten und dient als Einsprung für neue Konversationen.
+> ⚠️ **Dieser Abschnitt darf nie veralten.** Jede Session, die am Repo arbeitet,
+> aktualisiert die „Aktuell"-Zeilen unten (Version + zuletzt geliefert), bevor sie
+> fertig meldet. Im Zweifel gelten die verbindlichen Live-Quellen, NICHT dieser Text:
+> - **Version:** `backend/package.json` + `frontend/package.json` (Single Source of Truth, auch live unter `/api/system/version`)
+> - **Was zuletzt geschah:** oberster Eintrag in [`CHANGELOG.md`](CHANGELOG.md) / [`CHANGELOG.en.md`](CHANGELOG.en.md)
+> - **Letzte Commits:** `git log --oneline -15 origin/main`
 
-### Was in der letzten Session getan wurde (2026-05-29)
+### Aktuell (Stand 2026-07-02)
 
-**fix: vier latente ReferenceError-Bugs behoben (`dfc45ce`)**
-- Bug-Klasse: undefinierte Bezeichner, die sauber durch `node --check`/`vite build`
-  laufen und erst zur Laufzeit crashen — genau das Muster der früheren
-  "add missing import"-Commits.
-- `abrpService.js`: `getTenantSetting`-Import lag im JSDoc-Block (nie importiert);
-  `sendToAbrp` bekam kein `db` → Signatur jetzt `sendToAbrp(db, vehicle, tlm)`,
-  Aufrufer in `dataSync.js` + `fleetTelemetry.js` angepasst.
-- `grokService.js`: `getTenantSetting`-Import ebenfalls im JSDoc-Block.
-- `telemetryConfig.js`: `getTenantSetting` mit nackten Bezeichnern statt String-Literalen aufgerufen.
-- `serviceReminders.js`: Push-Send nutzte `wp` statt `wpMod`.
+- **Version:** v3.32.6
+- **Zuletzt geliefert:**
+  - **Setup-Wizard-Fix (#170):** `db.transaction()`-Callback in `/api/setup/init` synchron gemacht (better-sqlite3 lehnt async-Callbacks ab); frische Installationen können Schritt 2 (Admin-Anlage) wieder abschließen.
+  - **Fleet-Telemetry Ende-zu-Ende funktionsfähig (v3.32.4/.5):** Receiver entpackt jetzt den FlatBuffers-Envelope (Firmware 2026.20.x) samt eingebettetem Protobuf; `fleet_telemetry_config` läuft über den Fleet-Level-Endpoint mit echter CA-Kette, WS-Root-Requests werden an den Backend-Receiver geroutet. Live verifiziert.
+  - **Betriebs-Selbsttest (v3.32.0):** `selfCheck.js` + `GET/POST /api/system/self-check`, Wochenlauf in `nightlyMaintenance`.
+- **Doku-Stand:** README (7 Sprachen), In-App-Handbuch (6 Sprachen), GitHub-Wiki (Features + Troubleshooting, 7 Sprachen) und Marketing-Site `teslaview-web` sind alle auf v3.32.6 synchronisiert.
 
-**chore(ci): ESLint no-undef dauerhaft eingerichtet (`2b06aac`)**
-- `eslint` + `globals` (Backend) bzw. + `vue-eslint-parser` (Frontend) als devDeps;
-  je ein `npm run lint`-Script + minimale Flat-Config (`eslint.config.js`).
-- Nur echte Bug-Regeln (`no-undef`, `no-dupe-keys`, `no-unreachable`), kein Stil —
-  CI bleibt aussagekräftig grün.
-- CI (`.github/workflows/ci.yml`): der bisherige No-op-"Syntax-Check" des Backend-Jobs
-  (gab nur einen String aus) ist durch echtes `npm run lint` ersetzt; Frontend-Job
-  bekommt einen Lint-Step vor dem Build. `npm run lint` lokal vor jedem Push laufen lassen.
+### Architektur-Ankerpunkte (stabil — hier nachschlagen)
 
-### Was in v3.4.0 getan wurde
+- **DB-vor-env-Pattern:** `backend/src/services/configService.js` → `getTenantSetting(db, key, envFallbackKey)` liest `tenant_settings` (SQLite), Fallback `.env`.
+- **Fleet-Telemetry-Receiver:** `backend/src/services/fleetTelemetry.js` (FlatBuffers-Envelope → eingebettetes Protobuf).
+- **Betriebs-Selbsttest:** `backend/src/services/selfCheck.js`.
+- **Version dynamisch:** Backend liefert sie über `/api/system/version` aus der package.json; Frontend zeigt sie in `AppFooter.vue`/`System.vue` — niemals hart kodieren.
+- **Admin-UI-Config-Routen:** `GET/PUT /api/system/{tesla-credentials,vapid-config,telegram-config,abrp-config}`, `POST /api/system/vapid-generate`, `PUT /api/grok/config`.
 
-**PR #69 — feat: admin config via UI + wizard split (v3.4.0)**
-- Alle Secrets (Tesla-Credentials, VAPID, Telegram, xAI, ABRP) sind jetzt über die Admin-UI konfigurierbar — kein SSH/.env-Editieren mehr nötig
-- Neuer `configService.js` (`backend/src/services/configService.js`): `getTenantSetting(db, key, envFallbackKey)` — liest aus `tenant_settings`-Tabelle, fällt auf `.env` zurück. Bestehende `.env`-Konfigurationen funktionieren unverändert.
-- `AdminSetupWizard.vue` (`frontend/src/components/AdminSetupWizard.vue`): neuer geführter Einrichtungsassistent, erreichbar über Admin-Hub → 🛠️
-- `SettingsWizard.vue` auf persönliche Einstellungen reduziert (Sprache, Design, Farbe, Einheiten, Dashboard, Nav, Benachrichtigungen)
-- Fahrerverwaltung + Geofences aus Profile.vue → AdminSettings.vue verschoben
+### Offen / Ideen
 
-**PR #70 — fix: Design-/Akzentfarb-Persistenz in Profil**
-- Bug: `themeStore.setDesign/apply()` schrieb nur in eigene localStorage-Keys; `prefsStore.load()` überschrieb beim Reload mit altem Backend-Wert
-- Fix: `Profile.vue` nutzt Wrapper `selectDesign(key)` / `selectAccent(key)`, die beide Stores (`themeStore` + `prefsStore.set()`) schreiben
-
-**PR #71 — docs: v3.4.0-Dokumentation**
-- `CHANGELOG.en.md` — v3.4.0-Eintrag ergänzt
-- `docs/07-setup-wizard.md + .en.md` — Wizard-Split dokumentiert
-- `docs/10-configuration.md + .en.md` — DB-vor-env-Muster + UI-Konfig-Tabelle
-
-### Architektur-Highlights v3.4.0
-
-- **DB-vor-env-Pattern**: Jeder konfigurierbare Wert liest zuerst `tenant_settings` (SQLite), dann `.env`. Pattern-Datei: `backend/src/services/configService.js`
-- **Admin-UI-Routen**: `GET/PUT /api/system/tesla-credentials`, `/api/system/vapid-config`, `POST /api/system/vapid-generate`, `GET/PUT /api/system/telegram-config`, `GET/PUT /api/system/abrp-config`; `PUT /api/grok/config`
-- **Theme-Dualität**: `themeStore` (localStorage) + `prefsStore` (Backend) sind jetzt synchron — beim Klick im Profil werden beide geschrieben
-
-### Offene / geplante Arbeiten
-
-- **`feat/grok-tab` Branch**: xAI-SSE-Chat mit Fahrzeugkontext — Branch existiert, noch nicht in main gemergt
-- **Telegram-Neustart nach Token-Setzen**: Erfordert `docker compose … up -d --build backend` — in Wizard-UI bereits dokumentiert
+- Neue Feature-Roadmap nach v3.32 (siehe Issues). Die Value-Drop-Roadmap S01–S06 ist abgeschlossen.
 
 ### Deployment
 
-Dokploy deployt automatisch nach jedem Merge auf `main`. Für manuelle Eingriffe: Server-Zugang und Repo-Pfad sind in der privaten Deployment-Dokumentation hinterlegt.
+Dokploy deployt die App automatisch nach jedem Merge auf `main`. Die Marketing-Site `teslaview-web` deployt per SSH-Pull auf den Host (GitHub Action, kein Build) beim Merge auf deren `main`. Für manuelle Eingriffe: Zugang und Repo-Pfad sind in der privaten Deployment-Dokumentation hinterlegt.
 
 ---
 
