@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.35.2] - 2026-07-02
+
+### Fixed
+
+- **Battery & power were always empty on trips/telemetry.** Across the entire history, 0 of >15,000 telemetry points had a SoC or power value. Cause: Tesla sends `Soc`/`PackVoltage`/`PackCurrent` not as `float` but often as `int`/`string` (e.g. SoC as `"82.3"`), while the decoder only read `float_value`/`double_value` and dropped the rest. A new `numVal` helper robustly reads all numeric value types (double/float/int/string), so SoC, voltage and current (→ computed power) are stored again and show up in trip detail, live charge curve, etc. (Temporarily includes a self-limiting diagnostic log to finally confirm the value type.)
+
+---
+
 ## [v3.35.1] - 2026-07-02
 
 ### Fixed

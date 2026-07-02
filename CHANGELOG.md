@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.35.2] - 2026-07-02
+
+### Behoben
+
+- **Batterie & Leistung in Fahrten/Telemetrie waren immer leer.** Über die gesamte Historie hatten 0 von >15.000 Telemetrie-Punkten einen SoC- oder Leistungswert. Ursache: Tesla sendet `Soc`/`PackVoltage`/`PackCurrent` nicht als `float`, sondern oft als `int`/`string` (z. B. SoC als `"82.3"`) — der Decoder las aber nur `float_value`/`double_value` und verwarf den Rest. Neue Hilfsfunktion `numVal` liest alle Zahlen-Value-Typen (double/float/int/string) robust; damit werden SoC, Spannung und Strom (→ berechnete Leistung) wieder gespeichert und erscheinen in Fahrt-Detail, Live-Ladekurve etc. (Enthält vorübergehend ein selbst-begrenztes Diagnose-Log, um den Value-Typ final zu bestätigen.)
+
+---
+
 ## [v3.35.1] - 2026-07-02
 
 ### Behoben
