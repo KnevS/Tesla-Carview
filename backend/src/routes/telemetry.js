@@ -4,6 +4,26 @@ import { getVehicleData } from '../services/teslaApi.js';
 
 const router = Router();
 
+/** Offene Slow-Leak-Warnungen je Reifen (aus der Companion-Anomalie-Tabelle). */
+function activeTireWarnings(db, vehicleId) {
+  const rows = db.prepare(
+    `SELECT details_json FROM battery_anomalies
+     WHERE vehicle_id=? AND type='tire_slow_leak'
+       AND status IN ('new','notified','seen') AND dismissed_at IS NULL
+     ORDER BY occurred_at DESC`
+  ).all(vehicleId);
+  const out = {};
+  for (const r of rows) {
+    try {
+      const d = JSON.parse(r.details_json);
+      if (d.tire && !out[d.tire]) {
+        out[d.tire] = { drop_bar: d.drop_bar, days: d.days, from_bar: d.from_bar, to_bar: d.to_bar };
+      }
+    } catch { /* defekte Zeile überspringen */ }
+  }
+  return out;
+}
+
 router.get('/:vehicleId/live', async (req, res) => {
   const db = req.db;
   const vehicle = db.prepare('SELECT * FROM vehicles WHERE id = ?').get(req.params.vehicleId);
@@ -16,7 +36,7 @@ router.get('/:vehicleId/live', async (req, res) => {
       drive:   { speed_kph: 0, power_kw: 0, heading: 182, lat: 48.7758, lon: 9.1829, gear: 'P' },
       charge:  { level_pct: soc, range_km: Math.round(soc/100*420), charging_state: 'Disconnected', charge_rate_kph: null, charger_power_kw: null, time_to_full_charge_h: null, charge_limit_pct: 80 },
       climate: { inside_temp_c: 21.5, outside_temp_c: 17.0, driver_temp_setting: 21.0, is_climate_on: false, fan_status: 0, is_front_defroster_on: false, is_rear_defroster_on: false },
-      vehicle: { odometer_km: 14832 + Math.round(Math.random()*20), locked: true, sentry_mode: false, software_version: '2024.44.25 a1b2c3d', tpms: { fl: 2.90, fr: 2.91, rl: 2.86, rr: 2.87 } },
+      vehicle: { odometer_km: 14832 + Math.round(Math.random()*20), locked: true, sentry_mode: false, software_version: '2024.44.25 a1b2c3d', tpms: { fl: 2.90, fr: 2.91, rl: 2.86, rr: 2.87 }, tpms_warnings: {} },
       ts: Math.floor(Date.now() / 1000),
       _demo: true,
     });
@@ -66,6 +86,7 @@ router.get('/:vehicleId/live', async (req, res) => {
           rl: vs?.tpms_pressure_rl != null ? +vs.tpms_pressure_rl.toFixed(2) : null,
           rr: vs?.tpms_pressure_rr != null ? +vs.tpms_pressure_rr.toFixed(2) : null,
         },
+        tpms_warnings: activeTireWarnings(db, vehicle.id),
       },
       ts: Math.floor(Date.now() / 1000),
     });
@@ -76,6 +97,22 @@ router.get('/:vehicleId/live', async (req, res) => {
     console.error('[telemetry] error:', e.message);
     res.status(502).json({ error: 'Fehler beim Abrufen der Fahrzeugdaten' });
   }
+});
+
+// Reifendruck-Zeitreihe (temperaturbereinigte Trendbasis) + offene Warnungen.
+router.get('/:vehicleId/tire-history', (req, res) => {
+  const db = req.db;
+  const vehicle = db.prepare('SELECT id FROM vehicles WHERE id = ?').get(req.params.vehicleId);
+  if (!vehicle) return res.status(404).json({ error: 'Fahrzeug nicht gefunden' });
+  const days = Math.min(90, Math.max(1, parseInt(req.query.days, 10) || 30));
+  const since = Math.floor(Date.now() / 1000) - days * 86400;
+  const points = db.prepare(
+    `SELECT timestamp, pressure_fl, pressure_fr, pressure_rl, pressure_rr, outside_temp_c
+     FROM tire_pressure_snapshots
+     WHERE vehicle_id=? AND timestamp >= ?
+     ORDER BY timestamp ASC`
+  ).all(vehicle.id, since);
+  res.json({ points, warnings: activeTireWarnings(db, vehicle.id) });
 });
 
 export default router;

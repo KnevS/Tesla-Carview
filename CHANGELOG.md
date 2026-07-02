@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.33.0] - 2026-07-02
+
+### Hinzugefügt
+
+- **Reifendruck-Trend & Slow-Leak-Warnung (S07)** ([#176](https://github.com/KnevS/Tesla-Carview/issues/176)): TeslaView zeichnet den Reifendruck je Reifen als Zeitreihe auf (neue Tabelle `tire_pressure_snapshots`, alle 15 Min im Poller) und erkennt im 6-stündigen Companion-Lauf einen **langsamen Druckverlust**. Die Werte werden **temperaturbereinigt** (ideales Gasgesetz, normiert auf 20 °C), damit Kältetage keine Fehlalarme auslösen. Bei stetigem Abfall (Trend ≤ −0,03 bar/Tag und ≥ 0,2 bar Gesamtverlust über mehrere Tage) gibt es **höchstens einmal pro Reifen und Woche** eine Warnung über die bestehenden Kanäle (Web-Push, Telegram, E-Mail). Die Reifenkarte (`TireMap`) zeigt einen pulsierenden Warn-Ring, ein ⚠️-Badge und den Trend im Tooltip. Neuer Endpoint `GET /api/telemetry/:id/tire-history`. Reine Statistik, lokal.
+
+---
+
 ## [v3.32.6] - 2026-07-01
 
 ### Behoben

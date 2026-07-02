@@ -926,6 +926,17 @@ function runTenantMigrations(db) {
   )`);
   db.exec('CREATE INDEX IF NOT EXISTS idx_sleep_events_vehicle ON vehicle_sleep_events(vehicle_id, sleep_at DESC)');
 
+  // Reifendruck-Zeitreihe (TPMS) — Basis für Slow-Leak-Trenderkennung (S07)
+  db.exec(`CREATE TABLE IF NOT EXISTS tire_pressure_snapshots (
+    id             INTEGER PRIMARY KEY,
+    vehicle_id     INTEGER NOT NULL REFERENCES vehicles(id),
+    timestamp      INTEGER NOT NULL,
+    pressure_fl    REAL, pressure_fr REAL, pressure_rl REAL, pressure_rr REAL,
+    outside_temp_c REAL,
+    created_at     INTEGER DEFAULT (unixepoch())
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_tire_pressure_vehicle ON tire_pressure_snapshots(vehicle_id, timestamp DESC)');
+
   // Software-Update-Tracker: erfasst jede neue Firmware-Version pro Fahrzeug
   db.exec(`CREATE TABLE IF NOT EXISTS firmware_versions (
     id             INTEGER PRIMARY KEY,

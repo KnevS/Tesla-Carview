@@ -124,6 +124,17 @@ CREATE TABLE IF NOT EXISTS battery_snapshots (
   created_at INTEGER DEFAULT (unixepoch())
 );
 
+-- Reifendruck-Zeitreihe (TPMS) — Basis für Slow-Leak-Trenderkennung (S07)
+CREATE TABLE IF NOT EXISTS tire_pressure_snapshots (
+  id INTEGER PRIMARY KEY,
+  vehicle_id INTEGER NOT NULL REFERENCES vehicles(id),
+  timestamp INTEGER NOT NULL,
+  pressure_fl REAL, pressure_fr REAL, pressure_rl REAL, pressure_rr REAL,
+  outside_temp_c REAL,
+  created_at INTEGER DEFAULT (unixepoch())
+);
+CREATE INDEX IF NOT EXISTS idx_tire_pressure_vehicle ON tire_pressure_snapshots(vehicle_id, timestamp DESC);
+
 -- Companion Phase 2: persistierte Anomalien
 CREATE TABLE IF NOT EXISTS battery_anomalies (
   id INTEGER PRIMARY KEY,

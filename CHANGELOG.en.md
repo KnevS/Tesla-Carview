@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.33.0] - 2026-07-02
+
+### Added
+
+- **Tire-pressure trend & slow-leak warning (S07)** ([#176](https://github.com/KnevS/Tesla-Carview/issues/176)): TeslaView now records tire pressure per wheel as a time series (new `tire_pressure_snapshots` table, every 15 min in the poller) and detects a **slow pressure loss** in the 6-hourly Companion run. Readings are **temperature-compensated** (ideal gas law, normalised to 20 °C) so cold days don't trigger false alarms. On a steady decline (trend ≤ −0.03 bar/day and ≥ 0.2 bar total loss over several days) it warns **at most once per tire per week** through the existing channels (web push, Telegram, email). The tire map (`TireMap`) shows a pulsing warning ring, a ⚠️ badge and the trend in the tooltip. New endpoint `GET /api/telemetry/:id/tire-history`. Pure statistics, local.
+
+---
+
 ## [v3.32.6] - 2026-07-01
 
 ### Fixed
