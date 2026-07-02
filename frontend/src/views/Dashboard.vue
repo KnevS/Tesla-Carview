@@ -45,6 +45,36 @@
           </div>
         </SortableSection>
 
+        <!-- eco_score -->
+        <SortableSection v-if="sid === 'eco_score' && show.eco_score && ecoScore && ecoScore.enough_data"
+          page-id="dashboard" section-id="eco_score"
+          :title="$t('dashboard.ecoScore')" icon="🍃"
+          :collapsed="isCollapsed('eco_score')" @toggle="toggle('eco_score')" @move="(f,t,p) => moveSection(f,t,p)">
+          <div class="flex items-center gap-4">
+            <div class="relative shrink-0" style="width:72px;height:72px">
+              <svg viewBox="0 0 36 36" class="w-full h-full" style="transform:rotate(-90deg)">
+                <circle cx="18" cy="18" r="15.9155" fill="none" stroke="#374151" stroke-width="3" />
+                <circle cx="18" cy="18" r="15.9155" fill="none" :stroke="ecoRing(ecoScore.band)" stroke-width="3"
+                  stroke-linecap="round" :stroke-dasharray="ecoScore.score + ', 100'" />
+              </svg>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span class="text-lg font-bold" :class="ecoBandCls(ecoScore.band)">{{ ecoScore.score }}</span>
+              </div>
+            </div>
+            <div class="min-w-0">
+              <div class="text-sm font-semibold" :class="ecoBandCls(ecoScore.band)">{{ $t('dashboard.ecoBand_' + ecoScore.band) }}</div>
+              <div class="text-xs text-gray-400 mt-0.5" :title="$t('dashboard.ecoBasisTooltip')">
+                {{ $t('dashboard.ecoBasis', { kwh: ecoScore.stats.kwh_per_100km, base: ecoScore.stats.baseline_kwh_per_100km, n: ecoScore.stats.recent_trips }) }}
+              </div>
+            </div>
+          </div>
+          <ul class="mt-3 space-y-1">
+            <li v-for="tip in ecoScore.tips" :key="tip.key" class="flex items-start gap-2 text-sm text-gray-300">
+              <span class="mt-0.5">💡</span><span>{{ ecoTipText(tip) }}</span>
+            </li>
+          </ul>
+        </SortableSection>
+
         <!-- service -->
         <SortableSection v-if="sid === 'service' && show.service && dueServices.length" page-id="dashboard" section-id="service"
           :title="$t('dashboard.serviceTitle')" icon="🔧"
@@ -131,12 +161,13 @@ const appStore = useAppStore();
 const prefs    = usePrefsStore();
 const { fmtDistance, fmtEfficiency } = useUnits();
 
-const DASH_SECTIONS = ['stats', 'weekly_insight', 'service', 'last_trip', 'monthly_chart', 'tariff', 'tesla_usage'];
+const DASH_SECTIONS = ['stats', 'weekly_insight', 'eco_score', 'service', 'last_trip', 'monthly_chart', 'tariff', 'tesla_usage'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('dashboard', DASH_SECTIONS);
 
 const show = computed(() => ({
   stats:         prefs.isDashboardCardVisible('stats'),
   weekly_insight: prefs.isDashboardCardVisible('weekly_insight'),
+  eco_score:     prefs.isDashboardCardVisible('eco_score'),
   service:       prefs.isDashboardCardVisible('service'),
   last_trip:     prefs.isDashboardCardVisible('last_trip'),
   monthly_chart: prefs.isDashboardCardVisible('monthly_chart'),
@@ -176,6 +207,18 @@ function insightText(ins) {
   return t(key, ins.params || {});
 }
 
+// Fahrstil-/Effizienz-Score (S07) — relativ zum eigenen Langzeit-Schnitt.
+const ecoScore = ref(null);
+const ECO_BAND = {
+  excellent: { cls: 'text-green-300',  ring: '#22c55e' },
+  good:      { cls: 'text-lime-300',   ring: '#84cc16' },
+  ok:        { cls: 'text-yellow-300', ring: '#eab308' },
+  poor:      { cls: 'text-orange-300', ring: '#f97316' },
+};
+const ecoBandCls  = (b) => (ECO_BAND[b] || ECO_BAND.ok).cls;
+const ecoRing     = (b) => (ECO_BAND[b] || ECO_BAND.ok).ring;
+const ecoTipText  = (tip) => t('dashboard.ecoTip_' + tip.key, tip.params || {});
+
 const chartOptions = {
   responsive: true, maintainAspectRatio: false,
   plugins: { legend: { display: false } },
@@ -208,6 +251,10 @@ async function load() {
   // Wochen-Insights (user-gescoped, kein vehicle_id nötig) — nicht blockierend.
   api.get('/insights/weekly').then(r => { weeklyInsight.value = r.data; })
     .catch(() => { weeklyInsight.value = null; });
+
+  // Fahrstil-/Effizienz-Score (user-gescoped) — nicht blockierend.
+  api.get('/insights/eco-score').then(r => { ecoScore.value = r.data; })
+    .catch(() => { ecoScore.value = null; });
 
   const allTrips = (await api.get('/trips', { params: { ...params, limit: 500 } })).data;
   const monthly = {};

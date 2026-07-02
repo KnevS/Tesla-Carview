@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.34.0] - 2026-07-02
+
+### Added
+
+- **Driving & efficiency score (S07)** ([#175](https://github.com/KnevS/Tesla-Carview/issues/175)): a new "Driving score" dashboard card rates the last 30 days as a **relative efficiency index against your own long-term average** (0–100 with a traffic-light band) — judged against your own history, not an absolute ideal. Plus up to three **data-backed tips**: cold-weather explanation, elevated average speed, high short-trip share, or praise on improvement. Median-based (robust to outliers), appears only with enough trips (≥ 8 recent, ≥ 20 baseline). New service `buildEcoScore` + endpoint `GET /api/insights/eco-score`. Pure statistics, local, no AI.
+
+---
+
 ## [v3.33.0] - 2026-07-02
 
 ### Added

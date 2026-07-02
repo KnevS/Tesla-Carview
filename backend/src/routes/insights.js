@@ -1,6 +1,6 @@
 // © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import { Router } from 'express';
-import { buildWeeklyInsights } from '../services/insightEngine.js';
+import { buildWeeklyInsights, buildEcoScore } from '../services/insightEngine.js';
 
 const router = Router();
 
@@ -9,6 +9,16 @@ const router = Router();
 router.get('/weekly', (req, res) => {
   try {
     res.json(buildWeeklyInsights(req.db, req.user.sub));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// GET /api/insights/eco-score — Fahrstil-/Effizienz-Score (relativ zum eigenen
+// Langzeit-Schnitt), rein statistisch, user-gescoped.
+router.get('/eco-score', (req, res) => {
+  try {
+    res.json(buildEcoScore(req.db, req.user.sub));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

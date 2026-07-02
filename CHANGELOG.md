@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.34.0] - 2026-07-02
+
+### Hinzugefügt
+
+- **Fahrstil- & Effizienz-Score (S07)** ([#175](https://github.com/KnevS/Tesla-Carview/issues/175)): Neue Dashboard-Karte „Fahrstil-Score" bewertet die Fahrweise der letzten 30 Tage als **relativen Effizienz-Index gegen den eigenen Langzeit-Schnitt** (0–100 mit Ampel-Band) — bewertet also an der eigenen Historie, nicht an einem absoluten Ideal. Dazu bis zu drei **datenbelegte Tipps**: Kälte-Erklärung, erhöhte Durchschnittsgeschwindigkeit, hoher Kurzstrecken-Anteil oder Lob bei Verbesserung. Median-basiert (robust gegen Ausreißer), erscheint erst ab genügend Fahrten (≥ 8 aktuell, ≥ 20 Basis). Neuer Service `buildEcoScore` + Endpoint `GET /api/insights/eco-score`. Reine Statistik, lokal, keine KI.
+
+---
+
 ## [v3.33.0] - 2026-07-02
 
 ### Hinzugefügt

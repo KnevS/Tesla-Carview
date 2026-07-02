@@ -18,6 +18,7 @@ Tesla Carview, Tesla araçlar için **kendi sunucunda barındırılan** bir veri
 - 📊 **Pano** — İstatistikler, aylık özet, son etkinlikler
 - 🗓️ **Haftalık içgörüler** — «Haftanız» pano kartı: kat edilen yol, 90 günlük ortalamaya kıyasla tüketim (soğuk hava gerekçesi dahil), şarj maliyeti ve açık anormallikler hakkında açık ipuçları (v3.30, salt istatistik; isteğe bağlı yerel LLM zenginleştirmesi, Ollama)
 - 🛞 **Lastik basıncı eğilimi** — lastik başına yavaş, sıcaklık düzeltmeli basınç kaybını algılar ve erken uyarır (v3.33)
+- 🍃 **Sürüş puanı** — sürüş verimliliğini kendi ortalamana göre değerlendirir, veriye dayalı tasarruf ipuçlarıyla (v3.34, salt istatistik)
 - 🎮 **Kontrol** — Klima, kapılar, ışıklar — doğrudan uygulamadan
 - 📝 **Servis defteri** — Bakım, onarım, tarihli maliyetler
 - 📤 **Dışa aktarma** — Sürüşler için CSV/JSON/**PDF**, şarj için CSV, ZIP olarak tam yedek; tarih, mesafe, enerji ve SOC ile baskıya hazır PDF seyahat günlüğü
