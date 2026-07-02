@@ -16,6 +16,7 @@ Tesla Carview, Tesla araçlar için **kendi sunucunda barındırılan** bir veri
 - ⚡ **Şarj** — Maliyetli şarj seansları, GPS ile konum tespiti
 - 🔋 **Batarya** — Aşınma takibi, menzil geçmişi, şarj eğrisi, sıcaklığa karşı verimlilik, hayalet boşalma, anomali tespiti (Companion Aşama 1, salt istatistik, yerel)
 - 📊 **Pano** — İstatistikler, aylık özet, son etkinlikler
+- 🗓️ **Haftalık içgörüler** — «Haftanız» pano kartı: kat edilen yol, 90 günlük ortalamaya kıyasla tüketim (soğuk hava gerekçesi dahil), şarj maliyeti ve açık anormallikler hakkında açık ipuçları (v3.30, salt istatistik; isteğe bağlı yerel LLM zenginleştirmesi, Ollama)
 - 🎮 **Kontrol** — Klima, kapılar, ışıklar — doğrudan uygulamadan
 - 📝 **Servis defteri** — Bakım, onarım, tarihli maliyetler
 - 📤 **Dışa aktarma** — Sürüşler için CSV/JSON/**PDF**, şarj için CSV, ZIP olarak tam yedek; tarih, mesafe, enerji ve SOC ile baskıya hazır PDF seyahat günlüğü

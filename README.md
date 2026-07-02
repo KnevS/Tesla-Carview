@@ -90,6 +90,7 @@ Für Live-Vehicle-Daten (Akku, Klima, TPMS, Telemetry-Stream) gibt es **nur eine
 | **Firmware-Tracker** | Automatisches Aufzeichnen jeder neuen Fahrzeug-Softwareversion mit Verlauf und Installationsdauer |
 | **Community Benchmark** | Opt-in anonymer Verbrauchsvergleich mit anderen Fahrern desselben Modells; k-Anonymität, SHA-256-Hash, DSGVO-konform |
 | **System-Status** | Ampel-Karte (Tesla-Token, Virtual Key, Fleet Telemetry, Poller, DB) — grün/gelb/rot auf einen Blick |
+| **Betriebs-Selbsttest** (v3.32) | Admin-Selbsttest unter **System**: prüft auf Knopfdruck und automatisch wöchentlich im nächtlichen Wartungslauf Sicherheit und Backup-Integrität — MFA-Abdeckung, Verschlüsselungsschlüssel, kritische Secrets, Audit-Log-Aktivität, SQLite-Integrität sowie Aktualität und Integrität des letzten Backups — als Ampel-Report. Reine Diagnostik, keine KI |
 | **Aktivitäts-Heatmap** | Kalender-Heatmap aller Fahrten (Jahr/Monat/Woche/Alle) im Fahrtenbuch, Klick führt zur Fahrtenliste des Tages |
 | **Mandanten-Pseudonym** | Datenschutz: Login-Seite zeigt zufälligen `adjective-noun`-Pseudonym statt Klarnamen, vom Admin neu generierbar |
 | **Fleet Telemetry primär** | WebSocket-Streaming als bevorzugte Datenquelle (Tesla-Approval-pflichtig). Wenn aktiv → Poller schaltet auf 1×/h-Heartbeat, spart >95 % API-Budget. Sonst API-Polling als Fallback |

@@ -89,6 +89,7 @@ Pour les données véhicule en direct (batterie, climatisation, TPMS, flux de t�
 | **Suivi firmware** | Enregistre automatiquement chaque nouvelle version logicielle du véhicule avec historique et nombre de jours installés |
 | **Community Benchmark** | Comparaison anonyme et opt-in de la consommation avec d'autres conducteurs du même modèle ; k-anonymat, hash SHA-256, conforme RGPD |
 | **État du système** | Carte de feu tricolore (token Tesla, Virtual Key, Fleet Telemetry, poller, DB) — vert/jaune/rouge en un coup d'œil |
+| **Auto-test opérationnel** (v3.32) | Auto-test admin sous **Système** : à la demande et automatiquement chaque semaine lors de la maintenance nocturne, il vérifie la sécurité et l'intégrité des sauvegardes — couverture MFA, clé de chiffrement, secrets critiques, activité du journal d'audit, intégrité SQLite, ainsi que la fraîcheur et l'intégrité de la dernière sauvegarde — sous forme de rapport tricolore. Pur diagnostic, sans IA |
 | **Heatmap d'activité** | Heatmap calendaire de tous les trajets (Année/Mois/Semaine/Tout), un clic mène à la liste des trajets du jour |
 | **Pseudonyme de tenant** | Confidentialité : la page de connexion affiche un pseudonyme aléatoire `adjectif-nom` à la place du vrai nom de tenant, régénérable par l'admin |
 | **Fleet Telemetry first** | Streaming WebSocket comme source de données préférée (validation Tesla requise). Lorsqu'il est actif → le poller passe à un heartbeat 1×/h, économisant >95 % du budget API. Sinon polling API en repli |

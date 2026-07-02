@@ -1512,7 +1512,7 @@
   },
   "handbook": {
     "title": "Tesla Carview Manual",
-    "version": "Version 2.1 · Self-Hosted · Multi-Tenant",
+    "version": "Self-Hosted · Multi-Tenant",
     "toc": "Table of contents",
     "sections": [
       {

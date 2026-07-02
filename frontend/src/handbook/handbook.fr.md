@@ -16,6 +16,7 @@ Tesla Carview est une application **auto-hébergée** d'enregistrement de donné
 - ⚡ **Recharge** — Sessions de recharge avec coûts, détection de l'emplacement par GPS
 - 🔋 **Batterie** — Suivi de la dégradation, historique d'autonomie, courbe de charge, efficacité vs température, décharge fantôme, détection d'anomalies (Companion Phase 1, statistique pure, local)
 - 📊 **Tableau de bord** — Statistiques, vue mensuelle, dernières activités
+- 🗓️ **Aperçus hebdomadaires** — carte « Votre semaine » avec des indications claires sur le kilométrage, la consommation vs moyenne sur 90 jours (avec justification liée au froid), le coût de recharge et les anomalies ouvertes (v3.30, statistiques pures ; amélioration optionnelle par LLM local avec Ollama)
 - 🎮 **Commandes** — Climatisation, portes, lumières — directement depuis l'application
 - 📝 **Carnet d'entretien** — Entretiens, réparations, coûts avec date
 - 📤 **Export** — CSV/JSON/**PDF** pour les trajets, CSV pour la recharge, sauvegarde complète au format ZIP ; carnet de bord PDF prêt à imprimer avec date, distance, énergie et SOC

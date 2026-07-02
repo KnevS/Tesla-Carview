@@ -89,6 +89,7 @@ Canlı araç verileri (batarya, klima, TPMS, telemetri akışı) için **tek bir
 | **Firmware takipçisi** | Geçmiş ve yüklü gün sayısıyla birlikte her yeni araç yazılımı sürümünü otomatik olarak kaydeder |
 | **Topluluk Karşılaştırması (Benchmark)** | Aynı modeli kullanan diğer sürücülerle isteğe bağlı anonim tüketim karşılaştırması; k-anonymity, SHA-256 hash, GDPR uyumlu |
 | **Sistem durumu** | Trafik ışığı kartı (Tesla token, Virtual Key, Fleet Telemetry, poller, DB) — bir bakışta yeşil/sarı/kırmızı |
+| **Operasyonel öz-denetim** (v3.32) | **Sistem** altında yönetici öz-denetimi: istek üzerine ve her hafta otomatik olarak gece bakımında güvenliği ve yedek bütünlüğünü denetler — MFA kapsamı, şifreleme anahtarı, kritik gizli anahtarlar, denetim günlüğü etkinliği, SQLite bütünlüğü ve son yedeğin güncelliği ile bütünlüğü — trafik ışığı raporu olarak. Salt tanılama, yapay zekâ yok |
 | **Etkinlik ısı haritası** | Tüm yolculukların takvim ısı haritası (Yıl/Ay/Hafta/Tümü), tıklayınca o günün yolculuk listesine gider |
 | **Kiracı takma adı** | Gizlilik: oturum açma sayfası gerçek kiracı adı yerine rastgele bir `sıfat-isim` takma adı gösterir, yönetici tarafından yeniden üretilebilir |
 | **Önce Fleet Telemetry** | Tercih edilen veri kaynağı olarak WebSocket akışı (Tesla onayı gerekir). Etkin olduğunda → poller saatte 1× heartbeat'e düşer ve API bütçesinin %95'inden fazlasını korur. Aksi halde yedek olarak API polling |

@@ -89,6 +89,7 @@ Para los datos del vehículo en tiempo real (batería, climatización, TPMS, str
 | **Tracker de firmware** | Registra automáticamente cada nueva versión de software del vehículo con histórico y días instalados |
 | **Community Benchmark** | Comparación anónima opt-in del consumo con otros conductores del mismo modelo; k-anonimato, hash SHA-256, conforme al RGPD |
 | **Estado del sistema** | Tarjeta tipo semáforo (token de Tesla, Virtual Key, Fleet Telemetry, poller, BD) — verde/amarillo/rojo de un vistazo |
+| **Autodiagnóstico operativo** (v3.32) | Autodiagnóstico de admin en **Sistema**: bajo demanda y automáticamente cada semana en el mantenimiento nocturno verifica seguridad e integridad del backup — cobertura MFA, clave de cifrado, secretos críticos, actividad del registro de auditoría, integridad de SQLite, además de vigencia e integridad del último backup — como informe tipo semáforo. Pura diagnosis, sin IA |
 | **Mapa de calor de actividad** | Mapa de calor tipo calendario de todos los viajes (Año/Mes/Semana/Todo), un clic lleva a la lista de viajes de ese día |
 | **Pseudónimo de inquilino** | Privacidad: la página de inicio de sesión muestra un pseudónimo aleatorio `adjetivo-sustantivo` en lugar del nombre real del inquilino, regenerable por el admin |
 | **Fleet Telemetry primero** | Streaming WebSocket como fuente de datos preferida (requiere aprobación de Tesla). Cuando está activo → el poller cae a un heartbeat de 1×/h, ahorrando >95 % del presupuesto de API. En caso contrario, polling de API como respaldo |

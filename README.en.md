@@ -90,6 +90,7 @@ For live vehicle data (battery, climate, TPMS, telemetry stream) there is **only
 | **Firmware tracker** | Automatically records every new vehicle software version with history and days installed |
 | **Community Benchmark** | Opt-in anonymous consumption comparison with other drivers of the same model; k-anonymity, SHA-256 hash, GDPR-compliant |
 | **System status** | Traffic-light card (Tesla token, Virtual Key, Fleet Telemetry, poller, DB) — green/yellow/red at a glance |
+| **Operational self-check** (v3.32) | Admin self-check under **System**: on demand and automatically every week in the nightly maintenance run it verifies security and backup integrity — MFA coverage, encryption key, critical secrets, audit-log activity, SQLite integrity plus recency and integrity of the last backup — as a traffic-light report. Pure diagnostics, no AI |
 | **Activity heatmap** | Calendar heatmap of all trips (Year/Month/Week/All), click navigates to that day's trip list |
 | **Tenant pseudonym** | Privacy: login page shows a random `adjective-noun` pseudonym instead of the real tenant name, regeneratable by admin |
 | **Fleet Telemetry first** | WebSocket streaming as the preferred data source (Tesla approval required). When active → poller falls back to 1×/h heartbeat, saving >95 % of API budget. Otherwise API polling as fallback |
