@@ -4,7 +4,7 @@
 > (Laden, TCO, Batterie, Routen, CO₂, KI-Chat). Die nächsten Drops bauen auf
 > diesen Daten auf und machen sie klüger, statt neue Kacheln danebenzustellen.
 >
-> Stand: v3.23.8 · 2026-06-21
+> Stand: v3.32.6 · 2026-07-02
 
 ## Leitplanken (gelten für jeden Drop)
 
@@ -20,6 +20,10 @@
 ## Sprints
 
 Reihenfolge nach Nutzen × Aufwand — jederzeit umsortierbar.
+
+> **Status:** S01–S06 sind **ausgeliefert** (als Value-Drops v3.24–v3.32, Stand v3.32.6).
+> Die nächste Welle **S07–S09** baut auf der seit v3.32.5 **live funktionierenden
+> Fleet-Telemetrie** auf — Echtzeit zuerst, dann gesteuertes Laden, dann Dienstwagen/Werterhalt.
 
 ### S01 · Ladekosten, die sich selbst erklären — 23. Jun – 04. Jul
 *Nutzer · Aufwand M · Nutzen Hoch · baut auf `charging` · `tariff`*
@@ -75,3 +79,34 @@ Vieles läuft schon automatisch — dieser Drop macht es sichtbar, prüfbar und 
 - **Betriebs-Dashboard** — Tesla-API-Budget, Poller-Latenz und Circuit-Breaker auf einen Blick.
 - **Wöchentlicher Sicherheits-Selbsttest** — Auth-Abdeckung, Zugriffs-Stichproben, Abhängigkeits-Audit als Report.
 - **Backup-Probe & Wiederherstellungs-Test** — Integritätsprüfung plus verschlüsselte Off-Site-Option.
+
+---
+
+## Nächste Welle (nach v3.32)
+
+### S07 · Live-Telemetrie, endlich sichtbar — ab v3.33
+*Nutzer · Aufwand M · Nutzen Hoch · baut auf `fleetTelemetry` · `charging` · `battery`*
+
+Seit v3.32.5 kommt der Fleet-Telemetrie-Stream live an — dieser Drop macht ihn erlebbar, statt ihn nur zu loggen.
+
+- **Live-Ladekurve** — Leistung, Ladestand und Zelltemperatur in Echtzeit während des Ladens, mit Soll-Kurve und sofort sichtbarer Drosselung.
+- **Fahrstil- & Effizienz-Score** — aus Beschleunigung, Rekuperationsanteil und Tempo/Verbrauch ein Eco-Score mit Klartext-Spartipps. Rein statistisch, lokal.
+- **Reifendruck-Trend & Slow-Leak-Warnung** — TPMS über die Zeit: langsamer Druckverlust je Reifen wird früh erkannt und gemeldet (baut TireMap vom Momentwert zum Trend aus).
+
+### S08 · Laden, das sich selbst timt — ab v3.34
+*Nutzer + Betrieb · Aufwand L · Nutzen Hoch · baut auf `tariff` · `charging` · `chargeLocations`*
+
+Die günstigsten Fenster zeigt die App schon — dieser Drop handelt danach.
+
+- **Gesteuertes Laden** — automatisch in die günstigste Stunde laden (Tesla-Charge-Schedule bzw. Wallbox/Monta), mit Ziel-Ladestand und Abfahrtszeit.
+- **PV-Überschussladen** — nur mit Solarüberschuss laden, über lokale Anbindung (EVCC/Home Assistant/Modbus). Datenlokal, kein Cloud-Zwang.
+- **Kosten-Splitting dienstlich/privat** — getrennt erfasste kWh und Arbeitgeber-Erstattung als PDF, eingebettet in die bestehende Abrechnung.
+
+### S09 · Dienstwagen & Werterhalt, belegbar — ab v3.35
+*Nutzer · Aufwand M · Nutzen Hoch · baut auf `trips` · `tco` · `battery`*
+
+Zwei harte Argumente — für die Steuer und für den Wiederverkauf.
+
+- **Dienstwagen-Versteuerungs-Assistent** — 1%-Regel gegen Fahrtenbuchmethode gegenüberstellen, geldwerten Vorteil inkl. 0,25/0,5%-BEV-Privileg rechnen.
+- **State-of-Health-Zertifikat (PDF)** — belastbarer Batterie-Gesundheitsreport aus den Snapshots, für Leasingrückgabe, Wiederverkauf oder Garantie.
+- **Manipulationssicheres Fahrtenbuch** — lückenlose, gehashte Änderungskette als Argument fürs Finanzamt.
