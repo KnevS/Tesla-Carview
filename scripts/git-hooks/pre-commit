@@ -68,4 +68,19 @@ if [ -n "$LARGE" ]; then
   # Nur Warnung, kein Abbruch — große Bilder/Bundles können legitim sein.
 fi
 
+# ─── Stufe 4: CLAUDE.md-Entwicklungsstand darf nicht veralten ──────────
+# Die "Aktuell"-Zeile in CLAUDE.md muss die echte package.json-Version nennen.
+# Verhindert, dass ein Versionsbump ohne Entwicklungsstand-Update durchrutscht.
+if command -v node >/dev/null 2>&1 && [ -f backend/package.json ] && [ -f CLAUDE.md ]; then
+  PKG_VERSION=$(node -p "require('./backend/package.json').version" 2>/dev/null || echo "")
+  if [ -n "$PKG_VERSION" ] && ! grep -q "v${PKG_VERSION}" CLAUDE.md; then
+    echo ""
+    echo "✘ CLAUDE.md nennt nicht die aktuelle Version v${PKG_VERSION}."
+    echo "  Der Abschnitt „Aktueller Entwicklungsstand\" darf nie veralten —"
+    echo "  bitte die „Aktuell\"-Zeile (Version + zuletzt geliefert) aktualisieren."
+    echo "  Bypass (nur wenn bewusst): git commit --no-verify"
+    exit 1
+  fi
+fi
+
 echo "✓ pre-commit OK"

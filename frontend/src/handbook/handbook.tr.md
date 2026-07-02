@@ -4,7 +4,7 @@
 >
 > 📚 **Tesla Carview'e yeni misiniz?** **[GitHub Wiki](https://github.com/KnevS/Tesla-Carview/wiki)** rehberli bir giriş sunar: adım adım kurulum, statik IP olmadan ağ erişimi (DynDNS, Cloudflare Tunnel), Raspberry Pi depolama (SD kart yerine SSD) — BT uzmanı olmayanlar için yazılmıştır.
 
-Sürüm 2.1 · Self-Hosted · Çoklu Kiracı (Multi-Tenant)
+Self-Hosted · Çoklu Kiracı (Multi-Tenant)
 
 ## 🌟 Genel Bakış {#overview}
 
