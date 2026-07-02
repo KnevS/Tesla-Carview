@@ -109,8 +109,9 @@ Workflow — keine PRs nötig. Aber **vor jedem Push**:
 
 ### Aktuell (Stand 2026-07-02)
 
-- **Version:** v3.33.0
+- **Version:** v3.34.0
 - **Zuletzt geliefert:**
+  - **Fahrstil-/Effizienz-Score (S07, v3.34.0, #175):** `buildEcoScore` in `insightEngine.js` — relativer Effizienz-Index (Median letzte 30 T vs. eigener 180-T-Schnitt) + datenbelegte Tipps; Endpoint `GET /api/insights/eco-score`; Dashboard-Karte `eco_score` (Donut) in `Dashboard.vue`. Rein statistisch, lokal.
   - **Reifendruck-Trend & Slow-Leak-Warnung (S07, v3.33.0, #176):** TPMS-Zeitreihe (`tire_pressure_snapshots`, Poller-Write in `dataSync.js`) + temperaturbereinigte Trenderkennung in `companionEngine.js` (`findTireAnomalies`, stabiler Wochen-Hash gegen Alarm-Spam) → Warnung über die bestehenden Kanäle; `TireMap.vue` zeigt Warn-Ring/Badge + Trend-Tooltip; Endpoint `GET /api/telemetry/:id/tire-history`.
   - **Setup-Wizard-Fix (#170):** `db.transaction()`-Callback in `/api/setup/init` synchron gemacht (better-sqlite3 lehnt async-Callbacks ab).
   - **Fleet-Telemetry Ende-zu-Ende funktionsfähig (v3.32.4/.5):** Receiver entpackt FlatBuffers-Envelope + eingebettetes Protobuf; `fleet_telemetry_config` über den Fleet-Level-Endpoint mit echter CA-Kette. Live verifiziert.
