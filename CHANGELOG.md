@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.36.0] - 2026-07-03
+
+### Hinzugefügt
+
+- **Geschwindigkeit in mph oder km/h wählbar.** Die Geschwindigkeitsanzeige folgt jetzt der bestehenden Einheiten-Einstellung (**Einstellungen → Assistent → Einheiten → Strecke: km / Meilen**): bei „Meilen" werden Geschwindigkeiten in **mph** angezeigt, sonst in **km/h**. Neuer Helfer `fmtSpeed` (in `useUnits`) rechnet konsistent um; angewandt im Fahrt-Detail (Ø-Geschwindigkeit, Schieber-Wert, Verlaufskurve inkl. Achsenbeschriftung) und in der Live-Telemetrie. Basiseinheit intern bleibt km/h. (Wind-/Tempolimit-Anzeigen aus externen Quellen bleiben vorerst in km/h.)
+
+---
+
 ## [v3.35.3] - 2026-07-03
 
 ### Behoben

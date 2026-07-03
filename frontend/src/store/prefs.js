@@ -191,5 +191,15 @@ export function useUnits() {
     }
   }
 
-  return { fmtDistance, fmtTemp, fmtEfficiency };
+  // Geschwindigkeit folgt der Distanz-Einheit: km → km/h, mi → mph.
+  // Eingabe immer in km/h (interne Basiseinheit). Null → '–'.
+  function fmtSpeed(kmh, decimals = 0) {
+    if (kmh == null) return '–';
+    if (prefs.data.unit_distance === 'mi') {
+      return `${(kmh * 0.621371).toFixed(decimals)} mph`;
+    }
+    return `${kmh.toFixed(decimals)} km/h`;
+  }
+
+  return { fmtDistance, fmtTemp, fmtEfficiency, fmtSpeed };
 }
