@@ -42,10 +42,10 @@
               <div class="text-4xl font-bold" :class="socColor">{{ data.charge.level_pct ?? '—' }}%</div>
               <div class="text-sm text-gray-400">{{ data.charge.range_km != null ? fmtDistance(data.charge.range_km) : '—' }} Reichweite</div>
             </div>
-            <div class="space-y-1" v-tooltip="'Aktuelle Geschwindigkeit in km/h'">
+            <div class="space-y-1" v-tooltip="'Aktuelle Geschwindigkeit'">
               <div class="text-xs text-gray-400 uppercase tracking-wide">Geschwindigkeit</div>
-              <div class="text-4xl font-bold text-white">{{ data.drive.speed_kph ?? 0 }}</div>
-              <div class="text-sm text-gray-400">km/h · Gang: {{ data.drive.gear ?? 'P' }}</div>
+              <div class="text-4xl font-bold text-white">{{ Math.round((data.drive.speed_kph ?? 0) * (prefs.data.unit_distance === 'mi' ? 0.621371 : 1)) }}</div>
+              <div class="text-sm text-gray-400">{{ prefs.data.unit_distance === 'mi' ? 'mph' : 'km/h' }} · Gang: {{ data.drive.gear ?? 'P' }}</div>
             </div>
             <div class="space-y-1" v-tooltip="'Momentane Motorleistung. Positiv = Antrieb, Negativ = Rekuperation (Energie zurückgewinnen beim Bremsen)'">
               <div class="text-xs text-gray-400 uppercase tracking-wide">Leistung</div>
@@ -228,7 +228,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch, nextTick, h, resolveDirective, withDirectives } from 'vue';
 import { useAppStore } from '../store/index.js';
-import { useUnits } from '../store/prefs.js';
+import { useUnits, usePrefsStore } from '../store/prefs.js';
 import api from '../api.js';
 import AppIcon from '../components/AppIcon.vue';
 import SortableSection from '../components/SortableSection.vue';
@@ -238,6 +238,7 @@ import { usePageLayout } from '../composables/usePageLayout.js';
 const appStore = useAppStore();
 const vehicle  = computed(() => appStore.selectedVehicle);
 const { fmtDistance, fmtTemp } = useUnits();
+const prefs = usePrefsStore();
 
 const TELEMETRY_SECTIONS = ['hero', 'map', 'power', 'tpms', 'climate', 'charging', 'vehicle'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('telemetry', TELEMETRY_SECTIONS);

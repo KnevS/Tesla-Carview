@@ -13,7 +13,7 @@
           tooltip="Gesamtstrecke dieser Fahrt" />
         <StatCard label="Dauer"      :value="duration"                          icon="clock"
           tooltip="Gesamtfahrtdauer von Start bis Ziel" />
-        <StatCard label="Ø Geschw."  :value="fmt(trip.avg_speed_kmh, 0) + ' km/h'" icon="gauge"
+        <StatCard label="Ø Geschw."  :value="fmtSpeed(trip.avg_speed_kmh, 0)" icon="gauge"
           tooltip="Durchschnittsgeschwindigkeit — Strecke geteilt durch Fahrzeit (ohne Standzeiten)" />
         <StatCard label="Verbrauch"  :value="consumption"                        icon="bolt"
           tooltip="Energieverbrauch pro 100 km — das wichtigste Effizienzmaß für Elektrofahrzeuge" />
@@ -34,7 +34,7 @@
             <div class="bg-gray-800 rounded-xl p-3"
               v-tooltip="'Momentane Geschwindigkeit an diesem Punkt der Fahrt'">
               <p class="text-gray-400 text-xs mb-1">Geschwindigkeit</p>
-              <p class="text-white font-bold text-lg">{{ sliderPt.speed_kmh ?? '–' }} <span class="text-xs font-normal text-gray-400">km/h</span></p>
+              <p class="text-white font-bold text-lg">{{ fmtSpeed(sliderPt.speed_kmh) }}</p>
             </div>
             <div class="bg-gray-800 rounded-xl p-3"
               v-tooltip="'Motorleistung: positiv = Antrieb, negativ = Rekuperation (Energie zurückgewinnen beim Bremsen)'">
@@ -264,7 +264,7 @@ import { useRoute } from 'vue-router';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip } from 'chart.js';
 import StatCard from '../components/StatCard.vue';
-import { useUnits } from '../store/prefs.js';
+import { useUnits, usePrefsStore } from '../store/prefs.js';
 import api from '../api.js';
 import { formatLocation } from '../lib/location.js';
 
@@ -279,7 +279,8 @@ const showDriverMenu = ref(false);
 let leafletMap  = null;
 let sliderMarker = null;
 
-const { fmtDistance, fmtEfficiency } = useUnits();
+const { fmtDistance, fmtEfficiency, fmtSpeed } = useUnits();
+const prefs = usePrefsStore();
 const fmt         = (v, d = 0) => (+(v || 0)).toFixed(d);
 const fmtDateTime = ts => ts ? new Date(ts * 1000).toLocaleString('de-DE') : '–';
 const fmtTime     = ts => new Date(ts * 1000).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -345,10 +346,12 @@ const chartOpts = {
 const speedChart = computed(() => {
   if (!trip.value?.points) return null;
   const pts = trip.value.points;
+  const mph = prefs.data.unit_distance === 'mi';
+  const speedFactor = mph ? 0.621371 : 1;
   return {
     labels: pts.map(p => fmtTime(p.timestamp)),
     datasets: [
-      { label: 'km/h', data: pts.map(p => p.speed_kmh || 0), borderColor: '#E31937', tension: 0.4, pointRadius: 0, fill: false },
+      { label: mph ? 'mph' : 'km/h', data: pts.map(p => (p.speed_kmh || 0) * speedFactor), borderColor: '#E31937', tension: 0.4, pointRadius: 0, fill: false },
       { label: 'kW',   data: pts.map(p => p.power_kw  || 0), borderColor: '#10b981', tension: 0.4, pointRadius: 0, fill: false },
     ],
   };

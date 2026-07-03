@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.36.0] - 2026-07-03
+
+### Added
+
+- **Choose speed in mph or km/h.** The speed display now follows the existing units setting (**Settings → Wizard → Units → Distance: km / miles**): with "miles" speeds show in **mph**, otherwise **km/h**. New `fmtSpeed` helper (in `useUnits`) converts consistently; applied in trip detail (avg speed, slider value, timeline chart incl. axis label) and live telemetry. Internal base unit stays km/h. (Wind/speed-limit values from external sources remain in km/h for now.)
+
+---
+
 ## [v3.35.3] - 2026-07-03
 
 ### Fixed
