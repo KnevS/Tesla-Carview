@@ -198,29 +198,18 @@ function numVal(v) {
   return null;
 }
 
-// Selbst-begrenzte Diagnose: klärt einmalig, welchen Value-Typ Tesla für
-// SoC/Spannung/Strom sendet (bzw. ob sie überhaupt ankommen). Nach Bestätigung
-// wieder entfernen.
-let __telDiagCount = 0;
-const __TEL_DIAG_MAX = 24;
-
 function extractPoint(data) {
   if (!data?.length) return null;
   const point = {};
   for (const datum of data) {
     const v = datum.value;
-
-    if (__telDiagCount < __TEL_DIAG_MAX
-        && (datum.key === FIELD.Soc || datum.key === FIELD.PackVoltage || datum.key === FIELD.PackCurrent)) {
-      __telDiagCount++;
-      console.log(`[FleetTelemetry][diag] field=${datum.key} value=${JSON.stringify(v)}`);
-    }
-
     switch (datum.key) {
       case FIELD.Location:
         if (v?.location_value) { point.lat = v.location_value.latitude; point.lon = v.location_value.longitude; }
         break;
-      case FIELD.VehicleSpeed: point.speed_kmh = numVal(v); break;
+      // Tesla streamt VehicleSpeed in mph → auf km/h umrechnen (konsistent mit
+      // Odometer unten, dem Live-Endpoint telemetry.js und dataSync.milesToKm).
+      case FIELD.VehicleSpeed: { const s = numVal(v); point.speed_kmh = s != null ? s * 1.60934 : null; break; }
       case FIELD.Gear:         point.gear      = GEAR_MAP[v?.shift_state_value] ?? null; break;
       case FIELD.PackVoltage:  point.voltage   = numVal(v); break;
       case FIELD.PackCurrent:  point.current   = numVal(v); break;
