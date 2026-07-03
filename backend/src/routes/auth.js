@@ -18,6 +18,16 @@ import { getMasterDb, getDb, getTenantBySlug, getTenantByPseudonym, getAllTenant
 
 const router = Router();
 
+// TEMP-Diagnose (#14 Login-bei-Reload): Ringpuffer der letzten Refresh-Versuche,
+// abrufbar über GET /api/auth/_diag — enthält NUR Booleans + Cookie-NAMEN, keine
+// Werte/Secrets. Nach Auswertung wieder entfernen.
+const _authDiag = [];
+function pushDiag(rec) {
+  _authDiag.push({ at: new Date().toISOString(), ...rec });
+  if (_authDiag.length > 12) _authDiag.shift();
+}
+router.get('/_diag', (_req, res) => res.json({ note: 'temp login-reload diagnostic (#14)', events: _authDiag }));
+
 const ACCESS_TTL  = '15m';
 const REFRESH_TTL = 7 * 24 * 60 * 60;
 
@@ -176,22 +186,23 @@ router.post('/mfa/verify', loginRateLimit, validate(z.object({
 // POST /api/auth/refresh
 router.post('/refresh', (req, res) => {
   const raw = req.cookies?.refresh_token;
-  // TEMP-Diagnose (Login-bei-Reload-Bug): klärt, ob das Cookie überhaupt ankommt.
-  // Nach Auswertung wieder entfernen.
-  console.log('[auth][diag] refresh hasCookieHeader=%s cookieNames=[%s] hasRefreshCookie=%s xfProto=%s',
-    !!req.headers.cookie,
-    req.cookies ? Object.keys(req.cookies).join(',') : '-',
-    !!raw,
-    req.headers['x-forwarded-proto'] || '-');
-  if (!raw) return res.status(401).json({ error: 'Kein Refresh-Token' });
+  // TEMP-Diagnose (#14): Ergebnis in _authDiag (GET /api/auth/_diag). Keine Werte.
+  const diag = {
+    hasCookieHeader:  !!req.headers.cookie,
+    cookieNames:      req.cookies ? Object.keys(req.cookies) : [],
+    hasRefreshCookie: !!raw,
+    xfProto:          req.headers['x-forwarded-proto'] || null,
+    origin:           req.headers.origin || null,
+  };
+  if (!raw) { pushDiag({ ...diag, result: 'no_refresh_cookie' }); return res.status(401).json({ error: 'Kein Refresh-Token' }); }
 
   const hash   = createHash('sha256').update(raw).digest('hex');
   const master = getMasterDb();
   const token  = master.prepare(
     'SELECT * FROM refresh_tokens WHERE token_hash=? AND expires_at > unixepoch()'
   ).get(hash);
-  if (!token) { console.log('[auth][diag] refresh: Cookie da, aber Token NICHT in DB (Rotation/Hash?)'); return res.status(401).json({ error: 'Refresh-Token ungueltig oder abgelaufen' }); }
-  console.log('[auth][diag] refresh: OK — Token gefunden, rotiere');
+  if (!token) { pushDiag({ ...diag, result: 'token_not_in_db' }); return res.status(401).json({ error: 'Refresh-Token ungueltig oder abgelaufen' }); }
+  pushDiag({ ...diag, result: 'ok' });
 
   const db   = getDb(token.tenant_id);
   const user = db.prepare('SELECT * FROM users WHERE id=? AND is_active=1').get(token.user_id);
