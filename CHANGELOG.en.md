@@ -7,6 +7,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.35.3] - 2026-07-03
+
+### Fixed
+
+- **Telemetry speed was in mph, not km/h.** Tesla streams `VehicleSpeed` in **mph**, but the decoder stored the raw value in the `speed_kmh` column — so the trip-detail slider showed mph under a "km/h" label (~1.6× too low). `VehicleSpeed` is now converted with `× 1.60934`, consistent with odometer, the live endpoint and `dataSync`. Applies to new trips; already-stored telemetry points keep their old (mph) value.
+- **Removed diagnostic log.** The temporary `[FleetTelemetry][diag]` log from v3.35.2 is gone — the value-type fix is confirmed (SoC & power are captured again: 742 SoC / 213 power points in 3h, was 0).
+
+---
+
 ## [v3.35.2] - 2026-07-02
 
 ### Fixed
