@@ -176,6 +176,13 @@ router.post('/mfa/verify', loginRateLimit, validate(z.object({
 // POST /api/auth/refresh
 router.post('/refresh', (req, res) => {
   const raw = req.cookies?.refresh_token;
+  // TEMP-Diagnose (Login-bei-Reload-Bug): klärt, ob das Cookie überhaupt ankommt.
+  // Nach Auswertung wieder entfernen.
+  console.log('[auth][diag] refresh hasCookieHeader=%s cookieNames=[%s] hasRefreshCookie=%s xfProto=%s',
+    !!req.headers.cookie,
+    req.cookies ? Object.keys(req.cookies).join(',') : '-',
+    !!raw,
+    req.headers['x-forwarded-proto'] || '-');
   if (!raw) return res.status(401).json({ error: 'Kein Refresh-Token' });
 
   const hash   = createHash('sha256').update(raw).digest('hex');
@@ -183,7 +190,8 @@ router.post('/refresh', (req, res) => {
   const token  = master.prepare(
     'SELECT * FROM refresh_tokens WHERE token_hash=? AND expires_at > unixepoch()'
   ).get(hash);
-  if (!token) return res.status(401).json({ error: 'Refresh-Token ungueltig oder abgelaufen' });
+  if (!token) { console.log('[auth][diag] refresh: Cookie da, aber Token NICHT in DB (Rotation/Hash?)'); return res.status(401).json({ error: 'Refresh-Token ungueltig oder abgelaufen' }); }
+  console.log('[auth][diag] refresh: OK — Token gefunden, rotiere');
 
   const db   = getDb(token.tenant_id);
   const user = db.prepare('SELECT * FROM users WHERE id=? AND is_active=1').get(token.user_id);
