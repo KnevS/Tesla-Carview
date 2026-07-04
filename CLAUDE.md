@@ -109,7 +109,7 @@ Workflow — keine PRs nötig. Aber **vor jedem Push**:
 
 ### Aktuell (Stand 2026-07-02)
 
-- **Version:** v3.36.2
+- **Version:** v3.36.3
 - **Zuletzt geliefert:**
   - **TEMP Diagnose (v3.36.2):** SSH zu iland unzuverlässig (IP-Whitelist) → Diag jetzt HTTPS-abrufbar: Ringpuffer in `auth.js` + öffentlicher `GET /api/auth/_diag` (nur Booleans/Cookie-Namen). Für Login-bei-Reload-Bug (#14). Nach Auswertung entfernen.
   - **Geschwindigkeit mph/km/h wählbar (v3.36.0):** Speed folgt `unit_distance` (km→km/h, mi→mph). Neuer `fmtSpeed` in `useUnits` (prefs.js); umgestellt: TripDetail (Ø/Slider/Chart) + Telemetry Live-Speed. Interne Basis bleibt km/h.
