@@ -7,6 +7,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.36.4] - 2026-07-04
+
+### Fixed
+
+- **Logout on every reload in Safari.** API responses carried no `Cache-Control` but an `ETag` — Safari then caches GETs aggressively and served `GET /api/auth/me` from cache (stale/error response) on reload, even though the refresh succeeded server-side. Session restore failed → logout (Chrome unaffected). Fix: all `/api` responses now send `Cache-Control: no-store` (map tiles `/api/tiles` stay cacheable). Also good hardening — sensitive API responses are no longer cached.
+- **Removed the temporary auth diagnostic** (`GET /api/auth/_diag` + ring buffer). It was only for narrowing down #14; also resolves the observability security finding.
+
+---
+
 ## [v3.36.0] - 2026-07-03
 
 ### Added
