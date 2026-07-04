@@ -7,6 +7,15 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.36.4] - 2026-07-04
+
+### Behoben
+
+- **Logout bei jedem Reload in Safari.** API-Antworten trugen kein `Cache-Control`, aber ein `ETag` — Safari cacht GETs dann aggressiv und lieferte `GET /api/auth/me` beim Reload aus dem Cache (alte/Fehlantwort), während der Refresh serverseitig erfolgreich war. Session-Restore scheiterte → Rausflug (Chrome betroffen: nein). Fix: alle `/api`-Antworten senden jetzt `Cache-Control: no-store` (Kartenkacheln `/api/tiles` bleiben cachebar). Zugleich gute Härtung — sensible API-Antworten werden nicht mehr zwischengespeichert.
+- **Temporäres Auth-Diagnose-Log/-Endpoint entfernt** (`GET /api/auth/_diag` inkl. Ringpuffer). War nur zur Eingrenzung von #14 gedacht; behebt zugleich das Observability-Security-Finding.
+
+---
+
 ## [v3.36.0] - 2026-07-03
 
 ### Hinzugefügt

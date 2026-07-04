@@ -89,6 +89,16 @@ app.use(cors({
 }));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
+
+// API-Antworten nicht cachen. Safari cacht GETs sonst aggressiv (es fehlte
+// Cache-Control) und lieferte z. B. /auth/me aus dem Cache → Session-Restore
+// beim Reload schlug fehl (Logout, v. a. in Safari). Kartenkacheln bleiben
+// bewusst cachebar (Performance).
+app.use((req, res, next) => {
+  if (!req.path.startsWith('/api/tiles')) res.set('Cache-Control', 'no-store');
+  next();
+});
+
 app.use(apiRateLimit);
 
 // Datenbank initialisieren (migriert ggf. Legacy-DB)
