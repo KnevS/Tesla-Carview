@@ -131,6 +131,7 @@ router.post('/login', loginRateLimit, validate(z.object({
   const accessToken  = issueAccessToken(user, tenant.id);
   const refreshToken = issueRefreshToken(user.id, tenant.id, req);
   setRefreshCookie(res, refreshToken);
+  pushDiag({ event: 'login', setRefreshCookie: true, ua: req.headers['user-agent'] || null, origin: req.headers.origin || null });
   auditLog(db, user.id, 'login_success', req);
   res.json({
     accessToken,
@@ -188,11 +189,13 @@ router.post('/refresh', (req, res) => {
   const raw = req.cookies?.refresh_token;
   // TEMP-Diagnose (#14): Ergebnis in _authDiag (GET /api/auth/_diag). Keine Werte.
   const diag = {
+    event:            'refresh',
     hasCookieHeader:  !!req.headers.cookie,
     cookieNames:      req.cookies ? Object.keys(req.cookies) : [],
     hasRefreshCookie: !!raw,
     xfProto:          req.headers['x-forwarded-proto'] || null,
     origin:           req.headers.origin || null,
+    ua:               req.headers['user-agent'] || null,
   };
   if (!raw) { pushDiag({ ...diag, result: 'no_refresh_cookie' }); return res.status(401).json({ error: 'Kein Refresh-Token' }); }
 
