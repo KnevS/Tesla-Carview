@@ -3059,5 +3059,20 @@
     "colMinPowerTip": "Puissance minimale — les valeurs négatives correspondent à la régénération",
     "colSoc": "SoC",
     "colSocTip": "État de charge départ → arrivée"
+  },
+  "heatmap": {
+    "title": "Carte de chaleur",
+    "subtitle": "Où vous roulez, rechargez et vos points de charge — sur une carte",
+    "intro": "Densité géographique sur la carte. Rouge = trajets (départ/arrivée), vert = sessions de charge, bleu = points de charge définis. Activez chaque couche séparément.",
+    "days": "jours",
+    "months": "mois",
+    "all": "Tout",
+    "layerTrips": "Trajets",
+    "layerTripsTip": "Densité des points de départ et d’arrivée des trajets",
+    "layerCharging": "Charges",
+    "layerChargingTip": "Densité des lieux où vous avez rechargé",
+    "layerLocations": "Points de charge",
+    "layerLocationsTip": "Vos points de charge définis (domicile/travail/…)",
+    "empty": "Aucune donnée géographique pour la période sélectionnée."
   }
 }

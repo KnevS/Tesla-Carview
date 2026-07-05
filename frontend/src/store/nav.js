@@ -30,6 +30,7 @@ export const NAV_GROUPS = [
     items: [
       { key: 'trips',       to: '/trips',            icon: 'map',         emojiFallback: '🗺️', label: 'Fahrten',          tooltip: 'Liste aller aufgezeichneten Fahrten mit GPS-Track auf einer Karte' },
       { key: 'fahrtwerte',  to: '/fahrtwerte',       icon: 'pulse',       emojiFallback: '📈', label: 'Fahrtwerte',       tooltip: 'Tabellarische Kennzahlen pro Fahrt: Dauer, Strecke, Geschwindigkeit und Leistung (min/max/Ø), Verbrauch — sortier- und CSV-exportierbar' },
+      { key: 'heatmap',     to: '/heatmap',          icon: 'map',         emojiFallback: '🔥', label: 'Heatmap',          tooltip: 'Geografische Heatmap auf der Karte: Dichte der Fahrten, Ladevorgänge und definierte Ladeorte — Layer einzeln ein-/ausblendbar' },
       { key: 'fahrtenbuch', to: '/fahrtenbuch',      icon: 'logbook',     emojiFallback: '📋', label: 'Fahrtenbuch',      tooltip: 'Fahrten klassifizieren und Auswertung nach Privat/Dienst/Arbeitsweg' },
       { key: 'charging',    to: '/charging',         icon: 'bolt',        emojiFallback: '🔋', label: 'Laden',            tooltip: 'Alle Ladevorgänge mit Ladekurven, Kosten und Aufschlüsselung nach Ladertyp' },
       { key: 'energy',      to: '/energy',           icon: 'sparkles',    emojiFallback: '🌿', label: 'Energiebericht',   tooltip: 'Wöchentliche Effizienztrends, kWh/100 km und Eco-Score' },

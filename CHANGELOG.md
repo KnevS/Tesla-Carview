@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.38.0] - 2026-07-05
+
+### Neu
+
+- **Geografische Heatmap.** Neue Ansicht (`/heatmap`, Navigation unter „Auswertungen") mit einer Karte, die die räumliche Dichte deiner Daten in drei einzeln ein-/ausblendbaren Layern zeigt: **Fahrten** (Start-/Zielpunkte, rot), **Ladevorgänge** (grün) und deine definierten **Ladeorte** (blaue Marker mit Namen). Zeitraum wählbar (30/90/365 Tage/alles), Karte zoomt automatisch auf die sichtbaren Punkte. Rendering ohne externes Karten-Plugin — gewichtete Circles je Rasterpunkt (dieselbe Technik wie die bestehende `LocationHeatmap`, MIT keiner zusätzlichen Abhängigkeit). Backend: neuer `GET /api/charging/location-heatmap` (aggregiert `charging_sessions` auf ~100-m-Raster) neben dem vorhandenen `GET /api/trips/location-heatmap`; Ladeorte aus `GET /api/charging-locations`. Alle Endpoints auf eigene Fahrzeuge beschränkt. Voll i18n (7 Sprachen).
+
+---
+
 ## [v3.37.0] - 2026-07-05
 
 ### Neu

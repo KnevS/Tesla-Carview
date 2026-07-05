@@ -3059,5 +3059,20 @@
     "colMinPowerTip": "Potencia mínima: los valores negativos indican regeneración",
     "colSoc": "SoC",
     "colSocTip": "Estado de carga inicio → fin"
+  },
+  "heatmap": {
+    "title": "Mapa de calor",
+    "subtitle": "Dónde conduces, cargas y tus puntos de carga — en un mapa",
+    "intro": "Densidad geográfica en el mapa. Rojo = viajes (inicio/fin), verde = sesiones de carga, azul = puntos de carga definidos. Activa cada capa por separado.",
+    "days": "días",
+    "months": "meses",
+    "all": "Todo",
+    "layerTrips": "Viajes",
+    "layerTripsTip": "Densidad de puntos de inicio y fin de viaje",
+    "layerCharging": "Cargas",
+    "layerChargingTip": "Densidad de lugares donde has cargado",
+    "layerLocations": "Puntos de carga",
+    "layerLocationsTip": "Tus puntos de carga definidos (casa/trabajo/…)",
+    "empty": "No hay datos geográficos para el período seleccionado."
   }
 }

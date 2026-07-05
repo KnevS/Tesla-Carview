@@ -56,6 +56,7 @@ Für Live-Vehicle-Daten (Akku, Klima, TPMS, Telemetry-Stream) gibt es **nur eine
 | **Dashboard** | Gesamtstatistiken, letzte Fahrt, monatliches Kilometerdiagramm |
 | **Fahrten** | GPS-Track auf Karte, Verbrauch, Geschwindigkeit, SoC-Verlauf |
 | **Fahrtwerte** (v3.37.0) | Tabellarische Analyse pro Fahrt: Dauer, Strecke, Verbrauch, Geschwindigkeit und Leistung jeweils als Min/Max/Ø — sortierbar, mit Summen-Kacheln und CSV-Export |
+| **Heatmap** (v3.38.0) | Geografische Karten-Heatmap mit ein-/ausblendbaren Layern: Fahrten (Start/Ziel-Dichte), Ladevorgänge und definierte Ladeorte — Zeitraum wählbar, ohne externe Karten-Plugins |
 | **Laden** | Ladesessions mit Kosten, GPS-basierter Ladeort-Zuordnung, kostenlose Ladungen markierbar; **Ladeverlauf je Session** (Leistungs-/Ladestandskurve), **Kosten nach Ort** und **günstige Ladefenster** aus dynamischem Strompreis (v3.24–v3.26) |
 | **Ladeorte** | Definierbare Standorte mit GPS-Radius, Preis/kWh, Auto-Erkennung |
 | **Batterie / Battery-Health-Companion** | Phase 1 (v3.6.0): Reichweiten-Verlauf, Degradation, Ladekurve, Effizienz vs. Außentemperatur, Phantom-Drain, Anomalien — alles rein statistisch aus eigenen Daten. Phase 2 (v3.7.0): persistierte Anomalie-Alerts via Push + Vorklimatisierungs-Vorschläge bei Frost/Hitze (Open-Meteo). **Gesundheit & Prognose (v3.27–v3.28): Reichweiten-Hochrechnung per Regression mit Konfidenzband + Standby-Drain-Trend-Warnung — reine Statistik, keine KI** |

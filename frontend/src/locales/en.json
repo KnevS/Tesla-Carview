@@ -3068,5 +3068,20 @@
     "colMinPowerTip": "Minimum power — negative values mean regeneration",
     "colSoc": "SoC",
     "colSocTip": "State of charge start → end"
+  },
+  "heatmap": {
+    "title": "Heatmap",
+    "subtitle": "Where you drive, charge and your charging spots — on one map",
+    "intro": "Geographic density on the map. Red = trips (start/end), green = charging sessions, blue = defined charging spots. Toggle each layer individually.",
+    "days": "days",
+    "months": "months",
+    "all": "All",
+    "layerTrips": "Trips",
+    "layerTripsTip": "Density of trip start and end points",
+    "layerCharging": "Charging",
+    "layerChargingTip": "Density of places where you charged",
+    "layerLocations": "Charging spots",
+    "layerLocationsTip": "Your defined charging locations (home/work/…)",
+    "empty": "No geo data for the selected period."
   }
 }

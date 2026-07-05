@@ -19,6 +19,7 @@ import InviteAccept from '../views/InviteAccept.vue';
 const Trips          = () => import('../views/Trips.vue');
 const TripDetail     = () => import('../views/TripDetail.vue');
 const TripMetrics    = () => import('../views/TripMetrics.vue');
+const HeatmapMap     = () => import('../views/HeatmapMap.vue');
 const Charging       = () => import('../views/Charging.vue');
 const Battery        = () => import('../views/Battery.vue');
 const Launcher       = () => import('../views/Launcher.vue');
@@ -78,6 +79,7 @@ const routes = [
   { path: '/trips',         component: Trips,         meta: { title: 'Fahrten' } },
   { path: '/trips/:id',     component: TripDetail,    meta: { title: 'Fahrtdetail' } },
   { path: '/fahrtwerte',    component: TripMetrics,   meta: { title: 'Fahrtwerte' } },
+  { path: '/heatmap',       component: HeatmapMap,    meta: { title: 'Heatmap' } },
   { path: '/fahrtenbuch',      component: Fahrtenbuch,      meta: { title: 'Fahrtenbuch' } },
   { path: '/kostenabrechnung', component: Kostenabrechnung, meta: { title: 'Kostenabrechnung' } },
   { path: '/tco',              component: Tco,              meta: { title: 'TCO-Cockpit' } },

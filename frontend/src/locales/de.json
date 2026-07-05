@@ -3068,5 +3068,20 @@
     "colMinPowerTip": "Minimale Leistung — negative Werte bedeuten Rekuperation",
     "colSoc": "SoC",
     "colSocTip": "Ladestand Start → Ziel"
+  },
+  "heatmap": {
+    "title": "Heatmap",
+    "subtitle": "Wo du fährst, lädst und deine Ladeorte liegen — auf einer Karte",
+    "intro": "Geografische Dichte auf der Karte. Rot = Fahrten (Start/Ziel), Grün = Ladevorgänge, Blau = definierte Ladeorte. Layer einzeln ein- oder ausblendbar.",
+    "days": "Tage",
+    "months": "Monate",
+    "all": "Alles",
+    "layerTrips": "Fahrten",
+    "layerTripsTip": "Dichte der Fahrt-Start- und -Zielpunkte",
+    "layerCharging": "Ladevorgänge",
+    "layerChargingTip": "Dichte der Orte, an denen geladen wurde",
+    "layerLocations": "Ladeorte",
+    "layerLocationsTip": "Deine definierten Ladeorte (Heim/Arbeit/…)",
+    "empty": "Keine Geodaten für den gewählten Zeitraum vorhanden."
   }
 }
