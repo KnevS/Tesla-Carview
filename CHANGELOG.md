@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.37.0] - 2026-07-05
+
+### Neu
+
+- **Fahrtwerte — tabellarische Fahrt-Analyse.** Neue Ansicht (`/fahrtwerte`, Navigation unter „Auswertungen" + Button in der Fahrten-Liste) mit einer sortierbaren Tabelle über alle aufgezeichneten Fahrten: Datum, Strecke (Start→Ziel), Dauer, Verbrauch (kWh/100 km), Geschwindigkeit als **Ø/Max/Min** und Antriebsleistung als **Ø/Max/Min** (Min-Leistung negativ = Rekuperation) sowie SoC Start→Ziel. Dazu Summen-Kacheln (Fahrten, Gesamtstrecke, Gesamtenergie, Gesamtfahrzeit) und **CSV-Export** (Semikolon + BOM, Excel-freundlich). Alle Werte respektieren die gewählten Einheiten (km/mi, km/h/mph, kWh/100 km · Wh/km · mi/kWh). Backend: `GET /api/trips/metrics` aggregiert die `trip_points`-Zeitreihe je Fahrt in **einem** SQL-Query (kein N+1), zugriffsbeschränkt auf eigene Fahrzeuge. Voll i18n (7 Sprachen).
+
+---
+
 ## [v3.36.9] - 2026-07-05
 
 ### Behoben
