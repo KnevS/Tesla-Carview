@@ -12,7 +12,7 @@ import './style.css';
 // es landet in jedem Karten-View / Komponente als lazy import,
 // sodass der Leaflet-CSS-Chunk nur heruntergeladen wird wenn
 // der User tatsächlich eine Karten-Seite besucht.
-import { useAuthStore }  from './store/auth.js';
+import { useAuthStore, ensureSessionRestored }  from './store/auth.js';
 import { useAppStore }   from './store/index.js';
 import { useThemeStore } from './store/theme.js';
 import { useLangStore }  from './store/lang.js';
@@ -43,7 +43,10 @@ registerSW();
 // einmalig reloaden statt stillem Routing-Fehler.
 chunkLoadErrorGuard(router);
 
-authStore.tryRestoreSession()
+// ensureSessionRestored() teilt sich die Promise mit dem Router-Guard, damit
+// GENAU EIN /auth/refresh fliegt und der Guard nicht vorzeitig auf /login
+// umleitet (#14).
+ensureSessionRestored()
   .then(async restored => {
     if (restored && authStore.user) langStore.applyFromUser(authStore.user);
     if (restored) {

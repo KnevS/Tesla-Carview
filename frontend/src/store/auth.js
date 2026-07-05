@@ -13,6 +13,20 @@ function applyUserLocale(user) {
   try { useLangStore().applyFromUser(user); } catch { /* Pinia noch nicht ready */ }
 }
 
+// Teilt die EINMALIGE Erst-Session-Wiederherstellung zwischen dem Boot in
+// main.js und dem Router-Guard. Ohne das lief ein Race: der Router-Guard
+// prüfte `isAuthenticated` (false, weil `user` noch nicht gesetzt) und leitete
+// auf /login um, WÄHREND refresh+me noch liefen und danach mit 200 zurückkamen
+// → Logout bei jedem Reload (#14). Beide warten jetzt auf DIESELBE Promise —
+// es fliegt genau EIN /auth/refresh, kein Refresh-Token-Rotations-Race.
+let _restorePromise = null;
+export function ensureSessionRestored() {
+  const auth = useAuthStore();
+  if (auth.isAuthenticated) return Promise.resolve(true);
+  if (!_restorePromise) _restorePromise = auth.tryRestoreSession();
+  return _restorePromise;
+}
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     accessToken:  null,
