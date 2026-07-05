@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.36.9] - 2026-07-05
+
+### Fixed
+
+- **Guarded a `null.toFixed` render crash.** Several spots called `.toFixed()` directly on potentially-empty fields (preconditioning suggestion without a temperature in `Battery.vue`, hover/summary km in `TripsHeatmap.vue`, avg/peak kW tooltip in `ChargingHeatmap.vue`). When the value was missing, the render threw `Cannot read properties of null (reading 'toFixed')`. All affected calls are now guarded with `?? 0`.
+
+---
+
 ## [v3.36.8] - 2026-07-05
 
 ### Fixed
