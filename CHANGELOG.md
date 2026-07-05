@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.36.7] - 2026-07-05
+
+### Behoben
+
+- **CSP für Google Fonts an der richtigen Stelle korrigiert.** Der ausgelieferte `Content-Security-Policy`-Header stammt vom **Host-Edge-nginx** (`deploy/nginx-host.conf.template`), nicht von helmet — der helmet-Fix aus v3.36.6 blieb daher wirkungslos für den echten Header. Jetzt erlaubt das nginx-Template `https://fonts.googleapis.com` (`style-src`) und `https://fonts.gstatic.com` (`font-src`). **Hinweis:** Dieses Host-Template wird nur über `setup.sh` angewendet, nicht vom Deploy — auf dem Live-Host muss `/etc/nginx/sites-available/tesla-carview` einmalig nachgezogen + nginx neu geladen werden.
+
+---
+
 ## [v3.36.6] - 2026-07-05
 
 ### Behoben
