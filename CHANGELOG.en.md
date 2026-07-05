@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.38.0] - 2026-07-05
+
+### Added
+
+- **Geographic heatmap.** New view (`/heatmap`, in the "Analytics" navigation) with a map showing the spatial density of your data across three individually toggleable layers: **trips** (start/end points, red), **charging sessions** (green) and your defined **charging spots** (blue markers with names). Selectable time range (30/90/365 days/all), the map auto-fits to the visible points. Rendered without an external map plugin — weighted circles per grid point (same technique as the existing `LocationHeatmap`, no extra dependency). Backend: new `GET /api/charging/location-heatmap` (aggregates `charging_sessions` onto a ~100 m grid) alongside the existing `GET /api/trips/location-heatmap`; charging spots from `GET /api/charging-locations`. All endpoints restricted to the user's own vehicles. Fully i18n (7 languages).
+
+---
+
 ## [v3.37.0] - 2026-07-05
 
 ### Added

@@ -72,6 +72,46 @@ router.get('/heatmap', (req, res) => {
   }
 });
 
+/**
+ * GET /api/charging/location-heatmap
+ *
+ * Geografische Dichte der Ladevorgänge: aggregiert `charging_sessions` mit
+ * GPS auf ~100-m-Raster (ROUND(lat/lon, 3)); Gewicht = Anzahl Sessions,
+ * zusätzlich total_kwh je Punkt für spätere Gewichtung. Pendant zu
+ * `/api/trips/location-heatmap`. Schutz: restrictToOwnVehicles + vehicle_id.
+ */
+router.get('/location-heatmap', (req, res) => {
+  const { vehicle_id, since } = req.query;
+  try {
+    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
+    const conds  = ['lat IS NOT NULL', 'lon IS NOT NULL'];
+    const params = [];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+    const sinceTs = since
+      ? parseInt(since, 10)
+      : Math.floor(Date.now() / 1000) - 365 * 86400;
+    conds.push('start_time >= ?');
+    params.push(sinceTs);
+    const where = 'WHERE ' + conds.join(' AND ') + restrict.fragment;
+    params.push(...restrict.params);
+
+    const rows = req.db.prepare(
+      `SELECT ROUND(lat, 3) AS lat, ROUND(lon, 3) AS lon,
+              COUNT(*) AS weight,
+              COALESCE(SUM(energy_added_kwh), 0) AS total_kwh,
+              MAX(location_name) AS location_name
+         FROM charging_sessions
+         ${where}
+         GROUP BY ROUND(lat, 3), ROUND(lon, 3)
+         ORDER BY weight DESC
+         LIMIT 5000`
+    ).all(...params);
+    res.json({ since: sinceTs, points: rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/stats', (req, res) => {
   const { vehicle_id } = req.query;
   try {

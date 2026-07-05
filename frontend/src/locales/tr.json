@@ -3059,5 +3059,20 @@
     "colMinPowerTip": "Minimum güç — negatif değerler rejenerasyonu belirtir",
     "colSoc": "SoC",
     "colSocTip": "Şarj durumu başlangıç → bitiş"
+  },
+  "heatmap": {
+    "title": "Isı haritası",
+    "subtitle": "Nerede sürdüğün, şarj ettiğin ve şarj noktaların — tek haritada",
+    "intro": "Harita üzerinde coğrafi yoğunluk. Kırmızı = sürüşler (başlangıç/bitiş), yeşil = şarj oturumları, mavi = tanımlı şarj noktaları. Her katmanı ayrı ayrı aç/kapat.",
+    "days": "gün",
+    "months": "ay",
+    "all": "Tümü",
+    "layerTrips": "Sürüşler",
+    "layerTripsTip": "Sürüş başlangıç ve bitiş noktalarının yoğunluğu",
+    "layerCharging": "Şarjlar",
+    "layerChargingTip": "Şarj ettiğin yerlerin yoğunluğu",
+    "layerLocations": "Şarj noktaları",
+    "layerLocationsTip": "Tanımladığın şarj noktaların (ev/iş/…)",
+    "empty": "Seçilen dönem için coğrafi veri yok."
   }
 }

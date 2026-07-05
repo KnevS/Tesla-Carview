@@ -56,6 +56,7 @@ For live vehicle data (battery, climate, TPMS, telemetry stream) there is **only
 | **Dashboard** | Overall statistics, latest trip, monthly distance chart |
 | **Trips** | GPS track on map, consumption, speed, SoC over time |
 | **Trip Metrics** (v3.37.0) | Tabular per-trip analysis: duration, distance, consumption, speed and power each as min/max/avg — sortable, with summary tiles and CSV export |
+| **Heatmap** (v3.38.0) | Geographic map heatmap with toggleable layers: trips (start/end density), charging sessions and defined charging spots — selectable time range, no external map plugins |
 | **Charging** | Charging sessions with cost, GPS-based charging-location matching, free sessions can be flagged; **per-session charge timeline** (power/SoC curve), **cost by location** and **cheapest charging windows** from dynamic electricity price (v3.24–v3.26) |
 | **Charging locations** | Definable spots with GPS radius, price/kWh, auto-detection |
 | **Battery / Battery-Health Companion** | Phase 1 (v3.6.0): range history, degradation, charging curve, efficiency vs outside temperature, phantom drain, anomalies — all pure statistics from your own data. Phase 2 (v3.7.0): persistent anomaly alerts via push + preconditioning suggestions on frost/heat (Open-Meteo). **Health & forecast (v3.27–v3.28): range projection via regression with confidence band + standby-drain trend warning — pure statistics, no AI** |
