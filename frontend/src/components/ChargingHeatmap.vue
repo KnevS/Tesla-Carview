@@ -121,7 +121,7 @@ function cellColor(uiDay, hour) {
 function cellTooltip(uiDay, hour) {
   const c = getCell(uiDay, hour);
   if (!c.count) return `${DAY_LABELS_LONG[uiDay]} ${String(hour).padStart(2, '0')}:00 — keine Sessions`;
-  return `${DAY_LABELS_LONG[uiDay]} ${String(hour).padStart(2, '0')}:00 · ${c.count} Session(s) · ø ${c.avg_kw.toFixed(1)} kW · Peak ${c.peak_kw.toFixed(0)} kW`;
+  return `${DAY_LABELS_LONG[uiDay]} ${String(hour).padStart(2, '0')}:00 · ${c.count} Session(s) · ø ${(c.avg_kw ?? 0).toFixed(1)} kW · Peak ${(c.peak_kw ?? 0).toFixed(0)} kW`;
 }
 
 const hoverCell = computed(() => hover.value ? getCell(hover.value.d, hover.value.h) : null);

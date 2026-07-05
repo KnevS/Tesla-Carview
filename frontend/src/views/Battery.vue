@@ -252,7 +252,7 @@
             <p class="font-semibold">{{ s.details.vehicle_label }} · {{ s.for_date }}</p>
             <p class="text-sm text-gray-300">
               {{ $t('battery.preconditionAt', {
-                temp: s.expected_temp_c.toFixed(1),
+                temp: (s.expected_temp_c ?? 0).toFixed(1),
                 time: s.expected_departure_hhmm,
               }) }}
             </p>

@@ -66,7 +66,7 @@
         class="absolute pointer-events-none bg-gray-900 border border-gray-700 rounded-lg px-3 py-1.5 text-xs shadow-xl z-20"
         :style="{ left: (hover.x + 30) + 'px', top: (hover.y - 30) + 'px' }">
         <p class="font-semibold text-white">{{ fmtDateLong(hover.date) }}</p>
-        <p class="text-gray-300">{{ hover.trips }} Fahrt(en) · {{ hover.km.toFixed(1) }} km</p>
+        <p class="text-gray-300">{{ hover.trips }} Fahrt(en) · {{ (hover.km ?? 0).toFixed(1) }} km</p>
       </div>
     </div>
 
@@ -77,7 +77,7 @@
         class="w-4 h-4 rounded-sm" :style="{ background: c }"></div>
       <span>{{ $t('trips.heatmapMore') }}</span>
       <span class="ml-auto">
-        {{ $t('trips.heatmapSummary', { trips: totalTrips, km: totalKm.toFixed(0) }) }}
+        {{ $t('trips.heatmapSummary', { trips: totalTrips, km: (totalKm ?? 0).toFixed(0) }) }}
       </span>
     </div>
   </div>
