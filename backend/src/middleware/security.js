@@ -11,10 +11,10 @@ export const securityHeaders = helmet({
     directives: {
       defaultSrc: ["'self'"],
       scriptSrc:  ["'self'"],
-      styleSrc:   ["'self'", "'unsafe-inline'"],
+      styleSrc:   ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
       imgSrc:     ["'self'", 'data:', 'https://*.tile.openstreetmap.org'],
       connectSrc: ["'self'", 'https://nominatim.openstreetmap.org', 'https://router.project-osrm.org'],
-      fontSrc:    ["'self'"],
+      fontSrc:    ["'self'", 'https://fonts.gstatic.com'],
       objectSrc:  ["'none'"],
       frameSrc:   ["'none'"],
       upgradeInsecureRequests: [],

@@ -7,6 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.36.6] - 2026-07-05
+
+### Fixed
+
+- **Logout on every reload — the real cause was in the service worker, not the server.** The `no-store` fix from v3.36.4 didn't solve it because the problem was client-side: the SW `fetch` handler also tried to cache foreign requests (e.g. `chrome-extension://` from browser extensions) — `cache.put` then throws "unsupported scheme". On top of that, the navigation fallback could return `undefined` ("Failed to convert value to 'Response'"). Both made the HTML navigation fail on reload → the app never booted → the session was never restored → login screen. Fix in `sw.js`: only same-origin GETs are handled, every `cache.put` is guarded against errors, and the navigation fallback **always** returns a valid response. Cache version `tcv-v4` → `tcv-v5`.
+- **Removed the temporary auth diagnostic (`GET /api/auth/_diag`) for good.** It was re-enabled (secret-gated) in v3.36.5 to narrow down #14; cause now confirmed (SW-side), security finding resolved.
+
+### Changed
+
+- **CSP now allows Google Fonts** (`styleSrc`: `fonts.googleapis.com`, `fontSrc`: `fonts.gstatic.com`) — the console CSP blockers when loading the app font are gone.
+
+---
+
 ## [v3.36.4] - 2026-07-04
 
 ### Fixed

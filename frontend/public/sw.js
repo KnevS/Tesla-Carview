@@ -15,7 +15,7 @@
 // (s. unten) loest das normalerweise — aber wenn ein User noch eine alte
 // SW-Version installiert hat, sorgt der Bump dafuer dass das alte Set
 // von Chunk-Referenzen sicher invalidiert wird.
-const CACHE = 'tcv-v4';
+const CACHE = 'tcv-v5';
 // Icons und Manifest sind selten geaendert + hash-los; safe vorzucachen.
 // index.html ('/') BEWUSST NICHT mehr im SHELL — die wird ueber den
 // network-first-Pfad unten frisch geholt, sonst zeigt das SW bei jedem
@@ -54,36 +54,40 @@ function isHtmlEntry(req, url) {
 
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-  // API + Auth + tesla — strikt online: keine veralteten Daten anzeigen.
-  if (url.pathname.startsWith('/api/')) return;
+  // NUR eigene http(s)-GETs behandeln. Cross-Origin (z. B. Google Fonts) und
+  // fremde Schemes (chrome-extension://, ws://) NICHT anfassen — sonst wirft
+  // cache.put „unsupported scheme" und wir stören/brechen fremde Requests.
+  if (url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith('/api/')) return;   // API strikt online
   if (event.request.method !== 'GET') return;
 
-  // HTML/Navigations-Requests: network-first, mit Cache nur als
-  // Offline-Fallback. Verhindert das Deploy-vs-Cache-Race.
+  // HTML/Navigations-Requests: network-first, Cache nur als Offline-Fallback.
+  // WICHTIG: der respondWith-Handler MUSS immer eine Response liefern — nie
+  // undefined, sonst „Failed to convert value to 'Response'" → Navigation
+  // scheitert → App bootet nicht → Logout beim Reload.
   if (isHtmlEntry(event.request, url)) {
     event.respondWith(
       fetch(event.request)
         .then(res => {
-          if (res.ok) caches.open(CACHE).then(c => c.put(event.request, res.clone()));
+          if (res.ok) caches.open(CACHE).then(c => c.put(event.request, res.clone())).catch(() => {});
           return res;
         })
-        .catch(() => caches.match(event.request).then(r => r || caches.match('/')))
+        .catch(async () =>
+          (await caches.match(event.request)) || (await caches.match('/')) || Response.error()
+        )
     );
     return;
   }
 
-  // Statische Assets (hashed JS/CSS, Icons): stale-while-revalidate ist
-  // hier sicher, weil Vite jedem Asset einen content-hash gibt — eine
-  // alte gecachte Datei ist entweder identisch zur neuen oder hat
-  // einen anderen URL-Pfad.
+  // Statische Assets (hashed JS/CSS, Icons): stale-while-revalidate.
   event.respondWith(
     caches.open(CACHE).then(async cache => {
       const cached = await cache.match(event.request);
       const network = fetch(event.request).then(res => {
-        if (res.ok) cache.put(event.request, res.clone());
+        if (res.ok) cache.put(event.request, res.clone()).catch(() => {});
         return res;
       }).catch(() => cached);
-      return cached || network;
+      return cached || network || fetch(event.request);
     })
   );
 });
