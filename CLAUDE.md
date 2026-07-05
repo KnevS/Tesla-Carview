@@ -107,11 +107,12 @@ Workflow — keine PRs nötig. Aber **vor jedem Push**:
 > - **Was zuletzt geschah:** oberster Eintrag in [`CHANGELOG.md`](CHANGELOG.md) / [`CHANGELOG.en.md`](CHANGELOG.en.md)
 > - **Letzte Commits:** `git log --oneline -15 origin/main`
 
-### Aktuell (Stand 2026-07-02)
+### Aktuell (Stand 2026-07-05)
 
-- **Version:** v3.36.5
+- **Version:** v3.36.6
 - **Zuletzt geliefert:**
-  - **TEMP Diagnose #14 v3.36.5:** `no-store` (v3.36.4) hat Safari-Logout NICHT gelöst → Server-refresh ist „ok", also scheitert `/auth/me` danach. Neue **secret-gated** Diagnose (`GET /api/auth/_diag?k=…` → sonst 404) in `auth.js` erfasst `me_attempt` (authHeader ja/nein) + refresh-Ausgang. Nach Auswertung entfernen.
+  - **Fix Logout-bei-Reload — echte Ursache im Service-Worker (v3.36.6, #14):** Nicht der Server. Der SW-`fetch`-Handler (a) versuchte `chrome-extension://`-Requests zu cachen → `cache.put` warf „unsupported scheme", (b) der Navigations-Fallback konnte `undefined` liefern → „Failed to convert value to 'Response'" → die HTML-Navigation scheiterte → App bootete nie → keine Session-Wiederherstellung → Anmeldeseite. Fix in `sw.js`: nur eigene `same-origin`-GETs behandeln (`url.origin !== self.location.origin` → return), alle `cache.put` mit `.catch(()=>{})` abgesichert, Navigations-Fallback liefert **immer** eine Response (`Response.error()` als letzter Ausweg), Cache `tcv-v4`→`tcv-v5`. Secret-gated TEMP-Diagnose (`/api/auth/_diag`) aus v3.36.5 entfernt (Ursache client-seitig bestätigt, Security-Finding erledigt).
+  - **CSP: Google Fonts erlaubt (v3.36.6):** `styleSrc += https://fonts.googleapis.com`, `fontSrc += https://fonts.gstatic.com` in `security.js` — Konsolen-CSP-Blocker weg, App-Schrift lädt.
   - **Fix Safari-Logout-bei-Reload (v3.36.4, #14):** API-Antworten hatten kein `Cache-Control` (nur ETag) → Safari cachte `GET /auth/me` → gecachte Fehlantwort → Session-Restore scheiterte trotz erfolgreichem Refresh. Fix: `Cache-Control: no-store` für alle `/api` (außer `/api/tiles`) in `index.js`. Temp-Diagnose (`/api/auth/_diag`) wieder entfernt (auch Security-Finding erledigt). Diagnose-Weg war: HTTPS-Ringpuffer, weil SSH-Whitelist unzuverlässig.
   - **Geschwindigkeit mph/km/h wählbar (v3.36.0):** Speed folgt `unit_distance` (km→km/h, mi→mph). Neuer `fmtSpeed` in `useUnits` (prefs.js); umgestellt: TripDetail (Ø/Slider/Chart) + Telemetry Live-Speed. Interne Basis bleibt km/h.
   - **Fix Telemetrie-Speed mph→km/h (v3.35.3):** `VehicleSpeed` (mph) wurde ungerechnet als `speed_kmh` gespeichert → Schieber zeigte mph als km/h. Jetzt `× 1,60934` in `extractPoint`. Diag-Log aus v3.35.2 entfernt (Value-Typ-Fix bestätigt: SoC 742/Leistung 213 in 3h, vorher 0). Alte Telemetrie-Punkte behalten mph-Wert.
