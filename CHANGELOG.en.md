@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.37.0] - 2026-07-05
+
+### Added
+
+- **Trip Metrics — tabular trip analysis.** New view (`/fahrtwerte`, in the "Analytics" navigation + a button on the trip list) with a sortable table across all recorded trips: date, route (start→end), duration, consumption (kWh/100 km), speed as **avg/max/min** and drive power as **avg/max/min** (negative min power = regeneration) plus SoC start→end. Includes summary tiles (trips, total distance, total energy, total drive time) and **CSV export** (semicolon + BOM, Excel-friendly). All values respect the chosen units (km/mi, km/h/mph, kWh/100 km · Wh/km · mi/kWh). Backend: `GET /api/trips/metrics` aggregates the `trip_points` time series per trip in a **single** SQL query (no N+1), restricted to the user's own vehicles. Fully i18n (7 languages).
+
+---
+
 ## [v3.36.9] - 2026-07-05
 
 ### Fixed

@@ -101,6 +101,86 @@ router.get('/stats', (req, res) => {
  *
  * Schutz: restrictToOwnVehicles + optional vehicle_id.
  */
+/**
+ * GET /api/trips/metrics
+ *
+ * Tabellarische Fahrt-Kennzahlen für die Analyse-Ansicht. Aggregiert die
+ * sparse `trip_points`-Zeitreihe pro Fahrt in EINEM Query (LEFT JOIN auf ein
+ * GROUP-BY-Subselect) — kein N+1. Liefert je Fahrt Distanz, Energie, Dauer,
+ * Geschwindigkeit (Ø aus trips + min/max aus Punkten) und Leistung
+ * (min/max/Ø aus Punkten). Fehlt die Telemetrie (z.B. reine OwnTracks-Fahrt),
+ * sind die Punkt-Kennzahlen `null` → Frontend zeigt „—".
+ *
+ * Query: vehicle_id?, driver_id?, limit=100, offset=0, sort=desc|asc.
+ * Interne Basiseinheit km/h + km + kWh; Umrechnung passiert im Frontend
+ * (useUnits), damit die CSV-/Tabellenwerte konsistent zur restlichen App sind.
+ * Schutz: restrictToOwnVehicles + optional vehicle_id/driver_id.
+ */
+router.get('/metrics', (req, res) => {
+  const db = req.db;
+  const { vehicle_id, driver_id, limit = 100, offset = 0, sort } = req.query;
+  try {
+    const conds  = [];
+    const params = [];
+    if (vehicle_id) { conds.push('t.vehicle_id = ?'); params.push(vehicle_id); }
+    if (driver_id === 'null') { conds.push('t.driver_id IS NULL'); }
+    else if (driver_id) { conds.push('t.driver_id = ?'); params.push(driver_id); }
+    const restrict = restrictToOwnVehicles(req, 't.vehicle_id');
+    const where = conds.length
+      ? 'WHERE ' + conds.join(' AND ') + restrict.fragment
+      : (restrict.fragment ? 'WHERE 1=1' + restrict.fragment : '');
+    const orderDir = sort === 'asc' ? 'ASC' : 'DESC';
+    const lim = Math.min(1000, Math.max(1, +limit || 100));
+    const off = Math.max(0, +offset || 0);
+
+    const rows = db.prepare(
+      `SELECT
+         t.id, t.start_time, t.end_time,
+         t.distance_km, t.energy_used_kwh,
+         t.avg_speed_kmh, t.max_speed_kmh,
+         t.start_soc, t.end_soc,
+         t.trip_type,
+         t.start_address, t.end_address,
+         v.display_name AS vehicle_name, v.model AS vehicle_model,
+         d.name AS driver_name,
+         agg.min_speed_kmh, agg.max_speed_pts_kmh, agg.avg_speed_pts_kmh,
+         agg.min_power_kw, agg.max_power_kw, agg.avg_power_kw,
+         agg.point_count
+       FROM trips t
+       JOIN vehicles v ON v.id = t.vehicle_id
+       LEFT JOIN drivers d ON d.id = t.driver_id
+       LEFT JOIN (
+         SELECT trip_id,
+           MIN(speed_kmh) AS min_speed_kmh,
+           MAX(speed_kmh) AS max_speed_pts_kmh,
+           AVG(speed_kmh) AS avg_speed_pts_kmh,
+           MIN(power_kw)  AS min_power_kw,
+           MAX(power_kw)  AS max_power_kw,
+           AVG(power_kw)  AS avg_power_kw,
+           COUNT(*)       AS point_count
+         FROM trip_points
+         GROUP BY trip_id
+       ) agg ON agg.trip_id = t.id
+       ${where}
+       ORDER BY t.start_time ${orderDir}
+       LIMIT ? OFFSET ?`
+    ).all(...params, ...restrict.params, lim, off);
+
+    // Abgeleitete Felder in JS: Dauer (s) + Verbrauch (kWh/100km).
+    for (const r of rows) {
+      r.duration_s = (r.end_time && r.start_time) ? (r.end_time - r.start_time) : null;
+      r.consumption_kwh_100km = (r.energy_used_kwh != null && r.distance_km > 0)
+        ? (r.energy_used_kwh / r.distance_km * 100)
+        : null;
+      // Max-Speed: bevorzugt der auf dem Trip gespeicherte Wert, sonst aus Punkten.
+      r.max_speed_kmh = r.max_speed_kmh ?? r.max_speed_pts_kmh ?? null;
+    }
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/consumption-by-temp', (req, res) => {
   const db = req.db;
   const { vehicle_id } = req.query;

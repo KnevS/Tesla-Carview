@@ -16,6 +16,10 @@
           <option value="null">{{ $t('trips.noDriver') }}</option>
         </select>
         <SortToggle v-model:direction="sortDir" />
+        <RouterLink to="/fahrtwerte" class="btn-secondary text-sm"
+          v-tooltip="$t('tripMetrics.intro')">
+          {{ $t('tripMetrics.title') }}
+        </RouterLink>
         <div class="text-sm text-gray-400">{{ $t('trips.countLabel', { count: trips.length }) }}</div>
       </div>
     </div>
