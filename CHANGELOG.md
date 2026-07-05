@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.36.8] - 2026-07-05
+
+### Behoben
+
+- **Logout bei jedem Reload — die tatsächliche Ursache: Router-Guard-vs-Session-Restore-Race (#14).** Serverseitig war alles korrekt (`/auth/refresh` **und** `/auth/me` lieferten beim Reload nachweislich `200`, die Cookies passten) — trotzdem landete man auf der Anmeldeseite. Grund: Die Initial-Navigation des Routers lief **parallel** zur Session-Wiederherstellung. Der `beforeEach`-Guard prüfte `isAuthenticated` in dem Moment, in dem `refresh` schon lief, aber `this.user` noch nicht gesetzt war → `false` → Umleitung auf `/login`. Wenn `refresh`+`me` kurz danach mit `200` zurückkamen, stand die App längst auf `/login` und navigierte nicht zurück. Fix: neue geteilte Promise `ensureSessionRestored()` in `store/auth.js` — Boot (`main.js`) **und** Router-Guard warten auf **dieselbe** einmalige Wiederherstellung, bevor `isAuthenticated` gelesen wird. Es fliegt genau **ein** `/auth/refresh` (kein Refresh-Token-Rotations-Race). Damit sind die vorherigen Anläufe (v3.36.4 `no-store`, v3.36.6 Service-Worker) als Fehldiagnosen bestätigt — beide bleiben als sinnvolle Härtung erhalten.
+
+---
+
 ## [v3.36.7] - 2026-07-05
 
 ### Behoben

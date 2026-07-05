@@ -1,6 +1,6 @@
 // © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import { createRouter, createWebHistory } from 'vue-router';
-import { useAuthStore } from '../store/auth.js';
+import { useAuthStore, ensureSessionRestored } from '../store/auth.js';
 import api from '../api.js';
 
 // ─── Eager (immer geladen — kritischer Pfad, kein Map/Chart/PDF) ──────────────
@@ -141,6 +141,12 @@ router.beforeEach(async to => {
   }
 
   const auth = useAuthStore();
+  // Erst-Session-Wiederherstellung abwarten, BEVOR isAuthenticated gelesen wird.
+  // Sonst leitet der Guard beim Reload auf /login um, obwohl refresh+me gleich
+  // danach mit 200 antworten (Race → Logout bei jedem Reload, #14). Awaiten
+  // einer bereits erfüllten Promise ist ein No-op — kostet nach dem ersten Mal
+  // nichts.
+  await ensureSessionRestored();
   if (to.meta.public) {
     if (auth.isAuthenticated && to.path === '/login') return '/';
     return true;
