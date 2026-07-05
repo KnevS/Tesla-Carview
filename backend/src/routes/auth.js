@@ -18,6 +18,17 @@ import { getMasterDb, getDb, getTenantBySlug, getTenantByPseudonym, getAllTenant
 
 const router = Router();
 
+// TEMP-Diagnose (#14 Safari): fokussiert + secret-gated (kein offener Endpoint —
+// ohne korrekten ?k=… → 404). Erfasst nur Event-Namen/Booleans, keine Werte.
+// Nach Auswertung wieder entfernen.
+const _d = [];
+const _dpush = r => { _d.push({ at: new Date().toISOString(), ...r }); if (_d.length > 20) _d.shift(); };
+const DIAG_KEY = 'k7x9q2m4';
+router.get('/_diag', (req, res) => {
+  if (req.query.k !== DIAG_KEY) return res.status(404).end();
+  res.json({ events: _d });
+});
+
 const ACCESS_TTL  = '15m';
 const REFRESH_TTL = 7 * 24 * 60 * 60;
 
@@ -176,14 +187,15 @@ router.post('/mfa/verify', loginRateLimit, validate(z.object({
 // POST /api/auth/refresh
 router.post('/refresh', (req, res) => {
   const raw = req.cookies?.refresh_token;
-  if (!raw) return res.status(401).json({ error: 'Kein Refresh-Token' });
+  if (!raw) { _dpush({ ev: 'refresh', cookie: false, result: 'no_cookie' }); return res.status(401).json({ error: 'Kein Refresh-Token' }); }
 
   const hash   = createHash('sha256').update(raw).digest('hex');
   const master = getMasterDb();
   const token  = master.prepare(
     'SELECT * FROM refresh_tokens WHERE token_hash=? AND expires_at > unixepoch()'
   ).get(hash);
-  if (!token) return res.status(401).json({ error: 'Refresh-Token ungueltig oder abgelaufen' });
+  if (!token) { _dpush({ ev: 'refresh', cookie: true, result: 'no_token' }); return res.status(401).json({ error: 'Refresh-Token ungueltig oder abgelaufen' }); }
+  _dpush({ ev: 'refresh', cookie: true, result: 'ok' });
 
   const db   = getDb(token.tenant_id);
   const user = db.prepare('SELECT * FROM users WHERE id=? AND is_active=1').get(token.user_id);
@@ -208,7 +220,11 @@ router.post('/logout', requireAuth, (req, res) => {
 });
 
 // GET /api/auth/me
-router.get('/me', requireAuth, (req, res) => {
+router.get('/me',
+  (req, _res, next) => { _dpush({ ev: 'me_attempt', authHeader: !!req.headers.authorization, hasCookie: !!req.headers.cookie }); next(); },
+  requireAuth,
+  (req, res) => {
+  _dpush({ ev: 'me_ok' });
   const user = req.db.prepare(
     `SELECT id, username, role, email, lang, mfa_enabled, mfa_required,
             can_edit_vehicles, can_add_vehicles, last_login, created_at,
