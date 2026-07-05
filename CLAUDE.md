@@ -109,8 +109,9 @@ Workflow — keine PRs nötig. Aber **vor jedem Push**:
 
 ### Aktuell (Stand 2026-07-02)
 
-- **Version:** v3.36.4
+- **Version:** v3.36.5
 - **Zuletzt geliefert:**
+  - **TEMP Diagnose #14 v3.36.5:** `no-store` (v3.36.4) hat Safari-Logout NICHT gelöst → Server-refresh ist „ok", also scheitert `/auth/me` danach. Neue **secret-gated** Diagnose (`GET /api/auth/_diag?k=…` → sonst 404) in `auth.js` erfasst `me_attempt` (authHeader ja/nein) + refresh-Ausgang. Nach Auswertung entfernen.
   - **Fix Safari-Logout-bei-Reload (v3.36.4, #14):** API-Antworten hatten kein `Cache-Control` (nur ETag) → Safari cachte `GET /auth/me` → gecachte Fehlantwort → Session-Restore scheiterte trotz erfolgreichem Refresh. Fix: `Cache-Control: no-store` für alle `/api` (außer `/api/tiles`) in `index.js`. Temp-Diagnose (`/api/auth/_diag`) wieder entfernt (auch Security-Finding erledigt). Diagnose-Weg war: HTTPS-Ringpuffer, weil SSH-Whitelist unzuverlässig.
   - **Geschwindigkeit mph/km/h wählbar (v3.36.0):** Speed folgt `unit_distance` (km→km/h, mi→mph). Neuer `fmtSpeed` in `useUnits` (prefs.js); umgestellt: TripDetail (Ø/Slider/Chart) + Telemetry Live-Speed. Interne Basis bleibt km/h.
   - **Fix Telemetrie-Speed mph→km/h (v3.35.3):** `VehicleSpeed` (mph) wurde ungerechnet als `speed_kmh` gespeichert → Schieber zeigte mph als km/h. Jetzt `× 1,60934` in `extractPoint`. Diag-Log aus v3.35.2 entfernt (Value-Typ-Fix bestätigt: SoC 742/Leistung 213 in 3h, vorher 0). Alte Telemetrie-Punkte behalten mph-Wert.
