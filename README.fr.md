@@ -55,6 +55,8 @@ Pour les données véhicule en direct (batterie, climatisation, TPMS, flux de t�
 |---|---|
 | **Tableau de bord** | Statistiques globales, dernier trajet, graphique mensuel des distances |
 | **Trajets** | Trace GPS sur carte, consommation, vitesse, SoC dans le temps |
+| **Données de trajet** (v3.37.0) | Analyse tabulaire par trajet : durée, distance, consommation, vitesse et puissance en min/max/moy — triable, avec cartes de synthèse et export CSV |
+| **Carte de chaleur** (v3.38.0) | Carte de chaleur géographique avec couches activables : trajets (densité départ/arrivée), sessions de charge et points de charge définis — plage temporelle réglable, sans plugin cartographique externe |
 | **Recharge** | Sessions de recharge avec coût, association de l'emplacement de recharge basée sur GPS, sessions gratuites marquables |
 | **Emplacements de recharge** | Points définissables avec rayon GPS, prix/kWh, détection automatique |
 | **Battery / Battery-Health Companion** | Phase 1 (v3.6.0) : historique d'autonomie, dégradation, courbe de recharge, efficacité selon la température extérieure, phantom drain, anomalies — uniquement des statistiques issues de vos propres données. Phase 2 (v3.7.0) : alertes persistantes d'anomalies via push + suggestions de préconditionnement en cas de gel/forte chaleur (Open-Meteo) |

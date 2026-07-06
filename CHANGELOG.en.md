@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.38.1] - 2026-07-06
+
+### Documentation
+
+- **Documentation sync for Trip Metrics (v3.37.0) & Heatmap (v3.38.0)** across all languages: new handbook section "Trip Metrics & Heatmap" ({#fahrtwerte-heatmap}) in all **6** in-app handbooks (de/en/es/fr/tr/el) and the two feature rows in the **es/fr/tr/el/uk** READMEs (de/en already shipped with the features). No code changes.
+
+---
+
 ## [v3.38.0] - 2026-07-05
 
 ### Added

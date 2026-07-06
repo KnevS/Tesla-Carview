@@ -98,6 +98,13 @@ Chaque utilisateur connecté a sa propre page sur `/my-tracking` (« 📱 Mon GP
 - Code QR pour la configuration directe, récupérable à tout moment (plus de problème de token perdu)
 - Sélection de véhicule filtrée sur les véhicules avec droits d'accès — pas d'envoi GPS accidentel vers d'autres voitures
 
+## 📊 Données de trajet & carte de chaleur {#fahrtwerte-heatmap}
+
+**Données de trajet** (navigation → *Données de trajet*, ou le bouton dans la liste des trajets) affiche un tableau triable de tous les trajets : date, itinéraire, durée, distance, consommation, ainsi que vitesse et puissance en minimum / maximum / moyenne, et l'état de charge (départ → arrivée). Cliquez sur un en-tête pour trier, sur une ligne pour ouvrir le trajet. En haut, des cartes de synthèse (trajets, distance totale, énergie totale, temps total) ; l'**export CSV** fournit les valeurs pour Excel/comptabilité. Toutes les valeurs suivent vos unités. La puissance provient de la télémétrie ; si elle manque (p. ex. trajet OwnTracks seul), « — » s'affiche.
+
+**Carte de chaleur** (navigation → *Carte de chaleur*) montre sur une carte *où* vous roulez — avec trois couches activables : **trajets** (densité départ/arrivée), **sessions de charge** et vos **points de charge** définis. Plage temporelle (30/90/365 jours/tout) réglable ; la carte s'ajuste automatiquement aux points visibles.
+
+
 ## 🔋 Tableau santé batterie (Companion Phase 1) {#battery-health}
 
 **Santé & prévision (v3.27–v3.28) :** projection linéaire de l’autonomie normalisée à 100 % avec bande de confiance (dégradation par an, autonomie dans 3 ans, temps jusqu’à 80 %), plus une alerte de décharge à l’arrêt en cas de hausse durable. Statistiques pures, pas d’IA.

@@ -98,6 +98,13 @@ Every signed-in user has their own page at `/my-tracking` ("📱 My GPS" in the 
 - QR code for direct setup, retrievable at any time (no more lost-token problem)
 - Vehicle selection filtered to vehicles with access rights — no accidental GPS push to other cars
 
+## 📊 Trip Metrics & Heatmap {#fahrtwerte-heatmap}
+
+**Trip Metrics** (navigation → *Trip Metrics*, or the button on the trip list) shows a sortable table across all trips: date, route, duration, distance, consumption, plus speed and power each as minimum / maximum / average, and the state of charge (start → end). Click a column header to sort, click a row to open the trip. Summary tiles at the top show trips, total distance, total energy and total drive time; **CSV export** provides the values for Excel/accounting. All figures follow your unit settings. Power values come from telemetry — if it's missing (e.g. an OwnTracks-only trip) you'll see "—".
+
+**Heatmap** (navigation → *Heatmap*) shows on a map *where* you drive — with three individually toggleable layers: **trips** (density of start/end points), **charging sessions** and your defined **charging spots**. Time range (30/90/365 days/all) is selectable; the map auto-fits to the visible points.
+
+
 ## 🔋 Battery health dashboard (Companion Phase 1) {#battery-health}
 
 `/battery` ships six sections since v3.6.0 that give you honest answers on the key battery questions — **statistics only, no AI, no data leaving the box**:

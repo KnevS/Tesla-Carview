@@ -98,6 +98,13 @@ Oturum açmış her kullanıcının `/my-tracking` ("📱 Benim GPS'im" navigasy
 - Doğrudan kurulum için QR kodu, herhangi bir zamanda yeniden alınabilir (artık kayıp-token sorunu yok)
 - Erişim hakları olan araçlara göre filtrelenmiş araç seçimi — diğer arabalara yanlışlıkla GPS gönderimi yok
 
+## 📊 Sürüş Değerleri ve Isı Haritası {#fahrtwerte-heatmap}
+
+**Sürüş Değerleri** (menü → *Sürüş Değerleri* veya yolculuk listesindeki düğme) tüm yolculukları sıralanabilir bir tabloda gösterir: tarih, rota, süre, mesafe, tüketim ve ayrıca minimum / maksimum / ortalama olarak hız ve güç, şarj durumu (başlangıç → bitiş). Sıralamak için sütun başlığına, yolculuğu açmak için satıra tıklayın. Üstte özet kartları (yolculuklar, toplam mesafe, toplam enerji, toplam süre); **CSV dışa aktarma** değerleri Excel/muhasebe için verir. Tüm değerler birim ayarlarınıza uyar. Güç değerleri telemetriden gelir; yoksa (ör. yalnızca OwnTracks yolculuğu) "—" görünür.
+
+**Isı haritası** (menü → *Isı haritası*) haritada *nerede* sürdüğünüzü gösterir — ayrı ayrı açılıp kapanan üç katmanla: **sürüşler** (başlangıç/bitiş yoğunluğu), **şarj oturumları** ve tanımlı **şarj noktalarınız**. Zaman aralığı (30/90/365 gün/tümü) seçilebilir; harita görünür noktalara otomatik yakınlaşır.
+
+
 ## 🔋 Batarya sağlık paneli (Companion Aşama 1) {#battery-health}
 
 **Sağlık ve tahmin (v3.27–v3.28):** %100 SoC’ye normalize edilmiş menzilin güven bandıyla doğrusal projeksiyonu (yıllık yıpranma, 3 yıl içindeki menzil, %80’e kalan süre), ayrıca kalıcı artışta park tüketimi uyarısı. Saf istatistik, yapay zeka yok.
