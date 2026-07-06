@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.38.2] - 2026-07-06
+
+### Changed / Security
+
+- **Self-hosted web fonts instead of Google — privacy.** Bricolage Grotesque, Manrope and JetBrains Mono (the "editorial" design) were loaded live from `fonts.googleapis.com`/`fonts.gstatic.com`, which would send every visitor's IP to Google. The fonts are now bundled as variable `woff2` (SIL OFL 1.1, including latin/-ext, cyrillic/-ext, greek/-ext subsets for all 7 UI languages) under `frontend/public/fonts/` and served same-origin (`/fonts/fonts.css`). The Google `<link>` and `preconnect` are removed from `index.html` — **the app no longer contacts Google at all**. Consequently the **CSP is strict again** (`style-src 'self' 'unsafe-inline'`, `font-src 'self'`) — the font opening required in v3.36.7 is reverted. License text + attribution: `frontend/public/fonts/LICENSE.md`.
+
+---
+
 ## [v3.38.1] - 2026-07-06
 
 ### Documentation
