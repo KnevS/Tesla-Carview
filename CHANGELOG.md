@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.38.1] - 2026-07-06
+
+### Dokumentation
+
+- **Doku-Sync für Fahrtwerte (v3.37.0) & Heatmap (v3.38.0)** über alle Sprachen nachgezogen: neue Handbuch-Sektion „Fahrtwerte & Heatmap" ({#fahrtwerte-heatmap}) in allen **6** In-App-Handbüchern (de/en/es/fr/tr/el) und die zwei Feature-Zeilen in den READMEs **es/fr/tr/el/uk** (de/en waren bereits mit den Features gepflegt). Keine Code-Änderung.
+
+---
+
 ## [v3.38.0] - 2026-07-05
 
 ### Neu

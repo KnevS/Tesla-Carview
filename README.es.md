@@ -55,6 +55,8 @@ Para los datos del vehículo en tiempo real (batería, climatización, TPMS, str
 |---|---|
 | **Dashboard** | Estadísticas generales, último viaje, gráfico de distancia mensual |
 | **Viajes** | Traza GPS en el mapa, consumo, velocidad, SoC a lo largo del tiempo |
+| **Métricas de viaje** (v3.37.0) | Análisis tabular por viaje: duración, distancia, consumo, velocidad y potencia como mín/máx/media — ordenable, con tarjetas de resumen y exportación CSV |
+| **Mapa de calor** (v3.38.0) | Mapa de calor geográfico con capas conmutables: viajes (densidad inicio/fin), sesiones de carga y puntos de carga definidos — rango temporal seleccionable, sin plugins de mapa externos |
 | **Cargas** | Sesiones de carga con coste, emparejamiento de ubicación de carga por GPS, las sesiones gratuitas se pueden marcar |
 | **Ubicaciones de carga** | Puntos definibles con radio GPS, precio/kWh, detección automática |
 | **Battery / Battery-Health Companion** | Fase 1 (v3.6.0): histórico de autonomía, degradación, curva de carga, eficiencia frente a temperatura exterior, drenaje fantasma, anomalías — todo son estadísticas puras a partir de tus propios datos. Fase 2 (v3.7.0): alertas persistentes de anomalías por push + sugerencias de preacondicionamiento ante heladas/calor (Open-Meteo) |

@@ -98,6 +98,13 @@ Jeder eingeloggte Nutzer hat unter `/my-tracking` („📱 Mein GPS" in der Navi
 - QR-Code für Direkt-Setup, jederzeit erneut abrufbar (kein Verlust-Problem mehr)
 - Fahrzeug-Auswahl gefiltert auf Fahrzeuge mit Zugriffsrechten — kein versehentliches GPS-Pushen auf fremde Autos
 
+## 📊 Fahrtwerte & Heatmap {#fahrtwerte-heatmap}
+
+**Fahrtwerte** (Navigation → *Fahrtwerte*, oder Button in der Fahrtenliste) zeigt eine sortierbare Tabelle über alle Fahrten: Datum, Route, Dauer, Strecke, Verbrauch sowie Geschwindigkeit und Leistung jeweils als Minimum / Maximum / Durchschnitt und den Ladestand (Start → Ziel). Klick auf eine Spaltenüberschrift sortiert, Klick auf die Zeile öffnet die Fahrt. Oben stehen Summen-Kacheln (Fahrten, Gesamtstrecke, Gesamtenergie, Gesamtfahrzeit); **CSV-Export** liefert die Werte für Excel/Buchhaltung. Alle Angaben folgen deinen Einheiten-Einstellungen. Leistungswerte stammen aus der Telemetrie — fehlt sie (z. B. reine OwnTracks-Fahrt), steht „—".
+
+**Heatmap** (Navigation → *Heatmap*) zeigt auf einer Karte, *wo* du unterwegs bist — mit drei einzeln ein-/ausblendbaren Ebenen: **Fahrten** (Dichte der Start-/Zielpunkte), **Ladevorgänge** und deine definierten **Ladeorte**. Zeitraum (30/90/365 Tage/alles) wählbar; die Karte zoomt automatisch auf die sichtbaren Punkte.
+
+
 ## 🔋 Battery-Health-Dashboard (Companion Phase 1) {#battery-health}
 
 Unter `/battery` findest du seit v3.6.0 sechs Sektionen, die dir ehrliche Antworten auf die wichtigsten Akku-Fragen geben — **rein statistisch, ohne KI, ohne Datenabfluss**:

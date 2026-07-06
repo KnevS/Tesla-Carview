@@ -55,6 +55,8 @@ Canlı araç verileri (batarya, klima, TPMS, telemetri akışı) için **tek bir
 |---|---|
 | **Pano (Dashboard)** | Genel istatistikler, son yolculuk, aylık mesafe grafiği |
 | **Yolculuklar** | Harita üzerinde GPS izi, tüketim, hız, zamana göre SoC |
+| **Sürüş Değerleri** (v3.37.0) | Sürüş başına tablo halinde analiz: süre, mesafe, tüketim, hız ve güç min/maks/ortalama — sıralanabilir, özet kartları ve CSV dışa aktarma |
+| **Isı haritası** (v3.38.0) | Katmanları açılıp kapanabilen coğrafi ısı haritası: sürüşler (başlangıç/bitiş yoğunluğu), şarj oturumları ve tanımlı şarj noktaları — seçilebilir zaman aralığı, harici harita eklentisi yok |
 | **Şarj** | Maliyetli şarj oturumları, GPS tabanlı şarj konumu eşleştirme, ücretsiz oturumlar işaretlenebilir |
 | **Şarj konumları** | GPS yarıçapı, fiyat/kWh ve otomatik tespitli tanımlanabilir noktalar |
 | **Batarya / Batarya Sağlığı Asistanı** | Faz 1 (v3.6.0): menzil geçmişi, dejenerasyon, şarj eğrisi, dış sıcaklığa göre verim, hayalet boşalma, anomaliler — tümü kendi verilerinizden çıkarılan saf istatistikler. Faz 2 (v3.7.0): push ile kalıcı anomali uyarıları + don/sıcak havada ön koşullandırma önerileri (Open-Meteo) |

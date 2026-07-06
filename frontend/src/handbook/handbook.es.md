@@ -98,6 +98,13 @@ Cada usuario autenticado tiene su propia página en `/my-tracking` («📱 Mi GP
 - Código QR para configuración directa, recuperable en cualquier momento (sin más problema de token perdido)
 - Selección de vehículo filtrada a vehículos con derechos de acceso — sin envío GPS accidental a otros coches
 
+## 📊 Métricas de viaje y mapa de calor {#fahrtwerte-heatmap}
+
+**Métricas de viaje** (navegación → *Métricas de viaje*, o el botón en la lista de viajes) muestra una tabla ordenable de todos los viajes: fecha, ruta, duración, distancia, consumo, además de velocidad y potencia como mínimo / máximo / media, y el estado de carga (inicio → fin). Haz clic en un encabezado para ordenar y en una fila para abrir el viaje. Arriba hay tarjetas de resumen (viajes, distancia total, energía total, tiempo total); la **exportación CSV** entrega los valores para Excel/contabilidad. Todas las cifras siguen tus unidades. Los valores de potencia provienen de la telemetría; si falta (p. ej. un viaje solo con OwnTracks) verás "—".
+
+**Mapa de calor** (navegación → *Mapa de calor*) muestra en un mapa *dónde* conduces — con tres capas conmutables: **viajes** (densidad de puntos inicio/fin), **sesiones de carga** y tus **puntos de carga** definidos. Rango temporal (30/90/365 días/todo) seleccionable; el mapa se ajusta automáticamente a los puntos visibles.
+
+
 ## 🔋 Panel salud de batería (Companion Fase 1) {#battery-health}
 
 **Salud y pronóstico (v3.27–v3.28):** proyección lineal de la autonomía normalizada al 100 % con banda de confianza (degradación anual, autonomía en 3 años, tiempo hasta el 80 %), más un aviso de consumo en reposo ante un aumento sostenido. Estadística pura, sin IA.
