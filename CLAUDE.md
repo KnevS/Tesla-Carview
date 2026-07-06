@@ -109,8 +109,9 @@ Workflow — keine PRs nötig. Aber **vor jedem Push**:
 
 ### Aktuell (Stand 2026-07-05)
 
-- **Version:** v3.38.1
+- **Version:** v3.38.2
 - **Zuletzt geliefert:**
+  - **Webfonts self-hosted (v3.38.2, Privacy):** Bricolage/Manrope/JetBrains Mono als variable woff2 unter `frontend/public/fonts/` (SIL OFL, Subsets latin/-ext/cyrillic/-ext/greek/-ext), same-origin via `/fonts/fonts.css`; Google-`<link>`+preconnect aus `index.html` raus → keine Google-Requests mehr. CSP wieder strikt (`font-src 'self'`, helmet + `deploy/nginx-host.conf.template` zurückgesetzt). **Hinweis Live-iland:** die traefik-Middleware `sec-headers-app` erlaubt noch die Font-Hosts — harmlos (App fragt Google nicht mehr an), kann aber zurückgedreht werden. Font-Extraktion: `scripts`-losem curl-Skript, Details [[project_teslaview_csp_source]].
   - **Doku-Sync (v3.38.1):** Handbuch-Sektion „Fahrtwerte & Heatmap" ({#fahrtwerte-heatmap}) in allen 6 Handbüchern + Feature-Zeilen in README es/fr/tr/el/uk nachgezogen. Doku-Pflicht für v3.37/3.38 damit vollständig.
   - **Feature Geo-Heatmap (v3.38.0):** neue View `HeatmapMap.vue` (`/heatmap`) — Leaflet-Karte, 3 toggle-Layer (Fahrten rot / Ladevorgänge grün / Ladeorte blau). Rendering per gewichteten `L.circle` (kein Extra-Dep, wie das bisher ungenutzte `LocationHeatmap.vue`). Backend: neuer `GET /api/charging/location-heatmap` (charging_sessions ~100-m-Raster) + vorhandener `/api/trips/location-heatmap` + `/api/charging-locations`. Nav-Eintrag `heatmap`. i18n×7 (`heatmap`). Gitleaks-Falle: KEINE `key: '<langer_wert>'`-Muster (triggert generic-api-key) — Tabellen-Property hieß darum `field`.
   - **Feature Fahrtwerte-Tabelle (v3.37.0):** neue View `TripMetrics.vue` (`/fahrtwerte`), Backend `GET /api/trips/metrics` (EIN SQL-Query: trips LEFT JOIN GROUP-BY-Aggregat aus `trip_points` → min/max/Ø Speed+Leistung, kein N+1). Sortierbar, Summen-Kacheln, CSV (`;`+BOM), unit-aware (useUnits). Nav-Eintrag `fahrtwerte` + Button in Trips.vue. i18n×7 (`tripMetrics`).
