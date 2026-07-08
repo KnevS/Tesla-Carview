@@ -7,6 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.39.0] - 2026-07-08
+
+### Added
+
+- **Zone analysis in the trip detail.** New "Zone analysis" card below the GPS track with three modes, each as a table with matching highlighting on the map:
+  - **Speed zones:** speed bands (0–30/30–50/50–100/100–130/>130 km/h, unit-aware) with distance, time, average power and net energy per band; checkboxes colour the matching track sections on the map, deselected ones are dimmed; totals row for the selection.
+  - **My zones:** which defined geofences and charging locations the trip touches — entry/exit time, dwell time and distance inside the zone; zone circles (real radius) can be shown on the map.
+  - **Section:** freely chosen range via from/to sliders with distance, time, avg/max speed, avg/max power, strongest regeneration, energy and SoC progression.
+- **Map hints in the trip detail:** the "📍 Hints" checkbox marks Vmax, peak power, strongest regeneration and stops (≥ 1 min) as markers with popups on the GPS track.
+- Computed entirely client-side from the existing trip points (time gaps > 120 s are capped, energy is net incl. regeneration). i18n ×7, handbook DE/EN.
+
+---
+
 ## [v3.38.4] - 2026-07-08
 
 ### Fixed

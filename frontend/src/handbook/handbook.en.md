@@ -104,6 +104,8 @@ Every signed-in user has their own page at `/my-tracking` ("📱 My GPS" in the 
 
 **Heatmap** (navigation → *Heatmap*) shows on a map *where* you drive — with three individually toggleable layers: **trips** (density of start/end points), **charging sessions** and your defined **charging spots**. Time range (30/90/365 days/all) is selectable; the map auto-fits to the visible points.
 
+**Zone analysis in the trip detail** (open a trip → "Zone analysis" card): analyses a single trip by zones, each as a table with matching highlighting on the map. Three modes: **speed zones** (speed bands with distance, time, average power and net energy per band — checkboxes colour the matching track sections, deselected ones are dimmed), **my zones** (which of your geofences/charging locations the trip touches, with entry/exit time, duration and distance inside the zone — zone circles can be shown on the map) and **section** (freely chosen range via from/to sliders with all key figures). In addition, the **📍 Hints** checkbox on the GPS map marks Vmax, peak power, strongest regeneration and stops (≥ 1 min).
+
 
 ## 🔋 Battery health dashboard (Companion Phase 1) {#battery-health}
 

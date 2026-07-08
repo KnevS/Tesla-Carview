@@ -7,6 +7,19 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.39.0] - 2026-07-08
+
+### Neu
+
+- **Zonen-Analyse im Fahrtdetail.** Neue Karte „Zonen-Analyse" unter dem GPS-Track mit drei Modi, jeweils tabellarisch und mit Hervorhebung auf der Karte:
+  - **Tempo-Zonen:** Geschwindigkeits-Bereiche (0–30/30–50/50–100/100–130/>130 km/h, einheiten-bewusst) mit Strecke, Zeit, Ø-Leistung und Netto-Energie je Bereich; Häkchen färbt die zugehörigen Streckenabschnitte auf der Karte, Abgewähltes wird ausgegraut; Summenzeile über die Auswahl.
+  - **Meine Zonen:** welche definierten Geofences und Ladeorte die Fahrt berührt — Ein-/Ausfahrtszeit, Aufenthaltsdauer und Strecke in der Zone; Zonen-Kreise (echter Radius) auf der Karte einblendbar.
+  - **Abschnitt:** frei wählbarer Bereich per Von/Bis-Regler mit Strecke, Zeit, Ø/Max-Geschwindigkeit, Ø/Max-Leistung, stärkster Rekuperation, Energie und SoC-Verlauf.
+- **Karten-Hinweise im Fahrtdetail:** Checkbox „📍 Hinweise" markiert Vmax, höchste Leistung, stärkste Rekuperation und Stopps (≥ 1 min) als Marker mit Popup auf dem GPS-Track.
+- Berechnung vollständig clientseitig aus den vorhandenen Trip-Punkten (Zeitlücken > 120 s werden gedeckelt, Energie netto inkl. Rekuperation). i18n ×7, Handbuch DE/EN.
+
+---
+
 ## [v3.38.4] - 2026-07-08
 
 ### Behoben

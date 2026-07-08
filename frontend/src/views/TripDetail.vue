@@ -23,7 +23,14 @@
            mit ihren hohen z-Indizes (200-700) aus dem Stacking Context
            herausfloaten und NavBar-Dropdowns überdecken. -->
       <div class="card space-y-3 isolate">
-        <h2 class="text-lg font-semibold">GPS-Track</h2>
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <h2 class="text-lg font-semibold">GPS-Track</h2>
+          <label v-if="hasPoints" class="inline-flex items-center gap-2 text-sm text-gray-300 cursor-pointer"
+            v-tooltip="$t('tripDetail.zones.hintsTip')">
+            <input type="checkbox" v-model="showHints" class="accent-tesla-red">
+            📍 {{ $t('tripDetail.zones.hints') }}
+          </label>
+        </div>
 
         <div v-if="hasPoints">
           <!-- Karte -->
@@ -69,6 +76,121 @@
         </div>
 
         <p v-else class="text-gray-400 text-sm">Keine GPS-Daten für diese Fahrt vorhanden.</p>
+      </div>
+
+      <!-- Zonen-Analyse: Tempo-Zonen / eigene Geofence-/Ladeort-Zonen /
+           frei wählbarer Abschnitt — die Auswahl steuert das Karten-Styling. -->
+      <div class="card space-y-3" v-if="hasPoints">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <h2 class="text-lg font-semibold flex items-center gap-2">
+            {{ $t('tripDetail.zones.title') }}
+            <span class="text-xs text-gray-500 font-normal" v-tooltip="$t('tripDetail.zones.intro')">ℹ️</span>
+          </h2>
+          <div class="flex rounded-lg overflow-hidden border border-gray-600 text-sm">
+            <button v-for="m in ZONE_MODES" :key="m" @click="zoneMode = m"
+              class="px-3 py-1.5 transition"
+              :class="zoneMode === m ? 'bg-tesla-red text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'">
+              {{ $t('tripDetail.zones.tab_' + m) }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Tempo-Zonen -->
+        <div v-if="zoneMode === 'speed'" class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-gray-400 text-left border-b border-gray-700">
+                <th class="py-2 pr-2 w-8"></th>
+                <th class="py-2 pr-4">{{ $t('tripDetail.zones.zone') }}</th>
+                <th class="py-2 pr-4 text-right">{{ $t('tripDetail.zones.distance') }}</th>
+                <th class="py-2 pr-4 text-right">{{ $t('tripDetail.zones.time') }}</th>
+                <th class="py-2 pr-4 text-right">{{ $t('tripDetail.zones.avgPower') }}</th>
+                <th class="py-2 text-right">{{ $t('tripDetail.zones.energy') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="b in speedZoneRows" :key="b.id" class="border-b border-gray-800"
+                :class="{ 'opacity-40': !selectedBands[b.id] }">
+                <td class="py-1.5 pr-2">
+                  <input type="checkbox" v-model="selectedBands[b.id]" class="accent-tesla-red">
+                </td>
+                <td class="py-1.5 pr-4 whitespace-nowrap">
+                  <span class="inline-block w-3 h-3 rounded-full mr-1.5 align-middle" :style="{ background: b.color }"></span>
+                  {{ b.label }}
+                </td>
+                <td class="py-1.5 pr-4 text-right">{{ fmtDistance(b.dist) }}</td>
+                <td class="py-1.5 pr-4 text-right">{{ b.seconds ? fmtDur(b.seconds) : '–' }}</td>
+                <td class="py-1.5 pr-4 text-right">{{ b.seconds ? fmt(b.avgKw, 1) + ' kW' : '–' }}</td>
+                <td class="py-1.5 text-right">{{ b.seconds ? fmt(b.energyKwh, 2) + ' kWh' : '–' }}</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr class="font-semibold text-white">
+                <td class="py-2 pr-2"></td>
+                <td class="py-2 pr-4">{{ $t('tripDetail.zones.selection') }}</td>
+                <td class="py-2 pr-4 text-right">{{ fmtDistance(speedSelection.dist) }}</td>
+                <td class="py-2 pr-4 text-right">{{ fmtDur(speedSelection.seconds) }}</td>
+                <td class="py-2 pr-4 text-right">{{ speedSelection.seconds ? fmt(speedSelection.avgKw, 1) + ' kW' : '–' }}</td>
+                <td class="py-2 text-right">{{ fmt(speedSelection.energyKwh, 2) }} kWh</td>
+              </tr>
+            </tfoot>
+          </table>
+          <p class="text-xs text-gray-500 mt-2">{{ $t('tripDetail.zones.speedHint') }}</p>
+        </div>
+
+        <!-- Meine Zonen (Geofences + Ladeorte) -->
+        <div v-else-if="zoneMode === 'geo'" class="overflow-x-auto">
+          <table v-if="zoneIntervals.length" class="w-full text-sm">
+            <thead>
+              <tr class="text-gray-400 text-left border-b border-gray-700">
+                <th class="py-2 pr-2 w-8"></th>
+                <th class="py-2 pr-4">{{ $t('tripDetail.zones.zone') }}</th>
+                <th class="py-2 pr-4">{{ $t('tripDetail.zones.enter') }}</th>
+                <th class="py-2 pr-4">{{ $t('tripDetail.zones.exit') }}</th>
+                <th class="py-2 pr-4 text-right">{{ $t('tripDetail.zones.stay') }}</th>
+                <th class="py-2 text-right">{{ $t('tripDetail.zones.distance') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(r, idx) in zoneIntervals" :key="idx" class="border-b border-gray-800">
+                <td class="py-1.5 pr-2">
+                  <input type="checkbox" v-model="selectedZones[r.zoneId]" class="accent-tesla-red"
+                    v-tooltip="$t('tripDetail.zones.geoHint')">
+                </td>
+                <td class="py-1.5 pr-4 whitespace-nowrap">{{ r.icon }} {{ r.name }}</td>
+                <td class="py-1.5 pr-4">{{ r.enterTs ? fmtTime(r.enterTs) : '▶ ' + $t('tripDetail.zones.tripStart') }}</td>
+                <td class="py-1.5 pr-4">{{ r.exitTs ? fmtTime(r.exitTs) : '🏁 ' + $t('tripDetail.zones.tripEnd') }}</td>
+                <td class="py-1.5 pr-4 text-right">{{ fmtDur(r.seconds) }}</td>
+                <td class="py-1.5 text-right">{{ fmtDistance(r.dist) }}</td>
+              </tr>
+            </tbody>
+          </table>
+          <p v-else class="text-gray-400 text-sm">{{ $t('tripDetail.zones.noZones') }}</p>
+        </div>
+
+        <!-- Freier Abschnitt -->
+        <div v-else class="space-y-3">
+          <div class="space-y-1">
+            <div class="flex justify-between text-xs text-gray-400">
+              <span>{{ $t('tripDetail.zones.from') }}: {{ rangeStats ? fmtTime(rangeStats.tsFrom) : '–' }}</span>
+              <span>{{ $t('tripDetail.zones.to') }}: {{ rangeStats ? fmtTime(rangeStats.tsTo) : '–' }}</span>
+            </div>
+            <input type="range" min="0" :max="maxPtIdx" v-model.number="rangeFrom"
+              class="w-full accent-tesla-red cursor-pointer">
+            <input type="range" min="0" :max="maxPtIdx" v-model.number="rangeTo"
+              class="w-full accent-tesla-red cursor-pointer">
+          </div>
+          <div v-if="rangeStats" class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <tbody>
+                <tr v-for="row in rangeRows" :key="row.label" class="border-b border-gray-800">
+                  <td class="py-1.5 pr-4 text-gray-400">{{ row.label }}</td>
+                  <td class="py-1.5 text-right font-medium">{{ row.value }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <div class="card">
@@ -259,8 +381,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue';
+import { ref, reactive, watch, onMounted, onUnmounted, computed, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { Line } from 'vue-chartjs';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip } from 'chart.js';
 import StatCard from '../components/StatCard.vue';
@@ -271,6 +394,7 @@ import { formatLocation } from '../lib/location.js';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip);
 
 const route   = useRoute();
+const { t }   = useI18n();
 const trip    = ref(null);
 const loading = ref(true);
 const sliderIdx = ref(0);
@@ -278,6 +402,30 @@ const drivers = ref([]);
 const showDriverMenu = ref(false);
 let leafletMap  = null;
 let sliderMarker = null;
+let Lmod = null;            // Leaflet-Namespace nach Lazy-Import
+let segmentLines = [];      // [{ i, line, gradColor, bandId, bandColor }]
+let zoneCircleLayer = null; // Kreise der gewählten Geofence-/Ladeort-Zonen
+let hintsLayer = null;      // Vmax-/Leistungs-/Stopp-Marker
+
+// ── Zonen-Analyse ──
+const ZONE_MODES = ['speed', 'geo', 'range'];
+// Tempo-Bänder in km/h (interne Basiseinheit); Farben = eigene Skala,
+// damit die Karte die Bänder eindeutig den Tabellenzeilen zuordnet.
+const SPEED_BANDS = [
+  { id: 'b0',   min: 0,   max: 30,       color: '#60a5fa' },
+  { id: 'b30',  min: 30,  max: 50,       color: '#34d399' },
+  { id: 'b50',  min: 50,  max: 100,      color: '#fbbf24' },
+  { id: 'b100', min: 100, max: 130,      color: '#fb923c' },
+  { id: 'b130', min: 130, max: Infinity, color: '#ef4444' },
+];
+const DIM_STYLE = { color: '#6b7280', opacity: 0.18, weight: 3 };
+const zoneMode = ref('speed');
+const selectedBands = reactive(Object.fromEntries(SPEED_BANDS.map(b => [b.id, true])));
+const zones = ref([]);            // Geofences + Ladeorte: [{id,name,lat,lon,radius_m,icon}]
+const selectedZones = reactive({});
+const rangeFrom = ref(0);
+const rangeTo = ref(0);
+const showHints = ref(false);
 
 const { fmtDistance, fmtEfficiency, fmtSpeed } = useUnits();
 const prefs = usePrefsStore();
@@ -333,6 +481,225 @@ const regenBarPct = computed(() =>
   Math.min(50, regenRatioPct.value)
 );
 
+// ── Zonen-Analyse: Berechnungen ──
+const maxPtIdx = computed(() => Math.max(0, (trip.value?.points?.length ?? 1) - 1));
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+const fmtDur = (s) => {
+  s = Math.max(0, Math.round(s));
+  if (s < 60) return `${s} s`;
+  const m = Math.round(s / 60);
+  return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}min` : `${m} min`;
+};
+
+const bandOf = (speed) => SPEED_BANDS.find(b => speed >= b.min && speed < b.max) ?? SPEED_BANDS[0];
+
+const speedBandLabel = (b) => {
+  const mph = prefs.data.unit_distance === 'mi';
+  const f = mph ? 0.621371 : 1;
+  const u = mph ? 'mph' : 'km/h';
+  const lo = Math.round(b.min * f);
+  return b.max === Infinity ? `> ${lo} ${u}` : `${lo}–${Math.round(b.max * f)} ${u}`;
+};
+
+/** Segment i = Punkt i-1 → i. dt auf 120 s gedeckelt, damit Datenlücken
+ *  (Telemetrie-Aussetzer) Zeit- und Energie-Summen nicht aufblähen. */
+const segments = computed(() => {
+  const pts = trip.value?.points ?? [];
+  const out = [];
+  for (let i = 1; i < pts.length; i++) {
+    out.push({
+      i,
+      dt:    Math.min(Math.max(pts[i].timestamp - pts[i - 1].timestamp, 0), 120),
+      dist:  haversineKm(pts[i - 1].lat, pts[i - 1].lon, pts[i].lat, pts[i].lon),
+      kw:    pts[i].power_kw ?? 0,
+      speed: pts[i].speed_kmh ?? 0,
+    });
+  }
+  return out;
+});
+
+const speedZoneRows = computed(() => SPEED_BANDS.map((b) => {
+  const segs = segments.value.filter(s => s.speed >= b.min && s.speed < b.max);
+  const seconds   = segs.reduce((a, s) => a + s.dt, 0);
+  const dist      = segs.reduce((a, s) => a + s.dist, 0);
+  const energyKwh = segs.reduce((a, s) => a + s.kw * s.dt / 3600, 0); // netto inkl. Reku
+  return { ...b, label: speedBandLabel(b), seconds, dist, energyKwh,
+           avgKw: seconds ? energyKwh * 3600 / seconds : 0 };
+}));
+
+const speedSelection = computed(() => {
+  const rows = speedZoneRows.value.filter(r => selectedBands[r.id]);
+  const seconds   = rows.reduce((a, r) => a + r.seconds, 0);
+  const dist      = rows.reduce((a, r) => a + r.dist, 0);
+  const energyKwh = rows.reduce((a, r) => a + r.energyKwh, 0);
+  return { seconds, dist, energyKwh, avgKw: seconds ? energyKwh * 3600 / seconds : 0 };
+});
+
+/** Zusammenhängende Aufenthalte je Zone (Punkt innerhalb radius_m). */
+const zoneIntervals = computed(() => {
+  const pts = trip.value?.points ?? [];
+  const rows = [];
+  const mkRow = (z, run) => {
+    let dist = 0;
+    for (let i = run.from + 1; i <= run.to; i++) {
+      dist += haversineKm(pts[i - 1].lat, pts[i - 1].lon, pts[i].lat, pts[i].lon);
+    }
+    return {
+      zoneId: z.id, icon: z.icon, name: z.name,
+      enterTs: run.from === 0 ? null : pts[run.from].timestamp,
+      exitTs:  run.to === pts.length - 1 ? null : pts[run.to].timestamp,
+      seconds: pts[run.to].timestamp - pts[run.from].timestamp,
+      dist,
+    };
+  };
+  for (const z of zones.value) {
+    let run = null;
+    for (let i = 0; i < pts.length; i++) {
+      const inside = haversineKm(pts[i].lat, pts[i].lon, z.lat, z.lon) * 1000 <= z.radius_m;
+      if (inside) run = run ? { ...run, to: i } : { from: i, to: i };
+      else if (run) { rows.push(mkRow(z, run)); run = null; }
+    }
+    if (run) rows.push(mkRow(z, run));
+  }
+  return rows;
+});
+const touchedZoneIds = computed(() => new Set(zoneIntervals.value.map(r => r.zoneId)));
+
+const rangeStats = computed(() => {
+  const pts = trip.value?.points ?? [];
+  if (pts.length < 2) return null;
+  const lo = Math.min(rangeFrom.value, rangeTo.value);
+  const hi = Math.min(Math.max(rangeFrom.value, rangeTo.value), pts.length - 1);
+  const segs = segments.value.filter(s => s.i > lo && s.i <= hi);
+  const seconds   = segs.reduce((a, s) => a + s.dt, 0);
+  const dist      = segs.reduce((a, s) => a + s.dist, 0);
+  const energyKwh = segs.reduce((a, s) => a + s.kw * s.dt / 3600, 0);
+  const slice  = pts.slice(lo, hi + 1);
+  const speeds = slice.map(p => p.speed_kmh ?? 0);
+  const powers = slice.map(p => p.power_kw ?? 0);
+  return {
+    tsFrom: pts[lo].timestamp, tsTo: pts[hi].timestamp,
+    seconds, dist, energyKwh,
+    avgKw:    seconds ? energyKwh * 3600 / seconds : 0,
+    avgSpeed: seconds ? dist / (seconds / 3600) : 0,
+    maxSpeed: Math.max(...speeds),
+    maxPower: Math.max(...powers),
+    maxRegen: Math.min(...powers),
+    socFrom:  pts[lo].battery_level ?? null,
+    socTo:    pts[hi].battery_level ?? null,
+  };
+});
+
+const rangeRows = computed(() => {
+  const s = rangeStats.value;
+  if (!s) return [];
+  return [
+    { label: t('tripDetail.zones.distance'), value: fmtDistance(s.dist) },
+    { label: t('tripDetail.zones.time'),     value: fmtDur(s.seconds) },
+    { label: t('tripDetail.zones.avgSpeed'), value: fmtSpeed(s.avgSpeed, 0) },
+    { label: t('tripDetail.zones.maxSpeed'), value: fmtSpeed(s.maxSpeed, 0) },
+    { label: t('tripDetail.zones.avgPower'), value: fmt(s.avgKw, 1) + ' kW' },
+    { label: t('tripDetail.zones.maxPower'), value: fmt(s.maxPower, 1) + ' kW' },
+    { label: t('tripDetail.zones.maxRegen'), value: s.maxRegen < 0 ? fmt(s.maxRegen, 1) + ' kW' : '–' },
+    { label: t('tripDetail.zones.energy'),   value: fmt(s.energyKwh, 2) + ' kWh' },
+    { label: t('tripDetail.zones.soc'),
+      value: s.socFrom != null && s.socTo != null ? `${s.socFrom}% → ${s.socTo}%` : '–' },
+  ];
+});
+
+/** Karten-Styling je Modus: nicht gewählte Abschnitte ausgrauen,
+ *  gewählte Zonen-Kreise einblenden. */
+function applyMapOverlay() {
+  if (!leafletMap || !Lmod || !segmentLines.length) return;
+  if (zoneCircleLayer) { zoneCircleLayer.remove(); zoneCircleLayer = null; }
+
+  if (zoneMode.value === 'speed') {
+    for (const s of segmentLines) {
+      s.line.setStyle(selectedBands[s.bandId]
+        ? { color: s.bandColor, opacity: 0.9, weight: 4 }
+        : DIM_STYLE);
+    }
+  } else if (zoneMode.value === 'range') {
+    const lo = Math.min(rangeFrom.value, rangeTo.value);
+    const hi = Math.max(rangeFrom.value, rangeTo.value);
+    for (const s of segmentLines) {
+      s.line.setStyle(s.i > lo && s.i <= hi
+        ? { color: '#E31937', opacity: 0.95, weight: 5 }
+        : DIM_STYLE);
+    }
+  } else { // 'geo': Original-Gradient + Kreise der gewählten, berührten Zonen
+    for (const s of segmentLines) {
+      s.line.setStyle({ color: s.gradColor, opacity: 0.85, weight: 4 });
+    }
+    const circles = zones.value
+      .filter(z => selectedZones[z.id] && touchedZoneIds.value.has(z.id))
+      .map(z => Lmod.circle([z.lat, z.lon], {
+        radius: z.radius_m, color: '#3b82f6', weight: 2, dashArray: '6 4',
+        fillColor: '#3b82f6', fillOpacity: 0.12,
+      }).bindTooltip(`${z.icon} ${z.name}`));
+    if (circles.length) zoneCircleLayer = Lmod.layerGroup(circles).addTo(leafletMap);
+  }
+}
+
+/** Hinweis-Marker: Vmax, höchste Leistung, stärkste Reku, Stopps ≥ 60 s. */
+function buildHintsLayer() {
+  const pts = trip.value?.points ?? [];
+  const mk = (p, color, html) => Lmod.circleMarker([p.lat, p.lon], {
+    radius: 8, color: '#111827', fillColor: color, fillOpacity: 0.95, weight: 2,
+  }).bindPopup(html);
+  const markers = [];
+
+  let vmax = null, pmax = null, rmin = null;
+  for (const p of pts) {
+    if (p.lat == null) continue;
+    if ((p.speed_kmh ?? 0) > (vmax?.speed_kmh ?? 0)) vmax = p;
+    if ((p.power_kw ?? -Infinity) > (pmax?.power_kw ?? -Infinity)) pmax = p;
+    if ((p.power_kw ??  Infinity) < (rmin?.power_kw ??  Infinity)) rmin = p;
+  }
+  if (vmax) markers.push(mk(vmax, '#eab308',
+    `🏁 ${t('tripDetail.zones.vmax')}: <b>${fmtSpeed(vmax.speed_kmh)}</b><br>${fmtTime(vmax.timestamp)}`));
+  if (pmax && (pmax.power_kw ?? 0) > 0) markers.push(mk(pmax, '#ef4444',
+    `⚡ ${t('tripDetail.zones.maxPower')}: <b>+${fmt(pmax.power_kw, 0)} kW</b><br>${fmtTime(pmax.timestamp)}`));
+  if (rmin && (rmin.power_kw ?? 0) < 0) markers.push(mk(rmin, '#10b981',
+    `♻️ ${t('tripDetail.zones.maxRegen')}: <b>${fmt(rmin.power_kw, 0)} kW</b><br>${fmtTime(rmin.timestamp)}`));
+
+  // Stopps: zusammenhängend < 2 km/h für ≥ 60 s, ohne Start-/Ziel-Standzeit
+  let run = null;
+  for (let i = 0; i < pts.length; i++) {
+    const stopped = (pts[i].speed_kmh ?? 0) < 2;
+    if (stopped) run = run ? { ...run, to: i } : { from: i, to: i };
+    if ((!stopped || i === pts.length - 1) && run) {
+      const dur = pts[run.to].timestamp - pts[run.from].timestamp;
+      if (dur >= 60 && run.from > 0 && run.to < pts.length - 1 && pts[run.from].lat != null) {
+        markers.push(mk(pts[run.from], '#9ca3af',
+          `⏸ ${t('tripDetail.zones.stop')}: <b>${fmtDur(dur)}</b><br>${fmtTime(pts[run.from].timestamp)}`));
+      }
+      run = null;
+    }
+  }
+  return Lmod.layerGroup(markers);
+}
+
+watch([zoneMode, selectedBands, selectedZones, rangeFrom, rangeTo], applyMapOverlay, { deep: true });
+watch(showHints, (on) => {
+  if (!leafletMap || !Lmod) return;
+  if (on) {
+    if (!hintsLayer) hintsLayer = buildHintsLayer();
+    hintsLayer.addTo(leafletMap);
+  } else {
+    hintsLayer?.remove();
+  }
+});
+
 const chartOpts = {
   responsive: true,
   maintainAspectRatio: false,
@@ -380,17 +747,24 @@ async function initMap(points) {
   }).addTo(leafletMap);
   new ResizeObserver(() => leafletMap?.invalidateSize()).observe(mapEl);
 
+  Lmod = L;
   const latlngs = points.map(p => [p.lat, p.lon]);
 
-  // Track nach Geschwindigkeit einfärben
+  // Track nach Geschwindigkeit einfärben; Segment-Referenzen behalten,
+  // damit die Zonen-Analyse die Abschnitte umstylen kann (applyMapOverlay).
   const maxSpeed = Math.max(...points.map(p => p.speed_kmh || 0), 1);
+  segmentLines = [];
   for (let i = 1; i < points.length; i++) {
-    const ratio = (points[i].speed_kmh || 0) / maxSpeed;
+    const speed = points[i].speed_kmh || 0;
+    const ratio = speed / maxSpeed;
     const r = Math.round(227 * ratio);
     const g = Math.round(183 * (1 - ratio));
-    L.polyline([[points[i-1].lat, points[i-1].lon], [points[i].lat, points[i].lon]], {
-      color: `rgb(${r},${g},50)`, weight: 4, opacity: 0.85,
+    const gradColor = `rgb(${r},${g},50)`;
+    const band = bandOf(speed);
+    const line = L.polyline([[points[i-1].lat, points[i-1].lon], [points[i].lat, points[i].lon]], {
+      color: gradColor, weight: 4, opacity: 0.85,
     }).addTo(leafletMap);
+    segmentLines.push({ i, line, gradColor, bandId: band.id, bandColor: band.color });
   }
 
   // Start- und Endmarker
@@ -404,6 +778,7 @@ async function initMap(points) {
   }).addTo(leafletMap);
 
   leafletMap.fitBounds(L.latLngBounds(latlngs), { padding: [20, 20] });
+  applyMapOverlay();
 }
 
 async function assignDriver(driver) {
@@ -462,6 +837,29 @@ onMounted(async () => {
   trip.value    = tripRes.data;
   drivers.value = driversRes.data;
   loading.value = false;
+  rangeTo.value = Math.max(0, (tripRes.data.points?.length ?? 1) - 1);
+
+  // Zonen für die Analyse: Geofences + definierte Ladeorte des Fahrzeugs
+  const vp = tripRes.data.vehicle_id ? { vehicle_id: tripRes.data.vehicle_id } : {};
+  Promise.all([
+    api.get('/geofences',          { params: vp }).catch(() => ({ data: [] })),
+    api.get('/charging-locations', { params: vp }).catch(() => ({ data: [] })),
+  ]).then(([gf, cl]) => {
+    const gfZones = (Array.isArray(gf.data) ? gf.data : []).map(g => ({
+      id: `g${g.id}`, name: g.name, lat: g.lat, lon: g.lon,
+      radius_m: g.radius_m || 200,
+      icon: g.kind === 'home' ? '🏠' : g.kind === 'work' ? '💼' : '📍',
+    }));
+    const clZones = (Array.isArray(cl.data) ? cl.data : [])
+      .filter(c => c.lat != null && c.lon != null)
+      .map(c => ({
+        id: `c${c.id}`, name: c.name, lat: c.lat, lon: c.lon,
+        radius_m: c.radius_m || 200, icon: '⚡',
+      }));
+    zones.value = [...gfZones, ...clZones];
+    for (const z of zones.value) selectedZones[z.id] = true;
+  });
+
   if (tripRes.data.points?.length >= 2) {
     await initMap(tripRes.data.points);
   }
