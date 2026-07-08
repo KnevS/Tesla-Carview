@@ -88,17 +88,19 @@ async function loadAll() {
 }
 
 /** Leichtgewichtiges Heat-Rendering ohne Extra-Dep (wie LocationHeatmap.vue):
- *  pro Punkt ein Circle mit gewichtsabhängiger Opazität. */
+ *  pro Punkt ein CircleMarker mit gewichtsabhängiger Größe und Opazität.
+ *  Pixel-Radius (zoomunabhängig) statt L.circle mit Meter-Radius — ein
+ *  60–140-m-Kreis ist bei rausgefitteter Karte (Zoom ≤ 11) subpixel-klein
+ *  und damit unsichtbar. */
 function heatLayer(points, rgb) {
   const maxW = Math.max(1, ...points.map(p => p.weight || 1));
   return L.layerGroup(points.map(p => {
     const intensity = Math.min(1, (p.weight || 1) / maxW);
-    return L.circle([p.lat, p.lon], {
-      radius:      Math.max(40, 60 + intensity * 80),
-      color:       `rgba(${rgb}, ${0.15 + intensity * 0.45})`,
-      fillColor:   `rgba(${rgb}, ${0.10 + intensity * 0.55})`,
-      weight:      0,
-      fillOpacity: 0.5 + intensity * 0.4,
+    return L.circleMarker([p.lat, p.lon], {
+      radius:      5 + intensity * 9,
+      stroke:      false,
+      fillColor:   `rgb(${rgb})`,
+      fillOpacity: 0.35 + intensity * 0.5,
     });
   }));
 }

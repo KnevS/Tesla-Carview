@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.38.3] - 2026-07-08
+
+### Fixed
+
+- **Heatmap layers were practically invisible on the map.** The density points of the geo heatmap (`/heatmap`: trips/charging, plus the logbook map) were drawn as `L.circle` with a **radius in meters** (60–140 m). On the auto-fitted overview map (zoom ≤ 11) that is less than one pixel — the enabled display options appeared to show nothing even though the point counters were correct. Both maps now render `L.circleMarker` with a **zoom-independent pixel radius** (5–14 px, weight-based size and opacity): the layers are visible at every zoom level. (`HeatmapMap.vue`, `LocationHeatmap.vue`)
+
+---
+
 ## [v3.38.2] - 2026-07-06
 
 ### Changed / Security

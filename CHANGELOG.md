@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.38.3] - 2026-07-08
+
+### Behoben
+
+- **Heatmap-Layer waren auf der Karte praktisch unsichtbar.** Die Dichte-Punkte der Geo-Heatmap (`/heatmap`: Fahrten/Ladevorgänge, sowie die Fahrtenbuch-Karte) wurden als `L.circle` mit **Meter-Radius** (60–140 m) gezeichnet. Bei der automatisch rausgezoomten Übersichtskarte (Zoom ≤ 11) entspricht das weniger als einem Pixel — die aktivierten Anzeigeoptionen zeigten daher scheinbar nichts an, obwohl die Punktzähler stimmten. Jetzt rendern beide Karten `L.circleMarker` mit **zoomunabhängigem Pixel-Radius** (5–14 px, gewichtsabhängige Größe und Deckkraft): die Layer sind auf jeder Zoomstufe sichtbar. (`HeatmapMap.vue`, `LocationHeatmap.vue`)
+
+---
+
 ## [v3.38.2] - 2026-07-06
 
 ### Geändert / Sicherheit
