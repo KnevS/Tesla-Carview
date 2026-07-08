@@ -1030,6 +1030,26 @@ function runTenantMigrations(db) {
     fetched_at INTEGER NOT NULL DEFAULT (unixepoch()),
     PRIMARY KEY (lat_key, lon_key)
   )`);
+
+  // Daten-Repair (idempotent): Telemetrie-Fahrten, deren Start-/End-Datum ohne
+  // Location kam, aus den Trackpunkten nachziehen — sonst fehlen Heatmap-Punkt
+  // und Adresse dauerhaft. Trifft nach dem ersten Lauf keine Zeilen mehr;
+  // Neu-Fahrten werden seit v3.38.4 direkt beim Trip-Close vervollständigt.
+  db.exec(`
+    UPDATE trips SET
+      start_lat = COALESCE(start_lat, (SELECT lat FROM telemetry_points p
+        WHERE p.trip_id = trips.id AND p.lat IS NOT NULL ORDER BY p.timestamp ASC  LIMIT 1)),
+      start_lon = COALESCE(start_lon, (SELECT lon FROM telemetry_points p
+        WHERE p.trip_id = trips.id AND p.lat IS NOT NULL ORDER BY p.timestamp ASC  LIMIT 1)),
+      end_lat   = COALESCE(end_lat,   (SELECT lat FROM telemetry_points p
+        WHERE p.trip_id = trips.id AND p.lat IS NOT NULL ORDER BY p.timestamp DESC LIMIT 1)),
+      end_lon   = COALESCE(end_lon,   (SELECT lon FROM telemetry_points p
+        WHERE p.trip_id = trips.id AND p.lat IS NOT NULL ORDER BY p.timestamp DESC LIMIT 1))
+    WHERE source = 'telemetry'
+      AND (start_lat IS NULL OR end_lat IS NULL)
+      AND EXISTS (SELECT 1 FROM telemetry_points p
+        WHERE p.trip_id = trips.id AND p.lat IS NOT NULL)
+  `);
 }
 
 // Alias für Abwärtskompatibilität

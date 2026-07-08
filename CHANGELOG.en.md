@@ -7,6 +7,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.38.4] - 2026-07-08
+
+### Fixed
+
+- **Trip metrics table was empty for telemetry trips.** The point-based metrics (min/max/avg speed and power) in `/fahrtwerte` aggregated only `trip_points` — which are written only by poller and OwnTracks trips. Fleet telemetry trips store their time series in `telemetry_points`, so all telemetry trips showed "—" there. The aggregation now spans both point tables (`UNION ALL`).
+- **Telemetry trips showed coordinates instead of addresses.** Closing a trip via fleet telemetry never triggered reverse geocoding (unlike OwnTracks trips) — start/end addresses stayed empty until the nightly backfill (max. 60/night) and the UI fell back to raw coordinates. Addresses are now resolved directly on trip start and end (Nominatim, throttled + cached).
+- **Repaired telemetry trips without start/end coordinates.** With sparse telemetry the gear datum at trip start/end often arrives without a GPS position — `start_lat`/`end_lat` then stayed NULL forever: no heatmap point, no address. Trip close now backfills start/end from the track points; an idempotent migration repairs existing trips on first start after the update.
+
+---
+
 ## [v3.38.3] - 2026-07-08
 
 ### Fixed

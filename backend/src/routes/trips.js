@@ -158,7 +158,16 @@ router.get('/metrics', (req, res) => {
            MAX(power_kw)  AS max_power_kw,
            AVG(power_kw)  AS avg_power_kw,
            COUNT(*)       AS point_count
-         FROM trip_points
+         FROM (
+           -- Poller-/OwnTracks-Fahrten schreiben trip_points, Fleet-Telemetry-
+           -- Fahrten telemetry_points (vgl. /:id, pointsTable nach t.source) —
+           -- ohne die UNION blieben alle Punkt-Kennzahlen bei Telemetrie leer.
+           SELECT trip_id, speed_kmh, power_kw FROM trip_points
+            WHERE trip_id IS NOT NULL
+           UNION ALL
+           SELECT trip_id, speed_kmh, power_kw FROM telemetry_points
+            WHERE trip_id IS NOT NULL
+         )
          GROUP BY trip_id
        ) agg ON agg.trip_id = t.id
        ${where}

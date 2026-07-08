@@ -109,8 +109,9 @@ Workflow — keine PRs nötig. Aber **vor jedem Push**:
 
 ### Aktuell (Stand 2026-07-08)
 
-- **Version:** v3.38.3
+- **Version:** v3.38.4
 - **Zuletzt geliefert:**
+  - **Fix Telemetrie-Erfassungskette (v3.38.4):** (1) `/api/trips/metrics` aggregierte nur `trip_points` → Fahrtwerte-Tabelle leer für Telemetrie-Fahrten; jetzt UNION ALL über `trip_points`+`telemetry_points`. (2) fleetTelemetry rief nie `geocodeTrip` → Koordinaten statt Adressen; jetzt Fire-and-forget-Hook bei Trip-Start/-Close (wie OwnTracks). (3) Gear-Datum ohne GPS → `start_/end_lat` NULL; Trip-Close zieht Start/Ziel aus Trackpunkten nach + idempotenter Daten-Repair in `runTenantMigrations`. Merke: `trip_points` = Poller/OwnTracks, `telemetry_points` = Fleet-Telemetry (Detail-Endpoint `/:id` switcht nach `t.source`).
   - **Fix Heatmap-Layer unsichtbar (v3.38.3):** `HeatmapMap.vue` + `LocationHeatmap.vue` zeichneten `L.circle` mit Meter-Radius (60–140 m) — bei auto-gefitteter Übersichtskarte (Zoom ≤ 11) subpixel-klein, Layer wirkten leer trotz korrekter Punktzähler. Jetzt `L.circleMarker` mit zoomunabhängigem Pixel-Radius (5–14 px, gewichtsabhängige Größe/Deckkraft).
   - **Webfonts self-hosted (v3.38.2, Privacy):** Bricolage/Manrope/JetBrains Mono als variable woff2 unter `frontend/public/fonts/` (SIL OFL, Subsets latin/-ext/cyrillic/-ext/greek/-ext), same-origin via `/fonts/fonts.css`; Google-`<link>`+preconnect aus `index.html` raus → keine Google-Requests mehr. CSP wieder strikt (`font-src 'self'`, helmet + `deploy/nginx-host.conf.template` zurückgesetzt). **Hinweis Live-iland:** die traefik-Middleware `sec-headers-app` erlaubt noch die Font-Hosts — harmlos (App fragt Google nicht mehr an), kann aber zurückgedreht werden. Font-Extraktion: `scripts`-losem curl-Skript, Details [[project_teslaview_csp_source]].
   - **Doku-Sync (v3.38.1):** Handbuch-Sektion „Fahrtwerte & Heatmap" ({#fahrtwerte-heatmap}) in allen 6 Handbüchern + Feature-Zeilen in README es/fr/tr/el/uk nachgezogen. Doku-Pflicht für v3.37/3.38 damit vollständig.

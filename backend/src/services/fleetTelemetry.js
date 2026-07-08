@@ -247,6 +247,12 @@ function storePoint(vin, ts, point) {
     ).run(vehicle.id, ts, point.lat ?? null, point.lon ?? null, soc, point.odometer_km ?? null, defaultDriver?.id ?? null);
     tripId = result.lastInsertRowid;
     console.log(`[FleetTelemetry] Fahrt gestartet: ${vin}`);
+    // Fire-and-forget: Start-Adresse aus GPS holen (Nominatim-throttled,
+    // gecacht) — sonst zeigt die UI nur Koordinaten bis zum Nightly-Backfill.
+    const newTripId = tripId;
+    import('./geocodingService.js')
+      .then(({ geocodeTrip }) => geocodeTrip(db, newTripId))
+      .catch(() => {});
   }
 
   if (activeTrip && (point.gear === 'P' || point.gear === null)) {
@@ -263,7 +269,24 @@ function storePoint(vin, ts, point) {
       for (let i = 1; i < pts.length; i++) dist += haversine(pts[i-1].lat, pts[i-1].lon, pts[i].lat, pts[i].lon);
       db.prepare('UPDATE trips SET distance_km=? WHERE id=?').run(dist, activeTrip.id);
     }
+    if (pts.length) {
+      // Sparse Telemetrie: Start-/End-Datum kommt oft ohne Location — Start/
+      // Ziel aus den Trackpunkten nachziehen, sonst bleiben start_/end_lat
+      // NULL und weder Adresse noch Heatmap-Punkt können entstehen.
+      const first = pts[0], last = pts[pts.length - 1];
+      db.prepare(
+        `UPDATE trips SET
+           start_lat = COALESCE(start_lat, ?), start_lon = COALESCE(start_lon, ?),
+           end_lat   = COALESCE(end_lat, ?),   end_lon   = COALESCE(end_lon, ?)
+         WHERE id=?`
+      ).run(first.lat, first.lon, last.lat, last.lon, activeTrip.id);
+    }
     console.log(`[FleetTelemetry] Fahrt beendet: ${vin}`);
+    // Fire-and-forget: Start-/Ziel-Adresse nachziehen (wie OwnTracks-Close).
+    const closedTripId = activeTrip.id;
+    import('./geocodingService.js')
+      .then(({ geocodeTrip }) => geocodeTrip(db, closedTripId))
+      .catch(() => {});
     tripId = null;
   }
 

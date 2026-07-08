@@ -7,6 +7,16 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.38.4] - 2026-07-08
+
+### Behoben
+
+- **Fahrtwerte-Tabelle war für Telemetrie-Fahrten leer.** Die Punkt-Kennzahlen (min/max/Ø Geschwindigkeit und Leistung) in `/fahrtwerte` aggregierten nur `trip_points` — die schreiben aber nur Poller- und OwnTracks-Fahrten. Fleet-Telemetrie-Fahrten speichern ihre Zeitreihe in `telemetry_points`, daher zeigten alle Telemetrie-Fahrten dort „—". Die Aggregation läuft jetzt über beide Punkt-Tabellen (`UNION ALL`).
+- **Telemetrie-Fahrten zeigten Koordinaten statt Adressen.** Beim Fahrt-Ende über Fleet-Telemetrie wurde nie Reverse-Geocoding angestoßen (anders als bei OwnTracks-Fahrten) — Start-/Zieladresse blieben bis zum nächtlichen Backfill (max. 60/Nacht) leer, die UI zeigte nur Koordinaten. Jetzt werden Adressen direkt bei Fahrt-Start und -Ende aufgelöst (Nominatim, gedrosselt + gecacht).
+- **Telemetrie-Fahrten ohne Start-/Ziel-Koordinaten repariert.** Das Gear-Datum bei Fahrt-Start/-Ende kommt bei sparser Telemetrie oft ohne GPS-Position — `start_lat`/`end_lat` blieben dann dauerhaft NULL: kein Heatmap-Punkt, keine Adresse. Beim Fahrt-Ende werden Start/Ziel jetzt aus den Trackpunkten nachgezogen; eine idempotente Migration repariert Bestandsfahrten beim ersten Start nach dem Update.
+
+---
+
 ## [v3.38.3] - 2026-07-08
 
 ### Behoben
