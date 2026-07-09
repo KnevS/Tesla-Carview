@@ -102,7 +102,9 @@ Cada usuario autenticado tiene su propia página en `/my-tracking` («📱 Mi GP
 
 **Métricas de viaje** (navegación → *Métricas de viaje*, o el botón en la lista de viajes) muestra una tabla ordenable de todos los viajes: fecha, ruta, duración, distancia, consumo, además de velocidad y potencia como mínimo / máximo / media, y el estado de carga (inicio → fin). Haz clic en un encabezado para ordenar y en una fila para abrir el viaje. Arriba hay tarjetas de resumen (viajes, distancia total, energía total, tiempo total); la **exportación CSV** entrega los valores para Excel/contabilidad. Todas las cifras siguen tus unidades. Los valores de potencia provienen de la telemetría; si falta (p. ej. un viaje solo con OwnTracks) verás "—".
 
-**Mapa de calor** (navegación → *Mapa de calor*) muestra en un mapa *dónde* conduces — con tres capas conmutables: **viajes** (densidad de puntos inicio/fin), **sesiones de carga** y tus **puntos de carga** definidos. Rango temporal (30/90/365 días/todo) seleccionable; el mapa se ajusta automáticamente a los puntos visibles.
+**Mapa de calor** (navegación → *Mapa de calor*) muestra en un mapa *dónde* conduces — con cuatro capas activables por separado: **viajes** (densidad de puntos de inicio/fin), **cargas**, tus **lugares de carga** definidos y **trayectos** (las rutas GPS de los viajes como líneas, hasta los 300 viajes más recientes del periodo). Periodo seleccionable (30/90/365 días/todo); el mapa se ajusta automáticamente a los puntos visibles. El **color de cada capa** se puede ajustar mediante el punto de color junto a la opción (se guarda en el navegador, «↺ Colores estándar» restablece).
+
+**Análisis de zonas en el detalle del viaje** (abrir un viaje → tarjeta «Análisis de zonas»): analiza un viaje por zonas, cada modo como tabla con resaltado en el mapa. Tres modos: **zonas de velocidad** (rangos con distancia, tiempo, potencia media y energía neta por rango — las casillas colorean los tramos correspondientes, lo no seleccionado se atenúa), **mis zonas** (qué geocercas/lugares de carga toca el viaje, con hora de entrada/salida, duración y distancia en la zona — círculos de zona en el mapa) y **tramo** (rango libre con reguladores desde/hasta y todas las cifras). Además, la casilla **📍 Indicaciones** en el mapa GPS marca Vmax, potencia máxima, mayor regeneración y paradas (≥ 1 min).
 
 
 ## 🔋 Panel salud de batería (Companion Fase 1) {#battery-health}
@@ -553,6 +555,8 @@ Android no tiene un reemplazo nativo 1:1 para los Atajos de iOS. Tres caminos:
 **Audio por los altavoces Tesla:** pasa por Bluetooth desde tu teléfono como siempre — sin configuración.
 
 **Lista blanca admin:** bajo `/admin?tab=launcher` un admin puede ocultar apps por inquilino, p. ej. si no quieres mostrar Telegram Web. La lista se persiste en `tenant_settings` bajo `launcher.disabled_slugs`.
+
+**Apps propias (desde v3.40.0):** en la administración del App Hub un admin puede además **crear, editar y eliminar apps propias** (emoji, nombre, URL, nota opcional; solo direcciones http/https). Las apps propias aparecen para todos los usuarios bajo la categoría «Propias» y se guardan por inquilino; crear, editar y eliminar quedan en el registro de auditoría.
 
 ## 📍 Introducir ubicación manualmente (sin GPS) {#manual-location}
 

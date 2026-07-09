@@ -102,7 +102,9 @@ Oturum açmış her kullanıcının `/my-tracking` ("📱 Benim GPS'im" navigasy
 
 **Sürüş Değerleri** (menü → *Sürüş Değerleri* veya yolculuk listesindeki düğme) tüm yolculukları sıralanabilir bir tabloda gösterir: tarih, rota, süre, mesafe, tüketim ve ayrıca minimum / maksimum / ortalama olarak hız ve güç, şarj durumu (başlangıç → bitiş). Sıralamak için sütun başlığına, yolculuğu açmak için satıra tıklayın. Üstte özet kartları (yolculuklar, toplam mesafe, toplam enerji, toplam süre); **CSV dışa aktarma** değerleri Excel/muhasebe için verir. Tüm değerler birim ayarlarınıza uyar. Güç değerleri telemetriden gelir; yoksa (ör. yalnızca OwnTracks yolculuğu) "—" görünür.
 
-**Isı haritası** (menü → *Isı haritası*) haritada *nerede* sürdüğünüzü gösterir — ayrı ayrı açılıp kapanan üç katmanla: **sürüşler** (başlangıç/bitiş yoğunluğu), **şarj oturumları** ve tanımlı **şarj noktalarınız**. Zaman aralığı (30/90/365 gün/tümü) seçilebilir; harita görünür noktalara otomatik yakınlaşır.
+**Isı haritası** (menü → *Isı Haritası*) haritada *nerede* sürdüğünü gösterir — ayrı ayrı açılıp kapanabilen dört katmanla: **sürüşler** (başlangıç/varış noktalarının yoğunluğu), **şarjlar**, tanımlı **şarj konumların** ve **güzergâhlar** (sürüşlerin GPS rotaları çizgi olarak, dönemdeki en yeni 300 sürüşe kadar). Dönem seçilebilir (30/90/365 gün/tümü); harita görünür noktalara otomatik uyar. Her **katmanın rengi** seçeneğin yanındaki renk noktasıyla ayarlanabilir (tarayıcıda saklanır, «↺ Varsayılan renkler» sıfırlar).
+
+**Sürüş detayında bölge analizi** (bir sürüşü aç → «Bölge analizi» kartı): tek bir sürüşü bölgelere göre inceler; her mod tablo + haritada vurgulama sunar. Üç mod: **hız bölgeleri** (aralık başına mesafe, süre, ortalama güç ve net enerji — onay kutuları ilgili kesimleri renklendirir, seçilmeyenler soluklaşır), **bölgelerim** (sürüşün hangi coğrafi sınırlara/şarj konumlarına değdiği; giriş/çıkış saati, süre ve bölgedeki mesafe — bölge daireleri haritada gösterilebilir) ve **kesit** (başlangıç/bitiş kaydırıcılarıyla serbest aralık, tüm değerlerle). Ayrıca GPS haritasındaki **📍 İpuçları** kutusu Vmax, en yüksek güç, en güçlü geri kazanım ve durakları (≥ 1 dk) işaretler.
 
 
 ## 🔋 Batarya sağlık paneli (Companion Aşama 1) {#battery-health}
@@ -557,6 +559,8 @@ Android, iOS Kısayollarına yerel bir 1:1 alternatif sunmaz. Üç yol:
 **Tesla hoparlörlerinden ses:** her zamanki gibi telefonunuzdan Bluetooth ile geçer — yapılandırma yok.
 
 **Yönetici beyaz listesi:** `/admin?tab=launcher` altında yönetici, kiracı başına uygulamaları gizleyebilir, örn. Telegram Web göstermek istemiyorsanız. Liste `tenant_settings` içinde `launcher.disabled_slugs` altında saklanır.
+
+**Özel uygulamalar (v3.40.0'dan itibaren):** App Hub yönetiminde yönetici ayrıca **kendi web uygulamalarını oluşturabilir, düzenleyebilir ve silebilir** (emoji, ad, URL, isteğe bağlı not; yalnızca http/https adresleri). Özel uygulamalar tüm kullanıcılar için «Özel» kategorisinde görünür ve kiracı başına saklanır; oluşturma, düzenleme ve silme denetim günlüğüne kaydedilir.
 
 ## 📍 Konumu manuel girme (GPS olmadan) {#manual-location}
 

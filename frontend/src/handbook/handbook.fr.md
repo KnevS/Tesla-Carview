@@ -102,7 +102,9 @@ Chaque utilisateur connecté a sa propre page sur `/my-tracking` (« 📱 Mon GP
 
 **Données de trajet** (navigation → *Données de trajet*, ou le bouton dans la liste des trajets) affiche un tableau triable de tous les trajets : date, itinéraire, durée, distance, consommation, ainsi que vitesse et puissance en minimum / maximum / moyenne, et l'état de charge (départ → arrivée). Cliquez sur un en-tête pour trier, sur une ligne pour ouvrir le trajet. En haut, des cartes de synthèse (trajets, distance totale, énergie totale, temps total) ; l'**export CSV** fournit les valeurs pour Excel/comptabilité. Toutes les valeurs suivent vos unités. La puissance provient de la télémétrie ; si elle manque (p. ex. trajet OwnTracks seul), « — » s'affiche.
 
-**Carte de chaleur** (navigation → *Carte de chaleur*) montre sur une carte *où* vous roulez — avec trois couches activables : **trajets** (densité départ/arrivée), **sessions de charge** et vos **points de charge** définis. Plage temporelle (30/90/365 jours/tout) réglable ; la carte s'ajuste automatiquement aux points visibles.
+**Carte de chaleur** (navigation → *Carte de chaleur*) montre sur une carte *où* vous roulez — avec quatre calques activables séparément : **trajets** (densité des points de départ/arrivée), **charges**, vos **lieux de charge** définis et **itinéraires** (les routes GPS des trajets en lignes, jusqu'aux 300 trajets les plus récents de la période). Période au choix (30/90/365 jours/tout) ; la carte s'ajuste automatiquement aux points visibles. La **couleur de chaque calque** est réglable via le point de couleur à côté de l'option (enregistrée dans le navigateur, « ↺ Couleurs par défaut » réinitialise).
+
+**Analyse par zones dans le détail du trajet** (ouvrir un trajet → carte « Analyse par zones ») : analyse un trajet par zones, chaque mode en tableau avec mise en évidence sur la carte. Trois modes : **zones de vitesse** (plages avec distance, temps, puissance moyenne et énergie nette par plage — les cases colorent les sections correspondantes, le reste est grisé), **mes zones** (quels géorepérages/lieux de charge le trajet touche, avec heure d'entrée/sortie, durée et distance dans la zone — cercles de zone affichables) et **section** (plage libre via curseurs de/à avec toutes les valeurs). En plus, la case **📍 Repères** sur la carte GPS marque Vmax, puissance max, plus forte régénération et arrêts (≥ 1 min).
 
 
 ## 🔋 Tableau santé batterie (Companion Phase 1) {#battery-health}
@@ -553,6 +555,8 @@ Android n'a pas de remplacement natif 1:1 pour les raccourcis iOS. Trois voies :
 **Audio dans les haut-parleurs Tesla** : transite par Bluetooth depuis votre téléphone comme d'habitude — pas de configuration.
 
 **Liste blanche admin** : sous `/admin?tab=launcher`, un admin peut masquer des apps par locataire, p. ex. si vous ne voulez pas afficher Telegram Web. La liste est persistée dans `tenant_settings` sous `launcher.disabled_slugs`.
+
+**Apps personnalisées (depuis v3.40.0) :** dans la gestion de l'App Hub, un admin peut en outre **créer, modifier et supprimer ses propres web apps** (emoji, nom, URL, note facultative ; adresses http/https uniquement). Elles apparaissent pour tous les utilisateurs sous la catégorie « Personnalisées » et sont stockées par locataire ; création, modification et suppression sont consignées dans le journal d'audit.
 
 ## 📍 Saisie manuelle d'emplacement (sans GPS) {#manual-location}
 
