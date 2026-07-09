@@ -9,9 +9,12 @@ import { wltpConsumption } from '../services/wltp.js';
 const router = Router();
 
 // ── Tile-Disk-Cache ───────────────────────────────────────────────────────────
-// Per Env auf ein persistentes Volume legbar — /tmp ist im Container flüchtig,
-// nach jedem Neustart/Update startet der Tile-Cache sonst kalt.
-const TILE_CACHE_DIR = process.env.TILE_CACHE_DIR || '/tmp/tc-tiles';
+// Tile-Cache im persistenten data/-Verzeichnis (dort liegen auch die DBs) —
+// /tmp ist im Container flüchtig, nach jedem Update startete der Cache kalt
+// und jeder Zoom lief in frische OSM-Fetches (Drosselung → leere Karte).
+// Per TILE_CACHE_DIR-Env weiterhin frei legbar.
+const DATA_DIR = process.env.DATA_DIR || './data';
+const TILE_CACHE_DIR = process.env.TILE_CACHE_DIR || join(DATA_DIR, 'tiles');
 const TILE_TTL_MS    = 7 * 24 * 60 * 60 * 1000; // 7 Tage
 try { mkdirSync(TILE_CACHE_DIR, { recursive: true }); } catch {}
 
@@ -197,15 +200,26 @@ function releaseSlot() {
 async function fetchTile(zn, xn, yn, cacheFile) {
   await nextSlot();
   try {
-    const sub = ['a', 'b', 'c'][xn % 3];
-    const r   = await fetch(`https://${sub}.tile.openstreetmap.org/${zn}/${xn}/${yn}.png`, {
-      headers: { 'User-Agent': 'TeslaCarview/2.2 (personal-server)', 'Referer': 'https://github.com/KnevS/Tesla-Carview' },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!r.ok) throw new Error(`upstream ${r.status}`);
-    const buf = Buffer.from(await r.arrayBuffer());
-    try { writeFileSync(cacheFile, buf); } catch {} // best-effort
-    return buf;
+    // 2 Versuche über rotierende Mirror-Subdomains — transiente Drosselung
+    // (429/5xx/Timeout) frisst sonst genau die Kacheln des aktuellen Zooms.
+    let lastErr;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const sub = ['a', 'b', 'c'][(xn + attempt) % 3];
+        const r   = await fetch(`https://${sub}.tile.openstreetmap.org/${zn}/${xn}/${yn}.png`, {
+          headers: { 'User-Agent': 'TeslaCarview/2.2 (personal-server)', 'Referer': 'https://github.com/KnevS/Tesla-Carview' },
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!r.ok) throw new Error(`upstream ${r.status}`);
+        const buf = Buffer.from(await r.arrayBuffer());
+        try { writeFileSync(cacheFile, buf); } catch {} // best-effort
+        return buf;
+      } catch (e) {
+        lastErr = e;
+        if (attempt === 0) await new Promise(rs => setTimeout(rs, 300));
+      }
+    }
+    throw lastErr;
   } finally {
     releaseSlot();
   }

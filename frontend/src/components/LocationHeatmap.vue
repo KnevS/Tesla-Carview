@@ -13,7 +13,8 @@
         <option :value="3650">{{ $t('locationHeatmap.all') }}</option>
       </select>
     </div>
-    <div ref="mapEl" class="rounded-lg" style="height: 360px"></div>
+    <!-- isolate: Leaflet-Pane-z-Indizes kapseln, sonst überdecken sie NavBar-Dropdowns -->
+    <div ref="mapEl" class="rounded-lg isolate" style="height: 360px"></div>
     <p class="text-xs text-gray-500 text-right">
       {{ $t('locationHeatmap.summary', { points: points.length }) }}
     </p>
@@ -24,6 +25,7 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useAppStore } from '../store/index.js';
 import api from '../api.js';
+import { osmTileLayer } from '../lib/tiles.js';
 // Leaflet lazy — wird erst beim Mounten geladen, nicht beim App-Start.
 // Verhindert, dass der 150 KB Leaflet-Bundle den Initial-Load verlangsamt.
 let L = null;
@@ -84,10 +86,7 @@ onMounted(async () => {
     L = (await import('leaflet')).default;
   }
   map = L.map(mapEl.value).setView([51.16, 10.45], 5); // Default: D-Mitte
-  L.tileLayer('/api/tiles/{z}/{x}/{y}', {
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 18,
-  }).addTo(map);
+  osmTileLayer(L).addTo(map);
   load();
 });
 

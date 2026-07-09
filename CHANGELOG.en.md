@@ -7,6 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.41.0] - 2026-07-09
+
+### Added
+
+- **Heatmap: customisable layer colours.** The colour dot next to each display option (trips/charging/charging spots/routes) is now a colour picker — the chosen colours apply to the map and the checkboxes and are stored in the browser; "↺ Default colours" resets them.
+
+### Fixed
+
+- **Map still partly empty while zooming — second round.** Three additional measures: (1) The tile cache now lives in the persistent `data/` directory (`data/tiles`) by default instead of volatile `/tmp` — after container updates the cache started empty and every zoom ran into fresh OSM fetches. (2) The proxy retries failed tiles once via a different OSM mirror subdomain (300 ms backoff). (3) The frontend reloads failed tiles up to 2 times with backoff (new shared `osmTileLayer` helper used by all 5 maps) — previously a hole stayed until the next zoom.
+- **NavBar menus were hidden behind the map.** Leaflet panes use z-indices up to 700 and covered open NavBar dropdowns. All map containers are now wrapped with `isolation: isolate` (heatmap, logbook map, live map, route planner — trip detail already had it).
+
+---
+
 ## [v3.40.0] - 2026-07-09
 
 ### Added

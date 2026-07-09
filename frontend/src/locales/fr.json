@@ -3122,6 +3122,9 @@
     "layerLocationsTip": "Vos points de charge définis (domicile/travail/…)",
     "layerRoutes": "Trajets",
     "layerRoutesTip": "Itinéraires GPS des trajets sous forme de lignes sur la carte (jusqu'aux 300 trajets les plus récents de la période)",
+    "colorTip": "Ajuster la couleur de ce calque — enregistrée dans le navigateur",
+    "resetColors": "Couleurs par défaut",
+    "resetColorsTip": "Réinitialiser toutes les couleurs de calque aux valeurs par défaut",
     "empty": "Aucune donnée géographique pour la période sélectionnée."
   }
 }

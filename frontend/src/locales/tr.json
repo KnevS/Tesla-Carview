@@ -3122,6 +3122,9 @@
     "layerLocationsTip": "Tanımladığın şarj noktaların (ev/iş/…)",
     "layerRoutes": "Güzergâhlar",
     "layerRoutesTip": "Sürüşlerin GPS rotaları haritada çizgi olarak (dönemdeki en yeni 300 sürüşe kadar)",
+    "colorTip": "Bu katmanın rengini ayarla — tarayıcıda saklanır",
+    "resetColors": "Varsayılan renkler",
+    "resetColorsTip": "Tüm katman renklerini varsayılana döndür",
     "empty": "Seçilen dönem için coğrafi veri yok."
   }
 }

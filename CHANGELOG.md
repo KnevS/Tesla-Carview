@@ -7,6 +7,19 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.41.0] - 2026-07-09
+
+### Neu
+
+- **Heatmap: Ebenen-Farben anpassbar.** Der Farbpunkt neben jeder Anzeigeoption (Fahrten/Ladevorgänge/Ladeorte/Fahrwege) ist jetzt ein Farbwähler — die gewählten Farben gelten für Karte und Checkboxen und werden im Browser gespeichert; „↺ Standardfarben" setzt zurück.
+
+### Behoben
+
+- **Karte beim Zoomen weiterhin teils leer — zweite Runde.** Drei zusätzliche Maßnahmen: (1) Der Tile-Cache liegt jetzt standardmäßig im persistenten `data/`-Verzeichnis (`data/tiles`) statt im flüchtigen `/tmp` — nach Container-Updates startete der Cache sonst leer und jeder Zoom lief in frische OSM-Abrufe. (2) Der Proxy versucht fehlgeschlagene Kacheln einmal erneut über eine andere OSM-Mirror-Subdomain (300 ms Backoff). (3) Das Frontend lädt fehlgeschlagene Kacheln bis zu 2× mit Backoff nach (neuer gemeinsamer `osmTileLayer`-Helper, genutzt von allen 5 Karten) — bisher blieb ein Loch bis zum nächsten Zoom bestehen.
+- **NavBar-Menüs lagen hinter der Karte.** Leaflet-Panes haben z-Indizes bis 700 und überdeckten geöffnete NavBar-Auswahlen. Alle Karten-Container sind jetzt mit `isolation: isolate` gekapselt (Heatmap, Fahrtenbuch-Karte, Live-Karte, Routenplaner — Fahrtdetail hatte es bereits).
+
+---
+
 ## [v3.40.0] - 2026-07-09
 
 ### Neu

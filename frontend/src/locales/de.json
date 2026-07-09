@@ -3131,6 +3131,9 @@
     "layerLocationsTip": "Deine definierten Ladeorte (Heim/Arbeit/…)",
     "layerRoutes": "Fahrwege",
     "layerRoutesTip": "GPS-Routen der Fahrten als Linien auf der Karte (max. 300 jüngste Fahrten im Zeitraum)",
+    "colorTip": "Farbe dieser Ebene anpassen — wird im Browser gespeichert",
+    "resetColors": "Standardfarben",
+    "resetColorsTip": "Alle Ebenen-Farben auf die Standardwerte zurücksetzen",
     "empty": "Keine Geodaten für den gewählten Zeitraum vorhanden."
   }
 }

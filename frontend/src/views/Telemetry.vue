@@ -67,7 +67,8 @@
         page-id="telemetry" section-id="map"
         title="Live-Position" icon="📍"
         :collapsed="isCollapsed('map')" @toggle="toggle('map')" @move="(f,t,p) => moveSection(f,t,p)">
-        <div id="live-map" style="height: clamp(200px, 35vh, 420px); border-radius: 10px;"></div>
+        <!-- isolate: Leaflet-Pane-z-Indizes kapseln, sonst überdecken sie NavBar-Dropdowns -->
+        <div id="live-map" class="isolate" style="height: clamp(200px, 35vh, 420px); border-radius: 10px;"></div>
       </SortableSection>
 
       <!-- Power flow + TPMS + Climate -->
@@ -234,6 +235,7 @@ import AppIcon from '../components/AppIcon.vue';
 import SortableSection from '../components/SortableSection.vue';
 import TireMap from '../components/TireMap.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
+import { osmTileLayer } from '../lib/tiles.js';
 
 const appStore = useAppStore();
 const vehicle  = computed(() => appStore.selectedVehicle);
@@ -299,9 +301,7 @@ async function updateMap(lat, lon) {
   await import('leaflet/dist/leaflet.css');
   if (!leafletMap) {
     leafletMap = L.map('live-map').setView([lat, lon], 15);
-    L.tileLayer('/api/tiles/{z}/{x}/{y}', {
-      attribution: '&copy; OpenStreetMap contributors', maxZoom: 19,
-    }).addTo(leafletMap);
+    osmTileLayer(L, { maxZoom: 19 }).addTo(leafletMap);
     new ResizeObserver(() => leafletMap?.invalidateSize()).observe(mapEl);
     posMarker = L.circleMarker([lat, lon], {
       radius: 10, color: '#E31937', fillColor: '#E31937', fillOpacity: 0.9, weight: 3,

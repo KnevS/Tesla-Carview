@@ -390,6 +390,7 @@ import StatCard from '../components/StatCard.vue';
 import { useUnits, usePrefsStore } from '../store/prefs.js';
 import api from '../api.js';
 import { formatLocation } from '../lib/location.js';
+import { osmTileLayer } from '../lib/tiles.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip);
 
@@ -741,10 +742,7 @@ async function initMap(points) {
   if (!mapEl) return;
 
   leafletMap = L.map('trip-map');
-  L.tileLayer('/api/tiles/{z}/{x}/{y}', {
-    attribution: '&copy; OpenStreetMap contributors',
-    maxZoom: 18,
-  }).addTo(leafletMap);
+  osmTileLayer(L).addTo(leafletMap);
   new ResizeObserver(() => leafletMap?.invalidateSize()).observe(mapEl);
 
   Lmod = L;

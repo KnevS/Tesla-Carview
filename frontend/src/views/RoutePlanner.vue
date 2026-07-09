@@ -536,7 +536,8 @@
            NavBar-Dropdown erscheinen (backdrop-filter allein ist in WebKit nicht
            immer ausreichend für Context-Isolation). -->
       <div class="card p-0 overflow-hidden rounded-2xl min-h-[420px] lg:min-h-0 isolate">
-        <div id="route-map" class="w-full h-full"></div>
+        <!-- isolate: Leaflet-Pane-z-Indizes kapseln, sonst überdecken sie NavBar-Dropdowns -->
+        <div id="route-map" class="w-full h-full isolate"></div>
 
         <!-- Karten-Layer-Schalter (immer sichtbar, direkt auf der Karte) -->
         <div class="absolute top-3 left-3 flex flex-col gap-1.5 z-[400]">
@@ -686,6 +687,7 @@ import AppIcon from '../components/AppIcon.vue';
 import SortableSection from '../components/SortableSection.vue';
 import { usePageLayout } from '../composables/usePageLayout.js';
 import api from '../api.js';
+import { osmTileLayer } from '../lib/tiles.js';
 
 const { t, locale } = useI18n();
 const appStore = useAppStore();
@@ -1470,7 +1472,7 @@ async function initMap() {
   );
 
   // Backend-Tile-Proxy (vermeidet CSP + OSM-Rate-Limits im Browser)
-  L.tileLayer('/api/tiles/{z}/{x}/{y}', {
+  osmTileLayer(L, {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     maxZoom: 19,
   }).addTo(leafletMap);

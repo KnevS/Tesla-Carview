@@ -3122,6 +3122,9 @@
     "layerLocationsTip": "Tus puntos de carga definidos (casa/trabajo/…)",
     "layerRoutes": "Trayectos",
     "layerRoutesTip": "Rutas GPS de los viajes como líneas en el mapa (hasta los 300 viajes más recientes del periodo)",
+    "colorTip": "Ajusta el color de esta capa; se guarda en el navegador",
+    "resetColors": "Colores estándar",
+    "resetColorsTip": "Restablecer todos los colores de capa a los valores estándar",
     "empty": "No hay datos geográficos para el período seleccionado."
   }
 }

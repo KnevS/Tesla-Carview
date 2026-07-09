@@ -18,31 +18,37 @@
       </select>
     </div>
 
-    <!-- Layer-Umschalter -->
+    <!-- Layer-Umschalter: Farbe je Ebene anpassbar (Color-Input statt Punkt) -->
     <div class="flex items-center gap-4 flex-wrap text-sm">
       <label class="inline-flex items-center gap-2 cursor-pointer" v-tooltip="$t('heatmap.layerTripsTip')">
-        <input type="checkbox" v-model="show.trips" @change="render" class="accent-red-500">
-        <span class="inline-block w-3 h-3 rounded-full" style="background:#ef4444"></span>
+        <input type="checkbox" v-model="show.trips" @change="render" :style="{ accentColor: colors.trips }">
+        <input type="color" v-model="colors.trips" class="heat-color" @click.stop v-tooltip="$t('heatmap.colorTip')">
         {{ $t('heatmap.layerTrips') }} <span class="text-gray-500">({{ trips.length }})</span>
       </label>
       <label class="inline-flex items-center gap-2 cursor-pointer" v-tooltip="$t('heatmap.layerChargingTip')">
-        <input type="checkbox" v-model="show.charging" @change="render" class="accent-green-500">
-        <span class="inline-block w-3 h-3 rounded-full" style="background:#22c55e"></span>
+        <input type="checkbox" v-model="show.charging" @change="render" :style="{ accentColor: colors.charging }">
+        <input type="color" v-model="colors.charging" class="heat-color" @click.stop v-tooltip="$t('heatmap.colorTip')">
         {{ $t('heatmap.layerCharging') }} <span class="text-gray-500">({{ charging.length }})</span>
       </label>
       <label class="inline-flex items-center gap-2 cursor-pointer" v-tooltip="$t('heatmap.layerLocationsTip')">
-        <input type="checkbox" v-model="show.locations" @change="render" class="accent-blue-500">
-        <span class="inline-block w-3 h-3 rounded-full" style="background:#3b82f6"></span>
+        <input type="checkbox" v-model="show.locations" @change="render" :style="{ accentColor: colors.locations }">
+        <input type="color" v-model="colors.locations" class="heat-color" @click.stop v-tooltip="$t('heatmap.colorTip')">
         {{ $t('heatmap.layerLocations') }} <span class="text-gray-500">({{ locations.length }})</span>
       </label>
       <label class="inline-flex items-center gap-2 cursor-pointer" v-tooltip="$t('heatmap.layerRoutesTip')">
-        <input type="checkbox" v-model="show.routes" @change="onRoutesToggle" class="accent-purple-400">
-        <span class="inline-block w-3 h-3 rounded-full" style="background:#a78bfa"></span>
+        <input type="checkbox" v-model="show.routes" @change="onRoutesToggle" :style="{ accentColor: colors.routes }">
+        <input type="color" v-model="colors.routes" class="heat-color" @click.stop v-tooltip="$t('heatmap.colorTip')">
         {{ $t('heatmap.layerRoutes') }} <span class="text-gray-500">({{ routeLines.length }})</span>
       </label>
+      <button v-if="colorsCustomized" @click="resetColors"
+        class="text-xs text-gray-500 hover:text-gray-300 transition" v-tooltip="$t('heatmap.resetColorsTip')">
+        ↺ {{ $t('heatmap.resetColors') }}
+      </button>
     </div>
 
-    <div ref="mapEl" class="rounded-xl border border-gray-700" style="height: 60vh; min-height: 380px"></div>
+    <!-- isolate: kapselt die hohen Leaflet-Pane-z-Indizes (200–700), sonst
+         überdecken sie NavBar-Dropdowns (gleiches Muster wie TripDetail). -->
+    <div ref="mapEl" class="rounded-xl border border-gray-700 isolate" style="height: 60vh; min-height: 380px"></div>
 
     <div v-if="!loading && !trips.length && !charging.length && !locations.length"
       class="text-center text-gray-400 text-sm">
@@ -52,16 +58,33 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue';
+import { ref, reactive, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
 import InfoTip from '../components/InfoTip.vue';
 import api from '../api.js';
+import { osmTileLayer } from '../lib/tiles.js';
 
 // Leaflet lazy — wie in LocationHeatmap.vue, kein Initial-Load-Ballast.
 let L = null;
 const { t } = useI18n();
 const appStore = useAppStore();
+
+// ── Anpassbare Layer-Farben (localStorage, pro Browser) ──
+const COLOR_KEY = 'tesla-carview-heatmap-colors';
+const DEFAULT_COLORS = { trips: '#ef4444', charging: '#22c55e', locations: '#3b82f6', routes: '#a78bfa' };
+function loadColors() {
+  try { return { ...DEFAULT_COLORS, ...(JSON.parse(localStorage.getItem(COLOR_KEY)) || {}) }; }
+  catch { return { ...DEFAULT_COLORS }; }
+}
+const colors = reactive(loadColors());
+const colorsCustomized = computed(() =>
+  Object.keys(DEFAULT_COLORS).some(k => colors[k] !== DEFAULT_COLORS[k]));
+function resetColors() { Object.assign(colors, DEFAULT_COLORS); }
+watch(colors, () => {
+  try { localStorage.setItem(COLOR_KEY, JSON.stringify({ ...colors })); } catch {}
+  render();
+});
 
 const mapEl     = ref(null);
 const rangeDays = ref(365);
@@ -122,14 +145,14 @@ async function onRoutesToggle() {
  *  Pixel-Radius (zoomunabhängig) statt L.circle mit Meter-Radius — ein
  *  60–140-m-Kreis ist bei rausgefitteter Karte (Zoom ≤ 11) subpixel-klein
  *  und damit unsichtbar. */
-function heatLayer(points, rgb) {
+function heatLayer(points, color) {
   const maxW = Math.max(1, ...points.map(p => p.weight || 1));
   return L.layerGroup(points.map(p => {
     const intensity = Math.min(1, (p.weight || 1) / maxW);
     return L.circleMarker([p.lat, p.lon], {
       radius:      5 + intensity * 9,
       stroke:      false,
-      fillColor:   `rgb(${rgb})`,
+      fillColor:   color,
       fillOpacity: 0.35 + intensity * 0.5,
     });
   }));
@@ -143,15 +166,15 @@ function render() {
   }
 
   if (show.trips && trips.value.length) {
-    layers.trips = heatLayer(trips.value, '239, 68, 68').addTo(map);
+    layers.trips = heatLayer(trips.value, colors.trips).addTo(map);
   }
   if (show.charging && charging.value.length) {
-    layers.charging = heatLayer(charging.value, '34, 197, 94').addTo(map);
+    layers.charging = heatLayer(charging.value, colors.charging).addTo(map);
   }
   if (show.locations && locations.value.length) {
     layers.locations = L.layerGroup(locations.value.map(loc =>
       L.circleMarker([loc.lat, loc.lon], {
-        radius: 7, color: '#3b82f6', fillColor: '#3b82f6', weight: 2, fillOpacity: 0.8,
+        radius: 7, color: colors.locations, fillColor: colors.locations, weight: 2, fillOpacity: 0.8,
       }).bindPopup(`<strong>${escapeHtml(loc.name || t('heatmap.layerLocations'))}</strong>`)
     )).addTo(map);
   }
@@ -159,7 +182,7 @@ function render() {
     // Fahrwege UNTER die Dichte-Punkte legen (zuerst zeichnen reicht nicht,
     // deshalb dünne, halbtransparente Linien).
     layers.routes = L.layerGroup(routeLines.value.map(l =>
-      L.polyline(l.pts, { color: '#a78bfa', weight: 2, opacity: 0.55 })
+      L.polyline(l.pts, { color: colors.routes, weight: 2, opacity: 0.55 })
     )).addTo(map);
     layers.routes.eachLayer(pl => pl.bringToBack());
   }
@@ -187,10 +210,7 @@ onMounted(async () => {
     L = (await import('leaflet')).default;
   }
   map = L.map(mapEl.value).setView([51.16, 10.45], 5); // Default: Mitte DE
-  L.tileLayer('/api/tiles/{z}/{x}/{y}', {
-    attribution: '© OpenStreetMap contributors',
-    maxZoom: 18,
-  }).addTo(map);
+  osmTileLayer(L).addTo(map);
   loadAll();
 });
 
@@ -198,3 +218,14 @@ onBeforeUnmount(() => { if (map) { map.remove(); map = null; } });
 
 watch(() => appStore.selectedVehicleId, loadAll);
 </script>
+
+<style scoped>
+/* Color-Inputs als runde Farbpunkte — ersetzt die statischen Legenden-Punkte */
+input[type='color'].heat-color {
+  width: 18px; height: 18px; padding: 0; border: none;
+  border-radius: 9999px; background: none; cursor: pointer;
+}
+input[type='color'].heat-color::-webkit-color-swatch-wrapper { padding: 0; }
+input[type='color'].heat-color::-webkit-color-swatch { border: none; border-radius: 9999px; }
+input[type='color'].heat-color::-moz-color-swatch { border: none; border-radius: 9999px; }
+</style>

@@ -3131,6 +3131,9 @@
     "layerLocationsTip": "Your defined charging locations (home/work/…)",
     "layerRoutes": "Routes",
     "layerRoutesTip": "GPS routes of the trips as lines on the map (up to the 300 most recent trips in the range)",
+    "colorTip": "Adjust the colour of this layer — stored in the browser",
+    "resetColors": "Default colours",
+    "resetColorsTip": "Reset all layer colours to their defaults",
     "empty": "No geo data for the selected period."
   }
 }
