@@ -84,10 +84,21 @@ Lesen. Deshalb diese Datei.
 - Co-Author-Line am Ende: `Co-Authored-By: Sven Krische <…>`
 - Format: `<type>(<scope>): <subject>`, type ∈ `fix|feat|chore|docs|refactor`
 
-## Bei jedem Push auf main
+## Workflow: PR-Pflicht (seit 2026-07-09)
 
-Direkt-Push auf `main` ist explizit erlaubt für diesen Single-Maintainer-
-Workflow — keine PRs nötig. Aber **vor jedem Push**:
+Änderungen laufen über Feature-Branches und Pull Requests — **kein
+Direkt-Push auf `main` mehr** (einzige Ausnahme: das GitHub-Wiki, das
+technisch keine PRs unterstützt). Gilt auch für `teslaview-web`.
+
+1. Branch `feat/…` / `fix/…` / `docs/…` / `chore/…` von aktuellem `origin/main`
+2. Commits nach den Konventionen oben; Version-Bump + CHANGELOG DE/EN
+   gehören in denselben PR
+3. PR öffnen (`gh pr create`) — CI, Security und Secret-Scan müssen grün sein
+4. Squash-Merge (`gh pr merge --squash --delete-branch`) — Historie bleibt
+   linear, PR-Nummer landet im Commit-Titel
+5. Deploy läuft wie gehabt automatisch nach dem Merge auf `main`
+
+**Vor jedem Commit/PR** (unverändert):
 
 1. `git diff --cached` reviewen, nicht nur die Summary
 2. Auf Dateinamen achten, die nach Test-Fixtures aussehen
