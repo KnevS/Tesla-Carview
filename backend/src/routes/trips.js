@@ -130,7 +130,8 @@ router.get('/metrics', (req, res) => {
       ? 'WHERE ' + conds.join(' AND ') + restrict.fragment
       : (restrict.fragment ? 'WHERE 1=1' + restrict.fragment : '');
     const orderDir = sort === 'asc' ? 'ASC' : 'DESC';
-    const lim = Math.min(1000, Math.max(1, +limit || 100));
+    // limit=0 → alle Fahrten (SQLite: LIMIT -1 = unbegrenzt).
+    const lim = +limit === 0 ? -1 : Math.min(1000, Math.max(1, +limit || 100));
     const off = Math.max(0, +offset || 0);
 
     const rows = db.prepare(
@@ -453,6 +454,73 @@ router.get('/location-heatmap', (req, res) => {
         LIMIT 5000`
     ).all(...params, ...params);
     res.json({ since: sinceTs, points: rows });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/trips/route-lines
+ *
+ * Fahrwege für den Heatmap-Layer „Fahrwege": pro Fahrt eine downsampled
+ * Polyline (max. 60 Punkte, 5 Nachkommastellen) aus der jeweils richtigen
+ * Punkt-Tabelle (telemetry_points bei source='telemetry', sonst trip_points).
+ * Deckel: die 300 jüngsten Fahrten im Zeitraum — hält die Antwort auch bei
+ * großen Beständen unter ~1 MB. Query: vehicle_id?, since?.
+ * Schutz: restrictToOwnVehicles.
+ */
+router.get('/route-lines', (req, res) => {
+  const db = req.db;
+  const { vehicle_id, since } = req.query;
+  try {
+    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
+    const conds  = ['start_time IS NOT NULL'];
+    const params = [];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+    const sinceTs = since
+      ? parseInt(since, 10)
+      : Math.floor(Date.now() / 1000) - 365 * 86400;
+    conds.push('start_time >= ?');
+    params.push(sinceTs);
+    const where = 'WHERE ' + conds.join(' AND ') + restrict.fragment;
+
+    const trips = db.prepare(
+      `SELECT id, source FROM trips ${where} ORDER BY start_time DESC LIMIT 300`
+    ).all(...params, ...restrict.params);
+    if (!trips.length) return res.json({ since: sinceTs, lines: [] });
+
+    const byTable = { telemetry_points: [], trip_points: [] };
+    for (const t of trips) {
+      byTable[t.source === 'telemetry' ? 'telemetry_points' : 'trip_points'].push(t.id);
+    }
+
+    const lines = [];
+    for (const [table, ids] of Object.entries(byTable)) {
+      if (!ids.length) continue;
+      const ph = ids.map(() => '?').join(',');
+      const rows = db.prepare(
+        `SELECT trip_id, lat, lon FROM ${table}
+          WHERE trip_id IN (${ph}) AND lat IS NOT NULL AND lon IS NOT NULL
+          ORDER BY trip_id, timestamp`
+      ).all(...ids);
+      let cur = null;
+      const flush = () => {
+        if (!cur || cur.pts.length < 2) { cur = null; return; }
+        // Downsampling: max. 60 Stützpunkte je Fahrt, letzter Punkt bleibt.
+        const step = Math.max(1, Math.ceil(cur.pts.length / 60));
+        const pts = cur.pts.filter((_, i) => i % step === 0);
+        const last = cur.pts[cur.pts.length - 1];
+        if (pts[pts.length - 1] !== last) pts.push(last);
+        lines.push({ trip_id: cur.trip_id, pts });
+        cur = null;
+      };
+      for (const r of rows) {
+        if (!cur || cur.trip_id !== r.trip_id) { flush(); cur = { trip_id: r.trip_id, pts: [] }; }
+        cur.pts.push([+r.lat.toFixed(5), +r.lon.toFixed(5)]);
+      }
+      flush();
+    }
+    res.json({ since: sinceTs, lines });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

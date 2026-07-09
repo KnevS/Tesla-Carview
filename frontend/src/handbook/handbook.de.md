@@ -102,7 +102,7 @@ Jeder eingeloggte Nutzer hat unter `/my-tracking` („📱 Mein GPS" in der Navi
 
 **Fahrtwerte** (Navigation → *Fahrtwerte*, oder Button in der Fahrtenliste) zeigt eine sortierbare Tabelle über alle Fahrten: Datum, Route, Dauer, Strecke, Verbrauch sowie Geschwindigkeit und Leistung jeweils als Minimum / Maximum / Durchschnitt und den Ladestand (Start → Ziel). Klick auf eine Spaltenüberschrift sortiert, Klick auf die Zeile öffnet die Fahrt. Oben stehen Summen-Kacheln (Fahrten, Gesamtstrecke, Gesamtenergie, Gesamtfahrzeit); **CSV-Export** liefert die Werte für Excel/Buchhaltung. Alle Angaben folgen deinen Einheiten-Einstellungen. Leistungswerte stammen aus der Telemetrie — fehlt sie (z. B. reine OwnTracks-Fahrt), steht „—".
 
-**Heatmap** (Navigation → *Heatmap*) zeigt auf einer Karte, *wo* du unterwegs bist — mit drei einzeln ein-/ausblendbaren Ebenen: **Fahrten** (Dichte der Start-/Zielpunkte), **Ladevorgänge** und deine definierten **Ladeorte**. Zeitraum (30/90/365 Tage/alles) wählbar; die Karte zoomt automatisch auf die sichtbaren Punkte.
+**Heatmap** (Navigation → *Heatmap*) zeigt auf einer Karte, *wo* du unterwegs bist — mit vier einzeln ein-/ausblendbaren Ebenen: **Fahrten** (Dichte der Start-/Zielpunkte), **Ladevorgänge**, deine definierten **Ladeorte** und **Fahrwege** (die GPS-Routen der Fahrten als Linien, max. die 300 jüngsten Fahrten im Zeitraum). Zeitraum (30/90/365 Tage/alles) wählbar; die Karte zoomt automatisch auf die sichtbaren Punkte.
 
 **Zonen-Analyse im Fahrtdetail** (Fahrt öffnen → Karte „Zonen-Analyse"): wertet eine einzelne Fahrt nach Zonen aus, jeweils tabellarisch und mit Hervorhebung auf der Karte. Drei Modi: **Tempo-Zonen** (Geschwindigkeits-Bereiche mit Strecke, Zeit, Ø-Leistung und Netto-Energie je Bereich — Häkchen färbt die zugehörigen Streckenabschnitte, Abgewähltes wird ausgegraut), **Meine Zonen** (welche deiner Geofences/Ladeorte die Fahrt berührt, mit Ein-/Ausfahrtszeit, Dauer und Strecke in der Zone — Zonen-Kreise einblendbar) und **Abschnitt** (frei wählbarer Bereich per Von/Bis-Regler mit allen Kennzahlen). Zusätzlich blendet die Checkbox **📍 Hinweise** an der GPS-Karte Marker für Vmax, höchste Leistung, stärkste Rekuperation und Stopps (≥ 1 min) ein.
 
@@ -571,6 +571,8 @@ Unter `/launcher` findest du eine **kuratierte Liste von Web-Apps**, die im Tesl
 **Audio im Tesla-Lautsprecher:** läuft wie immer via Bluetooth vom Smartphone — keine Konfiguration nötig.
 
 **Admin-Whitelist:** unter `/admin?tab=launcher` kannst du als Admin einzelne Apps pro Mandant ausblenden, z.B. wenn du Telegram Web nicht anzeigen willst. Die Liste wird in `tenant_settings` unter `launcher.disabled_slugs` persistiert.
+
+**Eigene Apps (ab v3.40.0):** In der App-Hub-Verwaltung kannst du als Admin zusätzlich **eigene Web-Apps anlegen, ändern und löschen** (Emoji, Name, URL, optionale Notiz; nur http/https-Adressen). Eigene Apps erscheinen für alle Nutzer unter der Kategorie „Eigene" und werden pro Mandant gespeichert; Anlegen, Ändern und Löschen landen im Audit-Log.
 
 ## 📍 Ort manuell eintragen (ohne GPS) {#manual-location}
 

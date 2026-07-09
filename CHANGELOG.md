@@ -7,6 +7,24 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.40.0] - 2026-07-09
+
+### Neu
+
+- **Heatmap: Fahrwege-Layer.** Vierte Anzeigeoption „Fahrwege" blendet die GPS-Routen der Fahrten als Linien ein (violett, halbtransparent, unter den Dichte-Punkten). Neuer Endpoint `GET /api/trips/route-lines`: pro Fahrt eine downsampled Polyline (max. 60 Stützpunkte, 5 Nachkommastellen), gedeckelt auf die 300 jüngsten Fahrten im Zeitraum; Punktquelle je nach Fahrt-Typ (`telemetry_points`/`trip_points`). Lazy geladen — erst beim Aktivieren des Layers.
+- **App-Hub: eigene Apps verwalten.** Der Admin kann unter *App-Hub verwalten* jetzt eigene Web-Apps anlegen, ändern und löschen (Emoji, Name, URL, Notiz; nur http/https, Zwei-Klick-Löschbestätigung). Eigene Apps erscheinen für alle Nutzer im App-Hub unter der Kategorie „Eigene"; Speicherung pro Mandant (`launcher_custom_apps`), Audit-Log-Einträge für Anlegen/Ändern/Löschen.
+
+### Geändert
+
+- **Fahrtwerte: „Alle" als Umfang wählbar.** Die Tabelle war bisher auf maximal 500 Fahrten begrenzt; die neue Option „Alle" lädt sämtliche Fahrten (`limit=0` → unbegrenzt).
+- **Navigation alphabetisch sortiert.** Die Einträge innerhalb der bestehenden Gruppen (Fahrzeug/Auswertungen/Planung/Admin) sind jetzt alphabetisch geordnet, Dashboard bleibt vorn. Eine individuell angepasste Reihenfolge wird dabei **einmalig zurückgesetzt** (ausgeblendete Einträge bleiben erhalten); danach greift wieder die eigene Anpassung im Profil.
+
+### Behoben
+
+- **Karte beim Zoomen leer (Tile-Proxy).** Beim Zoomen fordert die Karte dutzende Kacheln gleichzeitig an; der Proxy reichte alle parallel an OpenStreetMap durch und lief in die Drosselung — die Karte blieb leer. Jetzt: parallele Anfragen derselben Kachel werden zusammengefasst, Upstream-Fetches auf 8 gleichzeitige begrenzt (Warteschlange), und bei Upstream-Fehlern wird eine abgelaufene Cache-Kachel statt eines Lochs ausgeliefert. Zusätzlich ist das Cache-Verzeichnis per `TILE_CACHE_DIR` auf ein persistentes Volume legbar (Standard `/tmp/tc-tiles` ist im Container flüchtig).
+
+---
+
 ## [v3.39.0] - 2026-07-08
 
 ### Neu

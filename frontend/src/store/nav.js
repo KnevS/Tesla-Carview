@@ -73,6 +73,20 @@ export const NAV_GROUPS = [
   },
 ];
 
+// Default-Reihenfolge innerhalb der Gruppen: Dashboard bleibt vorn, danach
+// alphabetisch nach deutschem Label (Basis-Sprache der Defaults). So bleiben
+// auch künftige Einträge automatisch einsortiert; User können die Reihenfolge
+// weiterhin im Profil individuell anpassen.
+const PINNED_FIRST = ['dashboard'];
+for (const g of NAV_GROUPS) {
+  g.items.sort((a, b) => {
+    const pa = PINNED_FIRST.indexOf(a.key);
+    const pb = PINNED_FIRST.indexOf(b.key);
+    if (pa !== -1 || pb !== -1) return (pa === -1 ? 99 : pa) - (pb === -1 ? 99 : pb);
+    return a.label.localeCompare(b.label, 'de');
+  });
+}
+
 /** Flache Liste aller Items mit Gruppen-ID. Wird vom Store fuer
  *  Reihenfolge / Hidden-Tracking benutzt. */
 export const ALL_LINKS = NAV_GROUPS.flatMap(g =>
@@ -80,11 +94,17 @@ export const ALL_LINKS = NAV_GROUPS.flatMap(g =>
 );
 
 const STORAGE_KEY = 'tesla-carview-nav';
+// v2 (2026-07): alphabetische Default-Reihenfolge. Ältere gespeicherte
+// Reihenfolgen werden einmalig zurückgesetzt (hidden bleibt erhalten).
+const NAV_DEFAULTS_VERSION = 2;
 
 function loadStored() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
+    const saved = raw ? JSON.parse(raw) : null;
+    if (!saved) return null;
+    if ((saved.v ?? 1) < NAV_DEFAULTS_VERSION) return { hidden: saved.hidden ?? [] };
+    return saved;
   } catch { return null; }
 }
 
@@ -142,7 +162,9 @@ export const useNavStore = defineStore('nav', {
   },
   actions: {
     _persist() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ order: this.order, hidden: this.hidden }));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        v: NAV_DEFAULTS_VERSION, order: this.order, hidden: this.hidden,
+      }));
     },
     sync() {
       const known = new Set(ALL_LINKS.map(l => l.key));

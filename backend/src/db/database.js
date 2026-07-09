@@ -1031,6 +1031,18 @@ function runTenantMigrations(db) {
     PRIMARY KEY (lat_key, lon_key)
   )`);
 
+  // App-Hub: eigene, vom Admin gepflegte Apps (ergänzen den kuratierten
+  // Katalog aus launcherCatalog.js; slug im API = 'custom-<id>')
+  db.exec(`CREATE TABLE IF NOT EXISTS launcher_custom_apps (
+    id INTEGER PRIMARY KEY,
+    name TEXT NOT NULL,
+    url TEXT NOT NULL,
+    icon TEXT NOT NULL DEFAULT '🌐',
+    category TEXT NOT NULL DEFAULT 'custom',
+    note TEXT,
+    created_at INTEGER NOT NULL DEFAULT (unixepoch())
+  )`);
+
   // Daten-Repair (idempotent): Telemetrie-Fahrten, deren Start-/End-Datum ohne
   // Location kam, aus den Trackpunkten nachziehen — sonst fehlen Heatmap-Punkt
   // und Adresse dauerhaft. Trifft nach dem ersten Lauf keine Zeilen mehr;

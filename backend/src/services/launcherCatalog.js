@@ -106,7 +106,21 @@ export const LAUNCHER_CATEGORIES = [
   'ev',
   'communication',
   'knowledge',
+  'custom',
 ];
+
+/** Eigene Apps des Tenants (Admin-gepflegt, launcher_custom_apps).
+ *  Liefert Klartext-`label`/`note` statt `label_i18n` — das Frontend
+ *  rendert bei Custom-Apps den Fallback ohne i18n-Lookup. */
+export function getCustomApps(db) {
+  return db.prepare(
+    'SELECT * FROM launcher_custom_apps ORDER BY name COLLATE NOCASE'
+  ).all().map(a => ({
+    slug: `custom-${a.id}`, id: a.id, custom: true,
+    label: a.name, icon: a.icon || '🌐', url: a.url,
+    category: a.category || 'custom', note: a.note || null,
+  }));
+}
 
 /** Holt die deaktivierten Slugs aus tenant_settings. */
 export function getDisabledSlugs(db) {

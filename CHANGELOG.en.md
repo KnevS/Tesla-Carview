@@ -7,6 +7,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.40.0] - 2026-07-09
+
+### Added
+
+- **Heatmap: routes layer.** A fourth display option "Routes" shows the GPS routes of the trips as lines (purple, semi-transparent, below the density points). New endpoint `GET /api/trips/route-lines`: one downsampled polyline per trip (max. 60 points, 5 decimals), capped at the 300 most recent trips in the range; point source per trip type (`telemetry_points`/`trip_points`). Lazy loaded — only when the layer is enabled.
+- **App Hub: manage custom apps.** Under *Manage App Hub* the admin can now create, edit and delete custom web apps (emoji, name, URL, note; http/https only, two-click delete confirmation). Custom apps appear in the App Hub for all users under the "Custom" category; stored per tenant (`launcher_custom_apps`), audit-log entries for create/update/delete.
+
+### Changed
+
+- **Trip metrics: "All" selectable as scope.** The table was previously capped at 500 trips; the new "All" option loads every trip (`limit=0` → unlimited).
+- **Navigation sorted alphabetically.** Entries within the existing groups (vehicle/analytics/planning/admin) are now ordered alphabetically, with Dashboard staying first. A customised order is **reset once** (hidden entries are preserved); afterwards your own arrangement in the profile applies again.
+
+### Fixed
+
+- **Map empty while zooming (tile proxy).** Zooming requests dozens of tiles at once; the proxy passed them all to OpenStreetMap in parallel and ran into throttling — the map stayed empty. Now: parallel requests for the same tile are coalesced, upstream fetches are capped at 8 concurrent (queue), and on upstream errors an expired cached tile is served instead of a hole. The cache directory can also be placed on a persistent volume via `TILE_CACHE_DIR` (the default `/tmp/tc-tiles` is volatile in containers).
+
+---
+
 ## [v3.39.0] - 2026-07-08
 
 ### Added

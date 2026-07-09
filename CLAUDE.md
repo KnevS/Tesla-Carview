@@ -107,10 +107,11 @@ Workflow — keine PRs nötig. Aber **vor jedem Push**:
 > - **Was zuletzt geschah:** oberster Eintrag in [`CHANGELOG.md`](CHANGELOG.md) / [`CHANGELOG.en.md`](CHANGELOG.en.md)
 > - **Letzte Commits:** `git log --oneline -15 origin/main`
 
-### Aktuell (Stand 2026-07-08)
+### Aktuell (Stand 2026-07-09)
 
-- **Version:** v3.39.0
+- **Version:** v3.40.0
 - **Zuletzt geliefert:**
+  - **v3.40.0 (Sammel-Release):** (1) Heatmap-Layer „Fahrwege" — `GET /api/trips/route-lines` (max. 300 Trips, 60 Punkte/Trip downsampled), lazy im Frontend. (2) App-Hub-CRUD für Admins — Tabelle `launcher_custom_apps`, POST/PUT/DELETE `/api/launcher/admin/apps`, Custom-Apps mit Klartext-`label` (kein i18n-Key; Frontend-Fallback `label_i18n ? $t(...) : label`). (3) Fahrtwerte-Limit „Alle" (`limit=0` → SQLite `LIMIT -1`). (4) Nav alphabetisch je Gruppe (programmatischer Sort in nav.js, `NAV_DEFAULTS_VERSION=2` resettet gespeicherte Order einmalig, hidden bleibt). (5) Tile-Proxy: In-flight-Dedupe + max. 8 parallele OSM-Fetches + Stale-Fallback; `TILE_CACHE_DIR`-Env für persistentes Volume.
   - **Feature Zonen-Analyse im Fahrtdetail (v3.39.0):** Karte „Zonen-Analyse" in `TripDetail.vue` — 3 Modi (Tempo-Zonen / Meine Zonen [Geofences+Ladeorte] / Abschnitt via Von-Bis-Regler), tabellarische Werte + Karten-Hervorhebung (Segment-Refs aus initMap, `applyMapOverlay()`); Checkbox „📍 Hinweise" (Vmax/Max-Leistung/Max-Reku/Stopps ≥ 1 min). Alles clientseitig aus `trip.points` (dt-Cap 120 s, Energie netto). i18n ×7 (`tripDetail.zones`), Handbuch DE/EN (Rest im nächsten Doku-Sync).
   - **Fix Telemetrie-Erfassungskette (v3.38.4):** (1) `/api/trips/metrics` aggregierte nur `trip_points` → Fahrtwerte-Tabelle leer für Telemetrie-Fahrten; jetzt UNION ALL über `trip_points`+`telemetry_points`. (2) fleetTelemetry rief nie `geocodeTrip` → Koordinaten statt Adressen; jetzt Fire-and-forget-Hook bei Trip-Start/-Close (wie OwnTracks). (3) Gear-Datum ohne GPS → `start_/end_lat` NULL; Trip-Close zieht Start/Ziel aus Trackpunkten nach + idempotenter Daten-Repair in `runTenantMigrations`. Merke: `trip_points` = Poller/OwnTracks, `telemetry_points` = Fleet-Telemetry (Detail-Endpoint `/:id` switcht nach `t.source`).
   - **Fix Heatmap-Layer unsichtbar (v3.38.3):** `HeatmapMap.vue` + `LocationHeatmap.vue` zeichneten `L.circle` mit Meter-Radius (60–140 m) — bei auto-gefitteter Übersichtskarte (Zoom ≤ 11) subpixel-klein, Layer wirkten leer trotz korrekter Punktzähler. Jetzt `L.circleMarker` mit zoomunabhängigem Pixel-Radius (5–14 px, gewichtsabhängige Größe/Deckkraft).

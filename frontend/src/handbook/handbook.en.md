@@ -102,7 +102,7 @@ Every signed-in user has their own page at `/my-tracking` ("📱 My GPS" in the 
 
 **Trip Metrics** (navigation → *Trip Metrics*, or the button on the trip list) shows a sortable table across all trips: date, route, duration, distance, consumption, plus speed and power each as minimum / maximum / average, and the state of charge (start → end). Click a column header to sort, click a row to open the trip. Summary tiles at the top show trips, total distance, total energy and total drive time; **CSV export** provides the values for Excel/accounting. All figures follow your unit settings. Power values come from telemetry — if it's missing (e.g. an OwnTracks-only trip) you'll see "—".
 
-**Heatmap** (navigation → *Heatmap*) shows on a map *where* you drive — with three individually toggleable layers: **trips** (density of start/end points), **charging sessions** and your defined **charging spots**. Time range (30/90/365 days/all) is selectable; the map auto-fits to the visible points.
+**Heatmap** (navigation → *Heatmap*) shows on a map *where* you drive — with four individually toggleable layers: **trips** (density of start/end points), **charging sessions**, your defined **charging spots** and **routes** (the GPS routes of the trips as lines, up to the 300 most recent trips in the range). Time range (30/90/365 days/all) is selectable; the map auto-fits to the visible points.
 
 **Zone analysis in the trip detail** (open a trip → "Zone analysis" card): analyses a single trip by zones, each as a table with matching highlighting on the map. Three modes: **speed zones** (speed bands with distance, time, average power and net energy per band — checkboxes colour the matching track sections, deselected ones are dimmed), **my zones** (which of your geofences/charging locations the trip touches, with entry/exit time, duration and distance inside the zone — zone circles can be shown on the map) and **section** (freely chosen range via from/to sliders with all key figures). In addition, the **📍 Hints** checkbox on the GPS map marks Vmax, peak power, strongest regeneration and stops (≥ 1 min).
 
@@ -574,6 +574,8 @@ In `/my-tracking` every device shows a clear status:
 **Audio through the Tesla speakers:** runs via Bluetooth from your phone as always — no setup needed.
 
 **Admin whitelist:** under `/admin?tab=launcher` an admin can hide individual apps per tenant, e.g. if you do not want to show Telegram Web. The list persists in `tenant_settings` under `launcher.disabled_slugs`.
+
+**Custom apps (from v3.40.0):** In the App Hub management an admin can additionally **create, edit and delete custom web apps** (emoji, name, URL, optional note; http/https addresses only). Custom apps appear for all users under the "Custom" category and are stored per tenant; create, update and delete are recorded in the audit log.
 
 ## 📍 Manual location entry (no GPS) {#manual-location}
 

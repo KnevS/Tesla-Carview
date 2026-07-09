@@ -9,7 +9,9 @@ import { wltpConsumption } from '../services/wltp.js';
 const router = Router();
 
 // ── Tile-Disk-Cache ───────────────────────────────────────────────────────────
-const TILE_CACHE_DIR = '/tmp/tc-tiles';
+// Per Env auf ein persistentes Volume legbar — /tmp ist im Container flüchtig,
+// nach jedem Neustart/Update startet der Tile-Cache sonst kalt.
+const TILE_CACHE_DIR = process.env.TILE_CACHE_DIR || '/tmp/tc-tiles';
 const TILE_TTL_MS    = 7 * 24 * 60 * 60 * 1000; // 7 Tage
 try { mkdirSync(TILE_CACHE_DIR, { recursive: true }); } catch {}
 
@@ -165,6 +167,50 @@ async function fetchValhalla(coordinates, { avoidMotorways, avoidTolls, avoidFer
 
 export const tileRouter = Router();
 
+// Zoom-Bursts entschärfen: Leaflet fordert beim Zoomen dutzende Tiles auf
+// einmal an. Unbegrenzt parallele Upstream-Fetches provozieren die
+// OSM-Drosselung (429/Block) → Karte bleibt leer. Deshalb:
+//  - In-flight-Dedupe: identische Tiles werden nur einmal geholt
+//  - Concurrency-Limit für Upstream-Fetches (OSM-Tile-Policy-freundlich)
+//  - Stale-Fallback: bei Upstream-Fehlern lieber eine abgelaufene
+//    Cache-Kachel ausliefern als eine leere Karte
+const TILE_MAX_PARALLEL = 8;
+const inflight = new Map();   // cacheFile → Promise<Buffer>
+let   active   = 0;
+const queue    = [];
+
+function nextSlot() {
+  return new Promise((resolve) => {
+    const tryRun = () => {
+      if (active < TILE_MAX_PARALLEL) { active++; resolve(); }
+      else queue.push(tryRun);
+    };
+    tryRun();
+  });
+}
+function releaseSlot() {
+  active--;
+  const next = queue.shift();
+  if (next) next();
+}
+
+async function fetchTile(zn, xn, yn, cacheFile) {
+  await nextSlot();
+  try {
+    const sub = ['a', 'b', 'c'][xn % 3];
+    const r   = await fetch(`https://${sub}.tile.openstreetmap.org/${zn}/${xn}/${yn}.png`, {
+      headers: { 'User-Agent': 'TeslaCarview/2.2 (personal-server)', 'Referer': 'https://github.com/KnevS/Tesla-Carview' },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!r.ok) throw new Error(`upstream ${r.status}`);
+    const buf = Buffer.from(await r.arrayBuffer());
+    try { writeFileSync(cacheFile, buf); } catch {} // best-effort
+    return buf;
+  } finally {
+    releaseSlot();
+  }
+}
+
 tileRouter.get('/:z/:x/:y', async (req, res) => {
   const { z, x, y } = req.params;
   const zn = parseInt(z); const xn = parseInt(x); const yn = parseInt(y);
@@ -174,25 +220,29 @@ tileRouter.get('/:z/:x/:y', async (req, res) => {
 
   const cacheFile = join(TILE_CACHE_DIR, `${zn}_${xn}_${yn}.png`);
   const headers = { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=604800, stale-while-revalidate=86400' };
+  const cached = existsSync(cacheFile);
 
-  // Disk-Cache-Hit: direkt ausliefern
-  if (existsSync(cacheFile) && (Date.now() - statSync(cacheFile).mtimeMs) < TILE_TTL_MS) {
+  // Disk-Cache-Hit (frisch): direkt ausliefern
+  if (cached && (Date.now() - statSync(cacheFile).mtimeMs) < TILE_TTL_MS) {
     res.set(headers);
     return res.send(readFileSync(cacheFile));
   }
 
   try {
-    const sub = ['a', 'b', 'c'][xn % 3];
-    const r   = await fetch(`https://${sub}.tile.openstreetmap.org/${z}/${x}/${y}.png`, {
-      headers: { 'User-Agent': 'TeslaCarview/2.2 (personal-server)', 'Referer': 'https://github.com/KnevS/Tesla-Carview' },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!r.ok) return res.status(r.status).end();
-    const buf = Buffer.from(await r.arrayBuffer());
-    try { writeFileSync(cacheFile, buf); } catch {} // best-effort
+    let p = inflight.get(cacheFile);
+    if (!p) {
+      p = fetchTile(zn, xn, yn, cacheFile).finally(() => inflight.delete(cacheFile));
+      inflight.set(cacheFile, p);
+    }
+    const buf = await p;
     res.set(headers);
     res.send(buf);
   } catch {
+    // Upstream weg/drosselt → abgelaufene Kachel ist besser als Loch in der Karte
+    if (cached) {
+      res.set({ ...headers, 'Cache-Control': 'public, max-age=3600' });
+      return res.send(readFileSync(cacheFile));
+    }
     res.status(502).end();
   }
 });

@@ -17,6 +17,7 @@
           <option :value="100">100</option>
           <option :value="250">250</option>
           <option :value="500">500</option>
+          <option :value="0">{{ $t('tripMetrics.limitAll') }}</option>
         </select>
         <button @click="exportCsv" :disabled="!rows.length" class="btn-secondary text-sm disabled:opacity-40"
           v-tooltip="$t('tripMetrics.csvTip')">

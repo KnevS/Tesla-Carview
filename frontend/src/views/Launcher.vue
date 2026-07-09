@@ -29,8 +29,11 @@
         :href="app.url" target="_blank" rel="noopener noreferrer"
         class="bg-gray-800 hover:bg-gray-700 rounded-xl p-5 flex flex-col items-center text-center transition active:scale-95">
         <span class="text-5xl mb-3" aria-hidden="true">{{ app.icon }}</span>
-        <p class="font-semibold text-base">{{ $t(app.label_i18n) }}</p>
-        <p v-if="app.note_i18n" class="text-gray-400 text-xs mt-1">{{ $t(app.note_i18n) }}</p>
+        <!-- Katalog-Apps haben i18n-Keys, eigene Apps Klartext-Label/Notiz -->
+        <p class="font-semibold text-base">{{ app.label_i18n ? $t(app.label_i18n) : app.label }}</p>
+        <p v-if="app.note_i18n || app.note" class="text-gray-400 text-xs mt-1">
+          {{ app.note_i18n ? $t(app.note_i18n) : app.note }}
+        </p>
       </a>
     </div>
     <p v-else-if="loaded" class="text-gray-400 text-sm">{{ $t('launcher.empty') }}</p>
