@@ -134,7 +134,7 @@ Workflow — keine PRs nötig. Aber **vor jedem Push**:
   - **Setup-Wizard-Fix (#170):** `db.transaction()`-Callback in `/api/setup/init` synchron gemacht (better-sqlite3 lehnt async-Callbacks ab).
   - **Fleet-Telemetry Ende-zu-Ende funktionsfähig (v3.32.4/.5):** Receiver entpackt FlatBuffers-Envelope + eingebettetes Protobuf; `fleet_telemetry_config` über den Fleet-Level-Endpoint mit echter CA-Kette. Live verifiziert.
   - **Betriebs-Selbsttest (v3.32.0):** `selfCheck.js` + `GET/POST /api/system/self-check`.
-- **Doku-Stand:** README (7 Sprachen), In-App-Handbuch (6 Sprachen), GitHub-Wiki (7 Sprachen) und Marketing-Site `teslaview-web` auf v3.32.6 synchronisiert; Marketing-/Wiki-Bump auf v3.33.0 folgt im nächsten Sync.
+- **Doku-Stand:** README (7 Sprachen), In-App-Handbuch (6 Sprachen), GitHub-Wiki (7 Sprachen) und Marketing-Site `teslaview-web` auf **v3.41.0** synchronisiert (2026-07-09). **Regel (Sven): Doku + Marketing-Site immer im selben Arbeitsgang wie das Feature — nie auf einen Sammel-Sync verschieben.**
 
 ### Architektur-Ankerpunkte (stabil — hier nachschlagen)
 
