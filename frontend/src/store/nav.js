@@ -73,17 +73,25 @@ export const NAV_GROUPS = [
   },
 ];
 
-// Default-Reihenfolge innerhalb der Gruppen: Dashboard bleibt vorn, danach
-// alphabetisch nach deutschem Label (Basis-Sprache der Defaults). So bleiben
-// auch künftige Einträge automatisch einsortiert; User können die Reihenfolge
-// weiterhin im Profil individuell anpassen.
-const PINNED_FIRST = ['dashboard'];
+// Default-Reihenfolge innerhalb der Gruppen: thematisch (Sven, 2026-07-09) —
+// Zusammengehöriges steht beieinander statt alphabetisch: Fahren → Energie/
+// Laden → Kosten → Pflege/Daten. Neue Einträge hier einsortieren; Unbekanntes
+// landet ans Gruppenende. User passen die Reihenfolge weiterhin im Profil an.
+const GROUP_ORDER = {
+  vehicle:   ['dashboard', 'telemetry', 'control', 'battery'],
+  analytics: ['trips', 'fahrtwerte', 'fahrtenbuch', 'heatmap',
+              'charging', 'energy', 'co2', 'climate', 'sleep',
+              'abrechnung', 'tco', 'logbook', 'export'],
+  plan:      ['routes', 'chargers', 'chargingLocations', 'nearby',
+              'mytracking', 'automations', 'grok', 'launcher'],
+  admin:     ['users', 'data', 'audit', 'legal', 'system'],
+};
 for (const g of NAV_GROUPS) {
+  const order = GROUP_ORDER[g.id] ?? [];
   g.items.sort((a, b) => {
-    const pa = PINNED_FIRST.indexOf(a.key);
-    const pb = PINNED_FIRST.indexOf(b.key);
-    if (pa !== -1 || pb !== -1) return (pa === -1 ? 99 : pa) - (pb === -1 ? 99 : pb);
-    return a.label.localeCompare(b.label, 'de');
+    const ia = order.indexOf(a.key);
+    const ib = order.indexOf(b.key);
+    return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
   });
 }
 
@@ -94,9 +102,10 @@ export const ALL_LINKS = NAV_GROUPS.flatMap(g =>
 );
 
 const STORAGE_KEY = 'tesla-carview-nav';
-// v2 (2026-07): alphabetische Default-Reihenfolge. Ältere gespeicherte
-// Reihenfolgen werden einmalig zurückgesetzt (hidden bleibt erhalten).
-const NAV_DEFAULTS_VERSION = 2;
+// v3 (2026-07-09): thematische Default-Reihenfolge (ersetzt das kurzlebige
+// alphabetische v2). Ältere gespeicherte Reihenfolgen werden einmalig
+// zurückgesetzt (hidden bleibt erhalten).
+const NAV_DEFAULTS_VERSION = 3;
 
 function loadStored() {
   try {

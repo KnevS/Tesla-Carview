@@ -120,8 +120,9 @@ technisch keine PRs unterstützt). Gilt auch für `teslaview-web`.
 
 ### Aktuell (Stand 2026-07-09)
 
-- **Version:** v3.41.0
+- **Version:** v3.41.1
 - **Zuletzt geliefert:**
+  - **v3.41.1:** Nav thematisch statt alphabetisch (Sven-Wahl per Preview): `GROUP_ORDER` in nav.js, `NAV_DEFAULTS_VERSION=3` (einmaliger Order-Reset). Erster Release über den neuen PR-Workflow.
   - **v3.41.0:** Heatmap-Ebenen-Farben anpassbar (Color-Picker je Layer, localStorage, Reset-Button). Tile-Leere Runde 2: Cache-Default nach `data/tiles` (persistent), Upstream-Retry über Mirror-Rotation, Frontend-Tile-Retry via gemeinsamem `lib/tiles.js#osmTileLayer` (alle 5 Karten). NavBar-Dropdowns hinter Karte gefixt: `isolate` auf allen Karten-Containern.
   - **v3.40.0 (Sammel-Release):** (1) Heatmap-Layer „Fahrwege" — `GET /api/trips/route-lines` (max. 300 Trips, 60 Punkte/Trip downsampled), lazy im Frontend. (2) App-Hub-CRUD für Admins — Tabelle `launcher_custom_apps`, POST/PUT/DELETE `/api/launcher/admin/apps`, Custom-Apps mit Klartext-`label` (kein i18n-Key; Frontend-Fallback `label_i18n ? $t(...) : label`). (3) Fahrtwerte-Limit „Alle" (`limit=0` → SQLite `LIMIT -1`). (4) Nav alphabetisch je Gruppe (programmatischer Sort in nav.js, `NAV_DEFAULTS_VERSION=2` resettet gespeicherte Order einmalig, hidden bleibt). (5) Tile-Proxy: In-flight-Dedupe + max. 8 parallele OSM-Fetches + Stale-Fallback; `TILE_CACHE_DIR`-Env für persistentes Volume.
   - **Feature Zonen-Analyse im Fahrtdetail (v3.39.0):** Karte „Zonen-Analyse" in `TripDetail.vue` — 3 Modi (Tempo-Zonen / Meine Zonen [Geofences+Ladeorte] / Abschnitt via Von-Bis-Regler), tabellarische Werte + Karten-Hervorhebung (Segment-Refs aus initMap, `applyMapOverlay()`); Checkbox „📍 Hinweise" (Vmax/Max-Leistung/Max-Reku/Stopps ≥ 1 min). Alles clientseitig aus `trip.points` (dt-Cap 120 s, Energie netto). i18n ×7 (`tripDetail.zones`), Handbuch DE/EN (Rest im nächsten Doku-Sync).

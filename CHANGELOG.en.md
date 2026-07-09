@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.41.1] - 2026-07-09
+
+### Changed
+
+- **Navigation ordered thematically instead of alphabetically.** The alphabetical order from v3.40.0 is replaced: within the groups, related entries now sit together — vehicle (dashboard → tech → controls → battery), analytics (driving → charging/energy → costs → care/data), planning (route → charging infrastructure → tracking/automation → Grok/app hub). A customised order is reset once more (hidden entries are preserved); afterwards your own arrangement in the profile applies again.
+
+---
+
 ## [v3.41.0] - 2026-07-09
 
 ### Added

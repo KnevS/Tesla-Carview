@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.41.1] - 2026-07-09
+
+### Geändert
+
+- **Navigation thematisch statt alphabetisch geordnet.** Die alphabetische Reihenfolge aus v3.40.0 ist ersetzt: Innerhalb der Gruppen steht Zusammengehöriges jetzt beieinander — Fahrzeug (Dashboard → Technik → Steuerung → Batterie), Auswertungen (Fahren → Laden/Energie → Kosten → Pflege/Daten), Planung (Route → Ladeinfrastruktur → Tracking/Automation → Grok/App-Hub). Eine individuell angepasste Reihenfolge wird dabei erneut einmalig zurückgesetzt (Ausgeblendetes bleibt); danach greift wieder die eigene Anpassung im Profil.
+
+---
+
 ## [v3.41.0] - 2026-07-09
 
 ### Neu
