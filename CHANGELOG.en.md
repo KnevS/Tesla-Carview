@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.41.2] - 2026-07-10
+
+### Fixed
+
+- **Corrected too-low speeds in old telemetry trips.** Telemetry points captured before the mph→km/h fix (v3.35.3, 3 July) stored the speed unconverted in mph — old trips therefore showed ~38% too-low values in trip metrics, charts and the zone analysis. A one-time migration (marker in `tenant_settings`, double conversion impossible) converts the affected points on first start after the update; the demo tenant is not affected.
+
+---
+
 ## [v3.41.1] - 2026-07-09
 
 ### Changed

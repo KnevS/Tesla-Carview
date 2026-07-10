@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.41.2] - 2026-07-10
+
+### Behoben
+
+- **Zu niedrige Geschwindigkeiten in alten Telemetrie-Fahrten korrigiert.** Telemetrie-Punkte, die vor dem mph→km/h-Fix (v3.35.3, 03.07.) erfasst wurden, speicherten die Geschwindigkeit unkonvertiert in mph — alte Fahrten zeigten dadurch ~38 % zu niedrige Werte in Fahrtwerten, Charts und Zonen-Analyse. Eine einmalige Migration (Marker in `tenant_settings`, keine Doppel-Konvertierung möglich) rechnet die betroffenen Punkte beim ersten Start nach dem Update um; der Demo-Mandant ist nicht betroffen.
+
+---
+
 ## [v3.41.1] - 2026-07-09
 
 ### Geändert
