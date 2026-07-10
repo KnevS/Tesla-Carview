@@ -120,8 +120,9 @@ technisch keine PRs unterstützt). Gilt auch für `teslaview-web`.
 
 ### Aktuell (Stand 2026-07-09)
 
-- **Version:** v3.41.1
+- **Version:** v3.41.2
 - **Zuletzt geliefert:**
+  - **v3.41.2:** Einmalige mph-Korrektur-Migration für Telemetrie-Punkte vor v3.35.3 (Marker `migration.telemetry_speed_mph_fix` in tenant_settings, Cutoff 2026-07-03T19:25:45Z).
   - **v3.41.1:** Nav thematisch statt alphabetisch (Sven-Wahl per Preview): `GROUP_ORDER` in nav.js, `NAV_DEFAULTS_VERSION=3` (einmaliger Order-Reset). Erster Release über den neuen PR-Workflow.
   - **v3.41.0:** Heatmap-Ebenen-Farben anpassbar (Color-Picker je Layer, localStorage, Reset-Button). Tile-Leere Runde 2: Cache-Default nach `data/tiles` (persistent), Upstream-Retry über Mirror-Rotation, Frontend-Tile-Retry via gemeinsamem `lib/tiles.js#osmTileLayer` (alle 5 Karten). NavBar-Dropdowns hinter Karte gefixt: `isolate` auf allen Karten-Containern.
   - **v3.40.0 (Sammel-Release):** (1) Heatmap-Layer „Fahrwege" — `GET /api/trips/route-lines` (max. 300 Trips, 60 Punkte/Trip downsampled), lazy im Frontend. (2) App-Hub-CRUD für Admins — Tabelle `launcher_custom_apps`, POST/PUT/DELETE `/api/launcher/admin/apps`, Custom-Apps mit Klartext-`label` (kein i18n-Key; Frontend-Fallback `label_i18n ? $t(...) : label`). (3) Fahrtwerte-Limit „Alle" (`limit=0` → SQLite `LIMIT -1`). (4) Nav alphabetisch je Gruppe (programmatischer Sort in nav.js, `NAV_DEFAULTS_VERSION=2` resettet gespeicherte Order einmalig, hidden bleibt). (5) Tile-Proxy: In-flight-Dedupe + max. 8 parallele OSM-Fetches + Stale-Fallback; `TILE_CACHE_DIR`-Env für persistentes Volume.

@@ -1062,6 +1062,27 @@ function runTenantMigrations(db) {
       AND EXISTS (SELECT 1 FROM telemetry_points p
         WHERE p.trip_id = trips.id AND p.lat IS NOT NULL)
   `);
+
+  // Daten-Repair (einmalig, Marker in tenant_settings): Telemetrie-Punkte vor
+  // dem mph→km/h-Fix (v3.35.3, live 2026-07-03 ~21:25 MESZ) speichern
+  // VehicleSpeed unkonvertiert in mph als speed_kmh — alte Fahrten zeigten
+  // dadurch ~38 % zu niedrige Geschwindigkeiten in Fahrtwerten/Charts.
+  // Einmalig ×1,60934 nachziehen; der Marker verhindert Doppel-Konvertierung.
+  // Der Demo-Seeder schreibt keine telemetry_points — Demo bleibt unberührt.
+  const SPEED_FIX_MARKER = 'migration.telemetry_speed_mph_fix';
+  const SPEED_FIX_CUTOFF = 1783106745; // 2026-07-03T19:25:45Z (Commit 1e395f7 + 20 min Deploy-Puffer)
+  const speedFixDone = db.prepare(
+    'SELECT value FROM tenant_settings WHERE key=?'
+  ).get(SPEED_FIX_MARKER);
+  if (!speedFixDone) {
+    const r = db.prepare(
+      'UPDATE telemetry_points SET speed_kmh = speed_kmh * 1.60934 WHERE timestamp < ? AND speed_kmh IS NOT NULL'
+    ).run(SPEED_FIX_CUTOFF);
+    db.prepare(
+      'INSERT OR REPLACE INTO tenant_settings (key, value) VALUES (?, ?)'
+    ).run(SPEED_FIX_MARKER, JSON.stringify({ fixed: r.changes, at: Math.floor(Date.now() / 1000) }));
+    if (r.changes) console.log(`[Migration] telemetry_speed_mph_fix: ${r.changes} Punkte konvertiert`);
+  }
 }
 
 // Alias für Abwärtskompatibilität
