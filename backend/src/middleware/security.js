@@ -50,11 +50,30 @@ export const loginRateLimit = rateLimit({
   skipSuccessfulRequests: false,
 });
 
-/** Allgemeines API-Rate-Limit: 120 Anfragen pro Minute pro IP */
+/** Allgemeines API-Rate-Limit: 120 Anfragen pro Minute pro IP.
+ *  Kartenkacheln sind ausgenommen — ein einziger Karten-Zoom laedt
+ *  50–150 Tiles und frass sonst das komplette Budget: danach bekam
+ *  dieselbe IP fuer den Rest der Minute nur noch 429 auf ALLE
+ *  API-Calls, die App wirkte tot bis zum Seiten-Reload. Tiles haben
+ *  ihr eigenes, grosszuegigeres Limit (tileRateLimit unten). */
 export const apiRateLimit = rateLimit({
   windowMs: 60 * 1000,
   limit: 120,
   message: { error: 'Rate-Limit ueberschritten. Bitte warten.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.path.startsWith('/api/tiles'),
+});
+
+/** Eigenes Rate-Limit fuer den OSM-Tile-Proxy: 1200 Kacheln pro Minute
+ *  pro IP. Deckt auch hektisches Zoomen/Pannen ueber mehrere Stufen
+ *  locker ab (inkl. der bis zu 2 Frontend-Retries pro Kachel), bleibt
+ *  aber eine Missbrauchsbremse — den Upstream schuetzt zusaetzlich die
+ *  8er-Semaphore + Cache im Tile-Proxy selbst. */
+export const tileRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 1200,
+  message: { error: 'Tile-Rate-Limit ueberschritten. Bitte warten.' },
   standardHeaders: true,
   legacyHeaders: false,
 });

@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.41.3] - 2026-07-11
+
+### Behoben
+
+- **Karten-Zoom legte die App lahm (bis zum Seiten-Reload).** Die Kachel-Anfragen des OSM-Tile-Proxys (`/api/tiles`) zählten gegen das allgemeine API-Rate-Limit (120 Anfragen/Minute pro IP). Ein einziger Zoom über mehrere Stufen lädt 50–150 Kacheln — danach bekam dieselbe IP für den Rest der Minute nur noch `429` auf **alle** API-Aufrufe: Menüpunkte schienen nicht mehr zu reagieren, Seiten blieben leer, erst ein Neuladen „half" (weil bis zum App-Start das Minutenfenster ablief). Kacheln haben jetzt ein eigenes, großzügiges Limit (1200/Minute pro IP) und sind vom allgemeinen API-Limit ausgenommen.
+
+---
+
 ## [v3.41.2] - 2026-07-10
 
 ### Behoben

@@ -6,7 +6,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { initMasterDb, getAllTenants, getDb } from './db/database.js';
-import { securityHeaders, apiRateLimit } from './middleware/security.js';
+import { securityHeaders, apiRateLimit, tileRateLimit } from './middleware/security.js';
 import { requireAuth } from './middleware/auth.js';
 import { startPoller, resetTelemetryHeartbeat } from './services/poller.js';
 import { startServiceReminderScheduler } from './services/serviceReminders.js';
@@ -117,7 +117,10 @@ const APP_VERSION = (() => {
 
 // Öffentliche Routen
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', version: APP_VERSION }));
-app.use('/api/tiles', tileRouter); // OSM-Tile-Proxy (keine Auth, nur öffentliche Kartendaten)
+// OSM-Tile-Proxy (keine Auth, nur öffentliche Kartendaten). Eigenes
+// Rate-Limit statt apiRateLimit: Karten-Zoom-Bursts (50–150 Kacheln)
+// duerfen nicht das API-Budget der restlichen App leerfressen.
+app.use('/api/tiles', tileRateLimit, tileRouter);
 app.use('/api/setup',          setupRoutes);
 app.use('/api/auth',           authRoutes);
 app.use('/api/register',       registerRoutes);

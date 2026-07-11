@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.41.3] - 2026-07-11
+
+### Fixed
+
+- **Zooming a map froze the app (until a page reload).** Tile requests from the OSM tile proxy (`/api/tiles`) counted against the general API rate limit (120 requests/minute per IP). A single zoom across several levels loads 50–150 tiles — after that, the same IP received nothing but `429` for **all** API calls for the rest of the minute: menu items appeared unresponsive, pages stayed empty, and only a reload "helped" (because the minute window expired while the app restarted). Tiles now have their own generous limit (1200/minute per IP) and are exempt from the general API limit.
+
+---
+
 ## [v3.41.2] - 2026-07-10
 
 ### Fixed
