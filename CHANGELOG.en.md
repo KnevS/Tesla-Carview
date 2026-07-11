@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.41.4] - 2026-07-11
+
+### Fixed
+
+- **Map-zoom throttling, part 2: host nginx.** The v3.41.3 fix only covered the app layer — on setups following `deploy/nginx-host.conf.template`, the host nginx additionally throttled all `/api` paths (tiles included) to 120 requests/minute with burst 20 per IP, with the same effect (`429` on everything after a map zoom until reload). The template now has a dedicated nginx zone for `/api/tiles/` (1200/minute, burst 300). **Existing installations:** re-apply the template (`setup.sh` or the `sed` line in the template header) and reload nginx — updating the container alone does not change the host nginx configuration.
+
+---
+
 ## [v3.41.3] - 2026-07-11
 
 ### Fixed
