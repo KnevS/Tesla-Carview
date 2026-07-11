@@ -9,6 +9,12 @@
 
 limit_req_zone $binary_remote_addr zone=login:10m rate=10r/m;
 limit_req_zone $binary_remote_addr zone=api:10m   rate=120r/m;
+# Kartenkacheln brauchen eine eigene, großzügige Zone: ein einziger
+# Karten-Zoom lädt 50–150 Tiles als Burst. Liefen die über zone=api
+# (120r/m, burst=20), war das Budget der IP sofort leer und ALLE
+# API-Aufrufe bekamen für den Rest der Minute 429 — die App wirkte
+# tot, bis die Seite neu geladen wurde (v3.41.3/v3.41.4).
+limit_req_zone $binary_remote_addr zone=tiles:10m rate=1200r/m;
 
 server {
     listen 80;
@@ -50,6 +56,18 @@ server {
 
     location /api/auth/login {
         limit_req zone=login burst=3 nodelay;
+        limit_req_status 429;
+        proxy_pass         http://127.0.0.1:8080;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+
+    # Tile-Proxy: eigene Zone (s. o.), burst=300 fängt Zoom/Pan-Bursts ab.
+    # Längster Prefix gewinnt — dieser Block greift vor location /api/.
+    location /api/tiles/ {
+        limit_req zone=tiles burst=300 nodelay;
         limit_req_status 429;
         proxy_pass         http://127.0.0.1:8080;
         proxy_set_header   Host              $host;

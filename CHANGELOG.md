@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.41.4] - 2026-07-11
+
+### Behoben
+
+- **Karten-Zoom-Drossel, Teil 2: Host-nginx.** Der Fix aus v3.41.3 griff nur auf App-Ebene — auf Setups nach `deploy/nginx-host.conf.template` drosselte zusätzlich der Host-nginx alle `/api`-Pfade (inkl. Kacheln) auf 120 Anfragen/Minute mit Burst 20 pro IP, mit demselben Effekt (nach einem Karten-Zoom `429` auf alles bis zum Reload). Das Template hat jetzt eine eigene nginx-Zone für `/api/tiles/` (1200/Minute, Burst 300). **Bestehende Installationen:** Template neu anwenden (`setup.sh` bzw. `sed`-Zeile im Template-Kopf) und nginx neu laden — das Update des Containers allein ändert die Host-nginx-Konfiguration nicht.
+
+---
+
 ## [v3.41.3] - 2026-07-11
 
 ### Behoben
