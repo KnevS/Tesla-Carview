@@ -21,17 +21,28 @@ name: Dependabot Auto-Merge
 on:
   pull_request_target:
     types: [opened, reopened, synchronize]
+  # Bei jedem Push auf main alle offenen Dependabot-PRs nachziehen
+  # (Auto-Rebase): mit Required-Check „branches up to date" blieben
+  # Bot-PRs sonst dauerhaft BEHIND haengen, sobald main sich bewegt —
+  # der aktivierte Auto-Merge kam nie zum Zug. Muster aus indasys-fleet
+  # (dependabot-automerge.yml, dort seit v1.181.0 produktiv).
+  push:
+    branches: [main]
 
 permissions:
   contents: write
   pull-requests: write
   issues: write
 
+concurrency:
+  group: dependabot-automerge-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: false
+
 jobs:
   auto-merge:
     name: auto-merge non-major
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]'
+    if: github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]'
     # Dieser Job hat bewusst KEINEN actions/checkout-Schritt. Ohne Working Tree
     # faellt `gh` auf `git remote get-url origin` zurueck, um owner/repo zu
     # ermitteln — was mit "fatal: not a git repository" scheitert. Befehle mit
@@ -66,3 +77,27 @@ jobs:
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  update-dependabot-branches:
+    name: keep dependabot PRs up to date
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+    steps:
+      - name: Offene Dependabot-PRs per update-branch aktualisieren
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -uo pipefail
+          PRS=$(gh pr list --repo "$REPO" --author "app/dependabot" --state open --json number --jq '.[].number')
+          if [ -z "$PRS" ]; then
+            echo "Keine offenen Dependabot-PRs."
+            exit 0
+          fi
+          for PR in $PRS; do
+            echo "::group::PR #$PR"
+            # Fehler tolerieren: „already up to date", Merge-Konflikte etc.
+            gh pr update-branch "$PR" --repo "$REPO" \
+              || echo "::warning::PR #$PR konnte nicht aktualisiert werden (evtl. bereits aktuell oder Konflikt)"
+            echo "::endgroup::"
+          done

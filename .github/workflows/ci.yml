@@ -5,6 +5,11 @@ on:
     branches: ['**']
   pull_request:
     branches: [main]
+  # security-autofix.yml pusht seinen Fix-Branch mit GITHUB_TOKEN — solche
+  # Pushes triggern keine push/pull_request-Workflows (GitHub-Rekursions-
+  # schutz). Der Autofix-Job stößt die Required-Checks deshalb explizit per
+  # workflow_dispatch auf dem Branch an.
+  workflow_dispatch:
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
