@@ -10,7 +10,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1079.0",
+    "@aws-sdk/client-s3": "^3.1085.0",
     "@simplewebauthn/server": "^13.3.2",
     "argon2": "^0.44.0",
     "axios": "^1.18.1",
@@ -22,7 +22,7 @@
     "express": "^4.19.2",
     "express-rate-limit": "^8.5.2",
     "geoip-lite": "^2.0.3",
-    "helmet": "^8.2.0",
+    "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.1.1",
     "nodemailer": "^9.0.1",
@@ -37,7 +37,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "eslint": "^10.6.0",
+    "eslint": "^10.7.0",
     "globals": "^17.7.0",
     "nodemon": "^3.1.4"
   },
