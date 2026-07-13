@@ -1,0 +1,230 @@
+name: Security Autofix
+
+# CVE-getriggerte Selbstheilung — Ergänzung zu security.yml (Report) und
+# dependabot-auto-merge.yml (Version-Bumps). Muster übernommen aus dem
+# Skillmatrix-Repo (dort seit v3.35.2 produktiv) und indasys-fleet (v1.181.0):
+#
+#   1. npm-audit-autofix: läuft `npm audit fix` (OHNE --force, also nur
+#      semver-kompatible Fixes) über beide npm-Workspaces (backend,
+#      frontend). Gibt es dadurch Änderungen, entsteht EIN gemeinsamer PR
+#      auf dem festen Branch `chore/security-autofix` — idempotent:
+#      existiert der PR bereits, wird derselbe Branch/PR aktualisiert
+#      statt ein Duplikat zu öffnen.
+#   2. cve-report: trivy-Filesystem-Scan (HIGH/CRITICAL, nur fixbare);
+#      Findings landen in EINEM Sammel-Issue (Label `security`), das bei
+#      jedem Lauf aktualisiert und bei 0 Findings automatisch geschlossen
+#      wird — keine Issue-Flut.
+#
+# Kein Approve-Schritt: Der Merge des Autofix-PRs bleibt manuell bzw.
+# läuft über die Required-Status-Checks der Branch-Protection.
+#
+# Bekannte GITHUB_TOKEN-Einschränkungen:
+#   - Ob Actions PRs ERSTELLEN dürfen, steuert das Setting
+#     „Allow GitHub Actions to create and approve pull requests"
+#     (Repo → Settings → Actions → General → Workflow permissions).
+#     Ist es deaktiviert, scheitert `gh pr create` mit einer klaren
+#     Fehlermeldung — der Workflow bricht dann bewusst rot ab.
+#   - Pushes mit GITHUB_TOKEN lösen keine push/pull_request-Workflows aus
+#     (GitHub-Rekursionsschutz). workflow_dispatch ist davon ausgenommen,
+#     deshalb stößt der Job die Required-Check-Workflows (CI, Security,
+#     Gitleaks) nach dem Push selbst per Dispatch auf dem Autofix-Branch
+#     an; die Check-Runs hängen am Head-SHA und erfüllen damit die
+#     Branch-Protection.
+#
+# Hinweis native Deps (argon2, better-sqlite3): für `npm audit`/`npm audit
+# fix` ist kein Build nötig, deshalb laufen alle npm-Schritte mit
+# --ignore-scripts (wie in ci.yml — Supply-Chain-Schutz).
+
+on:
+  schedule:
+    - cron: '37 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: write
+
+concurrency:
+  group: security-autofix
+  cancel-in-progress: false
+
+jobs:
+  npm-audit-autofix:
+    name: npm audit fix · backend + frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Git-Identität setzen
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: npm audit fix je Workspace
+        id: fix
+        run: |
+          set -euo pipefail
+          BODY="$RUNNER_TEMP/pr-body.md"
+          {
+            echo "Automated security autofix (\`npm audit fix\`, without \`--force\`)."
+            echo ""
+            echo "Semver-compatible fixes only; run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          } > "$BODY"
+
+          CHANGED=false
+          for ws in backend frontend; do
+            echo "══ $ws ══"
+            pushd "$ws" >/dev/null
+            npm ci --ignore-scripts
+            # npm audit endet mit Exit 1 bei Findings — Report trotzdem einsammeln
+            npm audit --json > "$RUNNER_TEMP/audit-$ws.json" || true
+            VULNS=$(jq -r '.metadata.vulnerabilities | (.critical + .high + .moderate + .low)' "$RUNNER_TEMP/audit-$ws.json")
+            echo "$ws: $VULNS Vulnerabilities gemeldet"
+            if [ "$VULNS" -gt 0 ]; then
+              npm audit fix --ignore-scripts || true
+            fi
+            popd >/dev/null
+
+            if ! git diff --quiet -- "$ws/package.json" "$ws/package-lock.json"; then
+              CHANGED=true
+              {
+                echo ""
+                echo "### $ws"
+                echo ""
+                jq -r '
+                  [.vulnerabilities // {} | to_entries[].value.via[]? | select(type=="object")]
+                  | unique_by(.url)
+                  | .[]
+                  | "- **\(.name)** (\(.severity)): \(.title) — \(.url)"
+                ' "$RUNNER_TEMP/audit-$ws.json"
+              } >> "$BODY"
+            else
+              echo "$ws: keine per audit fix behebbaren Änderungen"
+            fi
+          done
+
+          {
+            echo ""
+            echo "---"
+            echo "Created by the \`security-autofix.yml\` workflow. Merge manually or via auto-merge once required checks are green."
+          } >> "$BODY"
+
+          echo "changed=$CHANGED" >> "$GITHUB_OUTPUT"
+          echo "body_file=$BODY" >> "$GITHUB_OUTPUT"
+
+      - name: Branch + PR erstellen/aktualisieren (idempotent)
+        if: steps.fix.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BODY_FILE: ${{ steps.fix.outputs.body_file }}
+        run: |
+          set -euo pipefail
+          BRANCH=chore/security-autofix
+
+          git checkout -B "$BRANCH"
+          git add -u
+          git commit -m "fix(security): npm audit fix - automated CVE remediation (semver-compatible)"
+          git push --force origin "$BRANCH"
+
+          gh label create security --color D93F0B \
+            --description "Security-relevant findings and fixes" --force || true
+
+          EXISTING=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$EXISTING" ]; then
+            gh pr edit "$EXISTING" --body-file "$BODY_FILE"
+            echo "::notice::Bestehender Autofix-PR #$EXISTING aktualisiert (kein Duplikat erstellt)"
+          else
+            gh pr create \
+              --title "fix(security): npm audit fix - automated CVE remediation" \
+              --body-file "$BODY_FILE" \
+              --label security \
+              --base main --head "$BRANCH"
+          fi
+
+          # GITHUB_TOKEN-Push triggert keine push/pull_request-Workflows —
+          # Required-Checks deshalb explizit per workflow_dispatch anstoßen
+          # (Check-Runs hängen am Head-SHA des PR-Branches).
+          for wf in ci.yml security.yml gitleaks.yml; do
+            gh workflow run "$wf" --ref "$BRANCH" || echo "::warning::Dispatch $wf fehlgeschlagen"
+          done
+
+      - name: Ergebnis ins Step-Summary
+        if: always()
+        env:
+          CHANGED: ${{ steps.fix.outputs.changed }}
+        run: |
+          if [ "$CHANGED" = "true" ]; then
+            echo "## npm audit fix: Änderungen → PR auf \`chore/security-autofix\`" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "## npm audit fix: keine automatisch behebbaren Vulnerabilities" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  cve-report:
+    name: trivy · CVE-Sammel-Issue
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Trivy filesystem scan (JSON, informational)
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'json'
+          output: 'trivy-report.json'
+          severity: 'CRITICAL,HIGH'
+          exit-code: '0'
+          ignore-unfixed: true
+
+      - name: Sammel-Issue erstellen/aktualisieren/schließen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          TITLE="Security: Open HIGH/CRITICAL CVEs (trivy, automated report)"
+          COUNT=$(jq '[.Results[]?.Vulnerabilities[]?] | length' trivy-report.json)
+          echo "trivy meldet $COUNT fixbare HIGH/CRITICAL-Findings"
+          echo "## trivy fs: $COUNT fixbare HIGH/CRITICAL-Findings" >> "$GITHUB_STEP_SUMMARY"
+
+          EXISTING=$(gh issue list --state open --json number,title \
+            | jq -r --arg t "$TITLE" '[.[] | select(.title == $t)][0].number // empty')
+
+          if [ "$COUNT" -gt 0 ]; then
+            {
+              echo "Automated CVE report (trivy fs, HIGH/CRITICAL, only findings with an available fix)."
+              echo ""
+              echo "Last run: $(date -u '+%Y-%m-%d %H:%M UTC') — ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+              echo ""
+              echo "| Target | CVE | Package | Installed | Fix | Severity |"
+              echo "|---|---|---|---|---|---|"
+              jq -r '
+                .Results[]? | .Target as $t | .Vulnerabilities[]?
+                | "| \($t) | \(.VulnerabilityID) | \(.PkgName) | \(.InstalledVersion) | \(.FixedVersion // "—") | \(.Severity) |"
+              ' trivy-report.json
+              echo ""
+              echo "_This issue is maintained by the \`security-autofix.yml\` workflow (updated in place; closed automatically at 0 findings)._"
+            } > "$RUNNER_TEMP/issue-body.md"
+
+            gh label create security --color D93F0B \
+              --description "Security-relevant findings and fixes" --force || true
+
+            if [ -n "$EXISTING" ]; then
+              gh issue edit "$EXISTING" --body-file "$RUNNER_TEMP/issue-body.md"
+              echo "::notice::Sammel-Issue #$EXISTING aktualisiert"
+            else
+              gh issue create --title "$TITLE" --label security \
+                --body-file "$RUNNER_TEMP/issue-body.md"
+            fi
+          else
+            if [ -n "$EXISTING" ]; then
+              gh issue close "$EXISTING" \
+                --comment "Closed automatically: trivy no longer reports fixable HIGH/CRITICAL CVEs (run ${GITHUB_RUN_ID})."
+              echo "::notice::Sammel-Issue #$EXISTING geschlossen — keine Findings mehr"
+            fi
+          fi

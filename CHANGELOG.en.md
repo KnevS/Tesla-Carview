@@ -7,6 +7,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.41.5] - 2026-07-13
+
+### Changed
+
+- **Dependabot PRs no longer get stuck behind `main` (auto-rebase).** On every push to `main`, the auto-merge workflow now updates all open Dependabot PRs via `update-branch`. Previously, bot PRs with auto-merge enabled stayed "behind" for good once `main` moved on, and had to be updated manually.
+- **New workflow `security-autofix.yml` (CVE self-healing).** Daily run: (1) `npm audit fix` (semver-compatible fixes only, no `--force`) across backend + frontend — changes land idempotently in a single PR on `chore/security-autofix`; (2) a trivy filesystem scan (HIGH/CRITICAL, fixable only) maintains a single collective issue that closes automatically at 0 findings. Pattern adopted from the sister repos (Skillmatrix, indasys-fleet); no approve step — merging stays behind the required checks.
+
+---
+
 ## [v3.41.4] - 2026-07-11
 
 ### Fixed

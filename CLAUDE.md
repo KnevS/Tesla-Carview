@@ -118,10 +118,11 @@ technisch keine PRs unterstützt). Gilt auch für `teslaview-web`.
 > - **Was zuletzt geschah:** oberster Eintrag in [`CHANGELOG.md`](CHANGELOG.md) / [`CHANGELOG.en.md`](CHANGELOG.en.md)
 > - **Letzte Commits:** `git log --oneline -15 origin/main`
 
-### Aktuell (Stand 2026-07-11)
+### Aktuell (Stand 2026-07-13)
 
-- **Version:** v3.41.4
+- **Version:** v3.41.5
 - **Zuletzt geliefert:**
+  - **v3.41.5:** CI-Ausbau nach fleet/Skillmatrix-Muster: (1) Auto-Rebase-Fix — `dependabot-auto-merge.yml` zieht bei jedem main-Push alle offenen Dependabot-PRs per `gh pr update-branch` nach (vorher blieben Bot-PRs „behind" hängen). (2) Neuer Workflow `security-autofix.yml`: täglich `npm audit fix` (semver-kompatibel) über backend+frontend → idempotenter PR auf `chore/security-autofix`, plus trivy-CVE-Sammel-Issue (schließt sich bei 0 Findings). Required-Checks werden nach dem Bot-Push per `workflow_dispatch` angestoßen (GITHUB_TOKEN-Rekursionsschutz), dafür hat ci.yml jetzt einen dispatch-Trigger.
   - **v3.41.4:** Zoom-Drossel Teil 2 — der Live-429 kam NICHT nur von express, sondern (auf iland) vom **Host-nginx** (`deploy/nginx-host.conf.template`: zone=api 120r/m burst=20 auf `location /api/` inkl. Tiles). Template hat jetzt eigene zone=tiles (1200r/m, burst=300) + `location /api/tiles/`. **Host-nginx auf iland muss manuell nachgezogen werden** (Template anwenden + reload) — Container-Deploy ändert die Host-Config nicht. Merke: 429-Quelle unterscheiden via `ratelimit-*`-Header (express) vs. nackte nginx-Antwort.
   - **v3.41.3:** Karten-Zoom fraß das API-Rate-Limit leer (Sven-Report: „nach Map-Zoom muss ich die Seite neu laden um Menüpunkte auszuwählen"). `/api/tiles` zählte gegen `apiRateLimit` (120/min/IP); ein Zoom = 50–150 Kacheln → Rest der Minute 429 auf ALLE API-Calls. Fix: eigener `tileRateLimit` (1200/min/IP) + `skip` für `/api/tiles` im allgemeinen Limiter (`security.js`, `index.js`). Diagnose-Weg: lokal Demo-Tenant + Playwright; 150 parallele Tile-Requests → `/api/health` 429 reproduziert.
   - **v3.41.2:** Einmalige mph-Korrektur-Migration für Telemetrie-Punkte vor v3.35.3 (Marker `migration.telemetry_speed_mph_fix` in tenant_settings, Cutoff 2026-07-03T19:25:45Z).

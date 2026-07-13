@@ -7,6 +7,15 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.41.5] - 2026-07-13
+
+### Geändert
+
+- **Dependabot-PRs bleiben nicht mehr hinter `main` hängen (Auto-Rebase).** Bei jedem Push auf `main` zieht der Auto-Merge-Workflow jetzt alle offenen Dependabot-PRs per `update-branch` nach. Vorher blieben Bot-PRs mit aktiviertem Auto-Merge dauerhaft „behind" liegen, sobald sich `main` bewegte, und mussten manuell aktualisiert werden.
+- **Neuer Workflow `security-autofix.yml` (CVE-Selbstheilung).** Täglicher Lauf: (1) `npm audit fix` (nur semver-kompatible Fixes, ohne `--force`) über backend + frontend — Änderungen landen idempotent in einem PR auf `chore/security-autofix`; (2) trivy-Filesystem-Scan (HIGH/CRITICAL, nur fixbare) pflegt ein einzelnes Sammel-Issue, das bei 0 Findings automatisch geschlossen wird. Muster aus den Schwester-Repos (Skillmatrix, indasys-fleet) übernommen; kein Approve-Schritt — der Merge bleibt hinter den Required-Checks.
+
+---
+
 ## [v3.41.4] - 2026-07-11
 
 ### Behoben
