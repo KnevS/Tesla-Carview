@@ -7,6 +7,13 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.43.0] - 2026-07-17
+
+### Neu
+
+- **Dienstlich/Privat-Kostensplit für die Heimladen-Erstattung (S08).** Die Kostenabrechnung (Dienstwagen) hat eine neue Sektion „Dienstlich / Privat — Erstattung" mit zwei Methoden: **Pauschale** (steuerfreier Auslagenersatz nach § 3 Nr. 50 EStG — 30 € mit Lademöglichkeit beim Arbeitgeber, 70 € ohne, × Anzahl abgerechneter Monate) und **Fahranteil** (dienstlicher km-Anteil aus `trip_type` [business + commute] ÷ gesamt × tatsächliche Heimladekosten des Zeitraums). Jede Methode erzeugt ein unterschriftsreifes **Erstattungs-PDF** (clientseitig via jsPDF). Backend: neuer `GET /api/billing/:vehicleId/reimbursement` (Heimladekosten + km nach trip_type je Jahr/Monat). Nur für Dienstwagen (`category=company`); deutschsprachig (deutsches Steuerthema, wie die übrige Abrechnung).
+
+
 ## [v3.42.0] - 2026-07-17
 
 ### Neu

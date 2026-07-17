@@ -70,6 +70,88 @@ router.get('/:vehicleId/summary', (req, res) => {
   res.json({ months: rows, vehicle });
 });
 
+// Dienstlich/Privat-Kostensplit für die Erstattung (S08).
+//
+// Liefert die Heimladekosten des Zeitraums plus die gefahrenen km nach
+// `trip_type`, damit das Frontend beide Erstattungsmethoden belegen kann:
+//  - Pauschale: fester Monatsbetrag (dt. Lohnsteuer: 30 € mit Lademöglichkeit
+//    beim Arbeitgeber, 70 € ohne) — die Rate wählt das Frontend.
+//  - Fahranteil: dienstlich (business + commute) ÷ gesamt × Heimladekosten.
+// Zeitraum via ?year=YYYY (Pflicht) und optional ?month=MM (sonst ganzes Jahr).
+router.get('/:vehicleId/reimbursement', (req, res) => {
+  const db = req.db;
+  const vehicle = db.prepare('SELECT * FROM vehicles WHERE id=?').get(req.params.vehicleId);
+  if (!vehicle) return res.status(404).json({ error: 'Fahrzeug nicht gefunden' });
+
+  const year  = parseInt(req.query.year, 10);
+  const month = req.query.month ? parseInt(req.query.month, 10) : null;
+  if (!Number.isInteger(year) || year < 2000 || year > 2100) {
+    return res.status(400).json({ error: 'year (2000–2100) erforderlich' });
+  }
+  if (month !== null && (month < 1 || month > 12)) {
+    return res.status(400).json({ error: 'month muss 1–12 sein' });
+  }
+  // UTC-Zeitfenster [from, to) — konsistent mit der monatlichen Summary,
+  // die ebenfalls über datetime(...,'unixepoch') (UTC) gruppiert.
+  const from   = Math.floor(Date.UTC(year, month ? month - 1 : 0, 1) / 1000);
+  const to     = Math.floor(Date.UTC(year, month ? month : 12, 1) / 1000);
+  const months = month ? 1 : 12;
+
+  const rate = vehicle.electricity_rate_kwh ?? 0.30;
+  const home = db.prepare(`
+    SELECT
+      COUNT(*) as sessions,
+      COALESCE(SUM(COALESCE(cs.energy_kwh_mid, cs.energy_added_kwh)), 0) as kwh,
+      COALESCE(SUM(
+        COALESCE(cs.energy_kwh_mid, cs.energy_added_kwh) *
+        COALESCE(cs.billing_rate_kwh, cl.rate_kwh, ?, 0.30)
+      ), 0) as cost
+    FROM charging_sessions cs
+    LEFT JOIN charging_locations cl ON cl.id = cs.location_id
+    WHERE cs.vehicle_id = ?
+      AND cs.is_free = 0
+      AND cs.start_time >= ? AND cs.start_time < ?
+      AND (cs.is_home_charged = 1
+           OR cs.location_id IN (SELECT id FROM charging_locations WHERE vehicle_id=? AND type='home')
+           OR cs.location_id IS NULL)
+  `).get(rate, vehicle.id, from, to, vehicle.id);
+
+  const km = db.prepare(`
+    SELECT
+      COALESCE(SUM(distance_km), 0) as total_km,
+      COALESCE(SUM(CASE WHEN trip_type='private'  THEN distance_km ELSE 0 END), 0) as private_km,
+      COALESCE(SUM(CASE WHEN trip_type='business' THEN distance_km ELSE 0 END), 0) as business_km,
+      COALESCE(SUM(CASE WHEN trip_type='commute'  THEN distance_km ELSE 0 END), 0) as commute_km
+    FROM trips
+    WHERE vehicle_id = ? AND start_time >= ? AND start_time < ?
+  `).get(vehicle.id, from, to);
+
+  const r1 = v => Math.round((v || 0) * 10) / 10;
+  const r2 = v => Math.round((v || 0) * 100) / 100;
+  const dienstKm = (km.business_km || 0) + (km.commute_km || 0);
+  const share    = km.total_km > 0 ? dienstKm / km.total_km : 0;
+
+  res.json({
+    vehicle: { id: vehicle.id, name: vehicle.display_name, category: vehicle.category },
+    period:  { year, month, months, from, to },
+    home_charging: { sessions: home.sessions, kwh: r2(home.kwh), cost: r2(home.cost) },
+    km: {
+      total:      r1(km.total_km),
+      private:    r1(km.private_km),
+      business:   r1(km.business_km),
+      commute:    r1(km.commute_km),
+      dienstlich: r1(dienstKm),
+    },
+    fahranteil: {
+      business_share_pct: Math.round(share * 100),
+      reimbursable_cost:  r2(home.cost * share),
+      private_cost:       r2(home.cost * (1 - share)),
+    },
+    // Pauschbeträge nach § 3 Nr. 50 EStG / BMF (Auslagenersatz E-Dienstwagen).
+    pauschale: { rate_with_employer: 30, rate_without_employer: 70, months },
+  });
+});
+
 // Einzel-Session: Ladeort zuweisen + Tarif setzen
 router.patch('/sessions/:sessionId', (req, res) => {
   const db = req.db;

@@ -141,6 +141,103 @@
           </div>
         </SortableSection>
 
+        <!-- Dienstlich/Privat-Kostensplit (nur Dienstwagen) — S08 -->
+        <SortableSection v-if="sid === 'split' && reimb && vehicle.category === 'company'"
+          page-id="kostenabrechnung" section-id="split"
+          title="Dienstlich / Privat — Erstattung" icon="🧾"
+          :collapsed="isCollapsed('split')"
+          @toggle="toggle('split')"
+          @move="(f, t, p) => moveSection(f, t, p)">
+          <template #badge>
+            <button @click="exportSplitPdf" class="btn-primary text-xs inline-flex items-center gap-1.5"
+              v-tooltip="'Erstattungsblatt für die gewählte Methode als PDF — mit Berechnung und Unterschriftsfeld.'">
+              <AppIcon name="export" :size="14" /> Erstattungs-PDF
+            </button>
+          </template>
+
+          <!-- Methoden-Umschalter -->
+          <div class="flex gap-2 mb-4">
+            <button @click="splitMethod = 'pauschale'"
+              class="px-3 py-1.5 rounded-lg text-sm transition"
+              :class="splitMethod === 'pauschale' ? 'bg-tesla-red text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'"
+              v-tooltip="'Fester Monatsbetrag laut Lohnsteuerrecht — ohne km-Aufteilung.'">
+              Pauschale
+            </button>
+            <button @click="splitMethod = 'fahranteil'"
+              class="px-3 py-1.5 rounded-lg text-sm transition"
+              :class="splitMethod === 'fahranteil' ? 'bg-tesla-red text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'"
+              v-tooltip="'Datenbasiert: dienstlicher km-Anteil × tatsächliche Heimladekosten.'">
+              Fahranteil
+            </button>
+          </div>
+
+          <!-- Pauschale -->
+          <div v-if="splitMethod === 'pauschale'" class="space-y-4">
+            <div class="flex flex-wrap items-center gap-3">
+              <label class="text-sm text-gray-300">Pauschalrate</label>
+              <select v-model.number="pauschaleRate"
+                class="bg-gray-700 text-white text-sm rounded-lg px-3 py-1.5 border border-gray-600">
+                <option :value="30">30 € — mit Lademöglichkeit beim Arbeitgeber</option>
+                <option :value="70">70 € — ohne Lademöglichkeit beim Arbeitgeber</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-3 gap-4">
+              <div class="bg-gray-800 rounded-xl p-4 text-center space-y-1">
+                <p class="text-xs text-gray-400 uppercase tracking-wide">Monatsrate</p>
+                <p class="text-2xl font-bold text-white">{{ fmtN(pauschaleRate, 0) }} €</p>
+              </div>
+              <div class="bg-gray-800 rounded-xl p-4 text-center space-y-1">
+                <p class="text-xs text-gray-400 uppercase tracking-wide">Zeitraum</p>
+                <p class="text-2xl font-bold text-white">{{ reimb.period.months }}</p>
+                <p class="text-xs text-gray-500">{{ reimb.period.months === 1 ? 'Monat' : 'Monate' }}</p>
+              </div>
+              <div class="bg-gray-800 rounded-xl p-4 text-center space-y-1 bg-green-900/20 border border-green-800">
+                <p class="text-xs text-gray-400 uppercase tracking-wide">Erstattung</p>
+                <p class="text-2xl font-bold text-green-300">{{ fmtN(pauschaleTotal, 2) }} €</p>
+                <p class="text-xs text-gray-500">steuerfrei</p>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500">
+              Steuerfreier Auslagenersatz nach § 3 Nr. 50 EStG (BMF-Pauschale für das elektrische Aufladen eines
+              Dienstwagens beim Arbeitnehmer). Kein Einzelnachweis der Ladekosten nötig.
+            </p>
+          </div>
+
+          <!-- Fahranteil -->
+          <div v-else class="space-y-4">
+            <div v-if="reimb.km.total <= 0"
+                 class="flex items-start gap-3 bg-amber-900/20 border border-amber-700/30 rounded-xl px-4 py-3 text-sm text-amber-200">
+              <span class="text-lg leading-none mt-0.5">⚠️</span>
+              <span>Keine klassifizierten Fahrten im Zeitraum. Ordne unter <RouterLink to="/fahrtenbuch" class="underline">Fahrtenbuch</RouterLink> Fahrten als dienstlich/privat zu, damit der Fahranteil berechnet werden kann.</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div class="bg-gray-800 rounded-xl p-3 text-center space-y-1">
+                <p class="text-xs text-gray-400 uppercase tracking-wide">Dienstlich</p>
+                <p class="text-lg font-bold text-white">{{ fmtN(reimb.km.dienstlich, 0) }} km</p>
+                <p class="text-xs text-gray-500">Geschäft + Arbeitsweg</p>
+              </div>
+              <div class="bg-gray-800 rounded-xl p-3 text-center space-y-1">
+                <p class="text-xs text-gray-400 uppercase tracking-wide">Privat</p>
+                <p class="text-lg font-bold text-white">{{ fmtN(reimb.km.private, 0) }} km</p>
+              </div>
+              <div class="bg-gray-800 rounded-xl p-3 text-center space-y-1">
+                <p class="text-xs text-gray-400 uppercase tracking-wide">Dienstl. Anteil</p>
+                <p class="text-lg font-bold text-white">{{ reimb.fahranteil.business_share_pct }} %</p>
+                <p class="text-xs text-gray-500">von {{ fmtN(reimb.km.total, 0) }} km</p>
+              </div>
+              <div class="bg-gray-800 rounded-xl p-3 text-center space-y-1 bg-green-900/20 border border-green-800">
+                <p class="text-xs text-gray-400 uppercase tracking-wide">Erstattung</p>
+                <p class="text-lg font-bold text-green-300">{{ fmtN(reimb.fahranteil.reimbursable_cost, 2) }} €</p>
+                <p class="text-xs text-gray-500">von {{ fmtN(reimb.home_charging.cost, 2) }} €</p>
+              </div>
+            </div>
+            <p class="text-xs text-gray-500">
+              Dienstlicher km-Anteil × tatsächliche Heimladekosten des Zeitraums ({{ fmtN(reimb.home_charging.kwh, 1) }} kWh
+              aus {{ reimb.home_charging.sessions }} Sessions). Privat verbleiben {{ fmtN(reimb.fahranteil.private_cost, 2) }} €.
+            </p>
+          </div>
+        </SortableSection>
+
         <!-- Sessions-Detail -->
         <SortableSection v-if="sid === 'sessions'"
           page-id="kostenabrechnung" section-id="sessions"
@@ -259,13 +356,17 @@ const sessions = ref([]);
 const months   = ref([]);
 const syncing  = ref(false);
 const toast    = ref(null);
+// Dienstlich/Privat-Kostensplit (S08)
+const reimb        = ref(null);
+const splitMethod  = ref('pauschale');   // 'pauschale' | 'fahranteil'
+const pauschaleRate = ref(30);           // 30 € (mit Lademögl. beim AG) | 70 € (ohne)
 const selYear  = ref(String(new Date().getFullYear()));
 const selMonth = ref(String(new Date().getMonth() + 1).padStart(2, '0'));
 // Sortierreihenfolge pro View in localStorage. Default desc (Neueste oben).
 const { direction: sortDir } = useSortDirection('kostenabrechnung');
 
 // Dynamisches Sektions-Layout: per Drag sortierbar, kollabierbar.
-const KA_SECTIONS = ['overview', 'months', 'sessions', 'template'];
+const KA_SECTIONS = ['overview', 'months', 'split', 'sessions', 'template'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('kostenabrechnung', KA_SECTIONS);
 
 const years = computed(() => Array.from({ length: 5 }, (_, i) => String(new Date().getFullYear() - i)));
@@ -275,6 +376,9 @@ const yearTotal = computed(() => ({
   amount:   months.value.reduce((s, m) => s + m.total_amount, 0),
   sessions: months.value.reduce((s, m) => s + m.sessions, 0),
 }));
+
+// Pauschale: Monatsrate × Anzahl abgerechneter Monate (1 bei Monatswahl, sonst 12).
+const pauschaleTotal = computed(() => (reimb.value?.period?.months || 0) * pauschaleRate.value);
 
 const fmtN    = (v, d = 0) => Number(+(v || 0)).toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
 const fmtDate = ts => new Date(ts * 1000).toLocaleDateString('de-DE');
@@ -297,14 +401,18 @@ async function load() {
   const v = appStore.selectedVehicle;
   if (!v) return;
 
-  const [vRes, sRes, mRes] = await Promise.all([
+  const [vRes, sRes, mRes, rRes] = await Promise.all([
     api.get(`/vehicles/${v.id}`).catch(() => ({ data: v })),
     api.get(`/billing/${v.id}/sessions`, { params: buildParams() }),
     api.get(`/billing/${v.id}/summary`),
+    api.get(`/billing/${v.id}/reimbursement`, {
+      params: { year: selYear.value, month: selMonth.value || undefined },
+    }).catch(() => ({ data: null })),
   ]);
 
   vehicle.value  = vRes.data ?? v;
   sessions.value = sRes.data?.sessions ?? [];
+  reimb.value    = rRes.data;
 
   // Monatsstatistik aus Sessions berechnen
   const raw = mRes.data?.months ?? [];
@@ -436,6 +544,92 @@ async function exportPdf() {
   doc.setTextColor(0);
 
   doc.save(`heimladen-${selYear.value}${selMonth.value ? '-' + selMonth.value : ''}.pdf`);
+}
+
+/** Erstattungsblatt für den Dienstlich/Privat-Split (S08) als PDF — je nach
+ *  gewählter Methode (Pauschale oder Fahranteil). Wie exportPdf vollständig
+ *  clientseitig via jsPDF, damit keine Daten über den Server gehen. */
+async function exportSplitPdf() {
+  if (!reimb.value) return;
+  const { jsPDF } = await import('jspdf');
+  const autoTable = (await import('jspdf-autotable')).default;
+
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const fmtMoney = v => fmtN(v, 2).replace('.', ',') + ' €';
+  const periodLabel = selMonth.value ? `${monthName(+selMonth.value)} ${selYear.value}` : selYear.value;
+  const isPausch = splitMethod.value === 'pauschale';
+
+  doc.setFontSize(16); doc.setFont('helvetica', 'bold');
+  doc.text('Erstattung Ladekosten Dienstwagen', 14, 18);
+  doc.setFontSize(11); doc.setFont('helvetica', 'normal');
+  doc.text(isPausch ? 'Methode: Pauschale (steuerfreier Auslagenersatz)'
+                    : 'Methode: Fahranteil (dienstlicher km-Anteil)', 14, 25);
+
+  doc.setFontSize(10);
+  const head = [];
+  if (vehicle.value?.company_name) head.push(`Arbeitgeber: ${vehicle.value.company_name}`);
+  head.push(`Fahrzeug: ${vehicle.value?.display_name ?? ''}${vehicle.value?.license_plate ? ` (${vehicle.value.license_plate})` : ''}`);
+  head.push(`Abrechnungszeitraum: ${periodLabel}`);
+  head.push(`Erstellt: ${new Date().toLocaleDateString('de-DE')}`);
+  let y = 35;
+  for (const line of head) { doc.text(line, 14, y); y += 5; }
+
+  const rows = [];
+  let total;
+  if (isPausch) {
+    total = pauschaleTotal.value;
+    rows.push(['Pauschalrate', `${fmtN(pauschaleRate.value, 0)} € / Monat`]);
+    rows.push(['Abgerechnete Monate', String(reimb.value.period.months)]);
+    rows.push(['Rechtsgrundlage', pauschaleRate.value === 30
+      ? '§ 3 Nr. 50 EStG — mit Lademöglichkeit beim Arbeitgeber'
+      : '§ 3 Nr. 50 EStG — ohne Lademöglichkeit beim Arbeitgeber']);
+    rows.push(['Erstattungsbetrag (steuerfrei)', fmtMoney(total)]);
+  } else {
+    const k = reimb.value.km, f = reimb.value.fahranteil, h = reimb.value.home_charging;
+    total = f.reimbursable_cost;
+    rows.push(['Dienstlich (Geschäft + Arbeitsweg)', `${fmtN(k.dienstlich, 0)} km`]);
+    rows.push(['Privat', `${fmtN(k.private, 0)} km`]);
+    rows.push(['Gesamt', `${fmtN(k.total, 0)} km`]);
+    rows.push(['Dienstlicher Anteil', `${f.business_share_pct} %`]);
+    rows.push(['Heimladung', `${fmtN(h.kwh, 1)} kWh · ${h.sessions} Sessions · ${fmtMoney(h.cost)}`]);
+    rows.push(['Erstattungsbetrag (dienstlich)', fmtMoney(total)]);
+  }
+
+  autoTable(doc, {
+    startY: y + 4,
+    body: rows,
+    styles: { fontSize: 10, cellPadding: 2.2 },
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 95 }, 1: { halign: 'right' } },
+    // Letzte Zeile (Erstattungsbetrag) hervorheben.
+    didParseCell: hook => {
+      if (hook.row.index === rows.length - 1) {
+        hook.cell.styles.fillColor = [220, 252, 231];
+        hook.cell.styles.textColor = [22, 101, 52];
+        hook.cell.styles.fontStyle = 'bold';
+      }
+    },
+    margin: { left: 14, right: 14 },
+  });
+
+  const afterY = doc.lastAutoTable.finalY + 8;
+  doc.setFontSize(8); doc.setTextColor(120);
+  doc.text(isPausch
+    ? 'Pauschaler Auslagenersatz ohne Einzelnachweis der Ladekosten (BMF).'
+    : 'Dienstlicher km-Anteil aus den klassifizierten Fahrten × tatsächliche Heimladekosten des Zeitraums.',
+    14, afterY);
+  doc.setTextColor(0);
+
+  const pageH = doc.internal.pageSize.getHeight();
+  const sigY  = pageH - 35;
+  doc.setDrawColor(150);
+  doc.line(14, sigY, 90, sigY);
+  doc.line(110, sigY, 195, sigY);
+  doc.setFontSize(8); doc.setTextColor(120);
+  doc.text('Ort, Datum', 14, sigY + 4);
+  doc.text('Unterschrift Arbeitnehmer', 110, sigY + 4);
+  doc.setTextColor(0);
+
+  doc.save(`erstattung-${splitMethod.value}-${selYear.value}${selMonth.value ? '-' + selMonth.value : ''}.pdf`);
 }
 
 function exportCsv() {

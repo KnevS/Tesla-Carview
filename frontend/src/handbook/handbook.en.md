@@ -241,6 +241,15 @@ Each location can carry a desired charge limit (e.g. 80 %). At trip end TeslaVie
 
 The "🔋 Apply now" button can trigger the command manually. Tesla recommends 70-80 % for daily charging, 50-60 % for long-term storage, 100 % only for long trips.
 
+## 💶 Business/private reimbursement {#reimbursement-split}
+
+For **company cars** (vehicle category "company car"), **Cost billing → Business / private — reimbursement** splits the home-charging cost and produces a signature-ready reimbursement PDF using one of two methods:
+
+- **Flat rate** — a fixed tax-free monthly amount under German § 3 No. 50 EStG: **€30** with a charging option at the employer, **€70** without. No itemised proof needed; the amount is multiplied by the number of billed months.
+- **Mileage share** — data-driven: the business share of km (business + commute, from the classified trips) times the actual home-charging cost for the period. Requires trips to be classified as business/private in the logbook.
+
+Both methods are German-language only (German tax topic) and available for company cars only.
+
 ## 📅 Charge planner {#charge-planner}
 
 The **charge planner** (nav "Planning → Charge Planner", `/ladeplan`) answers the "when should I charge?" question for a dynamic electricity tariff. It picks the **cheapest hours before departure** from the price curve — not necessarily contiguous — rather than just the next contiguous window.
