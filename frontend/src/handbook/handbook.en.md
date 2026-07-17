@@ -241,6 +241,20 @@ Each location can carry a desired charge limit (e.g. 80 %). At trip end TeslaVie
 
 The "🔋 Apply now" button can trigger the command manually. Tesla recommends 70-80 % for daily charging, 50-60 % for long-term storage, 100 % only for long trips.
 
+## 📅 Charge planner {#charge-planner}
+
+The **charge planner** (nav "Planning → Charge Planner", `/ladeplan`) answers the "when should I charge?" question for a dynamic electricity tariff. It picks the **cheapest hours before departure** from the price curve — not necessarily contiguous — rather than just the next contiguous window.
+
+**Prerequisite** — A dynamic provider (aWattar or Tibber) must be connected under Settings → Tariff. Without a tariff the planner shows a hint linking to the configuration.
+
+**Inputs** — Current charge, target charge, battery capacity (kWh), charging power (kW) and departure time. The values are remembered locally in the browser.
+
+**Result** — Four figures: energy to add (incl. the charge level reached), pure charging time, optimal cost (cheapest hours only) and the savings versus charging straight away (absolute and in %). Below, a bar chart shows the planning window until departure; the charging hours chosen by the planner are highlighted in green.
+
+**Not enough time** — If the window before departure is too short for the target charge, the planner says so and states the maximum reachable charge level.
+
+The planner works purely on the tariff curve — **no command is sent to the vehicle** and no Fleet API is required. Charging losses (AC typically ~10 %) are included in energy and cost.
+
 ## 🔐 Security {#security}
 
 - 🔑 **Passkey / WebAuthn** — Passwordless login with fingerprint, Face ID or hardware key

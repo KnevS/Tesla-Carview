@@ -114,6 +114,10 @@
     "nearby": {
       "label": "Cerca",
       "tooltip": "POIs alrededor de tu posición o estación de carga"
+    },
+    "chargePlanner": {
+      "label": "Planificador de carga",
+      "tooltip": "Calcula las franjas de carga más baratas antes de la salida a partir de tu tarifa dinámica, con coste y ahorro frente a cargar ahora"
     }
   },
   "dashboard": {
@@ -3126,5 +3130,35 @@
     "resetColors": "Colores estándar",
     "resetColorsTip": "Restablecer todos los colores de capa a los valores estándar",
     "empty": "No hay datos geográficos para el período seleccionado."
+  },
+  "chargePlanner": {
+    "title": "Planificador de carga",
+    "intro": "Usa tu tarifa eléctrica dinámica para calcular en qué horas antes de la salida es más barato cargar, y cuánto ahorras frente a cargar de inmediato. Solo analiza la curva de precios, sin acceso al vehículo.",
+    "subtitle": "Franjas de carga más baratas antes de la salida",
+    "notConfigured": "El planificador de carga necesita una tarifa eléctrica dinámica (aWattar o Tibber). Configúrala en los ajustes de administración.",
+    "configureTariff": "Configurar tarifa",
+    "currentSoc": "Carga actual (%)",
+    "targetSoc": "Carga objetivo (%)",
+    "capacity": "Capacidad de la batería (kWh)",
+    "capacityTip": "Capacidad utilizable de tu batería. Model 3/Y SR ~57–60, LR ~75–79 kWh.",
+    "power": "Potencia de carga (kW)",
+    "powerTip": "En casa, la CA suele ser 11 kW, monofásica 3,7 kW. Cargadores rápidos (CC) mucho más.",
+    "readyBy": "Salida / listo para",
+    "compute": "Calcular",
+    "computing": "Calculando …",
+    "infeasible": "No hay tiempo suficiente antes de la salida para alcanzar la carga objetivo. Se puede llegar a un {soc}% en lugar de {target}%.",
+    "tileCharge": "Por cargar",
+    "tileChargeTip": "Energía que debe entrar en la batería para pasar de la carga actual a la objetivo.",
+    "tileDuration": "Tiempo de carga",
+    "tileDurationTip": "Tiempo de carga puro a la potencia indicada, incluidas las pérdidas de carga.",
+    "tileCost": "Coste óptimo",
+    "tileCostTip": "Coste al cargar solo durante las horas más baratas antes de la salida.",
+    "tileSavings": "Ahorro",
+    "tileSavingsTip": "Diferencia entre cargar de inmediato y el plan óptimo.",
+    "vsImmediate": "en vez de {value} ahora",
+    "scheduleTitle": "Plan de carga hasta la salida",
+    "legendCharge": "Cargando",
+    "legendIdle": "Pausa",
+    "barTooltip": "{time}: {value} ct/kWh · {kwh} kWh cargados"
   }
 }

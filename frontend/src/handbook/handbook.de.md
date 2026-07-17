@@ -238,6 +238,20 @@ Typischer Anwendungsfall: Laden am Arbeitsplatz, das vom Arbeitgeber gestellt wi
 
 **Ladeverlauf, Kosten nach Ort & günstige Ladefenster (v3.24–v3.26)** — In der Laden-Ansicht öffnet jede Session über *„📈 Verlauf ansehen"* ihren **Ladeverlauf**: Leistungs- und Ladestandskurve über die Zeit plus Eckdaten (Dauer, geladene kWh, Ø-/Spitzenleistung, Kosten) und eine klar gekennzeichnete Schätzung von Netzentnahme und Ladeverlust (Wirkungsgrad je Ladetyp). Die Sektion **„Kosten nach Ort"** fasst je Ladeort Anzahl, kWh, Gesamtkosten und Ø €/kWh zusammen — mit Heim-/Auswärts-Kennzeichnung. Ist unter Einstellungen → Tarif ein Strompreis-Anbieter (aWattar/Tibber) verbunden, zeigt **„Günstige Ladefenster"** den aktuellen Preis sowie das günstigste 4- und 8-Stunden-Fenster der nächsten 24 Stunden samt Stundenraster.
 
+## 📅 Ladeplaner {#charge-planner}
+
+Der **Ladeplaner** (Nav „Planung → Ladeplaner", `/ladeplan`) beantwortet die Frage „Wann soll ich laden?" für einen dynamischen Stromtarif. Er wählt aus der Preiskurve die **günstigsten Stunden bis zur Abfahrt** — auch nicht zusammenhängend — statt einfach das nächste zusammenhängende Fenster.
+
+**Voraussetzung** — Unter Einstellungen → Tarif muss ein dynamischer Anbieter (aWattar oder Tibber) verbunden sein. Ohne Tarif zeigt der Ladeplaner einen Hinweis mit Link zur Konfiguration.
+
+**Eingaben** — Aktueller Ladestand, Ziel-Ladestand, Akkukapazität (kWh), Ladeleistung (kW) und Abfahrtszeit. Die Werte werden lokal im Browser gemerkt.
+
+**Ergebnis** — Vier Kennzahlen: nachzuladende Energie (inkl. erreichtem Ladestand), reine Ladedauer, optimale Kosten (nur günstigste Stunden) und die Ersparnis gegenüber sofortigem Durchladen (absolut und in %). Darunter zeigt ein Balkendiagramm das Planungsfenster bis zur Abfahrt; die vom Planer gewählten Ladestunden sind grün hervorgehoben.
+
+**Reicht die Zeit nicht** — Ist das Fenster bis zur Abfahrt zu kurz für den Ziel-Ladestand, weist der Planer darauf hin und nennt den maximal erreichbaren Ladestand.
+
+Der Ladeplaner rechnet ausschließlich auf der Tarifkurve — es wird **kein Befehl ans Fahrzeug gesendet** und keine Fleet-API benötigt. Ladeverluste (AC typischerweise ~10 %) sind in Energie und Kosten eingerechnet.
+
 ## 🔐 Sicherheit {#security}
 
 - 🔑 **Passkey / WebAuthn** — Passwortloser Login mit Fingerabdruck, Face ID oder Hardware-Key

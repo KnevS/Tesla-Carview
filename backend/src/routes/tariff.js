@@ -11,7 +11,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import { requireAdmin } from '../middleware/auth.js';
-import { getPrices, currentPrice, bestWindow, invalidateCache } from '../services/tariffService.js';
+import { getPrices, currentPrice, bestWindow, planCharge, invalidateCache } from '../services/tariffService.js';
 
 const router = Router();
 
@@ -111,6 +111,36 @@ router.get('/best-window', async (req, res) => {
   try {
     const prices = await getPrices(req.tenantId, config);
     res.json({ configured: true, ...(bestWindow(prices, hours) || {}) });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+
+/** GET /api/tariff/charge-plan — Ladeplan-Rechner (S08).
+ *  Query: current_soc, target_soc, capacity_kwh, power_kw (Pflicht),
+ *  ready_by (unix_seconds, optional), efficiency (0.5–1, optional).
+ *  Liefert die guenstigsten Ladeslots bis zur Abfahrt + Kosten/Ersparnis. */
+router.get('/charge-plan', async (req, res) => {
+  const num = (v, def) => {
+    const n = parseFloat(v);
+    return Number.isFinite(n) ? n : def;
+  };
+  const currentSoc  = Math.min(100, Math.max(0, num(req.query.current_soc, 20)));
+  const targetSoc   = Math.min(100, Math.max(0, num(req.query.target_soc, 80)));
+  const capacityKwh = Math.min(250, Math.max(1, num(req.query.capacity_kwh, 75)));
+  const powerKw     = Math.min(400, Math.max(0.1, num(req.query.power_kw, 11)));
+  const efficiency  = Math.min(1, Math.max(0.5, num(req.query.efficiency, 0.9)));
+  const readyByRaw  = parseInt(req.query.ready_by, 10);
+  const readyBy     = Number.isFinite(readyByRaw) && readyByRaw > 0 ? readyByRaw : null;
+
+  const config = readConfig(req.db);
+  if (config.provider === 'none') return res.json({ configured: false });
+  try {
+    const prices = await getPrices(req.tenantId, config);
+    const plan = planCharge(prices, {
+      currentSoc, targetSoc, capacityKwh, powerKw, readyBy, efficiency,
+    });
+    res.json({ configured: true, ...(plan || {}) });
   } catch (e) {
     res.status(502).json({ error: e.message });
   }

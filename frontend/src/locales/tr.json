@@ -114,6 +114,10 @@
     "nearby": {
       "label": "Yakında",
       "tooltip": "Güncel konumunuz veya şarj istasyonunuz çevresindeki POIlar"
+    },
+    "chargePlanner": {
+      "label": "Şarj planlayıcı",
+      "tooltip": "Dinamik tarifenizden kalkıştan önceki en ucuz şarj aralıklarını hesaplar — hemen şarj etmeye kıyasla maliyet ve tasarrufla"
     }
   },
   "dashboard": {
@@ -3126,5 +3130,35 @@
     "resetColors": "Varsayılan renkler",
     "resetColorsTip": "Tüm katman renklerini varsayılana döndür",
     "empty": "Seçilen dönem için coğrafi veri yok."
+  },
+  "chargePlanner": {
+    "title": "Şarj planlayıcı",
+    "intro": "Dinamik elektrik tarifenizi kullanarak kalkıştan önce hangi saatlerde şarj etmenin en ucuz olduğunu ve hemen şarj etmeye kıyasla ne kadar tasarruf ettiğinizi hesaplar. Yalnızca fiyat eğrisini analiz eder, araca erişmez.",
+    "subtitle": "Kalkıştan önceki en ucuz şarj aralıkları",
+    "notConfigured": "Şarj planlayıcı, dinamik bir elektrik tarifesi (aWattar veya Tibber) gerektirir. Yönetici ayarlarından ayarlayın.",
+    "configureTariff": "Tarife ayarla",
+    "currentSoc": "Mevcut şarj (%)",
+    "targetSoc": "Hedef şarj (%)",
+    "capacity": "Batarya kapasitesi (kWh)",
+    "capacityTip": "Bataryanızın kullanılabilir kapasitesi. Model 3/Y SR ~57–60, LR ~75–79 kWh.",
+    "power": "Şarj gücü (kW)",
+    "powerTip": "Evde AC genelde 11 kW, tek faz 3,7 kW. DC hızlı şarj çok daha yüksek.",
+    "readyBy": "Kalkış / hazır olma",
+    "compute": "Hesapla",
+    "computing": "Hesaplanıyor …",
+    "infeasible": "Kalkışa kadar hedef şarja ulaşmak için yeterli zaman yok. %{target} yerine yaklaşık %{soc} elde edilebilir.",
+    "tileCharge": "Şarj edilecek",
+    "tileChargeTip": "Mevcut şarjdan hedef şarja ulaşmak için bataryaya girmesi gereken enerji.",
+    "tileDuration": "Şarj süresi",
+    "tileDurationTip": "Belirtilen güçte saf şarj süresi — şarj kayıpları dahil.",
+    "tileCost": "En uygun maliyet",
+    "tileCostTip": "Yalnızca kalkıştan önceki en ucuz saatlerde şarj edildiğindeki maliyet.",
+    "tileSavings": "Tasarruf",
+    "tileSavingsTip": "Hemen şarj etmek ile en uygun plan arasındaki fark.",
+    "vsImmediate": "hemen {value} yerine",
+    "scheduleTitle": "Kalkışa kadar şarj planı",
+    "legendCharge": "Şarj",
+    "legendIdle": "Bekleme",
+    "barTooltip": "{time}: {value} ct/kWh · {kwh} kWh şarj edildi"
   }
 }

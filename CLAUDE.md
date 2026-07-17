@@ -118,10 +118,11 @@ technisch keine PRs unterstützt). Gilt auch für `teslaview-web`.
 > - **Was zuletzt geschah:** oberster Eintrag in [`CHANGELOG.md`](CHANGELOG.md) / [`CHANGELOG.en.md`](CHANGELOG.en.md)
 > - **Letzte Commits:** `git log --oneline -15 origin/main`
 
-### Aktuell (Stand 2026-07-13)
+### Aktuell (Stand 2026-07-17)
 
-- **Version:** v3.41.5
+- **Version:** v3.42.0
 - **Zuletzt geliefert:**
+  - **v3.42.0 (Feature Ladeplaner, S08):** neue View `ChargePlanner.vue` (`/ladeplan`, Nav-Gruppe „Planung") + Backend `planCharge()` in `tariffService.js` und `GET /api/tariff/charge-plan`. Greedy wählt die günstigsten — auch nicht zusammenhängenden — Stundenslots bis zur Abfahrt aus der aWattar/Tibber-Preiskurve (Rand-Slots anteilig); vier Kennzahlen (Nachladen inkl. erreichtem SoC / Ladedauer / optimale Kosten / Ersparnis gegen „sofort") + Balken mit grün markierten Slots; Ladeverluste via `efficiency` (AC ~0,9). **Reine Preiskurven-Rechnung, KEIN Tesla-/Fleet-Call.** i18n ×7 (`chargePlanner`, `nav.chargePlanner`), Handbuch DE/EN/ES/FR/TR/EL, README ×7. Merke: NavBar nutzt hardcoded `label` (`it.label ?? t(...)`); der i18n-Key `nav.<key>` greift nur in SettingsWizard/MobileTabBar. **Offen für S08:** PV-Überschussladen (EVCC/HA/Modbus) und dienstlich/privat-Kostensplit-PDF sind noch nicht gebaut.
   - **v3.41.5:** CI-Ausbau nach fleet/Skillmatrix-Muster: (1) Auto-Rebase-Fix — `dependabot-auto-merge.yml` zieht bei jedem main-Push alle offenen Dependabot-PRs per `gh pr update-branch` nach (vorher blieben Bot-PRs „behind" hängen). (2) Neuer Workflow `security-autofix.yml`: täglich `npm audit fix` (semver-kompatibel) über backend+frontend → idempotenter PR auf `chore/security-autofix`, plus trivy-CVE-Sammel-Issue (schließt sich bei 0 Findings). Required-Checks werden nach dem Bot-Push per `workflow_dispatch` angestoßen (GITHUB_TOKEN-Rekursionsschutz), dafür hat ci.yml jetzt einen dispatch-Trigger.
   - **v3.41.4:** Zoom-Drossel Teil 2 — der Live-429 kam NICHT nur von express, sondern (auf iland) vom **Host-nginx** (`deploy/nginx-host.conf.template`: zone=api 120r/m burst=20 auf `location /api/` inkl. Tiles). Template hat jetzt eigene zone=tiles (1200r/m, burst=300) + `location /api/tiles/`. **Host-nginx auf iland muss manuell nachgezogen werden** (Template anwenden + reload) — Container-Deploy ändert die Host-Config nicht. Merke: 429-Quelle unterscheiden via `ratelimit-*`-Header (express) vs. nackte nginx-Antwort.
   - **v3.41.3:** Karten-Zoom fraß das API-Rate-Limit leer (Sven-Report: „nach Map-Zoom muss ich die Seite neu laden um Menüpunkte auszuwählen"). `/api/tiles` zählte gegen `apiRateLimit` (120/min/IP); ein Zoom = 50–150 Kacheln → Rest der Minute 429 auf ALLE API-Calls. Fix: eigener `tileRateLimit` (1200/min/IP) + `skip` für `/api/tiles` im allgemeinen Limiter (`security.js`, `index.js`). Diagnose-Weg: lokal Demo-Tenant + Playwright; 150 parallele Tile-Requests → `/api/health` 429 reproduziert.
@@ -150,7 +151,7 @@ technisch keine PRs unterstützt). Gilt auch für `teslaview-web`.
   - **Setup-Wizard-Fix (#170):** `db.transaction()`-Callback in `/api/setup/init` synchron gemacht (better-sqlite3 lehnt async-Callbacks ab).
   - **Fleet-Telemetry Ende-zu-Ende funktionsfähig (v3.32.4/.5):** Receiver entpackt FlatBuffers-Envelope + eingebettetes Protobuf; `fleet_telemetry_config` über den Fleet-Level-Endpoint mit echter CA-Kette. Live verifiziert.
   - **Betriebs-Selbsttest (v3.32.0):** `selfCheck.js` + `GET/POST /api/system/self-check`.
-- **Doku-Stand:** README (7 Sprachen), In-App-Handbuch (6 Sprachen), GitHub-Wiki (7 Sprachen) und Marketing-Site `teslaview-web` auf **v3.41.0** synchronisiert (2026-07-09). **Regel (Sven): Doku + Marketing-Site immer im selben Arbeitsgang wie das Feature — nie auf einen Sammel-Sync verschieben.**
+- **Doku-Stand:** README (7 Sprachen) + In-App-Handbuch (6 Sprachen) mit dem Ladeplaner (v3.42.0) synchronisiert (2026-07-17). **Offen für v3.42.0:** GitHub-Wiki (7 Sprachen) und Marketing-Site `teslaview-web` noch nicht nachgezogen (separate Repos). Basis-Sync für v3.41.0 lag bei 2026-07-09. **Regel (Sven): Doku + Marketing-Site immer im selben Arbeitsgang wie das Feature — nie auf einen Sammel-Sync verschieben.**
 
 ### Architektur-Ankerpunkte (stabil — hier nachschlagen)
 

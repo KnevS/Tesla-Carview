@@ -242,6 +242,20 @@ Her konum istenen bir şarj limiti taşıyabilir (örn. %80). Yolculuk sonunda T
 
 "🔋 Şimdi uygula" düğmesi komutu manuel olarak tetikler. Tesla günlük şarj için %70-80, uzun süreli depolama için %50-60, sadece uzun yolculuklar için %100 önerir.
 
+## 📅 Şarj planlayıcı {#charge-planner}
+
+**Şarj planlayıcı** (nav "Planlama → Şarj planlayıcı", `/ladeplan`), dinamik bir elektrik tarifesi için "ne zaman şarj etmeliyim?" sorusunu yanıtlar. Fiyat eğrisinden kalkıştan önceki **en ucuz saatleri** — mutlaka ardışık olmayan — seçer, yalnızca bir sonraki ardışık aralığı değil.
+
+**Ön koşul** — Ayarlar → Tarife altında dinamik bir sağlayıcı (aWattar veya Tibber) bağlı olmalıdır. Tarife yoksa planlayıcı, yapılandırmaya bağlantı içeren bir uyarı gösterir.
+
+**Girdiler** — Mevcut şarj, hedef şarj, batarya kapasitesi (kWh), şarj gücü (kW) ve kalkış saati. Değerler tarayıcıda yerel olarak hatırlanır.
+
+**Sonuç** — Dört değer: şarj edilecek enerji (ulaşılan şarj dahil), saf şarj süresi, en uygun maliyet (yalnızca en ucuz saatler) ve hemen şarj etmeye kıyasla tasarruf (mutlak ve % olarak). Altında bir çubuk grafik kalkışa kadarki planlama penceresini gösterir; planlayıcının seçtiği şarj saatleri yeşil vurgulanır.
+
+**Zaman yetersizse** — Kalkıştan önceki pencere hedef şarj için çok kısaysa, planlayıcı bunu belirtir ve ulaşılabilecek maksimum şarj seviyesini söyler.
+
+Planlayıcı yalnızca tarife eğrisi üzerinde hesaplar: araca **hiçbir komut gönderilmez** ve Fleet API gerekmez. Şarj kayıpları (AC tipik olarak ~%10) enerji ve maliyete dahildir.
+
 ## 🔐 Güvenlik {#security}
 
 - 🔑 **Passkey / WebAuthn** — Parmak izi, Face ID veya donanım anahtarıyla parolasız giriş

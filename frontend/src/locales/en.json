@@ -114,6 +114,10 @@
     "nearby": {
       "label": "Nearby",
       "tooltip": "POIs around your current position or charging station"
+    },
+    "chargePlanner": {
+      "label": "Charge Planner",
+      "tooltip": "Work out the cheapest charging slots before departure from your dynamic tariff — with cost and savings versus charging right now"
     }
   },
   "dashboard": {
@@ -3135,5 +3139,35 @@
     "resetColors": "Default colours",
     "resetColorsTip": "Reset all layer colours to their defaults",
     "empty": "No geo data for the selected period."
+  },
+  "chargePlanner": {
+    "title": "Charge Planner",
+    "intro": "Uses your dynamic electricity tariff to work out which hours before departure are cheapest to charge — and how much you save versus charging straight away. Pure price-curve analysis, no vehicle access.",
+    "subtitle": "Cheapest charging slots before departure",
+    "notConfigured": "The charge planner needs a dynamic electricity tariff (aWattar or Tibber). Set one up in the admin settings.",
+    "configureTariff": "Set up tariff",
+    "currentSoc": "Current charge (%)",
+    "targetSoc": "Target charge (%)",
+    "capacity": "Battery capacity (kWh)",
+    "capacityTip": "Usable capacity of your battery. Model 3/Y SR ~57–60, LR ~75–79 kWh.",
+    "power": "Charging power (kW)",
+    "powerTip": "At home, AC is typically 11 kW, single-phase 3.7 kW. DC fast chargers much higher.",
+    "readyBy": "Departure / ready by",
+    "compute": "Calculate",
+    "computing": "Calculating …",
+    "infeasible": "There isn't enough time before departure to reach the target charge. About {soc}% is achievable instead of {target}%.",
+    "tileCharge": "To charge",
+    "tileChargeTip": "Energy that needs to go into the battery to get from the current to the target charge.",
+    "tileDuration": "Charging time",
+    "tileDurationTip": "Pure charging time at the given power — including charging losses.",
+    "tileCost": "Optimal cost",
+    "tileCostTip": "Cost when charging only during the cheapest hours before departure.",
+    "tileSavings": "Savings",
+    "tileSavingsTip": "Difference between charging straight away and the optimal plan.",
+    "vsImmediate": "vs {value} now",
+    "scheduleTitle": "Charging schedule until departure",
+    "legendCharge": "Charging",
+    "legendIdle": "Idle",
+    "barTooltip": "{time}: {value} ct/kWh · {kwh} kWh charged"
   }
 }
