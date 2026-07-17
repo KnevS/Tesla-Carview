@@ -209,8 +209,11 @@ export function planCharge(prices, {
     immediate_cost_ct:          Math.round(immediate.costCt),
     immediate_avg_ct_per_kwh:   avg(immediate.costCt, immediate.chargedKwh),
     savings_ct:                 Math.max(0, Math.round(immediate.costCt - optimal.costCt)),
+    // Prozent auf [0,100] gedeckelt: bei negativen Spotpreisen (optimal < 0,
+    // z.B. Solar-Mittag) laege der Rohwert sonst ueber 100 % und wirkt im UI
+    // widerspruechlich — die absolute Euro-Ersparnis bleibt die ehrliche Zahl.
     savings_pct:                immediate.costCt > 0
-      ? Math.round(((immediate.costCt - optimal.costCt) / immediate.costCt) * 100)
+      ? Math.min(100, Math.max(0, Math.round(((immediate.costCt - optimal.costCt) / immediate.costCt) * 100)))
       : 0,
   };
 }

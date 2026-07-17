@@ -88,7 +88,7 @@
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <div class="bg-gray-800 rounded-xl p-3" v-tooltip="$t('chargePlanner.tileChargeTip')">
             <p class="text-gray-400 text-xs">{{ $t('chargePlanner.tileCharge') }}</p>
-            <p class="text-xl font-bold">{{ fmt(plan.energy_to_battery_kwh, 1) }} kWh</p>
+            <p class="text-xl font-bold">{{ fmt(deliveredKwh, 1) }} kWh</p>
             <p class="text-xs text-gray-400">{{ form.currentSoc }}% → {{ plan.achieved_soc }}%</p>
           </div>
           <div class="bg-gray-800 rounded-xl p-3" v-tooltip="$t('chargePlanner.tileDurationTip')">
@@ -200,6 +200,12 @@ const chosenMap = computed(() => {
 });
 const isChosen = p => chosenMap.value.has(p.start);
 const chosenKwh = p => chosenMap.value.get(p.start) ?? 0;
+
+// Tatsaechlich im Akku ankommende Energie (Netz minus Ladeverluste). Im
+// machbaren Fall == energy_to_battery_kwh; im nicht-machbaren Fall passt sie
+// zum erreichten Ladestand statt zum (unerreichbaren) Ziel.
+const deliveredKwh = computed(() =>
+  (plan.value?.charged_kwh ?? 0) * (plan.value?.efficiency ?? 0.9));
 
 function barHeight(ct) {
   const vals = windowPrices.value.map(p => p.ct_per_kwh);
