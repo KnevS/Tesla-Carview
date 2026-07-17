@@ -114,6 +114,10 @@
     "nearby": {
       "label": "À proximité",
       "tooltip": "POIs autour de votre position actuelle ou station de charge"
+    },
+    "chargePlanner": {
+      "label": "Planificateur de charge",
+      "tooltip": "Calcule les créneaux de charge les moins chers avant le départ à partir de votre tarif dynamique, avec coût et économie par rapport à une charge immédiate"
     }
   },
   "dashboard": {
@@ -3126,5 +3130,35 @@
     "resetColors": "Couleurs par défaut",
     "resetColorsTip": "Réinitialiser toutes les couleurs de calque aux valeurs par défaut",
     "empty": "Aucune donnée géographique pour la période sélectionnée."
+  },
+  "chargePlanner": {
+    "title": "Planificateur de charge",
+    "intro": "Utilise votre tarif d'électricité dynamique pour déterminer les heures les moins chères pour charger avant le départ, et combien vous économisez par rapport à une charge immédiate. Simple analyse de la courbe de prix, sans accès au véhicule.",
+    "subtitle": "Créneaux de charge les moins chers avant le départ",
+    "notConfigured": "Le planificateur de charge nécessite un tarif d'électricité dynamique (aWattar ou Tibber). Configurez-le dans les paramètres d'administration.",
+    "configureTariff": "Configurer le tarif",
+    "currentSoc": "Charge actuelle (%)",
+    "targetSoc": "Charge cible (%)",
+    "capacity": "Capacité de la batterie (kWh)",
+    "capacityTip": "Capacité utilisable de votre batterie. Model 3/Y SR ~57–60, LR ~75–79 kWh.",
+    "power": "Puissance de charge (kW)",
+    "powerTip": "À domicile, l'AC est généralement de 11 kW, monophasé 3,7 kW. Chargeurs rapides (DC) bien plus.",
+    "readyBy": "Départ / prêt à",
+    "compute": "Calculer",
+    "computing": "Calcul …",
+    "infeasible": "Le temps avant le départ ne suffit pas pour atteindre la charge cible. Environ {soc}% est atteignable au lieu de {target}%.",
+    "tileCharge": "À charger",
+    "tileChargeTip": "Énergie à injecter dans la batterie pour passer de la charge actuelle à la charge cible.",
+    "tileDuration": "Durée de charge",
+    "tileDurationTip": "Temps de charge pur à la puissance indiquée, pertes de charge incluses.",
+    "tileCost": "Coût optimal",
+    "tileCostTip": "Coût en chargeant uniquement pendant les heures les moins chères avant le départ.",
+    "tileSavings": "Économie",
+    "tileSavingsTip": "Différence entre une charge immédiate et le plan optimal.",
+    "vsImmediate": "au lieu de {value} maintenant",
+    "scheduleTitle": "Plan de charge jusqu'au départ",
+    "legendCharge": "Charge",
+    "legendIdle": "Pause",
+    "barTooltip": "{time} : {value} ct/kWh · {kwh} kWh chargés"
   }
 }

@@ -7,6 +7,13 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.42.0] - 2026-07-17
+
+### Neu
+
+- **Ladeplaner — günstigste Ladeslots bis zur Abfahrt (S08).** Neue Ansicht (`/ladeplan`, Navigation unter „Planung") berechnet aus dem dynamischen Stromtarif (aWattar/Tibber), in welchen Stunden bis zur Abfahrt am günstigsten geladen wird. Eingaben: aktueller/Ziel-Ladestand, Akkukapazität, Ladeleistung und Abfahrtszeit (lokal im Browser gemerkt). Der Planer wählt die **günstigsten — auch nicht zusammenhängenden — Stunden** (Greedy) statt nur das nächste zusammenhängende Fenster und zeigt vier Kennzahlen: nachzuladende Energie (inkl. erreichtem Ladestand), reine Ladedauer, optimale Kosten und die Ersparnis gegenüber sofortigem Durchladen (€ und %). Darunter ein Balkendiagramm des Planungsfensters mit grün markierten Ladestunden. Reicht die Zeit bis zur Abfahrt nicht für den Ziel-Ladestand, wird der maximal erreichbare Ladestand genannt. Ladeverluste (AC ~10 %) sind in Energie und Kosten eingerechnet. Backend: `planCharge()` in `tariffService.js` + `GET /api/tariff/charge-plan` — reine Auswertung der Preiskurve, **kein Tesla-/Fleet-Call**. i18n ×7, Handbuch DE/EN/ES/FR/TR/EL.
+
+
 ## [v3.41.5] - 2026-07-13
 
 ### Geändert

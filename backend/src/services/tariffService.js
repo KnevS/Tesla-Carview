@@ -109,5 +109,114 @@ export function bestWindow(prices, hours = 4) {
   return best;
 }
 
+/**
+ * Ladeplan-Rechner (S08 „Laden, das sich selbst timt").
+ *
+ * Gegeben aktueller/gewuenschter Ladestand, Akkukapazitaet, Ladeleistung
+ * und optionale Abfahrtszeit: waehlt aus der dynamischen Preiskurve die
+ * *guenstigsten* Stundenslots (nicht zwingend zusammenhaengend, anders
+ * als bestWindow) bis zur Abfahrt und rechnet Kosten + Ersparnis gegen
+ * „sofort durchladen" aus. Reine Berechnung auf vorhandenen Tarifdaten —
+ * kein Tesla-/Fleet-Call noetig.
+ *
+ * Modell: aWattar/Tibber liefern Stundenslots. Pro Slot koennen bis zu
+ * `powerKw` kWh geladen werden (1 h × Leistung); teilangebrochene Slots
+ * am Rand des Planungsfensters werden anteilig gewertet. Ladeverluste
+ * (AC ~10 %) ueber `efficiency`: aus dem Netz gezogene Energie ist hoeher
+ * als die im Akku ankommende.
+ *
+ * @returns {object} Plan mit feasible-Flag, gewaehlten Slots und Kosten
+ *   in ganzen Cent. `null` nur bei voellig fehlenden Preisdaten.
+ */
+export function planCharge(prices, {
+  currentSoc,
+  targetSoc,
+  capacityKwh,
+  powerKw,
+  readyBy = null,      // Abfahrt als unix_seconds; null => naechste 24 h
+  efficiency = 0.9,    // Ladewirkungsgrad (Netz -> Akku), AC typ. ~0,9
+} = {}) {
+  const now = Math.floor(Date.now() / 1000);
+  const eff = Math.min(1, Math.max(0.5, efficiency || 0.9));
+
+  const socDelta = Math.max(0, (targetSoc ?? 0) - (currentSoc ?? 0));
+  const energyToBatteryKwh = (socDelta / 100) * (capacityKwh || 0);
+  const energyFromGridKwh  = energyToBatteryKwh / eff;
+  const hoursNeeded        = powerKw > 0 ? energyFromGridKwh / powerKw : 0;
+
+  const horizonEnd = readyBy && readyBy > now ? readyBy : now + 24 * 3600;
+
+  // Verfuegbare Slots im Planungsfenster inkl. anteiliger Rand-Slots.
+  const slots = (prices || [])
+    .filter(p => p.end > now && p.start < horizonEnd)
+    .map(p => {
+      const from = Math.max(now, p.start);
+      const to   = Math.min(horizonEnd, p.end);
+      const durationH = Math.max(0, (to - from) / 3600);
+      return {
+        start: p.start,
+        end:   p.end,
+        ct_per_kwh: p.ct_per_kwh,
+        capacity_kwh: (powerKw || 0) * durationH,
+      };
+    })
+    .filter(s => s.capacity_kwh > 0);
+
+  const totalAvailableKwh = slots.reduce((s, x) => s + x.capacity_kwh, 0);
+
+  // Greedy-Fueller: fuellt `need` kWh aus den nach `keyFn` sortierten Slots.
+  const fill = (need, ordered) => {
+    let remaining = need;
+    let costCt = 0;
+    const used = [];
+    for (const s of ordered) {
+      if (remaining <= 1e-6) break;
+      const take = Math.min(s.capacity_kwh, remaining);
+      used.push({ start: s.start, end: s.end, ct_per_kwh: s.ct_per_kwh, kwh: Math.round(take * 1000) / 1000 });
+      costCt += take * s.ct_per_kwh;
+      remaining -= take;
+    }
+    return { used, costCt, chargedKwh: need - Math.max(0, remaining) };
+  };
+
+  // Optimal: guenstigste Slots zuerst (bei Gleichstand frueher Slot zuerst).
+  const byPrice = [...slots].sort((a, b) => a.ct_per_kwh - b.ct_per_kwh || a.start - b.start);
+  const optimal = fill(energyFromGridKwh, byPrice);
+  // Sofort durchladen: zusammenhaengend ab jetzt (Slots nach Zeit).
+  const byTime = [...slots].sort((a, b) => a.start - b.start);
+  const immediate = fill(energyFromGridKwh, byTime);
+
+  const feasible = totalAvailableKwh + 1e-6 >= energyFromGridKwh;
+  const chargedKwh = optimal.chargedKwh;
+  const achievedSoc = (currentSoc ?? 0) + (chargedKwh * eff / (capacityKwh || 1)) * 100;
+
+  const avg = (costCt, kwh) => (kwh > 0 ? Math.round((costCt / kwh) * 100) / 100 : 0);
+  const round2 = v => Math.round(v * 100) / 100;
+
+  return {
+    feasible,
+    energy_to_battery_kwh: round2(energyToBatteryKwh),
+    energy_from_grid_kwh:  round2(energyFromGridKwh),
+    hours_needed:          round2(hoursNeeded),
+    charged_kwh:           round2(chargedKwh),
+    achieved_soc:          Math.round(Math.min(targetSoc ?? 100, achievedSoc)),
+    efficiency:            eff,
+    window: { start: now, end: horizonEnd },
+    // Gewaehlte Slots nach Zeit sortiert fuer die Balken-Darstellung.
+    slots: optimal.used.sort((a, b) => a.start - b.start),
+    optimal_cost_ct:            Math.round(optimal.costCt),
+    optimal_avg_ct_per_kwh:     avg(optimal.costCt, optimal.chargedKwh),
+    immediate_cost_ct:          Math.round(immediate.costCt),
+    immediate_avg_ct_per_kwh:   avg(immediate.costCt, immediate.chargedKwh),
+    savings_ct:                 Math.max(0, Math.round(immediate.costCt - optimal.costCt)),
+    // Prozent auf [0,100] gedeckelt: bei negativen Spotpreisen (optimal < 0,
+    // z.B. Solar-Mittag) laege der Rohwert sonst ueber 100 % und wirkt im UI
+    // widerspruechlich — die absolute Euro-Ersparnis bleibt die ehrliche Zahl.
+    savings_pct:                immediate.costCt > 0
+      ? Math.min(100, Math.max(0, Math.round(((immediate.costCt - optimal.costCt) / immediate.costCt) * 100)))
+      : 0,
+  };
+}
+
 /** Cache invalidieren (nach Config-Aenderung). */
 export function invalidateCache(tenantId) { CACHE.delete(tenantId); }

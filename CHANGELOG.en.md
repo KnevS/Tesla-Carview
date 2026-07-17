@@ -7,6 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.42.0] - 2026-07-17
+
+### Added
+
+- **Charge planner — cheapest charging slots before departure (S08).** New view (`/ladeplan`, navigation under "Planning") works out from the dynamic electricity tariff (aWattar/Tibber) which hours before departure are cheapest to charge. Inputs: current/target charge, battery capacity, charging power and departure time (remembered locally in the browser). The planner picks the **cheapest — not necessarily contiguous — hours** (greedy) instead of just the next contiguous window and shows four figures: energy to add (incl. the charge level reached), pure charging time, optimal cost and the savings versus charging straight away (€ and %). Below is a bar chart of the planning window with the chosen charging hours highlighted in green. If there isn't enough time before departure for the target charge, it states the maximum reachable charge level. Charging losses (AC ~10 %) are included in energy and cost. Backend: `planCharge()` in `tariffService.js` + `GET /api/tariff/charge-plan` — pure price-curve analysis, **no Tesla/Fleet call**. i18n ×7, handbook DE/EN/ES/FR/TR/EL.
+
+
 ## [v3.41.5] - 2026-07-13
 
 ### Changed

@@ -242,6 +242,20 @@ Cada lugar puede llevar un límite de carga deseado (p. ej. 80 %). Al final del 
 
 El botón «🔋 Aplicar ahora» dispara el comando manualmente. Tesla recomienda 70-80 % para carga diaria, 50-60 % para almacenamiento largo, 100 % solo para viajes largos.
 
+## 📅 Planificador de carga {#charge-planner}
+
+El **planificador de carga** (nav "Planificación → Planificador de carga", `/ladeplan`) responde a la pregunta «¿cuándo debo cargar?» para una tarifa eléctrica dinámica. Elige de la curva de precios las **horas más baratas antes de la salida** —no necesariamente consecutivas— en lugar de simplemente la siguiente franja consecutiva.
+
+**Requisito** — En Ajustes → Tarifa debe haber un proveedor dinámico (aWattar o Tibber) conectado. Sin tarifa, el planificador muestra un aviso con enlace a la configuración.
+
+**Entradas** — Carga actual, carga objetivo, capacidad de la batería (kWh), potencia de carga (kW) y hora de salida. Los valores se recuerdan localmente en el navegador.
+
+**Resultado** — Cuatro cifras: energía a cargar (incl. la carga alcanzada), tiempo de carga puro, coste óptimo (solo horas más baratas) y el ahorro frente a cargar de inmediato (absoluto y en %). Debajo, un gráfico de barras muestra la ventana de planificación hasta la salida; las horas de carga elegidas por el planificador se resaltan en verde.
+
+**Tiempo insuficiente** — Si la ventana antes de la salida es demasiado corta para la carga objetivo, el planificador lo indica y muestra la carga máxima alcanzable.
+
+El planificador calcula únicamente sobre la curva de precios: **no se envía ningún comando al vehículo** y no se necesita la Fleet API. Las pérdidas de carga (CA típicamente ~10 %) están incluidas en la energía y el coste.
+
 ## 🔐 Seguridad {#security}
 
 - 🔑 **Passkey / WebAuthn** — Inicio de sesión sin contraseña con huella digital, Face ID o llave hardware

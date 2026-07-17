@@ -114,6 +114,10 @@
     "nearby": {
       "label": "In der Nähe",
       "tooltip": "POIs im Umfeld deiner aktuellen Position oder Ladestation"
+    },
+    "chargePlanner": {
+      "label": "Ladeplaner",
+      "tooltip": "Günstigste Ladeslots bis zur Abfahrt aus dem dynamischen Tarif berechnen — mit Kosten und Ersparnis gegenüber sofortigem Laden"
     }
   },
   "dashboard": {
@@ -3135,5 +3139,35 @@
     "resetColors": "Standardfarben",
     "resetColorsTip": "Alle Ebenen-Farben auf die Standardwerte zurücksetzen",
     "empty": "Keine Geodaten für den gewählten Zeitraum vorhanden."
+  },
+  "chargePlanner": {
+    "title": "Ladeplaner",
+    "intro": "Berechnet aus deinem dynamischen Stromtarif, in welchen Stunden bis zur Abfahrt am günstigsten geladen wird — und wie viel du gegenüber sofortigem Durchladen sparst. Reine Auswertung der Preiskurve, kein Zugriff aufs Fahrzeug.",
+    "subtitle": "Günstigste Ladeslots bis zur Abfahrt",
+    "notConfigured": "Für den Ladeplaner ist ein dynamischer Stromtarif (aWattar oder Tibber) nötig. Richte ihn in den Admin-Einstellungen ein.",
+    "configureTariff": "Tarif einrichten",
+    "currentSoc": "Aktueller Ladestand (%)",
+    "targetSoc": "Ziel-Ladestand (%)",
+    "capacity": "Akkukapazität (kWh)",
+    "capacityTip": "Nutzbare Kapazität deines Akkus. Model 3/Y SR ~57–60, LR ~75–79 kWh.",
+    "power": "Ladeleistung (kW)",
+    "powerTip": "Zu Hause AC typisch 11 kW, einphasig 3,7 kW. Schnelllader (DC) deutlich höher.",
+    "readyBy": "Abfahrt / fertig bis",
+    "compute": "Berechnen",
+    "computing": "Berechne …",
+    "infeasible": "Die Zeit bis zur Abfahrt reicht nicht für den Ziel-Ladestand. Erreichbar sind rund {soc} % statt {target} %.",
+    "tileCharge": "Nachzuladen",
+    "tileChargeTip": "Energie, die in den Akku muss, um vom aktuellen auf den Ziel-Ladestand zu kommen.",
+    "tileDuration": "Ladedauer",
+    "tileDurationTip": "Reine Ladezeit bei der angegebenen Leistung — inklusive Ladeverlusten.",
+    "tileCost": "Optimale Kosten",
+    "tileCostTip": "Kosten, wenn nur in den günstigsten Stunden bis zur Abfahrt geladen wird.",
+    "tileSavings": "Ersparnis",
+    "tileSavingsTip": "Differenz zwischen sofortigem Durchladen und dem optimalen Plan.",
+    "vsImmediate": "statt {value} sofort",
+    "scheduleTitle": "Ladeplan bis zur Abfahrt",
+    "legendCharge": "Laden",
+    "legendIdle": "Pause",
+    "barTooltip": "{time}: {value} ct/kWh · {kwh} kWh geladen"
   }
 }
