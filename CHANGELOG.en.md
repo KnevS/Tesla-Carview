@@ -7,6 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.45.0] - 2026-07-18
+
+### Added
+
+- **Company-car tax assistant (S09).** New view (`/dienstwagen-steuer`, navigation under "Analytics", company cars only) compares the **1% rule with the logbook method** and computes the monthly/yearly taxable benefit. For EVs the applicable rate (0.25% quarter / 0.5% half / 1%) is **date-dependent** — the view asks for the acquisition/first-provision date and applies the gross-list-price cap in force at that date (BEV ≤ €60,000 until 2023, ≤ €70,000 from 2024, ≤ €100,000 from 2025-07-01; the special rule expires end of 2030). For plug-in hybrids the 0.5% rate applies only at ≤ 50 g/km CO₂ or a minimum electric range (≥ 40/60/80 km depending on year). The reduction also applies to the 0.03% commute surcharge and (logbook method) to depreciation. Costs/private share come from the TCO cockpit + trip classification. Client-side guidance calculation only (not tax advice), German-language. Calculation logic in `frontend/src/lib/companyCarTax.js` (unit-tested).
+
+
 ## [v3.44.0] - 2026-07-18
 
 ### Added

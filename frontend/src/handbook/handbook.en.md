@@ -250,6 +250,18 @@ For **company cars** (vehicle category "company car"), **Cost billing → Busine
 
 Both methods are German-language only (German tax topic) and available for company cars only.
 
+## 🧾 Company-car tax {#company-car-tax}
+
+For **company cars**, the tax assistant (nav "Analytics → Company-car tax", `/dienstwagen-steuer`) compares the **1% rule** with the **logbook method** and computes the monthly taxable benefit.
+
+**Date-dependent EV rate** — For electric and hybrid vehicles the rate depends on the **acquisition/first-provision date**. The assistant asks for this date and applies the gross-list-price cap in force then:
+- Pure electric: **0.25%** (quarter) if the gross list price does not exceed the cap for the acquisition date — **€60,000** until 2023, **€70,000** from 2024, **€100,000** from 2025-07-01; above that **0.5%**. The special rule expires end of 2030.
+- Plug-in hybrid: **0.5%** only at up to 50 g/km CO₂ or a minimum electric range (≥ 40 km until 2021, ≥ 60 km 2022–2024, ≥ 80 km from 2025), otherwise **1%**.
+
+**Inputs** — Gross list price, acquisition date (pre-filled from the TCO cockpit), vehicle type and the one-way commute distance. Costs (logbook method) come from the TCO cockpit, the private share from trips classified as private/business.
+
+**Result** — Both methods with monthly and yearly taxable benefit, the cheaper one highlighted, plus the annual difference. Guidance calculation under German § 6 (1) no. 4 EStG only — **not tax advice**.
+
 ## 📅 Charge planner {#charge-planner}
 
 The **charge planner** (nav "Planning → Charge Planner", `/ladeplan`) answers the "when should I charge?" question for a dynamic electricity tariff. It picks the **cheapest hours before departure** from the price curve — not necessarily contiguous — rather than just the next contiguous window.

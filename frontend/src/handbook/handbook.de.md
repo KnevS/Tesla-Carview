@@ -247,6 +247,18 @@ Für **Dienstwagen** (Fahrzeug-Kategorie „Dienstwagen") teilt die **Kostenabre
 
 Beide Methoden sind rein deutschsprachig (deutsches Steuerthema) und nur für Dienstwagen verfügbar.
 
+## 🧾 Dienstwagen-Versteuerung {#company-car-tax}
+
+Für **Dienstwagen** stellt der Versteuerungs-Assistent (Nav „Auswertungen → Dienstwagen-Steuer", `/dienstwagen-steuer`) die **1-%-Regel** der **Fahrtenbuchmethode** gegenüber und rechnet den monatlichen geldwerten Vorteil.
+
+**Datumsabhängiger E-Fahrzeug-Satz** — Bei Elektro- und Hybridfahrzeugen hängt der Satz vom **Anschaffungs-/Überlassungsdatum** ab. Der Assistent fragt dieses Datum ab und wendet die dann geltende Bruttolistenpreis-Grenze an:
+- Reines Elektro: **0,25 %** (Viertelung), wenn der Bruttolistenpreis die Grenze zum Anschaffungsdatum nicht übersteigt — **60.000 €** bis 2023, **70.000 €** ab 2024, **100.000 €** ab 01.07.2025; darüber **0,5 %**. Die Sonderregelung läuft Ende 2030 aus.
+- Plug-in-Hybrid: **0,5 %** nur bei höchstens 50 g/km CO₂ oder E-Mindestreichweite (≥ 40 km bis 2021, ≥ 60 km 2022–2024, ≥ 80 km ab 2025), sonst **1 %**.
+
+**Eingaben** — Bruttolistenpreis, Anschaffungsdatum (aus dem TCO-Cockpit vorbelegt), Fahrzeugtyp und einfache Entfernung Wohnung–Arbeit. Die Kosten (Fahrtenbuchmethode) kommen aus dem TCO-Cockpit, der Privatanteil aus den als privat/dienstlich klassifizierten Fahrten.
+
+**Ergebnis** — Beide Methoden mit monatlichem und jährlichem geldwerten Vorteil, die günstigere ist hervorgehoben, plus die jährliche Differenz. Reine Orientierungsrechnung nach § 6 Abs. 1 Nr. 4 EStG — **keine Steuerberatung**.
+
 ## 📅 Ladeplaner {#charge-planner}
 
 Der **Ladeplaner** (Nav „Planung → Ladeplaner", `/ladeplan`) beantwortet die Frage „Wann soll ich laden?" für einen dynamischen Stromtarif. Er wählt aus der Preiskurve die **günstigsten Stunden bis zur Abfahrt** — auch nicht zusammenhängend — statt einfach das nächste zusammenhängende Fenster.

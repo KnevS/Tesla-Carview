@@ -40,6 +40,7 @@ const Control        = () => import('../views/Control.vue');
 const RoutePlanner   = () => import('../views/RoutePlanner.vue');
 const Fahrtenbuch    = () => import('../views/Fahrtenbuch.vue');
 const Kostenabrechnung = () => import('../views/Kostenabrechnung.vue');
+const CompanyCarTax  = () => import('../views/CompanyCarTax.vue');
 const Tco            = () => import('../views/Tco.vue');
 const MyTracking     = () => import('../views/MyTracking.vue');
 const System         = () => import('../views/System.vue');
@@ -84,6 +85,7 @@ const routes = [
   { path: '/heatmap',       component: HeatmapMap,    meta: { title: 'Heatmap' } },
   { path: '/fahrtenbuch',      component: Fahrtenbuch,      meta: { title: 'Fahrtenbuch' } },
   { path: '/kostenabrechnung', component: Kostenabrechnung, meta: { title: 'Kostenabrechnung' } },
+  { path: '/dienstwagen-steuer', component: CompanyCarTax, meta: { title: 'Dienstwagen-Versteuerung' } },
   { path: '/tco',              component: Tco,              meta: { title: 'TCO-Cockpit' } },
   { path: '/my-tracking',      component: MyTracking,       meta: { title: 'Mein Smartphone-GPS' } },
   { path: '/charging',      component: Charging,      meta: { title: 'Laden' } },
