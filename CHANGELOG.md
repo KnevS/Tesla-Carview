@@ -7,6 +7,13 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.45.0] - 2026-07-18
+
+### Neu
+
+- **Dienstwagen-Versteuerungs-Assistent (S09).** Neue Ansicht (`/dienstwagen-steuer`, Navigation unter „Auswertungen", nur Dienstwagen) stellt die **1-%-Regel der Fahrtenbuchmethode** gegenüber und rechnet den monatlichen/jährlichen geldwerten Vorteil. Der maßgebliche Satz bei E-Fahrzeugen (0,25 % Viertelung / 0,5 % Halbierung / 1 %) ist **datumsabhängig** — die Ansicht fragt das Anschaffungs-/Überlassungsdatum ab und wendet die zum Datum geltende Bruttolistenpreis-Grenze an (BEV ≤ 60.000 € bis 2023, ≤ 70.000 € ab 2024, ≤ 100.000 € ab 01.07.2025; Sonderregelung bis Ende 2030). Für Plug-in-Hybride greift 0,5 % nur bei ≤ 50 g/km CO₂ oder E-Mindestreichweite (≥ 40/60/80 km je nach Jahr). Die Reduktion wirkt auch auf den 0,03-%-Pendlerzuschlag und (Fahrtenbuch) auf die Abschreibung. Kosten/Privatanteil kommen aus TCO-Cockpit + Fahrten-Klassifizierung. Reine clientseitige Orientierungsrechnung (keine Steuerberatung), deutschsprachig. Rechenlogik in `frontend/src/lib/companyCarTax.js` (unit-getestet).
+
+
 ## [v3.44.0] - 2026-07-18
 
 ### Neu
