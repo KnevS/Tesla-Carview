@@ -123,6 +123,10 @@ Unter `/battery` findest du seit v3.6.0 sechs Sektionen, die dir ehrliche Antwor
 
 **Vehicle-Selector**: alle Sektionen reagieren auf den aktuell gewählten Wagen.
 
+### SoH-Zertifikat (v3.46.0) {#soh-certificate}
+
+In der Batterie-Ansicht unter „Prognose" erzeugt der Knopf **SoH-Zertifikat (PDF)** ein Batterie-Gesundheitszertifikat für Leasingrückgabe, Wiederverkauf oder Garantie: Fahrzeugdaten (FIN, Kennzeichen, Kilometerstand), aktuelle Reichweite bei 100 % Ladung, Degradationsrate, Datengüte (R²), Datenbasis und die Prognose (Reichweite in 3 Jahren, Zeit bis 80 %). Optional die WLTP-Neu-Reichweite eintragen, dann wird die Gesundheit als **SoH in %** ausgewiesen. Rein statistische Schätzung aus den erfassten Fahrzeugdaten — keine Gewährleistung.
+
 ### Companion Phase 2 (ab v3.7.0) {#companion-phase-2}
 
 Zwei neue Sektionen auf `/battery`, beide aus den vorhandenen Daten:
