@@ -12,16 +12,19 @@
  * editierbar. Routen muessen das vorher pruefen.
  */
 
+import { recordTripChange } from './tripLedger.js';
+
 export function isLocked(trip) {
   return !!(trip && trip.locked_at);
 }
 
-export function logChanges(db, tripId, userId, before, after, fields) {
+export function logChanges(db, tripId, userId, before, after, fields, action = 'update') {
   if (!before || !after) return;
   const stmt = db.prepare(
     `INSERT INTO trip_changes (trip_id, changed_by_user_id, field, old_value, new_value)
        VALUES (?, ?, ?, ?, ?)`
   );
+  let changed = 0;
   for (const field of fields) {
     const o = before[field];
     const n = after[field];
@@ -30,5 +33,9 @@ export function logChanges(db, tripId, userId, before, after, fields) {
     const nNorm = n == null ? '' : String(n);
     if (oNorm === nNorm) continue;
     stmt.run(tripId, userId ?? null, field, oNorm || null, nNorm || null);
+    changed++;
   }
+  // Manipulationssicheres Fahrtenbuch (S09): tatsächliche Änderungen zusätzlich
+  // in die signierte Hash-Chain schreiben.
+  if (changed > 0) recordTripChange(db, tripId, action, userId);
 }

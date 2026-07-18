@@ -40,6 +40,10 @@ gecrawlt / im Web-Archive landen. **Was einmal drin ist, ist drin.**
 - `data/.encryption-key` (32 Bytes, 0600) — entschlüsselt Tesla-Tokens,
   MFA-Secrets und Virtual-Key Private-Keys at-rest. **Nie ins Repo,
   nie in Logs, nie in Issues.** Backup zusammen mit `data/`.
+- `data/.ledger-key` (32 Bytes, 0600) — HMAC-Signaturschlüssel des
+  manipulationssicheren Fahrtenbuchs (`trip_ledger`, S09). **Nie ins Repo,
+  nie in Logs.** Backup zusammen mit `data/`; ohne ihn ist die Änderungs-
+  Chain nicht mehr verifizierbar.
 
 ### Build- und Runtime-Artefakte
 - `.env`, `.env.local`, `.env.production` (nur `.env.example` ist OK)
@@ -120,8 +124,9 @@ technisch keine PRs unterstützt). Gilt auch für `teslaview-web`.
 
 ### Aktuell (Stand 2026-07-18)
 
-- **Version:** v3.46.0
+- **Version:** v3.47.0
 - **Zuletzt geliefert:**
+  - **v3.47.0 (Feature Manipulationssicheres Fahrtenbuch, S09 — Sven wählte „Hash-Chain je Änderung + HMAC-signiert"):** `services/tripLedger.js` — append-only `trip_ledger`, jede Fahrt-Änderung schreibt einen HMAC-signierten Eintrag (`prev_hash` verkettet auf Vorgänger-HMAC), Signaturschlüssel `data/.ledger-key`. Zentral über `logChanges` (tripAudit.js) eingehängt + explizit bei create/delete. `GET /api/trips/ledger/verify` (rechnet Kette nach) + `GET /api/trips/:id/ledger`. Migration legt Tabelle an + Genesis-Backfill (Marker `ledger.genesis_done`). `Fahrtenbuch.vue`: Integritäts-Badge + Aussage im Finanzamt-PDF (DE-only View). **Live verifiziert:** Snapshot-Manipulation → `content_hash`-Bruch, Eintrag gelöscht → `prev_hash`-Bruch. **Damit S09 komplett** (Versteuerung + SoH + Ledger).
   - **v3.46.0 (Feature SoH-Zertifikat, S09):** Batterie-Ansicht („Prognose") erzeugt ein **Batterie-Gesundheitszertifikat als PDF** (`exportSohCertificate` in `Battery.vue`, jsPDF+autoTable). Nutzt das bestehende `/api/battery/forecast` (kein neues Backend): aktuelle Reichweite @100 % (`current_soh_km`), Degradationsrate %/a, R², Datenbasis, 3-Jahres-Prognose, Zeit bis 80 %. Optionale WLTP-Neu-Reichweite (localStorage) → SoH in %. Klarer Gewährleistungs-Ausschluss. i18n ×7 (`battery.sohCert`, 25 Keys). Merke: keine Werks-Reichweite je Modell gespeichert → SoH-% nur mit User-Eingabe.
 
   - **v3.45.0 (Feature Dienstwagen-Versteuerungs-Assistent, S09):** neue View `CompanyCarTax.vue` (`/dienstwagen-steuer`, Nav „Auswertungen", nur `category=company`) + reine Rechenlogik in `frontend/src/lib/companyCarTax.js` (unit-getestet). Vergleicht 1-%-Regel vs. Fahrtenbuchmethode. **E-Satz ist datumsabhängig** (Sven-Vorgabe): `determineFactor` wählt 0,25/0,5/1 % nach Fahrzeugtyp + BLP + Anschaffungsdatum; BEV-Viertelungs-Grenze 60.000 € (bis 2023) / 70.000 € (ab 2024) / 100.000 € (ab 01.07.2025), Sonderregel bis Ende 2030; PHEV 0,5 % nur bei ≤50 g/km oder E-Reichweite ≥40/60/80 km je Jahr. Reduktion wirkt auch auf 0,03-%-Pendlerzuschlag + (Fahrtenbuch) AfA. Kosten aus `/tco/vehicles/:id`, Privatanteil aus `/trips/stats`. Rein clientseitig, DE-only, Orientierungsrechnung. Regeln 2026-07 gegen ADAC/Haufe verifiziert. **Offen S09:** SoH-Zertifikat-PDF, manipulationssicheres Fahrtenbuch.
@@ -156,7 +161,7 @@ technisch keine PRs unterstützt). Gilt auch für `teslaview-web`.
   - **Setup-Wizard-Fix (#170):** `db.transaction()`-Callback in `/api/setup/init` synchron gemacht (better-sqlite3 lehnt async-Callbacks ab).
   - **Fleet-Telemetry Ende-zu-Ende funktionsfähig (v3.32.4/.5):** Receiver entpackt FlatBuffers-Envelope + eingebettetes Protobuf; `fleet_telemetry_config` über den Fleet-Level-Endpoint mit echter CA-Kette. Live verifiziert.
   - **Betriebs-Selbsttest (v3.32.0):** `selfCheck.js` + `GET/POST /api/system/self-check`.
-- **Doku-Stand:** Ladeplaner (v3.42.0), Kostensplit (v3.43.0), PV-Überschuss (v3.44.0): App-Doku (README ×7, Handbuch) + **Wiki (7 Sprachen, gepusht)** synchron; Marketing-Site `teslaview-web` bis v3.44.0 gepflegt (PR #5 offen). **Dienstwagen-Steuer (v3.45.0):** README ×7 + Handbuch DE/EN. **SoH-Zertifikat (v3.46.0):** README ×7 + Handbuch DE/EN + i18n ×7. **Offen:** Wiki + Marketing für v3.45.0/v3.46.0. **Regel (Sven): Doku + Marketing-Site immer im selben Arbeitsgang wie das Feature — nie auf einen Sammel-Sync verschieben.**
+- **Doku-Stand:** Ladeplaner (v3.42.0), Kostensplit (v3.43.0), PV-Überschuss (v3.44.0): App-Doku (README ×7, Handbuch) + **Wiki (7 Sprachen, gepusht)** synchron; Marketing-Site `teslaview-web` bis v3.44.0 gepflegt (PR #5 offen). **Dienstwagen-Steuer (v3.45.0):** README ×7 + Handbuch DE/EN. **SoH-Zertifikat (v3.46.0):** README ×7 + Handbuch DE/EN + i18n ×7. **Manipulationssicheres Fahrtenbuch (v3.47.0):** README ×7 + Handbuch DE/EN (DE-only View). **Offen:** Wiki + Marketing für v3.45.0–v3.47.0. **Regel (Sven): Doku + Marketing-Site immer im selben Arbeitsgang wie das Feature — nie auf einen Sammel-Sync verschieben.**
 
 ### Architektur-Ankerpunkte (stabil — hier nachschlagen)
 

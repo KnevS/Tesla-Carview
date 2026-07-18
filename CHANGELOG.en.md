@@ -7,6 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.47.0] - 2026-07-18
+
+### Added
+
+- **Tamper-proof logbook (GoBD, S09).** Every change to a trip (classification, business partner, driver, location, creation, merge/split, deletion) now writes an **append-only, HMAC-signed entry into a linked hash chain** (`trip_ledger`). Each entry links via `prev_hash` to the previous entry's HMAC and is signed with a server-side key (`data/.ledger-key`, 0600) — so even the operator cannot silently rewrite the change history. New endpoints `GET /api/trips/ledger/verify` (recomputes HMAC + linkage, reports the first break) and `GET /api/trips/:id/ledger` (per-trip change history). The logbook shows an **integrity status** (green "verified" / red "break at entry X"); the tax-office PDF carries the tamper-evidence statement. Existing trips get a one-time genesis entry (idempotent migration). Backend: `services/tripLedger.js`, hooked centrally via `logChanges`. Verified: altering a snapshot → `content_hash` break, deleting an entry → `prev_hash` break.
+
+
 ## [v3.46.0] - 2026-07-18
 
 ### Added

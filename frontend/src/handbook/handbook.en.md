@@ -754,6 +754,14 @@ Tesla Carview is a **PWA** (Progressive Web App) — you can install it like a n
 
 **Recommended:** bookmark Carview on the Tesla display — Tesla shows saved bookmarks in the browser quick access. For jotting down a trip purpose during a short stop that's much faster than typing the URL again.
 
+### 🔒 Tamper-proof logbook (v3.47.0) {#tamper-proof}
+
+Every change to a trip (classification, business partner, driver, location, creation, merge/split, deletion) is written into an **HMAC-signed, linked hash chain**. Each entry links to the previous entry's HMAC and is signed with a server-side key — so the change history cannot be silently altered or made incomplete afterwards, not even by the operator (GoBD principles of traceability and immutability).
+
+Above the trip list an **integrity status** shows whether the chain verifies gap-free (green) or a break was detected (red, with the entry number). The tax-office PDF also carries a corresponding statement. Existing trips get a one-time baseline entry at first start.
+
+**Important:** The signing key lives in `data/.ledger-key` — back it up together with the `data/` directory; if it is lost, the chain can no longer be verified.
+
 ### 🚗 Open the logbook directly in the Tesla browser {#tesla-direct}
 
 The **"🚗 Open in Tesla"** button at the top of the Logbook view makes accessing the logbook from the Tesla browser effortless:
