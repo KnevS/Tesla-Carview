@@ -51,6 +51,7 @@ import userInviteRoutes from './routes/userInvites.js';
 import serviceIntervalRoutes from './routes/serviceIntervals.js';
 import auditRoutes from './routes/audit.js';
 import tariffRoutes from './routes/tariff.js';
+import pvRoutes from './routes/pv.js';
 import webhookRoutes from './routes/webhooks.js';
 import grokRoutes from './routes/grok.js';
 import savedRoutesRoutes from './routes/savedRoutes.js';
@@ -166,6 +167,7 @@ app.use('/api/legal',              legalAuthedRoutes);   // /accept, /acceptance
 app.use('/api/service-intervals',  serviceIntervalRoutes);
 app.use('/api/audit',              auditRoutes);
 app.use('/api/tariff',             tariffRoutes);
+app.use('/api/pv',                 pvRoutes);
 app.use('/api/webhooks',           webhookRoutes);
 app.use('/api/grok',               grokRoutes);
 app.use('/api/saved-routes',        savedRoutesRoutes);

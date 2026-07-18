@@ -256,6 +256,14 @@ Her konum istenen bir şarj limiti taşıyabilir (örn. %80). Yolculuk sonunda T
 
 Planlayıcı yalnızca tarife eğrisi üzerinde hesaplar: araca **hiçbir komut gönderilmez** ve Fleet API gerekmez. Şarj kayıpları (AC tipik olarak ~%10) enerji ve maliyete dahildir.
 
+## ☀️ Solar fazlası şarjı {#pv-solar}
+
+**Solar fazlası şarjı** (nav "Planlama → Solar fazlası", `/pv-solar`) yalnızca güneş fazlasıyla şarj eder. TeslaView, mevcut fazlayı bir **Home Assistant sensöründen** (yerel REST API) okur ve önerilen şarj akımını türetir — tamamen yerel, bulut yok.
+
+**Kurulum (yönetici)** — Home Assistant URL'si, uzun ömürlü bir erişim jetonu (HA → Profil → Güvenlik) ve fazla sensörünün entity kimliği (watt) girilir. Ayrıca parametreler: asgari fazla, fazlar (1/3), gerilim ve azami şarj akımı.
+
+**Durum ve uygulama** — Görünüm, mevcut fazlayı, önerilen şarj akımını (`fazla ÷ (gerilim × faz)`, sınırlı) ve yeterli fazla olup olmadığını gösterir. "Şimdi uygula" akımı ayarlar ve araçta şarjı başlatır/durdurur — bunun için **Virtual Key ile Fleet API** gerekir. Tesla asgari akımının (5 A) altında şarj etmez.
+
 ## 🔐 Güvenlik {#security}
 
 - 🔑 **Passkey / WebAuthn** — Parmak izi, Face ID veya donanım anahtarıyla parolasız giriş

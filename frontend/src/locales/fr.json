@@ -118,6 +118,10 @@
     "chargePlanner": {
       "label": "Planificateur de charge",
       "tooltip": "Calcule les créneaux de charge les moins chers avant le départ à partir de votre tarif dynamique, avec coût et économie par rapport à une charge immédiate"
+    },
+    "pvSolar": {
+      "label": "Surplus solaire",
+      "tooltip": "Charger uniquement avec le surplus solaire — lit le surplus depuis Home Assistant et en déduit le courant de charge"
     }
   },
   "dashboard": {
@@ -3160,5 +3164,42 @@
     "legendCharge": "Charge",
     "legendIdle": "Pause",
     "barTooltip": "{time} : {value} ct/kWh · {kwh} kWh chargés"
+  },
+  "pvSolar": {
+    "title": "Charge sur surplus solaire",
+    "intro": "Charge uniquement avec le surplus solaire : TeslaView lit le surplus actuel depuis un capteur Home Assistant et en déduit le courant de charge recommandé. Entièrement local — les données ne quittent pas votre réseau.",
+    "subtitle": "Charger sur surplus solaire via Home Assistant",
+    "notConfiguredUser": "La charge sur surplus solaire n'est pas encore configurée. Un administrateur peut configurer la connexion Home Assistant.",
+    "statusTitle": "Surplus actuel",
+    "refresh": "Actualiser",
+    "apply": "Appliquer",
+    "applyTip": "Envoyer le courant de charge recommandé au véhicule et démarrer ou arrêter la charge (Fleet API requise).",
+    "applying": "Envoi …",
+    "surplus": "Surplus solaire",
+    "recommendedAmps": "Courant recommandé",
+    "aboveThreshold": "Surplus suffisant",
+    "belowThreshold": "Surplus insuffisant",
+    "threshold": "Seuil : {value} W",
+    "cfgTitle": "Connexion Home Assistant",
+    "haUrl": "URL Home Assistant",
+    "haUrlTip": "URL de base de votre instance Home Assistant, p. ex. http://homeassistant.local:8123.",
+    "haToken": "Jeton d’accès longue durée",
+    "haTokenTip": "À créer dans Home Assistant sous Profil → Sécurité → Jetons d’accès longue durée.",
+    "entity": "Capteur de surplus (entity)",
+    "entityTip": "ID d'entité du capteur qui indique le surplus disponible en watts (p. ex. sensor.pv_surplus).",
+    "minSurplus": "Surplus minimal (W)",
+    "minSurplusTip": "À partir de ce surplus, la charge est jugée pertinente. Sous le courant minimal Tesla (5 A), pas de charge.",
+    "phases": "Phases",
+    "voltage": "Tension (V)",
+    "maxAmps": "Courant max. (A)",
+    "maxAmpsTip": "Limite supérieure de la wallbox ou du raccordement.",
+    "enabled": "Automatisation active",
+    "enabledTip": "Indique que la commande PV doit être utilisée. L'envoi réel se fait via « Appliquer ».",
+    "save": "Enregistrer",
+    "saving": "Enregistrement …",
+    "saved": "Enregistré",
+    "noVehicle": "Aucun véhicule sélectionné.",
+    "applyStart": "Courant de charge réglé sur {amps} A, charge démarrée.",
+    "applyStop": "Charge arrêtée — surplus insuffisant."
   }
 }

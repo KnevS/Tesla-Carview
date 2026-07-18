@@ -118,6 +118,10 @@
     "chargePlanner": {
       "label": "Charge Planner",
       "tooltip": "Work out the cheapest charging slots before departure from your dynamic tariff — with cost and savings versus charging right now"
+    },
+    "pvSolar": {
+      "label": "Solar surplus",
+      "tooltip": "Charge only from solar surplus — reads the surplus from Home Assistant and derives the charging current"
     }
   },
   "dashboard": {
@@ -3169,5 +3173,42 @@
     "legendCharge": "Charging",
     "legendIdle": "Idle",
     "barTooltip": "{time}: {value} ct/kWh · {kwh} kWh charged"
+  },
+  "pvSolar": {
+    "title": "Solar surplus charging",
+    "intro": "Charge only from solar surplus: TeslaView reads the current surplus from a Home Assistant sensor and derives the recommended charging current. Fully local — the data never leaves your network.",
+    "subtitle": "Charge from solar surplus via Home Assistant",
+    "notConfiguredUser": "Solar surplus charging isn't set up yet. An administrator can configure the Home Assistant connection.",
+    "statusTitle": "Current surplus",
+    "refresh": "Refresh",
+    "apply": "Apply now",
+    "applyTip": "Send the recommended charging current to the vehicle and start or stop charging (Fleet API required).",
+    "applying": "Sending …",
+    "surplus": "Solar surplus",
+    "recommendedAmps": "Recommended current",
+    "aboveThreshold": "Enough surplus",
+    "belowThreshold": "Not enough surplus",
+    "threshold": "Threshold: {value} W",
+    "cfgTitle": "Home Assistant connection",
+    "haUrl": "Home Assistant URL",
+    "haUrlTip": "Base URL of your Home Assistant instance, e.g. http://homeassistant.local:8123.",
+    "haToken": "Long-lived access token",
+    "haTokenTip": "Create one in Home Assistant under Profile → Security → Long-Lived Access Tokens.",
+    "entity": "Surplus sensor (entity)",
+    "entityTip": "Entity ID of the sensor that reports the available surplus in watts (e.g. sensor.pv_surplus).",
+    "minSurplus": "Minimum surplus (W)",
+    "minSurplusTip": "From this surplus, charging is considered worthwhile. Below the Tesla minimum current (5 A) it won't charge.",
+    "phases": "Phases",
+    "voltage": "Voltage (V)",
+    "maxAmps": "Max. current (A)",
+    "maxAmpsTip": "Upper limit of the wallbox or house connection.",
+    "enabled": "Automation on",
+    "enabledTip": "Marks that PV control should be used. The actual sending happens via \"Apply now\".",
+    "save": "Save",
+    "saving": "Saving …",
+    "saved": "Saved",
+    "noVehicle": "No vehicle selected.",
+    "applyStart": "Charging current set to {amps} A, charging started.",
+    "applyStop": "Charging stopped — not enough surplus."
   }
 }
