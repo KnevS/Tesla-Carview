@@ -76,6 +76,20 @@
           <Line v-if="forecastChart" :data="forecastChart" :options="forecastOpts" />
         </div>
         <p class="text-gray-500 text-xs mt-2">{{ $t('battery.forecastR2', { r2: fmt(forecast.trend.r2 * 100, 0) }) }}</p>
+
+        <!-- SoH-Zertifikat (S09) -->
+        <div class="mt-4 flex flex-wrap items-end gap-3 border-t border-gray-800 pt-3">
+          <label class="text-xs text-gray-400">
+            <span class="flex items-center gap-1">{{ $t('battery.sohCert.originalRange') }}</span>
+            <input v-model.number="sohOriginalRange" type="number" min="0" step="1"
+              class="mt-1 block w-36 bg-gray-700 text-white rounded-lg px-3 py-1.5 border border-gray-600"
+              :placeholder="$t('battery.sohCert.originalRangePlaceholder')" />
+          </label>
+          <button @click="exportSohCertificate" class="btn-primary text-sm"
+            v-tooltip="$t('battery.sohCert.buttonTip')">
+            {{ $t('battery.sohCert.button') }}
+          </button>
+        </div>
       </template>
       <p v-else class="text-gray-400 text-sm">{{ $t('battery.forecastNoData', { n: forecast?.min_days || 14 }) }}</p>
     </SortableSection>
@@ -315,6 +329,79 @@ const fmt = (v, d = 0) => (+(v || 0)).toFixed(d);
 const fmtDate = (ts) => new Date(ts * 1000).toLocaleString(locale.value, {
   year: '2-digit', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
 });
+
+// SoH-Zertifikat (S09): optionale Neu-Reichweite (WLTP, km) für die SoH-%-Angabe.
+const SOH_KEY = 'tesla-carview-soh-original-range';
+const sohOriginalRange = ref(Number(localStorage.getItem(SOH_KEY)) || null);
+watch(sohOriginalRange, v => { try { localStorage.setItem(SOH_KEY, v || ''); } catch { /* egal */ } });
+
+/** Erzeugt ein Batterie-Gesundheitszertifikat (SoH) als PDF — statistische
+ *  Schätzung aus den Forecast-Daten, clientseitig via jsPDF. Für Leasing-
+ *  rückgabe, Wiederverkauf oder Garantie. Keine Gewährleistung. */
+async function exportSohCertificate() {
+  if (!forecast.value?.enough_data) return;
+  const { jsPDF } = await import('jspdf');
+  const autoTable = (await import('jspdf-autotable')).default;
+  const v  = appStore.selectedVehicle || {};
+  const tr = forecast.value.trend, es = forecast.value.estimates;
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const km = n => `${(+n || 0).toLocaleString(locale.value)} km`;
+  const tt = (k, p) => t('battery.sohCert.' + k, p || {});
+
+  doc.setFontSize(18); doc.setFont('helvetica', 'bold');
+  doc.text(tt('title'), 14, 20);
+  doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(90);
+  doc.text(tt('subtitle'), 14, 27);
+  doc.setTextColor(0);
+
+  autoTable(doc, {
+    startY: 34, theme: 'plain', styles: { fontSize: 10, cellPadding: 1 },
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 55 } },
+    body: [
+      [tt('fieldVehicle'),  v.display_name || v.model || '—'],
+      [tt('fieldVin'),      v.vin || '—'],
+      [tt('fieldPlate'),    v.license_plate || '—'],
+      [tt('fieldOdometer'), v.odometer_km ? km(v.odometer_km) : '—'],
+      [tt('fieldIssued'),   new Date().toLocaleDateString(locale.value)],
+    ],
+  });
+
+  const soh = sohOriginalRange.value > 0 ? Math.round(tr.current_soh_km / sohOriginalRange.value * 100) : null;
+  const rows = [];
+  if (soh != null) rows.push([tt('mSoh'), `${soh} %  (${km(sohOriginalRange.value)} ${tt('originalRangeLabel')})`]);
+  rows.push([tt('mCurrentRange'), `${km(tr.current_soh_km)}  @ 100 % SoC`]);
+  rows.push([tt('mDegRate'), `${(tr.rate_pct_per_year || 0).toLocaleString(locale.value)} %/a  (${km(Math.abs(tr.rate_km_per_year))}/a)`]);
+  rows.push([tt('mDataQuality'), `R² ${Math.round(tr.r2 * 100)} %`]);
+  rows.push([tt('mDataBasis'), tt('basisValue', { since: tr.first_day, days: tr.days_observed })]);
+  rows.push([tt('mForecast3y'), km(es.in_3y.km)]);
+  rows.push([tt('mUntilThreshold', { pct: es.threshold_pct }),
+    es.years_until_threshold != null ? tt('untilValue', { years: (es.years_until_threshold || 0).toLocaleString(locale.value), date: es.date_threshold || '' }) : '—']);
+
+  autoTable(doc, {
+    startY: doc.lastAutoTable.finalY + 6,
+    head: [[tt('colMetric'), tt('colValue')]],
+    body: rows,
+    styles: { fontSize: 10, cellPadding: 2.2 },
+    headStyles: { fillColor: [55, 65, 81], textColor: 255 },
+    columnStyles: { 0: { fontStyle: 'bold', cellWidth: 85 } },
+    didParseCell: hook => {
+      if (soh != null && hook.section === 'body' && hook.row.index === 0) {
+        hook.cell.styles.fillColor = [220, 252, 231];
+        hook.cell.styles.textColor = [22, 101, 52];
+        hook.cell.styles.fontStyle = 'bold';
+      }
+    },
+  });
+
+  const y = doc.lastAutoTable.finalY + 8;
+  doc.setFontSize(8); doc.setTextColor(120);
+  doc.text(doc.splitTextToSize(tt('disclaimer'), 180), 14, y);
+  doc.setTextColor(150);
+  doc.text(`${tt('generatedBy')} · ${new Date().toLocaleString(locale.value)}`, 14, doc.internal.pageSize.getHeight() - 12);
+  doc.setTextColor(0);
+
+  doc.save(`soh-zertifikat-${(v.vin || 'vehicle').slice(-6)}.pdf`);
+}
 
 const dayRanges = computed(() => [
   { value: 30,  tooltip: t('battery.range30')  },

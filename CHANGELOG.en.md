@@ -7,6 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.46.0] - 2026-07-18
+
+### Added
+
+- **Battery health certificate (SoH PDF, S09).** The battery view ("Forecast") can now generate a **SoH certificate as PDF** — for lease return, resale or warranty. It includes vehicle data (VIN, plate, odometer), the current range at 100% charge, the degradation rate (%/year), data quality (R²), the data basis and the projection (range in 3 years, time to 80%). Optionally you can enter the new WLTP range, then battery health is shown as **SoH in %**. Purely statistical estimate (linear regression over `battery_snapshots` via the existing `/api/battery/forecast`), client-side via jsPDF, with a clear no-warranty disclaimer. i18n ×7.
+
+
 ## [v3.45.0] - 2026-07-18
 
 ### Added
