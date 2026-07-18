@@ -118,6 +118,10 @@
     "chargePlanner": {
       "label": "Ladeplaner",
       "tooltip": "Günstigste Ladeslots bis zur Abfahrt aus dem dynamischen Tarif berechnen — mit Kosten und Ersparnis gegenüber sofortigem Laden"
+    },
+    "pvSolar": {
+      "label": "PV-Überschuss",
+      "tooltip": "Nur mit Solarüberschuss laden — liest den Überschuss aus Home Assistant und leitet die Ladestromstärke ab"
     }
   },
   "dashboard": {
@@ -3169,5 +3173,42 @@
     "legendCharge": "Laden",
     "legendIdle": "Pause",
     "barTooltip": "{time}: {value} ct/kWh · {kwh} kWh geladen"
+  },
+  "pvSolar": {
+    "title": "PV-Überschussladen",
+    "intro": "Lädt nur mit Solarüberschuss: TeslaView liest den aktuellen Überschuss aus einem Home-Assistant-Sensor und leitet daraus die empfohlene Ladestromstärke ab. Rein lokal — die Daten verlassen dein Netz nicht.",
+    "subtitle": "Laden mit Solarüberschuss über Home Assistant",
+    "notConfiguredUser": "PV-Überschussladen ist noch nicht eingerichtet. Ein Administrator kann die Home-Assistant-Verbindung konfigurieren.",
+    "statusTitle": "Aktueller Überschuss",
+    "refresh": "Aktualisieren",
+    "apply": "Jetzt anwenden",
+    "applyTip": "Empfohlene Ladestromstärke ans Fahrzeug senden und Laden starten bzw. stoppen (Fleet-API nötig).",
+    "applying": "Sende …",
+    "surplus": "Solarüberschuss",
+    "recommendedAmps": "Empfohlener Ladestrom",
+    "aboveThreshold": "Genug Überschuss",
+    "belowThreshold": "Zu wenig Überschuss",
+    "threshold": "Schwelle: {value} W",
+    "cfgTitle": "Home-Assistant-Verbindung",
+    "haUrl": "Home-Assistant-URL",
+    "haUrlTip": "Basis-URL deiner Home-Assistant-Instanz, z. B. http://homeassistant.local:8123.",
+    "haToken": "Long-Lived Access Token",
+    "haTokenTip": "In Home Assistant unter Profil → Sicherheit → Long-Lived Access Tokens erstellen.",
+    "entity": "Überschuss-Sensor (Entity)",
+    "entityTip": "Entity-ID des Sensors, der den verfügbaren Überschuss in Watt liefert (z. B. sensor.pv_ueberschuss).",
+    "minSurplus": "Mindest-Überschuss (W)",
+    "minSurplusTip": "Ab diesem Überschuss gilt Laden als sinnvoll. Unter der Tesla-Mindeststromstärke (5 A) wird nicht geladen.",
+    "phases": "Phasen",
+    "voltage": "Spannung (V)",
+    "maxAmps": "Max. Ladestrom (A)",
+    "maxAmpsTip": "Obergrenze der Wallbox bzw. des Hausanschlusses.",
+    "enabled": "Automatik aktiv",
+    "enabledTip": "Merker, dass die PV-Steuerung genutzt werden soll. Das eigentliche Senden erfolgt über „Jetzt anwenden\".",
+    "save": "Speichern",
+    "saving": "Speichere …",
+    "saved": "Gespeichert",
+    "noVehicle": "Kein Fahrzeug ausgewählt.",
+    "applyStart": "Ladestrom auf {amps} A gesetzt, Laden gestartet.",
+    "applyStop": "Laden gestoppt — nicht genug Überschuss."
   }
 }

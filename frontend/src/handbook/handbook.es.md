@@ -256,6 +256,14 @@ El **planificador de carga** (nav "Planificación → Planificador de carga", `/
 
 El planificador calcula únicamente sobre la curva de precios: **no se envía ningún comando al vehículo** y no se necesita la Fleet API. Las pérdidas de carga (CA típicamente ~10 %) están incluidas en la energía y el coste.
 
+## ☀️ Carga con excedente solar {#pv-solar}
+
+La **carga con excedente solar** (nav «Planificación → Excedente solar», `/pv-solar`) carga solo con excedente solar. TeslaView lee el excedente actual de un **sensor de Home Assistant** (API REST local) y deriva la corriente de carga recomendada — totalmente local, sin nube.
+
+**Configuración (admin)** — Introduce la URL de Home Assistant, un token de acceso de larga duración (HA → Perfil → Seguridad) y el ID de entidad del sensor de excedente (vatios). Además parámetros: excedente mínimo, fases (1/3), tensión y corriente de carga máxima.
+
+**Estado y aplicar** — La vista muestra el excedente actual, la corriente de carga recomendada (`excedente ÷ (tensión × fases)`, limitada) y si hay excedente suficiente. «Aplicar ahora» fija la corriente e inicia o detiene la carga en el vehículo — para ello se necesita la **Fleet API con clave virtual**. Por debajo de la corriente mínima de Tesla (5 A) no carga.
+
 ## 🔐 Seguridad {#security}
 
 - 🔑 **Passkey / WebAuthn** — Inicio de sesión sin contraseña con huella digital, Face ID o llave hardware

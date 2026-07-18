@@ -7,6 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.44.0] - 2026-07-18
+
+### Added
+
+- **Solar surplus charging via Home Assistant (S08).** New view (`/pv-solar`, navigation under "Planning") charges only from solar surplus: TeslaView reads the current surplus from a Home Assistant sensor (local REST API, long-lived token) and derives the recommended charging current (`surplus ÷ (voltage × phases)`, capped to the max current; below 5 A counts as "not chargeable"). "Apply now" sets the current and starts/stops charging on the vehicle (Fleet API + virtual key). Admin config (HA URL/token/entity, minimum surplus, phases, voltage, max current) in `tenant_settings`, token redacted in GET responses. Backend: `homeAssistantService.js` + `GET/PUT /api/pv/config`, `GET /api/pv/status`, `POST /api/pv/:vehicleId/apply`. Fully local, no cloud dependency. i18n ×7, handbook in 6 languages.
+
+
 ## [v3.43.0] - 2026-07-17
 
 ### Added
