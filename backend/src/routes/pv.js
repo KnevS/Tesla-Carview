@@ -14,6 +14,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import { requireAdmin } from '../middleware/auth.js';
+import { assertVehicleAccess } from '../middleware/vehicleAccess.js';
 import { getTenantSetting, setTenantSetting } from '../services/configService.js';
 import { readEntityState, surplusToAmps } from '../services/homeAssistantService.js';
 import { apiProxyPost } from '../services/teslaApi.js';
@@ -121,6 +122,14 @@ router.get('/status', async (req, res) => {
 // POST /api/pv/:vehicleId/apply — Empfehlung ans Fahrzeug senden.
 // Über Schwelle → Ladestrom setzen + Laden starten; darunter → stoppen.
 router.post('/:vehicleId/apply', async (req, res) => {
+  // Zugriffsschutz: nur Admins oder zugeordnete Fahrer dürfen Ladebefehle
+  // an DIESES Fahrzeug senden (sonst IDOR — jeder Tenant-User könnte an
+  // jedem Fahrzeug laden/stoppen).
+  try {
+    assertVehicleAccess(req.db, req.params.vehicleId, req.user);
+  } catch (e) {
+    return res.status(e.status || 403).json({ error: e.message });
+  }
   const vehicle = req.db.prepare('SELECT * FROM vehicles WHERE id=?').get(req.params.vehicleId);
   if (!vehicle) return res.status(404).json({ error: 'Fahrzeug nicht gefunden' });
   if (!vehicle.vin) return res.status(400).json({ error: 'Fahrzeug hat keine VIN hinterlegt' });
