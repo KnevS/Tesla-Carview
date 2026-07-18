@@ -751,6 +751,14 @@ Tesla Carview ist eine **PWA** (Progressive Web App) — du kannst sie wie eine 
 
 **Empfehlung:** Lass dir Carview auf dem Tesla-Display als Lesezeichen ablegen — Tesla zeigt eingestellte Lesezeichen direkt im Browser-Schnellzugriff. Für das Eintragen von Fahrt-Notizen während einer kurzen Pause ist das schneller als die URL jedes Mal zu tippen.
 
+### 🔒 Manipulationssicheres Fahrtenbuch (v3.47.0) {#tamper-proof}
+
+Jede Änderung an einer Fahrt (Klassifizierung, Geschäftspartner, Fahrer, Ort, Anlegen, Zusammenführen/Teilen, Löschen) wird in eine **HMAC-signierte, verkettete Hash-Chain** geschrieben. Jeder Eintrag hängt am HMAC des Vorgängers und ist mit einem serverseitigen Schlüssel signiert — dadurch lässt sich die Änderungshistorie nicht unbemerkt nachträglich verändern oder lückenhaft machen, auch nicht durch den Betreiber (GoBD-Grundsätze Nachvollziehbarkeit + Unveränderbarkeit).
+
+Über der Fahrtenliste zeigt ein **Integritäts-Status**, ob die Kette lückenlos verifiziert ist (grün) oder ein Bruch erkannt wurde (rot, mit Eintragsnummer). Das Finanzamt-PDF trägt zusätzlich eine entsprechende Aussage. Bestandsfahrten erhalten beim ersten Start einmalig einen Basis-Eintrag.
+
+**Wichtig:** Der Signatur-Schlüssel liegt in `data/.ledger-key` — zusammen mit dem `data/`-Verzeichnis sichern; geht er verloren, lässt sich die Kette nicht mehr verifizieren.
+
 ### 🚗 Fahrtenbuch direkt im Tesla-Browser öffnen {#tesla-direkt}
 
 Der Button **„🚗 Im Tesla öffnen"** oben im Fahrtenbuch macht den Tesla-Browser-Zugriff kinderleicht:

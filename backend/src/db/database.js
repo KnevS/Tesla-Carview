@@ -7,6 +7,7 @@ import { randomUUID } from 'crypto';
 import { LEGAL_DEFAULTS, LEGAL_SCOPES, LEGAL_LOCALES } from './legalDefaults.js';
 import { encrypt, isEncrypted } from '../services/cryptoService.js';
 import { generatePseudonym } from '../services/pseudonymService.js';
+import { ensureLedgerTable, backfillGenesis } from '../services/tripLedger.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const DATA_DIR   = process.env.DATA_DIR   || './data';
@@ -1083,6 +1084,11 @@ function runTenantMigrations(db) {
     ).run(SPEED_FIX_MARKER, JSON.stringify({ fixed: r.changes, at: Math.floor(Date.now() / 1000) }));
     if (r.changes) console.log(`[Migration] telemetry_speed_mph_fix: ${r.changes} Punkte konvertiert`);
   }
+
+  // Manipulationssicheres Fahrtenbuch (S09): Ledger-Tabelle anlegen und für
+  // Bestandsfahrten einmalig Genesis-Einträge erzeugen (idempotent).
+  ensureLedgerTable(db);
+  backfillGenesis(db);
 }
 
 // Alias für Abwärtskompatibilität

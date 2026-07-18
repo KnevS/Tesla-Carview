@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { validate } from '../middleware/validate.js';
 import { logChanges, isLocked } from '../services/tripAudit.js';
+import { recordTripChange, verifyChain, tripHistory } from '../services/tripLedger.js';
 import { wltpDeltaPct } from '../services/wltp.js';
 import {
   assertVehicleAccess, assertTripAccess,
@@ -659,6 +660,7 @@ router.post('/', (req, res) => {
     ).run(vehicle_id, start_time, end_time, start_lat, start_lon, end_lat, end_lon,
       start_address, end_address, distance_km, energy_used_kwh, avg_speed_kmh,
       max_speed_kmh, start_soc, end_soc);
+    recordTripChange(db, result.lastInsertRowid, 'create', req.user?.sub);
     res.status(201).json({ id: result.lastInsertRowid });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -732,6 +734,7 @@ router.post('/manual', validate(z.object({
           b.start_odometer_km ?? null, b.end_odometer_km ?? null, distKm ?? null,
           b.trip_type, b.purpose ?? null, b.business_partner ?? null,
           b.driver_id ?? null);
+    recordTripChange(req.db, r.lastInsertRowid, 'create', req.user?.sub);
     res.status(201).json({ id: r.lastInsertRowid });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -919,6 +922,8 @@ router.delete('/:id', (req, res) => {
   const db = req.db;
   if (guardAccess(res, () => assertTripAccess(db, req.params.id, req.user))) return;
   try {
+    // Endzustand vor dem Löschen signiert in die Chain schreiben.
+    recordTripChange(db, +req.params.id, 'delete', req.user?.sub);
     db.prepare('DELETE FROM trips WHERE id = ?').run(req.params.id);
     res.json({ success: true });
   } catch (err) {
@@ -973,6 +978,22 @@ router.get('/weather-consumption', (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// ── Manipulationssicheres Fahrtenbuch (S09) ─────────────────────────────────
+
+// GET /api/trips/ledger/verify — Integrität der signierten Änderungs-Chain
+// prüfen (rechnet HMAC + Verkettung nach). Liefert ok + erste Bruchstelle.
+router.get('/ledger/verify', (req, res) => {
+  try { res.json(verifyChain(req.db)); }
+  catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET /api/trips/:id/ledger — Änderungshistorie (Hash-Chain) einer Fahrt.
+router.get('/:id/ledger', (req, res) => {
+  if (guardAccess(res, () => assertTripAccess(req.db, req.params.id, req.user))) return;
+  try { res.json(tripHistory(req.db, +req.params.id)); }
+  catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 export default router;
