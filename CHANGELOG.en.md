@@ -7,6 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.43.0] - 2026-07-17
+
+### Added
+
+- **Business/private cost split for home-charging reimbursement (S08).** The (company-car) cost billing gains a new "Business / private — reimbursement" section with two methods: **flat rate** (tax-free expense allowance under German § 3 No. 50 EStG — €30 with a charging option at the employer, €70 without, × number of billed months) and **mileage share** (business share of km from `trip_type` [business + commute] ÷ total × the actual home-charging cost for the period). Each method produces a signature-ready **reimbursement PDF** (client-side via jsPDF). Backend: new `GET /api/billing/:vehicleId/reimbursement` (home-charging cost + km by trip_type per year/month). Company cars only (`category=company`); German-language (German tax topic, like the rest of the billing).
+
+
 ## [v3.42.0] - 2026-07-17
 
 ### Added

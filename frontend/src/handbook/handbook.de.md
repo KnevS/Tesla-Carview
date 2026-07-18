@@ -238,6 +238,15 @@ Typischer Anwendungsfall: Laden am Arbeitsplatz, das vom Arbeitgeber gestellt wi
 
 **Ladeverlauf, Kosten nach Ort & günstige Ladefenster (v3.24–v3.26)** — In der Laden-Ansicht öffnet jede Session über *„📈 Verlauf ansehen"* ihren **Ladeverlauf**: Leistungs- und Ladestandskurve über die Zeit plus Eckdaten (Dauer, geladene kWh, Ø-/Spitzenleistung, Kosten) und eine klar gekennzeichnete Schätzung von Netzentnahme und Ladeverlust (Wirkungsgrad je Ladetyp). Die Sektion **„Kosten nach Ort"** fasst je Ladeort Anzahl, kWh, Gesamtkosten und Ø €/kWh zusammen — mit Heim-/Auswärts-Kennzeichnung. Ist unter Einstellungen → Tarif ein Strompreis-Anbieter (aWattar/Tibber) verbunden, zeigt **„Günstige Ladefenster"** den aktuellen Preis sowie das günstigste 4- und 8-Stunden-Fenster der nächsten 24 Stunden samt Stundenraster.
 
+## 💶 Dienstlich/Privat-Erstattung {#reimbursement-split}
+
+Für **Dienstwagen** (Fahrzeug-Kategorie „Dienstwagen") teilt die **Kostenabrechnung → Dienstlich / Privat — Erstattung** die Heimladekosten auf und erzeugt ein unterschriftsreifes Erstattungs-PDF nach einer von zwei Methoden:
+
+- **Pauschale** — fester steuerfreier Monatsbetrag nach § 3 Nr. 50 EStG: **30 €** mit Lademöglichkeit beim Arbeitgeber, **70 €** ohne. Kein Einzelnachweis nötig; der Betrag wird mit der Anzahl der abgerechneten Monate multipliziert.
+- **Fahranteil** — datenbasiert: der dienstliche km-Anteil (geschäftlich + Arbeitsweg aus den klassifizierten Fahrten) mal die tatsächlichen Heimladekosten des Zeitraums. Setzt voraus, dass Fahrten im Fahrtenbuch als dienstlich/privat klassifiziert sind.
+
+Beide Methoden sind rein deutschsprachig (deutsches Steuerthema) und nur für Dienstwagen verfügbar.
+
 ## 📅 Ladeplaner {#charge-planner}
 
 Der **Ladeplaner** (Nav „Planung → Ladeplaner", `/ladeplan`) beantwortet die Frage „Wann soll ich laden?" für einen dynamischen Stromtarif. Er wählt aus der Preiskurve die **günstigsten Stunden bis zur Abfahrt** — auch nicht zusammenhängend — statt einfach das nächste zusammenhängende Fenster.
