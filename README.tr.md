@@ -62,6 +62,7 @@ Canlı araç verileri (batarya, klima, TPMS, telemetri akışı) için **tek bir
 | **Şirket aracı gider ayrımı** (v3.43.0) | Ev şarjını iş/özel olarak ayırır ve geri ödeme PDF'i olarak dışa aktarır — sabit oran (Alman § 3 Nr. 50 EStG, 30/70 €) veya km payı (iş km payı × ev şarj maliyeti). Yalnızca şirket araçları, Almanca |
 | **Solar fazlası şarjı** (v3.44.0) | Yalnızca güneş fazlasıyla şarj: fazlayı Home Assistant'tan okur ve önerilen şarj akımını türetir — "Şimdi uygula" akımı ayarlar ve başlatır/durdurur (Fleet API). Tamamen yerel, bulut yok |
 | **Şirket aracı vergisi** (v3.45.0) | Nakdi menfaat için %1 kuralı vs. seyir defteri yöntemi — tarihe bağlı EV oranıyla (%0,25/%0,5/%1, satın alma tarihine göre liste fiyatı sınırı). Yönlendirici hesaplama, yalnızca şirket araçları, Almanca |
+| **SoH sertifikası** (v3.46.0) | Leasing iadesi/satış için PDF batarya sağlık sertifikası — %100'de menzil, bozunma oranı, %80'e kadar tahmin, isteğe bağlı %SoH. İstatistiksel tahmin, garanti yok |
 | **Şarj** | Maliyetli şarj oturumları, GPS tabanlı şarj konumu eşleştirme, ücretsiz oturumlar işaretlenebilir |
 | **Şarj konumları** | GPS yarıçapı, fiyat/kWh ve otomatik tespitli tanımlanabilir noktalar |
 | **Batarya / Batarya Sağlığı Asistanı** | Faz 1 (v3.6.0): menzil geçmişi, dejenerasyon, şarj eğrisi, dış sıcaklığa göre verim, hayalet boşalma, anomaliler — tümü kendi verilerinizden çıkarılan saf istatistikler. Faz 2 (v3.7.0): push ile kalıcı anomali uyarıları + don/sıcak havada ön koşullandırma önerileri (Open-Meteo) |

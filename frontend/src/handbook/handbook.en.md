@@ -123,6 +123,10 @@ Every signed-in user has their own page at `/my-tracking` ("📱 My GPS" in the 
 
 **Vehicle selector**: all sections react to the currently selected vehicle.
 
+### SoH certificate (v3.46.0) {#soh-certificate}
+
+In the battery view under "Forecast", the **SoH certificate (PDF)** button generates a battery health certificate for lease return, resale or warranty: vehicle data (VIN, plate, odometer), current range at 100% charge, degradation rate, data quality (R²), data basis and the projection (range in 3 years, time to 80%). Optionally enter the new WLTP range to show health as **SoH in %**. Purely statistical estimate from the recorded vehicle data — no warranty.
+
 ### Companion Phase 2 (from v3.7.0) {#companion-phase-2}
 
 Two new sections on `/battery`, both from your existing data:

@@ -7,6 +7,13 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.46.0] - 2026-07-18
+
+### Neu
+
+- **Batterie-Gesundheitszertifikat (SoH-PDF, S09).** Die Batterie-Ansicht („Prognose") erzeugt jetzt ein **SoH-Zertifikat als PDF** — für Leasingrückgabe, Wiederverkauf oder Garantie. Enthält Fahrzeugdaten (FIN, Kennzeichen, Kilometerstand), die aktuelle Reichweite bei 100 % Ladung, die Degradationsrate (%/Jahr), die Datengüte (R²), die Datenbasis und die Prognose (Reichweite in 3 Jahren, Zeit bis 80 %). Optional lässt sich die WLTP-Neu-Reichweite eingeben, dann wird die Batteriegesundheit als **SoH in %** ausgewiesen. Rein statistische Schätzung (lineare Regression aus den `battery_snapshots` über das bestehende `/api/battery/forecast`), clientseitig via jsPDF, mit klarem Gewährleistungs-Ausschluss. i18n ×7.
+
+
 ## [v3.45.0] - 2026-07-18
 
 ### Neu
