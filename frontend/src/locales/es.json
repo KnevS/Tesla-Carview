@@ -118,6 +118,10 @@
     "chargePlanner": {
       "label": "Planificador de carga",
       "tooltip": "Calcula las franjas de carga más baratas antes de la salida a partir de tu tarifa dinámica, con coste y ahorro frente a cargar ahora"
+    },
+    "pvSolar": {
+      "label": "Excedente solar",
+      "tooltip": "Cargar solo con excedente solar — lee el excedente de Home Assistant y deriva la corriente de carga"
     }
   },
   "dashboard": {
@@ -3160,5 +3164,42 @@
     "legendCharge": "Cargando",
     "legendIdle": "Pausa",
     "barTooltip": "{time}: {value} ct/kWh · {kwh} kWh cargados"
+  },
+  "pvSolar": {
+    "title": "Carga con excedente solar",
+    "intro": "Carga solo con excedente solar: TeslaView lee el excedente actual de un sensor de Home Assistant y deriva la corriente de carga recomendada. Totalmente local — los datos no salen de tu red.",
+    "subtitle": "Cargar con excedente solar vía Home Assistant",
+    "notConfiguredUser": "La carga con excedente solar aún no está configurada. Un administrador puede configurar la conexión con Home Assistant.",
+    "statusTitle": "Excedente actual",
+    "refresh": "Actualizar",
+    "apply": "Aplicar ahora",
+    "applyTip": "Enviar la corriente de carga recomendada al vehículo e iniciar o detener la carga (requiere Fleet API).",
+    "applying": "Enviando …",
+    "surplus": "Excedente solar",
+    "recommendedAmps": "Corriente recomendada",
+    "aboveThreshold": "Excedente suficiente",
+    "belowThreshold": "Excedente insuficiente",
+    "threshold": "Umbral: {value} W",
+    "cfgTitle": "Conexión con Home Assistant",
+    "haUrl": "URL de Home Assistant",
+    "haUrlTip": "URL base de tu instancia de Home Assistant, p. ej. http://homeassistant.local:8123.",
+    "haToken": "Token de acceso de larga duración",
+    "haTokenTip": "Créalo en Home Assistant en Perfil → Seguridad → Tokens de acceso de larga duración.",
+    "entity": "Sensor de excedente (entity)",
+    "entityTip": "ID de entidad del sensor que informa el excedente disponible en vatios (p. ej. sensor.pv_surplus).",
+    "minSurplus": "Excedente mínimo (W)",
+    "minSurplusTip": "A partir de este excedente, cargar se considera razonable. Por debajo de la corriente mínima de Tesla (5 A) no carga.",
+    "phases": "Fases",
+    "voltage": "Tensión (V)",
+    "maxAmps": "Corriente máx. (A)",
+    "maxAmpsTip": "Límite superior del wallbox o de la acometida.",
+    "enabled": "Automatización activa",
+    "enabledTip": "Marca que se debe usar el control PV. El envío real se realiza mediante «Aplicar ahora».",
+    "save": "Guardar",
+    "saving": "Guardando …",
+    "saved": "Guardado",
+    "noVehicle": "Ningún vehículo seleccionado.",
+    "applyStart": "Corriente de carga fijada en {amps} A, carga iniciada.",
+    "applyStop": "Carga detenida — excedente insuficiente."
   }
 }

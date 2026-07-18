@@ -7,6 +7,13 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.44.0] - 2026-07-18
+
+### Neu
+
+- **PV-Überschussladen über Home Assistant (S08).** Neue Ansicht (`/pv-solar`, Navigation unter „Planung") lädt nur mit Solarüberschuss: TeslaView liest den aktuellen Überschuss aus einem Home-Assistant-Sensor (lokale REST-API, Long-Lived Token) und leitet die empfohlene Ladestromstärke ab (`Überschuss ÷ (Spannung × Phasen)`, gedeckelt auf den max. Ladestrom; unter 5 A gilt „nicht ladbar"). „Jetzt anwenden" setzt den Ladestrom und startet/stoppt das Laden am Fahrzeug (Fleet-API + Virtual Key). Admin-Konfiguration (HA-URL/Token/Entity, Mindest-Überschuss, Phasen, Spannung, Max-Strom) in `tenant_settings`, Token in GET-Antworten redacted. Backend: `homeAssistantService.js` + `GET/PUT /api/pv/config`, `GET /api/pv/status`, `POST /api/pv/:vehicleId/apply`. Rein lokal, kein Cloud-Zwang. i18n ×7, Handbuch 6 Sprachen.
+
+
 ## [v3.43.0] - 2026-07-17
 
 ### Neu

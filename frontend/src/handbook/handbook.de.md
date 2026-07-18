@@ -261,6 +261,14 @@ Der **Ladeplaner** (Nav „Planung → Ladeplaner", `/ladeplan`) beantwortet die
 
 Der Ladeplaner rechnet ausschließlich auf der Tarifkurve — es wird **kein Befehl ans Fahrzeug gesendet** und keine Fleet-API benötigt. Ladeverluste (AC typischerweise ~10 %) sind in Energie und Kosten eingerechnet.
 
+## ☀️ PV-Überschussladen {#pv-solar}
+
+**PV-Überschussladen** (Nav „Planung → PV-Überschuss", `/pv-solar`) lädt nur mit Solarüberschuss. TeslaView liest den aktuellen Überschuss aus einem **Home-Assistant-Sensor** (lokale REST-API) und leitet daraus die empfohlene Ladestromstärke ab — rein lokal, ohne Cloud.
+
+**Einrichtung (Admin)** — Home-Assistant-URL, ein Long-Lived Access Token (HA → Profil → Sicherheit) und die Entity-ID des Überschuss-Sensors (Watt) hinterlegen. Dazu Anlagenparameter: Mindest-Überschuss, Phasen (1/3), Spannung und maximaler Ladestrom.
+
+**Status & Anwenden** — Die Ansicht zeigt den aktuellen Überschuss, die empfohlene Ladestromstärke (`Überschuss ÷ (Spannung × Phasen)`, gedeckelt) und ob genug Überschuss vorhanden ist. „Jetzt anwenden" setzt den Ladestrom und startet bzw. stoppt das Laden am Fahrzeug — dafür ist die **Fleet-API mit Virtual Key** nötig. Unter der Tesla-Mindeststromstärke (5 A) wird nicht geladen.
+
 ## 🔐 Sicherheit {#security}
 
 - 🔑 **Passkey / WebAuthn** — Passwortloser Login mit Fingerabdruck, Face ID oder Hardware-Key

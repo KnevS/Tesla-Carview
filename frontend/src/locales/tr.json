@@ -118,6 +118,10 @@
     "chargePlanner": {
       "label": "Şarj planlayıcı",
       "tooltip": "Dinamik tarifenizden kalkıştan önceki en ucuz şarj aralıklarını hesaplar — hemen şarj etmeye kıyasla maliyet ve tasarrufla"
+    },
+    "pvSolar": {
+      "label": "Solar fazlası",
+      "tooltip": "Yalnızca güneş fazlasıyla şarj — fazlayı Home Assistant'tan okur ve şarj akımını türetir"
     }
   },
   "dashboard": {
@@ -3160,5 +3164,42 @@
     "legendCharge": "Şarj",
     "legendIdle": "Bekleme",
     "barTooltip": "{time}: {value} ct/kWh · {kwh} kWh şarj edildi"
+  },
+  "pvSolar": {
+    "title": "Solar fazlası şarjı",
+    "intro": "Yalnızca güneş fazlasıyla şarj eder: TeslaView, mevcut fazlayı bir Home Assistant sensöründen okur ve önerilen şarj akımını türetir. Tamamen yerel — veriler ağınızdan çıkmaz.",
+    "subtitle": "Home Assistant üzerinden güneş fazlasıyla şarj",
+    "notConfiguredUser": "Solar fazlası şarjı henüz ayarlanmadı. Bir yönetici Home Assistant bağlantısını yapılandırabilir.",
+    "statusTitle": "Mevcut fazla",
+    "refresh": "Yenile",
+    "apply": "Şimdi uygula",
+    "applyTip": "Önerilen şarj akımını araca gönder ve şarjı başlat/durdur (Fleet API gerekir).",
+    "applying": "Gönderiliyor …",
+    "surplus": "Güneş fazlası",
+    "recommendedAmps": "Önerilen akım",
+    "aboveThreshold": "Yeterli fazla",
+    "belowThreshold": "Yetersiz fazla",
+    "threshold": "Eşik: {value} W",
+    "cfgTitle": "Home Assistant bağlantısı",
+    "haUrl": "Home Assistant URL",
+    "haUrlTip": "Home Assistant örneğinizin temel URL’si, ör. http://homeassistant.local:8123.",
+    "haToken": "Uzun ömürlü erişim jetonu",
+    "haTokenTip": "Home Assistant’ta Profil → Güvenlik → Uzun Ömürlü Erişim Jetonları altından oluşturun.",
+    "entity": "Fazla sensörü (entity)",
+    "entityTip": "Kullanılabilir fazlayı watt olarak bildiren sensörün entity kimliği (ör. sensor.pv_surplus).",
+    "minSurplus": "Asgari fazla (W)",
+    "minSurplusTip": "Bu fazladan itibaren şarj mantıklı sayılır. Tesla asgari akımının (5 A) altında şarj etmez.",
+    "phases": "Fazlar",
+    "voltage": "Gerilim (V)",
+    "maxAmps": "Maks. akım (A)",
+    "maxAmpsTip": "Wallbox veya ev bağlantısının üst sınırı.",
+    "enabled": "Otomasyon açık",
+    "enabledTip": "PV kontrolünün kullanılacağını işaretler. Asıl gönderim «Şimdi uygula» ile yapılır.",
+    "save": "Kaydet",
+    "saving": "Kaydediliyor …",
+    "saved": "Kaydedildi",
+    "noVehicle": "Araç seçilmedi.",
+    "applyStart": "Şarj akımı {amps} A olarak ayarlandı, şarj başladı.",
+    "applyStop": "Şarj durduruldu — yeterli fazla yok."
   }
 }

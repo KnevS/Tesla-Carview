@@ -264,6 +264,14 @@ The **charge planner** (nav "Planning → Charge Planner", `/ladeplan`) answers 
 
 The planner works purely on the tariff curve — **no command is sent to the vehicle** and no Fleet API is required. Charging losses (AC typically ~10 %) are included in energy and cost.
 
+## ☀️ Solar surplus charging {#pv-solar}
+
+**Solar surplus charging** (nav "Planning → Solar surplus", `/pv-solar`) charges only from solar surplus. TeslaView reads the current surplus from a **Home Assistant sensor** (local REST API) and derives the recommended charging current — fully local, no cloud.
+
+**Setup (admin)** — Enter the Home Assistant URL, a long-lived access token (HA → Profile → Security) and the entity ID of the surplus sensor (watts). Plus system parameters: minimum surplus, phases (1/3), voltage and maximum charging current.
+
+**Status & apply** — The view shows the current surplus, the recommended charging current (`surplus ÷ (voltage × phases)`, capped) and whether there is enough surplus. "Apply now" sets the charging current and starts or stops charging on the vehicle — this needs the **Fleet API with a virtual key**. Below the Tesla minimum current (5 A) it won't charge.
+
 ## 🔐 Security {#security}
 
 - 🔑 **Passkey / WebAuthn** — Passwordless login with fingerprint, Face ID or hardware key

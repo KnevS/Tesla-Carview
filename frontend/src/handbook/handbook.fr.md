@@ -256,6 +256,14 @@ Le **planificateur de charge** (nav « Planification → Planificateur de charge
 
 Le planificateur calcule uniquement sur la courbe tarifaire : **aucune commande n'est envoyée au véhicule** et aucune Fleet API n'est requise. Les pertes de charge (AC généralement ~10 %) sont incluses dans l'énergie et le coût.
 
+## ☀️ Charge sur surplus solaire {#pv-solar}
+
+La **charge sur surplus solaire** (nav « Planification → Surplus solaire », `/pv-solar`) ne charge qu'avec le surplus solaire. TeslaView lit le surplus actuel depuis un **capteur Home Assistant** (API REST locale) et en déduit le courant de charge recommandé — entièrement local, sans cloud.
+
+**Configuration (admin)** — Renseignez l'URL Home Assistant, un jeton d'accès longue durée (HA → Profil → Sécurité) et l'ID d'entité du capteur de surplus (watts). Ainsi que des paramètres : surplus minimal, phases (1/3), tension et courant de charge maximal.
+
+**État et application** — La vue affiche le surplus actuel, le courant de charge recommandé (`surplus ÷ (tension × phases)`, plafonné) et s'il y a assez de surplus. « Appliquer » règle le courant et démarre ou arrête la charge du véhicule — cela nécessite la **Fleet API avec clé virtuelle**. Sous le courant minimal Tesla (5 A), pas de charge.
+
 ## 🔐 Sécurité {#security}
 
 - 🔑 **Passkey / WebAuthn** — Connexion sans mot de passe avec empreinte digitale, Face ID ou clé matérielle

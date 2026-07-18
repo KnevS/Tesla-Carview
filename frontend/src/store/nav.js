@@ -53,6 +53,7 @@ export const NAV_GROUPS = [
       { key: 'chargers',    to: '/chargers',    icon: 'bolt',     emojiFallback: '🗺', label: 'Ladestationen', tooltip: 'Schnellladestationen in deiner Nähe suchen – OpenChargeMap-Daten' },
       { key: 'chargingLocations', to: '/charging-locations', icon: 'bolt', emojiFallback: '🏠', label: 'Ladeorte', tooltip: 'Eigene Ladeorte verwalten — Tarif, Radius, automatisches Ladelimit bei Ankunft' },
       { key: 'chargePlanner', to: '/ladeplan', icon: 'bolt', emojiFallback: '📅', label: 'Ladeplaner', tooltip: 'Günstigste Ladeslots bis zur Abfahrt aus dem dynamischen Tarif berechnen — mit Kosten und Ersparnis gegenüber sofortigem Laden' },
+      { key: 'pvSolar', to: '/pv-solar', icon: 'sparkles', emojiFallback: '☀️', label: 'PV-Überschuss', tooltip: 'Nur mit Solarüberschuss laden — liest den Überschuss aus Home Assistant und leitet die Ladestromstärke ab' },
       { key: 'mytracking',  to: '/my-tracking',      icon: 'smartphone',  emojiFallback: '📱', label: 'Mein GPS',         tooltip: 'Eigene Smartphone-GPS-Geräte (OwnTracks) einrichten + Bluetooth-Validierung + QR-Code' },
       { key: 'automations', to: '/automations', icon: 'bolt',     emojiFallback: '⚡', label: 'Automationen',  tooltip: 'Push-Alarme und automatische Aktionen bei Ladestufe, Geofence u. m.' },
       { key: 'grok',        to: '/grok',        icon: 'sparkles', emojiFallback: '💬', label: 'Grok',          tooltip: 'Chat mit Grok KI — stelle Fragen zu deinen Fahrten, Ladedaten und deinem Tesla' },
@@ -83,7 +84,7 @@ const GROUP_ORDER = {
   analytics: ['trips', 'fahrtwerte', 'fahrtenbuch', 'heatmap',
               'charging', 'energy', 'co2', 'climate', 'sleep',
               'abrechnung', 'tco', 'logbook', 'export'],
-  plan:      ['routes', 'chargers', 'chargingLocations', 'chargePlanner', 'nearby',
+  plan:      ['routes', 'chargers', 'chargingLocations', 'chargePlanner', 'pvSolar', 'nearby',
               'mytracking', 'automations', 'grok', 'launcher'],
   admin:     ['users', 'data', 'audit', 'legal', 'system'],
 };
