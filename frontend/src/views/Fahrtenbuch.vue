@@ -48,6 +48,15 @@
       </div>
     </div>
 
+    <!-- Manipulationssicheres Fahrtenbuch: Integritätsstatus (S09) -->
+    <div v-if="ledgerStatus" class="flex items-center gap-2 text-xs rounded-lg px-3 py-2"
+         :class="ledgerStatus.ok ? 'bg-green-900/20 border border-green-800 text-green-300' : 'bg-red-900/20 border border-red-800 text-red-300'"
+         v-tooltip="'Jede Änderung an einer Fahrt wird als HMAC-signierter Eintrag in eine verkettete Hash-Chain geschrieben. Die Prüfung rechnet die Kette nach — jede nachträgliche Änderung oder Löschung würde auffallen (GoBD).'">
+      <span>{{ ledgerStatus.ok ? '🔒' : '⚠️' }}</span>
+      <span v-if="ledgerStatus.ok">Manipulationssicher: Änderungshistorie signiert &amp; lückenlos verifiziert ({{ ledgerStatus.total }} Einträge).</span>
+      <span v-else>Integritätswarnung: Bruch der Änderungskette bei Eintrag {{ ledgerStatus.first_break?.seq }} — die Historie wurde außerhalb der App verändert.</span>
+    </div>
+
     <!-- BMF-Hinweis: nur einblenden, wenn der Filter auf einen kompletten
          Monat zeigt — das ist der Use-Case fuers Finanzamt. -->
     <div v-if="selMonth" class="card bg-blue-900/15 border border-blue-700/40 text-sm space-y-1">
@@ -657,6 +666,14 @@ async function saveManual() {
   }
 }
 
+// Manipulationssicheres Fahrtenbuch (S09): Integrität der signierten
+// Änderungs-Chain. null = noch nicht geprüft.
+const ledgerStatus = ref(null);
+async function verifyLedger() {
+  try { ledgerStatus.value = (await api.get('/trips/ledger/verify')).data; }
+  catch { ledgerStatus.value = null; }
+}
+
 async function load() {
   loading.value = true;
   const vid = appStore.selectedVehicle?.id;
@@ -670,6 +687,7 @@ async function load() {
   trips.value  = tripsRes.data;
   months.value = monthsRes.data.filter(m => m.month.startsWith(selYear.value));
   loading.value = false;
+  verifyLedger();
 }
 
 function exportCsv() {
@@ -789,6 +807,18 @@ async function exportFinanzamtPdf() {
   doc.text(`Privat: ${fmt(privateKm, 1)} km`,         60, y + 5);
   doc.text(`Dienst: ${fmt(businessKm, 1)} km`,       110, y + 5);
   doc.text(`Arbeitsweg: ${fmt(commuteKm, 1)} km`,    160, y + 5);
+
+  // Manipulationssicherheit (S09): Status der signierten Änderungs-Chain.
+  const ls = ledgerStatus.value;
+  if (ls) {
+    const stmt = ls.ok
+      ? `Manipulationssicheres Fahrtenbuch: Die Änderungshistorie ist als HMAC-signierte Hash-Chain lückenlos verifiziert (${ls.total} Einträge). Jede nachträgliche Änderung oder Löschung wäre erkennbar.`
+      : `Manipulationssicheres Fahrtenbuch: Integritätsprüfung FEHLGESCHLAGEN — Bruch bei Eintrag ${ls.first_break?.seq}. Die Änderungshistorie wurde außerhalb der Anwendung verändert.`;
+    doc.setFontSize(7);
+    doc.setTextColor(ls.ok ? 90 : 180, ls.ok ? 90 : 40, ls.ok ? 90 : 40);
+    doc.text(doc.splitTextToSize(stmt, 182), 14, y + 13);
+    doc.setTextColor(0);
+  }
 
   doc.save(`fahrtenbuch-finanzamt-${selYear.value}${selMonth.value ? '-' + selMonth.value : ''}.pdf`);
 

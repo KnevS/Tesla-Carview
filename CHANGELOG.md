@@ -7,6 +7,13 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.47.0] - 2026-07-18
+
+### Neu
+
+- **Manipulationssicheres Fahrtenbuch (GoBD, S09).** Jede Änderung an einer Fahrt (Klassifizierung, Geschäftspartner, Fahrer, Ort, Anlegen, Zusammenführen/Teilen, Löschen) schreibt jetzt einen **append-only, HMAC-signierten Eintrag in eine verkettete Hash-Chain** (`trip_ledger`). Jeder Eintrag verkettet über `prev_hash` auf den HMAC des Vorgängers und ist mit einem serverseitigen Schlüssel (`data/.ledger-key`, 0600) signiert — dadurch kann auch der Betreiber die Änderungshistorie nicht unbemerkt neu schreiben. Neue Endpunkte `GET /api/trips/ledger/verify` (rechnet HMAC + Verkettung nach, meldet die erste Bruchstelle) und `GET /api/trips/:id/ledger` (Änderungshistorie je Fahrt). Das Fahrtenbuch zeigt einen **Integritäts-Status** (grün „verifiziert" / rot „Bruch bei Eintrag X"); das Finanzamt-PDF trägt die Manipulationssicherheits-Aussage. Bestandsfahrten erhalten einmalig einen Genesis-Eintrag (idempotente Migration). Backend: `services/tripLedger.js`, zentral über `logChanges` eingehängt. Verifiziert: Snapshot-Änderung → `content_hash`-Bruch, gelöschter Eintrag → `prev_hash`-Bruch.
+
+
 ## [v3.46.0] - 2026-07-18
 
 ### Neu
