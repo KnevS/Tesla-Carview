@@ -266,6 +266,20 @@ For **company cars**, the tax assistant (nav "Analytics → Company-car tax", `/
 
 **Result** — Both methods with monthly and yearly taxable benefit, the cheaper one highlighted, plus the annual difference. Guidance calculation under German § 6 (1) no. 4 EStG only — **not tax advice**.
 
+## 🔌 Charging efficiency {#charging-efficiency}
+
+The charging view shows under **"Charging efficiency"** how much of the energy drawn actually reaches the battery. Tesla only reports what arrived in the battery — what the wallbox pulled is nowhere to be seen. The difference is **charging loss**, and it varies considerably: a few percent at an 11 kW wallbox, easily over a fifth at a household socket drawing only a few amps.
+
+**Breakdown by power band** — the real insight. It reveals which charging method is genuinely expensive: the same amount of energy costs noticeably more from a socket than from a wallbox, because a larger share dissipates as heat.
+
+**Two measurement paths**, reported separately rather than blended:
+- **Calibrated** — via the MID meter of a connected wallbox (see [Monta integration](#monta)). Exact.
+- **Estimated** — from vehicle data. Works without extra hardware, but is approximate.
+
+**What stays deliberately unrated** — not every charge supports a solid statement. Skipped are charges with too few measurements (short fast-charging sessions often yield just one), under 3 kWh of covered energy, measurement gaps beyond 70 minutes, or an implausible result. Such charges appear in the list but without an efficiency figure — a missing number is more honest than an invented one.
+
+**Why the evaluation takes time** — the value builds from several measurements per charge. After a few longer charges (typically overnight) the first solid evaluation appears.
+
 ## 📅 Charge planner {#charge-planner}
 
 The **charge planner** (nav "Planning → Charge Planner", `/ladeplan`) answers the "when should I charge?" question for a dynamic electricity tariff. It picks the **cheapest hours before departure** from the price curve — not necessarily contiguous — rather than just the next contiguous window.

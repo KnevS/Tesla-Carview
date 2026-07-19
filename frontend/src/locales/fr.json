@@ -459,7 +459,22 @@
     "windowsNext24h": "Prochaines 24 heures",
     "windowsUnit": "ct/kWh",
     "windowsAvgPrice": "moy. {value} ct/kWh",
-    "windowsBarTooltip": "{time} : {value} ct/kWh"
+    "windowsBarTooltip": "{time} : {value} ct/kWh",
+    "efficiencyTitle": "Rendement de charge",
+    "efficiencySubtitle": "Quelle part de l'énergie consommée arrive réellement dans la batterie ? La différence correspond aux pertes de charge — quelques pour cent sur une wallbox, vite un cinquième sur une prise domestique.",
+    "effAvg": "Rendement",
+    "effAvgTooltip": "Énergie arrivée dans la batterie divisée par l'énergie soutirée au réseau, pondérée par le volume chargé.",
+    "effLost": "Perdu",
+    "effLostTooltip": "Énergie dissipée en chaleur dans le chargeur et le câble — payée, mais jamais stockée.",
+    "effGrid": "Depuis le réseau",
+    "effGridTooltip": "Énergie totale soutirée sur toutes les charges évaluées.",
+    "effRated": "Évaluées",
+    "effRatedTooltip": "Charges disposant de données suffisantes. Les charges rapides courtes fournissent trop peu de mesures et restent volontairement non évaluées.",
+    "effByPower": "Pertes selon la puissance de charge",
+    "effBandSessions": "{n} charges",
+    "effMethodNote": "{metered} charges mesurées via le compteur MID étalonné, {telemetry} estimées à partir des données du véhicule.",
+    "effEstimateNote": "Estimé à partir des données du véhicule. Avec une wallbox connectée (compteur MID), la valeur devient exacte.",
+    "effNoData": "Aucune charge avec des données suffisantes pour l'instant. Le rendement nécessite plusieurs mesures par charge — une évaluation apparaîtra ici après quelques charges plus longues."
   },
   "battery": {
     "title": "Batterie & Dégradation",

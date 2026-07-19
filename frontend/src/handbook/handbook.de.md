@@ -263,6 +263,20 @@ Für **Dienstwagen** stellt der Versteuerungs-Assistent (Nav „Auswertungen →
 
 **Ergebnis** — Beide Methoden mit monatlichem und jährlichem geldwerten Vorteil, die günstigere ist hervorgehoben, plus die jährliche Differenz. Reine Orientierungsrechnung nach § 6 Abs. 1 Nr. 4 EStG — **keine Steuerberatung**.
 
+## 🔌 Ladewirkungsgrad {#charging-efficiency}
+
+Die Ladeansicht zeigt unter **„Ladewirkungsgrad"**, wie viel der bezogenen Energie tatsächlich im Akku ankommt. Tesla weist nur aus, was im Akku ankam — was die Wallbox gezogen hat, steht nirgends. Die Differenz ist **Ladeverlust**, und der schwankt erheblich: an einer 11-kW-Wallbox sind es wenige Prozent, an einer Schuko-Dose mit wenigen Ampere schnell über ein Fünftel.
+
+**Aufschlüsselung nach Leistungsband** — Der eigentliche Erkenntniswert. Sichtbar wird, welche Ladeart wirklich teuer ist: Dieselbe Strommenge kostet an der Steckdose spürbar mehr als an der Wallbox, weil ein größerer Teil als Wärme verpufft.
+
+**Zwei Messwege**, getrennt ausgewiesen statt vermischt:
+- **Geeicht** — über den MID-Zähler einer angebundenen Wallbox (siehe [Monta-Integration](#monta)). Exakt.
+- **Geschätzt** — aus Fahrzeugdaten. Funktioniert ohne Zusatzhardware, ist aber approximativ.
+
+**Was bewusst unbewertet bleibt** — Nicht jede Ladung lässt eine belastbare Aussage zu. Übersprungen werden Ladungen mit zu wenigen Messpunkten (kurze Schnellladungen liefern oft nur einen), unter 3 kWh erfasster Energie, Messlücken über 70 Minuten oder unplausiblem Ergebnis. Solche Ladungen erscheinen in der Liste, aber ohne Wirkungsgrad — eine fehlende Zahl ist ehrlicher als eine erfundene.
+
+**Warum die Auswertung Zeit braucht** — Der Wert entsteht aus mehreren Messpunkten je Ladung. Nach ein paar längeren Ladungen (typisch über Nacht) steht die erste belastbare Auswertung.
+
 ## 📅 Ladeplaner {#charge-planner}
 
 Der **Ladeplaner** (Nav „Planung → Ladeplaner", `/ladeplan`) beantwortet die Frage „Wann soll ich laden?" für einen dynamischen Stromtarif. Er wählt aus der Preiskurve die **günstigsten Stunden bis zur Abfahrt** — auch nicht zusammenhängend — statt einfach das nächste zusammenhängende Fenster.

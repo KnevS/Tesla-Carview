@@ -459,7 +459,22 @@
     "windowsNext24h": "Próximas 24 horas",
     "windowsUnit": "ct/kWh",
     "windowsAvgPrice": "med. {value} ct/kWh",
-    "windowsBarTooltip": "{time}: {value} ct/kWh"
+    "windowsBarTooltip": "{time}: {value} ct/kWh",
+    "efficiencyTitle": "Eficiencia de carga",
+    "efficiencySubtitle": "¿Cuánta de la energía consumida llega realmente a la batería? La diferencia son pérdidas de carga: unos pocos por ciento en un wallbox, fácilmente una quinta parte en un enchufe doméstico.",
+    "effAvg": "Eficiencia",
+    "effAvgTooltip": "Energía que llegó a la batería dividida por la energía tomada de la red, ponderada por volumen de carga.",
+    "effLost": "Perdido",
+    "effLostTooltip": "Energía disipada como calor en cargador y cable: pagada, pero nunca almacenada en la batería.",
+    "effGrid": "De la red",
+    "effGridTooltip": "Energía total tomada en todas las cargas evaluadas.",
+    "effRated": "Evaluadas",
+    "effRatedTooltip": "Cargas con datos suficientes. Las cargas rápidas cortas aportan muy pocas mediciones y quedan deliberadamente sin evaluar.",
+    "effByPower": "Pérdidas según potencia de carga",
+    "effBandSessions": "{n} cargas",
+    "effMethodNote": "{metered} cargas medidas con el contador MID homologado, {telemetry} estimadas a partir de datos del vehículo.",
+    "effEstimateNote": "Estimado a partir de datos del vehículo. Con un wallbox conectado (contador MID) el valor se vuelve exacto.",
+    "effNoData": "Aún no hay ninguna carga con datos suficientes. La eficiencia necesita varias mediciones por carga: aquí aparecerá una evaluación tras algunas cargas más largas."
   },
   "battery": {
     "title": "Batería y Degradación",

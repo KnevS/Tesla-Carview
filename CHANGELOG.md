@@ -7,6 +7,19 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.48.0] - 2026-07-19
+
+### Neu
+
+- **Ladewirkungsgrad — wo verpufft mein Strom?** Neue Sektion in der Ladeansicht: Wie viel der bezogenen Energie kommt tatsächlich im Akku an? Tesla zeigt nur, was im Akku ankam; was die Wallbox gezogen hat, stand bisher nirgends. Die Differenz ist Ladeverlust — an einer 11-kW-Wallbox wenige Prozent, an der Schuko-Dose schnell über ein Fünftel. **Aufschlüsselung nach Leistungsband** macht sichtbar, welche Ladeart wirklich teuer ist, plus Gesamtbilanz mit den verlorenen kWh.
+
+  Zwei Quellen, bewusst getrennt ausgewiesen statt vermischt: **geeicht** über den MID-Zähler der angebundenen Wallbox (exakt, via Monta) und **geschätzt** aus Fahrzeugdaten (`charger_power` ist die Netzseite, `charge_energy_added` der Akku-Zähler) — letzteres funktioniert ohne jede Zusatzhardware für alle Nutzer.
+
+  Gerechnet wird **intervallweise**, nicht Session-Summe gegen Session-Summe: Der erste Messpunkt fällt erst auf den Poll nach dem Ladestart, der letzte auf den davor. Über die Session summiert fehlte die Netz-Energie der unbedeckten Ränder, während der Akku-Zähler die volle Ladung enthält — das Ergebnis läge systematisch über 100 %. Je Intervall gerechnet tragen unbedeckte Ränder zu keiner der beiden Summen bei.
+
+  Ladungen ohne belastbare Datenlage bleiben **bewusst unbewertet** statt geschätzt: zu wenige Messpunkte (kurze Schnellladungen), unter 3 kWh erfasste Energie, Messlücken über 70 Minuten oder ein unplausibles Ergebnis (über 100 % oder unter 60 %). Backend `services/chargingEfficiency.js` + `GET /api/charging/efficiency`, ein Query für alle Messpunkte (kein N+1). i18n ×7. 41 Assertions.
+
+
 ## [v3.47.1] - 2026-07-19
 
 ### Behoben
