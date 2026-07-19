@@ -68,6 +68,62 @@
       </div>
     </SortableSection>
 
+    <SortableSection v-if="sid === 'priceranking'" page-id="charging" section-id="priceranking"
+      :title="$t('charging.rankingTitle')" icon="🏷️"
+      :collapsed="isCollapsed('priceranking')" @toggle="toggle('priceranking')" @move="(f,t,p) => moveSection(f,t,p)">
+      <template v-if="ranking?.locations?.length">
+        <p class="text-sm text-gray-400 mb-3">{{ $t('charging.rankingSubtitle') }}</p>
+
+        <div v-if="ranking.reliable && ranking.extra_vs_home_total > 0"
+          class="bg-gray-700 rounded-xl p-4 mb-4 text-center">
+          <p class="text-sm text-gray-400">{{ $t('charging.rankingExtraTitle') }}</p>
+          <p class="font-bold text-2xl text-yellow-400 mt-1">{{ fmt(ranking.extra_vs_home_total, 0) }} €</p>
+          <p class="text-xs text-gray-400 mt-1">
+            {{ $t('charging.rankingExtraHint', {
+                 days: ranking.days,
+                 home: fmt(ranking.home_price_kwh, 3) }) }}
+          </p>
+        </div>
+
+        <div class="space-y-2">
+          <div v-for="loc in ranking.locations" :key="loc.location_name || '∅'"
+            class="bg-gray-700/50 rounded-xl p-3 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold truncate">
+                  {{ loc.location_name || $t('charging.unknownLocation') }}
+                </span>
+                <span v-if="loc.is_home"
+                  class="text-xs bg-green-900/40 text-green-300 px-2 py-0.5 rounded-full">
+                  {{ $t('charging.locationTypeHome') }}</span>
+                <span v-if="loc.free_sessions"
+                  class="text-xs bg-blue-900/40 text-blue-300 px-2 py-0.5 rounded-full">
+                  {{ $t('charging.rankingFree', { n: loc.free_sessions }) }}</span>
+              </div>
+              <p class="text-xs text-gray-400 mt-0.5">
+                {{ $t('charging.effBandSessions', { n: loc.sessions_priced }) }} ·
+                {{ fmt(loc.energy_priced_kwh, 0) }} kWh · {{ fmt(loc.cost, 2) }} €
+              </p>
+            </div>
+            <div class="text-right shrink-0">
+              <p class="font-bold text-lg">{{ fmt(loc.price_kwh, 3) }} €</p>
+              <p v-if="loc.vs_home_pct != null && !loc.is_home"
+                class="text-xs" :class="loc.vs_home_pct > 0 ? 'text-red-400' : 'text-green-400'">
+                {{ loc.vs_home_pct > 0 ? '+' : '' }}{{ fmt(loc.vs_home_pct, 0) }} %
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p v-if="ranking.coverage.share < 1" class="text-xs text-gray-500 mt-3">
+          {{ $t('charging.rankingCoverage', {
+               pct: fmt(ranking.coverage.share * 100, 0),
+               kwh: fmt(ranking.coverage.energy_total_kwh - ranking.coverage.energy_priced_kwh, 0) }) }}
+        </p>
+      </template>
+      <p v-else class="text-gray-400">{{ $t('charging.rankingNoData') }}</p>
+    </SortableSection>
+
     <SortableSection v-if="sid === 'efficiency'" page-id="charging" section-id="efficiency"
       :title="$t('charging.efficiencyTitle')" icon="🔌"
       :collapsed="isCollapsed('efficiency')" @toggle="toggle('efficiency')" @move="(f,t,p) => moveSection(f,t,p)">
@@ -305,13 +361,14 @@ import api from '../api.js';
 const { t, locale } = useI18n();
 const appStore = useAppStore();
 
-const CHARGING_SECTIONS = ['stats', 'bytype', 'costbyloc', 'efficiency', 'heatmap', 'tariffwin', 'sessions'];
+const CHARGING_SECTIONS = ['stats', 'bytype', 'costbyloc', 'priceranking', 'efficiency', 'heatmap', 'tariffwin', 'sessions'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('charging', CHARGING_SECTIONS);
 
 const sessions = ref([]);
 const stats = ref({ byType: [] });
 const costByLocation = ref([]);
 const efficiency = ref(null);
+const ranking = ref(null);
 const loading = ref(true);
 // Sortierreihenfolge pro View in localStorage. Default desc (Neueste oben).
 const { direction: sortDir } = useSortDirection('charging');
@@ -362,18 +419,20 @@ async function load() {
   const baseParams = vid ? { vehicle_id: vid } : {};
   // Sortier-Param nur an /charging — /charging/stats nutzt aggregierte
   // Daten unabhaengig von Reihenfolge.
-  const [s, st, cbl, eff] = await Promise.all([
+  const [s, st, cbl, eff, rank] = await Promise.all([
     api.get('/charging', { params: { ...baseParams, sort: sortDir.value } }),
     api.get('/charging/stats', { params: baseParams }),
     api.get('/charging/cost-by-location', { params: baseParams }),
     // Wirkungsgrad braucht einen laengeren Zeitraum als die Uebersicht:
     // erst ueber viele Ladungen wird der Verlust je Leistungsband stabil.
     api.get('/charging/efficiency', { params: { ...baseParams, days: 365 } }).catch(() => null),
+    api.get('/charging/price-ranking', { params: { ...baseParams, days: 365 } }).catch(() => null),
   ]);
   sessions.value = s.data;
   stats.value = st.data;
   costByLocation.value = cbl.data.rows || [];
   efficiency.value = eff?.data ?? null;
+  ranking.value = rank?.data ?? null;
   loading.value = false;
 }
 

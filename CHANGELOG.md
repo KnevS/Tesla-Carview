@@ -7,6 +7,17 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.50.0] - 2026-07-19
+
+### Neu
+
+- **„Wo lädst du am günstigsten?" — Ladepreis-Ranking.** Neue Sektion in der Ladeansicht, sortiert nach **€/kWh** statt nach Gesamtausgaben. Das ist bewusst etwas anderes als die bestehende Auswertung „Kosten nach Ort": Die zeigt, wo das meiste Geld hinfließt — typischerweise nach Hause, weil dort am meisten geladen wird. Der teuerste Ort ist selten derselbe.
+
+  **Aufpreis gegen den eigenen Heimstrom** macht den Unterschied greifbar: Je Ort in Prozent, dazu die Gesamtsumme („so viel mehr als zu Hause in den letzten 365 Tagen"). Die Heim-Erkennung folgt derselben Definition wie das Abrechnungsmodul, statt eine zweite einzuführen.
+
+  **Ladungen ohne hinterlegten Tarif zählen nicht als kostenlos.** Sie sind unbekannt, nicht gratis — würde man sie als 0 € mitrechnen, sähe jeder Ort künstlich günstig aus. Solche Ladungen bleiben aus der Preisrechnung heraus, die Abdeckung wird ausgewiesen, und unter 50 % bepreister Energie gibt es keine Gesamtaussage. Ausdrücklich als kostenlos markierte Ladungen zählen dagegen als echte 0 — und verwässern die Heim-Referenz nicht, weil sie dort ausgenommen sind. Orte unter 5 kWh erscheinen nicht im Ranking, damit eine einzelne Notladung keinen Preisrekord aufstellt. Backend `services/chargingPriceRanking.js` + `GET /api/charging/price-ranking`. i18n ×7. 46 Assertions.
+
+
 ## [v3.49.0] - 2026-07-19
 
 ### Neu

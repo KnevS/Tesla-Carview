@@ -474,7 +474,14 @@
     "effBandSessions": "{n} cargas",
     "effMethodNote": "{metered} cargas medidas con el contador MID homologado, {telemetry} estimadas a partir de datos del vehículo.",
     "effEstimateNote": "Estimado a partir de datos del vehículo. Con un wallbox conectado (contador MID) el valor se vuelve exacto.",
-    "effNoData": "Aún no hay ninguna carga con datos suficientes. La eficiencia necesita varias mediciones por carga: aquí aparecerá una evaluación tras algunas cargas más largas."
+    "effNoData": "Aún no hay ninguna carga con datos suficientes. La eficiencia necesita varias mediciones por carga: aquí aparecerá una evaluación tras algunas cargas más largas.",
+    "rankingTitle": "¿Dónde cargas más barato?",
+    "rankingSubtitle": "Ordenado por precio del kilovatio-hora, no por gasto total. El lugar más caro rara vez es aquel al que va más dinero.",
+    "rankingExtraTitle": "Sobrecoste de cargar fuera de casa",
+    "rankingExtraHint": "Eso es lo que pagas de más frente a casa ({home} €/kWh) en los últimos {days} días.",
+    "rankingFree": "{n}× gratis",
+    "rankingCoverage": "Base de precios: {pct} % de la energía cargada. No hay tarifa registrada para {kwh} kWh: esas cargas quedan fuera en lugar de contarse como gratuitas.",
+    "rankingNoData": "Aún no hay cargas con precio registrado. En cuanto haya tarifas en tus puntos de carga, aquí aparecerá la clasificación de precios."
   },
   "battery": {
     "title": "Batería y Degradación",

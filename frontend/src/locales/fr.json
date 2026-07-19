@@ -474,7 +474,14 @@
     "effBandSessions": "{n} charges",
     "effMethodNote": "{metered} charges mesurées via le compteur MID étalonné, {telemetry} estimées à partir des données du véhicule.",
     "effEstimateNote": "Estimé à partir des données du véhicule. Avec une wallbox connectée (compteur MID), la valeur devient exacte.",
-    "effNoData": "Aucune charge avec des données suffisantes pour l'instant. Le rendement nécessite plusieurs mesures par charge — une évaluation apparaîtra ici après quelques charges plus longues."
+    "effNoData": "Aucune charge avec des données suffisantes pour l'instant. Le rendement nécessite plusieurs mesures par charge — une évaluation apparaîtra ici après quelques charges plus longues.",
+    "rankingTitle": "Où charges-tu le moins cher ?",
+    "rankingSubtitle": "Trié par prix au kilowattheure — pas par dépense totale. L'endroit le plus cher est rarement celui où part le plus d'argent.",
+    "rankingExtraTitle": "Surcoût de la charge hors domicile",
+    "rankingExtraHint": "Tant de plus qu’à la maison ({home} €/kWh) sur les {days} derniers jours.",
+    "rankingFree": "{n}× gratuit",
+    "rankingCoverage": "Base tarifaire : {pct} % de l'énergie chargée. Aucun tarif enregistré pour {kwh} kWh — ces charges sont écartées plutôt que comptées comme gratuites.",
+    "rankingNoData": "Aucune charge avec un prix enregistré pour le moment. Dès que des tarifs seront définis pour tes lieux de charge, le classement apparaîtra ici."
   },
   "battery": {
     "title": "Batterie & Dégradation",

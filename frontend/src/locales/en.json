@@ -474,7 +474,14 @@
     "effBandSessions": "{n} charges",
     "effMethodNote": "{metered} charges measured via the calibrated MID meter, {telemetry} estimated from vehicle data.",
     "effEstimateNote": "Estimated from vehicle data. With a connected wallbox (MID meter) the value becomes exact.",
-    "effNoData": "No charge with sufficient data yet. Efficiency needs several measurements per charge — an evaluation appears here after a few longer charges."
+    "effNoData": "No charge with sufficient data yet. Efficiency needs several measurements per charge — an evaluation appears here after a few longer charges.",
+    "rankingTitle": "Where do you charge cheapest?",
+    "rankingSubtitle": "Sorted by price per kilowatt-hour — not by total spend. The most expensive place is rarely the one where most money goes.",
+    "rankingExtraTitle": "Premium for charging away from home",
+    "rankingExtraHint": "That much more than at home ({home} €/kWh) over the last {days} days.",
+    "rankingFree": "{n}× free",
+    "rankingCoverage": "Price basis: {pct} % of the energy charged. No tariff is on file for {kwh} kWh — those charges are left out rather than counted as free.",
+    "rankingNoData": "No charges with a recorded price yet. Once tariffs are set for your charging locations, the price ranking appears here."
   },
   "battery": {
     "title": "Battery & Degradation",
