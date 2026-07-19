@@ -182,7 +182,11 @@ export async function syncVehicleState(db, vehicle, state, tenantId = null) {
 
   // Notification-Rules + Sleep-Monitoring (best-effort, darf Sync nie crashen)
   evaluateRules(db, vehicle.id, charge, drive, tenantId).catch(() => {});
-  trackSleepEvents(db, vehicle.id, vs?.state || 'unknown', charge?.battery_level);
+  // Der Online-Status steht top-level in der vehicle_data-Antwort (`state`),
+  // NICHT in `vehicle_state` — `vs.state` gab es nie, der Monitor sah damit
+  // dauerhaft 'unknown'. Hier ist der Wert praktisch immer 'online' (sonst
+  // haetten wir keine Daten); den Einschlaf-Uebergang liefert der Listen-Poll.
+  trackSleepEvents(db, vehicle.id, state.state || 'online', charge?.battery_level ?? null);
 
   // Software-Update-Tracker: neue Firmware-Version erkennen und benachrichtigen
   // (nur wenn das Fahrzeug schon bekannte Versionen hat — initialer Import
@@ -594,41 +598,112 @@ export async function evaluateRules(db, vehicleId, chargeState, driveState, tena
 
 // ── Sleep Monitoring ──────────────────────────────────────────────────────────
 
-const lastVehicleState = new Map(); // vehicleId → { state, soc, timestamp }
+// Wie lange ein per Listen-Poll geschlossener Schlaf-Event auf seinen
+// SoC-Nachtrag warten darf. Grosszuegig, weil der Wert zeitlich an einem
+// battery_snapshot verankert wird (s. backfillWakeSoc) — spaeter nachtragen
+// verfaelscht ihn also nicht.
+const WAKE_SOC_BACKFILL_WINDOW_S = 6 * 3600;
 
-export function trackSleepEvents(db, vehicleId, currentState, currentSoc) {
+// Maximaler Abstand zwischen Aufwachen und dem Snapshot, der als „Ladestand
+// beim Aufwachen" gilt. Weiter entfernte Werte sind bereits von Fahrt oder
+// Ladung ueberlagert und taugen nicht mehr zur Drain-Messung.
+const WAKE_SNAPSHOT_MAX_LAG_S = 2 * 3600;
+
+// Der Rueckfall auf den Live-SoC hat keinen Zeitstempel und ist deshalb nur
+// kurz nach dem Aufwachen belastbar — danach steckt in ihm laengst der
+// Verbrauch der Weiterfahrt. Ohne Snapshot bleibt der Drain lieber leer.
+const CURRENT_SOC_FALLBACK_MAX_LAG_S = 30 * 60;
+
+/**
+ * Erkennt Einschlaf-/Aufwach-Uebergaenge und schreibt sie nach
+ * vehicle_sleep_events.
+ *
+ * WICHTIG — woher `currentState` kommen muss: Ein schlafendes Fahrzeug
+ * beantwortet `vehicle_data` gar nicht (HTTP 408), der Uebergang nach
+ * „asleep" ist ueber diesen Endpoint also prinzipiell unbeobachtbar. Der
+ * Status muss aus dem Fahrzeug-LIST-Endpoint stammen (`GET /api/1/vehicles`
+ * → `state`), der das Auto nicht weckt. Siehe `pollSleepStates` in poller.js.
+ *
+ * Zustandsanker ist bewusst die DB (offener Event = galt zuletzt als
+ * schlafend) und keine Prozess-Map: so uebersteht die Erkennung
+ * Container-Neustarts, die bei einem 90-Minuten-Idle-Intervall sonst
+ * regelmaessig ganze Schlafphasen verschlucken wuerden.
+ *
+ * @param {string}      currentState online | asleep | offline | unknown
+ * @param {number|null} currentSoc   Ladestand, falls frische Daten vorliegen
+ */
+export function trackSleepEvents(db, vehicleId, currentState, currentSoc = null) {
   try {
-    const prev = lastVehicleState.get(vehicleId);
+    // 'unknown' heisst: keine belastbare Aussage — nichts umschreiben.
+    if (!currentState || currentState === 'unknown') return;
+
     const now  = Math.floor(Date.now() / 1000);
+    const open = db.prepare(
+      'SELECT * FROM vehicle_sleep_events WHERE vehicle_id=? AND wake_at IS NULL ORDER BY sleep_at DESC LIMIT 1'
+    ).get(vehicleId);
 
-    if (prev) {
-      const wasAwake  = prev.state !== 'asleep';
-      const isAsleep  = currentState === 'asleep';
-      const wasAsleep = prev.state === 'asleep';
-      const isAwake   = currentState !== 'asleep';
+    // 'offline' zaehlt als Schlaf: das Auto ist im Standby und verliert dabei
+    // Energie — genau das misst dieser Monitor (vgl. IDLE-Modus im Poller).
+    const isAsleep = currentState === 'asleep' || currentState === 'offline';
 
-      if (wasAwake && isAsleep) {
-        db.prepare(
-          'INSERT INTO vehicle_sleep_events (vehicle_id, sleep_at, soc_at_sleep) VALUES (?, ?, ?)'
-        ).run(vehicleId, now, prev.soc ?? currentSoc);
-      } else if (wasAsleep && isAwake) {
-        const open = db.prepare(
-          'SELECT * FROM vehicle_sleep_events WHERE vehicle_id=? AND wake_at IS NULL ORDER BY sleep_at DESC LIMIT 1'
-        ).get(vehicleId);
-        if (open) {
-          const durationMin = Math.round((now - open.sleep_at) / 60);
-          const drainPct    = open.soc_at_sleep != null && currentSoc != null ? open.soc_at_sleep - currentSoc : null;
-          db.prepare(
-            'UPDATE vehicle_sleep_events SET wake_at=?, soc_at_wake=?, drain_pct=?, duration_min=? WHERE id=?'
-          ).run(now, currentSoc, drainPct, durationMin, open.id);
-        }
-      }
+    if (isAsleep && !open) {
+      // Beim Einschlafen liefert Tesla keinen Ladestand mehr → letzter
+      // bekannter Wert aus dem State-Cache.
+      const cachedSoc = db.prepare(
+        'SELECT battery_level FROM vehicle_state_cache WHERE vehicle_id=?'
+      ).get(vehicleId)?.battery_level;
+      db.prepare(
+        'INSERT INTO vehicle_sleep_events (vehicle_id, sleep_at, soc_at_sleep) VALUES (?, ?, ?)'
+      ).run(vehicleId, now, currentSoc ?? cachedSoc ?? null);
+    } else if (!isAsleep && open) {
+      const durationMin = Math.round((now - open.sleep_at) / 60);
+      const drainPct    = open.soc_at_sleep != null && currentSoc != null
+        ? open.soc_at_sleep - currentSoc
+        : null;
+      db.prepare(
+        'UPDATE vehicle_sleep_events SET wake_at=?, soc_at_wake=?, drain_pct=?, duration_min=? WHERE id=?'
+      ).run(now, currentSoc, drainPct, durationMin, open.id);
+    } else if (!isAsleep) {
+      backfillWakeSoc(db, vehicleId, currentSoc, now);
     }
-
-    lastVehicleState.set(vehicleId, { state: currentState, soc: currentSoc, timestamp: now });
   } catch (err) {
     console.error('[SleepMonitor] Fehler:', err.message);
   }
+}
+
+/**
+ * Traegt Ladestand und Drain fuer einen Schlaf-Event nach, der ueber den
+ * Listen-Poll (ohne SoC) geschlossen wurde.
+ *
+ * Bevorzugte Quelle ist der erste `battery_snapshot` nach dem Aufwachen: der
+ * ist zeitlich korrekt verankert, auch wenn der Nachtrag selbst erst Stunden
+ * spaeter laeuft (bei aktiver Fleet-Telemetry kommt der naechste
+ * vehicle_data-Sync erst mit dem Stunden-Heartbeat). `currentSoc` dient nur
+ * als Rueckfall, wenn noch kein Snapshot vorliegt.
+ */
+function backfillWakeSoc(db, vehicleId, currentSoc, now) {
+  const pending = db.prepare(`
+    SELECT * FROM vehicle_sleep_events
+    WHERE vehicle_id=? AND wake_at IS NOT NULL AND soc_at_wake IS NULL
+      AND wake_at >= ?
+    ORDER BY wake_at DESC LIMIT 1
+  `).get(vehicleId, now - WAKE_SOC_BACKFILL_WINDOW_S);
+  if (!pending) return;
+
+  const snapshot = db.prepare(`
+    SELECT soc FROM battery_snapshots
+    WHERE vehicle_id=? AND timestamp >= ? AND timestamp <= ? AND soc IS NOT NULL
+    ORDER BY timestamp ASC LIMIT 1
+  `).get(vehicleId, pending.wake_at, pending.wake_at + WAKE_SNAPSHOT_MAX_LAG_S);
+
+  const fallbackUsable = (now - pending.wake_at) <= CURRENT_SOC_FALLBACK_MAX_LAG_S;
+  const wakeSoc = snapshot?.soc ?? (fallbackUsable ? currentSoc : null);
+  if (wakeSoc == null) return;
+
+  const drainPct = pending.soc_at_sleep != null ? pending.soc_at_sleep - wakeSoc : null;
+  db.prepare(
+    'UPDATE vehicle_sleep_events SET soc_at_wake=?, drain_pct=? WHERE id=?'
+  ).run(wakeSoc, drainPct, pending.id);
 }
 
 // ── HVAC-Statistiken ──────────────────────────────────────────────────────────

@@ -7,6 +7,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.47.1] - 2026-07-19
+
+### Fixed
+
+- **Sleep monitor was permanently empty.** The "Sleep monitor" page had never shown any data — not a single sleep event was ever written. Two causes: (1) the online state was read from `vehicle_state.state`, a field that does not exist in Tesla's response (the state sits top-level in `state`), so detection always saw `unknown`. (2) More fundamentally: a **sleeping vehicle does not answer `vehicle_data` at all** (HTTP 408) — the "awake → asleep" transition is inherently unobservable through that endpoint. The sleep state now comes from the **vehicle LIST endpoint** (`GET /api/1/vehicles` → `state`), which does not wake the car and also runs for vehicles skipped by the regular poll loop due to active Fleet Telemetry. Own cadence (default 15 min, `TESLA_SLEEP_POLL_MINUTES`), one list call per tenant — **not counted against `TESLA_DAILY_CAP`/`TESLA_MONTHLY_CAP`**, which only track `vehicle_data` calls.
+- **Sleep detection now survives container restarts.** The state ("was last considered asleep") lived in a process map and was gone after every restart — with a 90-minute idle interval, entire sleep phases were lost. The anchor is now the open event in the database (`wake_at IS NULL`).
+- **Standby drain (%/h) is measured correctly.** On wake-up the list endpoint carries no state of charge. The value is therefore backfilled from the first `battery_snapshot` after wake-up — correctly anchored in time even if the backfill only runs hours later. Without a matching snapshot the drain stays empty instead of reporting the consumption of an intervening drive as standby loss.
+- **Average drain is guarded against outliers.** A car that briefly loses connectivity in a tunnel or underground garage produces mini sleep phases — extrapolated to %/h, 2 % over 5 minutes would read as 24 %/h. Only phases of 60 minutes or more now feed the metric; phases with negative drain (the car was charging) are excluded as well. All phases remain visible in the event list.
+
+
 ## [v3.47.0] - 2026-07-18
 
 ### Added

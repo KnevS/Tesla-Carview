@@ -8,7 +8,7 @@ import cookieParser from 'cookie-parser';
 import { initMasterDb, getAllTenants, getDb } from './db/database.js';
 import { securityHeaders, apiRateLimit, tileRateLimit } from './middleware/security.js';
 import { requireAuth } from './middleware/auth.js';
-import { startPoller, resetTelemetryHeartbeat } from './services/poller.js';
+import { startPoller, startSleepMonitor, resetTelemetryHeartbeat } from './services/poller.js';
 import { startServiceReminderScheduler } from './services/serviceReminders.js';
 import { startWeeklySummaryScheduler }   from './services/weeklySummary.js';
 import { startDemoLifecycle } from './services/demoLifecycle.js';
@@ -234,6 +234,9 @@ server.listen(PORT, async () => {
 
   if (process.env.ENABLE_POLLER !== 'false') {
     startPoller().catch(err => console.error('[Poller] Start fehlgeschlagen:', err.message));
+    // Eigener Takt: schlafende Autos liefern kein vehicle_data, der Status
+    // kommt aus der Fahrzeugliste (siehe poller.js).
+    startSleepMonitor().catch(err => console.error('[SleepMonitor] Start fehlgeschlagen:', err.message));
   }
   startServiceReminderScheduler();
   startWeeklySummaryScheduler();
