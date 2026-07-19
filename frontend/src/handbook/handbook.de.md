@@ -477,6 +477,8 @@ Deshalb: **Fleet Telemetry konfigurieren** statt zu pollen — drastischer Koste
 
 **Tages-Cap:** Standardmäßig max. 30 Calls/Fahrzeug/Tag (konfigurierbar via `TESLA_DAILY_CAP`), danach Pause bis Mitternacht. **Monats-Cap:** Standardmäßig max. 400 Calls/Fahrzeug/Monat (konfigurierbar via `TESLA_MONTHLY_CAP`). Beide Caps sind DB-persistent und werden durch Container-Neustarts nicht zurückgesetzt.
 
+**Schlaf-Monitor:** Zusätzlich fragt die App alle 15 Minuten die **Fahrzeugliste** ab (`TESLA_SLEEP_POLL_MINUTES`), um zu erkennen, wann das Auto einschläft und aufwacht. Das ist nötig, weil ein schlafendes Fahrzeug `vehicle_data` gar nicht mehr beantwortet — der Einschlaf-Zeitpunkt wäre sonst nicht messbar. Dieser Listen-Aufruf **weckt das Auto nicht** und zählt **nicht** gegen die beiden Caps oben (die erfassen ausschließlich `vehicle_data`). Es ist ein Aufruf pro Mandant, unabhängig von der Fahrzeuganzahl.
+
 **Kosten senken (falls nötig):**
 - Fleet Telemetry einrichten → Streaming statt Polling, ~$5/Monat ohne Free-Tier, $0 mit Free-Tier
 - In Einstellungen → Tesla-Verbindung: Monatslimit + Hard-Stop aktivieren

@@ -1,7 +1,7 @@
 // © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import { getVehicleData, getVehicles } from './teslaApi.js';
 import { getAllTenants, getDb, registerVin } from '../db/database.js';
-import { syncVehicleState } from './dataSync.js';
+import { syncVehicleState, trackSleepEvents } from './dataSync.js';
 import {
   isOpen as isCircuitOpen,
   record403,
@@ -34,6 +34,17 @@ const POLL_INTERVAL_PARKED    = 1_200_000; // 20min — online, steht
 const POLL_INTERVAL_IDLE      = 5_400_000; // 90min — offline
 const POLL_INTERVAL_HEARTBEAT = 3_600_000; // 1h    — Telemetry aktiv
 const TELEMETRY_FRESH_S       = 15 * 60;  // 15min: Telemetry-Signal gilt als frisch
+
+// Schlaf-Monitor: eigener, vom vehicle_data-Loop entkoppelter Takt.
+// Bewusst NICHT an POLL_INTERVAL_* gekoppelt — der Loop oben darf nicht
+// haeufiger ticken, sonst reisst der vehicle_data-Cap (DAILY_CAP).
+// Unbrauchbare Werte fallen auf den Default zurueck: ein NaN wuerde bis in
+// setTimeout durchschlagen und den Takt auf „sofort" setzen — also eine
+// Dauerschleife gegen die Tesla-API.
+const SLEEP_POLL_MINUTES_RAW = parseInt(process.env.TESLA_SLEEP_POLL_MINUTES ?? '', 10);
+const SLEEP_POLL_INTERVAL_MS = (
+  Number.isFinite(SLEEP_POLL_MINUTES_RAW) ? Math.max(5, SLEEP_POLL_MINUTES_RAW) : 15
+) * 60_000;
 
 // Kosten-Limits (konfigurierbar via .env)
 const DAILY_CAP   = parseInt(process.env.TESLA_DAILY_CAP   ?? '30',  10); // max. Calls/Tag/Fahrzeug
@@ -161,6 +172,71 @@ function isDriving(state) {
 function isCoveredByTelemetry(vehicle, nowS) {
   return vehicle.telemetry_last_signal_at != null
     && (nowS - vehicle.telemetry_last_signal_at) <= TELEMETRY_FRESH_S;
+}
+
+// ---------------------------------------------------------------------------
+// Schlaf-Monitor
+//
+// Ein schlafendes Fahrzeug beantwortet `vehicle_data` nicht (HTTP 408) — der
+// Uebergang „wach → schlafend" ist ueber den Haupt-Poll-Loop also gar nicht
+// beobachtbar. Der Fahrzeug-LIST-Endpoint liefert `state`
+// (online/asleep/offline), ohne das Auto zu wecken, und funktioniert auch fuer
+// Fahrzeuge, die wegen aktiver Fleet-Telemetry im Haupt-Loop uebersprungen
+// werden.
+//
+// Kosten: ein Listen-Call pro Mandant und Takt — unabhaengig von der Anzahl
+// Fahrzeuge und ohne Anrechnung auf den vehicle_data-Cap (der zaehlt nur
+// `%/vehicle_data`). Takt via TESLA_SLEEP_POLL_MINUTES einstellbar.
+// ---------------------------------------------------------------------------
+
+/** Holt die Fahrzeugliste eines Mandanten und schreibt Schlaf-Uebergaenge fort. */
+async function pollTenantSleepStates(tenant) {
+  const db   = getDb(tenant.id);
+  const rows = db.prepare('SELECT id, tesla_id FROM vehicles').all();
+  if (!rows.length) return; // Erstimport laeuft im Haupt-Loop
+
+  const data = await getVehicles(db);
+  const byTeslaId = new Map(
+    (data?.response || []).map(v => [String(v.id), v.state]),
+  );
+
+  for (const vehicle of rows) {
+    const remoteState = byTeslaId.get(String(vehicle.tesla_id));
+    // Fehlt das Fahrzeug in der Antwort, ist der Status unbekannt — dann
+    // lieber nichts schreiben als einen Schlaf-Event erfinden.
+    if (remoteState) trackSleepEvents(db, vehicle.id, remoteState);
+  }
+}
+
+async function pollSleep() {
+  try {
+    for (const tenant of getAllTenants()) {
+      if (tenant.status === 'suspended') continue;
+      if (tenant.is_demo) continue;
+      if (isCircuitOpen(tenant.id)) continue;
+      if (is404Paused(tenant.id)) continue;
+
+      try {
+        await pollTenantSleepStates(tenant);
+      } catch (err) {
+        // Nur loggen: die Breaker-Signale liefert der Haupt-Loop, ein
+        // zweiter Fehlerpfad wuerde dessen Zaehler verfaelschen.
+        console.error(`[SleepMonitor] Mandant ${tenant.slug}:`, err.message);
+      }
+    }
+  } catch (err) {
+    console.error('[SleepMonitor] Allgemeiner Fehler:', err.message);
+  }
+
+  setTimeout(pollSleep, SLEEP_POLL_INTERVAL_MS);
+}
+
+export async function startSleepMonitor() {
+  console.log(
+    `[SleepMonitor] Starte Schlaf-Erkennung (Fahrzeug-Liste)` +
+    ` | Takt: ${SLEEP_POLL_INTERVAL_MS / 60000}min`
+  );
+  pollSleep();
 }
 
 export async function startPoller() {

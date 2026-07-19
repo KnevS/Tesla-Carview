@@ -7,6 +7,15 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.47.1] - 2026-07-19
+
+### Behoben
+
+- **Schlaf-Monitor blieb dauerhaft leer.** Die Seite „Schlaf-Monitor" zeigte seit jeher keine Daten — es wurde nie ein einziger Schlaf-Event geschrieben. Zwei Ursachen: (1) Der Online-Status wurde aus `vehicle_state.state` gelesen, dieses Feld gibt es in der Tesla-Antwort nicht (der Status steht top-level in `state`), sodass die Erkennung immer `unknown` sah. (2) Grundsätzlicher: Ein **schlafendes Fahrzeug beantwortet `vehicle_data` gar nicht** (HTTP 408) — der Übergang „wach → schlafend" ist über diesen Endpunkt prinzipiell nicht beobachtbar. Der Schlafstatus kommt jetzt aus dem **Fahrzeug-LIST-Endpunkt** (`GET /api/1/vehicles` → `state`), der das Auto nicht weckt und auch dann läuft, wenn ein Fahrzeug wegen aktiver Fleet-Telemetry im normalen Poll-Loop übersprungen wird. Eigener Takt (Standard 15 min, `TESLA_SLEEP_POLL_MINUTES`), ein Listen-Call pro Mandant — **ohne Anrechnung auf `TESLA_DAILY_CAP`/`TESLA_MONTHLY_CAP`**, die nur `vehicle_data`-Calls zählen.
+- **Schlaf-Erkennung übersteht jetzt Container-Neustarts.** Der Zustand („galt zuletzt als schlafend") hing an einer Prozess-Map und war nach jedem Restart weg — bei 90-Minuten-Idle-Intervall gingen so ganze Schlafphasen verloren. Anker ist jetzt der offene Event in der DB (`wake_at IS NULL`).
+- **Standby-Verlust (%/h) wird korrekt gemessen.** Beim Aufwachen liefert der Listen-Endpunkt keinen Ladestand. Der Wert wird deshalb aus dem ersten `battery_snapshot` nach dem Aufwachen nachgetragen — zeitlich korrekt verankert, auch wenn der Nachtrag erst Stunden später läuft. Ohne passenden Snapshot bleibt der Drain leer, statt den Verbrauch einer zwischenzeitlichen Fahrt als Standby-Verlust auszuweisen.
+
+
 ## [v3.47.0] - 2026-07-18
 
 ### Neu
