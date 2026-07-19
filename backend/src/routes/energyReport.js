@@ -1,8 +1,22 @@
 // © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import { Router } from 'express';
 import { assertVehicleAccess, guardAccess } from '../middleware/vehicleAccess.js';
+import { computeEnergyBalance, estimateUsableCapacity, extraVsTesla } from '../services/energyBalance.js';
+import { computeSessionEfficiency, summarizeEfficiency } from '../services/chargingEfficiency.js';
 
 const router = Router();
+
+// Wie weit ein battery_snapshot vom Fensterrand entfernt sein darf, um noch
+// als Randwert zu taugen. Snapshots entstehen alle 15 Minuten, ein Tag
+// Abstand heisst: das Auto stand die ganze Zeit ohne Verbindung.
+const SOC_BOUND_MAX_LAG_S = 86400;
+
+// Anteil des Fensters, innerhalb dessen der erste Schlaf-Event liegen muss,
+// damit die Standby-Aufschluesselung den Zeitraum plausibel abdeckt. Der
+// Schlaf-Monitor schreibt erst seit v3.47.1 — fuer aeltere Fenster gibt es
+// am Anfang keine Events, und eine Standby-Zeile waere dort eine
+// Behauptung statt einer Messung.
+const STANDBY_COVERAGE_HEAD = 0.2;
 
 const WLTP_MAP = { 'model y': 16.9, 'model 3': 14.9, 'model s': 19.5, 'model x': 22.0 };
 function wltpFor(model) {
@@ -26,6 +40,144 @@ function weekLabel(dateStr) {
 }
 
 // GET /api/energy/report?weeks=4&vehicle_id=X
+/** GET /api/energy/balance?vehicle_id=&days=90
+ *
+ *  Energiebilanz: „welche Verbrauchsangabe ist eigentlich echt?"
+ *
+ *  Tesla zeigt nur den Fahrtverbrauch. Standby, Waechter-Modus und
+ *  Ladeverluste tauchen dort nicht auf, bezahlt werden sie trotzdem.
+ *  Geliefert wird eine Leiter aus drei Sprossen (Fahrt → Akku-zu-Rad →
+ *  Netz-zu-Rad), Rechenlogik in services/energyBalance.js.
+ *
+ *  Faellt eine Datenquelle aus, endet die Leiter eine Sprosse frueher —
+ *  geraten wird nichts. */
+router.get('/balance', (req, res) => {
+  try {
+    const vehicleId = parseInt(req.query.vehicle_id);
+    if (!vehicleId) return res.status(400).json({ error: 'vehicle_id erforderlich' });
+    if (guardAccess(res, () => assertVehicleAccess(req.db, vehicleId, req.user))) return;
+
+    // Default bewusst lang: Δsoc skaliert mit der Akkukapazitaet, der
+    // Durchsatz mit der Nutzung. Ueber wenige Tage dominiert ein einzelner
+    // Ladehub die Bilanz, ueber ein Quartal faellt er kaum ins Gewicht.
+    const days  = Math.min(730, Math.max(7, parseInt(req.query.days) || 90));
+    const now   = Math.floor(Date.now() / 1000);
+    const since = now - days * 86400;
+
+    const trips = req.db.prepare(`
+      SELECT COALESCE(SUM(distance_km), 0) AS km,
+             COALESCE(SUM(energy_used_kwh), 0) AS kwh
+      FROM trips
+      WHERE vehicle_id=? AND start_time>=? AND end_time IS NOT NULL
+        AND distance_km > 0
+    `).get(vehicleId, since);
+
+    const sessions = req.db.prepare(`
+      SELECT id, start_soc, end_soc, energy_added_kwh, energy_kwh_mid, max_power_kw
+      FROM charging_sessions
+      WHERE vehicle_id=? AND start_time>=? AND end_time IS NOT NULL
+        AND energy_added_kwh > 0
+    `).all(vehicleId, since);
+
+    const chargedKwh = sessions.reduce((s, r) => s + (r.energy_added_kwh ?? 0), 0);
+    const capacity   = estimateUsableCapacity(sessions);
+
+    // SoC-Randwerte: naechster Snapshot zum Fensterrand. Liegt keiner nah
+    // genug, bleibt Δsoc unbekannt und die Bilanz endet bei Sprosse 1.
+    const socStart = nearestSoc(req.db, vehicleId, since, SOC_BOUND_MAX_LAG_S);
+    const socEnd   = nearestSoc(req.db, vehicleId, now,   SOC_BOUND_MAX_LAG_S);
+
+    // Ladewirkungsgrad ueber dasselbe Fenster — nur so passt die Netz-Sprosse
+    // zum betrachteten Zeitraum.
+    const efficiency = windowEfficiency(req.db, sessions);
+
+    const standby = standbyKwh(req.db, vehicleId, since, now, days, capacity.kwh);
+
+    const balance = computeEnergyBalance({
+      km:         trips?.km  ?? 0,
+      driveKwh:   trips?.kwh ?? 0,
+      chargedKwh,
+      socStart, socEnd, capacity, efficiency,
+      standbyKwh: standby,
+    });
+
+    res.json({
+      ...balance,
+      days,
+      sessions_count: sessions.length,
+      extra_vs_tesla: extraVsTesla(balance),
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/** SoC aus dem Snapshot, der einem Zeitpunkt am naechsten liegt. */
+function nearestSoc(db, vehicleId, at, maxLagS) {
+  const row = db.prepare(`
+    SELECT soc, ABS(timestamp - ?) AS lag
+    FROM battery_snapshots
+    WHERE vehicle_id=? AND soc IS NOT NULL
+    ORDER BY lag ASC LIMIT 1
+  `).get(at, vehicleId);
+  if (!row || row.lag > maxLagS) return null;
+  return row.soc;
+}
+
+/** Energiegewichteter Ladewirkungsgrad ueber die Sessions des Fensters. */
+function windowEfficiency(db, sessions) {
+  if (!sessions.length) return null;
+
+  const ids  = sessions.map(s => s.id);
+  const pts  = db.prepare(`
+    SELECT session_id, timestamp, power_kw, energy_added_kwh
+    FROM charging_points
+    WHERE session_id IN (${ids.map(() => '?').join(',')})
+    ORDER BY session_id, timestamp ASC
+  `).all(...ids);
+
+  const bySession = new Map();
+  for (const p of pts) {
+    if (!bySession.has(p.session_id)) bySession.set(p.session_id, []);
+    bySession.get(p.session_id).push(p);
+  }
+
+  const rated = sessions.map(s => {
+    const eff = computeSessionEfficiency(s, bySession.get(s.id) ?? []);
+    return {
+      efficiency:  eff?.efficiency  ?? null,
+      grid_kwh:    eff?.grid_kwh    ?? 0,
+      battery_kwh: eff?.battery_kwh ?? 0,
+      method:      eff?.method      ?? null,
+      band:        null,
+    };
+  });
+
+  return summarizeEfficiency(rated).avg_efficiency;
+}
+
+/**
+ * Standby-Verlust aus den Schlaf-Events — aber nur, wenn sie den Zeitraum
+ * plausibel abdecken. Der Schlaf-Monitor schreibt erst seit v3.47.1; fuer
+ * aeltere Fenster faende sich am Anfang kein Event, und die Bilanz wuerde
+ * einen Verlust von 0 kWh behaupten, der nie gemessen wurde.
+ */
+function standbyKwh(db, vehicleId, since, now, days, capacityKwh) {
+  const row = db.prepare(`
+    SELECT COALESCE(SUM(drain_pct), 0) AS drain, MIN(sleep_at) AS first_at, COUNT(*) AS n
+    FROM vehicle_sleep_events
+    WHERE vehicle_id=? AND sleep_at>=? AND wake_at IS NOT NULL AND drain_pct > 0
+  `).get(vehicleId, since);
+
+  if (!row?.n || row.first_at == null) return null;
+
+  // Beginnt die Aufzeichnung erst spaet im Fenster, deckt sie es nicht ab.
+  const headWindow = since + (now - since) * STANDBY_COVERAGE_HEAD;
+  if (row.first_at > headWindow) return null;
+
+  return row.drain / 100 * capacityKwh;
+}
+
 router.get('/report', async (req, res) => {
   try {
     const weeks     = Math.min(52, Math.max(1, parseInt(req.query.weeks) || 4));

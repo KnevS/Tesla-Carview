@@ -7,6 +7,21 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.49.0] - 2026-07-19
+
+### Neu
+
+- **„Was verbrauchst du wirklich?" — Energiebilanz.** Neue Sektion im Energiebericht, die die meistgestellte Frage der Tesla-Community beantwortet. Teslas Anzeige zeigt nur den **Fahrtverbrauch**; Standby, Wächter-Modus und Ladeverluste tauchen dort nicht auf — bezahlt werden sie trotzdem. Die Bilanz stellt drei Zahlen nebeneinander, z. B. **Tesla 16,0 → Akku-zu-Rad 17,5 → Netz-zu-Rad 19,4 kWh/100 km (+21,5 %)**.
+
+  Gebaut als **Leiter statt als eine fragile Gesamtbilanz**: (1) Fahrtverbrauch — Teslas Zahl, exakt. (2) Akku-zu-Rad — geladene Energie abzüglich Ladestandsänderung, enthält Standby und Wächter implizit, exakt. (3) Netz-zu-Rad — Sprosse 2 geteilt durch den gemessenen Ladewirkungsgrad (v3.48.0), als Schätzung gekennzeichnet. Fällt eine Datenquelle aus, endet die Leiter eine Sprosse früher, statt einen Faktor zu raten.
+
+  **Ladestandskorrektur:** Ohne sie wäre die Bilanz wertlos — ein am Fensterende vollerer Akku sähe sonst wie Mehrverbrauch aus. Die Randwerte kommen aus den Batterie-Snapshots; fehlen sie, endet die Leiter bei Sprosse 1. Die nutzbare Kapazität wird aus Ladungen mit großem Ladehub **gemessen** (Median, fahrzeugspezifisch) statt geraten, mit Rückfall auf einen Standardwert.
+
+  **Die Bilanzgleichung ist zugleich die Absicherung:** Bleibt zwischen geladener und erklärter Energie mehr als 15 % Residuum, ist die Aufzeichnung lückenhaft (fehlende Fahrten oder Ladungen) — dann erscheint **bewusst keine Zahl**, sondern der Grund im Klartext.
+
+  **Standby wird nur aufgeschlüsselt, wenn die Schlafdaten den Zeitraum wirklich abdecken.** Der Schlaf-Monitor schreibt erst seit v3.47.1; für ältere Zeiträume gäbe es am Anfang keine Ereignisse, und eine Zeile „Standby: 0,0 kWh" wäre eine Behauptung statt einer Messung. In dem Fall bleibt der Anteil im Residuum. Backend `services/energyBalance.js` + `GET /api/energy/balance`. i18n ×7. 48 Assertions.
+
+
 ## [v3.48.0] - 2026-07-19
 
 ### Neu
