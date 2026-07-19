@@ -286,6 +286,18 @@ The gap between the first and the last figure is typically **15–25 %**. That d
 
 **Standby share** — only broken out separately when the sleep monitor covers the period. For periods before the monitor existed, the share remains inside the total figure but stays unattributed.
 
+## 🏷️ Where do you charge cheapest? {#price-ranking}
+
+The charging view sorts your charging locations under **"Where do you charge cheapest?"** by **price per kilowatt-hour**. This is deliberately different from the "cost by location" view above it: that one shows where the money goes — usually home, simply because that is where most charging happens. The most expensive location is rarely the same one.
+
+**Premium against your own home electricity** — per location as a percentage, plus the total across the period. That makes the real cost of charging away from home tangible.
+
+**What is left out** — charges without a recorded tariff are **unknown, not free**. Counting them as €0 would make every location look artificially cheap. They therefore stay out; the price basis is shown below the list. Charges explicitly marked as free do count as a genuine zero.
+
+**Keeping the figures meaningful** — locations with less than 5 kWh do not appear: a single expensive emergency top-up should not set a price record. If less than half the charged energy has a tariff on file, the overall statement is omitted and only the individual locations remain.
+
+**Maintaining tariffs** — prices come from [charging locations](#charging-locations) (the "price per kWh" field) or from the manual cost entry per session. The more that is maintained, the more solid the ranking.
+
 ## 🔌 Charging efficiency {#charging-efficiency}
 
 The charging view shows under **"Charging efficiency"** how much of the energy drawn actually reaches the battery. Tesla only reports what arrived in the battery — what the wallbox pulled is nowhere to be seen. The difference is **charging loss**, and it varies considerably: a few percent at an 11 kW wallbox, easily over a fifth at a household socket drawing only a few amps.

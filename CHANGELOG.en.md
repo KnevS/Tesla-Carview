@@ -7,6 +7,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.50.0] - 2026-07-19
+
+### Added
+
+- **"Where do you charge cheapest?" — charging price ranking.** New section in the charging view, sorted by **€/kWh** rather than by total spend. This is deliberately different from the existing "cost by location" view: that one shows where the money goes — typically home, because that is where most charging happens. The most expensive location is rarely the same one.
+
+  **Premium against your own home electricity** makes the difference tangible: per location as a percentage, plus the total ("that much more than at home over the last 365 days"). Home detection follows the same definition as the billing module rather than introducing a second one.
+
+  **Charges without a recorded tariff do not count as free.** They are unknown, not gratis — counting them as €0 would make every location look artificially cheap. Such charges stay out of the price calculation, coverage is reported, and below 50 % priced energy there is no overall statement. Charges explicitly marked as free do count as a genuine zero — and do not dilute the home reference, since they are excluded there. Locations under 5 kWh do not appear in the ranking, so a single emergency top-up cannot set a price record. Backend `services/chargingPriceRanking.js` + `GET /api/charging/price-ranking`. i18n ×7. 46 assertions.
+
+
 ## [v3.49.0] - 2026-07-19
 
 ### Added

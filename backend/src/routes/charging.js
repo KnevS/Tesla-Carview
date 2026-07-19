@@ -4,6 +4,7 @@ import { matchChargingLocation } from '../services/dataSync.js';
 import {
   computeSessionEfficiency, summarizeEfficiency, bandForPower,
 } from '../services/chargingEfficiency.js';
+import { buildPriceRanking } from '../services/chargingPriceRanking.js';
 import {
   assertVehicleAccess, assertChargingAccess,
   restrictToOwnVehicles, guardAccess,
@@ -27,6 +28,52 @@ router.get('/', (req, res) => {
     res.json(req.db.prepare(
       `SELECT * FROM charging_sessions ${where} ORDER BY start_time ${orderDir} LIMIT ? OFFSET ?`
     ).all(...params));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/** GET /api/charging/price-ranking?vehicle_id=&days=365
+ *
+ *  „Wo lade ich am guenstigsten?" — sortiert Ladeorte nach €/kWh und
+ *  rechnet den Aufpreis gegen den eigenen Heimstrom.
+ *
+ *  Bewusst etwas anderes als `/cost-by-location`: Das beantwortet, wo das
+ *  meiste GELD hinfliesst (typischerweise zu Hause, weil dort am meisten
+ *  geladen wird). Hier geht es um den PREIS je Kilowattstunde.
+ *
+ *  Die Heim-Erkennung folgt derselben Definition wie das Abrechnungsmodul
+ *  (`is_home_charged`-Flag, sonst als „home" gepflegter Ladeort, sonst
+ *  Heuristik ueber den Charger-Typ) — Rechenlogik in
+ *  services/chargingPriceRanking.js. */
+router.get('/price-ranking', (req, res) => {
+  const { vehicle_id } = req.query;
+  try {
+    const days = Math.min(1095, Math.max(7, parseInt(req.query.days) || 365));
+    // Spalte qualifiziert uebergeben — die Abfrage joint charging_locations,
+    // ohne Praefix waere `vehicle_id` mehrdeutig.
+    const restrict = restrictToOwnVehicles(req, 'cs.vehicle_id');
+    const since = Math.floor(Date.now() / 1000) - days * 86400;
+
+    const conds  = ['cs.end_time IS NOT NULL', 'cs.start_time >= ?', 'cs.energy_added_kwh > 0'];
+    const params = [since];
+    if (vehicle_id) { conds.push('cs.vehicle_id = ?'); params.push(vehicle_id); }
+    const where = 'WHERE ' + conds.join(' AND ') + restrict.fragment;
+    params.push(...restrict.params);
+
+    const sessions = req.db.prepare(`
+      SELECT cs.energy_added_kwh, cs.cost, cs.is_free,
+             COALESCE(cl.name, cs.location_name) AS location_name,
+             CASE WHEN cs.is_home_charged = 1
+                    OR cl.type = 'home'
+                    OR (cs.location_id IS NULL AND cs.charger_type NOT IN ('Supercharger','DC'))
+                  THEN 1 ELSE 0 END AS is_home
+      FROM charging_sessions cs
+      LEFT JOIN charging_locations cl ON cl.id = cs.location_id
+      ${where}
+    `).all(...params);
+
+    res.json({ ...buildPriceRanking(sessions), days });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

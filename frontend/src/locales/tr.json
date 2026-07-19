@@ -474,7 +474,14 @@
     "effBandSessions": "{n} şarj",
     "effMethodNote": "{metered} şarj kalibreli MID sayacıyla ölçüldü, {telemetry} araç verilerinden tahmin edildi.",
     "effEstimateNote": "Araç verilerinden tahmin edildi. Bağlı bir duvar ünitesiyle (MID sayacı) değer kesinleşir.",
-    "effNoData": "Henüz yeterli veriye sahip şarj yok. Verimlilik için şarj başına birkaç ölçüm gerekir — birkaç uzun şarjdan sonra burada bir değerlendirme görünecek."
+    "effNoData": "Henüz yeterli veriye sahip şarj yok. Verimlilik için şarj başına birkaç ölçüm gerekir — birkaç uzun şarjdan sonra burada bir değerlendirme görünecek.",
+    "rankingTitle": "En ucuz nerede şarj ediyorsun?",
+    "rankingSubtitle": "Toplam harcamaya göre değil, kilovat-saat başına fiyata göre sıralanmıştır. En pahalı yer, nadiren en çok paranın gittiği yerdir.",
+    "rankingExtraTitle": "Dışarıda şarjın ek maliyeti",
+    "rankingExtraHint": "Son {days} günde evdekine ({home} €/kWh) kıyasla bu kadar fazla.",
+    "rankingFree": "{n}× ücretsiz",
+    "rankingCoverage": "Fiyat temeli: şarj edilen enerjinin %{pct} kadarı. {kwh} kWh için kayıtlı tarife yok — bu şarjlar ücretsiz sayılmak yerine kapsam dışı bırakılır.",
+    "rankingNoData": "Henüz kayıtlı fiyatı olan şarj yok. Şarj noktalarına tarifeler girildiğinde fiyat sıralaması burada görünecek."
   },
   "battery": {
     "title": "Batarya & Bozulma",

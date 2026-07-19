@@ -474,7 +474,14 @@
     "effBandSessions": "{n} Ladungen",
     "effMethodNote": "{metered} Ladungen über den geeichten MID-Zähler gemessen, {telemetry} aus Fahrzeugdaten geschätzt.",
     "effEstimateNote": "Geschätzt aus Fahrzeugdaten. Mit angebundener Wallbox (MID-Zähler) wird der Wert exakt.",
-    "effNoData": "Noch keine Ladung mit ausreichender Datenlage. Der Wirkungsgrad braucht mehrere Messpunkte je Ladung — nach ein paar längeren Ladungen erscheint hier eine Auswertung."
+    "effNoData": "Noch keine Ladung mit ausreichender Datenlage. Der Wirkungsgrad braucht mehrere Messpunkte je Ladung — nach ein paar längeren Ladungen erscheint hier eine Auswertung.",
+    "rankingTitle": "Wo lädst du am günstigsten?",
+    "rankingSubtitle": "Nach Preis je Kilowattstunde sortiert — nicht nach Gesamtausgaben. Der teuerste Ort ist selten der, an dem am meisten Geld hinfließt.",
+    "rankingExtraTitle": "Aufpreis fürs Laden unterwegs",
+    "rankingExtraHint": "So viel mehr als zu Hause ({home} €/kWh) in den letzten {days} Tagen.",
+    "rankingFree": "{n}× kostenlos",
+    "rankingCoverage": "Preisbasis: {pct} % der geladenen Energie. Für {kwh} kWh ist kein Tarif hinterlegt — diese Ladungen bleiben außen vor, statt als kostenlos zu zählen.",
+    "rankingNoData": "Noch keine Ladungen mit hinterlegtem Preis. Sobald Tarife an den Ladeorten gepflegt sind, erscheint hier das Preis-Ranking."
   },
   "battery": {
     "title": "Batterie & Degradation",

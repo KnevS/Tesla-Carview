@@ -283,6 +283,18 @@ Typisch liegen zwischen der ersten und der letzten Zahl **15–25 %**. Genau die
 
 **Standby-Anteil** — Wird nur separat ausgewiesen, wenn der Schlaf-Monitor den Zeitraum abdeckt. Für Zeiträume vor der Einführung des Monitors bleibt der Anteil in der Gesamtzahl enthalten, aber unaufgeschlüsselt.
 
+## 🏷️ Wo lädst du am günstigsten? {#price-ranking}
+
+Die Ladeansicht sortiert deine Ladeorte unter **„Wo lädst du am günstigsten?"** nach **Preis je Kilowattstunde**. Das ist bewusst etwas anderes als die Auswertung „Kosten nach Ort" darüber: Die zeigt, wo das meiste Geld hinfließt — meist zu Hause, schlicht weil dort am meisten geladen wird. Der teuerste Ort ist selten derselbe.
+
+**Aufpreis gegen den eigenen Heimstrom** — Je Ort in Prozent, dazu die Gesamtsumme über den Zeitraum. Damit wird greifbar, was das Laden unterwegs wirklich kostet.
+
+**Was nicht mitgerechnet wird** — Ladungen ohne hinterlegten Tarif sind **unbekannt, nicht kostenlos**. Würden sie als 0 € einfließen, sähe jeder Ort künstlich günstig aus. Sie bleiben deshalb außen vor; die Preisbasis wird unter der Liste ausgewiesen. Ausdrücklich als kostenlos markierte Ladungen zählen dagegen als echte Null.
+
+**Damit die Zahlen aussagekräftig sind** — Orte mit weniger als 5 kWh erscheinen nicht: Eine einzelne teure Notladung soll keinen Preisrekord aufstellen. Liegt für weniger als die Hälfte der geladenen Energie ein Tarif vor, entfällt die Gesamtaussage und es bleiben nur die Einzelorte.
+
+**Tarife pflegen** — Die Preise kommen aus den [Ladeorten](#charging-locations) (Feld „Preis je kWh") oder aus der manuellen Kostenangabe je Ladung. Je mehr gepflegt ist, desto belastbarer das Ranking.
+
 ## 🔌 Ladewirkungsgrad {#charging-efficiency}
 
 Die Ladeansicht zeigt unter **„Ladewirkungsgrad"**, wie viel der bezogenen Energie tatsächlich im Akku ankommt. Tesla weist nur aus, was im Akku ankam — was die Wallbox gezogen hat, steht nirgends. Die Differenz ist **Ladeverlust**, und der schwankt erheblich: an einer 11-kW-Wallbox sind es wenige Prozent, an einer Schuko-Dose mit wenigen Ampere schnell über ein Fünftel.
