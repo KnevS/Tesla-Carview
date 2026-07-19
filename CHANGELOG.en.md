@@ -7,6 +7,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.49.0] - 2026-07-19
+
+### Added
+
+- **"What do you actually consume?" — energy balance.** New section in the energy report answering the most frequently asked question in the Tesla community. Tesla's display only shows **driving consumption**; standby, sentry mode and charging losses never appear there — you pay for them regardless. The balance puts three figures side by side, e.g. **Tesla 16.0 → battery-to-wheel 17.5 → grid-to-wheel 19.4 kWh/100 km (+21.5 %)**.
+
+  Built as a **ladder rather than one fragile overall balance**: (1) driving consumption — Tesla's figure, exact. (2) Battery-to-wheel — energy charged minus the change in state of charge, implicitly including standby and sentry, exact. (3) Grid-to-wheel — rung 2 divided by the measured charging efficiency (v3.48.0), labelled as an estimate. If a data source is unavailable the ladder simply ends a rung earlier instead of guessing a factor.
+
+  **State-of-charge correction:** without it the balance would be worthless — a fuller battery at the end of the window would look like extra consumption. The boundary values come from battery snapshots; if they are missing, the ladder stops at rung 1. Usable capacity is **measured** from charges with a large state-of-charge span (median, vehicle-specific) rather than assumed, with a fallback to a default.
+
+  **The balance equation doubles as the safeguard:** if more than 15 % residual remains between energy charged and energy accounted for, the record has gaps (missing trips or charges) — then **no figure is shown at all**, just the reason in plain language.
+
+  **Standby is only broken out when sleep data actually covers the period.** The sleep monitor has only been recording since v3.47.1; for older periods there would be no events at the start, and a line reading "standby: 0.0 kWh" would be an assertion rather than a measurement. In that case the share stays inside the residual. Backend `services/energyBalance.js` + `GET /api/energy/balance`. i18n ×7. 48 assertions.
+
+
 ## [v3.48.0] - 2026-07-19
 
 ### Added

@@ -266,6 +266,26 @@ For **company cars**, the tax assistant (nav "Analytics → Company-car tax", `/
 
 **Result** — Both methods with monthly and yearly taxable benefit, the cheaper one highlighted, plus the annual difference. Guidance calculation under German § 6 (1) no. 4 EStG only — **not tax advice**.
 
+## ⚖️ What do you actually consume? {#energy-balance}
+
+The energy report includes an **energy balance** that answers a frequently asked question: which consumption figure is actually true? Tesla's display only shows **driving consumption** — energy that left the battery while driving. Standby, sentry mode and charging losses are not in there, yet you pay for them.
+
+The balance puts three figures side by side:
+
+| Rung | Meaning | Confidence |
+|---|---|---|
+| **Driving consumption** | Tesla's figure | exact |
+| **Battery-to-wheel** | everything that left the battery — including standby and sentry | exact |
+| **Grid-to-wheel** | what came out of the socket, including [charging losses](#charging-efficiency) | estimated |
+
+The gap between the first and the last figure is typically **15–25 %**. That difference is exactly what you pay without ever seeing it on the dashboard.
+
+**Why a long period** — the evaluation covers 90 days. Over a few weeks a single charging cycle would dominate the balance: a fuller battery at the end would look like extra consumption. The change in state of charge is therefore factored out, with usable capacity measured from your own charges rather than assumed.
+
+**When the balance does not add up** — if too large a gap remains between energy charged and energy accounted for, trips or charges are usually missing from the record. In that case **no figure is shown at all**, just the reason in plain language. A balance built on incomplete data would mislead more than showing nothing.
+
+**Standby share** — only broken out separately when the sleep monitor covers the period. For periods before the monitor existed, the share remains inside the total figure but stays unattributed.
+
 ## 🔌 Charging efficiency {#charging-efficiency}
 
 The charging view shows under **"Charging efficiency"** how much of the energy drawn actually reaches the battery. Tesla only reports what arrived in the battery — what the wallbox pulled is nowhere to be seen. The difference is **charging loss**, and it varies considerably: a few percent at an 11 kW wallbox, easily over a fifth at a household socket drawing only a few amps.

@@ -37,6 +37,61 @@
       <p v-else class="text-gray-400">{{ $t('energy.noData') }}</p>
     </SortableSection>
 
+    <SortableSection v-if="sid === 'balance'" page-id="energy" section-id="balance"
+      :title="$t('energy.sectionBalance')" icon="⚖️"
+      :collapsed="isCollapsed('balance')" @toggle="toggle('balance')" @move="(f,t,p) => moveSection(f,t,p)">
+      <p class="text-sm text-gray-400 mb-3">{{ $t('energy.balanceSubtitle') }}</p>
+
+      <template v-if="balance?.rungs?.drive">
+        <!-- Die Leiter: jede Sprosse addiert einen Verlusttopf. Fehlt eine
+             Datenquelle, endet sie frueher — geraten wird nichts. -->
+        <div class="space-y-2">
+          <div v-for="r in balanceRungs" :key="r.key"
+            class="bg-gray-700/50 rounded-xl p-3 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-semibold">{{ $t(`energy.rung_${r.key}`) }}</span>
+                <span v-if="r.confidence === 'estimated'"
+                  class="text-xs bg-gray-700 text-gray-400 px-2 py-0.5 rounded-full"
+                  v-tooltip="$t('energy.rungEstimatedTooltip')">{{ $t('energy.rungEstimated') }}</span>
+              </div>
+              <p class="text-xs text-gray-400 mt-0.5">{{ $t(`energy.rungDesc_${r.key}`) }}</p>
+            </div>
+            <div class="text-right shrink-0">
+              <p class="font-bold text-lg">{{ fmtEfficiency(r.kwh_100km) }}</p>
+              <p v-if="r.delta" class="text-xs text-yellow-400">+{{ fmt(r.delta, 1) }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="balance.extra_vs_tesla" class="mt-4 bg-gray-700 rounded-xl p-4 text-center">
+          <p class="text-sm text-gray-400">{{ $t('energy.extraVsTesla') }}</p>
+          <p class="font-bold text-2xl text-yellow-400 mt-1">
+            +{{ fmt(balance.extra_vs_tesla.percent, 1) }} %
+          </p>
+          <p class="text-xs text-gray-400 mt-1">
+            {{ $t('energy.extraVsTeslaHint', { kwh: fmt(balance.extra_vs_tesla.kwh_100km, 1) }) }}
+          </p>
+        </div>
+
+        <div v-if="!balance.reliable" class="mt-3 text-xs text-gray-500">
+          {{ $t(`energy.balanceReason_${balance.reason}`) }}
+        </div>
+        <div v-else class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500">
+          <span>{{ $t('energy.balanceWindow', { days: balance.days, km: fmt(balance.km, 0) }) }}</span>
+          <span v-if="balance.standby_kwh != null">
+            {{ $t('energy.balanceStandby', { kwh: fmt(balance.standby_kwh, 1) }) }}
+          </span>
+          <span v-if="balance.capacity?.source === 'measured'">
+            {{ $t('energy.balanceCapacity', { kwh: fmt(balance.capacity.kwh, 1) }) }}
+          </span>
+        </div>
+      </template>
+      <p v-else class="text-gray-400">
+        {{ balance?.reason ? $t(`energy.balanceReason_${balance.reason}`) : $t('energy.noData') }}
+      </p>
+    </SortableSection>
+
     <SortableSection v-if="sid === 'score'" page-id="energy" section-id="score"
       :title="$t('energy.sectionScore')" icon="🌿"
       :collapsed="isCollapsed('score')" @toggle="toggle('score')" @move="(f,t,p) => moveSection(f,t,p)">
@@ -208,7 +263,7 @@ import api from '../api.js';
 
 const { t } = useI18n();
 const { fmtDistance, fmtEfficiency } = useUnits();
-const ENERGY_SECTIONS = ['overall', 'score', 'co2', 'weather', 'community', 'trend'];
+const ENERGY_SECTIONS = ['overall', 'balance', 'score', 'co2', 'weather', 'community', 'trend'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('energy', ENERGY_SECTIONS);
 
 const appStore   = useAppStore();
@@ -217,21 +272,48 @@ const weekData   = ref([]);
 const overall    = ref(null);
 const wltpKwh    = ref(null);
 const tempBuckets = ref([]);
+const balance    = ref(null);
 
 async function load() {
   const vid = appStore.selectedVehicle?.id;
   if (!vid) return;
   try {
-    const [energyResp, weatherResp] = await Promise.all([
+    const [energyResp, weatherResp, balanceResp] = await Promise.all([
       api.get(`/energy/report?weeks=${weeks.value}&vehicle_id=${vid}`),
       api.get(`/trips/weather-consumption?vehicle_id=${vid}`).catch(() => ({ data: { buckets: [] } })),
+      // Bilanz braucht bewusst ein langes Fenster: Δsoc skaliert mit der
+      // Akkukapazitaet, ueber wenige Wochen dominiert ein einzelner Ladehub.
+      api.get(`/energy/balance?vehicle_id=${vid}&days=90`).catch(() => null),
     ]);
     weekData.value    = energyResp.data.weeks ?? [];
     overall.value     = energyResp.data.overall ?? null;
     wltpKwh.value     = energyResp.data.wltp_kwh_100km ?? null;
     tempBuckets.value = weatherResp.data.buckets ?? [];
+    balance.value     = balanceResp?.data ?? null;
   } catch { /* ignore */ }
 }
+
+// Die Leiter als Liste: nur vorhandene Sprossen, jede mit dem Aufschlag
+// gegenueber der darunterliegenden.
+const balanceRungs = computed(() => {
+  const r = balance.value?.rungs;
+  if (!r) return [];
+  const out = [];
+  let prev = null;
+  for (const key of ['drive', 'battery', 'grid']) {
+    if (!r[key]) continue;
+    out.push({
+      key,
+      kwh_100km:  r[key].kwh_100km,
+      confidence: r[key].confidence,
+      delta:      prev != null ? r[key].kwh_100km - prev : null,
+    });
+    prev = r[key].kwh_100km;
+  }
+  return out;
+});
+
+const fmt = (v, d = 0) => (+(v || 0)).toFixed(d);
 
 // CO₂-Balkenprozent relativ zum Diesel-Wert
 const co2TeslaBarPct = computed(() => {

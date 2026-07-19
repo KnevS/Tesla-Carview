@@ -263,6 +263,26 @@ Für **Dienstwagen** stellt der Versteuerungs-Assistent (Nav „Auswertungen →
 
 **Ergebnis** — Beide Methoden mit monatlichem und jährlichem geldwerten Vorteil, die günstigere ist hervorgehoben, plus die jährliche Differenz. Reine Orientierungsrechnung nach § 6 Abs. 1 Nr. 4 EStG — **keine Steuerberatung**.
 
+## ⚖️ Was verbrauchst du wirklich? {#energy-balance}
+
+Der Energiebericht enthält eine **Energiebilanz**, die eine oft gestellte Frage beantwortet: Welche Verbrauchsangabe stimmt eigentlich? Teslas Anzeige zeigt nur den **Fahrtverbrauch** — Energie, die während der Fahrt aus dem Akku floss. Standby, Wächter-Modus und Ladeverluste stehen dort nicht, bezahlt werden sie trotzdem.
+
+Die Bilanz stellt drei Zahlen nebeneinander:
+
+| Sprosse | Bedeutung | Güte |
+|---|---|---|
+| **Fahrtverbrauch** | Teslas Zahl | exakt |
+| **Akku-zu-Rad** | alles, was den Akku verlassen hat — inklusive Standby und Wächter | exakt |
+| **Netz-zu-Rad** | was aus der Steckdose kam, inklusive [Ladeverlusten](#charging-efficiency) | geschätzt |
+
+Typisch liegen zwischen der ersten und der letzten Zahl **15–25 %**. Genau diese Differenz zahlst du, ohne sie im Bordcomputer je zu sehen.
+
+**Warum ein langer Zeitraum** — Ausgewertet werden 90 Tage. Über wenige Wochen würde ein einzelner Ladehub die Bilanz dominieren: Ein am Ende vollerer Akku sähe wie Mehrverbrauch aus. Die Ladestandsänderung wird deshalb herausgerechnet, die nutzbare Kapazität dafür aus deinen eigenen Ladungen gemessen statt geschätzt.
+
+**Wenn die Bilanz nicht aufgeht** — Klafft zwischen geladener und erklärter Energie eine zu große Lücke, fehlen meist Fahrten oder Ladungen in der Aufzeichnung. Dann erscheint **bewusst keine Zahl**, sondern der Grund im Klartext. Eine Bilanz, die auf lückenhaften Daten beruht, wäre irreführender als gar keine.
+
+**Standby-Anteil** — Wird nur separat ausgewiesen, wenn der Schlaf-Monitor den Zeitraum abdeckt. Für Zeiträume vor der Einführung des Monitors bleibt der Anteil in der Gesamtzahl enthalten, aber unaufgeschlüsselt.
+
 ## 🔌 Ladewirkungsgrad {#charging-efficiency}
 
 Die Ladeansicht zeigt unter **„Ladewirkungsgrad"**, wie viel der bezogenen Energie tatsächlich im Akku ankommt. Tesla weist nur aus, was im Akku ankam — was die Wallbox gezogen hat, steht nirgends. Die Differenz ist **Ladeverlust**, und der schwankt erheblich: an einer 11-kW-Wallbox sind es wenige Prozent, an einer Schuko-Dose mit wenigen Ampere schnell über ein Fünftel.
