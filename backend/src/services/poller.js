@@ -187,6 +187,13 @@ function isCoveredByTelemetry(vehicle, nowS) {
 // Kosten: ein Listen-Call pro Mandant und Takt — unabhaengig von der Anzahl
 // Fahrzeuge und ohne Anrechnung auf den vehicle_data-Cap (der zaehlt nur
 // `%/vehicle_data`). Takt via TESLA_SLEEP_POLL_MINUTES einstellbar.
+//
+// Tesla berechnet vier Kategorien: Streaming Data, Vehicle Commands, Vehicle
+// Data und Wake Up. Der Listen-Endpoint faellt in keine davon — er liest nur
+// kontoseitige Metadaten und stellt keine Verbindung zum Auto her. Er wird
+// trotzdem regulaer in `tesla_api_usage` mitgezaehlt und ist damit in der
+// Nutzungsstatistik sichtbar. (Stand 2026-07; falls Tesla das aendert, ist
+// TESLA_SLEEP_POLL_MINUTES der Hebel.)
 // ---------------------------------------------------------------------------
 
 /** Holt die Fahrzeugliste eines Mandanten und schreibt Schlaf-Uebergaenge fort. */
