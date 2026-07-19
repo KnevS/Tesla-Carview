@@ -459,7 +459,22 @@
     "windowsNext24h": "Next 24 hours",
     "windowsUnit": "ct/kWh",
     "windowsAvgPrice": "avg {value} ct/kWh",
-    "windowsBarTooltip": "{time}: {value} ct/kWh"
+    "windowsBarTooltip": "{time}: {value} ct/kWh",
+    "efficiencyTitle": "Charging efficiency",
+    "efficiencySubtitle": "How much of the energy drawn actually reaches the battery? The difference is charging loss — a few percent at a wallbox, easily a fifth at a household socket.",
+    "effAvg": "Efficiency",
+    "effAvgTooltip": "Energy that reached the battery divided by energy drawn from the grid, weighted by charge volume.",
+    "effLost": "Lost",
+    "effLostTooltip": "Energy dissipated as heat in charger and cable — paid for, but never stored in the battery.",
+    "effGrid": "From the grid",
+    "effGridTooltip": "Total energy drawn across all rated charges.",
+    "effRated": "Rated",
+    "effRatedTooltip": "Charges with sufficient data. Short fast-charging sessions yield too few measurements and are deliberately left unrated.",
+    "effByPower": "Loss by charging power",
+    "effBandSessions": "{n} charges",
+    "effMethodNote": "{metered} charges measured via the calibrated MID meter, {telemetry} estimated from vehicle data.",
+    "effEstimateNote": "Estimated from vehicle data. With a connected wallbox (MID meter) the value becomes exact.",
+    "effNoData": "No charge with sufficient data yet. Efficiency needs several measurements per charge — an evaluation appears here after a few longer charges."
   },
   "battery": {
     "title": "Battery & Degradation",

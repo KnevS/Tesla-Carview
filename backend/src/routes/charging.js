@@ -2,6 +2,9 @@
 import { Router } from 'express';
 import { matchChargingLocation } from '../services/dataSync.js';
 import {
+  computeSessionEfficiency, summarizeEfficiency, bandForPower,
+} from '../services/chargingEfficiency.js';
+import {
   assertVehicleAccess, assertChargingAccess,
   restrictToOwnVehicles, guardAccess,
 } from '../middleware/vehicleAccess.js';
@@ -24,6 +27,78 @@ router.get('/', (req, res) => {
     res.json(req.db.prepare(
       `SELECT * FROM charging_sessions ${where} ORDER BY start_time ${orderDir} LIMIT ? OFFSET ?`
     ).all(...params));
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/** GET /api/charging/efficiency?vehicle_id=&days=180
+ *
+ *  Ladewirkungsgrad: wie viel der bezogenen Energie kommt im Akku an?
+ *  Beantwortet die Dauerfrage „wo verpufft mein Strom" — an der Wallbox
+ *  sind es wenige Prozent, an der Schuko-Dose ueber ein Fuenftel.
+ *
+ *  Liefert die Gesamtbilanz, die Aufschluesselung nach Leistungsband und
+ *  die bewerteten Einzelsessions. Sessions ohne belastbare Datenlage
+ *  (zu wenige Messpunkte, zu wenig Energie, unplausibles Ergebnis) werden
+ *  bewusst NICHT geschaetzt, sondern als unbewertet gefuehrt — die
+ *  Rechenlogik steckt in services/chargingEfficiency.js. */
+router.get('/efficiency', (req, res) => {
+  const { vehicle_id } = req.query;
+  try {
+    const days = Math.min(730, Math.max(1, parseInt(req.query.days) || 180));
+    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
+    const since = Math.floor(Date.now() / 1000) - days * 86400;
+
+    const conds  = ['end_time IS NOT NULL', 'start_time >= ?'];
+    const params = [since];
+    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
+    const where = 'WHERE ' + conds.join(' AND ') + restrict.fragment;
+    params.push(...restrict.params);
+
+    const sessions = req.db.prepare(
+      `SELECT id, vehicle_id, start_time, end_time, location_name, charger_type,
+              start_soc, end_soc, energy_added_kwh, energy_kwh_mid, max_power_kw
+       FROM charging_sessions ${where} ORDER BY start_time DESC`
+    ).all(...params);
+
+    // Messpunkte fuer alle Sessions in EINEM Query holen und im Speicher
+    // gruppieren — ein Query je Session waere ein klassisches N+1.
+    const pointsBySession = new Map();
+    if (sessions.length) {
+      const ids  = sessions.map(s => s.id);
+      const rows = req.db.prepare(
+        `SELECT session_id, timestamp, power_kw, energy_added_kwh
+         FROM charging_points
+         WHERE session_id IN (${ids.map(() => '?').join(',')})
+         ORDER BY session_id, timestamp ASC`
+      ).all(...ids);
+      for (const row of rows) {
+        if (!pointsBySession.has(row.session_id)) pointsBySession.set(row.session_id, []);
+        pointsBySession.get(row.session_id).push(row);
+      }
+    }
+
+    const rated = sessions.map(s => {
+      const eff  = computeSessionEfficiency(s, pointsBySession.get(s.id) ?? []);
+      const band = bandForPower(s.max_power_kw);
+      return {
+        id:             s.id,
+        start_time:     s.start_time,
+        location_name:  s.location_name,
+        charger_type:   s.charger_type,
+        max_power_kw:   s.max_power_kw,
+        band:           band?.key ?? null,
+        energy_added_kwh: s.energy_added_kwh,
+        efficiency:     eff?.efficiency  ?? null,
+        method:         eff?.method      ?? null,
+        grid_kwh:       eff?.grid_kwh    ?? 0,
+        battery_kwh:    eff?.battery_kwh ?? 0,
+        lost_kwh:       eff ? Math.round((eff.grid_kwh - eff.battery_kwh) * 1000) / 1000 : null,
+      };
+    });
+
+    res.json({ ...summarizeEfficiency(rated), days, sessions: rated });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

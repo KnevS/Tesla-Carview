@@ -68,6 +68,64 @@
       </div>
     </SortableSection>
 
+    <SortableSection v-if="sid === 'efficiency'" page-id="charging" section-id="efficiency"
+      :title="$t('charging.efficiencyTitle')" icon="🔌"
+      :collapsed="isCollapsed('efficiency')" @toggle="toggle('efficiency')" @move="(f,t,p) => moveSection(f,t,p)">
+      <template v-if="efficiency?.avg_efficiency != null">
+        <p class="text-sm text-gray-400 mb-3">{{ $t('charging.efficiencySubtitle') }}</p>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div class="bg-gray-700 rounded-xl p-3 text-center" v-tooltip="$t('charging.effAvgTooltip')">
+            <p class="text-sm text-gray-400">{{ $t('charging.effAvg') }}</p>
+            <p class="font-bold text-xl">{{ fmt(efficiency.avg_efficiency * 100, 1) }} %</p>
+          </div>
+          <div class="bg-gray-700 rounded-xl p-3 text-center" v-tooltip="$t('charging.effLostTooltip')">
+            <p class="text-sm text-gray-400">{{ $t('charging.effLost') }}</p>
+            <p class="font-bold text-xl text-yellow-400">{{ fmt(efficiency.lost_kwh, 1) }} kWh</p>
+          </div>
+          <div class="bg-gray-700 rounded-xl p-3 text-center" v-tooltip="$t('charging.effGridTooltip')">
+            <p class="text-sm text-gray-400">{{ $t('charging.effGrid') }}</p>
+            <p class="font-bold text-xl">{{ fmt(efficiency.grid_kwh, 1) }} kWh</p>
+          </div>
+          <div class="bg-gray-700 rounded-xl p-3 text-center" v-tooltip="$t('charging.effRatedTooltip')">
+            <p class="text-sm text-gray-400">{{ $t('charging.effRated') }}</p>
+            <p class="font-bold text-xl">{{ efficiency.sessions_rated }}/{{ efficiency.sessions_total }}</p>
+          </div>
+        </div>
+
+        <div v-if="efficiency.by_band.length" class="space-y-2">
+          <p class="text-sm font-semibold text-gray-300">{{ $t('charging.effByPower') }}</p>
+          <div v-for="b in efficiency.by_band" :key="b.band"
+            class="bg-gray-700/50 rounded-xl p-3 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <p class="font-semibold">{{ b.label_kw }}</p>
+              <p class="text-xs text-gray-400 mt-0.5">
+                {{ $t('charging.effBandSessions', { n: b.sessions }) }} · {{ fmt(b.grid_kwh, 1) }} kWh
+              </p>
+            </div>
+            <div class="flex items-center gap-3 shrink-0">
+              <div class="w-24 bg-gray-800 rounded-full h-2 overflow-hidden hidden sm:block">
+                <div class="h-full rounded-full" :class="effBarClass(b.efficiency)"
+                  :style="{ width: (b.efficiency * 100) + '%' }"></div>
+              </div>
+              <div class="text-right">
+                <p class="font-bold" :class="effTextClass(b.efficiency)">{{ fmt(b.efficiency * 100, 1) }} %</p>
+                <p class="text-xs text-gray-400">−{{ fmt(b.lost_kwh, 1) }} kWh</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <p v-if="efficiency.by_method?.metered" class="text-xs text-gray-500 mt-3">
+          {{ $t('charging.effMethodNote', {
+               metered: efficiency.by_method.metered ?? 0,
+               telemetry: efficiency.by_method.telemetry ?? 0 }) }}
+        </p>
+        <p v-else class="text-xs text-gray-500 mt-3">{{ $t('charging.effEstimateNote') }}</p>
+      </template>
+      <p v-else class="text-gray-400">{{ $t('charging.effNoData') }}</p>
+    </SortableSection>
+
     <SortableSection v-if="sid === 'heatmap'" page-id="charging" section-id="heatmap"
       :title="$t('charging.heatmapTitle')" icon="📅"
       :collapsed="isCollapsed('heatmap')" @toggle="toggle('heatmap')" @move="(f,t,p) => moveSection(f,t,p)">
@@ -247,12 +305,13 @@ import api from '../api.js';
 const { t, locale } = useI18n();
 const appStore = useAppStore();
 
-const CHARGING_SECTIONS = ['stats', 'bytype', 'costbyloc', 'heatmap', 'tariffwin', 'sessions'];
+const CHARGING_SECTIONS = ['stats', 'bytype', 'costbyloc', 'efficiency', 'heatmap', 'tariffwin', 'sessions'];
 const { orderedSections: layoutOrder, isCollapsed, toggle, moveSection } = usePageLayout('charging', CHARGING_SECTIONS);
 
 const sessions = ref([]);
 const stats = ref({ byType: [] });
 const costByLocation = ref([]);
+const efficiency = ref(null);
 const loading = ref(true);
 // Sortierreihenfolge pro View in localStorage. Default desc (Neueste oben).
 const { direction: sortDir } = useSortDirection('charging');
@@ -303,15 +362,32 @@ async function load() {
   const baseParams = vid ? { vehicle_id: vid } : {};
   // Sortier-Param nur an /charging — /charging/stats nutzt aggregierte
   // Daten unabhaengig von Reihenfolge.
-  const [s, st, cbl] = await Promise.all([
+  const [s, st, cbl, eff] = await Promise.all([
     api.get('/charging', { params: { ...baseParams, sort: sortDir.value } }),
     api.get('/charging/stats', { params: baseParams }),
     api.get('/charging/cost-by-location', { params: baseParams }),
+    // Wirkungsgrad braucht einen laengeren Zeitraum als die Uebersicht:
+    // erst ueber viele Ladungen wird der Verlust je Leistungsband stabil.
+    api.get('/charging/efficiency', { params: { ...baseParams, days: 365 } }).catch(() => null),
   ]);
   sessions.value = s.data;
   stats.value = st.data;
   costByLocation.value = cbl.data.rows || [];
+  efficiency.value = eff?.data ?? null;
   loading.value = false;
+}
+
+// Ampel fuer den Wirkungsgrad: ab 90 % gut, unter 80 % lohnt ein Blick auf
+// die Ladeart (Schuko-Dose statt Wallbox).
+function effBarClass(eff) {
+  if (eff >= 0.9)  return 'bg-green-500';
+  if (eff >= 0.8)  return 'bg-yellow-500';
+  return 'bg-red-500';
+}
+function effTextClass(eff) {
+  if (eff >= 0.9)  return 'text-green-400';
+  if (eff >= 0.8)  return 'text-yellow-400';
+  return 'text-red-400';
 }
 
 async function toggleFree(session) {

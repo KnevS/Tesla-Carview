@@ -7,6 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.48.0] - 2026-07-19
+
+### Added
+
+- **Charging efficiency — where does the power go?** New section in the charging view: how much of the energy drawn actually reaches the battery? Tesla only shows what arrived in the battery; what the wallbox pulled was never visible. The difference is charging loss — a few percent at an 11 kW wallbox, easily over a fifth at a household socket. A **breakdown by power band** reveals which charging method is genuinely expensive, plus a total balance with the kWh lost.
+
+  Two sources, deliberately reported separately rather than blended: **calibrated** via the MID meter of a connected wallbox (exact, through Monta) and **estimated** from vehicle data (`charger_power` is the grid side, `charge_energy_added` the battery counter) — the latter works for every user without any extra hardware.
+
+  The calculation runs **per interval**, not session sum against session sum: the first measurement lands on the poll after charging starts, the last on the poll before it ends. Summed over the session, the grid energy of the uncovered edges would be missing while the battery counter holds the full charge — the result would sit systematically above 100 %. Computed per interval, uncovered edges contribute to neither sum.
+
+  Charges without a solid data basis are **deliberately left unrated** rather than estimated: too few measurements (short fast-charging sessions), under 3 kWh of covered energy, measurement gaps beyond 70 minutes, or an implausible result (above 100 % or below 60 %). Backend `services/chargingEfficiency.js` + `GET /api/charging/efficiency`, one query for all measurements (no N+1). i18n ×7. 41 assertions.
+
+
 ## [v3.47.1] - 2026-07-19
 
 ### Fixed

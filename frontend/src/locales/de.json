@@ -459,7 +459,22 @@
     "windowsNext24h": "Nächste 24 Stunden",
     "windowsUnit": "ct/kWh",
     "windowsAvgPrice": "Ø {value} ct/kWh",
-    "windowsBarTooltip": "{time}: {value} ct/kWh"
+    "windowsBarTooltip": "{time}: {value} ct/kWh",
+    "efficiencyTitle": "Ladewirkungsgrad",
+    "efficiencySubtitle": "Wie viel der bezogenen Energie kommt tatsächlich im Akku an? Die Differenz ist Ladeverlust — an der Wallbox wenige Prozent, an der Schuko-Dose schnell ein Fünftel.",
+    "effAvg": "Wirkungsgrad",
+    "effAvgTooltip": "Im Akku angekommene Energie geteilt durch die aus dem Netz bezogene, gewichtet nach Lademenge.",
+    "effLost": "Verloren",
+    "effLostTooltip": "Energie, die als Wärme in Ladegerät und Kabel verpufft ist — bezahlt, aber nie im Akku angekommen.",
+    "effGrid": "Aus dem Netz",
+    "effGridTooltip": "Gesamte bezogene Energie über alle bewerteten Ladungen.",
+    "effRated": "Bewertet",
+    "effRatedTooltip": "Ladungen mit ausreichender Datenlage. Kurze Schnellladungen liefern zu wenige Messpunkte und bleiben bewusst unbewertet.",
+    "effByPower": "Verlust nach Ladeleistung",
+    "effBandSessions": "{n} Ladungen",
+    "effMethodNote": "{metered} Ladungen über den geeichten MID-Zähler gemessen, {telemetry} aus Fahrzeugdaten geschätzt.",
+    "effEstimateNote": "Geschätzt aus Fahrzeugdaten. Mit angebundener Wallbox (MID-Zähler) wird der Wert exakt.",
+    "effNoData": "Noch keine Ladung mit ausreichender Datenlage. Der Wirkungsgrad braucht mehrere Messpunkte je Ladung — nach ein paar längeren Ladungen erscheint hier eine Auswertung."
   },
   "battery": {
     "title": "Batterie & Degradation",

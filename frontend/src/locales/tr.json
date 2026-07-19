@@ -459,7 +459,22 @@
     "windowsNext24h": "Önümüzdeki 24 saat",
     "windowsUnit": "ct/kWh",
     "windowsAvgPrice": "ort. {value} ct/kWh",
-    "windowsBarTooltip": "{time}: {value} ct/kWh"
+    "windowsBarTooltip": "{time}: {value} ct/kWh",
+    "efficiencyTitle": "Şarj verimliliği",
+    "efficiencySubtitle": "Çekilen enerjinin ne kadarı gerçekten aküye ulaşıyor? Aradaki fark şarj kaybıdır — duvar ünitesinde birkaç yüzde, ev prizinde kolayca beşte bir.",
+    "effAvg": "Verimlilik",
+    "effAvgTooltip": "Aküye ulaşan enerjinin şebekeden çekilen enerjiye oranı, şarj miktarına göre ağırlıklandırılmış.",
+    "effLost": "Kaybedilen",
+    "effLostTooltip": "Şarj cihazı ve kabloda ısı olarak kaybolan enerji — ödendi, ama aküye hiç ulaşmadı.",
+    "effGrid": "Şebekeden",
+    "effGridTooltip": "Değerlendirilen tüm şarjlarda çekilen toplam enerji.",
+    "effRated": "Değerlendirilen",
+    "effRatedTooltip": "Yeterli veriye sahip şarjlar. Kısa hızlı şarjlar çok az ölçüm sağlar ve bilinçli olarak değerlendirilmez.",
+    "effByPower": "Şarj gücüne göre kayıp",
+    "effBandSessions": "{n} şarj",
+    "effMethodNote": "{metered} şarj kalibreli MID sayacıyla ölçüldü, {telemetry} araç verilerinden tahmin edildi.",
+    "effEstimateNote": "Araç verilerinden tahmin edildi. Bağlı bir duvar ünitesiyle (MID sayacı) değer kesinleşir.",
+    "effNoData": "Henüz yeterli veriye sahip şarj yok. Verimlilik için şarj başına birkaç ölçüm gerekir — birkaç uzun şarjdan sonra burada bir değerlendirme görünecek."
   },
   "battery": {
     "title": "Batarya & Bozulma",
