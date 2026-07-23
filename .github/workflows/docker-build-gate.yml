@@ -34,6 +34,19 @@ name: Docker Build Gate
 #   - Secret im Image gefunden                        → rot. Ausnahmslos.
 #   - CRITICAL mit verfuegbarem Fix im Runtime-Image  → rot.
 #   - HIGH / ohne Fix (will_not_fix, fix_deferred)    → nur Report.
+#
+# Ventil: Es gibt CRITICALs, die trivy als "fixed" fuehrt, die hier aber
+# trotzdem niemand beheben kann. CVE-2026-59873 (tar) war so ein Fall —
+# der Fix liegt in 7.5.19, aber kein node-Image liefert ihn aus. Hier gab
+# es noch einen Ausweg (npm aus dem Laufzeit-Image werfen). Fehlt der beim
+# naechsten Mal, blockiert dieses Gate JEDEN PR. Dokumentierter Weg dann:
+# `.trivyignore` im Repo-Root, das trivy automatisch beruecksichtigt —
+#
+#     # kein Base-Image liefert den Fix; Stand 2026-07, Lage neu pruefen
+#     CVE-2026-XXXXX exp:2026-10-01
+#
+# Das Ablaufdatum ist der Punkt: Danach blockiert der Fund wieder, statt
+# still zu verschwinden. Eintraege ohne `exp:` gehoeren hier nicht hin.
 
 # Bewusst OHNE paths-Filter auf Trigger-Ebene: `build-and-scan` ist ein
 # Required Check der Branch-Protection. Ein Workflow, der wegen paths gar
@@ -214,11 +227,13 @@ jobs:
     name: multi-arch build · ${{ matrix.component }}
     runs-on: ubuntu-latest
     needs: changes
-    if: needs.changes.outputs.docker == 'true'
+    # Bewusst KEIN Job-`if`: Ein uebersprungener Job meldet "skipped" statt
+    # eines Ergebnisses, und darauf laesst sich kein Required Check
+    # verlaesslich stuetzen. Der Job startet deshalb immer und meldet einen
+    # echten Status — die teuren Schritte haengen einzeln an `changes`.
     # QEMU-emulierte arm-Builds sind langsam (npm ci + vite build unter
-    # Emulation). Das ist vertretbar, weil dieser Job nur bei Aenderungen an
-    # Dockerfiles oder Lockfiles ueberhaupt startet — also genau dann, wenn
-    # ein Plattform-Bruch moeglich ist.
+    # Emulation); ohne Dockerfile-/Lockfile-Aenderung faellt der Job
+    # dadurch in wenigen Sekunden gruen durch.
     timeout-minutes: 90
     strategy:
       fail-fast: false
@@ -226,11 +241,14 @@ jobs:
         component: [backend, frontend]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        if: needs.changes.outputs.docker == 'true'
 
       - name: Set up QEMU (arm-Emulation)
+        if: needs.changes.outputs.docker == 'true'
         uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
 
       - name: Set up Buildx
+        if: needs.changes.outputs.docker == 'true'
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
       # Kein load/push: es geht ausschliesslich darum, ob der Build auf allen
@@ -243,22 +261,30 @@ jobs:
       # entfallen, unabhaengig von diesem Workflow. Ihn hier zu fordern
       # wuerde das Gate dauerhaft rot halten, ohne etwas zu reparieren.
       - name: Build fuer alle unterstuetzten Plattformen
+        if: needs.changes.outputs.docker == 'true'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: ./${{ matrix.component }}
           push: false
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha,scope=gate-multiarch-${{ matrix.component }}
-          cache-to: ${{ github.event.pull_request.head.repo.full_name == github.repository && format('type=gha,scope=gate-multiarch-{0},mode=max', matrix.component) || '' }}
+          cache-to: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && format('type=gha,scope=gate-multiarch-{0},mode=max', matrix.component) || '' }}
 
       - name: Step-Summary
         env:
           COMPONENT: ${{ matrix.component }}
+          RAN: ${{ needs.changes.outputs.docker }}
         run: |
           {
             echo "## Multi-Arch Build · $COMPONENT"
             echo ""
-            echo "Baut auf \`linux/amd64\` und \`linux/arm64\` (Pi 4/5)."
-            echo ""
-            echo "\`linux/arm/v7\` (Pi 3) entfaellt: Node liefert ab Major 24 keine arm/v7-Images."
+            if [ "$RAN" = "true" ]; then
+              echo "Gebaut auf \`linux/amd64\` und \`linux/arm64\` (Pi 4/5)."
+              echo ""
+              echo "\`linux/arm/v7\` (Pi 3) entfaellt: Node liefert ab Major 24 keine arm/v7-Images."
+            else
+              echo "Uebersprungen — dieser PR aendert weder ein Dockerfile noch ein Lockfile."
+              echo ""
+              echo "Der Job meldet trotzdem einen Status, damit er als Required Check taugt."
+            fi
           } >> "$GITHUB_STEP_SUMMARY"
