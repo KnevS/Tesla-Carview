@@ -46,8 +46,8 @@ Hangi Raspberry Pi'n var?
 │           → Seçenek A: USB SSD (en basit çözüm)
 │
 └── Raspberry Pi 3 veya daha eski
-      → Seçenek A: USB SSD (USB 2.0, Pi 4/5'ten yavaş)
-        veya: Pi 4/5'e yükselt — uzun vadede daha iyi yatırım
+     → Artık desteklenmiyor (32 bit ARM). Tesla Carview için
+        Pi 4 veya 5 gerekir — bkz. Kurulum.
 ```
 
 ---

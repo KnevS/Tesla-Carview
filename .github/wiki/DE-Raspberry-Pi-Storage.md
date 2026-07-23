@@ -46,8 +46,8 @@ Welchen Raspberry Pi hast du?
 │           → Option A: USB-SSD (einfachste Lösung)
 │
 └── Raspberry Pi 3 oder älter
-      → Option A: USB-SSD (mit USB 2.0, langsamer als Pi 4/5)
-        oder: Neueren Pi kaufen — Pi 4/5 ist die bessere Investition
+      → Nicht mehr unterstützt (32-Bit-ARM). Tesla Carview braucht
+        einen Pi 4 oder 5 — siehe Installation.
 ```
 
 ---

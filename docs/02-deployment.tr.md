@@ -10,8 +10,10 @@ Tesla Carview **tüm yaygın Linux platformlarında** çalışır:
 |---|---|---|
 | Linux sunucu (VPS, dedicated) | x86_64 | ✓ |
 | Raspberry Pi 4 / 5 | ARM64 | ✓ |
-| Raspberry Pi 3 | ARMv7 | ✓ |
+| Raspberry Pi 3 (ve öncesi) | ARMv7 | ✗ ¹ |
 | Yerel geliştirme (Mac/Windows/Linux) | tümü | ✓ |
+
+¹ **Raspberry Pi 3 ve öncesi (32 bit ARM) v3.51.0'dan itibaren desteklenmiyor.** Node.js 24. sürümden itibaren ARMv7 imajı yayınlamıyor — ne alpine ne de Debian —, bu nedenle backend imajı orada artık derlenemiyor. `deploy/setup.sh` bu sistemlerde imaj indirmede hata vermek yerine bir açıklamayla durur.
 
 
 ---

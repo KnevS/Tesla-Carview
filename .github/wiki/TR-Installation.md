@@ -30,7 +30,9 @@ Herhangi bir komut çalıştırmadan önce şunlara sahip olduğundan emin ol:
 |---|---|---|
 | Raspberry Pi 5 (önerilen) | 4 GB veya 8 GB | M.2 HAT+ ile NVMe SSD |
 | Raspberry Pi 4 | 4 GB | USB SSD |
-| Raspberry Pi 3 | 1 GB | USB SSD (daha yavaş) |
+| Raspberry Pi 3 | 1 GB | artık desteklenmiyor ¹ |
+
+¹ Raspberry Pi 3 ve öncesi (32 bit ARM) v3.51.0'dan itibaren desteklenmiyor: Node.js 24. sürümden itibaren ARMv7 imajı yayınlamıyor.
 
 > ⚠️ **Önemli:** Kalıcı çalışma için SD kart kullanma. Tesla Carview'in yazma yükü altında aylarca dayanır. 20 dakikada düzeltmek için [Raspberry Pi Depolama](TR-Raspberry-Pi-Storage)'ya bak.
 

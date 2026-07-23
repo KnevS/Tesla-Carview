@@ -1,8 +1,8 @@
 #!/bin/bash
 # ============================================================
 # Tesla Carview – Automatisches Server-Setup
-# Getestet auf: Debian/Ubuntu (x86_64, ARM64, ARMv7)
-# Kompatibel mit:  Linux-VMs, Netcup, Hetzner, Raspberry Pi 3/4/5
+# Getestet auf: Debian/Ubuntu (x86_64, ARM64)
+# Kompatibel mit:  Linux-VMs, Netcup, Hetzner, Raspberry Pi 4/5 (ARM64)
 #
 # Aufruf als root:  bash deploy/setup.sh
 # ============================================================
@@ -25,6 +25,34 @@ fi
 
 # Architektur erkennen
 ARCH="$(uname -m)"
+
+# 32-Bit-ARM (Pi 3 und aelter) frueh und verstaendlich abfangen. Ohne diese
+# Pruefung laeuft das komplette Setup durch und bricht erst beim Image-Pull
+# mit "no match for platform in manifest" ab — einer Meldung, die niemandem
+# sagt, was zu tun ist.
+case "$ARCH" in
+    armv6l|armv7l|armhf)
+        echo ""
+        echo -e "${RED}Nicht unterstuetzte Architektur: ${ARCH} (32-Bit-ARM)${RESET}"
+        echo ""
+        echo "  Tesla Carview braucht ARM64. Node.js veroeffentlicht seit"
+        echo "  Version 24 keine 32-Bit-ARM-Images mehr — weder alpine noch"
+        echo "  Debian. Damit laesst sich das Backend-Image auf einem"
+        echo "  Raspberry Pi 3 (oder aelter) nicht mehr bauen."
+        echo ""
+        echo "  Moeglichkeiten:"
+        echo "    - Raspberry Pi 4 oder 5 verwenden (ARM64, empfohlen)"
+        echo "    - Auf einem Pi 4/5 laeuft auch ein 64-Bit-Raspberry-Pi-OS:"
+        echo "      pruefe mit 'uname -m', ob dort aarch64 gemeldet wird"
+        echo "    - Beliebiger x86_64-Linux-Server"
+        echo ""
+        echo "  Wer bei 32-Bit-ARM bleiben muss, kann die Dockerfiles auf"
+        echo "  node:22 zuruecksetzen — die letzte Major mit armv7-Images."
+        echo "  Das ist ein Fork-Pfad ohne kuenftige Node-Security-Updates."
+        echo ""
+        exit 1
+        ;;
+esac
 echo ""
 echo -e "${BOLD}╔══════════════════════════════════════════════╗${RESET}"
 echo -e "${BOLD}║        Tesla Carview – Server-Setup          ║${RESET}"
