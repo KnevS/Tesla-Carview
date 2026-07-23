@@ -7,6 +7,17 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.50.2] - 2026-07-23
+
+### Sicherheit
+
+- **Alarm bei Drift im Build Gate.** Der wöchentliche `schedule`-Lauf erkannte zwar Basisimages, die unter *gleichem* Tag mit neuem Inhalt veröffentlicht wurden — dafür gibt es keinen Dependabot-PR —, aber ein rotes Ergebnis erreichte niemanden: Es hängt kein PR daran, und der fehlgeschlagene Cron-Lauf lag still in der Actions-Historie. Erkennen ohne Melden ist keine Überwachung.
+
+  Ein roter Lauf öffnet jetzt **ein Sammel-Issue** (Label `security`), das bei weiteren Läufen aktualisiert und bei grünem Ergebnis automatisch geschlossen wird. Bewusst ein Issue statt eines externen Dienstes: Das braucht nur das `GITHUB_TOKEN` — kein Secret muss zwischen Systemen bewegt werden. Da dieses Repo öffentlich ist, nennt das Issue nur, *dass* der Lauf rot ist; die Funde stehen im Step-Summary.
+
+  **Telegram ist optional** vorbereitet und bleibt inaktiv, solange `TELEGRAM_BOT_TOKEN` und `TELEGRAM_CHAT_ID` nicht als Repo-Secrets gesetzt sind.
+
+
 ## [v3.50.1] - 2026-07-23
 
 ### Sicherheit
