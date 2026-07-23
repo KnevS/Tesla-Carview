@@ -7,6 +7,33 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.50.1] - 2026-07-23
+
+### Sicherheit
+
+- **npm aus dem Backend-Laufzeit-Image entfernt.** Das mit Node gebündelte npm unter `/usr/local/lib/node_modules/npm` bringt eigene Abhängigkeiten mit (`tar`, `undici`, `brace-expansion`), deren CVEs im Laufzeit-Image landen, obwohl kein Anwendungscode sie erreicht — darunter `CVE-2026-59873` (**CRITICAL**, `tar` → 7.5.19). Ein Base-Image-Update behebt das nicht: node:24-alpine und node:26-alpine liefern `tar` 7.5.16, ebenfalls unterhalb des Fixes.
+
+  Der Container startet mit `node src/index.js`, ein Paketmanager wird zur Laufzeit nicht gebraucht. Nebeneffekt ist eine echte Härtung: Wer Code im Container ausführen kann, kann nichts nachinstallieren.
+
+### Behoben
+
+- **Dockerfile-Angaben zur Plattform-Unterstützung korrigiert.** Beide Dockerfiles sicherten `linux/arm/v7` (Pi 3) zu, obwohl **Node ab Major 24 keine arm/v7-Images mehr veröffentlicht** — weder alpine noch Debian. Mit dem Wechsel auf node:26 ist der Pi-3-Build faktisch entfallen; `docker buildx --platform linux/arm/v7` bricht mit „no match for platform in manifest" ab. Der neue Build-Gate hat das sichtbar gemacht.
+
+  Die Kommentare nennen jetzt den tatsächlichen Stand (amd64 · arm64). Damit ist auch die frühere Begründung für den glibc-Builder im Frontend gegenstandslos — sie stützte sich auf ein fehlendes rolldown-Binding für arm/v7, das mangels arm/v7-Basisimage keine Rolle mehr spielt. `bookworm-slim` bleibt dennoch: Ein Wechsel auf alpine bringt messbar nichts, node:26-alpine, node:24-alpine, node:26-trixie-slim und node:26-bookworm-slim melden alle dieselben 4 behebbaren Findings.
+
+  **Pi-3-Unterstützung ist damit eine offene Produktentscheidung** — wer sie zurück will, muss auf node:22 zurückgehen (letzte Major mit arm/v7). Dieser Release ändert die Unterstützungszusage in README und Handbuch bewusst nicht.
+
+- **Docker Build Gate** (`.github/workflows/docker-build-gate.yml`) — Images werden jetzt **während des PRs** gebaut und das fertige Laufzeit-Image gescannt. Bisher lief der Docker-Build erst nach dem Merge (`deploy.yml` hängt an erfolgreichem CI auf `main`), ein PR mit getauschtem Base-Image war also ungetestet mergebar.
+
+  **Der Multi-Arch-Job ist dabei der eigentliche Schutz.** Das Frontend baut für amd64, arm64 (Pi 4/5) und arm/v7 (Pi 3), und der Builder ist bewusst glibc-basiert (`bookworm-slim`), weil rolldown kein `@rolldown/binding-linux-arm-musleabihf` veröffentlicht. Ein gut gemeinter Wechsel auf `node:*-alpine` baut auf amd64 anstandslos durch und bricht ausschließlich auf arm/v7 — ohne Multi-Arch-Build im PR fällt das erst denen auf, die auf einem Pi 3 selbst bauen. Derselbe Fallstrick gilt im Backend für `better-sqlite3` und `argon2`.
+
+  **Scan auf dem Image statt auf dem Dateisystem.** `trivy fs` in `security.yml` sieht Lockfiles, aber nicht den Laufzeit-Stand. Bei Multi-Stage-Builds meldet es CVEs aus Builder-Stages, die nie laufen: Ins `nginx:alpine`-Image wandert nur `/app/dist`. Ein Gate, das Builder-CVEs zählt, erzeugt Druck auf Änderungen ohne jeden Sicherheitsgewinn.
+
+  **Secret-Scan im Image** — deckt ab, was `gitleaks.yml` prinzipbedingt nicht sieht: nicht das Repo, sondern was der Build ins Image *kopiert*. Ein `COPY . .` mit lückenhafter `.dockerignore` zieht `.env` in einen Layer, ohne Spur im Repo. Ein Fund ist immer hart rot; ausgegeben werden nur Datei und Regel, nie der Treffer selbst — dieses Repo ist öffentlich.
+
+  Bewertung sonst bewusst eng: fehlgeschlagener Build oder behebbares CRITICAL im Laufzeit-Image blockieren, HIGH und Findings ohne verfügbaren Fix (`will_not_fix`) sind nur Report. Ein Gate auf unbehebbare Distro-CVEs wäre dauerhaft rot.
+
+
 ## [v3.50.0] - 2026-07-19
 
 ### Neu
