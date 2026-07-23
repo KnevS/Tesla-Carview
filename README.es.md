@@ -17,7 +17,7 @@
 Desde los recorridos GPS y el libro de ruta hasta la planificación de rutas con paradas de carga y el historial de mantenimiento:
 todos los datos del vehículo permanecen en tu propio servidor.
 
-Funciona en: **servidores Linux** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), desarrollo local.
+Funciona en: **servidores Linux** (x86_64), **Raspberry Pi 4/5** (ARM64), desarrollo local.
 
 <!-- Operator-Hinweis im Footer / Footer note for operators:
      Wer Tesla Carview selbst hostet, kann die eigenen Kontaktdaten
@@ -239,7 +239,7 @@ Luego `docker compose up -d` sin Ollama. O más sencillo: en el asistente, ajust
 curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/setup.sh | bash
 ```
 
-El script detecta automáticamente la arquitectura (x86_64, ARM64, ARMv7) e instala todo.
+El script detecta automáticamente la arquitectura (x86_64, ARM64) e instala todo.
 
 ### Desarrollo local
 
@@ -349,7 +349,7 @@ La sincronización se ejecuta manualmente desde **Facturación → Sincronizaci�
 | Datos de Tesla | Tesla Fleet API (OAuth2) + Fleet Telemetry (WebSocket) |
 | Multi-tenancy | Bases de datos SQLite separadas por inquilino, BD maestra para datos globales |
 | Despliegue | Docker Compose + nginx + Let's Encrypt |
-| Plataformas | linux/amd64 · linux/arm64 · linux/arm/v7 |
+| Plataformas | linux/amd64 · linux/arm64 |
 
 ---
 

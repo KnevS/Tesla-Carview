@@ -46,8 +46,8 @@ Las tarjetas SD modernas aguantan **3.000–10.000 ciclos de escritura por bloqu
 │           → Opción A: SSD USB (solución más sencilla)
 │
 └── Raspberry Pi 3 o anterior
-      → Opción A: SSD USB (USB 2.0, más lento que Pi 4/5)
-        o: Actualiza a Pi 4/5 — mejor inversión a largo plazo
+      → Ya no es compatible (ARM de 32 bits). Tesla Carview
+        requiere una Pi 4 o 5 — ver Instalación.
 ```
 
 ---

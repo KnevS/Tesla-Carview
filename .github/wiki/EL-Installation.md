@@ -30,7 +30,9 @@
 |---|---|---|
 | Raspberry Pi 5 (συνιστάται) | 4 GB ή 8 GB | NVMe SSD μέσω M.2 HAT+ |
 | Raspberry Pi 4 | 4 GB | USB SSD |
-| Raspberry Pi 3 | 1 GB | USB SSD (πιο αργό) |
+| Raspberry Pi 3 | 1 GB | δεν υποστηρίζεται πλέον ¹ |
+
+¹ Το Raspberry Pi 3 και παλαιότερα (32-bit ARM) δεν υποστηρίζονται πλέον από την v3.51.0: η Node.js δεν δημοσιεύει εικόνες ARMv7 από την έκδοση 24 και μετά.
 
 > ⚠️ **Σημαντικό:** Μην χρησιμοποιείτε κάρτα SD για μόνιμη λειτουργία. Θα αποτύχει μέσα σε μήνες υπό το φόρτο εγγραφής του TeslaView. Δείτε [Raspberry Pi Storage](EL-Raspberry-Pi-Storage) για διόρθωση 20 λεπτών.
 
