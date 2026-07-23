@@ -7,6 +7,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.50.2] - 2026-07-23
+
+### Security
+
+- **Alerting when the build gate drifts.** The weekly `schedule` run did catch base images republished under the *same* tag with new content — there is no Dependabot PR for that — but a failing result reached nobody: no PR is attached to it, and the failed cron run sat quietly in the Actions history. Detecting without reporting is not monitoring.
+
+  A failing run now opens **a single collector issue** (label `security`), updated on subsequent runs and closed automatically once the run is green again. Deliberately an issue rather than an external service: it needs only the `GITHUB_TOKEN` — no secret has to be moved between systems. As this repository is public, the issue states only *that* the run is failing; the findings stay in the run's step summary.
+
+  **Telegram is optional**, prepared but inactive until `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are set as repository secrets.
+
+
 ## [v3.50.1] - 2026-07-23
 
 ### Security
