@@ -139,7 +139,7 @@ Dos nuevas secciones en `/battery`, ambas a partir de sus datos existentes:
 
 ### Servidor
 
-- Servidor Linux (x86_64, ARM64 o ARMv7) con al menos 1 GB de RAM
+- Servidor Linux (x86_64 o ARM64) con al menos 1 GB de RAM
 - Docker + Docker Compose (los instala el script de configuración)
 - Dominio accesible públicamente + certificado TLS (requerido por la API de Tesla)
 - El puerto 443 (HTTPS) debe ser accesible desde fuera

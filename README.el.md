@@ -17,7 +17,7 @@
 Από διαδρομές GPS και ημερολόγιο διαδρομών έως σχεδιασμό διαδρομής με προγραμματισμό φόρτισης και αρχεία συντήρησης:
 όλα τα δεδομένα του οχήματος παραμένουν στον δικό σας server.
 
-Εκτελείται σε: **Linux servers** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), τοπική ανάπτυξη.
+Εκτελείται σε: **Linux servers** (x86_64), **Raspberry Pi 4/5** (ARM64), τοπική ανάπτυξη.
 
 <!-- Operator-Hinweis im Footer / Footer note for operators:
      Wer Tesla Carview selbst hostet, kann die eigenen Kontaktdaten
@@ -239,7 +239,7 @@ services:
 curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/setup.sh | bash
 ```
 
-Το script ανιχνεύει αυτόματα την αρχιτεκτονική (x86_64, ARM64, ARMv7) και εγκαθιστά τα πάντα.
+Το script ανιχνεύει αυτόματα την αρχιτεκτονική (x86_64, ARM64) και εγκαθιστά τα πάντα.
 
 ### Τοπική ανάπτυξη
 
@@ -349,7 +349,7 @@ tesla-http-proxy -port 4443 -host 0.0.0.0 \
 | Δεδομένα Tesla | Tesla Fleet API (OAuth2) + Fleet Telemetry (WebSocket) |
 | Multi-tenancy | Ξεχωριστές βάσεις δεδομένων SQLite ανά tenant, master DB για παγκόσμια δεδομένα |
 | Deployment | Docker Compose + nginx + Let's Encrypt |
-| Πλατφόρμες | linux/amd64 · linux/arm64 · linux/arm/v7 |
+| Πλατφόρμες | linux/amd64 · linux/arm64 |
 
 ---
 

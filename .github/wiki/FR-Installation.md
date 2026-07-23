@@ -30,7 +30,9 @@ Idéal pour : usage personnel à domicile, faible coût (~60–120 € au total)
 |---|---|---|
 | Raspberry Pi 5 (recommandé) | 4 Go ou 8 Go | SSD NVMe via M.2 HAT+ |
 | Raspberry Pi 4 | 4 Go | SSD USB |
-| Raspberry Pi 3 | 1 Go | SSD USB (plus lent) |
+| Raspberry Pi 3 | 1 Go | plus pris en charge ¹ |
+
+¹ Les Raspberry Pi 3 et antérieurs (ARM 32 bits) ne sont plus pris en charge depuis la v3.51.0 : Node.js ne publie plus d'images ARMv7 à partir de la version 24.
 
 > ⚠️ **Important :** N'utilisez pas de carte SD pour un fonctionnement permanent. Elle tombera en panne en quelques mois sous la charge d'écriture de Tesla Carview. Consultez [Stockage Raspberry Pi](FR-Raspberry-Pi-Storage) pour une solution en 20 minutes.
 

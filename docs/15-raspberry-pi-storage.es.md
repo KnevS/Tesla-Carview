@@ -46,8 +46,8 @@ Las tarjetas SD modernas suelen sobrevivir **3.000–10.000 ciclos de escritura 
 │           → Opción A: SSD USB (la solución más sencilla)
 │
 └── Raspberry Pi 3 o más antigua
-      → Opción A: SSD USB (USB 2.0, más lento que Pi 4/5)
-        o: Compra una Pi más nueva — Pi 4/5 es mejor inversión
+      → Ya no es compatible (ARM de 32 bits). Tesla Carview
+        requiere una Pi 4 o 5 — ver Instalación.
 ```
 
 ---
@@ -197,7 +197,7 @@ dtparam=pciex1_gen=3
 **Requisitos:**
 - Gigabit Ethernet (sin Wi-Fi — demasiado lento e inestable para PXE)
 - Un servidor en la red que pueda proporcionar DHCP + TFTP (NAS, PC antiguo, Pi 4)
-- Raspberry Pi 4 o 5 (la Pi 3 funciona con esfuerzo adicional)
+- Raspberry Pi 4 o 5
 
 ### Setup rápido: servidor PXE con dnsmasq
 

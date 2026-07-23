@@ -139,7 +139,7 @@ Self-Hosted · Multi-Tenant
 
 ### Διακομιστής
 
-- Διακομιστής Linux (x86_64, ARM64 ή ARMv7) με τουλάχιστον 1 GB RAM
+- Διακομιστής Linux (x86_64 ή ARM64) με τουλάχιστον 1 GB RAM
 - Docker + Docker Compose (εγκαθίστανται από το script εγκατάστασης)
 - Δημόσια προσβάσιμο domain + πιστοποιητικό TLS (απαιτείται από το Tesla API)
 - Η θύρα 443 (HTTPS) πρέπει να είναι προσβάσιμη από έξω
