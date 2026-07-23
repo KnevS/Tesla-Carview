@@ -288,3 +288,110 @@ jobs:
               echo "Der Job meldet trotzdem einen Status, damit er als Required Check taugt."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
+
+  # ─── Alarm bei Drift ────────────────────────────────────────────────────
+  # Der woechentliche schedule-Lauf faengt Base-Images, die ohne Tag-Wechsel
+  # neue CVEs bekommen haben. Ohne diesen Job wuerde ein roter Lauf niemanden
+  # erreichen: Es gibt keinen PR, an dem der Check haengt, und ein rotes
+  # Cron-Ergebnis liegt still in der Actions-Historie.
+  #
+  # Der Alarm ist bewusst ein Issue und kein externer Dienst: Er braucht nur
+  # das GITHUB_TOKEN, also kein Secret, das dieses Repo verlassen oder in es
+  # hineinkopiert werden muesste. EIN Sammel-Issue, das aktualisiert und bei
+  # gruenem Lauf automatisch geschlossen wird — keine Issue-Flut.
+  #
+  # Dieses Repo ist oeffentlich: Das Issue nennt deshalb nur, DASS der Lauf
+  # rot ist, nie den Fund selbst. Details stehen im Step-Summary des Laufs.
+  #
+  # Telegram ist optional zugeschaltet und bleibt inaktiv, solange die
+  # Secrets fehlen. Bewusst so: Der Bot-Token liegt auf iland, und ein
+  # Secret wird nicht ungefragt zwischen Systemen bewegt. Aktivieren mit
+  #   gh secret set TELEGRAM_BOT_TOKEN --repo KnevS/Tesla-Carview
+  #   gh secret set TELEGRAM_CHAT_ID   --repo KnevS/Tesla-Carview
+  alert:
+    name: Alarm bei Drift
+    runs-on: ubuntu-latest
+    needs: [build-and-scan, multiarch]
+    if: always() && github.event_name == 'schedule'
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Sammel-Issue oeffnen/aktualisieren/schliessen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          SCAN_RESULT: ${{ needs.build-and-scan.result }}
+          ARCH_RESULT: ${{ needs.multiarch.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          TITLE="Docker Build Gate: weekly run failing"
+
+          EXISTING=$(gh issue list --state open --json number,title \
+            | jq -r --arg t "$TITLE" '[.[] | select(.title == $t)][0].number // empty')
+
+          if [ "$SCAN_RESULT" = "success" ] && [ "$ARCH_RESULT" = "success" ]; then
+            if [ -n "$EXISTING" ]; then
+              gh issue close "$EXISTING" \
+                --comment "Closed automatically: the weekly run is green again ($RUN_URL)."
+            fi
+            echo "::notice::Drift run green — nothing to report."
+            exit 0
+          fi
+
+          {
+            echo "The weekly Docker Build Gate run is **failing**."
+            echo ""
+            echo "| Job | Result |"
+            echo "|---|---|"
+            echo "| build + trivy | \`$SCAN_RESULT\` |"
+            echo "| multi-arch build | \`$ARCH_RESULT\` |"
+            echo ""
+            echo "Run: $RUN_URL"
+            echo "Time: $(date -u '+%Y-%m-%d %H:%M UTC')"
+            echo ""
+            echo "This run rebuilds the production images and scans them. It"
+            echo "fails when an image no longer builds, or when the runtime"
+            echo "image contains a secret or a fixable CRITICAL — typically"
+            echo "because a base image was republished under the same tag with"
+            echo "new content. There is no Dependabot PR for that, hence this"
+            echo "alert."
+            echo ""
+            echo "Findings are deliberately not repeated here (public repo) —"
+            echo "open the run's step summary for package, CVE and fix."
+            echo ""
+            echo "_Maintained by the \`docker-build-gate.yml\` workflow; closed"
+            echo "automatically once the weekly run is green again._"
+          } > issue-body.md
+
+          gh label create security --color D93F0B \
+            --description "Security-relevant findings and fixes" --force || true
+
+          if [ -n "$EXISTING" ]; then
+            gh issue edit "$EXISTING" --body-file issue-body.md
+            echo "::notice::Collector issue #$EXISTING updated."
+          else
+            gh issue create --title "$TITLE" --label security --body-file issue-body.md
+          fi
+
+      - name: Telegram (only when secrets are set)
+        if: needs.build-and-scan.result != 'success' || needs.multiarch.result != 'success'
+        env:
+          TG_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TG_CHAT: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REPO: ${{ github.repository }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TG_TOKEN:-}" ] || [ -z "${TG_CHAT:-}" ]; then
+            echo "::notice::Telegram skipped — TELEGRAM_BOT_TOKEN/CHAT_ID not set."
+            exit 0
+          fi
+          # --data-urlencode: the text must not introduce URL semantics.
+          curl -sS --fail-with-body -X POST \
+            "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TG_CHAT}" \
+            --data-urlencode "text=🔴 ${REPO}: Docker Build Gate (weekly run) is failing. ${RUN_URL}" \
+            -o /dev/null
+          echo "::notice::Telegram alert sent."
