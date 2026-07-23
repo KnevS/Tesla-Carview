@@ -11,6 +11,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Security
 
+- **npm removed from the backend runtime image.** The npm bundled with Node under `/usr/local/lib/node_modules/npm` ships its own dependencies (`tar`, `undici`, `brace-expansion`), whose CVEs end up in the runtime image even though no application code reaches them — including `CVE-2026-59873` (**CRITICAL**, `tar` → 7.5.19). A base image update does not fix this: node:24-alpine and node:26-alpine ship `tar` 7.5.16, also below the fix.
+
+  The container starts with `node src/index.js`; no package manager is needed at runtime. A real hardening comes for free: anyone able to execute code in the container cannot install anything.
+
+### Fixed
+
+- **Corrected the platform support stated in the Dockerfiles.** Both files promised `linux/arm/v7` (Pi 3), even though **Node ships no arm/v7 images from major 24 onwards** — neither alpine nor Debian. With the move to node:26 the Pi 3 build effectively disappeared; `docker buildx --platform linux/arm/v7` fails with "no match for platform in manifest". The new build gate surfaced this.
+
+  The comments now state the actual situation (amd64 · arm64). This also makes the earlier rationale for the glibc builder in the frontend moot — it rested on a missing rolldown binding for arm/v7, which is irrelevant without an arm/v7 base image. `bookworm-slim` stays regardless: switching to alpine measurably gains nothing, as node:26-alpine, node:24-alpine, node:26-trixie-slim and node:26-bookworm-slim all report the same 4 fixable findings.
+
+  **Pi 3 support is therefore an open product decision** — restoring it means going back to node:22 (the last major with arm/v7). This release deliberately leaves the support claims in README and handbook unchanged.
+
 - **Docker build gate** (`.github/workflows/docker-build-gate.yml`) — images are now built **during the PR** and the resulting runtime image is scanned. Previously the Docker build ran only after the merge (`deploy.yml` is chained to a successful CI run on `main`), so a PR swapping a base image was mergeable untested.
 
   **The multi-arch job is the real protection here.** The frontend builds for amd64, arm64 (Pi 4/5) and arm/v7 (Pi 3), and the builder is deliberately glibc-based (`bookworm-slim`) because rolldown ships no `@rolldown/binding-linux-arm-musleabihf`. A well-meant switch to `node:*-alpine` builds cleanly on amd64 and breaks on arm/v7 only — without a multi-arch build in the PR, that surfaces first for people building on a Pi 3. The same trap applies in the backend to `better-sqlite3` and `argon2`.

@@ -5,15 +5,17 @@ name: Docker Build Gate
 # deploy.yml laeuft erst nach erfolgreichem CI auf main — ein PR, der ein
 # Base-Image tauscht, wurde also nie gebaut, bevor er gemergt war.
 #
-# Der zweite Job ist hier der eigentliche Schutz. Das Frontend ist
-# ausdruecklich Multi-Arch (amd64 · arm64 fuer Pi 4/5 · arm/v7 fuer Pi 3),
-# und der Builder ist bewusst glibc-basiert (bookworm-slim), weil rolldown
-# kein @rolldown/binding-linux-arm-musleabihf veroeffentlicht — siehe
-# Kommentar in frontend/Dockerfile. Ein gut gemeinter Wechsel auf
-# node:*-alpine baut auf amd64 anstandslos durch und bricht ausschliesslich
-# auf arm/v7. Ohne Multi-Arch-Build im PR faellt das erst den Nutzern auf,
-# die auf einem Pi 3 selbst bauen. Derselbe Fallstrick gilt im Backend fuer
-# die nativen Module (better-sqlite3, argon2).
+# Der zweite Job ist hier der eigentliche Schutz. Beide Images sind
+# Multi-Arch (amd64 · arm64 fuer Pi 4/5), und ein Base-Image-Wechsel kann
+# auf amd64 anstandslos durchbauen und trotzdem auf arm brechen — durch
+# fehlende native Bindings (rolldown im Frontend) oder nicht kompilierende
+# Module (better-sqlite3, argon2 im Backend). Ohne Multi-Arch-Build im PR
+# faellt das erst denen auf, die auf einem Pi selbst bauen.
+#
+# linux/arm/v7 (Pi 3) ist bewusst nicht mehr dabei: Node veroeffentlicht ab
+# Major 24 keine arm/v7-Images, weder alpine noch Debian. Der Pi-3-Support
+# ist mit dem Wechsel auf node:26 faktisch entfallen — dieser Workflow hat
+# das sichtbar gemacht, nicht verursacht.
 #
 # Warum trivy hier auf dem IMAGE laeuft und nicht wie in security.yml auf
 # dem Dateisystem: Multi-Stage-Builds trennen Build- und Laufzeit scharf.
@@ -196,12 +198,18 @@ jobs:
       # Kein load/push: es geht ausschliesslich darum, ob der Build auf allen
       # unterstuetzten Plattformen durchlaeuft. Genau hier faellt ein
       # Base-Image auf, das auf amd64 gruen ist und auf arm/v7 bricht.
+      # linux/arm/v7 (Pi 3) fehlt hier bewusst: Node veroeffentlicht ab
+      # Major 24 keine arm/v7-Images mehr, weder alpine noch Debian. Seit
+      # dem Wechsel auf node:26 bricht ein arm/v7-Build mit "no match for
+      # platform in manifest" ab — der Pi-3-Support ist damit faktisch
+      # entfallen, unabhaengig von diesem Workflow. Ihn hier zu fordern
+      # wuerde das Gate dauerhaft rot halten, ohne etwas zu reparieren.
       - name: Build fuer alle unterstuetzten Plattformen
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: ./${{ matrix.component }}
           push: false
-          platforms: linux/amd64,linux/arm64,linux/arm/v7
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha,scope=gate-multiarch-${{ matrix.component }}
           cache-to: ${{ github.event.pull_request.head.repo.full_name == github.repository && format('type=gha,scope=gate-multiarch-{0},mode=max', matrix.component) || '' }}
 
@@ -212,5 +220,7 @@ jobs:
           {
             echo "## Multi-Arch Build · $COMPONENT"
             echo ""
-            echo "Baut auf \`linux/amd64\`, \`linux/arm64\` und \`linux/arm/v7\`."
+            echo "Baut auf \`linux/amd64\` und \`linux/arm64\` (Pi 4/5)."
+            echo ""
+            echo "\`linux/arm/v7\` (Pi 3) entfaellt: Node liefert ab Major 24 keine arm/v7-Images."
           } >> "$GITHUB_STEP_SUMMARY"
