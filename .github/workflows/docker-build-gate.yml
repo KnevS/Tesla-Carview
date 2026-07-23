@@ -1,0 +1,264 @@
+name: Docker Build Gate
+
+# Baut die Images WAEHREND des PRs und scannt das fertige Laufzeit-Image.
+# Schliesst die Luecke, die Base-Image-Updates zum Blindflug gemacht hat:
+# deploy.yml laeuft erst nach erfolgreichem CI auf main — ein PR, der ein
+# Base-Image tauscht, wurde also nie gebaut, bevor er gemergt war.
+#
+# Der zweite Job ist hier der eigentliche Schutz. Beide Images sind
+# Multi-Arch (amd64 · arm64 fuer Pi 4/5), und ein Base-Image-Wechsel kann
+# auf amd64 anstandslos durchbauen und trotzdem auf arm brechen — durch
+# fehlende native Bindings (rolldown im Frontend) oder nicht kompilierende
+# Module (better-sqlite3, argon2 im Backend). Ohne Multi-Arch-Build im PR
+# faellt das erst denen auf, die auf einem Pi selbst bauen.
+#
+# linux/arm/v7 (Pi 3) ist bewusst nicht mehr dabei: Node veroeffentlicht ab
+# Major 24 keine arm/v7-Images, weder alpine noch Debian. Der Pi-3-Support
+# ist mit dem Wechsel auf node:26 faktisch entfallen — dieser Workflow hat
+# das sichtbar gemacht, nicht verursacht.
+#
+# Warum trivy hier auf dem IMAGE laeuft und nicht wie in security.yml auf
+# dem Dateisystem: Multi-Stage-Builds trennen Build- und Laufzeit scharf.
+# Die Builder-Stage des Frontends meldet CVEs, die nie laufen — ins
+# nginx:alpine-Image wandert nur /app/dist. Ein Gate, das Builder-CVEs
+# zaehlt, erzeugt Druck auf Aenderungen ohne jeden Sicherheitsgewinn.
+#
+# Zusaetzlich laeuft der trivy-Secret-Scanner auf dem Image. Das deckt eine
+# Luecke, die gitleaks.yml prinzipbedingt nicht sieht: gitleaks prueft Repo
+# und History, aber nicht, was der Build ins Image KOPIERT. Ein `COPY . .`
+# mit unvollstaendiger .dockerignore zieht .env oder Tokens in einen Layer —
+# im Repo ist dann nichts zu finden, im veroeffentlichten Image schon.
+#
+# Bewertungsmassstab (bewusst eng, damit das Gate nicht zum Rauschen wird):
+#   - Build schlaegt fehl (auf irgendeiner Plattform) → rot. Kernzweck.
+#   - Secret im Image gefunden                        → rot. Ausnahmslos.
+#   - CRITICAL mit verfuegbarem Fix im Runtime-Image  → rot.
+#   - HIGH / ohne Fix (will_not_fix, fix_deferred)    → nur Report.
+
+# Bewusst OHNE paths-Filter auf Trigger-Ebene: `build-and-scan` ist ein
+# Required Check der Branch-Protection. Ein Workflow, der wegen paths gar
+# nicht startet, meldet seinen Check nie — GitHub wartet dann ewig auf
+# "Expected" und jeder PR ohne Dockerfile-Aenderung waere unmergebar.
+# Der teure Multi-Arch-Job wird stattdessen ueber den `changes`-Job
+# gesteuert, siehe unten.
+on:
+  pull_request:
+  schedule:
+    # Faengt Base-Images, die ohne Tag-Wechsel neue CVEs bekommen haben
+    # (gleicher Tag, neuer Digest) — dafuer gibt es keinen Dependabot-PR.
+    - cron: '23 7 * * 1'
+  workflow_dispatch:
+
+# Minimal: der Workflow liest nur den Code. Kein Registry-Push (push: false),
+# keine PR-Kommentare, keine Issues — Ergebnis steht im Check-Status und im
+# Step-Summary. Damit gibt es hier nichts, was ein Fork-PR missbrauchen
+# koennte, und der Workflow braucht kein einziges Secret.
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-build-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Ermittelt, ob dieser PR ueberhaupt etwas veraendert, das den
+  # Multi-Arch-Build betrifft. Ersetzt den frueheren paths-Filter, der
+  # als Required Check nicht funktioniert (siehe Kommentar bei `on:`).
+  changes:
+    name: relevante Aenderungen?
+    runs-on: ubuntu-latest
+    outputs:
+      docker: ${{ steps.detect.outputs.docker }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - id: detect
+        # SHAs kommen ueber env in die Shell, nicht per Expression-Inlining
+        # in die Kommandozeile — Werte aus dem Event gehoeren nie direkt
+        # in ein run-Skript.
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" != "pull_request" ]; then
+            # schedule/dispatch: immer vollstaendig pruefen
+            echo "docker=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if git diff --name-only "$BASE" "$HEAD" \
+             | grep -qE '(Dockerfile|package-lock\.json)$'; then
+            echo "docker=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "docker=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-and-scan:
+    name: build + trivy · ${{ matrix.component }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [backend, frontend]
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      # push: false + load: true — das Image bleibt im Runner und ist fuer
+      # trivy als lokales Image adressierbar. Kein Registry-Zugriff noetig.
+      # cache-to nur fuer PRs aus diesem Repo: Fork-PRs haben ein read-only
+      # GITHUB_TOKEN und koennten den GHA-Cache ohnehin nicht schreiben.
+      - name: Build image (amd64, echter Build)
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: ./${{ matrix.component }}
+          push: false
+          load: true
+          platforms: linux/amd64
+          tags: tcv-gate/${{ matrix.component }}:pr
+          cache-from: type=gha,scope=gate-${{ matrix.component }}
+          cache-to: ${{ (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && format('type=gha,scope=gate-{0},mode=max', matrix.component) || '' }}
+
+      - name: Trivy scan des fertigen Laufzeit-Images (CVEs + Secrets)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: tcv-gate/${{ matrix.component }}:pr
+          scanners: 'vuln,secret'
+          format: json
+          output: trivy-image.json
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
+          exit-code: '0'   # Bewertung differenziert im naechsten Step
+
+      - name: Auswertung + Step-Summary
+        env:
+          COMPONENT: ${{ matrix.component }}
+        run: |
+          set -euo pipefail
+          CRIT=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="CRITICAL")] | length' trivy-image.json)
+          HIGH=$(jq '[.Results[]?.Vulnerabilities[]? | select(.Severity=="HIGH")]     | length' trivy-image.json)
+          SECRETS=$(jq '[.Results[]?.Secrets[]?] | length' trivy-image.json)
+
+          {
+            echo "## Docker Build Gate · $COMPONENT"
+            echo ""
+            echo "Build erfolgreich (amd64). Trivy auf dem fertigen Laufzeit-Image, nur behebbare Findings:"
+            echo ""
+            echo "| Kategorie | Anzahl |"
+            echo "|---|---|"
+            echo "| Secrets im Image | $SECRETS |"
+            echo "| CRITICAL | $CRIT |"
+            echo "| HIGH | $HIGH |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$CRIT" -gt 0 ] || [ "$HIGH" -gt 0 ]; then
+            {
+              echo ""
+              echo "| Paket | CVE | Installiert | Fix | Severity |"
+              echo "|---|---|---|---|---|"
+              jq -r '
+                .Results[]?.Vulnerabilities[]?
+                | "| \(.PkgName) | \(.VulnerabilityID) | \(.InstalledVersion) | \(.FixedVersion // "—") | \(.Severity) |"
+              ' trivy-image.json | sort -u
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          # Secret-Fundstellen NUR mit Pfad/Regel benennen — niemals den
+          # Treffer selbst. Dieses Repo ist oeffentlich, jeder kann den Run
+          # lesen; ein geleaktes Secret hier nochmal im Klartext zu
+          # protokollieren wuerde den Schaden vergroessern.
+          if [ "$SECRETS" -gt 0 ]; then
+            {
+              echo ""
+              echo "### Secrets im Image — Build blockiert"
+              echo ""
+              echo "| Datei | Regel | Severity |"
+              echo "|---|---|---|"
+              jq -r '
+                .Results[]? as $r | $r.Secrets[]?
+                | "| \($r.Target) | \(.RuleID) | \(.Severity) |"
+              ' trivy-image.json | sort -u
+              echo ""
+              echo "Wert bewusst nicht ausgegeben. Ursache ist fast immer eine"
+              echo "lueckenhafte \`.dockerignore\` — Fundstelle pruefen, Secret"
+              echo "rotieren, Datei aus dem Build-Context ausschliessen."
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::$COMPONENT: $SECRETS Secret-Fund(e) im Laufzeit-Image — siehe Step-Summary."
+          fi
+
+          # Bewusst vollstaendige if-Bloecke: unter `set -e` liefert ein
+          # `[ x ] && FAIL=1` bei falscher Bedingung Exit 1 und bricht den
+          # Step ab — das Gate waere dann immer rot.
+          FAIL=0
+          if [ "$SECRETS" -gt 0 ]; then
+            FAIL=1
+          fi
+          if [ "$CRIT" -gt 0 ]; then
+            echo "::error::$COMPONENT: $CRIT behebbare CRITICAL-CVE(s) im Laufzeit-Image — Base-Image aktualisieren."
+            FAIL=1
+          fi
+          if [ "$FAIL" -eq 1 ]; then
+            exit 1
+          fi
+
+          echo "::notice::$COMPONENT: sauber — keine Secrets, keine behebbaren CRITICAL-CVEs (HIGH: $HIGH)."
+
+  multiarch:
+    name: multi-arch build · ${{ matrix.component }}
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
+    # QEMU-emulierte arm-Builds sind langsam (npm ci + vite build unter
+    # Emulation). Das ist vertretbar, weil dieser Job nur bei Aenderungen an
+    # Dockerfiles oder Lockfiles ueberhaupt startet — also genau dann, wenn
+    # ein Plattform-Bruch moeglich ist.
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        component: [backend, frontend]
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up QEMU (arm-Emulation)
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      # Kein load/push: es geht ausschliesslich darum, ob der Build auf allen
+      # unterstuetzten Plattformen durchlaeuft. Genau hier faellt ein
+      # Base-Image auf, das auf amd64 gruen ist und auf arm/v7 bricht.
+      # linux/arm/v7 (Pi 3) fehlt hier bewusst: Node veroeffentlicht ab
+      # Major 24 keine arm/v7-Images mehr, weder alpine noch Debian. Seit
+      # dem Wechsel auf node:26 bricht ein arm/v7-Build mit "no match for
+      # platform in manifest" ab — der Pi-3-Support ist damit faktisch
+      # entfallen, unabhaengig von diesem Workflow. Ihn hier zu fordern
+      # wuerde das Gate dauerhaft rot halten, ohne etwas zu reparieren.
+      - name: Build fuer alle unterstuetzten Plattformen
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: ./${{ matrix.component }}
+          push: false
+          platforms: linux/amd64,linux/arm64
+          cache-from: type=gha,scope=gate-multiarch-${{ matrix.component }}
+          cache-to: ${{ github.event.pull_request.head.repo.full_name == github.repository && format('type=gha,scope=gate-multiarch-{0},mode=max', matrix.component) || '' }}
+
+      - name: Step-Summary
+        env:
+          COMPONENT: ${{ matrix.component }}
+        run: |
+          {
+            echo "## Multi-Arch Build · $COMPONENT"
+            echo ""
+            echo "Baut auf \`linux/amd64\` und \`linux/arm64\` (Pi 4/5)."
+            echo ""
+            echo "\`linux/arm/v7\` (Pi 3) entfaellt: Node liefert ab Major 24 keine arm/v7-Images."
+          } >> "$GITHUB_STEP_SUMMARY"
