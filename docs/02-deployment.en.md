@@ -8,8 +8,10 @@ Tesla Carview runs on **all common Linux platforms**:
 |---|---|---|
 | Linux server (VPS, dedicated) | x86_64 | ✓ |
 | Raspberry Pi 4 / 5 | ARM64 | ✓ |
-| Raspberry Pi 3 | ARMv7 | ✓ |
+| Raspberry Pi 3 (and older) | ARMv7 | ✗ ¹ |
 | Local development (Mac/Windows/Linux) | all | ✓ |
+
+¹ **Raspberry Pi 3 and older (32-bit ARM) are no longer supported as of v3.51.0.** Node.js ships no ARMv7 images from version 24 onwards — neither alpine nor Debian — so the backend image can no longer be built there. `deploy/setup.sh` stops on such systems with an explanation instead of failing later at image pull.
 
 
 ---

@@ -139,7 +139,7 @@ v3.6.0 itibarıyla `/battery` altı bölüm sunuyor; temel batarya sorularına d
 
 ### Sunucu
 
-- En az 1 GB RAM ile Linux sunucu (x86_64, ARM64 veya ARMv7)
+- En az 1 GB RAM ile Linux sunucu (x86_64 veya ARM64)
 - Docker + Docker Compose (kurulum betiği yükler)
 - Genel olarak erişilebilen bir alan adı + TLS sertifikası (Tesla API için zorunlu)
 - 443 numaralı port (HTTPS) dışarıdan erişilebilir olmalı

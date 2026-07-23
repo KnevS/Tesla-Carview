@@ -46,8 +46,8 @@ What Raspberry Pi do you have?
 │           → Option A: USB SSD (simplest solution)
 │
 └── Raspberry Pi 3 or older
-      → Option A: USB SSD (USB 2.0, slower than Pi 4/5)
-        or: Upgrade to Pi 4/5 — better investment long-term
+      → No longer supported (32-bit ARM). Tesla Carview requires
+        a Pi 4 or 5 — see Installation.
 ```
 
 ---

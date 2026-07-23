@@ -7,6 +7,23 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.51.0] - 2026-07-23
+
+### Geändert
+
+- **Raspberry Pi 4 ist jetzt die Mindestanforderung — Pi 3 und älter (32-Bit-ARM) werden nicht mehr unterstützt.**
+
+  Der Grund liegt nicht bei Tesla Carview: **Node.js veröffentlicht ab Version 24 keine ARMv7-Images mehr**, weder alpine noch Debian. Seit dem Wechsel auf node:26 lässt sich das Backend-Image auf einem Pi 3 schlicht nicht mehr bauen — `docker buildx --platform linux/arm/v7` bricht mit „no match for platform in manifest" ab. Die Dokumentation hat den Support bis hierher weiterhin zugesichert; der neue Docker Build Gate hat die Lücke sichtbar gemacht.
+
+  **Was sich konkret ändert:**
+  - `deploy/setup.sh` erkennt 32-Bit-ARM (`armv6l`/`armv7l`/`armhf`) jetzt **vor** allen Installationsschritten und bricht mit einer Erklärung ab. Vorher lief das komplette Setup durch und scheiterte erst beim Image-Pull mit einer Meldung, die niemandem sagt, was zu tun ist.
+  - README (7 Sprachen), Handbuch (6 Sprachen), Deployment- und Raspberry-Pi-Speicher-Dokumentation sowie das Wiki nennen durchgehend `linux/amd64 · linux/arm64` und weisen Pi 3 als nicht mehr unterstützt aus.
+
+  **Wer auf einem Pi 3 läuft**, kann die vorhandene Installation weiter betreiben, bekommt aber keine neuen Images mehr. Sinnvoll ist der Umstieg auf einen Pi 4/5 (ARM64) oder einen beliebigen x86_64-Server. Wer bei 32-Bit-ARM bleiben muss, kann die Dockerfiles auf `node:22` zurücksetzen — die letzte Major mit ARMv7-Images. Das ist ein Fork-Pfad ohne künftige Node-Security-Updates und deshalb ausdrücklich keine Empfehlung.
+
+  **Hinweis für Pi-4-Besitzer:** Ein Pi 4 kann 32-Bit-Raspberry-Pi-OS ausführen. Entscheidend ist die Ausgabe von `uname -m` — `aarch64` ist gut, `armv7l` nicht.
+
+
 ## [v3.50.2] - 2026-07-23
 
 ### Sicherheit
