@@ -150,7 +150,14 @@ jobs:
           # GITHUB_TOKEN-Push triggert keine push/pull_request-Workflows —
           # Required-Checks deshalb explizit per workflow_dispatch anstoßen
           # (Check-Runs hängen am Head-SHA des PR-Branches).
-          for wf in ci.yml security.yml gitleaks.yml; do
+          #
+          # Diese Liste MUSS alle Required Checks der Branch-Protection
+          # abdecken. Fehlt einer, bleibt sein Check auf „Expected" stehen
+          # und der Autofix-PR ist dauerhaft unmergebar — und zwar genau
+          # dann, wenn es eine CVE zu fixen gibt. docker-build-gate.yml kam
+          # mit v3.50.1 dazu; sein `changes`-Job setzt bei Nicht-PR-Events
+          # bewusst `docker=true`, damit auch der Multi-Arch-Job meldet.
+          for wf in ci.yml security.yml gitleaks.yml docker-build-gate.yml; do
             gh workflow run "$wf" --ref "$BRANCH" || echo "::warning::Dispatch $wf fehlgeschlagen"
           done
 
