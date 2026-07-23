@@ -7,6 +7,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.50.1] - 2026-07-23
+
+### Security
+
+- **Docker build gate** (`.github/workflows/docker-build-gate.yml`) — images are now built **during the PR** and the resulting runtime image is scanned. Previously the Docker build ran only after the merge (`deploy.yml` is chained to a successful CI run on `main`), so a PR swapping a base image was mergeable untested.
+
+  **The multi-arch job is the real protection here.** The frontend builds for amd64, arm64 (Pi 4/5) and arm/v7 (Pi 3), and the builder is deliberately glibc-based (`bookworm-slim`) because rolldown ships no `@rolldown/binding-linux-arm-musleabihf`. A well-meant switch to `node:*-alpine` builds cleanly on amd64 and breaks on arm/v7 only — without a multi-arch build in the PR, that surfaces first for people building on a Pi 3. The same trap applies in the backend to `better-sqlite3` and `argon2`.
+
+  **Scanning the image rather than the filesystem.** `trivy fs` in `security.yml` sees lockfiles but not the runtime state. With multi-stage builds it reports CVEs from builder stages that never run: only `/app/dist` ends up in the `nginx:alpine` image. A gate counting builder CVEs creates pressure to change things with no security benefit whatsoever.
+
+  **Secret scan on the image** — covers what `gitleaks.yml` cannot see by design: not the repository, but what the build *copies* into the image. A `COPY . .` with an incomplete `.dockerignore` pulls `.env` into a layer with no trace in the repo. A finding is always a hard failure; only file and rule are printed, never the match itself — this repository is public.
+
+  Otherwise the bar is deliberately narrow: a failed build or a fixable CRITICAL in the runtime image blocks; HIGH and findings without an available fix (`will_not_fix`) are reported only. A gate on unfixable distro CVEs would be permanently red.
+
+
 ## [v3.50.0] - 2026-07-19
 
 ### Added
