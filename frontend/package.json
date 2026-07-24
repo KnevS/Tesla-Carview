@@ -17,7 +17,7 @@
     "jspdf-autotable": "^5.0.8",
     "leaflet": "^1.9.4",
     "marked": "^18.0.4",
-    "pinia": "^3.0.4",
+    "pinia": "^4.0.2",
     "vue": "^3.5.39",
     "vue-chartjs": "^5.3.1",
     "vue-i18n": "^11.4.6",
