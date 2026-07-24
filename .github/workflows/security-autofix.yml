@@ -22,8 +22,9 @@ name: Security Autofix
 #   - Ob Actions PRs ERSTELLEN dürfen, steuert das Setting
 #     „Allow GitHub Actions to create and approve pull requests"
 #     (Repo → Settings → Actions → General → Workflow permissions).
-#     Ist es deaktiviert, scheitert `gh pr create` mit einer klaren
-#     Fehlermeldung — der Workflow bricht dann bewusst rot ab.
+#     Ist es deaktiviert, scheitert `gh pr create` — der Workflow
+#     emittiert dann eine ::warning::-Annotation statt hart abzubrechen,
+#     damit der Branch-Push (der eigentliche Fix) als Erfolg gilt.
 #   - Pushes mit GITHUB_TOKEN lösen keine push/pull_request-Workflows aus
 #     (GitHub-Rekursionsschutz). workflow_dispatch ist davon ausgenommen,
 #     deshalb stößt der Job die Required-Check-Workflows (CI, Security,
@@ -140,17 +141,26 @@ jobs:
             gh pr edit "$EXISTING" --body-file "$BODY_FILE"
             echo "::notice::Bestehender Autofix-PR #$EXISTING aktualisiert (kein Duplikat erstellt)"
           else
-            gh pr create \
-              --title "fix(security): npm audit fix - automated CVE remediation" \
-              --body-file "$BODY_FILE" \
-              --label security \
-              --base main --head "$BRANCH"
+            if ! gh pr create \
+                --title "fix(security): npm audit fix - automated CVE remediation" \
+                --body-file "$BODY_FILE" \
+                --label security \
+                --base main --head "$BRANCH"; then
+              echo "::warning::PR creation failed — enable 'Allow GitHub Actions to create and approve pull requests' in repo Settings → Actions → General, or open a PR for '$BRANCH' manually."
+            fi
           fi
 
           # GITHUB_TOKEN-Push triggert keine push/pull_request-Workflows —
           # Required-Checks deshalb explizit per workflow_dispatch anstoßen
           # (Check-Runs hängen am Head-SHA des PR-Branches).
-          for wf in ci.yml security.yml gitleaks.yml; do
+          #
+          # Diese Liste MUSS alle Required Checks der Branch-Protection
+          # abdecken. Fehlt einer, bleibt sein Check auf „Expected" stehen
+          # und der Autofix-PR ist dauerhaft unmergebar — und zwar genau
+          # dann, wenn es eine CVE zu fixen gibt. docker-build-gate.yml kam
+          # mit v3.50.1 dazu; sein `changes`-Job setzt bei Nicht-PR-Events
+          # bewusst `docker=true`, damit auch der Multi-Arch-Job meldet.
+          for wf in ci.yml security.yml gitleaks.yml docker-build-gate.yml; do
             gh workflow run "$wf" --ref "$BRANCH" || echo "::warning::Dispatch $wf fehlgeschlagen"
           done
 

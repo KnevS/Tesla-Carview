@@ -7,6 +7,34 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.51.0] - 2026-07-23
+
+### Changed
+
+- **Raspberry Pi 4 is now the minimum requirement — Pi 3 and older (32-bit ARM) are no longer supported.**
+
+  The reason is not Tesla Carview: **Node.js ships no ARMv7 images from version 24 onwards**, neither alpine nor Debian. Since the move to node:26 the backend image simply cannot be built on a Pi 3 — `docker buildx --platform linux/arm/v7` fails with "no match for platform in manifest". The documentation kept promising that support until now; the new Docker build gate made the gap visible.
+
+  **What changes in practice:**
+  - `deploy/setup.sh` now detects 32-bit ARM (`armv6l`/`armv7l`/`armhf`) **before** any installation step and stops with an explanation. Previously the whole setup ran through and only failed at image pull, with a message that tells nobody what to do.
+  - README (7 languages), handbook (6 languages), deployment and Raspberry Pi storage documentation as well as the wiki consistently state `linux/amd64 · linux/arm64` and mark Pi 3 as unsupported.
+
+  **If you run on a Pi 3**, your existing installation keeps working, but there will be no new images. The sensible move is a Pi 4/5 (ARM64) or any x86_64 server. If you must stay on 32-bit ARM, you can pin the Dockerfiles back to `node:22` — the last major with ARMv7 images. That is a fork path without future Node security updates and explicitly not a recommendation.
+
+  **Note for Pi 4 owners:** a Pi 4 can run 32-bit Raspberry Pi OS. What matters is the output of `uname -m` — `aarch64` is fine, `armv7l` is not.
+
+
+## [v3.50.2] - 2026-07-23
+
+### Security
+
+- **Alerting when the build gate drifts.** The weekly `schedule` run did catch base images republished under the *same* tag with new content — there is no Dependabot PR for that — but a failing result reached nobody: no PR is attached to it, and the failed cron run sat quietly in the Actions history. Detecting without reporting is not monitoring.
+
+  A failing run now opens **a single collector issue** (label `security`), updated on subsequent runs and closed automatically once the run is green again. Deliberately an issue rather than an external service: it needs only the `GITHUB_TOKEN` — no secret has to be moved between systems. As this repository is public, the issue states only *that* the run is failing; the findings stay in the run's step summary.
+
+  **Telegram is optional**, prepared but inactive until `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` are set as repository secrets.
+
+
 ## [v3.50.1] - 2026-07-23
 
 ### Security

@@ -46,8 +46,8 @@ Hangi Raspberry Pi'niz var?
 │           → Seçenek A: USB SSD (en basit çözüm)
 │
 └── Raspberry Pi 3 veya daha eski
-      → Seçenek A: USB SSD (USB 2.0, Pi 4/5'ten yavaş)
-        veya: Daha yeni bir Pi alın — Pi 4/5 daha iyi bir yatırım
+     → Artık desteklenmiyor (32 bit ARM). Tesla Carview için
+        Pi 4 veya 5 gerekir — bkz. Kurulum.
 ```
 
 ---
@@ -197,7 +197,7 @@ dtparam=pciex1_gen=3
 **Gereksinimler:**
 - Gigabit Ethernet (Wi-Fi yok — PXE için çok yavaş ve güvenilmez)
 - DHCP + TFTP sağlayabilen ağda bir sunucu (NAS, eski PC, Pi 4)
-- Raspberry Pi 4 veya 5 (Pi 3 ekstra çabayla çalışır)
+- Raspberry Pi 4 veya 5
 
 ### Hızlı kurulum: dnsmasq ile PXE sunucusu
 

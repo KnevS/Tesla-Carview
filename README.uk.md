@@ -17,7 +17,7 @@
 Від GPS-треків і дорожнього журналу до планування маршрутів із графіками зарядки та записами обслуговування:
 усі дані автомобіля залишаються на вашому власному сервері.
 
-Працює на: **Linux-серверах** (x86_64), **Raspberry Pi 3/4/5** (ARM64/ARMv7), локальній розробці.
+Працює на: **Linux-серверах** (x86_64), **Raspberry Pi 4/5** (ARM64), локальній розробці.
 
 <!-- Operator-Hinweis im Footer / Footer note for operators:
      Wer Tesla Carview selbst hostet, kann die eigenen Kontaktdaten
@@ -239,7 +239,7 @@ services:
 curl -fsSL https://raw.githubusercontent.com/KnevS/Tesla-Carview/main/deploy/setup.sh | bash
 ```
 
-Скрипт автоматично визначає архітектуру (x86_64, ARM64, ARMv7) і встановлює все.
+Скрипт автоматично визначає архітектуру (x86_64, ARM64) і встановлює все.
 
 ### Локальна розробка
 
@@ -349,7 +349,7 @@ Tesla Carview підтримує опціональну синхронізаці
 | Дані Tesla | Tesla Fleet API (OAuth2) + Fleet Telemetry (WebSocket) |
 | Multi-tenancy | Окремі бази SQLite на орендаря, master-БД для глобальних даних |
 | Розгортання | Docker Compose + nginx + Let's Encrypt |
-| Платформи | linux/amd64 · linux/arm64 · linux/arm/v7 |
+| Платформи | linux/amd64 · linux/arm64 |
 
 ---
 
