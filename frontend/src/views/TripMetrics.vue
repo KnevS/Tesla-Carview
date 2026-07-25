@@ -57,7 +57,11 @@
          als der Viewport; macOS/iOS blenden die Scrollbar standardmäßig aus,
          daher braucht es einen expliziten Hinweis statt sich auf den (oft
          unsichtbaren) Scrollbalken zu verlassen — sonst wirkt es, als fehlten
-         Spalten, obwohl sie nur ungescrollt außerhalb des Viewports liegen. -->
+         Spalten, obwohl sie nur ungescrollt außerhalb des Viewports liegen.
+         Die gepinnte Datum-Spalte gibt es erst ab `sm:` (≥640px) — auf
+         Handy-Breite (390px gemessen) würde sie mit dem Fade zusammen 42,5 %
+         des Viewports fressen. Der Fade allein löst die Discoverability auch
+         ohne Pin. -->
     <div v-else class="relative rounded-xl border border-gray-700">
       <div ref="scrollEl" class="overflow-x-auto rounded-xl" @scroll="updateScrollHint">
         <table ref="tableEl" class="w-full text-sm whitespace-nowrap">
@@ -65,7 +69,7 @@
             <tr>
               <th v-for="col in columns" :key="col.field"
                 class="px-3 py-2 text-left font-medium cursor-pointer select-none hover:text-white"
-                :class="[col.num ? 'text-right' : 'text-left', col.field === 'start_time' ? 'sticky left-0 z-10 bg-gray-800' : '']"
+                :class="[col.num ? 'text-right' : 'text-left', col.field === 'start_time' ? 'sm:sticky sm:left-0 sm:z-10 sm:bg-gray-800' : '']"
                 @click="sortBy(col.field)"
                 v-tooltip="col.tip ? $t(col.tip) : null">
                 <span class="inline-flex items-center gap-1" :class="col.num ? 'justify-end w-full' : ''">
@@ -79,7 +83,7 @@
             <tr v-for="r in sortedRows" :key="r.id"
               class="border-t border-gray-800 hover:bg-gray-800/50 cursor-pointer"
               @click="$router.push(`/trips/${r.id}`)">
-              <td class="px-3 py-2 sticky left-0 z-10 bg-tesla-dark">{{ fmtDate(r.start_time) }}</td>
+              <td class="px-3 py-2 sm:sticky sm:left-0 sm:z-10 sm:bg-tesla-dark">{{ fmtDate(r.start_time) }}</td>
               <td class="px-3 py-2 text-gray-400">{{ trimAddr(r.start_address) }} → {{ trimAddr(r.end_address) }}</td>
               <td class="px-3 py-2 text-right">{{ fmtDuration(r.duration_s) }}</td>
               <td class="px-3 py-2 text-right">{{ fmtDist(r.distance_km) }}</td>
