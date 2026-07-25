@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.51.1] - 2026-07-25
+
+### Behoben
+
+- **Fahrtwerte-Tabelle: fehlende Spalten waren nur ungescrollt.** Die Tabelle unter `/fahrtwerte` hat 12 Spalten und ist auf den meisten Bildschirmen breiter als der Viewport. macOS und iOS blenden die Scrollbar standardmäßig aus, wodurch es keinen sichtbaren Hinweis gab, dass rechts noch mehr Spalten liegen — es wirkte, als fehlten sie (Sven-Report: „man kann nicht alle Spalten sehen"). Gemessen: 179 px Überhang bei 1440 px Viewport-Breite.
+
+  Die Tabelle bekommt jetzt einen rechten Fade-Hinweis, der nur sichtbar ist, solange ungesehene Spalten folgen, und verschwindet automatisch beim Durchscrollen. Die Datum-Spalte bleibt beim horizontalen Scrollen fixiert, damit der Bezug zur Zeile erhalten bleibt. Keine Spalte wurde versteckt oder auf kleineren Bildschirmen ausgeblendet.
+
 ## [v3.51.0] - 2026-07-23
 
 ### Geändert

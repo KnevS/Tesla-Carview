@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.51.1] - 2026-07-25
+
+### Fixed
+
+- **Trip metrics table: missing columns were only unscrolled.** The table under `/fahrtwerte` has 12 columns and is wider than the viewport on most screens. macOS and iOS hide the scrollbar by default, so there was no visible cue that more columns existed to the right — it looked like columns were missing (user report: "can't see all columns"). Measured: 179px of overflow at a 1440px viewport width.
+
+  The table now shows a right-edge fade hint that only appears while unseen columns remain and disappears automatically once scrolled all the way through. The date column stays pinned while scrolling horizontally so the row context is preserved. No column is hidden at any breakpoint.
+
 ## [v3.51.0] - 2026-07-23
 
 ### Changed
