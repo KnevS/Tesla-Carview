@@ -427,6 +427,54 @@ router.get('/chargers', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/routing/chargers/:id/comments
+ *
+ * Community-Feedback zu einer Ladestation (fünftes Ergebnis des
+ * Routenplaner-Wunschzettels: "Bewertung ... um zu erkennen ob es ein
+ * sauberes WC gibt"). OpenChargeMap hat kein strukturiertes Amenity-Feld
+ * dafür — nur Freitext-Nutzerkommentare (UserComments). Bewusst KEINE
+ * eigene Bewertungs-Tabelle/Migration: TeslaView ist ein Multi-Tenant-
+ * Selfhoster ohne zentralen Server, eine echte plattformübergreifende
+ * Community bräuchte einen, den es nicht gibt (Sven-Entscheidung).
+ *
+ * Lazy pro Station statt bulk bei /chargers, da includecomments=true
+ * die OCM-Antwort für jede der bis zu 100 Stationen pro Kartenausschnitt
+ * spürbar vergrößern würde.
+ */
+router.get('/chargers/:id/comments', async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isInteger(id)) return res.status(400).json({ error: 'ungültige Stations-ID' });
+
+  const params = new URLSearchParams({
+    chargepointid: id, includecomments: true, compact: false, verbose: false,
+  });
+  const ocmKey = getOcmKey(req.db);
+  if (ocmKey) params.set('key', ocmKey);
+
+  try {
+    const r = await fetch(`https://api.openchargemap.io/v3/poi/?${params}`, {
+      signal: AbortSignal.timeout(8000),
+    });
+    if (r.status === 403) return res.status(403).json({ error: 'OpenChargeMap API-Key fehlt', code: 'NO_API_KEY' });
+    if (!r.ok) return res.status(502).json({ error: 'OpenChargeMap nicht erreichbar' });
+    const data = await r.json();
+    const station = Array.isArray(data) ? data[0] : null;
+    const comments = (station?.UserComments ?? [])
+      .map(c => ({
+        author:  c.UserName ?? null,
+        text:    c.Comment ?? '',
+        type:    c.CommentType?.Title ?? null,
+        date:    c.DateCreated ?? null,
+      }))
+      .filter(c => c.text)
+      .sort((a, b) => new Date(b.date ?? 0) - new Date(a.date ?? 0));
+    res.json({ comments });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // POST /api/routing/route — OSRM-Proxy (oder Valhalla bei Umgehungsoptionen)
 router.post('/route', async (req, res) => {
   const { coordinates, avoid_motorways, avoid_tolls, avoid_ferry } = req.body;
