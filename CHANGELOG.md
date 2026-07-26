@@ -7,6 +7,12 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.51.3] - 2026-07-26
+
+### Hinzugefügt
+
+- **Routenplaner: Lademengen-Forecast (kWh) je Ladestopp (zweites Ergebnis des Routenplaner-Wunschzettels).** Der Ladeplan zeigte bisher nur die SoC-Differenz (Ankunft% → Abfahrt%) und die Ladedauer je Stopp, nicht die tatsächlich nachgeladene Energiemenge — obwohl das Backend sie längst berechnet (`kwh2add`, Grundlage der Ladedauer-Schätzung), aber nie zurückgab. Neu: `stops[].kwh_added` je Stopp + `total_kwh_added` als Routensumme, im Frontend neben der bestehenden Ladedauer/Leistungs-Zeile sowie als neue Gesamtsummen-Zeile angezeigt. i18n ×7 (`routes.kwhAdded`/`totalKwhAdded` — eigener Namespace, keine Kollision mit dem bereits bestehenden `charging.kwhAdded` aus v3.50.0).
+
 ## [v3.51.2] - 2026-07-26
 
 ### Behoben

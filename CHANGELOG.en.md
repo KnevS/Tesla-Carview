@@ -7,6 +7,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.51.3] - 2026-07-26
+
+### Added
+
+- **Route planner: charged-energy (kWh) forecast per charging stop (second item of the route planner wish list).** The charging plan previously only showed the SoC delta (arrival% → departure%) and charging duration per stop, not the actual amount of energy added — even though the backend already computed it (`kwh2add`, the basis for the duration estimate) but never returned it. New: `stops[].kwh_added` per stop plus `total_kwh_added` as a route-level summary, shown in the frontend next to the existing duration/power row and as a new total-energy summary line. i18n x7 (`routes.kwhAdded`/`totalKwhAdded` — its own namespace, no collision with the pre-existing `charging.kwhAdded` from v3.50.0).
+
 ## [v3.51.2] - 2026-07-26
 
 ### Fixed
