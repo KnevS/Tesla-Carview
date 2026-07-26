@@ -3,20 +3,17 @@
  * Dienstwagen-Versteuerung (S09) — reine Rechenlogik, damit sie testbar bleibt.
  *
  * Bildet die deutsche 1-%-/Fahrtenbuch-Methode für den geldwerten Vorteil
- * ab, inkl. der **stichtagsabhängigen** E-Fahrzeug-Privilegien (Viertelung
- * 0,25 % / Halbierung 0,5 %). Der maßgebliche Satz hängt vom Fahrzeugtyp,
- * vom Bruttolistenpreis UND vom Anschaffungs-/Überlassungsdatum ab — die
- * BLP-Grenze für die Viertelung wurde mehrfach angehoben.
+ * ab, inkl. der **stichtagsabhängigen** BEV-Privilegien (Viertelung
+ * 0,25 % / Halbierung 0,5 %). Nur reine E-Fahrzeuge (BEV) — der maßgebliche
+ * Satz hängt vom Bruttolistenpreis UND vom Anschaffungs-/Überlassungsdatum
+ * ab, die BLP-Grenze für die Viertelung wurde mehrfach angehoben.
  *
  * Rechtsstand (§ 6 Abs. 1 Nr. 4 EStG), verifiziert 2026-07 gegen ADAC/Haufe:
- *   BEV, Viertelung (0,25 %) wenn BLP ≤ Grenze zum Anschaffungsdatum:
+ *   Viertelung (0,25 %) wenn BLP ≤ Grenze zum Anschaffungsdatum:
  *     - ab 01.07.2025: 100.000 €
  *     - 01.01.2024–30.06.2025: 70.000 €
  *     - 2019–31.12.2023: 60.000 €
- *     darüber bzw. BEV: Halbierung (0,5 %). Sonderregel läuft Ende 2030 aus.
- *   PHEV, Halbierung (0,5 %) wenn ≤ 50 g/km CO₂ ODER E-Mindestreichweite
- *     erfüllt (≥ 40 km bis 2021, ≥ 60 km 2022–2024, ≥ 80 km ab 2025), sonst 1 %.
- *   Sonst (Verbrenner): 1 %.
+ *     darüber: Halbierung (0,5 %). Sonderregel läuft Ende 2030 aus.
  *
  * Keine Steuerberatung — Orientierungsrechnung.
  */
@@ -33,44 +30,20 @@ export function bevThreshold(acquisitionDate) {
   return 0;                                // vor 2019: kein E-Privileg
 }
 
-/** Mindest-E-Reichweite (km) für den PHEV-0,5-%-Satz nach Anschaffungsdatum. */
-export function phevRangeRequirement(acquisitionDate) {
-  const t = new Date(acquisitionDate).getTime();
-  if (Number.isNaN(t)) return 80;
-  if (t >= D(2025, 0, 1)) return 80;
-  if (t >= D(2022, 0, 1)) return 60;
-  return 40;                               // 2019–2021
-}
-
 /**
  * Bestimmt den Reduktionsfaktor auf die Bemessungsgrundlage (0.25 / 0.5 / 1)
  * samt Prozent-Label und Begründung.
  */
-export function determineFactor({ vehicleType = 'bev', blp = 0, acquisitionDate, phevRangeKm = null, phevCo2 = null }) {
+export function determineFactor({ blp = 0, acquisitionDate }) {
   const t = new Date(acquisitionDate).getTime();
   const expired = !Number.isNaN(t) && t >= D(2031, 0, 1); // Sonderregel bis Ende 2030
   const fmt = n => n.toLocaleString('de-DE');
 
-  if (vehicleType === 'bev') {
-    if (expired) return { factor: 1, rate: '1 %', reason: 'BEV-Sonderregelung ist Ende 2030 ausgelaufen' };
-    const thr = bevThreshold(acquisitionDate);
-    if (thr === 0) return { factor: 1, rate: '1 %', reason: 'Anschaffung vor 2019 — kein E-Privileg' };
-    if (blp <= thr) return { factor: 0.25, rate: '0,25 %', reason: `Elektro, Bruttolistenpreis ≤ ${fmt(thr)} € (Grenze zum Anschaffungsdatum)` };
-    return { factor: 0.5, rate: '0,5 %', reason: `Elektro, Bruttolistenpreis über ${fmt(thr)} € → nur Halbierung` };
-  }
-
-  if (vehicleType === 'phev') {
-    if (expired) return { factor: 1, rate: '1 %', reason: 'Hybrid-Sonderregelung ist Ende 2030 ausgelaufen' };
-    const req = phevRangeRequirement(acquisitionDate);
-    const co2ok   = phevCo2 != null && phevCo2 <= 50;
-    const rangeok = phevRangeKm != null && phevRangeKm >= req;
-    if (co2ok || rangeok) {
-      return { factor: 0.5, rate: '0,5 %', reason: `Plug-in-Hybrid erfüllt das Kriterium (≤ 50 g/km CO₂ oder ≥ ${req} km E-Reichweite)` };
-    }
-    return { factor: 1, rate: '1 %', reason: `Plug-in-Hybrid erfüllt das Kriterium nicht (nötig: ≤ 50 g/km oder ≥ ${req} km)` };
-  }
-
-  return { factor: 1, rate: '1 %', reason: 'Verbrenner — kein E-Privileg' };
+  if (expired) return { factor: 1, rate: '1 %', reason: 'BEV-Sonderregelung ist Ende 2030 ausgelaufen' };
+  const thr = bevThreshold(acquisitionDate);
+  if (thr === 0) return { factor: 1, rate: '1 %', reason: 'Anschaffung vor 2019 — kein E-Privileg' };
+  if (blp <= thr) return { factor: 0.25, rate: '0,25 %', reason: `Bruttolistenpreis ≤ ${fmt(thr)} € (Grenze zum Anschaffungsdatum)` };
+  return { factor: 0.5, rate: '0,5 %', reason: `Bruttolistenpreis über ${fmt(thr)} € → nur Halbierung` };
 }
 
 /** BLP auf volle 100 € abrunden (§ 6 Abs. 1 Nr. 4 EStG). */

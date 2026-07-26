@@ -7,11 +7,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [v3.51.3] - 2026-07-26
+## [v3.51.4] - 2026-07-26
 
 ### Added
 
 - **Route planner: total trip time and per-leg breakdown (first result of the route planner wish list).** `RoutePlanner.vue` already computed driving time and per-stop charging time internally, but never surfaced the combined total trip time (driving + charging) nor a per-leg breakdown when waypoints were used. New: a "total trip time" row (shown only when a charging plan exists) and a "legs" list (Start→Waypoint 1, Waypoint 1→Waypoint 2, …, last waypoint→destination) with distance and duration per segment — only shown with at least one waypoint, otherwise it would duplicate the overall distance/duration. **Backend finding along the way:** `fetchValhalla()` (used for the "avoid motorways/tolls/ferry" options) merged all legs into a single geometry and discarded per-leg duration/distance, even though Valhalla's own response has them (`data.trip.legs[].summary`) — OSRM has always returned them natively. Both routing paths now report `legs` in the same shape. i18n x7 (`routes.start/totalTripTime/plusChargeTime/legs`). Verified live against real OSRM (Stuttgart → Geislingen → Ulm: 2 legs, 59 km/53 min + 32 km/34 min = 90 km/1h 27min, matches the overall route exactly).
+
+## [v3.51.3] - 2026-07-26
+
+### Changed
+
+- **Company car taxation: BEV only.** The calculator at `/dienstwagen-steuer` previously also offered plug-in hybrid and combustion as vehicle type. Removed at Sven's request: the vehicle-type selector and the E-range/CO2 inputs are gone, `determineFactor()` now only computes the BEV quarter/half rate (0.25% up to €100,000 BLP since 2025-07-01 / €70,000 2024–06/2025 / €60,000 2019–2023, otherwise 0.5%). The now-dead PHEV range helper was removed as well.
 
 ## [v3.51.2] - 2026-07-26
 
