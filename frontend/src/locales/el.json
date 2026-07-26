@@ -1889,6 +1889,8 @@
     "routeInfo": "Πληροφορίες Διαδρομής",
     "distance": "Απόσταση",
     "duration": "Χρόνος οδήγησης",
+    "kwhAdded": "+{kwh} kWh",
+    "totalKwhAdded": "Συνολική ενέργεια φόρτισης",
     "start": "Εκκίνηση",
     "totalTripTime": "Συνολικός χρόνος διαδρομής",
     "plusChargeTime": "+{min} λεπτά φόρτισης",

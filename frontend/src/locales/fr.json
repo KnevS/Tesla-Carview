@@ -1889,6 +1889,8 @@
     "routeInfo": "Infos itinéraire",
     "distance": "Distance",
     "duration": "Durée",
+    "kwhAdded": "+{kwh} kWh",
+    "totalKwhAdded": "Énergie rechargée au total",
     "start": "Départ",
     "totalTripTime": "Durée totale du trajet",
     "plusChargeTime": "+{min} min de recharge",

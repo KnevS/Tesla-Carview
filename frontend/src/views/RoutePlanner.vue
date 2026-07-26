@@ -373,18 +373,27 @@
                 <span class="ml-auto text-yellow-300">{{ stop.charge_minutes }} min</span>
                 <span v-if="stop.max_kw" class="text-gray-500">{{ stop.max_kw }} kW</span>
               </div>
-              <div v-if="stop.operator" class="text-xs text-gray-500 truncate">{{ stop.operator }}</div>
+              <div class="flex items-center gap-2 text-xs">
+                <span v-if="stop.kwh_added != null" class="text-blue-300">{{ $t('routes.kwhAdded', { kwh: stop.kwh_added }) }}</span>
+                <span v-if="stop.operator" class="text-gray-500 truncate ml-auto">{{ stop.operator }}</span>
+              </div>
             </li>
           </ul>
 
           <!-- Gesamtzusammenfassung -->
-          <div v-if="chargingPlan?.stops?.length" class="border-t border-gray-700 pt-2 flex items-center justify-between text-xs">
-            <span class="text-gray-400">{{ $t('routes.totalChargeTime') }}:</span>
-            <span class="text-yellow-300 font-medium">+{{ chargingPlan.stops.reduce((s,st)=>s+st.charge_minutes,0) }} min</span>
-            <span class="text-gray-400 ml-3">{{ $t('routes.arriveWith') }}:</span>
-            <span :class="chargingPlan.arrival_soc >= 20 ? 'text-green-400' : 'text-red-400'" class="font-semibold">
-              {{ chargingPlan.arrival_soc }}%
-            </span>
+          <div v-if="chargingPlan?.stops?.length" class="border-t border-gray-700 pt-2 space-y-1">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-400">{{ $t('routes.totalChargeTime') }}:</span>
+              <span class="text-yellow-300 font-medium">+{{ chargingPlan.stops.reduce((s,st)=>s+st.charge_minutes,0) }} min</span>
+              <span class="text-gray-400 ml-3">{{ $t('routes.arriveWith') }}:</span>
+              <span :class="chargingPlan.arrival_soc >= 20 ? 'text-green-400' : 'text-red-400'" class="font-semibold">
+                {{ chargingPlan.arrival_soc }}%
+              </span>
+            </div>
+            <div v-if="chargingPlan.total_kwh_added != null" class="flex items-center justify-between text-xs">
+              <span class="text-gray-400">{{ $t('routes.totalKwhAdded') }}:</span>
+              <span class="text-blue-300 font-medium">{{ $t('routes.kwhAdded', { kwh: chargingPlan.total_kwh_added }) }}</span>
+            </div>
           </div>
           </div>
         </SortableSection>

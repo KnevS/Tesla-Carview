@@ -2134,6 +2134,8 @@
     "routeInfo": "Інформація про маршрут",
     "distance": "Відстань",
     "duration": "Час у дорозі",
+    "kwhAdded": "+{kwh} кВт·год",
+    "totalKwhAdded": "Загалом заряджено",
     "start": "Старт",
     "totalTripTime": "Загальний час поїздки",
     "plusChargeTime": "+{min} хв заряджання",

@@ -1889,6 +1889,8 @@
     "routeInfo": "Rota Bilgisi",
     "distance": "Mesafe",
     "duration": "Sürüş süresi",
+    "kwhAdded": "+{kwh} kWh",
+    "totalKwhAdded": "Toplam şarj edilen enerji",
     "start": "Başlangıç",
     "totalTripTime": "Toplam seyahat süresi",
     "plusChargeTime": "+{min} dk şarj",

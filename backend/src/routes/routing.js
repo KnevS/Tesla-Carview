@@ -111,6 +111,7 @@ function planChargingStops({ chargers, totalKm, initSoc, kwhPerKm, batteryKwh, m
       max_kw: maxKw, operator: best.operator ?? null,
       arrive_soc: Math.round(arrSoc), depart_soc: depSoc,
       charge_minutes: chargeMin, route_km: best.routeKm,
+      kwh_added: Math.round(kwh2add * 10) / 10,
     });
 
     posKm = best.routeKm;
@@ -623,6 +624,7 @@ router.post('/plan', async (req, res) => {
     ...plan,
     total_km:              totalKm,
     total_charge_time_min: plan.stops.reduce((s, st) => s + st.charge_minutes, 0),
+    total_kwh_added:       Math.round(plan.stops.reduce((s, st) => s + st.kwh_added, 0) * 10) / 10,
     chargers_found:        allChargers.length,
   });
 });

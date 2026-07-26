@@ -2134,6 +2134,8 @@
     "routeInfo": "Route Info",
     "distance": "Distance",
     "duration": "Drive time",
+    "kwhAdded": "+{kwh} kWh",
+    "totalKwhAdded": "Total energy added",
     "start": "Start",
     "totalTripTime": "Total trip time",
     "plusChargeTime": "+{min} min charging",
