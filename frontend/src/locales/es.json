@@ -1889,6 +1889,8 @@
     "routeInfo": "Información de ruta",
     "distance": "Distancia",
     "duration": "Tiempo de conducción",
+    "kwhAdded": "+{kwh} kWh",
+    "totalKwhAdded": "Energía total cargada",
     "arrivalSoc": "SoC a la llegada",
     "consumptionModelTooltip": "Rango según tu consumo personal (estadística pura, sin IA). Bordes = variación esperada de cada viaje.",
     "confidenceShort": "{pct} % de confianza",

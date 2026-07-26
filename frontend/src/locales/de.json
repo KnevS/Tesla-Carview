@@ -2134,6 +2134,8 @@
     "routeInfo": "Routeninfo",
     "distance": "Strecke",
     "duration": "Fahrzeit",
+    "kwhAdded": "+{kwh} kWh",
+    "totalKwhAdded": "Nachgeladen gesamt",
     "arrivalSoc": "Ankunft SoC",
     "consumptionModelTooltip": "Bereich aus deinem persönlichen Verbrauch (reine Statistik, keine KI). Ränder = erwartete Schwankung einzelner Fahrten.",
     "confidenceShort": "{pct} % Konfidenz",

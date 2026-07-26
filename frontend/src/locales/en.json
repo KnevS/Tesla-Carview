@@ -2134,6 +2134,8 @@
     "routeInfo": "Route Info",
     "distance": "Distance",
     "duration": "Drive time",
+    "kwhAdded": "+{kwh} kWh",
+    "totalKwhAdded": "Total energy added",
     "arrivalSoc": "Arrival SoC",
     "consumptionModelTooltip": "Range from your personal consumption (pure statistics, no AI). Edges = expected variation of individual trips.",
     "confidenceShort": "{pct} % confidence",

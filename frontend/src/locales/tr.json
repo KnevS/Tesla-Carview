@@ -1889,6 +1889,8 @@
     "routeInfo": "Rota Bilgisi",
     "distance": "Mesafe",
     "duration": "Sürüş süresi",
+    "kwhAdded": "+{kwh} kWh",
+    "totalKwhAdded": "Toplam şarj edilen enerji",
     "arrivalSoc": "Varış SoC",
     "consumptionModelTooltip": "Kişisel tüketiminize göre aralık (saf istatistik, yapay zeka yok). Kenarlar = tek tek yolculukların beklenen değişimi.",
     "confidenceShort": "%{pct} güven",
