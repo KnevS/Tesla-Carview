@@ -7,6 +7,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.51.2] - 2026-07-26
+
+### Fixed
+
+- **Consumption display showed "0.0 kWh/100km" instead of "–" for trips without vehicle data.** In `Trips.vue`, `Dashboard.vue`, and `TripDetail.vue`, the consumption calculation only checked `distance_km`, not `energy_used_kwh` — with a `null` energy value, `null / distance_km * 100` evaluates to `0` in JavaScript, producing a misleading consumption figure instead of an honest "–". This mainly affects trips without a Tesla vehicle connection: `owntracks.js` deliberately writes neither `energy_used_kwh` nor `start_soc`/`end_soc` when closing a GPS-only trip (smartphone tracking), since no vehicle data exists for those. Since Tesla disabled the Owner API community workaround in May/June 2026, part of trip tracking now runs through this GPS-only path exclusively — which is why the display bug appeared "always" (user report). The table under `/fahrtwerte` already had this guard correctly (backend `trips.js`); now made consistent across all three frontend spots. Not a data-collection bug — "–" is the honest answer for trips without vehicle telemetry.
+
 ## [v3.51.1] - 2026-07-25
 
 ### Fixed
