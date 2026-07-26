@@ -150,10 +150,18 @@ async function fetchValhalla(coordinates, { avoidMotorways, avoidTolls, avoidFer
   if (!r.ok) throw new Error(`Valhalla ${r.status}`);
   const data = await r.json();
 
-  // Legs zu einer Geometrie zusammenfügen
+  // Legs zu einer Geometrie zusammenfügen, Dauer/Distanz je Leg im
+  // OSRM-kompatiblen Format behalten (Grundlage für Teilstrecken-Info —
+  // ohne das ginge bei Umgehungsoptionen (Valhalla-Pfad) die Aufteilung
+  // pro Segment verloren, obwohl Valhalla sie selbst liefert).
   const allCoords = [];
+  const legs = [];
   for (const leg of (data.trip?.legs ?? [])) {
     allCoords.push(...(leg.shape?.coordinates ?? []));
+    legs.push({
+      distance: (leg.summary?.length ?? 0) * 1000, // km → m
+      duration: leg.summary?.time ?? 0,            // Sekunden
+    });
   }
 
   return {
@@ -161,6 +169,7 @@ async function fetchValhalla(coordinates, { avoidMotorways, avoidTolls, avoidFer
       distance: (data.trip?.summary?.length ?? 0) * 1000,  // km → m
       duration: data.trip?.summary?.time ?? 0,             // Sekunden
       geometry: { type: 'LineString', coordinates: allCoords },
+      legs,
     }],
   };
 }
