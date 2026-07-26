@@ -1889,6 +1889,7 @@
     "routeInfo": "Información de ruta",
     "distance": "Distancia",
     "duration": "Tiempo de conducción",
+    "filterByProvider": "Filtrar por operador",
     "arrivalSoc": "SoC a la llegada",
     "consumptionModelTooltip": "Rango según tu consumo personal (estadística pura, sin IA). Bordes = variación esperada de cada viaje.",
     "confidenceShort": "{pct} % de confianza",

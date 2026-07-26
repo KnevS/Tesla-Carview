@@ -1889,6 +1889,7 @@
     "routeInfo": "Infos itinéraire",
     "distance": "Distance",
     "duration": "Durée",
+    "filterByProvider": "Filtrer par opérateur",
     "arrivalSoc": "SoC à l'arrivée",
     "consumptionModelTooltip": "Plage basée sur votre consommation personnelle (statistiques pures, pas d'IA). Bords = variation attendue des trajets individuels.",
     "confidenceShort": "{pct} % de confiance",

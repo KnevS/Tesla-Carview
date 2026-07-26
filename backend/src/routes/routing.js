@@ -480,7 +480,13 @@ router.post('/plan', async (req, res) => {
     current_soc, avg_kwh_per_100km, battery_kwh,
     min_arrival_soc = 15, charge_to_soc = 80,
     avoid_motorways, avoid_tolls, avoid_ferry,
+    allowed_operators,
   } = req.body;
+  // Anbieter-Filter: case-insensitive Teilstring-Match (OCM-Operatornamen
+  // sind uneinheitlich formatiert, z.B. "Tesla, Inc." vs. "Tesla Supercharger").
+  const operatorFilter = Array.isArray(allowed_operators) && allowed_operators.length
+    ? allowed_operators.map(o => String(o).toLowerCase())
+    : null;
 
   if (!vehicleId || !Array.isArray(coordinates) || coordinates.length < 2) {
     return res.status(400).json({ error: 'vehicleId und coordinates erforderlich' });
@@ -599,9 +605,15 @@ router.post('/plan', async (req, res) => {
   // Nach Routenposition sortieren
   allChargers.sort((a, b) => a.routeKm - b.routeKm);
 
+  // Anbieter-Filter anwenden (falls gesetzt) — Stationen ohne Operator-Angabe
+  // fliegen dabei ebenfalls raus, da ihre Marke nicht verifizierbar ist.
+  const filteredChargers = operatorFilter
+    ? allChargers.filter(c => c.operator && operatorFilter.includes(c.operator.toLowerCase()))
+    : allChargers;
+
   // 4. Ladeplan berechnen
   const plan = planChargingStops({
-    chargers: allChargers,
+    chargers: filteredChargers,
     totalKm,
     initSoc:       soc,
     kwhPerKm,
@@ -614,7 +626,7 @@ router.post('/plan', async (req, res) => {
     ...plan,
     total_km:              totalKm,
     total_charge_time_min: plan.stops.reduce((s, st) => s + st.charge_minutes, 0),
-    chargers_found:        allChargers.length,
+    chargers_found:        filteredChargers.length,
   });
 });
 

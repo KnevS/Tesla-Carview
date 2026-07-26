@@ -448,6 +448,21 @@
             </button>
           </div>
 
+          <!-- Anbieter-Filter: nur sichtbar wenn Ladestationen geladen sind
+               und mehr als ein Anbieter zur Auswahl steht (sonst kein Mehrwert). -->
+          <div v-if="showChargers && availableOperators.length > 1" class="space-y-1.5">
+            <p class="text-xs text-gray-500">{{ $t('routes.filterByProvider') }}</p>
+            <div class="flex flex-wrap gap-1.5">
+              <button v-for="op in availableOperators" :key="op" @click="toggleOperator(op)"
+                class="px-2.5 py-1 rounded-lg text-xs font-medium transition border"
+                :class="selectedOperators.includes(op)
+                  ? 'bg-blue-700/70 border-blue-500 text-white'
+                  : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-300'">
+                {{ op }}
+              </button>
+            </div>
+          </div>
+
           <div class="flex gap-2">
             <button @click="showSaveDialog = true" :disabled="!destination"
               class="flex-1 py-2.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-white font-medium text-sm transition disabled:opacity-40 flex items-center justify-center gap-2">
@@ -546,7 +561,7 @@
             :class="showChargers ? 'bg-blue-600 text-white' : 'bg-gray-900/85 text-gray-300 hover:bg-gray-800/90'"
             v-tooltip="$t('routes.chargerTooltip')">
             <span class="w-2.5 h-2.5 rounded-full" :class="showChargers ? 'bg-white' : 'bg-blue-400'"></span>
-            ⚡ {{ showChargers && chargers.length ? chargers.length + ' ' + $t('routes.chargerLegend') : $t('routes.showChargers') }}
+            ⚡ {{ showChargers && filteredChargers.length ? filteredChargers.length + ' ' + $t('routes.chargerLegend') : $t('routes.showChargers') }}
             <span v-if="chargerLoading" class="animate-spin">↻</span>
           </button>
           <button @click="toggleCameras" :disabled="!routeData"
@@ -747,6 +762,23 @@ const chargeToSoc        = ref(80);
 const chargers      = ref([]);
 const chargerLoading = ref(false);
 const showChargers   = ref(false);
+// Anbieter-Filter (Sven-Wunsch: "welche Anbieter von Ladestationen gewählt
+// werden sollen"). Leer = alle Anbieter erlaubt. Wirkt auf Kartenanzeige
+// UND Ladeplan-Berechnung (an /routing/plan durchgereicht).
+const selectedOperators = ref([]);
+const availableOperators = computed(() =>
+  [...new Set(chargers.value.map(c => c.operator).filter(Boolean))].sort()
+);
+const filteredChargers = computed(() =>
+  selectedOperators.value.length
+    ? chargers.value.filter(c => c.operator && selectedOperators.value.includes(c.operator))
+    : chargers.value
+);
+function toggleOperator(op) {
+  const i = selectedOperators.value.indexOf(op);
+  if (i >= 0) selectedOperators.value.splice(i, 1);
+  else selectedOperators.value.push(op);
+}
 
 // ── Timing-Modus ──
 const planMode = ref('depart'); // 'depart' | 'arrive'
@@ -1304,6 +1336,7 @@ async function calcChargingPlan() {
       avoid_motorways:   avoidMotorways.value || undefined,
       avoid_tolls:       avoidTolls.value     || undefined,
       avoid_ferry:       avoidFerry.value      || undefined,
+      allowed_operators: selectedOperators.value.length ? selectedOperators.value : undefined,
     });
     chargingPlan.value = data;
     if (L && leafletMap) updatePlanMarkers();
@@ -1379,7 +1412,7 @@ async function _loadChargers() {
 function updateChargerMarkers() {
   clearChargerMarkers();
   if (!L || !leafletMap) return;
-  for (const s of chargers.value) {
+  for (const s of filteredChargers.value) {
     const kw    = s.max_kw ?? 0;
     const label = s.max_kw ? `${s.max_kw} kW` : '';
     const popup = `<b>${s.name}</b>${label ? `<br>${label}` : ''}${s.operator ? `<br><small>${s.operator}</small>` : ''}`;
@@ -1638,6 +1671,10 @@ function openAbrp() {
 watch(avoidMotorways, v => { localStorage.setItem('route_avoid_motorways', v); calculateRoute(); });
 watch(avoidTolls,     v => { localStorage.setItem('route_avoid_tolls',     v); calculateRoute(); });
 watch(avoidFerry,     v => { localStorage.setItem('route_avoid_ferry',     v); calculateRoute(); });
+
+// Anbieter-Filter ändert nur die Kartenanzeige sofort; der Ladeplan selbst
+// wird erst beim nächsten expliziten "Ladeplan berechnen"-Klick neu gerechnet.
+watch(selectedOperators, updateChargerMarkers, { deep: true });
 
 // ── Lifecycle ──
 watch(showSaveDialog, async (v) => {
