@@ -7,6 +7,12 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.51.3] - 2026-07-26
+
+### Geändert
+
+- **Dienstwagen-Versteuerung: nur noch reine E-Fahrzeuge (BEV).** Der Rechner unter `/dienstwagen-steuer` bot bislang auch Plug-in-Hybrid und Verbrenner als Fahrzeugtyp an. Auf Svens Wunsch entfernt: Fahrzeugtyp-Auswahl, E-Reichweite- und CO₂-Eingabe fallen weg, `determineFactor()` rechnet nur noch die BEV-Viertelung/-Halbierung (0,25 % bis 100.000 € BLP seit 01.07.2025 / 70.000 € 2024–06/2025 / 60.000 € 2019–2023, sonst 0,5 %). Die tote PHEV-Reichweiten-Hilfsfunktion wurde mit entfernt.
+
 ## [v3.51.2] - 2026-07-26
 
 ### Behoben
