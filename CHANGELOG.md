@@ -7,6 +7,12 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.51.4] - 2026-07-26
+
+### Hinzugefügt
+
+- **Routenplaner: Gesamtreisezeit und Teilstrecken-Aufschlüsselung (erstes Ergebnis des Routenplaner-Wunschzettels).** `RoutePlanner.vue` berechnete Fahrzeit und Ladezeit pro Stopp bereits intern, zeigte aber weder die kombinierte Gesamtreisezeit (Fahren + Laden) noch eine Aufschlüsselung nach Teilstrecken bei Zwischenstopps. Neu: Zeile „Gesamtreisezeit" (nur sichtbar, wenn ein Ladeplan vorliegt) sowie eine Liste „Teilstrecken" (Start→Wegpunkt 1, Wegpunkt 1→Wegpunkt 2, …, letzter Wegpunkt→Ziel) mit Distanz und Dauer je Segment — erscheint nur bei mindestens einem Zwischenstopp, sonst wäre sie identisch zur Gesamtstrecke. **Backend-Fund dabei:** `fetchValhalla()` (Umgehungsoptionen „Autobahn/Maut/Fähre meiden") fasste alle Segmente zu einer Geometrie zusammen und warf die Dauer/Distanz pro Segment weg, obwohl Valhalla sie selbst liefert (`data.trip.legs[].summary`) — OSRM lieferte sie schon immer nativ. Jetzt liefern beide Routing-Pfade `legs` im selben Format. i18n ×7 (`routes.start/totalTripTime/plusChargeTime/legs`). Live gegen echtes OSRM verifiziert (Stuttgart → Geislingen → Ulm: 2 Teilstrecken, 59 km/53 min + 32 km/34 min = 90 km/1h 27 min, stimmt exakt mit der Gesamtstrecke überein).
+
 ## [v3.51.3] - 2026-07-26
 
 ### Geändert
