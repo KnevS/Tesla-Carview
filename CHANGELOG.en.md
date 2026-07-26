@@ -7,6 +7,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.51.3] - 2026-07-26
+
+### Added
+
+- **Route planner: manual break input (third item of the route planner wish list).** New "Breaks" section — one or more breaks with an optional label and duration (minutes) can be added and removed. They flow into the existing arrival/departure time calculation (`total time = driving time + charging time + break time`) as well as the ICS calendar export. Client-side only for the current session — not persisted with saved routes (unlike waypoints), since the core request was about the time math. i18n x7 (`routes.breaksTitle`/`breakDefaultLabel`/`noBreaks`/`breakLabelPlaceholder`).
+
 ## [v3.51.2] - 2026-07-26
 
 ### Fixed

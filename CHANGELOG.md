@@ -7,6 +7,12 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.51.3] - 2026-07-26
+
+### Hinzugefügt
+
+- **Routenplaner: manuelle Pausen-Eingabe (drittes Ergebnis des Routenplaner-Wunschzettels).** Neue Sektion „Pausen" — eine oder mehrere Pausen mit optionaler Bezeichnung und Dauer (Minuten) lassen sich hinzufügen und wieder entfernen. Fließen in die bestehende Ankunfts-/Abfahrtszeit-Berechnung ein (`Gesamtzeit = Fahrzeit + Ladezeit + Pausenzeit`) sowie in den ICS-Kalenderexport. Rein clientseitig für die aktuelle Sitzung — keine Persistenz mit gespeicherten Routen (im Unterschied zu Zwischenstopps), da der Kernwunsch die Zeitrechnung war. i18n ×7 (`routes.breaksTitle`/`breakDefaultLabel`/`noBreaks`/`breakLabelPlaceholder`).
+
 ## [v3.51.2] - 2026-07-26
 
 ### Behoben
