@@ -219,6 +219,32 @@
                 <p class="text-white font-semibold text-sm">{{ formatDuration(routeData.duration_min) }}</p>
               </div>
             </div>
+
+            <!-- Gesamtreisezeit inkl. Ladestopps — nur wenn ein Ladeplan vorliegt,
+                 sonst identisch zur reinen Fahrzeit oben und redundant. -->
+            <div v-if="totalChargeMins > 0"
+              class="flex items-center justify-between text-xs bg-gray-800/60 rounded-xl px-3 py-2">
+              <span class="text-gray-400">{{ $t('routes.totalTripTime') }}</span>
+              <span class="text-white font-medium">
+                {{ formatDuration(totalTripMins) }}
+                <span class="text-yellow-400 font-normal">({{ $t('routes.plusChargeTime', { min: totalChargeMins }) }})</span>
+              </span>
+            </div>
+
+            <!-- Teilstrecken — nur bei Zwischenstopps ein Mehrwert gegenüber der Gesamtstrecke oben. -->
+            <div v-if="routeLegs.length > 1" class="space-y-1.5">
+              <p class="text-xs text-gray-400 uppercase tracking-wide">{{ $t('routes.legs') }}</p>
+              <ul class="space-y-1">
+                <li v-for="(leg, i) in routeLegs" :key="i"
+                  class="flex items-center gap-2 text-xs bg-gray-800/60 rounded-lg px-2.5 py-1.5">
+                  <span class="text-gray-500 font-mono w-4">{{ i + 1 }}</span>
+                  <span class="flex-1 min-w-0 truncate text-gray-300">{{ leg.from }} → {{ leg.to }}</span>
+                  <span class="text-gray-400 flex-shrink-0">{{ formatDistance(leg.distance_km) }}</span>
+                  <span class="text-white flex-shrink-0">{{ formatDuration(leg.duration_min) }}</span>
+                </li>
+              </ul>
+            </div>
+
             <div v-if="routeStats.soc != null" class="space-y-2">
               <div class="flex items-center justify-between text-xs">
                 <span class="text-gray-400">{{ $t('routes.currentSoc') }}</span>
@@ -824,6 +850,27 @@ function setDepartNow() {
 const totalChargeMins = computed(() =>
   (chargingPlan.value?.stops ?? []).reduce((s, st) => s + st.charge_minutes, 0)
 );
+// Gesamtreisezeit inkl. Ladestopps (Minuten) — nur informativ, keine Berechnungsbasis.
+const totalTripMins = computed(() =>
+  routeData.value ? routeData.value.duration_min + totalChargeMins.value : null
+);
+
+// ── Teilstrecken (Start→WP1, WP1→WP2, …, WPn→Ziel) ──
+// legs[i] ist die Strecke VON Punkt i ZU Punkt i+1; Punkte = Start + Wegpunkte + Ziel.
+const routeLegs = computed(() => {
+  if (!routeData.value?.legs?.length) return [];
+  const points = [
+    startLocation.value?.name ?? t('routes.start'),
+    ...waypoints.value.map(wp => wp.name),
+    destination.value?.name ?? t('routes.destination'),
+  ];
+  return routeData.value.legs.map((leg, i) => ({
+    from: points[i],
+    to:   points[i + 1],
+    distance_km:  leg.distance_km,
+    duration_min: leg.duration_min,
+  }));
+});
 const isScheduledDeparture  = computed(() => !!(planDate.value && planTime.value));
 const effectiveDepartureSoc = computed(() =>
   departureSocManual.value !== null ? departureSocManual.value : (routeStats.value.soc ?? null)
@@ -1253,6 +1300,13 @@ async function _doCalculateRoute() {
       duration_min: route.duration / 60,
       geometry:     route.geometry.coordinates,
       coordinates,  // für /plan weitergeben
+      // Pro Segment (Start→WP1, WP1→WP2, …, WPn→Ziel) — Grundlage der
+      // Teilstrecken-Anzeige. OSRM liefert das nativ; Valhalla-Pfad
+      // (Umgehungsoptionen) liefert es seit der Backend-Erweiterung mit.
+      legs: (route.legs ?? []).map(leg => ({
+        distance_km:  leg.distance / 1000,
+        duration_min: leg.duration / 60,
+      })),
     };
 
     if (L && leafletMap) {
