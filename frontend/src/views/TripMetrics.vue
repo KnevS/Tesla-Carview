@@ -53,51 +53,65 @@
       {{ $t('tripMetrics.empty') }}
     </div>
 
-    <!-- Tabelle -->
-    <div v-else class="overflow-x-auto rounded-xl border border-gray-700">
-      <table class="w-full text-sm whitespace-nowrap">
-        <thead class="bg-gray-800 text-gray-300">
-          <tr>
-            <th v-for="col in columns" :key="col.field"
-              class="px-3 py-2 text-left font-medium cursor-pointer select-none hover:text-white"
-              :class="col.num ? 'text-right' : 'text-left'"
-              @click="sortBy(col.field)"
-              v-tooltip="col.tip ? $t(col.tip) : null">
-              <span class="inline-flex items-center gap-1" :class="col.num ? 'justify-end w-full' : ''">
-                {{ $t(col.label) }}
-                <span v-if="sortKey === col.field" class="text-[10px]">{{ sortDir === 'asc' ? '▲' : '▼' }}</span>
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="r in sortedRows" :key="r.id"
-            class="border-t border-gray-800 hover:bg-gray-800/50 cursor-pointer"
-            @click="$router.push(`/trips/${r.id}`)">
-            <td class="px-3 py-2">{{ fmtDate(r.start_time) }}</td>
-            <td class="px-3 py-2 text-gray-400">{{ trimAddr(r.start_address) }} → {{ trimAddr(r.end_address) }}</td>
-            <td class="px-3 py-2 text-right">{{ fmtDuration(r.duration_s) }}</td>
-            <td class="px-3 py-2 text-right">{{ fmtDist(r.distance_km) }}</td>
-            <td class="px-3 py-2 text-right">{{ fmtEff(r.consumption_kwh_100km) }}</td>
-            <td class="px-3 py-2 text-right">{{ fmtSpeed(r.avg_speed_kmh) }}</td>
-            <td class="px-3 py-2 text-right">{{ fmtSpeed(r.max_speed_kmh) }}</td>
-            <td class="px-3 py-2 text-right">{{ fmtSpeed(r.min_speed_kmh) }}</td>
-            <td class="px-3 py-2 text-right">{{ fmtPower(r.avg_power_kw) }}</td>
-            <td class="px-3 py-2 text-right">{{ fmtPower(r.max_power_kw) }}</td>
-            <td class="px-3 py-2 text-right">{{ fmtPower(r.min_power_kw) }}</td>
-            <td class="px-3 py-2 text-right text-gray-400">
-              <span v-if="r.start_soc != null && r.end_soc != null">{{ r.start_soc }}→{{ r.end_soc }} %</span>
-              <span v-else>—</span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Tabelle. Bei 12 Spalten ist sie auf den meisten Bildschirmen breiter
+         als der Viewport; macOS/iOS blenden die Scrollbar standardmäßig aus,
+         daher braucht es einen expliziten Hinweis statt sich auf den (oft
+         unsichtbaren) Scrollbalken zu verlassen — sonst wirkt es, als fehlten
+         Spalten, obwohl sie nur ungescrollt außerhalb des Viewports liegen.
+         Die gepinnte Datum-Spalte gibt es erst ab `sm:` (≥640px) — auf
+         Handy-Breite (390px gemessen) würde sie mit dem Fade zusammen 42,5 %
+         des Viewports fressen. Der Fade allein löst die Discoverability auch
+         ohne Pin. -->
+    <div v-else class="relative rounded-xl border border-gray-700">
+      <div ref="scrollEl" class="overflow-x-auto rounded-xl" @scroll="updateScrollHint">
+        <table ref="tableEl" class="w-full text-sm whitespace-nowrap">
+          <thead class="bg-gray-800 text-gray-300">
+            <tr>
+              <th v-for="col in columns" :key="col.field"
+                class="px-3 py-2 text-left font-medium cursor-pointer select-none hover:text-white"
+                :class="[col.num ? 'text-right' : 'text-left', col.field === 'start_time' ? 'sm:sticky sm:left-0 sm:z-10 sm:bg-gray-800' : '']"
+                @click="sortBy(col.field)"
+                v-tooltip="col.tip ? $t(col.tip) : null">
+                <span class="inline-flex items-center gap-1" :class="col.num ? 'justify-end w-full' : ''">
+                  {{ $t(col.label) }}
+                  <span v-if="sortKey === col.field" class="text-[10px]">{{ sortDir === 'asc' ? '▲' : '▼' }}</span>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="r in sortedRows" :key="r.id"
+              class="border-t border-gray-800 hover:bg-gray-800/50 cursor-pointer"
+              @click="$router.push(`/trips/${r.id}`)">
+              <td class="px-3 py-2 sm:sticky sm:left-0 sm:z-10 sm:bg-tesla-dark">{{ fmtDate(r.start_time) }}</td>
+              <td class="px-3 py-2 text-gray-400">{{ trimAddr(r.start_address) }} → {{ trimAddr(r.end_address) }}</td>
+              <td class="px-3 py-2 text-right">{{ fmtDuration(r.duration_s) }}</td>
+              <td class="px-3 py-2 text-right">{{ fmtDist(r.distance_km) }}</td>
+              <td class="px-3 py-2 text-right">{{ fmtEff(r.consumption_kwh_100km) }}</td>
+              <td class="px-3 py-2 text-right">{{ fmtSpeed(r.avg_speed_kmh) }}</td>
+              <td class="px-3 py-2 text-right">{{ fmtSpeed(r.max_speed_kmh) }}</td>
+              <td class="px-3 py-2 text-right">{{ fmtSpeed(r.min_speed_kmh) }}</td>
+              <td class="px-3 py-2 text-right">{{ fmtPower(r.avg_power_kw) }}</td>
+              <td class="px-3 py-2 text-right">{{ fmtPower(r.max_power_kw) }}</td>
+              <td class="px-3 py-2 text-right">{{ fmtPower(r.min_power_kw) }}</td>
+              <td class="px-3 py-2 text-right text-gray-400">
+                <span v-if="r.start_soc != null && r.end_soc != null">{{ r.start_soc }}→{{ r.end_soc }} %</span>
+                <span v-else>—</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Fade-Hinweis: nur sichtbar solange rechts noch ungesehene Spalten
+           liegen, verschwindet automatisch beim Durchscrollen (updateScrollHint). -->
+      <div v-if="canScrollRight" aria-hidden="true"
+        class="pointer-events-none absolute inset-y-0 right-0 w-10 rounded-r-xl bg-gradient-to-l from-tesla-dark to-transparent"></div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAppStore } from '../store/index.js';
 import { useUnits } from '../store/prefs.js';
@@ -113,6 +127,33 @@ const loading = ref(true);
 const limit   = ref(100);
 const sortKey = ref('start_time');
 const sortDir = ref('desc');
+
+// ── Scroll-Hinweis (Tabelle ist bei 12 Spalten breiter als der Viewport) ────
+const scrollEl       = ref(null);
+const tableEl        = ref(null);
+const canScrollRight = ref(false);
+let scrollResizeObs  = null;
+
+function updateScrollHint() {
+  const el = scrollEl.value;
+  if (!el) { canScrollRight.value = false; return; }
+  // 1px Toleranz gegen Sub-Pixel-Rundung beim Scroll-Ende.
+  canScrollRight.value = el.scrollWidth - el.clientWidth - el.scrollLeft > 1;
+}
+
+watch(scrollEl, (el, oldEl) => {
+  if (oldEl) scrollResizeObs?.unobserve(oldEl);
+  if (el) {
+    scrollResizeObs ??= new ResizeObserver(updateScrollHint);
+    scrollResizeObs.observe(el);
+    if (tableEl.value) scrollResizeObs.observe(tableEl.value);
+  }
+  updateScrollHint();
+});
+// Tabellenbreite ändert sich mit den geladenen Zeilen (z.B. Route-Textlänge)
+// und bei Webfont-Swap — ResizeObserver auf Scroller+Table deckt beides ab.
+watch(rows, () => nextTick(updateScrollHint));
+onUnmounted(() => scrollResizeObs?.disconnect());
 
 // Spalten-Definition — Reihenfolge = Tabellen-Reihenfolge. `num` = rechtsbündig.
 const columns = [
