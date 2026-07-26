@@ -7,6 +7,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.51.3] - 2026-07-26
+
+### Changed
+
+- **Company car taxation: BEV only.** The calculator at `/dienstwagen-steuer` previously also offered plug-in hybrid and combustion as vehicle type. Removed at Sven's request: the vehicle-type selector and the E-range/CO2 inputs are gone, `determineFactor()` now only computes the BEV quarter/half rate (0.25% up to €100,000 BLP since 2025-07-01 / €70,000 2024–06/2025 / €60,000 2019–2023, otherwise 0.5%). The now-dead PHEV range helper was removed as well.
+
 ## [v3.51.2] - 2026-07-26
 
 ### Fixed
