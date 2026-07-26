@@ -449,7 +449,7 @@ const duration = computed(() => {
 });
 
 const consumption = computed(() =>
-  trip.value?.distance_km
+  (trip.value?.energy_used_kwh != null && trip.value?.distance_km)
     ? fmtEfficiency(trip.value.energy_used_kwh / trip.value.distance_km * 100)
     : '–'
 );

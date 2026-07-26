@@ -106,7 +106,7 @@
               <div v-tooltip="$t('dashboard.fromTooltip')"><p class="text-gray-400">{{ $t('dashboard.from') }}</p><p>{{ lastTrip.start_address || $t('dashboard.unknownPlace') }}</p></div>
               <div v-tooltip="$t('dashboard.toTooltip')"><p class="text-gray-400">{{ $t('dashboard.toLabel') }}</p><p>{{ lastTrip.end_address || $t('dashboard.unknownPlace') }}</p></div>
               <div v-tooltip="$t('dashboard.distanceTooltip')"><p class="text-gray-400">{{ $t('dashboard.distance') }}</p><p>{{ fmtDistance(lastTrip.distance_km) }}</p></div>
-              <div v-tooltip="$t('dashboard.consumptionTooltip')"><p class="text-gray-400">{{ $t('dashboard.consumption') }}</p><p>{{ lastTrip.distance_km ? fmtEfficiency(lastTrip.energy_used_kwh / lastTrip.distance_km * 100) : '–' }}</p></div>
+              <div v-tooltip="$t('dashboard.consumptionTooltip')"><p class="text-gray-400">{{ $t('dashboard.consumption') }}</p><p>{{ (lastTrip.energy_used_kwh != null && lastTrip.distance_km) ? fmtEfficiency(lastTrip.energy_used_kwh / lastTrip.distance_km * 100) : '–' }}</p></div>
             </div>
           </RouterLink>
         </SortableSection>

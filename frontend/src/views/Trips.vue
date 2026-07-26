@@ -88,7 +88,7 @@
               <div class="hidden md:block">
                 <p class="text-gray-400">{{ $t('trips.consumption') }}</p>
                 <p class="font-semibold">
-                  {{ trip.distance_km ? fmtEfficiency(trip.energy_used_kwh / trip.distance_km * 100) : '–' }}
+                  {{ (trip.energy_used_kwh != null && trip.distance_km) ? fmtEfficiency(trip.energy_used_kwh / trip.distance_km * 100) : '–' }}
                   <span v-if="trip.wltp_delta_pct != null"
                         :class="trip.wltp_delta_pct > 0 ? 'text-red-300' : 'text-green-300'"
                         class="text-xs font-normal ml-1"
