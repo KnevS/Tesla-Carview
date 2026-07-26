@@ -7,6 +7,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.51.3] - 2026-07-26
+
+### Added
+
+- **Route planner: charging provider filter (fourth item of the route planner wish list).** New "Filter by provider" chip bar — appears once charging stations are shown and more than one provider was found. The selection affects both the map display (immediately, client-side) and the automatic charging-plan calculation (`allowed_operators` sent to `POST /api/routing/plan`, filtered server-side before `planChargingStops()`). Empty selection = all providers allowed (default); clicking a chip restricts to exactly that provider (an inclusion filter, not an exclusion). The backend has returned `operator` per charging station for a while, just unused for filtering. **Verified live** (mocked the OpenChargeMap response since no API key is configured locally): 4 synthetic stations (2× EnBW, 1× Tesla Supercharger, 1× Ionity), selecting "EnBW" reduces the map markers from 5 to 3 (the 2 EnBW stations plus one other marker).
+
 ## [v3.51.2] - 2026-07-26
 
 ### Fixed

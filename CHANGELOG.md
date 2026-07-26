@@ -7,6 +7,12 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.51.3] - 2026-07-26
+
+### Hinzugefügt
+
+- **Routenplaner: Anbieter-Filter für Ladestationen (viertes Ergebnis des Routenplaner-Wunschzettels).** Neue Chip-Leiste „Nach Anbieter filtern" — erscheint, sobald Ladestationen eingeblendet sind und mehr als ein Anbieter gefunden wurde. Auswahl wirkt sowohl auf die Kartenanzeige (sofort, clientseitig) als auch auf die automatische Ladeplan-Berechnung (`allowed_operators` an `POST /api/routing/plan`, serverseitig gefiltert vor `planChargingStops()`). Leere Auswahl = alle Anbieter erlaubt (Standard); ein Klick auf einen Chip schränkt auf genau diesen Anbieter ein (Inklusions-Filter, kein Ausschluss). Backend liefert `operator` pro Ladestation schon länger, nur ungenutzt für Filterung. **Live verifiziert** (OpenChargeMap-Antwort gemockt, da lokal kein API-Key konfiguriert): 4 synthetische Stationen (2× EnBW, 1× Tesla Supercharger, 1× Ionity), Auswahl „EnBW" reduziert die Kartenmarker von 5 auf 3 (die 2 EnBW-Stationen + 1 weiterer Marker).
+
 ## [v3.51.2] - 2026-07-26
 
 ### Behoben
