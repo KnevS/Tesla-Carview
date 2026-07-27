@@ -1520,14 +1520,58 @@ async function _loadChargers() {
   finally { chargerLoading.value = false; }
 }
 
+// XSS-Schutz: Stationsnamen/Anbieter (OCM) und erst recht Community-
+// Kommentare sind unkuratierter Fremdtext, der roh ins Popup-HTML
+// interpoliert wird — ohne Escaping könnte ein böswilliger OCM-Eintrag
+// Skript in jedem Browser ausführen, der die Station ansieht.
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
+// Kommentar-Cache pro Ladestation (vermeidet Re-Fetch bei wiederholtem
+// Popup-Öffnen). key = charger id.
+const chargerCommentsCache = new Map();
+
+async function loadChargerCommentsInto(marker, chargerId) {
+  const el = marker.getPopup()?.getElement()?.querySelector('.charger-comments');
+  if (!el) return;
+  if (chargerCommentsCache.has(chargerId)) {
+    el.innerHTML = chargerCommentsCache.get(chargerId);
+    return;
+  }
+  el.innerHTML = `<span class="text-gray-400">${escapeHtml(t('routes.loadingComments'))}</span>`;
+  try {
+    const { data } = await api.get(`/routing/chargers/${chargerId}/comments`);
+    const comments = data.comments ?? [];
+    const html = comments.length
+      ? comments.slice(0, 3).map(c => `<div class="charger-comment">
+          <b>${escapeHtml(c.author || t('routes.anonymousUser'))}</b>
+          ${c.date ? `<span class="text-gray-500"> · ${new Date(c.date).toLocaleDateString()}</span>` : ''}
+          <div>${escapeHtml(c.text)}</div>
+        </div>`).join('')
+      : `<span class="text-gray-400">${escapeHtml(t('routes.noComments'))}</span>`;
+    chargerCommentsCache.set(chargerId, html);
+    // Popup könnte inzwischen geschlossen/neu aufgebaut worden sein.
+    const freshEl = marker.getPopup()?.getElement()?.querySelector('.charger-comments');
+    if (freshEl) freshEl.innerHTML = html;
+  } catch {
+    el.innerHTML = `<span class="text-red-400">${escapeHtml(t('routes.commentsLoadError'))}</span>`;
+  }
+}
+
 function updateChargerMarkers() {
   clearChargerMarkers();
   if (!L || !leafletMap) return;
   for (const s of filteredChargers.value) {
     const kw    = s.max_kw ?? 0;
     const label = s.max_kw ? `${s.max_kw} kW` : '';
-    const popup = `<b>${s.name}</b>${label ? `<br>${label}` : ''}${s.operator ? `<br><small>${s.operator}</small>` : ''}`;
-    chargerMarkers.push(L.marker([s.lat, s.lon], { icon: chargerIcon(kw) }).addTo(leafletMap).bindPopup(popup));
+    const popup = `<b>${escapeHtml(s.name)}</b>${label ? `<br>${label}` : ''}${s.operator ? `<br><small>${escapeHtml(s.operator)}</small>` : ''}
+      <div class="charger-comments" style="margin-top:6px;font-size:11px;max-width:220px;"></div>`;
+    const marker = L.marker([s.lat, s.lon], { icon: chargerIcon(kw) }).addTo(leafletMap).bindPopup(popup);
+    marker.on('popupopen', () => loadChargerCommentsInto(marker, s.id));
+    chargerMarkers.push(marker);
   }
 }
 
