@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.51.10] - 2026-07-27
+
+### Removed
+
+- **Removed the `wiki-sync.yml` workflow + `.github/wiki/*.md` (data-loss bug).** The workflow blindly overwrote (`cp`) the GitHub Wiki with the checked-in `.github/wiki/*.md` source on every push touching `docs/**` or `.github/wiki/**`. That source had been stale for months because the wiki was maintained directly in the separate wiki repo the whole time (see the "Wiki x7 languages, pushed" doc-sync entries throughout this changelog). A re-run of an old workflow run (referencing PR #245 from 2026-07-23) deleted entire feature sections from all 7 `Features.md` language variants on 2026-07-27 (company-car tax, tamper-proof logbook, trip metrics/heatmap/zone analysis, App Hub, charge planner, business/private reimbursement, solar surplus charging, SoH certificate) — the damage was repaired the same day in the wiki repo. **Sven's call:** remove the workflow outright rather than fix it, since the actual practice (direct wiki edits) is the only valid source anyway, and a second, stale snapshot is just a recurring risk.
+
+---
+
 ## [v3.51.9] - 2026-07-27
 
 ### Changed
