@@ -2134,6 +2134,7 @@
     "routeInfo": "Route Info",
     "distance": "Distance",
     "duration": "Drive time",
+    "filterByProvider": "Filter by provider",
     "breaksTitle": "Breaks",
     "breakDefaultLabel": "Break",
     "noBreaks": "No breaks planned",

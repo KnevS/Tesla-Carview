@@ -2134,6 +2134,7 @@
     "routeInfo": "Routeninfo",
     "distance": "Strecke",
     "duration": "Fahrzeit",
+    "filterByProvider": "Nach Anbieter filtern",
     "breaksTitle": "Pausen",
     "breakDefaultLabel": "Pause",
     "noBreaks": "Keine Pausen geplant",

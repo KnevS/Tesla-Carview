@@ -1889,6 +1889,7 @@
     "routeInfo": "Infos itinéraire",
     "distance": "Distance",
     "duration": "Durée",
+    "filterByProvider": "Filtrer par opérateur",
     "breaksTitle": "Pauses",
     "breakDefaultLabel": "Pause",
     "noBreaks": "Aucune pause prévue",
