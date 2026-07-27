@@ -64,6 +64,10 @@ const FIELD = {
 
 const GEAR_MAP = { 0: null, 1: null, 2: 'P', 3: 'R', 4: 'N', 5: 'D', 6: null };
 
+// Nutzbare Batteriekapazität für die Verbrauchsschätzung aus dem SoC-Delta —
+// gleicher Wert und gleiche Formel wie im Polling-Pfad (dataSync.js).
+const MODEL_Y_USABLE_KWH = 75;
+
 // ── Minimaler FlatBuffers-Leser (Little-Endian) ──────────────────────────────
 // Tesla-Fahrzeuge senden die Telemetrie als FlatBuffers-Envelope; die
 // eigentlichen Messwerte stecken als Protobuf darin. Wir brauchen nur wenige
@@ -281,6 +285,11 @@ function storePoint(vin, ts, point) {
          WHERE id=?`
       ).run(first.lat, first.lon, last.lat, last.lon, activeTrip.id);
     }
+    // SoC/Odometer/Verbrauch nachziehen: Die Nachricht, die das Fahrt-Ende
+    // auslöst (Gear-Wechsel), enthält diese Felder fast nie — Tesla streamt
+    // sie in separaten Nachrichten. Aus den Trackpunkten der Fahrt füllen,
+    // analog zum Lat/Lon-Nachzug oben.
+    enrichClosedTrip(db, activeTrip.id);
     console.log(`[FleetTelemetry] Fahrt beendet: ${vin}`);
     // Fire-and-forget: Start-/Ziel-Adresse nachziehen (wie OwnTracks-Close).
     const closedTripId = activeTrip.id;
@@ -308,6 +317,70 @@ function storePoint(vin, ts, point) {
     const enrichedPoint = { ...point, voltage: point.voltage, current: point.current };
     sendToAbrp(db, vehicle, buildTlmFromPoint(enrichedPoint, ts)).catch(() => {});
   }
+}
+
+/**
+ * Füllt SoC, Odometer und Verbrauch einer abgeschlossenen Fahrt aus ihren
+ * telemetry_points nach. Während der Fahrt werden SoC/Odometer laufend als
+ * Trackpunkte gespeichert, landeten aber nie in der Fahrt selbst, weil das
+ * Start-/End-Datum sie nicht mitbringt. COALESCE-Semantik: bereits gesetzte
+ * Werte werden nie überschrieben. energy_used_kwh aus dem SoC-Delta wie im
+ * Polling-Pfad (dataSync.finishOdometerTrip). Bewusst kein Ledger-Eintrag —
+ * System-Schreibpfade ledgern nicht, der Ledger sichert User-Edits ab.
+ */
+export function enrichClosedTrip(db, tripId) {
+  const trip = db.prepare('SELECT * FROM trips WHERE id=?').get(tripId);
+  if (!trip || trip.end_time == null) return { changed: false };
+
+  const firstPt = (col) => db.prepare(
+    `SELECT ${col} AS v FROM telemetry_points WHERE trip_id=? AND ${col} IS NOT NULL ORDER BY timestamp ASC LIMIT 1`
+  ).get(tripId)?.v ?? null;
+  const lastPt = (col) => db.prepare(
+    `SELECT ${col} AS v FROM telemetry_points WHERE trip_id=? AND ${col} IS NOT NULL ORDER BY timestamp DESC LIMIT 1`
+  ).get(tripId)?.v ?? null;
+
+  const startSoc = trip.start_soc         ?? firstPt('soc');
+  const endSoc   = trip.end_soc           ?? lastPt('soc');
+  const startOdo = trip.start_odometer_km ?? firstPt('odometer_km');
+  const endOdo   = trip.end_odometer_km   ?? lastPt('odometer_km');
+  const energy   = trip.energy_used_kwh   ?? (
+    startSoc != null && endSoc != null && startSoc > endSoc
+      ? (startSoc - endSoc) / 100 * MODEL_Y_USABLE_KWH
+      : null
+  );
+
+  const changed =
+    startSoc !== trip.start_soc || endSoc !== trip.end_soc ||
+    startOdo !== trip.start_odometer_km || endOdo !== trip.end_odometer_km ||
+    energy !== trip.energy_used_kwh;
+  if (!changed) return { changed: false };
+
+  db.prepare(
+    `UPDATE trips SET start_soc=?, end_soc=?, start_odometer_km=?, end_odometer_km=?, energy_used_kwh=?
+     WHERE id=?`
+  ).run(startSoc, endSoc, startOdo, endOdo, energy, tripId);
+  return { changed: true };
+}
+
+/**
+ * Backfill für bestehende Telemetry-Fahrten, denen SoC/Odometer/Verbrauch
+ * fehlen, obwohl ihre telemetry_points die Werte enthalten. Läuft nächtlich
+ * (nightlyMaintenance) und on-demand via POST /api/system/telemetry-backfill.
+ */
+export function backfillTelemetryTrips(db, { limit = 200 } = {}) {
+  const candidates = db.prepare(
+    `SELECT id FROM trips
+     WHERE source='telemetry' AND end_time IS NOT NULL
+       AND (start_soc IS NULL OR end_soc IS NULL OR energy_used_kwh IS NULL
+            OR start_odometer_km IS NULL OR end_odometer_km IS NULL)
+     ORDER BY id DESC LIMIT ?`
+  ).all(limit);
+
+  let enriched = 0;
+  for (const { id } of candidates) {
+    if (enrichClosedTrip(db, id).changed) enriched++;
+  }
+  return { checked: candidates.length, enriched };
 }
 
 function haversine(lat1, lon1, lat2, lon2) {

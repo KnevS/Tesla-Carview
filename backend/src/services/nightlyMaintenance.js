@@ -262,6 +262,27 @@ async function runOnce() {
     result.tasks.geocode_error = e.message;
   }
 
+  // 3d. Telemetry-Trip-Backfill: SoC/Odometer/Verbrauch aus den während der
+  // Fahrt gespeicherten telemetry_points in abgeschlossene Telemetry-Fahrten
+  // nachziehen (Sicherheitsnetz, falls der Nachzug beim Fahrt-Ende ausfiel).
+  try {
+    const { backfillTelemetryTrips } = await import('./fleetTelemetry.js');
+    const tlmSummaries = [];
+    for (const tenant of getAllTenants()) {
+      if (tenant.status === 'suspended') continue;
+      let tdb;
+      try { tdb = getDb(tenant.id); } catch { continue; }
+      try {
+        tlmSummaries.push({ tenant: tenant.slug, ...backfillTelemetryTrips(tdb) });
+      } catch (e) {
+        tlmSummaries.push({ tenant: tenant.slug, error: e.message });
+      }
+    }
+    result.tasks.telemetry_backfill = tlmSummaries;
+  } catch (e) {
+    result.tasks.telemetry_backfill_error = e.message;
+  }
+
   // 4. Optional: Auto-Update aus dem Git-Repo (opt-in)
   if (process.env.AUTO_UPDATE_ENABLED === 'true') {
     const repoDir = process.env.UPDATE_REPO_DIR || '/opt/tesla-carview';

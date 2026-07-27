@@ -7,6 +7,18 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.51.11] - 2026-07-27
+
+### Behoben
+
+- **Telemetry-Fahrten bekommen jetzt SoC, Odometer und Verbrauch.** Sven-Report: 20-km-Fahrt zeigt „Verbrauch –" und „SoC –% → –%". Ursache in `fleetTelemetry.js`: Beim Fahrt-Start/-Ende wurden `start_/end_soc` und `start_/end_odometer_km` nur aus genau der Telemetry-Nachricht gelesen, die den Gear-Wechsel meldet — Tesla streamt SoC/Odometer aber in separaten Nachrichten, die Werte blieben daher fast immer NULL, obwohl sie während der Fahrt laufend als `telemetry_points` gespeichert wurden (Beleg-Fahrt: 578 Punkte, davon 125 mit SoC und 49 mit Odometer). Zusätzlich berechnete der Telemetry-Pfad `energy_used_kwh` überhaupt nie — das tat bisher nur der Polling-Pfad (`dataSync.finishOdometerTrip`), und der stand wegen des erreichten Monats-Caps (1000 Calls) still. Fix: Neuer Nachzug `enrichClosedTrip()` beim Fahrt-Ende füllt SoC/Odometer per COALESCE aus dem ersten/letzten non-NULL-Trackpunkt (analog zum bestehenden Lat/Lon-Nachzug) und berechnet den Verbrauch aus dem SoC-Delta (gleiche Formel wie der Polling-Pfad). Bewusst kein Ledger-Eintrag — System-Schreibpfade ledgern nicht, der Ledger sichert User-Edits ab.
+
+### Hinzugefügt
+
+- **Backfill für bestehende Telemetry-Fahrten.** `backfillTelemetryTrips()` zieht SoC/Odometer/Verbrauch für bereits abgeschlossene Telemetry-Fahrten aus ihren vorhandenen `telemetry_points` nach — bereits gesetzte Werte werden nie überschrieben. Läuft nächtlich als Wartungs-Task (`telemetry_backfill` im Maintenance-Log) und on-demand via `POST /api/system/telemetry-backfill` (Admin-only, auditiert, Limit ≤ 1000 pro Aufruf).
+
+---
+
 ## [v3.51.10] - 2026-07-27
 
 ### Entfernt
