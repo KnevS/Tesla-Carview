@@ -1889,6 +1889,7 @@
     "routeInfo": "Información de ruta",
     "distance": "Distancia",
     "duration": "Tiempo de conducción",
+    "filterByProvider": "Filtrar por operador",
     "breaksTitle": "Descansos",
     "breakDefaultLabel": "Descanso",
     "noBreaks": "No hay descansos planificados",
