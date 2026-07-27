@@ -197,7 +197,33 @@
               </span>
               <span class="text-white font-medium">{{ timingResult }}</span>
               <span v-if="totalChargeMins > 0" class="text-yellow-400 ml-auto">+{{ totalChargeMins }} min ⚡</span>
+              <span v-if="totalBreakMins > 0" class="text-purple-300">+{{ totalBreakMins }} min ☕</span>
             </div>
+          </div>
+        </SortableSection>
+
+        <!-- Pausen -->
+        <SortableSection v-if="sid === 'breaks'" page-id="routePlanner" section-id="breaks"
+          :title="$t('routes.breaksTitle')" icon="☕"
+          :collapsed="isCollapsed('breaks')" @toggle="toggle('breaks')" @move="(f,t,p) => moveSection(f,t,p)">
+          <div class="space-y-3">
+          <ul v-if="breaks.length" class="space-y-2">
+            <li v-for="(b, i) in breaks" :key="i" class="flex items-center gap-2 bg-gray-800 rounded-xl px-3 py-2">
+              <span class="text-gray-400 text-xs font-mono w-4">{{ i + 1 }}</span>
+              <p class="flex-1 text-sm truncate text-white">{{ b.label || $t('routes.breakDefaultLabel') }}</p>
+              <span class="text-xs text-purple-300 flex-shrink-0">{{ b.minutes }} min</span>
+              <button @click="removeBreak(i)" class="text-gray-500 hover:text-red-400 text-lg leading-none">×</button>
+            </li>
+          </ul>
+          <p v-else class="text-xs text-gray-500">{{ $t('routes.noBreaks') }}</p>
+          <div class="flex gap-2">
+            <input v-model="newBreakLabel" type="text" :placeholder="$t('routes.breakLabelPlaceholder')"
+              class="input flex-1 text-sm" @keyup.enter="addBreak" />
+            <input v-model.number="newBreakMinutes" type="number" min="5" step="5" placeholder="30"
+              class="input w-20 text-sm text-center" @keyup.enter="addBreak" />
+            <button @click="addBreak" :disabled="!newBreakMinutes"
+              class="btn-secondary text-sm px-3 disabled:opacity-40">+</button>
+          </div>
           </div>
         </SortableSection>
 
@@ -730,7 +756,7 @@ const vehicle  = computed(() => appStore.selectedVehicle);
 const { fmtDistance, fmtTemp } = useUnits();
 
 // ── Layout ──
-const ROUTE_SECTIONS = ['start', 'destination', 'timing', 'charging', 'routeinfo', 'waypoints', 'weather', 'actions', 'saved'];
+const ROUTE_SECTIONS = ['start', 'destination', 'timing', 'breaks', 'charging', 'routeinfo', 'waypoints', 'weather', 'actions', 'saved'];
 const { orderedSections, isCollapsed, toggle, moveSection } = usePageLayout('routePlanner', ROUTE_SECTIONS);
 
 // ── Leaflet ──
@@ -763,6 +789,13 @@ let wpTimer           = null;
 // ── Route ──
 const destination = ref(null);
 const waypoints   = ref([]);
+
+// ── Manuelle Pausen (Sven-Wunsch: eine oder mehrere Pausen einplanen
+// können, die in Ankunfts-/Abfahrtszeit einfließen) — rein clientseitig
+// für die aktuelle Sitzung, keine Persistenz mit gespeicherten Routen.
+const breaks          = ref([]);
+const newBreakLabel   = ref('');
+const newBreakMinutes = ref(null);
 
 // ── Routenberechnung ──
 const routeData    = ref(null);
@@ -850,9 +883,16 @@ function setDepartNow() {
 const totalChargeMins = computed(() =>
   (chargingPlan.value?.stops ?? []).reduce((s, st) => s + st.charge_minutes, 0)
 );
-// Gesamtreisezeit inkl. Ladestopps (Minuten) — nur informativ, keine Berechnungsbasis.
+// ── Gesamte manuelle Pausenzeit in Minuten ──
+const totalBreakMins = computed(() =>
+  breaks.value.reduce((s, b) => s + (b.minutes || 0), 0)
+);
+
+// Gesamtreisezeit inkl. Ladestopps und Pausen (Minuten) — nur informativ,
+// keine Berechnungsbasis. Muss mit timingResult (unten) konsistent bleiben,
+// sonst würden zwei UI-Elemente unterschiedliche "Gesamtzeit"-Werte zeigen.
 const totalTripMins = computed(() =>
-  routeData.value ? routeData.value.duration_min + totalChargeMins.value : null
+  routeData.value ? routeData.value.duration_min + totalChargeMins.value + totalBreakMins.value : null
 );
 
 // ── Teilstrecken (Start→WP1, WP1→WP2, …, WPn→Ziel) ──
@@ -880,7 +920,7 @@ const effectiveDepartureSoc = computed(() =>
 const timingResult = computed(() => {
   if (!planDate.value || !planTime.value || !routeData.value) return null;
   const [hh, mm] = planTime.value.split(':').map(Number);
-  const totalMin = routeData.value.duration_min + totalChargeMins.value;
+  const totalMin = routeData.value.duration_min + totalChargeMins.value + totalBreakMins.value;
   if (planMode.value === 'depart') {
     const dep = new Date(planDate.value);
     dep.setHours(hh, mm, 0, 0);
@@ -908,7 +948,7 @@ function downloadICS() {
   if (!destination.value || !planDate.value || !planTime.value || !routeData.value) return;
 
   const [hh, mm] = planTime.value.split(':').map(Number);
-  const totalMin = routeData.value.duration_min + totalChargeMins.value;
+  const totalMin = routeData.value.duration_min + totalChargeMins.value + totalBreakMins.value;
 
   let depDate, arrDate;
   if (planMode.value === 'depart') {
@@ -1192,6 +1232,14 @@ function addWaypoint(r) {
 function removeWaypoint(i) {
   waypoints.value.splice(i, 1); updateWpMarkers(); calculateRoute();
 }
+
+function addBreak() {
+  if (!newBreakMinutes.value || newBreakMinutes.value <= 0) return;
+  breaks.value.push({ label: newBreakLabel.value.trim(), minutes: newBreakMinutes.value });
+  newBreakLabel.value = ''; newBreakMinutes.value = null;
+}
+
+function removeBreak(i) { breaks.value.splice(i, 1); }
 
 function clearSearch() { searchQuery.value = ''; searchResults.value = []; }
 
