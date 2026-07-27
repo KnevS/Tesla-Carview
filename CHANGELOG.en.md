@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.51.9] - 2026-07-27
+
+### Changed
+
+- **Doc sync: caught up the route planner wish list + company-car BEV switch.** The 5 route planner features (v3.51.4–v3.51.8) and the BEV-only simplification of the company-car tax calculator (v3.51.3) were tracked in the CHANGELOG/CLAUDE.md but not fully carried into the user-facing docs. Caught up: in-app Handbook (all 6 languages: route planner section extended with total trip time/legs, breaks, provider filter, community comments; company-car-tax section in DE/EN reduced to BEV-only), README ×7 (feature table rows updated), Wiki (`Features.md` + 6 language variants). Company-car tax remains deliberately DE/EN-only documentation (a German tax topic, as already decided for v3.45.0 — no retroactive addition to ES/FR/TR/EL, which never had this section).
+
+---
+
 ## [v3.51.8] - 2026-07-26
 
 ### Added

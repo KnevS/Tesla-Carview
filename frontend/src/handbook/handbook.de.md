@@ -253,13 +253,11 @@ Beide Methoden sind rein deutschsprachig (deutsches Steuerthema) und nur für Di
 
 ## 🧾 Dienstwagen-Versteuerung {#company-car-tax}
 
-Für **Dienstwagen** stellt der Versteuerungs-Assistent (Nav „Auswertungen → Dienstwagen-Steuer", `/dienstwagen-steuer`) die **1-%-Regel** der **Fahrtenbuchmethode** gegenüber und rechnet den monatlichen geldwerten Vorteil.
+Für **Dienstwagen** stellt der Versteuerungs-Assistent (Nav „Auswertungen → Dienstwagen-Steuer", `/dienstwagen-steuer`) die **1-%-Regel** der **Fahrtenbuchmethode** gegenüber und rechnet den monatlichen geldwerten Vorteil. Der Rechner deckt ausschließlich **reine E-Fahrzeuge (BEV)** ab.
 
-**Datumsabhängiger E-Fahrzeug-Satz** — Bei Elektro- und Hybridfahrzeugen hängt der Satz vom **Anschaffungs-/Überlassungsdatum** ab. Der Assistent fragt dieses Datum ab und wendet die dann geltende Bruttolistenpreis-Grenze an:
-- Reines Elektro: **0,25 %** (Viertelung), wenn der Bruttolistenpreis die Grenze zum Anschaffungsdatum nicht übersteigt — **60.000 €** bis 2023, **70.000 €** ab 2024, **100.000 €** ab 01.07.2025; darüber **0,5 %**. Die Sonderregelung läuft Ende 2030 aus.
-- Plug-in-Hybrid: **0,5 %** nur bei höchstens 50 g/km CO₂ oder E-Mindestreichweite (≥ 40 km bis 2021, ≥ 60 km 2022–2024, ≥ 80 km ab 2025), sonst **1 %**.
+**Datumsabhängiger E-Fahrzeug-Satz** — Der Satz hängt vom **Anschaffungs-/Überlassungsdatum** ab. Der Assistent fragt dieses Datum ab und wendet die dann geltende Bruttolistenpreis-Grenze an: **0,25 %** (Viertelung), wenn der Bruttolistenpreis die Grenze zum Anschaffungsdatum nicht übersteigt — **60.000 €** bis 2023, **70.000 €** ab 2024, **100.000 €** ab 01.07.2025; darüber **0,5 %**. Die Sonderregelung läuft Ende 2030 aus.
 
-**Eingaben** — Bruttolistenpreis, Anschaffungsdatum (aus dem TCO-Cockpit vorbelegt), Fahrzeugtyp und einfache Entfernung Wohnung–Arbeit. Die Kosten (Fahrtenbuchmethode) kommen aus dem TCO-Cockpit, der Privatanteil aus den als privat/dienstlich klassifizierten Fahrten.
+**Eingaben** — Bruttolistenpreis, Anschaffungsdatum (aus dem TCO-Cockpit vorbelegt) und einfache Entfernung Wohnung–Arbeit. Die Kosten (Fahrtenbuchmethode) kommen aus dem TCO-Cockpit, der Privatanteil aus den als privat/dienstlich klassifizierten Fahrten.
 
 **Ergebnis** — Beide Methoden mit monatlichem und jährlichem geldwerten Vorteil, die günstigere ist hervorgehoben, plus die jährliche Differenz. Reine Orientierungsrechnung nach § 6 Abs. 1 Nr. 4 EStG — **keine Steuerberatung**.
 
@@ -848,11 +846,17 @@ Der Routenplaner unter **Routenplaner** berechnet Fahrrouten und zeigt Schnellla
 
 Die gewählten Optionen werden im Browser gespeichert und gelten für alle folgenden Routenberechnungen bis zur nächsten Änderung. Das Routing nutzt intern die Valhalla-Engine (openstreetmap.de); bei kurzfristiger Nichterreichbarkeit wird automatisch auf OSRM umgestellt (Hinweis erscheint als Toast).
 
-**Schnellladestationen** — Die Karte zeigt Supercharger und CCS-Schnelllader entlang der Route. Voraussetzung: ein kostenloser OpenChargeMap-API-Key muss in **Admin → System → Externe API-Schlüssel** hinterlegt sein. Fehlt der Key, erscheint ein Toast mit Direkt-Link zu den Einstellungen. Die Suche verwendet den gewählten Radius (5/10/25/50 km) korrekt, zeigt Stationsnamen und Adressen, filtert nach DC-only und liefert Informationen zu Steckertypen, Anzahl der Ladepunkte und Tesla-Kompatibilität.
+**Gesamtreisezeit & Teilstrecken** — Neben der reinen Fahrzeit zeigt die Routeninfo bei aktivem Ladeplan zusätzlich die Gesamtreisezeit (Fahren + Laden + Pausen). Sind Zwischenstopps gesetzt, listet „Teilstrecken" Distanz und Dauer für jeden Abschnitt einzeln auf (Start→Wegpunkt 1, Wegpunkt 1→Wegpunkt 2 usw.).
+
+**Pausen einplanen** — In der Sektion „Pausen" lassen sich eine oder mehrere Pausen mit optionaler Bezeichnung und Dauer hinzufügen. Sie fließen direkt in die berechnete Ankunfts- bzw. Abfahrtszeit sowie in den ICS-Kalenderexport ein. Pausen gelten nur für die aktuelle Sitzung und werden nicht mit gespeicherten Routen mitgespeichert.
+
+**Schnellladestationen** — Die Karte zeigt Supercharger und CCS-Schnelllader entlang der Route. Voraussetzung: ein kostenloser OpenChargeMap-API-Key muss in **Admin → System → Externe API-Schlüssel** hinterlegt sein. Fehlt der Key, erscheint ein Toast mit Direkt-Link zu den Einstellungen. Die Suche verwendet den gewählten Radius (5/10/25/50 km) korrekt, zeigt Stationsnamen und Adressen, filtert nach DC-only und liefert Informationen zu Steckertypen, Anzahl der Ladepunkte und Tesla-Kompatibilität. Werden mehrere Anbieter gefunden, blendet sich eine Chip-Leiste „Nach Anbieter filtern" ein — die Auswahl wirkt sowohl auf die Kartenanzeige als auch auf die automatische Ladeplan-Berechnung.
+
+**Community-Kommentare** — Ein Klick auf eine Ladestation im Popup lädt bis zu drei aktuelle OpenChargeMap-Nutzerkommentare nach (Autor, Datum, Text). Dort finden sich mitunter Hinweise anderer Nutzer zur Ausstattung vor Ort, etwa zur Sauberkeit der Toiletten.
 
 **Echtzeit-Verkehr** — Wenn ein HERE Maps API-Key konfiguriert ist (ebenfalls unter Admin → System), wird der aktuelle Verkehrsfluss berücksichtigt und in der Reisezeit-Schätzung abgebildet.
 
-**Ladeplanung** — Bei aktivierter SoC-Planung (Akkustand eingeben) berechnet der Planer intelligente Ladestopps mit Zeitschätzung und prüft, ob die Reichweite für jeden Abschnitt ausreicht.
+**Ladeplanung** — Bei aktivierter SoC-Planung (Akkustand eingeben) berechnet der Planer intelligente Ladestopps mit Zeitschätzung und prüft, ob die Reichweite für jeden Abschnitt ausreicht. Jeder Ladestopp zeigt neben der geschätzten Ladedauer auch die voraussichtlich nachgeladene Energiemenge in kWh, zusätzlich zur Gesamtsumme über die ganze Route.
 
 ## 🔌 Ladestationen-Suche {#charger-finder}
 

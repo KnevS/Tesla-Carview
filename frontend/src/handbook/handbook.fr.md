@@ -751,11 +751,17 @@ Le planificateur calcule des itinéraires de conduite et affiche les bornes de r
 
 Les options sont sauvegardées dans le navigateur. Le routage utilise Valhalla (openstreetmap.de) ; en cas d'indisponibilité, repli automatique sur OSRM avec notification toast.
 
-**Bornes de recharge** — Superchargeurs et CCS le long du trajet. Nécessite une clé API OpenChargeMap gratuite dans Admin → System → Clés API externes. La recherche utilise correctement le rayon sélectionné (5/10/25/50 km), affiche les noms et adresses des stations, prend en charge le filtre DC uniquement et indique les types de connecteurs, le nombre de points de charge et la compatibilité Tesla.
+**Temps de trajet total & tronçons** — Une fois un plan de recharge actif, les infos de route affichent en plus le temps de trajet total (conduite + recharge + pauses). En présence d'étapes, « Tronçons » détaille distance et durée pour chaque segment (Départ→Étape 1, Étape 1→Étape 2, etc.).
+
+**Planifier des pauses** — Dans la section « Pauses », ajoutez une ou plusieurs pauses avec libellé et durée optionnels. Elles sont prises en compte dans l'heure d'arrivée/de départ calculée et dans l'export ICS. Les pauses ne concernent que la session en cours et ne sont pas sauvegardées avec les itinéraires enregistrés.
+
+**Bornes de recharge** — Superchargeurs et CCS le long du trajet. Nécessite une clé API OpenChargeMap gratuite dans Admin → System → Clés API externes. La recherche utilise correctement le rayon sélectionné (5/10/25/50 km), affiche les noms et adresses des stations, prend en charge le filtre DC uniquement et indique les types de connecteurs, le nombre de points de charge et la compatibilité Tesla. Lorsque plusieurs opérateurs sont trouvés, une barre de filtres « Filtrer par opérateur » apparaît — la sélection agit à la fois sur l'affichage de la carte et sur le calcul automatique du plan de recharge.
+
+**Commentaires de la communauté** — Cliquer sur une borne dans la popup charge jusqu'à trois commentaires récents d'utilisateurs OpenChargeMap (auteur, date, texte). D'autres utilisateurs y mentionnent parfois des détails pratiques, comme la propreté des toilettes.
 
 **Trafic en temps réel** — Avec une clé HERE Maps configurée, le trafic actuel est intégré à l'estimation du temps de trajet.
 
-**Planification de la recharge** — En activant la planification SoC (entrez le niveau de batterie), le planificateur calcule des arrêts de recharge optimaux avec estimation du temps et vérifie si l'autonomie est suffisante pour chaque tronçon.
+**Planification de la recharge** — En activant la planification SoC (entrez le niveau de batterie), le planificateur calcule des arrêts de recharge optimaux avec estimation du temps et vérifie si l'autonomie est suffisante pour chaque tronçon. Chaque arrêt affiche aussi la quantité d'énergie estimée rechargée en kWh, en plus de la durée estimée, ainsi que le total sur l'ensemble de l'itinéraire.
 
 ## 🟢 État du système (admin) {#system-health}
 
