@@ -2134,6 +2134,7 @@
     "routeInfo": "Інформація про маршрут",
     "distance": "Відстань",
     "duration": "Час у дорозі",
+    "filterByProvider": "Фільтр за оператором",
     "breaksTitle": "Перерви",
     "breakDefaultLabel": "Перерва",
     "noBreaks": "Перерви не заплановано",

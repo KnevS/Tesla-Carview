@@ -1889,6 +1889,7 @@
     "routeInfo": "Rota Bilgisi",
     "distance": "Mesafe",
     "duration": "Sürüş süresi",
+    "filterByProvider": "Sağlayıcıya göre filtrele",
     "breaksTitle": "Molalar",
     "breakDefaultLabel": "Mola",
     "noBreaks": "Planlanmış mola yok",
