@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.51.10] - 2026-07-27
+
+### Entfernt
+
+- **`wiki-sync.yml`-Workflow + `.github/wiki/*.md` entfernt (Datenverlust-Bug).** Der Workflow überschrieb das GitHub-Wiki bei jedem Push, der `docs/**` oder `.github/wiki/**` berührt, blind (`cp`) mit der eingecheckten `.github/wiki/*.md`-Quelle. Diese Quelle war seit Monaten veraltet, weil das Wiki durchgehend direkt im separaten Wiki-Repo gepflegt wurde (u. a. Doku-Sync-Einträge in diesem Changelog, „Wiki × 7 Sprachen, gepusht"). Ein Re-Run eines alten Workflow-Laufs (Bezug: PR #245 vom 23.07.) hat dadurch am 27.07. ganze Feature-Sektionen aus allen 7 `Features.md`-Sprachvarianten gelöscht (Dienstwagen-Steuer, Manipulationssicheres Fahrtenbuch, Fahrtwerte/Heatmap/Zonen-Analyse, App-Hub, Ladeplaner, Dienstlich/Privat-Erstattung, PV-Überschussladen, SoH-Zertifikat) — der Schaden wurde noch am selben Tag im Wiki-Repo repariert. **Sven-Entscheidung:** Workflow ersatzlos entfernen statt reparieren, da die tatsächliche Praxis (direkte Wiki-Pflege) ohnehin die einzig gültige Quelle ist und ein zweiter, veralteter Snapshot nur ein wiederkehrendes Risiko darstellt.
+
+---
+
 ## [v3.51.9] - 2026-07-27
 
 ### Geändert
