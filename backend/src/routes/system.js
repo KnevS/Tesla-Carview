@@ -1258,4 +1258,19 @@ router.post('/geocode-backfill', requireAuth, requireAdmin, async (req, res) => 
   }
 });
 
+// Telemetry-Trip-Backfill: SoC/Odometer/Verbrauch aus vorhandenen
+// telemetry_points in abgeschlossene Telemetry-Fahrten nachziehen.
+// Admin-only — reine DB-Operation, keine externen API-Calls.
+router.post('/telemetry-backfill', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { backfillTelemetryTrips } = await import('../services/fleetTelemetry.js');
+    const limit = Math.min(+req.body?.limit || 200, 1000);
+    const result = backfillTelemetryTrips(req.db, { limit });
+    auditLog(req.db, req.user.sub, 'telemetry_backfill', null, result);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 export default router;
