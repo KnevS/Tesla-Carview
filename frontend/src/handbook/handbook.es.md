@@ -751,11 +751,17 @@ El planificador calcula rutas de conducción y muestra estaciones de carga rápi
 
 Las opciones se guardan en el navegador. El enrutamiento usa Valhalla (openstreetmap.de); si no está disponible, hay respaldo automático a OSRM con aviso toast.
 
-**Estaciones de carga** — Supercargadores y CCS a lo largo del trayecto. Requiere una clave API gratuita de OpenChargeMap en Admin → System → Claves API externas. La búsqueda usa correctamente el radio seleccionado (5/10/25/50 km), muestra nombres y direcciones de las estaciones, admite el filtro solo DC e indica tipos de conector, número de puntos de carga y compatibilidad Tesla.
+**Tiempo total del viaje y tramos** — Con un plan de carga activo, la información de la ruta muestra además el tiempo total del viaje (conducción + carga + pausas). Si hay puntos de paso, « Tramos » detalla la distancia y duración de cada segmento (Origen→Punto 1, Punto 1→Punto 2, etc.).
+
+**Planificar pausas** — En la sección « Pausas » puedes añadir una o varias pausas con etiqueta y duración opcionales. Se incorporan directamente a la hora de llegada/salida calculada y a la exportación ICS. Las pausas solo se aplican a la sesión actual y no se guardan junto con las rutas guardadas.
+
+**Estaciones de carga** — Supercargadores y CCS a lo largo del trayecto. Requiere una clave API gratuita de OpenChargeMap en Admin → System → Claves API externas. La búsqueda usa correctamente el radio seleccionado (5/10/25/50 km), muestra nombres y direcciones de las estaciones, admite el filtro solo DC e indica tipos de conector, número de puntos de carga y compatibilidad Tesla. Cuando se encuentran varios operadores, aparece una barra de filtros « Filtrar por operador » — la selección afecta tanto a la visualización del mapa como al cálculo automático del plan de carga.
+
+**Comentarios de la comunidad** — Al hacer clic en una estación de carga, la ventana emergente carga hasta tres comentarios recientes de usuarios de OpenChargeMap (autor, fecha, texto). Otros usuarios a veces mencionan allí detalles como la limpieza de los aseos.
 
 **Tráfico en tiempo real** — Con una clave HERE Maps configurada, el tráfico actual se integra en la estimación del tiempo de viaje.
 
-**Planificación de carga** — Al activar la planificación SoC (introduce el nivel de batería), el planificador calcula paradas de carga óptimas con estimación de tiempo y comprueba si la autonomía es suficiente para cada tramo.
+**Planificación de carga** — Al activar la planificación SoC (introduce el nivel de batería), el planificador calcula paradas de carga óptimas con estimación de tiempo y comprueba si la autonomía es suficiente para cada tramo. Cada parada de carga muestra también la cantidad estimada de energía añadida en kWh, junto a la duración estimada, además del total para toda la ruta.
 
 ## 🟢 Estado del sistema (admin) {#system-health}
 

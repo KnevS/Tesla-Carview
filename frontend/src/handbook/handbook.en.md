@@ -256,13 +256,11 @@ Both methods are German-language only (German tax topic) and available for compa
 
 ## 🧾 Company-car tax {#company-car-tax}
 
-For **company cars**, the tax assistant (nav "Analytics → Company-car tax", `/dienstwagen-steuer`) compares the **1% rule** with the **logbook method** and computes the monthly taxable benefit.
+For **company cars**, the tax assistant (nav "Analytics → Company-car tax", `/dienstwagen-steuer`) compares the **1% rule** with the **logbook method** and computes the monthly taxable benefit. The calculator covers **pure electric vehicles (BEV) only**.
 
-**Date-dependent EV rate** — For electric and hybrid vehicles the rate depends on the **acquisition/first-provision date**. The assistant asks for this date and applies the gross-list-price cap in force then:
-- Pure electric: **0.25%** (quarter) if the gross list price does not exceed the cap for the acquisition date — **€60,000** until 2023, **€70,000** from 2024, **€100,000** from 2025-07-01; above that **0.5%**. The special rule expires end of 2030.
-- Plug-in hybrid: **0.5%** only at up to 50 g/km CO₂ or a minimum electric range (≥ 40 km until 2021, ≥ 60 km 2022–2024, ≥ 80 km from 2025), otherwise **1%**.
+**Date-dependent EV rate** — The rate depends on the **acquisition/first-provision date**. The assistant asks for this date and applies the gross-list-price cap in force then: **0.25%** (quarter) if the gross list price does not exceed the cap for the acquisition date — **€60,000** until 2023, **€70,000** from 2024, **€100,000** from 2025-07-01; above that **0.5%**. The special rule expires end of 2030.
 
-**Inputs** — Gross list price, acquisition date (pre-filled from the TCO cockpit), vehicle type and the one-way commute distance. Costs (logbook method) come from the TCO cockpit, the private share from trips classified as private/business.
+**Inputs** — Gross list price, acquisition date (pre-filled from the TCO cockpit) and the one-way commute distance. Costs (logbook method) come from the TCO cockpit, the private share from trips classified as private/business.
 
 **Result** — Both methods with monthly and yearly taxable benefit, the cheaper one highlighted, plus the annual difference. Guidance calculation under German § 6 (1) no. 4 EStG only — **not tax advice**.
 
@@ -851,11 +849,17 @@ The Route Planner calculates driving routes and shows fast-charging stations alo
 
 The selected options are saved in the browser and apply to all subsequent calculations until changed. Routing uses the Valhalla engine (openstreetmap.de); if Valhalla is temporarily unavailable the app falls back to OSRM and shows a toast.
 
-**Fast-charging stations** — The map shows Superchargers and CCS fast-chargers along the route. Requires a free OpenChargeMap API key set in **Admin → System → External API keys**. If the key is missing a toast appears with a direct link to settings. The search correctly uses the selected radius (5/10/25/50 km), displays station names and addresses, supports DC-only filtering, and shows connector types, number of charge points and Tesla compatibility.
+**Total trip time & legs** — Alongside the pure driving time, the route info shows the total trip time (driving + charging + breaks) once a charging plan exists. When waypoints are set, "Legs" lists distance and duration for each individual segment (Start→Waypoint 1, Waypoint 1→Waypoint 2, and so on).
+
+**Planning breaks** — In the "Breaks" section you can add one or more breaks with an optional label and duration. They flow directly into the calculated arrival/departure time and the ICS calendar export. Breaks only apply to the current session and are not saved with stored routes.
+
+**Fast-charging stations** — The map shows Superchargers and CCS fast-chargers along the route. Requires a free OpenChargeMap API key set in **Admin → System → External API keys**. If the key is missing a toast appears with a direct link to settings. The search correctly uses the selected radius (5/10/25/50 km), displays station names and addresses, supports DC-only filtering, and shows connector types, number of charge points and Tesla compatibility. When more than one provider is found, a "Filter by provider" chip bar appears — the selection affects both the map display and the automatic charging-plan calculation.
+
+**Community comments** — Clicking a charging station's popup lazy-loads up to three recent OpenChargeMap user comments (author, date, text). Other users sometimes mention amenity details there, such as restroom cleanliness.
 
 **Live traffic** — When a HERE Maps API key is configured (also under Admin → System), current traffic flow is factored into the travel-time estimate.
 
-**Charge planning** — With SoC planning enabled (enter current battery level) the planner calculates smart charging stops with time estimates and verifies whether range is sufficient for each leg.
+**Charge planning** — With SoC planning enabled (enter current battery level) the planner calculates smart charging stops with time estimates and verifies whether range is sufficient for each leg. Each charging stop also shows the estimated amount of energy added in kWh, next to the estimated duration, plus a route-level total.
 
 ## 🔌 Charging station finder {#charger-finder}
 

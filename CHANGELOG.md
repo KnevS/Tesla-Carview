@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.51.9] - 2026-07-27
+
+### Geändert
+
+- **Doku-Sync: Routenplaner-Wunschzettel + Dienstwagen-BEV-Umstellung nachgezogen.** Die 5 Routenplaner-Features (v3.51.4–v3.51.8) und die BEV-only-Vereinfachung der Dienstwagen-Versteuerung (v3.51.3) waren zwar im CHANGELOG/CLAUDE.md erfasst, aber nicht vollständig in die Nutzer-Doku übernommen. Nachgezogen: In-App-Handbuch (alle 6 Sprachen: Routenplaner-Sektion um Gesamtreisezeit/Teilstrecken, Pausen, Anbieter-Filter, Community-Kommentare erweitert; Dienstwagen-Sektion in DE/EN auf BEV-only reduziert), README ×7 (Feature-Tabellenzeilen ergänzt), Wiki (`Features.md` + 6 Sprachvarianten). Dienstwagen-Versteuerung bleibt bewusst nur DE/EN dokumentiert (deutsches Steuerthema, wie schon bei v3.45.0 entschieden — keine Rückwirkung auf ES/FR/TR/EL, die diese Sektion nie hatten).
+
+---
+
 ## [v3.51.8] - 2026-07-26
 
 ### Hinzugefügt
