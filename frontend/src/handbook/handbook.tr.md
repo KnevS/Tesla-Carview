@@ -765,11 +765,17 @@ Rota planlayıcı, sürüş güzergahları hesaplar ve yol boyunca hızlı şarj
 
 Seçenekler tarayıcıda kaydedilir. Yönlendirme Valhalla (openstreetmap.de) kullanır; erişilemezse otomatik olarak OSRM'ye geçilir ve toast bildirimi gösterilir.
 
-**Hızlı şarj istasyonları** — Güzergah boyunca Supercharger'lar ve CCS. Admin → System → Harici API anahtarları altında ücretsiz bir OpenChargeMap API anahtarı gerektirir. Arama, seçilen yarıçapı (5/10/25/50 km) doğru kullanır, istasyon adlarını ve adreslerini gösterir, yalnızca DC filtresini destekler ve konnektör türleri, şarj noktası sayısı ve Tesla uyumluluğunu gösterir.
+**Toplam seyahat süresi & bölümler** — Bir şarj planı etkinken rota bilgisi ayrıca toplam seyahat süresini (sürüş + şarj + molalar) gösterir. Ara duraklar tanımlıysa « Bölümler » her segmentin mesafesini ve süresini tek tek listeler (Başlangıç→Durak 1, Durak 1→Durak 2, vb.).
+
+**Mola planlama** — « Molalar » bölümünde isteğe bağlı etiket ve süreyle bir veya birden fazla mola eklenebilir. Bunlar hesaplanan varış/kalkış saatine ve ICS takvim dışa aktarımına doğrudan yansır. Molalar yalnızca geçerli oturum için geçerlidir ve kaydedilen rotalarla birlikte saklanmaz.
+
+**Hızlı şarj istasyonları** — Güzergah boyunca Supercharger'lar ve CCS. Admin → System → Harici API anahtarları altında ücretsiz bir OpenChargeMap API anahtarı gerektirir. Arama, seçilen yarıçapı (5/10/25/50 km) doğru kullanır, istasyon adlarını ve adreslerini gösterir, yalnızca DC filtresini destekler ve konnektör türleri, şarj noktası sayısı ve Tesla uyumluluğunu gösterir. Birden fazla operatör bulunduğunda « Operatöre göre filtrele » çip çubuğu belirir — seçim hem harita görünümünü hem de otomatik şarj planı hesaplamasını etkiler.
+
+**Topluluk yorumları** — Bir şarj istasyonuna tıklamak, açılır pencerede en fazla üç güncel OpenChargeMap kullanıcı yorumunu (yazar, tarih, metin) yükler. Diğer kullanıcılar burada bazen tuvalet temizliği gibi tesis ayrıntılarından bahseder.
 
 **Gerçek zamanlı trafik** — HERE Maps API anahtarı yapılandırıldığında, güncel trafik akışı seyahat süresi tahminine dahil edilir.
 
-**Şarj planlaması** — SoC planlaması etkinleştirildiğinde (pil seviyesini gir), planlayıcı zaman tahminiyle akıllı şarj durakları hesaplar ve her bölüm için menzil yeterli mi diye kontrol eder.
+**Şarj planlaması** — SoC planlaması etkinleştirildiğinde (pil seviyesini gir), planlayıcı zaman tahminiyle akıllı şarj durakları hesaplar ve her bölüm için menzil yeterli mi diye kontrol eder. Her şarj durağı, tahmini süreye ek olarak kWh cinsinden tahmini eklenen enerji miktarını ve tüm rota için toplamı da gösterir.
 
 ## 🟢 Sistem durumu (yönetici) {#system-health}
 
