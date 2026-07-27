@@ -7,6 +7,12 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.51.8] - 2026-07-26
+
+### Hinzugefügt
+
+- **Routenplaner: Community-Kommentare zu Ladestationen (fünftes und letztes Ergebnis des Routenplaner-Wunschzettels).** Beim Öffnen eines Ladestations-Popups werden jetzt bis zu 3 aktuelle OpenChargeMap-Nutzerkommentare nachgeladen und angezeigt (Autor, Datum, Text) — dort erwähnen Nutzer teils Ausstattungsdetails wie WC-Sauberkeit im Freitext. **Bewusst keine eigene Bewertungs-Datenbank:** TeslaView ist ein Multi-Tenant-Selfhoster ohne zentralen Server; eine echte plattformübergreifende Community-Bewertung bräuchte einen zentralen Dienst, den es nicht gibt. OpenChargeMap hat zudem kein strukturiertes Amenity-Feld (kein dediziertes WC/Ausstattungs-Datenfeld) — nur Freitext-`UserComments`. Neuer Endpoint `GET /api/routing/chargers/:id/comments` fragt gezielt nur die angeklickte Station ab (`chargepointid` + `includecomments=true`), bewusst NICHT bulk bei der Kartenanzeige aller Stationen (Performance). **Sicherheit:** Community-Freitext ist unkuratierter Fremdinhalt — alle Werte (Name, Anbieter, Kommentarautor, Kommentartext) werden vor der HTML-Interpolation ins Kartenpopup escaped, live mit einem `<script>`-Injection-Testkommentar verifiziert (landet als harmloser Text, kein ausführbares Element). i18n ×7 (4 neue Keys).
+
 ## [v3.51.7] - 2026-07-26
 
 ### Hinzugefügt
