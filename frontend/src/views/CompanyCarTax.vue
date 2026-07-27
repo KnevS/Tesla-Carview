@@ -45,30 +45,10 @@
               class="mt-1 w-full bg-gray-700 text-white rounded-lg px-3 py-1.5 border border-gray-600" />
           </label>
           <label class="block">
-            <span class="text-xs text-gray-400">Fahrzeugtyp</span>
-            <select v-model="form.vehicleType" class="mt-1 w-full bg-gray-700 text-white rounded-lg px-3 py-1.5 border border-gray-600">
-              <option value="bev">Elektro (BEV)</option>
-              <option value="phev">Plug-in-Hybrid</option>
-              <option value="ice">Verbrenner</option>
-            </select>
-          </label>
-          <label class="block">
             <span class="text-xs text-gray-400 flex items-center gap-1">Entfernung Wohnung–Arbeit (km) <InfoTip text="Einfache Entfernung zur ersten Tätigkeitsstätte. Grundlage des 0,03-%-Zuschlags pro Monat." /></span>
             <input v-model.number="form.commuteKm" type="number" min="0" step="1"
               class="mt-1 w-full bg-gray-700 text-white rounded-lg px-3 py-1.5 border border-gray-600" />
           </label>
-          <template v-if="form.vehicleType === 'phev'">
-            <label class="block">
-              <span class="text-xs text-gray-400">E-Reichweite (km)</span>
-              <input v-model.number="form.phevRangeKm" type="number" min="0" step="1"
-                class="mt-1 w-full bg-gray-700 text-white rounded-lg px-3 py-1.5 border border-gray-600" />
-            </label>
-            <label class="block">
-              <span class="text-xs text-gray-400">CO₂ (g/km)</span>
-              <input v-model.number="form.phevCo2" type="number" min="0" step="1"
-                class="mt-1 w-full bg-gray-700 text-white rounded-lg px-3 py-1.5 border border-gray-600" />
-            </label>
-          </template>
         </div>
       </div>
 
@@ -153,9 +133,6 @@ const STORAGE_KEY = 'tesla-carview-dienstwagensteuer';
 const form = reactive({
   blp: 50000,
   acquisitionDate: '',
-  vehicleType: 'bev',
-  phevRangeKm: 0,
-  phevCo2: null,
   commuteKm: 20,
 });
 
@@ -169,11 +146,8 @@ const privateShare = computed(() => {
 });
 
 const factor = computed(() => determineFactor({
-  vehicleType: form.vehicleType,
   blp: form.blp,
   acquisitionDate: form.acquisitionDate,
-  phevRangeKm: form.phevRangeKm || null,
-  phevCo2: form.phevCo2,
 }));
 const pauschal = computed(() => pauschalMethod({
   blp: form.blp, factor: factor.value.factor, commuteKm: form.commuteKm,

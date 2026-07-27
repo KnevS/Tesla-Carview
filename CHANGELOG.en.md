@@ -7,11 +7,35 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
-## [v3.51.3] - 2026-07-26
+## [v3.51.7] - 2026-07-26
 
 ### Added
 
 - **Route planner: charging provider filter (fourth item of the route planner wish list).** New "Filter by provider" chip bar — appears once charging stations are shown and more than one provider was found. The selection affects both the map display (immediately, client-side) and the automatic charging-plan calculation (`allowed_operators` sent to `POST /api/routing/plan`, filtered server-side before `planChargingStops()`). Empty selection = all providers allowed (default); clicking a chip restricts to exactly that provider (an inclusion filter, not an exclusion). The backend has returned `operator` per charging station for a while, just unused for filtering. **Verified live** (mocked the OpenChargeMap response since no API key is configured locally): 4 synthetic stations (2× EnBW, 1× Tesla Supercharger, 1× Ionity), selecting "EnBW" reduces the map markers from 5 to 3 (the 2 EnBW stations plus one other marker).
+
+## [v3.51.6] - 2026-07-26
+
+### Added
+
+- **Route planner: manual break input (third item of the route planner wish list).** New "Breaks" section — one or more breaks with an optional label and duration (minutes) can be added and removed. They flow into the existing arrival/departure time calculation (`total time = driving time + charging time + break time`) as well as the ICS calendar export. Client-side only for the current session — not persisted with saved routes (unlike waypoints), since the core request was about the time math. i18n x7 (`routes.breaksTitle`/`breakDefaultLabel`/`noBreaks`/`breakLabelPlaceholder`).
+
+## [v3.51.5] - 2026-07-26
+
+### Added
+
+- **Route planner: charged-energy (kWh) forecast per charging stop (second item of the route planner wish list).** The charging plan previously only showed the SoC delta (arrival% → departure%) and charging duration per stop, not the actual amount of energy added — even though the backend already computed it (`kwh2add`, the basis for the duration estimate) but never returned it. New: `stops[].kwh_added` per stop plus `total_kwh_added` as a route-level summary, shown in the frontend next to the existing duration/power row and as a new total-energy summary line. i18n x7 (`routes.kwhAdded`/`totalKwhAdded` — its own namespace, no collision with the pre-existing `charging.kwhAdded` from v3.50.0).
+
+## [v3.51.4] - 2026-07-26
+
+### Added
+
+- **Route planner: total trip time and per-leg breakdown (first result of the route planner wish list).** `RoutePlanner.vue` already computed driving time and per-stop charging time internally, but never surfaced the combined total trip time (driving + charging) nor a per-leg breakdown when waypoints were used. New: a "total trip time" row (shown only when a charging plan exists) and a "legs" list (Start→Waypoint 1, Waypoint 1→Waypoint 2, …, last waypoint→destination) with distance and duration per segment — only shown with at least one waypoint, otherwise it would duplicate the overall distance/duration. **Backend finding along the way:** `fetchValhalla()` (used for the "avoid motorways/tolls/ferry" options) merged all legs into a single geometry and discarded per-leg duration/distance, even though Valhalla's own response has them (`data.trip.legs[].summary`) — OSRM has always returned them natively. Both routing paths now report `legs` in the same shape. i18n x7 (`routes.start/totalTripTime/plusChargeTime/legs`). Verified live against real OSRM (Stuttgart → Geislingen → Ulm: 2 legs, 59 km/53 min + 32 km/34 min = 90 km/1h 27min, matches the overall route exactly).
+
+## [v3.51.3] - 2026-07-26
+
+### Changed
+
+- **Company car taxation: BEV only.** The calculator at `/dienstwagen-steuer` previously also offered plug-in hybrid and combustion as vehicle type. Removed at Sven's request: the vehicle-type selector and the E-range/CO2 inputs are gone, `determineFactor()` now only computes the BEV quarter/half rate (0.25% up to €100,000 BLP since 2025-07-01 / €70,000 2024–06/2025 / €60,000 2019–2023, otherwise 0.5%). The now-dead PHEV range helper was removed as well.
 
 ## [v3.51.2] - 2026-07-26
 
