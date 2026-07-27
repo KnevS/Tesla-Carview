@@ -111,6 +111,7 @@ function planChargingStops({ chargers, totalKm, initSoc, kwhPerKm, batteryKwh, m
       max_kw: maxKw, operator: best.operator ?? null,
       arrive_soc: Math.round(arrSoc), depart_soc: depSoc,
       charge_minutes: chargeMin, route_km: best.routeKm,
+      kwh_added: Math.round(kwh2add * 10) / 10,
     });
 
     posKm = best.routeKm;
@@ -150,10 +151,18 @@ async function fetchValhalla(coordinates, { avoidMotorways, avoidTolls, avoidFer
   if (!r.ok) throw new Error(`Valhalla ${r.status}`);
   const data = await r.json();
 
-  // Legs zu einer Geometrie zusammenfügen
+  // Legs zu einer Geometrie zusammenfügen, Dauer/Distanz je Leg im
+  // OSRM-kompatiblen Format behalten (Grundlage für Teilstrecken-Info —
+  // ohne das ginge bei Umgehungsoptionen (Valhalla-Pfad) die Aufteilung
+  // pro Segment verloren, obwohl Valhalla sie selbst liefert).
   const allCoords = [];
+  const legs = [];
   for (const leg of (data.trip?.legs ?? [])) {
     allCoords.push(...(leg.shape?.coordinates ?? []));
+    legs.push({
+      distance: (leg.summary?.length ?? 0) * 1000, // km → m
+      duration: leg.summary?.time ?? 0,            // Sekunden
+    });
   }
 
   return {
@@ -161,6 +170,7 @@ async function fetchValhalla(coordinates, { avoidMotorways, avoidTolls, avoidFer
       distance: (data.trip?.summary?.length ?? 0) * 1000,  // km → m
       duration: data.trip?.summary?.time ?? 0,             // Sekunden
       geometry: { type: 'LineString', coordinates: allCoords },
+      legs,
     }],
   };
 }
@@ -528,7 +538,13 @@ router.post('/plan', async (req, res) => {
     current_soc, avg_kwh_per_100km, battery_kwh,
     min_arrival_soc = 15, charge_to_soc = 80,
     avoid_motorways, avoid_tolls, avoid_ferry,
+    allowed_operators,
   } = req.body;
+  // Anbieter-Filter: case-insensitive Teilstring-Match (OCM-Operatornamen
+  // sind uneinheitlich formatiert, z.B. "Tesla, Inc." vs. "Tesla Supercharger").
+  const operatorFilter = Array.isArray(allowed_operators) && allowed_operators.length
+    ? allowed_operators.map(o => String(o).toLowerCase())
+    : null;
 
   if (!vehicleId || !Array.isArray(coordinates) || coordinates.length < 2) {
     return res.status(400).json({ error: 'vehicleId und coordinates erforderlich' });
@@ -647,9 +663,15 @@ router.post('/plan', async (req, res) => {
   // Nach Routenposition sortieren
   allChargers.sort((a, b) => a.routeKm - b.routeKm);
 
+  // Anbieter-Filter anwenden (falls gesetzt) — Stationen ohne Operator-Angabe
+  // fliegen dabei ebenfalls raus, da ihre Marke nicht verifizierbar ist.
+  const filteredChargers = operatorFilter
+    ? allChargers.filter(c => c.operator && operatorFilter.includes(c.operator.toLowerCase()))
+    : allChargers;
+
   // 4. Ladeplan berechnen
   const plan = planChargingStops({
-    chargers: allChargers,
+    chargers: filteredChargers,
     totalKm,
     initSoc:       soc,
     kwhPerKm,
@@ -662,7 +684,8 @@ router.post('/plan', async (req, res) => {
     ...plan,
     total_km:              totalKm,
     total_charge_time_min: plan.stops.reduce((s, st) => s + st.charge_minutes, 0),
-    chargers_found:        allChargers.length,
+    total_kwh_added:       Math.round(plan.stops.reduce((s, st) => s + st.kwh_added, 0) * 10) / 10,
+    chargers_found:        filteredChargers.length,
   });
 });
 

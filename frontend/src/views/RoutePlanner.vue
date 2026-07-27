@@ -197,7 +197,33 @@
               </span>
               <span class="text-white font-medium">{{ timingResult }}</span>
               <span v-if="totalChargeMins > 0" class="text-yellow-400 ml-auto">+{{ totalChargeMins }} min ⚡</span>
+              <span v-if="totalBreakMins > 0" class="text-purple-300">+{{ totalBreakMins }} min ☕</span>
             </div>
+          </div>
+        </SortableSection>
+
+        <!-- Pausen -->
+        <SortableSection v-if="sid === 'breaks'" page-id="routePlanner" section-id="breaks"
+          :title="$t('routes.breaksTitle')" icon="☕"
+          :collapsed="isCollapsed('breaks')" @toggle="toggle('breaks')" @move="(f,t,p) => moveSection(f,t,p)">
+          <div class="space-y-3">
+          <ul v-if="breaks.length" class="space-y-2">
+            <li v-for="(b, i) in breaks" :key="i" class="flex items-center gap-2 bg-gray-800 rounded-xl px-3 py-2">
+              <span class="text-gray-400 text-xs font-mono w-4">{{ i + 1 }}</span>
+              <p class="flex-1 text-sm truncate text-white">{{ b.label || $t('routes.breakDefaultLabel') }}</p>
+              <span class="text-xs text-purple-300 flex-shrink-0">{{ b.minutes }} min</span>
+              <button @click="removeBreak(i)" class="text-gray-500 hover:text-red-400 text-lg leading-none">×</button>
+            </li>
+          </ul>
+          <p v-else class="text-xs text-gray-500">{{ $t('routes.noBreaks') }}</p>
+          <div class="flex gap-2">
+            <input v-model="newBreakLabel" type="text" :placeholder="$t('routes.breakLabelPlaceholder')"
+              class="input flex-1 text-sm" @keyup.enter="addBreak" />
+            <input v-model.number="newBreakMinutes" type="number" min="5" step="5" placeholder="30"
+              class="input w-20 text-sm text-center" @keyup.enter="addBreak" />
+            <button @click="addBreak" :disabled="!newBreakMinutes"
+              class="btn-secondary text-sm px-3 disabled:opacity-40">+</button>
+          </div>
           </div>
         </SortableSection>
 
@@ -219,6 +245,32 @@
                 <p class="text-white font-semibold text-sm">{{ formatDuration(routeData.duration_min) }}</p>
               </div>
             </div>
+
+            <!-- Gesamtreisezeit inkl. Ladestopps — nur wenn ein Ladeplan vorliegt,
+                 sonst identisch zur reinen Fahrzeit oben und redundant. -->
+            <div v-if="totalChargeMins > 0"
+              class="flex items-center justify-between text-xs bg-gray-800/60 rounded-xl px-3 py-2">
+              <span class="text-gray-400">{{ $t('routes.totalTripTime') }}</span>
+              <span class="text-white font-medium">
+                {{ formatDuration(totalTripMins) }}
+                <span class="text-yellow-400 font-normal">({{ $t('routes.plusChargeTime', { min: totalChargeMins }) }})</span>
+              </span>
+            </div>
+
+            <!-- Teilstrecken — nur bei Zwischenstopps ein Mehrwert gegenüber der Gesamtstrecke oben. -->
+            <div v-if="routeLegs.length > 1" class="space-y-1.5">
+              <p class="text-xs text-gray-400 uppercase tracking-wide">{{ $t('routes.legs') }}</p>
+              <ul class="space-y-1">
+                <li v-for="(leg, i) in routeLegs" :key="i"
+                  class="flex items-center gap-2 text-xs bg-gray-800/60 rounded-lg px-2.5 py-1.5">
+                  <span class="text-gray-500 font-mono w-4">{{ i + 1 }}</span>
+                  <span class="flex-1 min-w-0 truncate text-gray-300">{{ leg.from }} → {{ leg.to }}</span>
+                  <span class="text-gray-400 flex-shrink-0">{{ formatDistance(leg.distance_km) }}</span>
+                  <span class="text-white flex-shrink-0">{{ formatDuration(leg.duration_min) }}</span>
+                </li>
+              </ul>
+            </div>
+
             <div v-if="routeStats.soc != null" class="space-y-2">
               <div class="flex items-center justify-between text-xs">
                 <span class="text-gray-400">{{ $t('routes.currentSoc') }}</span>
@@ -347,18 +399,27 @@
                 <span class="ml-auto text-yellow-300">{{ stop.charge_minutes }} min</span>
                 <span v-if="stop.max_kw" class="text-gray-500">{{ stop.max_kw }} kW</span>
               </div>
-              <div v-if="stop.operator" class="text-xs text-gray-500 truncate">{{ stop.operator }}</div>
+              <div class="flex items-center gap-2 text-xs">
+                <span v-if="stop.kwh_added != null" class="text-blue-300">{{ $t('routes.kwhAdded', { kwh: stop.kwh_added }) }}</span>
+                <span v-if="stop.operator" class="text-gray-500 truncate ml-auto">{{ stop.operator }}</span>
+              </div>
             </li>
           </ul>
 
           <!-- Gesamtzusammenfassung -->
-          <div v-if="chargingPlan?.stops?.length" class="border-t border-gray-700 pt-2 flex items-center justify-between text-xs">
-            <span class="text-gray-400">{{ $t('routes.totalChargeTime') }}:</span>
-            <span class="text-yellow-300 font-medium">+{{ chargingPlan.stops.reduce((s,st)=>s+st.charge_minutes,0) }} min</span>
-            <span class="text-gray-400 ml-3">{{ $t('routes.arriveWith') }}:</span>
-            <span :class="chargingPlan.arrival_soc >= 20 ? 'text-green-400' : 'text-red-400'" class="font-semibold">
-              {{ chargingPlan.arrival_soc }}%
-            </span>
+          <div v-if="chargingPlan?.stops?.length" class="border-t border-gray-700 pt-2 space-y-1">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-400">{{ $t('routes.totalChargeTime') }}:</span>
+              <span class="text-yellow-300 font-medium">+{{ chargingPlan.stops.reduce((s,st)=>s+st.charge_minutes,0) }} min</span>
+              <span class="text-gray-400 ml-3">{{ $t('routes.arriveWith') }}:</span>
+              <span :class="chargingPlan.arrival_soc >= 20 ? 'text-green-400' : 'text-red-400'" class="font-semibold">
+                {{ chargingPlan.arrival_soc }}%
+              </span>
+            </div>
+            <div v-if="chargingPlan.total_kwh_added != null" class="flex items-center justify-between text-xs">
+              <span class="text-gray-400">{{ $t('routes.totalKwhAdded') }}:</span>
+              <span class="text-blue-300 font-medium">{{ $t('routes.kwhAdded', { kwh: chargingPlan.total_kwh_added }) }}</span>
+            </div>
           </div>
           </div>
         </SortableSection>
@@ -446,6 +507,21 @@
               v-tooltip="$t('routes.camerasTooltip')">
               📷 {{ showCameras ? `${cameras.length}` : $t('routes.showCameras') }}
             </button>
+          </div>
+
+          <!-- Anbieter-Filter: nur sichtbar wenn Ladestationen geladen sind
+               und mehr als ein Anbieter zur Auswahl steht (sonst kein Mehrwert). -->
+          <div v-if="showChargers && availableOperators.length > 1" class="space-y-1.5">
+            <p class="text-xs text-gray-500">{{ $t('routes.filterByProvider') }}</p>
+            <div class="flex flex-wrap gap-1.5">
+              <button v-for="op in availableOperators" :key="op" @click="toggleOperator(op)"
+                class="px-2.5 py-1 rounded-lg text-xs font-medium transition border"
+                :class="selectedOperators.includes(op)
+                  ? 'bg-blue-700/70 border-blue-500 text-white'
+                  : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-300'">
+                {{ op }}
+              </button>
+            </div>
           </div>
 
           <div class="flex gap-2">
@@ -546,7 +622,7 @@
             :class="showChargers ? 'bg-blue-600 text-white' : 'bg-gray-900/85 text-gray-300 hover:bg-gray-800/90'"
             v-tooltip="$t('routes.chargerTooltip')">
             <span class="w-2.5 h-2.5 rounded-full" :class="showChargers ? 'bg-white' : 'bg-blue-400'"></span>
-            ⚡ {{ showChargers && chargers.length ? chargers.length + ' ' + $t('routes.chargerLegend') : $t('routes.showChargers') }}
+            ⚡ {{ showChargers && filteredChargers.length ? filteredChargers.length + ' ' + $t('routes.chargerLegend') : $t('routes.showChargers') }}
             <span v-if="chargerLoading" class="animate-spin">↻</span>
           </button>
           <button @click="toggleCameras" :disabled="!routeData"
@@ -695,7 +771,7 @@ const vehicle  = computed(() => appStore.selectedVehicle);
 const { fmtDistance, fmtTemp } = useUnits();
 
 // ── Layout ──
-const ROUTE_SECTIONS = ['start', 'destination', 'timing', 'charging', 'routeinfo', 'waypoints', 'weather', 'actions', 'saved'];
+const ROUTE_SECTIONS = ['start', 'destination', 'timing', 'breaks', 'charging', 'routeinfo', 'waypoints', 'weather', 'actions', 'saved'];
 const { orderedSections, isCollapsed, toggle, moveSection } = usePageLayout('routePlanner', ROUTE_SECTIONS);
 
 // ── Leaflet ──
@@ -729,6 +805,13 @@ let wpTimer           = null;
 const destination = ref(null);
 const waypoints   = ref([]);
 
+// ── Manuelle Pausen (Sven-Wunsch: eine oder mehrere Pausen einplanen
+// können, die in Ankunfts-/Abfahrtszeit einfließen) — rein clientseitig
+// für die aktuelle Sitzung, keine Persistenz mit gespeicherten Routen.
+const breaks          = ref([]);
+const newBreakLabel   = ref('');
+const newBreakMinutes = ref(null);
+
 // ── Routenberechnung ──
 const routeData    = ref(null);
 const routeLoading = ref(false);
@@ -747,6 +830,23 @@ const chargeToSoc        = ref(80);
 const chargers      = ref([]);
 const chargerLoading = ref(false);
 const showChargers   = ref(false);
+// Anbieter-Filter (Sven-Wunsch: "welche Anbieter von Ladestationen gewählt
+// werden sollen"). Leer = alle Anbieter erlaubt. Wirkt auf Kartenanzeige
+// UND Ladeplan-Berechnung (an /routing/plan durchgereicht).
+const selectedOperators = ref([]);
+const availableOperators = computed(() =>
+  [...new Set(chargers.value.map(c => c.operator).filter(Boolean))].sort()
+);
+const filteredChargers = computed(() =>
+  selectedOperators.value.length
+    ? chargers.value.filter(c => c.operator && selectedOperators.value.includes(c.operator))
+    : chargers.value
+);
+function toggleOperator(op) {
+  const i = selectedOperators.value.indexOf(op);
+  if (i >= 0) selectedOperators.value.splice(i, 1);
+  else selectedOperators.value.push(op);
+}
 
 // ── Timing-Modus ──
 const planMode = ref('depart'); // 'depart' | 'arrive'
@@ -815,6 +915,34 @@ function setDepartNow() {
 const totalChargeMins = computed(() =>
   (chargingPlan.value?.stops ?? []).reduce((s, st) => s + st.charge_minutes, 0)
 );
+// ── Gesamte manuelle Pausenzeit in Minuten ──
+const totalBreakMins = computed(() =>
+  breaks.value.reduce((s, b) => s + (b.minutes || 0), 0)
+);
+
+// Gesamtreisezeit inkl. Ladestopps und Pausen (Minuten) — nur informativ,
+// keine Berechnungsbasis. Muss mit timingResult (unten) konsistent bleiben,
+// sonst würden zwei UI-Elemente unterschiedliche "Gesamtzeit"-Werte zeigen.
+const totalTripMins = computed(() =>
+  routeData.value ? routeData.value.duration_min + totalChargeMins.value + totalBreakMins.value : null
+);
+
+// ── Teilstrecken (Start→WP1, WP1→WP2, …, WPn→Ziel) ──
+// legs[i] ist die Strecke VON Punkt i ZU Punkt i+1; Punkte = Start + Wegpunkte + Ziel.
+const routeLegs = computed(() => {
+  if (!routeData.value?.legs?.length) return [];
+  const points = [
+    startLocation.value?.name ?? t('routes.start'),
+    ...waypoints.value.map(wp => wp.name),
+    destination.value?.name ?? t('routes.destination'),
+  ];
+  return routeData.value.legs.map((leg, i) => ({
+    from: points[i],
+    to:   points[i + 1],
+    distance_km:  leg.distance_km,
+    duration_min: leg.duration_min,
+  }));
+});
 const isScheduledDeparture  = computed(() => !!(planDate.value && planTime.value));
 const effectiveDepartureSoc = computed(() =>
   departureSocManual.value !== null ? departureSocManual.value : (routeStats.value.soc ?? null)
@@ -824,7 +952,7 @@ const effectiveDepartureSoc = computed(() =>
 const timingResult = computed(() => {
   if (!planDate.value || !planTime.value || !routeData.value) return null;
   const [hh, mm] = planTime.value.split(':').map(Number);
-  const totalMin = routeData.value.duration_min + totalChargeMins.value;
+  const totalMin = routeData.value.duration_min + totalChargeMins.value + totalBreakMins.value;
   if (planMode.value === 'depart') {
     const dep = new Date(planDate.value);
     dep.setHours(hh, mm, 0, 0);
@@ -852,7 +980,7 @@ function downloadICS() {
   if (!destination.value || !planDate.value || !planTime.value || !routeData.value) return;
 
   const [hh, mm] = planTime.value.split(':').map(Number);
-  const totalMin = routeData.value.duration_min + totalChargeMins.value;
+  const totalMin = routeData.value.duration_min + totalChargeMins.value + totalBreakMins.value;
 
   let depDate, arrDate;
   if (planMode.value === 'depart') {
@@ -1137,6 +1265,14 @@ function removeWaypoint(i) {
   waypoints.value.splice(i, 1); updateWpMarkers(); calculateRoute();
 }
 
+function addBreak() {
+  if (!newBreakMinutes.value || newBreakMinutes.value <= 0) return;
+  breaks.value.push({ label: newBreakLabel.value.trim(), minutes: newBreakMinutes.value });
+  newBreakLabel.value = ''; newBreakMinutes.value = null;
+}
+
+function removeBreak(i) { breaks.value.splice(i, 1); }
+
 function clearSearch() { searchQuery.value = ''; searchResults.value = []; }
 
 function clearDestination() {
@@ -1244,6 +1380,13 @@ async function _doCalculateRoute() {
       duration_min: route.duration / 60,
       geometry:     route.geometry.coordinates,
       coordinates,  // für /plan weitergeben
+      // Pro Segment (Start→WP1, WP1→WP2, …, WPn→Ziel) — Grundlage der
+      // Teilstrecken-Anzeige. OSRM liefert das nativ; Valhalla-Pfad
+      // (Umgehungsoptionen) liefert es seit der Backend-Erweiterung mit.
+      legs: (route.legs ?? []).map(leg => ({
+        distance_km:  leg.distance / 1000,
+        duration_min: leg.duration / 60,
+      })),
     };
 
     if (L && leafletMap) {
@@ -1304,6 +1447,7 @@ async function calcChargingPlan() {
       avoid_motorways:   avoidMotorways.value || undefined,
       avoid_tolls:       avoidTolls.value     || undefined,
       avoid_ferry:       avoidFerry.value      || undefined,
+      allowed_operators: selectedOperators.value.length ? selectedOperators.value : undefined,
     });
     chargingPlan.value = data;
     if (L && leafletMap) updatePlanMarkers();
@@ -1420,7 +1564,7 @@ async function loadChargerCommentsInto(marker, chargerId) {
 function updateChargerMarkers() {
   clearChargerMarkers();
   if (!L || !leafletMap) return;
-  for (const s of chargers.value) {
+  for (const s of filteredChargers.value) {
     const kw    = s.max_kw ?? 0;
     const label = s.max_kw ? `${s.max_kw} kW` : '';
     const popup = `<b>${escapeHtml(s.name)}</b>${label ? `<br>${label}` : ''}${s.operator ? `<br><small>${escapeHtml(s.operator)}</small>` : ''}
@@ -1682,6 +1826,10 @@ function openAbrp() {
 watch(avoidMotorways, v => { localStorage.setItem('route_avoid_motorways', v); calculateRoute(); });
 watch(avoidTolls,     v => { localStorage.setItem('route_avoid_tolls',     v); calculateRoute(); });
 watch(avoidFerry,     v => { localStorage.setItem('route_avoid_ferry',     v); calculateRoute(); });
+
+// Anbieter-Filter ändert nur die Kartenanzeige sofort; der Ladeplan selbst
+// wird erst beim nächsten expliziten "Ladeplan berechnen"-Klick neu gerechnet.
+watch(selectedOperators, updateChargerMarkers, { deep: true });
 
 // ── Lifecycle ──
 watch(showSaveDialog, async (v) => {

@@ -7,11 +7,41 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
-## [v3.51.3] - 2026-07-26
+## [v3.51.8] - 2026-07-26
 
 ### Hinzugefügt
 
 - **Routenplaner: Community-Kommentare zu Ladestationen (fünftes und letztes Ergebnis des Routenplaner-Wunschzettels).** Beim Öffnen eines Ladestations-Popups werden jetzt bis zu 3 aktuelle OpenChargeMap-Nutzerkommentare nachgeladen und angezeigt (Autor, Datum, Text) — dort erwähnen Nutzer teils Ausstattungsdetails wie WC-Sauberkeit im Freitext. **Bewusst keine eigene Bewertungs-Datenbank:** TeslaView ist ein Multi-Tenant-Selfhoster ohne zentralen Server; eine echte plattformübergreifende Community-Bewertung bräuchte einen zentralen Dienst, den es nicht gibt. OpenChargeMap hat zudem kein strukturiertes Amenity-Feld (kein dediziertes WC/Ausstattungs-Datenfeld) — nur Freitext-`UserComments`. Neuer Endpoint `GET /api/routing/chargers/:id/comments` fragt gezielt nur die angeklickte Station ab (`chargepointid` + `includecomments=true`), bewusst NICHT bulk bei der Kartenanzeige aller Stationen (Performance). **Sicherheit:** Community-Freitext ist unkuratierter Fremdinhalt — alle Werte (Name, Anbieter, Kommentarautor, Kommentartext) werden vor der HTML-Interpolation ins Kartenpopup escaped, live mit einem `<script>`-Injection-Testkommentar verifiziert (landet als harmloser Text, kein ausführbares Element). i18n ×7 (4 neue Keys).
+
+## [v3.51.7] - 2026-07-26
+
+### Hinzugefügt
+
+- **Routenplaner: Anbieter-Filter für Ladestationen (viertes Ergebnis des Routenplaner-Wunschzettels).** Neue Chip-Leiste „Nach Anbieter filtern" — erscheint, sobald Ladestationen eingeblendet sind und mehr als ein Anbieter gefunden wurde. Auswahl wirkt sowohl auf die Kartenanzeige (sofort, clientseitig) als auch auf die automatische Ladeplan-Berechnung (`allowed_operators` an `POST /api/routing/plan`, serverseitig gefiltert vor `planChargingStops()`). Leere Auswahl = alle Anbieter erlaubt (Standard); ein Klick auf einen Chip schränkt auf genau diesen Anbieter ein (Inklusions-Filter, kein Ausschluss). Backend liefert `operator` pro Ladestation schon länger, nur ungenutzt für Filterung. **Live verifiziert** (OpenChargeMap-Antwort gemockt, da lokal kein API-Key konfiguriert): 4 synthetische Stationen (2× EnBW, 1× Tesla Supercharger, 1× Ionity), Auswahl „EnBW" reduziert die Kartenmarker von 5 auf 3 (die 2 EnBW-Stationen + 1 weiterer Marker).
+
+## [v3.51.6] - 2026-07-26
+
+### Hinzugefügt
+
+- **Routenplaner: manuelle Pausen-Eingabe (drittes Ergebnis des Routenplaner-Wunschzettels).** Neue Sektion „Pausen" — eine oder mehrere Pausen mit optionaler Bezeichnung und Dauer (Minuten) lassen sich hinzufügen und wieder entfernen. Fließen in die bestehende Ankunfts-/Abfahrtszeit-Berechnung ein (`Gesamtzeit = Fahrzeit + Ladezeit + Pausenzeit`) sowie in den ICS-Kalenderexport. Rein clientseitig für die aktuelle Sitzung — keine Persistenz mit gespeicherten Routen (im Unterschied zu Zwischenstopps), da der Kernwunsch die Zeitrechnung war. i18n ×7 (`routes.breaksTitle`/`breakDefaultLabel`/`noBreaks`/`breakLabelPlaceholder`).
+
+## [v3.51.5] - 2026-07-26
+
+### Hinzugefügt
+
+- **Routenplaner: Lademengen-Forecast (kWh) je Ladestopp (zweites Ergebnis des Routenplaner-Wunschzettels).** Der Ladeplan zeigte bisher nur die SoC-Differenz (Ankunft% → Abfahrt%) und die Ladedauer je Stopp, nicht die tatsächlich nachgeladene Energiemenge — obwohl das Backend sie längst berechnet (`kwh2add`, Grundlage der Ladedauer-Schätzung), aber nie zurückgab. Neu: `stops[].kwh_added` je Stopp + `total_kwh_added` als Routensumme, im Frontend neben der bestehenden Ladedauer/Leistungs-Zeile sowie als neue Gesamtsummen-Zeile angezeigt. i18n ×7 (`routes.kwhAdded`/`totalKwhAdded` — eigener Namespace, keine Kollision mit dem bereits bestehenden `charging.kwhAdded` aus v3.50.0).
+
+## [v3.51.4] - 2026-07-26
+
+### Hinzugefügt
+
+- **Routenplaner: Gesamtreisezeit und Teilstrecken-Aufschlüsselung (erstes Ergebnis des Routenplaner-Wunschzettels).** `RoutePlanner.vue` berechnete Fahrzeit und Ladezeit pro Stopp bereits intern, zeigte aber weder die kombinierte Gesamtreisezeit (Fahren + Laden) noch eine Aufschlüsselung nach Teilstrecken bei Zwischenstopps. Neu: Zeile „Gesamtreisezeit" (nur sichtbar, wenn ein Ladeplan vorliegt) sowie eine Liste „Teilstrecken" (Start→Wegpunkt 1, Wegpunkt 1→Wegpunkt 2, …, letzter Wegpunkt→Ziel) mit Distanz und Dauer je Segment — erscheint nur bei mindestens einem Zwischenstopp, sonst wäre sie identisch zur Gesamtstrecke. **Backend-Fund dabei:** `fetchValhalla()` (Umgehungsoptionen „Autobahn/Maut/Fähre meiden") fasste alle Segmente zu einer Geometrie zusammen und warf die Dauer/Distanz pro Segment weg, obwohl Valhalla sie selbst liefert (`data.trip.legs[].summary`) — OSRM lieferte sie schon immer nativ. Jetzt liefern beide Routing-Pfade `legs` im selben Format. i18n ×7 (`routes.start/totalTripTime/plusChargeTime/legs`). Live gegen echtes OSRM verifiziert (Stuttgart → Geislingen → Ulm: 2 Teilstrecken, 59 km/53 min + 32 km/34 min = 90 km/1h 27 min, stimmt exakt mit der Gesamtstrecke überein).
+
+## [v3.51.3] - 2026-07-26
+
+### Geändert
+
+- **Dienstwagen-Versteuerung: nur noch reine E-Fahrzeuge (BEV).** Der Rechner unter `/dienstwagen-steuer` bot bislang auch Plug-in-Hybrid und Verbrenner als Fahrzeugtyp an. Auf Svens Wunsch entfernt: Fahrzeugtyp-Auswahl, E-Reichweite- und CO₂-Eingabe fallen weg, `determineFactor()` rechnet nur noch die BEV-Viertelung/-Halbierung (0,25 % bis 100.000 € BLP seit 01.07.2025 / 70.000 € 2024–06/2025 / 60.000 € 2019–2023, sonst 0,5 %). Die tote PHEV-Reichweiten-Hilfsfunktion wurde mit entfernt.
 
 ## [v3.51.2] - 2026-07-26
 
