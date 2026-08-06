@@ -7,6 +7,18 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.51.12] - 2026-08-06
+
+### Behoben
+
+- **Auto-Backup riss jede Nacht das Backend um — seit 17 Tagen kein Backup mehr.** Befund im Produktivbetrieb: Zwischen 02:00 und 03:00 UTC starb der Backend-Prozess rund 31-mal pro Nacht mit `FATAL ERROR: Reached heap limit — JavaScript heap out of memory`; das letzte erfolgreiche Backup stammte vom 20.07. Ursachenkette: `buildBackupPayload()` lud alle 27 Tabellen per `.all()` als vollständigen JS-Objektgraph in den Heap, `JSON.stringify()` legte eine zweite Kopie als String daneben. Bei einer 43-MB-Tenant-DB ergibt das rund 92 MB JSON und im Heap ein Vielfaches davon — deutlich über dem V8-Limit des Containers. Fix: `writeBackupJson()` schreibt das JSON zeilenweise per `.iterate()` und 1-MB-Puffer direkt auf Platte. Nachgemessen gegen eine 44-MB-Datenbank bei identischem Heap-Limit: vorher Absturz bei 328 MB Heap, nachher 92 MB Datei in 0,7 s bei 31 MB Heap. Das Backup-Format (Version 2) bleibt unverändert, bestehende Sicherungen bleiben lesbar.
+- **Aus einem fehlgeschlagenen Backup wurde eine Absturzschleife.** Die Tagesmarke `lastRunDay` lag ausschließlich im Prozessspeicher. Nach jedem Absturz war sie verloren, die konfigurierte Stunde galt weiterhin — der Backup-Versuch startete sofort erneut und riss den Prozess wieder mit, eine volle Stunde lang. Die Marke wird jetzt als `backup.last_attempt_day` in `tenant_settings` und **vor** dem Lauf gesetzt, überlebt damit einen Absturz und begrenzt den Schaden auf einen einzelnen fehlgeschlagenen Versuch pro Tag.
+- **Der Selbsttest meldete den Ausfall nicht.** `Number(bc.last_run)` wurde auf einen ISO-String angewendet und ergab immer `NaN`, wodurch jeder Zeitvergleich fehlschlug und `backup_recent` dauerhaft auf „warn" stand — unabhängig vom tatsächlichen Zustand und damit ohne Aussagewert. Jetzt via `Date.parse()` mit `Number.isFinite()`-Prüfung; die Warnung nennt zusätzlich das Alter des letzten Laufs in Tagen.
+- **Backup-Download konnte das Backend on-demand abschießen.** `GET /api/data/backup` baute denselben vollständigen Objektgraphen im Speicher auf. Ein Klick auf „Backup herunterladen" hätte im Produktivbetrieb denselben Heap-Überlauf ausgelöst und den Prozess für alle Nutzer beendet, nicht nur die eigene Anfrage. Der Export läuft jetzt über eine temporäre Datei, die per Stream ausgeliefert und danach wieder entfernt wird.
+- **Integritätsprüfung des Backups las die gesamte Datei in den Speicher.** `backupIntegrity()` machte `JSON.parse(readFileSync(...))` über die komplette Sicherung und wäre am selben Limit gescheitert. Geprüft werden jetzt der `meta`-Block am Dateianfang (er trägt die Tabellenliste), das Dateiende als Beleg für einen vollständigen Schreibvorgang und die Dateigröße — ohne Voll-Parse.
+
+---
+
 ## [v3.51.11] - 2026-07-27
 
 ### Behoben

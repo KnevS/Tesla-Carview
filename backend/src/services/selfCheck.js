@@ -8,7 +8,7 @@
 // Schema-Change. Läuft on-demand (Admin-Button) und wöchentlich im
 // nightlyMaintenance-Lauf.
 
-import { existsSync, statSync, readFileSync } from 'fs';
+import { existsSync, statSync, openSync, readSync, closeSync } from 'fs';
 import { join } from 'path';
 import { getTenantSetting, setTenantSetting } from './configService.js';
 import { getBackupConfig } from './autoBackupService.js';
@@ -18,18 +18,55 @@ const DAY = 86400;
 const SEV = { error: 3, warn: 2, ok: 1, info: 0 };
 const mk = (key, status, message, meta = null) => ({ key, status, message, meta });
 
+// Prueft ohne Voll-Parse: Backups erreichen dreistellige MB-Groessen, und
+// JSON.parse der gesamten Datei haette hier denselben Heap-Ueberlauf ausgeloest
+// wie frueher das Schreiben. Der meta-Block steht am Dateianfang und traegt die
+// Tabellenliste, das Dateiende belegt den vollstaendigen Schreibvorgang.
+const HEAD_BYTES = 256 * 1024;
+
+function readHead(file, bytes) {
+  const fd = openSync(file, 'r');
+  try {
+    const buf = Buffer.alloc(bytes);
+    const n = readSync(fd, buf, 0, bytes, 0);
+    return buf.subarray(0, n).toString('utf8');
+  } finally { closeSync(fd); }
+}
+
+function readTail(file, size, bytes) {
+  const fd = openSync(file, 'r');
+  try {
+    const len = Math.min(bytes, size);
+    const buf = Buffer.alloc(len);
+    const n = readSync(fd, buf, 0, len, size - len);
+    return buf.subarray(0, n).toString('utf8');
+  } finally { closeSync(fd); }
+}
+
 function backupIntegrity(bc) {
   try {
     const file = join(bc.path || '/app/data/backups', bc.last_filename);
     if (!existsSync(file)) return mk('backup_integrity', 'error', 'Letzte Backup-Datei nicht gefunden');
     const size = statSync(file).size;
     if (size < 1024) return mk('backup_integrity', 'error', `Backup verdächtig klein (${size} B)`);
-    const json = JSON.parse(readFileSync(file, 'utf8'));
-    if (json?.meta?.format !== 'tesla-carview-backup') return mk('backup_integrity', 'error', 'Unerwartetes Backup-Format');
-    const present = Object.keys(json.data || {});
+
+    const head = readHead(file, HEAD_BYTES);
+    const marker = head.indexOf(',"data":{');
+    if (marker < 0 || !head.startsWith('{"meta":')) {
+      return mk('backup_integrity', 'error', 'Unerwartetes Backup-Format');
+    }
+    const meta = JSON.parse(head.slice('{"meta":'.length, marker));
+    if (meta?.format !== 'tesla-carview-backup') {
+      return mk('backup_integrity', 'error', 'Unerwartetes Backup-Format');
+    }
+    if (!readTail(file, size, 16).trimEnd().endsWith('}}')) {
+      return mk('backup_integrity', 'error', 'Backup unvollständig — Datei endet abrupt');
+    }
+
+    const present = Object.keys(meta.counts || {});
     const missing = BACKUP_TABLES.filter(t => !present.includes(t));
     if (missing.length) return mk('backup_integrity', 'warn', `${missing.length} Tabellen fehlen im Backup`, { missing });
-    return mk('backup_integrity', 'ok', `Backup geprüft: ${Math.round(size / 1024)} KB, ${present.length} Tabellen, JSON gültig`);
+    return mk('backup_integrity', 'ok', `Backup geprüft: ${Math.round(size / 1024)} KB, ${present.length} Tabellen, Struktur gültig`);
   } catch (e) {
     return mk('backup_integrity', 'error', `Backup nicht lesbar: ${e.message}`);
   }
@@ -81,14 +118,21 @@ export function runSelfCheck(db) {
 
   // ── Backup ────────────────────────────────────────────────────────────
   const bc = getBackupConfig(db);
-  const lastRun = bc.last_run ? Number(bc.last_run) : null;
+  // backup.last_run wird als ISO-String abgelegt — Number() ergab NaN, damit war
+  // jeder Vergleich unten falsch und der Check meldete dauerhaft "warn",
+  // unabhaengig vom tatsaechlichen Backup-Zustand.
+  const parsedRun = bc.last_run ? Math.floor(Date.parse(bc.last_run) / 1000) : NaN;
+  const lastRun = Number.isFinite(parsedRun) ? parsedRun : null;
   if (!bc.enabled) {
     checks.push(mk('backup_recent', 'info', 'Auto-Backup ist deaktiviert'));
   } else if (lastRun && (now - lastRun) < 2 * DAY && bc.last_status === 'success') {
     checks.push(mk('backup_recent', 'ok', `Letztes Backup erfolgreich vor ${Math.round((now - lastRun) / 3600)} h`));
   } else {
+    const age = lastRun ? ` (letzter Lauf vor ${Math.round((now - lastRun) / DAY)} Tagen)` : ' (noch nie gelaufen)';
     checks.push(mk('backup_recent', 'warn',
-      bc.last_status === 'error' ? `Letztes Backup fehlgeschlagen: ${bc.last_error || ''}` : 'Kein aktuelles erfolgreiches Backup'));
+      bc.last_status === 'error'
+        ? `Letztes Backup fehlgeschlagen: ${bc.last_error || ''}${age}`
+        : `Kein aktuelles erfolgreiches Backup${age}`));
   }
   if (bc.enabled && bc.mode === 'local' && bc.last_filename) checks.push(backupIntegrity(bc));
 

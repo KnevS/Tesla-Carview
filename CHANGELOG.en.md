@@ -7,6 +7,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.51.12] - 2026-08-06
+
+### Fixed
+
+- **Auto-backup crashed the backend every night — no backup had succeeded for 17 days.** Observed in production: between 02:00 and 03:00 UTC the backend process died roughly 31 times per night with `FATAL ERROR: Reached heap limit — JavaScript heap out of memory`, and the last successful backup dated from 2026-07-20. Root cause: `buildBackupPayload()` loaded all 27 tables via `.all()` into a full in-memory object graph, and `JSON.stringify()` placed a second copy beside it as a string. For a 43 MB tenant database that is about 92 MB of JSON and a multiple of that on the heap — far beyond the container's V8 limit. Fix: `writeBackupJson()` now streams the JSON row by row via `.iterate()` through a 1 MB buffer straight to disk. Measured against a 44 MB database at an identical heap limit: previously a crash at 328 MB heap, now a 92 MB file in 0.7 s at 31 MB heap. The backup format (version 2) is unchanged and existing backups remain readable.
+- **A single failed backup escalated into a crash loop.** The daily marker `lastRunDay` lived only in process memory. Every crash discarded it while the configured hour still matched, so the backup restarted immediately and killed the process again — for a full hour. The marker is now persisted as `backup.last_attempt_day` in `tenant_settings` and written **before** the run, so it survives a crash and limits the damage to one failed attempt per day.
+- **The self-check never reported the outage.** `Number(bc.last_run)` was applied to an ISO string and always produced `NaN`, so every time comparison failed and `backup_recent` reported "warn" permanently — regardless of actual state, and therefore carrying no signal. It now uses `Date.parse()` guarded by `Number.isFinite()`, and the warning states how many days ago the last run was.
+- **The backup download could take the backend down on demand.** `GET /api/data/backup` built the same complete object graph in memory. In production a click on "download backup" would have triggered the same heap exhaustion and terminated the process for every user, not just that request. The export now writes to a temporary file, streams it to the client, and removes it afterwards.
+- **Backup integrity checking read the entire file into memory.** `backupIntegrity()` ran `JSON.parse(readFileSync(...))` across the whole backup and would have hit the same limit. It now validates the `meta` block at the start of the file (which carries the table list), the end of the file as evidence of a complete write, and the file size — without a full parse.
+
+---
+
 ## [v3.51.11] - 2026-07-27
 
 ### Fixed

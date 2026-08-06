@@ -5,10 +5,12 @@ import multer from 'multer';
 import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import { auditLog } from '../services/auditService.js';
-import { copyFileSync, writeFileSync } from 'fs';
+import { copyFileSync, writeFileSync, createReadStream, existsSync, unlinkSync, statSync } from 'fs';
+import { tmpdir } from 'os';
 import { join, dirname } from 'path';
 import { getTenantById } from '../db/database.js';
 import { BACKUP_TABLES } from '../db/backupTables.js';
+import { writeBackupJson } from '../services/autoBackupService.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -115,35 +117,33 @@ router.get('/info', (req, res) => {
 router.get('/backup', requireAdmin, (req, res) => {
   const db     = req.db;
   const tenant = getTenantById(req.tenantId) || {};
-  const data   = {};
-  for (const table of BACKUP_TABLES) {
-    try {
-      data[table] = db.prepare(`SELECT * FROM ${table}`).all();
-    } catch {
-      // Tabelle existiert nicht (z.B. nach Migration) → leeres Array
-      data[table] = [];
-    }
-  }
-  const payload = {
-    meta: {
-      format:       'tesla-carview-backup',
-      version:      2,
-      exportedAt:   new Date().toISOString(),
-      exportedByUserId: req.user.sub,
-      tenant:       { id: tenant.id, slug: tenant.slug, name: tenant.name },
-      counts:       Object.fromEntries(
-        Object.entries(data).map(([k, v]) => [k, v.length])
-      ),
-    },
-    data,
-  };
-  auditLog(db, req.user.sub, 'data_backup_created', req, {
-    counts: payload.meta.counts,
-  });
   const filename = `tesla-carview-backup-${tenant.slug || 'tenant'}-${new Date().toISOString().slice(0, 10)}.json`;
+
+  // Ueber eine temporaere Datei statt komplett im Speicher: der Dump erreicht
+  // dreistellige MB, und der Objektgraph plus stringify-Kopie sprengte das
+  // Heap-Limit — ein Klick auf "Backup herunterladen" riss damit den ganzen
+  // Backend-Prozess mit, nicht nur diese Anfrage.
+  const tmpPath = join(tmpdir(), `${filename}.${process.pid}.part`);
+  let counts;
+  try {
+    ({ counts } = writeBackupJson(db, { id: req.tenantId, slug: tenant.slug, name: tenant.name },
+      tmpPath, { exportedByUserId: req.user.sub }));
+  } catch (e) {
+    try { if (existsSync(tmpPath)) unlinkSync(tmpPath); } catch { /* ignore */ }
+    return res.status(500).json({ error: `Backup fehlgeschlagen: ${e.message}` });
+  }
+
+  auditLog(db, req.user.sub, 'data_backup_created', req, { counts });
+
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
   res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
-  res.send(JSON.stringify(payload));
+  res.setHeader('Content-Length', String(statSync(tmpPath).size));
+
+  const stream = createReadStream(tmpPath);
+  const cleanup = () => { try { if (existsSync(tmpPath)) unlinkSync(tmpPath); } catch { /* ignore */ } };
+  stream.on('error', () => { cleanup(); res.destroy(); });
+  stream.on('close', cleanup);
+  stream.pipe(res);
 });
 
 /**
