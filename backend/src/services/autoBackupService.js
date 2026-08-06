@@ -15,7 +15,11 @@
  * verschluesselt (gleicher Mechanismus wie Tesla-Tokens).
  */
 
-import { mkdirSync, writeFileSync, readdirSync, unlinkSync, existsSync, statSync } from 'node:fs';
+import {
+  mkdirSync, readdirSync, unlinkSync, existsSync, statSync,
+  openSync, writeSync, closeSync, renameSync, createReadStream,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { getAllTenants, getDb } from '../db/database.js';
 import { BACKUP_TABLES } from '../db/backupTables.js';
@@ -37,6 +41,7 @@ const CFG_KEYS = [
   'backup.sftp_host', 'backup.sftp_port', 'backup.sftp_user',
   'backup.sftp_password', 'backup.sftp_path',
   'backup.last_run', 'backup.last_status', 'backup.last_error', 'backup.last_filename',
+  'backup.last_attempt_day',
 ];
 
 // Welche Felder werden bei Lesen/Schreiben verschluesselt?
@@ -72,6 +77,7 @@ export function getBackupConfig(db) {
     last_status:    raw.last_status    || null,
     last_error:     raw.last_error     || null,
     last_filename:  raw.last_filename  || null,
+    last_attempt_day: raw.last_attempt_day || null,
   };
 }
 
@@ -114,26 +120,60 @@ function tryDecrypt(v) {
 
 // ---- Backup-Daten erzeugen ----
 
-function buildBackupPayload(db, tenant) {
-  const data = {};
-  for (const table of BACKUP_TABLES) {
-    try {
-      data[table] = db.prepare(`SELECT * FROM ${table}`).all();
-    } catch {
-      data[table] = [];
-    }
+// Zeilenweise auf Platte statt komplett in den Heap: Ein Tenant mit ~40 MB DB
+// erzeugte als JS-Objektgraph plus JSON.stringify-Kopie mehrere hundert MB und
+// sprengte das V8-Heap-Limit — der Prozess starb, bevor der catch-Zweig unten
+// den Fehlerstatus schreiben konnte.
+const FLUSH_AT_BYTES = 1 << 20;
+
+function countRows(db, table) {
+  try {
+    return db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get().n;
+  } catch {
+    return 0;
   }
-  return {
-    meta: {
-      format:     'tesla-carview-backup',
-      version:    2,
-      exportedAt: new Date().toISOString(),
-      source:     'auto-backup',
-      tenant:     { id: tenant.id, slug: tenant.slug, name: tenant.name },
-      counts:     Object.fromEntries(Object.entries(data).map(([k, v]) => [k, v.length])),
-    },
-    data,
+}
+
+/** Schreibt das Backup-JSON streamend nach targetPath. Format identisch zu Version 2. */
+export function writeBackupJson(db, tenant, targetPath, metaExtra = {}) {
+  const counts = Object.fromEntries(BACKUP_TABLES.map(t => [t, countRows(db, t)]));
+  const meta = {
+    format:     'tesla-carview-backup',
+    version:    2,
+    exportedAt: new Date().toISOString(),
+    ...metaExtra,
+    tenant:     { id: tenant.id, slug: tenant.slug, name: tenant.name },
+    counts,
   };
+
+  const fd = openSync(targetPath, 'w');
+  let buf = '';
+  const push = (s) => {
+    buf += s;
+    if (buf.length >= FLUSH_AT_BYTES) {
+      writeSync(fd, buf);
+      buf = '';
+    }
+  };
+
+  try {
+    push(`{"meta":${JSON.stringify(meta)},"data":{`);
+    BACKUP_TABLES.forEach((table, ti) => {
+      push(`${ti ? ',' : ''}${JSON.stringify(table)}:[`);
+      try {
+        let ri = 0;
+        for (const row of db.prepare(`SELECT * FROM ${table}`).iterate()) {
+          push(`${ri++ ? ',' : ''}${JSON.stringify(row)}`);
+        }
+      } catch { /* Tabelle fehlt in dieser DB -> leeres Array */ }
+      push(']');
+    });
+    push('}}');
+    if (buf) writeSync(fd, buf);
+  } finally {
+    closeSync(fd);
+  }
+  return { bytes: statSync(targetPath).size, counts };
 }
 
 function makeFilename(slug) {
@@ -142,9 +182,9 @@ function makeFilename(slug) {
 
 // ---- Modus A + B: lokaler Pfad ----
 
-function saveLocal(jsonStr, targetDir, filename, retentionDays, slug) {
+function saveLocal(sourcePath, targetDir, filename, retentionDays, slug) {
   mkdirSync(targetDir, { recursive: true });
-  writeFileSync(join(targetDir, filename), jsonStr, 'utf8');
+  renameSync(sourcePath, join(targetDir, filename));
   // Rotation: alte Dateien loeschen
   if (retentionDays > 0) {
     const cutoff = Date.now() - retentionDays * 86400 * 1000;
@@ -164,7 +204,7 @@ function saveLocal(jsonStr, targetDir, filename, retentionDays, slug) {
 
 // ---- Modus S3 ----
 
-async function uploadS3(jsonStr, cfg, filename) {
+async function uploadS3(sourcePath, cfg, filename) {
   // Lazy-import: kein Start-Fehler wenn nicht installiert.
   const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3').catch(() => {
     throw new Error('@aws-sdk/client-s3 nicht installiert — bitte `npm install @aws-sdk/client-s3` im Backend');
@@ -177,17 +217,18 @@ async function uploadS3(jsonStr, cfg, filename) {
   const client = new S3Client(clientCfg);
   const key    = (cfg.s3_prefix || '').replace(/\/$/, '') + '/' + filename;
   await client.send(new PutObjectCommand({
-    Bucket:      cfg.s3_bucket,
-    Key:         key,
-    Body:        jsonStr,
-    ContentType: 'application/json',
+    Bucket:        cfg.s3_bucket,
+    Key:           key,
+    Body:          createReadStream(sourcePath),
+    ContentLength: statSync(sourcePath).size,
+    ContentType:   'application/json',
   }));
   return key;
 }
 
 // ---- Modus SFTP ----
 
-async function uploadSftp(jsonStr, cfg, filename) {
+async function uploadSftp(sourcePath, cfg, filename) {
   const SftpClient = await import('ssh2-sftp-client').catch(() => {
     throw new Error('ssh2-sftp-client nicht installiert — bitte `npm install ssh2-sftp-client` im Backend');
   });
@@ -203,7 +244,7 @@ async function uploadSftp(jsonStr, cfg, filename) {
       readyTimeout: 10000,
     });
     await sftp.mkdir(remoteDir, true).catch(() => {});
-    await sftp.put(Buffer.from(jsonStr, 'utf8'), remotePath);
+    await sftp.put(sourcePath, remotePath);
   } finally {
     sftp.end().catch(() => {});
   }
@@ -221,36 +262,40 @@ export async function runBackupForTenant(tenantId) {
   const cfg = getBackupConfig(db);
 
   const filename = makeFilename(tenant.slug);
-  const payload  = buildBackupPayload(db, tenant);
-  const jsonStr  = JSON.stringify(payload);
+
+  // Bei local/path liegt die Temp-Datei im Zielverzeichnis, damit der
+  // abschliessende Rename atomar bleibt (ueber Mount-Grenzen scheitert er).
+  const localDir = cfg.mode === 'local' ? '/app/data/backups'
+                 : cfg.mode === 'path'  ? cfg.path
+                 : null;
+  if (cfg.mode === 'path' && !cfg.path) throw new Error('Kein Ziel-Pfad konfiguriert');
+  if (localDir) mkdirSync(localDir, { recursive: true });
+  const tmpPath = join(localDir ?? tmpdir(), `${filename}.part`);
 
   let targetDescription = '';
 
   try {
+    const { bytes } = writeBackupJson(db, tenant, tmpPath, { source: 'auto-backup' });
+    console.log(`[AutoBackup] ${tenant.slug}: ${(bytes / 1048576).toFixed(1)} MB geschrieben`);
+
     switch (cfg.mode) {
-      case 'local': {
-        const dir = '/app/data/backups';
-        saveLocal(jsonStr, dir, filename, cfg.retention_days, tenant.slug);
-        targetDescription = `${dir}/${filename}`;
-        break;
-      }
+      case 'local':
       case 'path': {
-        if (!cfg.path) throw new Error('Kein Ziel-Pfad konfiguriert');
-        saveLocal(jsonStr, cfg.path, filename, cfg.retention_days, tenant.slug);
-        targetDescription = `${cfg.path}/${filename}`;
+        saveLocal(tmpPath, localDir, filename, cfg.retention_days, tenant.slug);
+        targetDescription = `${localDir}/${filename}`;
         break;
       }
       case 's3': {
         if (!cfg.s3_bucket || !cfg.s3_key_id || !cfg.s3_secret)
           throw new Error('S3-Konfiguration unvollstaendig (Bucket, Key-ID oder Secret fehlt)');
-        const key = await uploadS3(jsonStr, cfg, filename);
+        const key = await uploadS3(tmpPath, cfg, filename);
         targetDescription = `s3://${cfg.s3_bucket}/${key}`;
         break;
       }
       case 'sftp': {
         if (!cfg.sftp_host || !cfg.sftp_user)
           throw new Error('SFTP-Konfiguration unvollstaendig (Host oder Benutzer fehlt)');
-        const path = await uploadSftp(jsonStr, cfg, filename);
+        const path = await uploadSftp(tmpPath, cfg, filename);
         targetDescription = `sftp://${cfg.sftp_host}${path}`;
         break;
       }
@@ -267,6 +312,9 @@ export async function runBackupForTenant(tenantId) {
     auditLog(db, null, 'auto_backup_failed', { ip: 'system' }, { error: err.message });
     console.error(`[AutoBackup] ${tenant.slug}: FEHLER — ${err.message}`);
     return { ok: false, error: err.message };
+  } finally {
+    // Nach erfolgreichem local/path-Rename existiert die Datei nicht mehr.
+    try { if (existsSync(tmpPath)) unlinkSync(tmpPath); } catch { /* ignore */ }
   }
 }
 
@@ -292,8 +340,18 @@ async function tick() {
       const cfg = getBackupConfig(db);
       if (!cfg.enabled) continue;
       if (cfg.hour_utc !== hour) continue;
+      if (cfg.last_attempt_day === day) {   // ueberlebt einen Prozessabsturz
+        lastRunDay[tenant.id] = day;
+        continue;
+      }
 
+      // Tagesmarke persistent und VOR dem Lauf setzen. Nur im Speicher gehalten
+      // ging sie beim Prozessabsturz verloren, sodass der Backup-Versuch nach
+      // jedem Neustart erneut startete — eine Absturzschleife ueber die volle
+      // Stunde statt eines einzelnen fehlgeschlagenen Laufs.
       lastRunDay[tenant.id] = day;
+      db.prepare('INSERT OR REPLACE INTO tenant_settings (key, value) VALUES (?, ?)')
+        .run('backup.last_attempt_day', day);
       await runBackupForTenant(tenant.id);
     } catch (err) {
       console.error(`[AutoBackup] Tick-Fehler fuer ${tenant.id}:`, err.message);
