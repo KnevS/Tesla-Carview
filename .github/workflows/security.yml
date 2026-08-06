@@ -149,8 +149,11 @@ jobs:
 
       # --ignore-scripts hier ausreichend: SBOM braucht keinen Native-
       # Build, nur den aufgeloesten Dependency-Graph.
+      # --omit=optional verhindert ELSPROBLEMS durch plattform-spezifische
+      # optionale Pakete (sharp-wasm32, lightningcss-musl), die npm ls
+      # als extraneous/invalid flaggt und damit den CycloneDX-Run abbricht.
       - name: Install (no postinstall scripts)
-        run: npm ci --ignore-scripts
+        run: npm ci --ignore-scripts --omit=optional
 
       # CycloneDX-SBOM als Build-Artefakt. Laesst sich gegen den
       # Live-Stand des Repos verifizieren und in Audits referenzieren.
