@@ -8,7 +8,7 @@
 // Schema-Change. Läuft on-demand (Admin-Button) und wöchentlich im
 // nightlyMaintenance-Lauf.
 
-import { existsSync, statSync, readdirSync, openSync, readSync, closeSync } from 'fs';
+import { existsSync, statSync, openSync, readSync, closeSync } from 'fs';
 import { join } from 'path';
 import { getTenantSetting, setTenantSetting } from './configService.js';
 import { getBackupConfig } from './autoBackupService.js';
@@ -72,25 +72,27 @@ function backupIntegrity(bc) {
   }
 }
 
+// Der zu pruefende Pfad kommt aus backup.last_snapshot, die Aussage aber von
+// der Platte. Das Verzeichnis selbst zu erraten waere falsch: Der Schreiber
+// waehlt es abhaengig vom Modus, und der Dateiname traegt den Mandanten-Slug —
+// ein Verzeichnis-Scan ohne beides meldet bei zwei Mandanten den einen gruen,
+// weil der andere frisch gesichert hat.
 function snapshotRecent(bc, now) {
+  const v = bc.last_snapshot;
+  if (!v) return mk('backup_snapshot', 'warn', 'Noch kein Datenbank-Snapshot erstellt');
+  if (v.startsWith('FEHLER')) return mk('backup_snapshot', 'error', `Snapshot fehlgeschlagen: ${v.slice(7)}`);
+
   try {
-    const dir = bc.path || '/app/data/backups';
-    if (!existsSync(dir)) return mk('backup_snapshot', 'warn', 'Backup-Verzeichnis nicht gefunden');
-    const files = readdirSync(dir)
-      .filter(f => f.startsWith('tesla-carview-snapshot-') && f.endsWith('.db.gz'))
-      .map(f => ({ f, s: statSync(join(dir, f)) }))
-      .sort((a, b) => b.s.mtimeMs - a.s.mtimeMs);
-    if (!files.length) return mk('backup_snapshot', 'warn', 'Noch kein Datenbank-Snapshot vorhanden');
-    const newest = files[0];
-    const ageH = Math.round((now - newest.s.mtimeMs / 1000) / 3600);
-    if (newest.s.size < 1024) {
-      return mk('backup_snapshot', 'error', `Snapshot verdächtig klein (${newest.s.size} B)`);
+    const sep  = v.indexOf(' ');
+    const file = sep > 0 ? v.slice(sep + 1) : '';
+    if (!file || !existsSync(file)) {
+      return mk('backup_snapshot', 'error', `Snapshot-Datei fehlt: ${file || '(kein Pfad vermerkt)'}`);
     }
-    if (ageH > 48) {
-      return mk('backup_snapshot', 'warn', `Neuester Snapshot ist ${Math.round(ageH / 24)} Tage alt`);
-    }
-    return mk('backup_snapshot', 'ok',
-      `Snapshot vor ${ageH} h, ${Math.round(newest.s.size / 1048576)} MB, ${files.length} vorgehalten`);
+    const st   = statSync(file);
+    const ageH = Math.round((now - st.mtimeMs / 1000) / 3600);
+    if (st.size < 1024) return mk('backup_snapshot', 'error', `Snapshot verdächtig klein (${st.size} B)`);
+    if (ageH > 48) return mk('backup_snapshot', 'warn', `Neuester Snapshot ist ${Math.round(ageH / 24)} Tage alt`);
+    return mk('backup_snapshot', 'ok', `Snapshot vor ${ageH} h, ${Math.round(st.size / 1048576)} MB`);
   } catch (e) {
     return mk('backup_snapshot', 'error', `Snapshot nicht prüfbar: ${e.message}`);
   }
