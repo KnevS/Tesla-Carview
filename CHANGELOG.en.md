@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.52.1] - 2026-08-07
+
+### Fixed
+
+- **Rotation and self-check could not cope with encrypted backups.** On the server, `sanitize-backups.sh` encrypts backups after the fact (AES-256) and appends `.enc` to the filename. Rotation in `saveLocal()` and `writeDbSnapshot()` filtered strictly on `.json` and `.db.gz` — after the first encryption run it would **never** have matched a file again, and backups would have grown without bound. At roughly 115 MB per night against 3 GB of free disk, that is a full disk within weeks. Likewise `backup_snapshot` and `backup_integrity` would have reported "file missing" every day from the first encryption run onwards, even though both backups were produced correctly. Rotation and checks now accept either form; for an encrypted backup the integrity check states honestly that structure cannot be verified without the key, and judges only presence and size.
+
+---
+
 ## [v3.52.0] - 2026-08-07
 
 ### Added

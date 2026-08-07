@@ -45,7 +45,17 @@ function readTail(file, size, bytes) {
 
 function backupIntegrity(bc) {
   try {
-    const file = join(bc.path || '/app/data/backups', bc.last_filename);
+    const plain = join(bc.path || '/app/data/backups', bc.last_filename);
+    // Verschluesselte Sicherung: Struktur laesst sich nicht pruefen, ohne den
+    // Schluessel zu kennen — Vorhandensein und Groesse sind dann die Aussage.
+    if (!existsSync(plain) && existsSync(`${plain}.enc`)) {
+      const encSize = statSync(`${plain}.enc`).size;
+      return encSize < 1024
+        ? mk('backup_integrity', 'error', `Verschlüsseltes Backup verdächtig klein (${encSize} B)`)
+        : mk('backup_integrity', 'ok',
+          `Backup verschlüsselt vorhanden: ${Math.round(encSize / 1024)} KB (Struktur nicht prüfbar)`);
+    }
+    const file = plain;
     if (!existsSync(file)) return mk('backup_integrity', 'error', 'Letzte Backup-Datei nicht gefunden');
     const size = statSync(file).size;
     if (size < 1024) return mk('backup_integrity', 'error', `Backup verdächtig klein (${size} B)`);
@@ -84,9 +94,15 @@ function snapshotRecent(bc, now) {
 
   try {
     const sep  = v.indexOf(' ');
-    const file = sep > 0 ? v.slice(sep + 1) : '';
-    if (!file || !existsSync(file)) {
-      return mk('backup_snapshot', 'error', `Snapshot-Datei fehlt: ${file || '(kein Pfad vermerkt)'}`);
+    const noted = sep > 0 ? v.slice(sep + 1) : '';
+    // sanitize-backups.sh verschluesselt die Datei nachtraeglich und haengt
+    // `.enc` an. Ohne diesen Fallback meldet der Check jede Nacht ab 02:30
+    // "Datei fehlt", obwohl der Snapshot einwandfrei erzeugt wurde.
+    const file = noted && existsSync(noted) ? noted
+               : noted && existsSync(`${noted}.enc`) ? `${noted}.enc`
+               : null;
+    if (!file) {
+      return mk('backup_snapshot', 'error', `Snapshot-Datei fehlt: ${noted || '(kein Pfad vermerkt)'}`);
     }
     const st   = statSync(file);
     const ageH = Math.round((now - st.mtimeMs / 1000) / 3600);

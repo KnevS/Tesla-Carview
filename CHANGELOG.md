@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.52.1] - 2026-08-07
+
+### Behoben
+
+- **Rotation und Selbsttest kamen mit verschlüsselten Sicherungen nicht zurecht.** Auf dem Server verschlüsselt `sanitize-backups.sh` die Sicherungen nachträglich (AES-256) und hängt `.enc` an den Dateinamen. Die Rotation in `saveLocal()` und `writeDbSnapshot()` filterte aber strikt auf `.json` bzw. `.db.gz` — nach dem ersten Verschlüsselungslauf hätte sie **nie wieder** eine Datei gefunden, und die Sicherungen wären unbegrenzt gewachsen. Bei rund 115 MB pro Nacht und 3 GB freiem Platz wäre das binnen weniger Wochen eine volle Platte gewesen. Ebenso hätten `backup_snapshot` und `backup_integrity` im Selbsttest ab dem Verschlüsselungslauf täglich „Datei fehlt" gemeldet, obwohl beide Sicherungen einwandfrei erzeugt wurden. Rotation und Prüfungen akzeptieren jetzt beide Varianten; bei einer verschlüsselten Sicherung meldet die Integritätsprüfung ehrlich, dass sich die Struktur ohne Schlüssel nicht prüfen lässt, und beurteilt nur Vorhandensein und Größe.
+
+---
+
 ## [v3.52.0] - 2026-08-07
 
 ### Hinzugefügt
