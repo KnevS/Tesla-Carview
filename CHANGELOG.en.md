@@ -7,6 +7,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.52.0] - 2026-08-07
+
+### Added
+
+- **Nightly database snapshot — the recovery path that actually works.** The auto-backup now writes a compressed copy of the tenant database alongside the JSON (`tesla-carview-snapshot-<slug>-YYYY-MM-DD.db.gz`). Context: v3.51.12 fixed *producing* the JSON backup, but restoring it was still not viable — `POST /api/data/restore` loads the whole backup into memory as an object graph, measured at 405 MB peak for a 92 MB file. With ~174 MB of running backend against a 590 MB container limit that does not fit, and the backup grows daily. Small rearrangements do not help: `readFileSync` with an encoding instead of a buffer was *worse* at 570 MB, while releasing the buffer before parsing and parsing the buffer directly landed at 407 and 409 MB — the object graph itself is the cost. The snapshot sidesteps this entirely: `VACUUM INTO` produces a transactionally consistent copy (unlike a plain file copy, which can tear in WAL mode), SQLite handles it internally without touching the Node heap, and the gzip step streams. Measured against a 44 MB database: 20.7 MB output in about 1 s at **137 MB peak memory** instead of 405 MB. Restoring means decompressing the file and putting it in place — independent of data volume. Verified: `integrity_check` ok, all 350,000 test rows present, contents identical to the original.
+- **Self-check watches the snapshot.** A new `backup_snapshot` check reports age, size and retained count — deliberately based on the file on disk rather than a status field. Precisely such a field falsely reported success for 17 days in July, because the process died before the error could be written.
+
+### Changed
+
+- **Snapshot retention is configured separately** (`backup.snapshot_retention_days`, default 14 days; disable via `backup.db_snapshot`). Deliberately shorter than the JSON retention — snapshots exist for fast recovery, not archival, and at 30 days the JSON backups alone add up to several gigabytes.
+
+### Fixed
+
+- **Docs described a backup command that cannot work.** `docs/11-operations` recommended `sqlite3 … '.backup …'` for CLI backups, but the SQLite CLI is not part of the image. Replaced with `VACUUM INTO` via the bundled `better-sqlite3`, plus instructions for restoring a snapshot (DE + EN).
+
+---
+
 ## [v3.51.12] - 2026-08-06
 
 ### Fixed

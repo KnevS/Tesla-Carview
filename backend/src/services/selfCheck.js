@@ -72,6 +72,32 @@ function backupIntegrity(bc) {
   }
 }
 
+// Der zu pruefende Pfad kommt aus backup.last_snapshot, die Aussage aber von
+// der Platte. Das Verzeichnis selbst zu erraten waere falsch: Der Schreiber
+// waehlt es abhaengig vom Modus, und der Dateiname traegt den Mandanten-Slug —
+// ein Verzeichnis-Scan ohne beides meldet bei zwei Mandanten den einen gruen,
+// weil der andere frisch gesichert hat.
+function snapshotRecent(bc, now) {
+  const v = bc.last_snapshot;
+  if (!v) return mk('backup_snapshot', 'warn', 'Noch kein Datenbank-Snapshot erstellt');
+  if (v.startsWith('FEHLER')) return mk('backup_snapshot', 'error', `Snapshot fehlgeschlagen: ${v.slice(7)}`);
+
+  try {
+    const sep  = v.indexOf(' ');
+    const file = sep > 0 ? v.slice(sep + 1) : '';
+    if (!file || !existsSync(file)) {
+      return mk('backup_snapshot', 'error', `Snapshot-Datei fehlt: ${file || '(kein Pfad vermerkt)'}`);
+    }
+    const st   = statSync(file);
+    const ageH = Math.round((now - st.mtimeMs / 1000) / 3600);
+    if (st.size < 1024) return mk('backup_snapshot', 'error', `Snapshot verdächtig klein (${st.size} B)`);
+    if (ageH > 48) return mk('backup_snapshot', 'warn', `Neuester Snapshot ist ${Math.round(ageH / 24)} Tage alt`);
+    return mk('backup_snapshot', 'ok', `Snapshot vor ${ageH} h, ${Math.round(st.size / 1048576)} MB`);
+  } catch (e) {
+    return mk('backup_snapshot', 'error', `Snapshot nicht prüfbar: ${e.message}`);
+  }
+}
+
 /** Führt den Selbsttest aus, speichert den Report in tenant_settings und gibt ihn zurück. */
 export function runSelfCheck(db) {
   const now = Math.floor(Date.now() / 1000);
@@ -135,6 +161,13 @@ export function runSelfCheck(db) {
         : `Kein aktuelles erfolgreiches Backup${age}`));
   }
   if (bc.enabled && bc.mode === 'local' && bc.last_filename) checks.push(backupIntegrity(bc));
+
+  // Der Snapshot ist der Weg, der sich im Ernstfall wirklich zurueckspielen
+  // laesst — er wird deshalb eigenstaendig geprueft und nicht mit dem
+  // JSON-Status vermischt. Gemessen wird die Datei auf der Platte, nicht ein
+  // Statusfeld: Genau ein solches Feld meldete 17 Tage lang faelschlich
+  // Erfolg, weil der Prozess vor dem Schreiben des Fehlers starb.
+  if (bc.enabled && bc.db_snapshot) checks.push(snapshotRecent(bc, now));
 
   const summary = checks.reduce((s, c) => (SEV[c.status] > SEV[s] ? c.status : s), 'ok');
   const report = { generated_at: now, summary, checks };
