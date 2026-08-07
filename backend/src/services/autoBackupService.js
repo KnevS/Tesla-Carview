@@ -201,7 +201,12 @@ function saveLocal(sourcePath, targetDir, filename, retentionDays, slug) {
     const cutoff = Date.now() - retentionDays * 86400 * 1000;
     try {
       readdirSync(targetDir)
-        .filter(f => f.startsWith(`tesla-carview-backup-${slug}-`) && f.endsWith('.json'))
+        // `.enc` mitnehmen: sanitize-backups.sh verschluesselt die Sicherungen
+        // nachtraeglich und benennt sie um. Ohne diese Endung greift die
+        // Rotation nach dem ersten Verschluesselungslauf nie wieder, und die
+        // Sicherungen wachsen unbegrenzt.
+        .filter(f => f.startsWith(`tesla-carview-backup-${slug}-`)
+                  && (f.endsWith('.json') || f.endsWith('.json.enc')))
         .forEach(f => {
           try {
             const full = join(targetDir, f);
@@ -301,7 +306,9 @@ export async function writeDbSnapshot(db, tenant, targetDir, retentionDays) {
     const cutoff = Date.now() - retentionDays * 86400 * 1000;
     try {
       readdirSync(targetDir)
-        .filter(f => f.startsWith(`tesla-carview-snapshot-${tenant.slug}-`) && f.endsWith('.db.gz'))
+        // `.enc` wie bei den JSON-Sicherungen, siehe saveLocal().
+        .filter(f => f.startsWith(`tesla-carview-snapshot-${tenant.slug}-`)
+                  && (f.endsWith('.db.gz') || f.endsWith('.db.gz.enc')))
         .forEach(f => {
           try {
             const full = join(targetDir, f);
