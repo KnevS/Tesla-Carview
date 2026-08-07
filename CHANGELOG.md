@@ -7,6 +7,23 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.52.0] - 2026-08-07
+
+### Hinzugefügt
+
+- **Nächtlicher Datenbank-Snapshot — der Weg zurück, der im Ernstfall funktioniert.** Der Auto-Backup schreibt jetzt zusätzlich zum JSON eine komprimierte Kopie der Tenant-DB (`tesla-carview-snapshot-<slug>-YYYY-MM-DD.db.gz`). Hintergrund: Das JSON-Backup ließ sich zwar wieder erzeugen (v3.51.12), aber nicht mehr zuverlässig **einspielen** — `POST /api/data/restore` lädt die gesamte Sicherung als Objektgraph in den Speicher, gemessen 405 MB Spitzenbedarf bei 92 MB Datei. Bei rund 174 MB laufendem Backend und 590 MB Container-Limit ist das nicht tragfähig, und die Sicherung wächst täglich. Kleine Umbauten helfen dabei nicht: `readFileSync` mit Encoding statt Puffer war mit 570 MB sogar schlechter, Puffer-vor-dem-Parsen-freigeben und Puffer-direkt-parsen lagen bei 407 bzw. 409 MB — der Objektgraph selbst ist die Kosten. Der Snapshot umgeht das Problem vollständig: `VACUUM INTO` erzeugt einen transaktional konsistenten Stand (anders als ein Dateikopie, die im WAL-Modus zerreißen kann), SQLite erledigt das intern ohne den Node-Heap zu belasten, und das anschließende Gzip läuft streamend. Gemessen an einer 44-MB-Datenbank: 20,7 MB Ergebnis in rund 1 s bei **137 MB Spitzenspeicher** statt 405 MB. Der Snapshot wird entpackt und an die Stelle der Datenbank gelegt — fertig, unabhängig von der Datenmenge. Verifiziert: `integrity_check` ok, alle 350.000 Testzeilen vorhanden, Inhalte identisch zum Original.
+- **Selbsttest überwacht den Snapshot.** Neuer Check `backup_snapshot` prüft Alter, Größe und Anzahl der vorgehaltenen Snapshots — bewusst anhand der Datei auf der Platte statt eines Statusfelds. Genau ein solches Feld meldete im Juli 17 Tage lang fälschlich Erfolg, weil der Prozess vor dem Schreiben des Fehlers starb.
+
+### Geändert
+
+- **Aufbewahrung für Snapshots getrennt einstellbar** (`backup.snapshot_retention_days`, Standard 14 Tage; abschaltbar über `backup.db_snapshot`). Bewusst kürzer als beim JSON: Snapshots dienen der schnellen Wiederherstellung, nicht der Archivierung — und bei 30 Tagen Aufbewahrung summieren sich allein die JSON-Sicherungen auf mehrere Gigabyte.
+
+### Behoben
+
+- **Doku beschrieb eine Sicherung, die so nicht funktioniert.** `docs/11-operations` empfahl für CLI-Backups `sqlite3 … '.backup …'` — das SQLite-CLI ist im Image aber gar nicht installiert. Ersetzt durch `VACUUM INTO` über das mitgelieferte `better-sqlite3`, ergänzt um eine Anleitung zum Zurückspielen des Snapshots (DE + EN).
+
+---
+
 ## [v3.51.12] - 2026-08-06
 
 ### Behoben

@@ -23,13 +23,38 @@ Inhalt: alle 26 Tabellen der aktiven Tenant-DB (Fahrzeuge, Fahrten + GPS-Punkte,
 **Per CLI / Cron** (für externe Backup-Strategien):
 
 ```bash
-# Sichert direkt die SQLite-Dateien — atomar, ohne Service-Stop
-docker compose -f docker-compose.prod.yml exec backend sh -c \
-  "sqlite3 /app/data/master.db '.backup /app/data/backup-$(date +%F).db'"
-docker cp tesla-carview-backend:/app/data/. /pfad/zu/backup/
+# Konsistente Kopie ohne Service-Stop. VACUUM INTO schreibt einen
+# transaktional sauberen Stand, auch während Schreibzugriffe laufen —
+# ein blosses Kopieren der Datei liefert im WAL-Modus einen zerrissenen Stand.
+docker exec tesla-carview-backend node --input-type=module -e '
+import Database from "better-sqlite3";
+const db = new Database("/app/data/master.db", { readonly: true });
+db.prepare("VACUUM INTO ?").run("/tmp/master-backup.db");
+db.close();'
+docker cp tesla-carview-backend:/tmp/master-backup.db /pfad/zu/backup/
 ```
 
-Empfehlung: Web-UI-Backup zusätzlich auf eine externe Platte legen — eine einzige JSON-Datei pro Mandant ist portabel und versionierbar.
+> Das SQLite-CLI (`sqlite3`) ist im Image **nicht** enthalten — die Sicherung läuft deshalb über das mitgelieferte `better-sqlite3`.
+
+Empfehlung: Backup zusätzlich auf eine externe Platte legen. Liegen Sicherung und Datenbank auf derselben Maschine, schützen sie zwar gegen Bedienfehler und Datenkorruption, aber nicht gegen den Verlust des Servers.
+
+### Automatischer Datenbank-Snapshot
+
+Zusätzlich zum JSON schreibt der nächtliche Lauf eine komprimierte Kopie der Tenant-Datenbank: `tesla-carview-snapshot-<slug>-YYYY-MM-DD.db.gz` im selben Verzeichnis.
+
+Der Unterschied ist praktisch relevant: Der JSON-Restore lädt die gesamte Sicherung als Objektgraph in den Arbeitsspeicher (bei rund 100 MB Sicherung über 400 MB Spitzenbedarf, mehr als der Container üblicherweise übrig hat). Ein Snapshot wird stattdessen einfach entpackt und an die Stelle der Datenbank gelegt — unabhängig von der Datenmenge.
+
+Wiederherstellen:
+
+```bash
+gunzip tesla-carview-snapshot-<slug>-YYYY-MM-DD.db.gz
+docker compose -f docker-compose.prod.yml stop backend
+docker cp tesla-carview-snapshot-<slug>-YYYY-MM-DD.db \
+  tesla-carview-backend:/app/data/tenants/<tenant-id>.db
+docker compose -f docker-compose.prod.yml start backend
+```
+
+Steuerung in `tenant_settings`: `backup.db_snapshot` (Standard an) und `backup.snapshot_retention_days` (Standard 14). Die Aufbewahrung ist bewusst kürzer als beim JSON — Snapshots dienen der schnellen Wiederherstellung, nicht der Archivierung. Der Selbsttest prüft unter `backup_snapshot`, ob ein aktueller Snapshot vorliegt.
 
 ### Backup wiederherstellen
 
