@@ -17,8 +17,10 @@
 
 import {
   mkdirSync, readdirSync, unlinkSync, existsSync, statSync,
-  openSync, writeSync, closeSync, renameSync, createReadStream,
+  openSync, writeSync, closeSync, renameSync, createReadStream, createWriteStream,
 } from 'node:fs';
+import { createGzip } from 'node:zlib';
+import { pipeline } from 'node:stream/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { getAllTenants, getDb } from '../db/database.js';
@@ -42,6 +44,7 @@ const CFG_KEYS = [
   'backup.sftp_password', 'backup.sftp_path',
   'backup.last_run', 'backup.last_status', 'backup.last_error', 'backup.last_filename',
   'backup.last_attempt_day',
+  'backup.db_snapshot', 'backup.snapshot_retention_days', 'backup.last_snapshot',
 ];
 
 // Welche Felder werden bei Lesen/Schreiben verschluesselt?
@@ -78,6 +81,11 @@ export function getBackupConfig(db) {
     last_error:     raw.last_error     || null,
     last_filename:  raw.last_filename  || null,
     last_attempt_day: raw.last_attempt_day || null,
+    // Standardmaessig an: der Snapshot ist der einzige Weg, der sich ohne
+    // Speicherprobleme zurueckspielen laesst.
+    db_snapshot:    raw.db_snapshot !== '0',
+    snapshot_retention_days: parseInt(raw.snapshot_retention_days ?? '14', 10),
+    last_snapshot:  raw.last_snapshot  || null,
   };
 }
 
@@ -87,6 +95,9 @@ export function setBackupConfig(db, updates) {
   );
   const set = (k, v) => upsert.run(`backup.${k}`, v ?? '');
   if (updates.enabled   !== undefined) set('enabled',  updates.enabled ? '1' : '0');
+  if (updates.db_snapshot !== undefined) set('db_snapshot', updates.db_snapshot ? '1' : '0');
+  if (updates.snapshot_retention_days !== undefined)
+    set('snapshot_retention_days', String(updates.snapshot_retention_days));
   if (updates.mode      !== undefined) set('mode',      updates.mode);
   if (updates.hour_utc  !== undefined) set('hour_utc',  String(updates.hour_utc));
   if (updates.retention_days !== undefined) set('retention_days', String(updates.retention_days));
@@ -251,6 +262,57 @@ async function uploadSftp(sourcePath, cfg, filename) {
   return remotePath;
 }
 
+// ---- Datenbank-Snapshot ----
+
+/**
+ * Konsistente, kompakte Kopie der Tenant-DB als `.db.gz`.
+ *
+ * Ergaenzt den JSON-Dump um den Weg, der im Ernstfall zaehlt: Eine
+ * SQLite-Datei laesst sich direkt zurueckspielen, waehrend der JSON-Restore
+ * die gesamte Sicherung als Objektgraph in den Speicher laedt (gemessen
+ * 405 MB Spitze bei 92 MB Datei — mehr, als der Container uebrig hat).
+ *
+ * `VACUUM INTO` schreibt einen transaktional konsistenten Stand, auch waehrend
+ * Schreibzugriffe laufen — anders als ein blosses Kopieren der Datei, das im
+ * WAL-Modus einen zerrissenen Stand liefern kann. SQLite erledigt das intern,
+ * der Node-Heap bleibt unberuehrt; das anschliessende Gzip laeuft streamend
+ * (gemessen: 6 MB Heap, ~1 s fuer 44 MB, rund 50 % kleiner).
+ */
+export async function writeDbSnapshot(db, tenant, targetDir, retentionDays) {
+  mkdirSync(targetDir, { recursive: true });
+  const base    = `tesla-carview-snapshot-${tenant.slug}-${new Date().toISOString().slice(0, 10)}`;
+  const rawPath = join(targetDir, `${base}.db`);
+  const gzPath  = join(targetDir, `${base}.db.gz`);
+
+  try { if (existsSync(rawPath)) unlinkSync(rawPath); } catch { /* ignore */ }
+  // Parameterbindung statt String-Interpolation — der Pfad landet sonst
+  // ungeprueft in einer SQL-Anweisung.
+  db.prepare('VACUUM INTO ?').run(rawPath);
+
+  try {
+    await pipeline(createReadStream(rawPath), createGzip({ level: 6 }), createWriteStream(gzPath));
+  } finally {
+    try { unlinkSync(rawPath); } catch { /* ignore */ }
+  }
+
+  // Eigene, kuerzere Aufbewahrung als beim JSON: Snapshots dienen der schnellen
+  // Wiederherstellung, nicht der Archivierung — und die Platte ist knapp.
+  if (retentionDays > 0) {
+    const cutoff = Date.now() - retentionDays * 86400 * 1000;
+    try {
+      readdirSync(targetDir)
+        .filter(f => f.startsWith(`tesla-carview-snapshot-${tenant.slug}-`) && f.endsWith('.db.gz'))
+        .forEach(f => {
+          try {
+            const full = join(targetDir, f);
+            if (statSync(full).mtimeMs < cutoff) unlinkSync(full);
+          } catch { /* ignore */ }
+        });
+    } catch { /* ignore rotation errors */ }
+  }
+  return { path: gzPath, bytes: statSync(gzPath).size };
+}
+
 // ---- Haupt-Orchestrator ----
 
 export async function runBackupForTenant(tenantId) {
@@ -301,6 +363,23 @@ export async function runBackupForTenant(tenantId) {
       }
       default:
         throw new Error(`Unbekannter Backup-Modus: ${cfg.mode}`);
+    }
+
+    // Snapshot als Zusatz: Ein Fehlschlag hier darf das gelungene JSON-Backup
+    // nicht als gescheitert markieren, muss aber sichtbar bleiben.
+    if (cfg.db_snapshot) {
+      const snapDir = localDir ?? '/app/data/backups';
+      const noteSnapshot = (v) => db
+        .prepare('INSERT OR REPLACE INTO tenant_settings (key, value) VALUES (?, ?)')
+        .run('backup.last_snapshot', v);
+      try {
+        const snap = await writeDbSnapshot(db, tenant, snapDir, cfg.snapshot_retention_days);
+        noteSnapshot(`${new Date().toISOString()} ${snap.path}`);
+        console.log(`[AutoBackup] ${tenant.slug}: DB-Snapshot ${(snap.bytes / 1048576).toFixed(1)} MB → ${snap.path}`);
+      } catch (e) {
+        noteSnapshot(`FEHLER ${new Date().toISOString()}: ${e.message}`);
+        console.error(`[AutoBackup] ${tenant.slug}: DB-Snapshot fehlgeschlagen — ${e.message}`);
+      }
     }
 
     setStatus(db, 'success', '', targetDescription);

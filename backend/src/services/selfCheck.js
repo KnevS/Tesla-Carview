@@ -8,7 +8,7 @@
 // Schema-Change. Läuft on-demand (Admin-Button) und wöchentlich im
 // nightlyMaintenance-Lauf.
 
-import { existsSync, statSync, openSync, readSync, closeSync } from 'fs';
+import { existsSync, statSync, readdirSync, openSync, readSync, closeSync } from 'fs';
 import { join } from 'path';
 import { getTenantSetting, setTenantSetting } from './configService.js';
 import { getBackupConfig } from './autoBackupService.js';
@@ -69,6 +69,30 @@ function backupIntegrity(bc) {
     return mk('backup_integrity', 'ok', `Backup geprüft: ${Math.round(size / 1024)} KB, ${present.length} Tabellen, Struktur gültig`);
   } catch (e) {
     return mk('backup_integrity', 'error', `Backup nicht lesbar: ${e.message}`);
+  }
+}
+
+function snapshotRecent(bc, now) {
+  try {
+    const dir = bc.path || '/app/data/backups';
+    if (!existsSync(dir)) return mk('backup_snapshot', 'warn', 'Backup-Verzeichnis nicht gefunden');
+    const files = readdirSync(dir)
+      .filter(f => f.startsWith('tesla-carview-snapshot-') && f.endsWith('.db.gz'))
+      .map(f => ({ f, s: statSync(join(dir, f)) }))
+      .sort((a, b) => b.s.mtimeMs - a.s.mtimeMs);
+    if (!files.length) return mk('backup_snapshot', 'warn', 'Noch kein Datenbank-Snapshot vorhanden');
+    const newest = files[0];
+    const ageH = Math.round((now - newest.s.mtimeMs / 1000) / 3600);
+    if (newest.s.size < 1024) {
+      return mk('backup_snapshot', 'error', `Snapshot verdächtig klein (${newest.s.size} B)`);
+    }
+    if (ageH > 48) {
+      return mk('backup_snapshot', 'warn', `Neuester Snapshot ist ${Math.round(ageH / 24)} Tage alt`);
+    }
+    return mk('backup_snapshot', 'ok',
+      `Snapshot vor ${ageH} h, ${Math.round(newest.s.size / 1048576)} MB, ${files.length} vorgehalten`);
+  } catch (e) {
+    return mk('backup_snapshot', 'error', `Snapshot nicht prüfbar: ${e.message}`);
   }
 }
 
@@ -135,6 +159,13 @@ export function runSelfCheck(db) {
         : `Kein aktuelles erfolgreiches Backup${age}`));
   }
   if (bc.enabled && bc.mode === 'local' && bc.last_filename) checks.push(backupIntegrity(bc));
+
+  // Der Snapshot ist der Weg, der sich im Ernstfall wirklich zurueckspielen
+  // laesst — er wird deshalb eigenstaendig geprueft und nicht mit dem
+  // JSON-Status vermischt. Gemessen wird die Datei auf der Platte, nicht ein
+  // Statusfeld: Genau ein solches Feld meldete 17 Tage lang faelschlich
+  // Erfolg, weil der Prozess vor dem Schreiben des Fehlers starb.
+  if (bc.enabled && bc.db_snapshot) checks.push(snapshotRecent(bc, now));
 
   const summary = checks.reduce((s, c) => (SEV[c.status] > SEV[s] ? c.status : s), 'ok');
   const report = { generated_at: now, summary, checks };
