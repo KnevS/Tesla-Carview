@@ -104,15 +104,19 @@ jobs:
             sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml pull backend frontend
 
             echo "==> Container stoppen (sauberer Shutdown vor Recreate) …"
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml stop backend frontend || true
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml stop nginx backend frontend || true
 
             echo "==> Container entfernen (vermeidet Name-Konflikt beim Up) …"
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml rm -f backend frontend || true
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml rm -f nginx backend frontend || true
 
             # Falls ein vorheriger Deploy einen Random-Prefix-Container hinter-
             # lassen hat (selten, aber moeglich vor diesem Fix), raeumen wir
             # ihn jetzt mit auf damit der saubere Name wieder frei ist.
-            for name in tesla-carview-backend tesla-carview-frontend; do
+            # nginx wird ebenfalls gecheckt: sein Port-Mapping (8080:80) wird
+            # nur beim Recreate aus docker-compose.prod.yml uebernommen;
+            # ein blosses `restart` wuerde ein falsch gestartetes Container
+            # mit fehlendem Mapping nicht heilen.
+            for name in tesla-carview-nginx tesla-carview-backend tesla-carview-frontend; do
               for c in $(sudo docker ps -aq --filter "name=_${name}\$"); do
                 echo "==> Verwaister Random-Prefix-Container: $c"
                 sudo docker rm -f "$c" || true
@@ -120,7 +124,7 @@ jobs:
             done
 
             echo "==> Container hochziehen …"
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d backend frontend
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d backend frontend nginx
 
             # Ollama (gebundelter lokaler LLM-Runtime, ab v3.5.0). Idempotent:
             # wenn schon up → no-op, sonst starten.
@@ -158,9 +162,6 @@ jobs:
               echo "==> nginx nicht in traefik-proxy — network connect"
               sudo docker network connect traefik-proxy tesla-carview-nginx
             fi
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml \
-              restart nginx
-
             # Post-Deploy-Healthcheck (Lehre aus dem 502 vom 2026-06-21):
             # Der Host-nginx-Edge proxyt teslaview.krische.com → 127.0.0.1:8080
             # (Port-Mapping des nginx-Containers). Wenn das Mapping fehlt oder
