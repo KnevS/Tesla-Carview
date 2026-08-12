@@ -54,6 +54,12 @@ jobs:
     env:
       GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GHCR_ACTOR: ${{ github.actor }}
+      # Notausgang: Repository-Variable ALLOW_STALE_CHECKOUT=true laesst den
+      # Deploy trotz nicht-synchronem Checkout durchlaufen (dann nur Warnung
+      # statt Abbruch). Gedacht fuer Incidents, in denen ein Container-Update
+      # dringender ist als ein sauberer Arbeitsbaum. Setzbar unter
+      # Settings → Secrets and variables → Actions → Variables, ohne Code-Aenderung.
+      ALLOW_STALE_CHECKOUT: ${{ vars.ALLOW_STALE_CHECKOUT }}
     steps:
       - uses: actions/checkout@v7
 
@@ -63,7 +69,7 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-          envs: GHCR_TOKEN,GHCR_ACTOR
+          envs: GHCR_TOKEN,GHCR_ACTOR,ALLOW_STALE_CHECKOUT
           command_timeout: 30m
           script: |
             APP_DIR="${{ secrets.DEPLOY_APP_DIR }}"
@@ -71,6 +77,56 @@ jobs:
             cd "$APP_DIR"
             sudo git fetch origin main
             sudo git reset --hard origin/main
+
+            # ── Sync-Verifikation ────────────────────────────────────────
+            # Lehre aus dem 2026-08-12 entdeckten Ausfall: Der Arbeitsbaum
+            # unter /opt/tesla-carview folgte seit dem 2026-06-08 nicht mehr
+            # `main` — der Reset lief nicht mehr durch (belegt per Reflog),
+            # der Checkout stand auf einem Feature-Branch und hing auf
+            # v3.13.1 fest. Weil dieses Skript kein `set -e` hat, lief der
+            # Deploy trotzdem weiter und meldete Erfolg. Zwei Monate lang
+            # fiel das niemandem auf.
+            #
+            # Das ist deshalb gefaehrlich, weil docker compose die Datei
+            # docker-compose.prod.yml und alle Bind-Mounts aus genau diesem
+            # Arbeitsbaum liest: Container-Images waren aktuell, die
+            # Host-Dateien nicht. Konkret lief das Backend mit 43 statt 46
+            # Routen, weil ein gemountetes system.js eingefroren war.
+            #
+            # Ab hier gilt: kein Deploy auf einem Arbeitsbaum, der nicht
+            # `main` entspricht.
+            HEAD_SHA="$(sudo git rev-parse HEAD)"
+            MAIN_SHA="$(sudo git rev-parse origin/main)"
+            CUR_BRANCH="$(sudo git rev-parse --abbrev-ref HEAD)"
+
+            if [ "$HEAD_SHA" != "$MAIN_SHA" ]; then
+              echo "::error::Arbeitsbaum folgt origin/main nicht — Deploy abgebrochen."
+              echo "  Verzeichnis : $APP_DIR"
+              echo "  Branch      : $CUR_BRANCH"
+              echo "  HEAD        : $HEAD_SHA"
+              echo "  origin/main : $MAIN_SHA"
+              echo ""
+              echo "  Der Reset oben hat nicht gegriffen. Haeufige Ursachen:"
+              echo "    - Checkout steht auf einem Feature-Branch statt main"
+              echo "    - DEPLOY_APP_DIR zeigt woanders hin als der fest"
+              echo "      verdrahtete compose-Pfad /opt/tesla-carview"
+              echo "    - lokale Aenderungen/Rechte verhindern den Reset"
+              echo ""
+              echo "  Diagnose auf dem Server:"
+              echo "    sudo git -C $APP_DIR status"
+              echo "    sudo git -C $APP_DIR reflog -5"
+              echo ""
+              echo "  Notausgang: Repository-Variable ALLOW_STALE_CHECKOUT=true"
+              echo "  laesst den Deploy trotzdem laufen (nur fuer Incidents)."
+              if [ "$ALLOW_STALE_CHECKOUT" = "true" ]; then
+                echo "::warning::ALLOW_STALE_CHECKOUT=true — Deploy laeuft trotz nicht-synchronem Arbeitsbaum weiter."
+              else
+                exit 1
+              fi
+            else
+              echo "==> Arbeitsbaum synchron mit origin/main ($CUR_BRANCH @ $(sudo git rev-parse --short HEAD))"
+            fi
+
             PRIVATE_REPO="/opt/tc-private.git"
             if [ -d "$PRIVATE_REPO" ]; then
               sudo git --git-dir="$PRIVATE_REPO" --work-tree="$APP_DIR" checkout -f HEAD -- .
