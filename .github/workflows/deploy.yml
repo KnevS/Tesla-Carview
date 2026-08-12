@@ -76,6 +76,36 @@ jobs:
             APP_DIR="${APP_DIR:-/opt/tesla-carview}"
             cd "$APP_DIR"
             sudo git fetch origin main
+
+            # ── skip-worktree-Bits loesen, BEVOR resettet wird ────────────
+            # Weiter unten setzt dieses Skript `update-index --skip-worktree`
+            # auf die tc-private-Overlay-Dateien, damit git sie nicht als
+            # modifiziert meldet. Genau diese Bits lassen aber den `reset
+            # --hard` im *naechsten* Deploy scheitern:
+            #
+            #   Fehler: Entry 'backend/src/routes/demo.js' not uptodate.
+            #           Cannot merge.
+            #
+            # Ein Deploy vergiftete damit den folgenden. Real passiert am
+            # 2026-06-08: ab da lief der Reset nie wieder durch, der
+            # Arbeitsbaum blieb zwei Monate auf v3.13.1 stehen — unbemerkt,
+            # weil das Skript kein `set -e` hat und Erfolg meldete.
+            #
+            # Die Bits werden generisch ueber `ls-files -v` gelesen (Marker
+            # ist ein grosses S; Kleinbuchstaben stehen fuer
+            # assume-unchanged) und nicht ueber eine feste Dateiliste —
+            # sonst laeuft es wieder auf, sobald das Overlay eine weitere
+            # Datei bekommt.
+            SKIPPED="$(sudo git ls-files -v | awk '/^S/ {print substr($0,3)}')"
+            if [ -n "$SKIPPED" ]; then
+              echo "==> skip-worktree loesen vor dem Reset:"
+              echo "$SKIPPED" | while IFS= read -r f; do
+                [ -n "$f" ] || continue
+                echo "    $f"
+                sudo git update-index --no-skip-worktree -- "$f"
+              done
+            fi
+
             sudo git reset --hard origin/main
 
             # ── Sync-Verifikation ────────────────────────────────────────
