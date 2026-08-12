@@ -144,22 +144,25 @@ jobs:
             fi
 
             sudo docker logout ghcr.io
-            # Sicherstellen dass nginx in beiden erforderlichen Netzwerken läuft.
-            COMPOSE_NET="tesla-carview_tesla-net"
-            if ! sudo docker inspect tesla-carview-nginx \
-                --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' \
-                2>/dev/null | grep -q "$COMPOSE_NET"; then
-              echo "==> nginx nicht in $COMPOSE_NET — network connect"
-              sudo docker network connect "$COMPOSE_NET" tesla-carview-nginx
-            fi
+            # nginx immer neu erstellen (nicht nur restart) — stellt sicher,
+            # dass das Port-Mapping 8080:80 aus docker-compose.prod.yml
+            # tatsaechlich angewendet wird. `restart` belässt den Container
+            # unveraendert; Port-Bindings werden nur bei Container-Erstellung
+            # gesetzt. Dieses Muster behebt den 2026-08-07-Ausfall, bei dem
+            # der nginx-Container das Mapping verloren hatte und jeder Deploy
+            # es nur neu startete statt zu korrigieren.
+            echo "==> nginx neu erstellen (stellt Port-Bindung 8080:80 sicher) …"
+            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml \
+              up -d --force-recreate nginx
+
+            # traefik-proxy ist nicht in docker-compose.prod.yml definiert und
+            # muss nach dem Recreate (neuer Container) manuell verbunden werden.
             if ! sudo docker inspect tesla-carview-nginx \
                 --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' \
                 2>/dev/null | grep -q "traefik-proxy"; then
               echo "==> nginx nicht in traefik-proxy — network connect"
               sudo docker network connect traefik-proxy tesla-carview-nginx
             fi
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml \
-              restart nginx
 
             # Post-Deploy-Healthcheck (Lehre aus dem 502 vom 2026-06-21):
             # Der Host-nginx-Edge proxyt teslaview.krische.com → 127.0.0.1:8080
