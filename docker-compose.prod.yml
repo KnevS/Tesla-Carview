@@ -30,9 +30,23 @@ services:
       OLLAMA_URL: "http://ollama:11434"
     volumes:
       - tesla_data:/app/data
-      # system.js: enthaelt /container-restart Endpoint + generateVAPIDKeys-Fix.
-      # Volume-Mount sichert diese Aenderungen gegen Image-Updates ab.
-      - ./backend/src/routes/system.js:/app/src/routes/system.js:ro
+      # ENTFERNT (2026-08-12): Bind-Mount von backend/src/routes/system.js.
+      #
+      # Der Mount stammt aus einer Zeit, in der /container-restart und der
+      # generateVAPIDKeys-Fix nur lokal existierten und gegen Image-Updates
+      # abgesichert werden mussten. Beides ist laengst im Repo und damit im
+      # Image (`ghcr.io/knevs/tesla-carview/backend:main` fuehrt 46 Routen,
+      # inkl. partner_registered_domain).
+      #
+      # Seither kehrte sich die Wirkung um: ein Single-File-Bind-Mount
+      # gewinnt immer gegen das Image, der Mount zeigt aber auf den
+      # Arbeitsbaum unter /opt/tesla-carview — und der haengt auf einem
+      # alten Stand fest. Ergebnis: Prod lief mit 43 statt 46 Routen, es
+      # fehlten /system/self-check, /system/self-check/run und
+      # /system/telemetry-backfill.
+      #
+      # Ohne Mount kommt die Datei wieder aus dem Image und folgt damit
+      # automatisch jedem Deploy.
       # Demo-Feature wurde aus der Hauptinstanz entfernt (2026-05-26).
       # Die Demo laeuft als eigenstaendiger Stack unter /opt/tesla-carview-demo
       # und ist per https://demo.teslaview.krische.com erreichbar.
