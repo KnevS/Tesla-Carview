@@ -75,6 +75,30 @@ jobs:
             APP_DIR="${{ secrets.DEPLOY_APP_DIR }}"
             APP_DIR="${APP_DIR:-/opt/tesla-carview}"
             cd "$APP_DIR"
+
+            # ── Compose-Dateien bestimmen ────────────────────────────────
+            # Bisher war ueberall `-f docker-compose.prod.yml` fest
+            # verdrahtet. Mit explizitem -f laedt Compose die
+            # docker-compose.override.yml aber NICHT mehr automatisch dazu —
+            # anders als bei einem nackten `docker compose`. Jede
+            # Host-Anpassung in der override wurde vom Deploy also
+            # stillschweigend uebergangen, waehrend update.sh sie beachtete:
+            # zwei Deploy-Wege, zwei verschiedene Ergebnisse.
+            #
+            # Konkret auf iland: die override setzt `ports: !reset []` fuer
+            # nginx, weil Traefik direkt am Container haengt. Der Deploy
+            # erstellte nginx trotzdem mit 0.0.0.0:8080 — ein Port, der am
+            # TLS-Abschluss, den sec-headers und dem Login-Rate-Limit
+            # vorbeifuehrt.
+            #
+            # Fuer Fremd-Installationen aendert sich nichts: die override ist
+            # gitignored, existiert dort also nicht, und der Zweig greift
+            # nicht.
+            COMPOSE="-f $APP_DIR/docker-compose.prod.yml"
+            if [ -f "$APP_DIR/docker-compose.override.yml" ]; then
+              COMPOSE="$COMPOSE -f $APP_DIR/docker-compose.override.yml"
+              echo "==> docker-compose.override.yml gefunden — wird mitgeladen"
+            fi
             sudo git fetch origin main
 
             # ── skip-worktree-Bits loesen, BEVOR resettet wird ────────────
@@ -187,13 +211,13 @@ jobs:
             # Container sauber entfernen (kein Name-Conflict), dann hoch-
             # ziehen. Downtime ~10-15s; akzeptabel fuer ein Deployment.
             echo "==> Neue Images aus GHCR ziehen …"
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml pull backend frontend
+            sudo docker compose $COMPOSE pull backend frontend
 
             echo "==> Container stoppen (sauberer Shutdown vor Recreate) …"
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml stop backend frontend || true
+            sudo docker compose $COMPOSE stop backend frontend || true
 
             echo "==> Container entfernen (vermeidet Name-Konflikt beim Up) …"
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml rm -f backend frontend || true
+            sudo docker compose $COMPOSE rm -f backend frontend || true
 
             # Falls ein vorheriger Deploy einen Random-Prefix-Container hinter-
             # lassen hat (selten, aber moeglich vor diesem Fix), raeumen wir
@@ -206,7 +230,7 @@ jobs:
             done
 
             echo "==> Container hochziehen …"
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d backend frontend
+            sudo docker compose $COMPOSE up -d backend frontend
 
             # Ollama (gebundelter lokaler LLM-Runtime, ab v3.5.0). Idempotent:
             # wenn schon up → no-op, sonst starten.
@@ -220,25 +244,34 @@ jobs:
             # `compose --profile disabled config --services` listet die
             # Services die im disabled-Profile sind. Erscheint ollama dort,
             # ist der Service per Override abgeschaltet — skip.
-            if sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml \
+            if sudo docker compose $COMPOSE \
                  --profile disabled config --services 2>/dev/null | grep -q '^ollama$'; then
               echo "==> Ollama per disabled-Profile abgeschaltet — skip"
             else
               echo "==> Ollama sicherstellen (idempotent) …"
-              sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml up -d ollama || \
+              sudo docker compose $COMPOSE up -d ollama || \
                 echo "Ollama-Service nicht gestartet — OK"
             fi
 
             sudo docker logout ghcr.io
             # nginx immer neu erstellen (nicht nur restart) — stellt sicher,
-            # dass das Port-Mapping 8080:80 aus docker-compose.prod.yml
-            # tatsaechlich angewendet wird. `restart` belässt den Container
+            # dass die Port-Konfiguration aus den geladenen Compose-Dateien
+            # tatsaechlich angewendet wird. `restart` belaesst den Container
             # unveraendert; Port-Bindings werden nur bei Container-Erstellung
             # gesetzt. Dieses Muster behebt den 2026-08-07-Ausfall, bei dem
             # der nginx-Container das Mapping verloren hatte und jeder Deploy
             # es nur neu startete statt zu korrigieren.
-            echo "==> nginx neu erstellen (stellt Port-Bindung 8080:80 sicher) …"
-            sudo docker compose -f /opt/tesla-carview/docker-compose.prod.yml \
+            #
+            # Welche Bindung dabei herauskommt, haengt vom Host ab und ist
+            # bewusst nicht mehr hart auf 8080 festgelegt:
+            #   * ohne override  → 0.0.0.0:8080:80 aus docker-compose.prod.yml
+            #                      (Standard fuer Fremd-Installationen, z.B.
+            #                      Zugriff aus dem LAN auf einen Raspi)
+            #   * mit override   → `ports: !reset []`, also gar kein
+            #                      Host-Mapping; Traefik erreicht den
+            #                      Container ueber das traefik-proxy-Netz
+            echo "==> nginx neu erstellen (wendet die Port-Konfiguration an) …"
+            sudo docker compose $COMPOSE \
               up -d --force-recreate nginx
 
             # traefik-proxy ist nicht in docker-compose.prod.yml definiert und
@@ -251,23 +284,46 @@ jobs:
             fi
 
             # Post-Deploy-Healthcheck (Lehre aus dem 502 vom 2026-06-21):
-            # Der Host-nginx-Edge proxyt teslaview.krische.com → 127.0.0.1:8080
-            # (Port-Mapping des nginx-Containers). Wenn das Mapping fehlt oder
-            # das Backend nicht hochkommt, antwortet :8080 nicht — der Deploy
-            # soll dann ROT werden statt still "success" zu melden.
-            echo "==> Healthcheck: http://localhost:8080/api/health …"
+            # Kommt das Backend nach dem Deploy nicht hoch, soll der Deploy
+            # ROT werden statt still "success" zu melden.
+            #
+            # Geprueft wird IM nginx-Container gegen dessen eigenen Port 80.
+            # Frueher lief der Check gegen den Host-Port 8080 — das war an
+            # zwei Setups gebunden, die so nicht mehr gelten:
+            #
+            #   * Der urspruengliche Kommentar sprach von einem
+            #     "Host-nginx-Edge" auf 127.0.0.1:8080. Auf iland gibt es
+            #     keinen Host-nginx (mehr): Traefik belegt 80/443 und
+            #     erreicht den nginx-Container direkt ueber das
+            #     traefik-proxy-Netz.
+            #   * Seit die docker-compose.override.yml mitgeladen wird,
+            #     greift dort `ports: !reset []` — es GIBT dann bewusst kein
+            #     Host-Mapping mehr. Ein Check gegen :8080 wuerde jeden
+            #     Deploy scheitern lassen, obwohl alles korrekt ist.
+            #
+            # Der Weg ueber den Container testet dieselbe Kette
+            # (nginx → backend) und funktioniert in beiden Betriebsarten:
+            # mit Host-Port (Fremd-Installationen) wie ohne (Traefik-only).
+            # 127.0.0.1 statt localhost: im Container loest `localhost` auf
+            # [::1] auf, nginx hoert aber nur auf 0.0.0.0:80 (IPv4) — mit
+            # `localhost` gaebe es "Connection refused" bei voll intaktem
+            # Stack. Am laufenden Container verifiziert.
+            echo "==> Healthcheck: nginx-Container → http://127.0.0.1/api/health …"
             HEALTH_OK=""
             for i in $(seq 1 12); do
               sleep 3
-              if wget -q -O /dev/null -T 5 "http://localhost:8080/api/health"; then
+              if sudo docker exec tesla-carview-nginx \
+                   wget -q -O /dev/null -T 5 "http://127.0.0.1/api/health" 2>/dev/null; then
                 HEALTH_OK="yes"; echo "Healthcheck OK nach ~$((i*3))s"; break
               fi
-              echo "Versuch $i/12: Backend über :8080 noch nicht bereit …"
+              echo "Versuch $i/12: Backend ueber nginx noch nicht bereit …"
             done
             if [ -z "$HEALTH_OK" ]; then
-              echo "FEHLER: Backend antwortet nach dem Deploy nicht auf http://localhost:8080/api/health (Down/502)."
+              echo "FEHLER: Backend antwortet nach dem Deploy nicht auf http://127.0.0.1/api/health im nginx-Container (Down/502)."
               echo "Letzte Backend-Logs:"; sudo docker logs --tail 30 tesla-carview-backend 2>&1 || true
-              echo "nginx-Port-Mapping:"; sudo docker ps --filter name=tesla-carview-nginx --format '{{.Ports}}' || true
+              echo "Letzte nginx-Logs:";   sudo docker logs --tail 15 tesla-carview-nginx 2>&1 || true
+              echo "nginx-Port-Mapping (leer = Traefik-only, das ist ok):"
+              sudo docker ps --filter name=tesla-carview-nginx --format '{{.Ports}}' || true
               exit 1
             fi
 
