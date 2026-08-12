@@ -7,6 +7,32 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.52.2] - 2026-08-13
+
+### Fixed
+
+- **`docker-compose.prod.yml` shadowed the backend image with a local file.** `backend/src/routes/system.js` was mounted as a single-file bind mount. Such a mount always wins over the file inside the image — so if the checkout sits on an older commit or a branch, the container silently runs a different backend than the one that was built. On the reference installation this meant a backend with 43 instead of 46 routes; `GET /api/system/self-check`, `POST /api/system/self-check/run` and `POST /api/system/telemetry-backfill` were missing, and no deploy ever reported an error. The mount's original purpose (protecting `/container-restart` and the `generateVAPIDKeys` fix from image updates) has long been obsolete — both have been in the image for months. The mount is removed; the file now comes from the image again and follows every update.
+
+### Note for installations cloned on 2026-08-12
+
+Between **17:43 and 22:27 UTC on 2026-08-12**, `main` contained a broken `deploy/nginx-internal.conf` with a duplicate `location /` block. nginx refuses to start with it (`[emerg] duplicate location "/"`) and the stack stays at 502. If you cloned or pulled during that window, a plain `git pull` picks up the fix:
+
+```bash
+git pull
+docker compose -f docker-compose.prod.yml up -d --force-recreate nginx
+```
+
+Clones from before or after that window are unaffected.
+
+### Changed (deploy pipeline — only relevant if you run the GitHub Actions deploy)
+
+- **The deploy now honours an existing `docker-compose.override.yml`.** Previously `-f docker-compose.prod.yml` was hardcoded at every call site — and with an explicit `-f`, Compose no longer auto-loads the override. Host-specific settings were silently ignored by the deploy while `update.sh` honoured them. Without an override, nothing changes.
+- **The post-deploy healthcheck now runs inside the nginx container** instead of against the host port. It tests the same chain (nginx → backend) and works regardless of whether a host port is mapped. The `0.0.0.0:8080` default is unchanged — LAN access to a Raspberry Pi installation depends on it.
+- **The deploy aborts when the server checkout does not follow `main`** instead of reporting success. Previously a deploy could report green for two months without ever updating the host files.
+- **Root cause fixed:** the deploy script set `git update-index --skip-worktree` on the overlay files at the end — and exactly those bits made the `git reset --hard` fail on the *next* run (`Entry '…' not uptodate. Cannot merge.`). Each deploy poisoned the following one. The bits are now cleared before the reset.
+
+---
+
 ## [v3.52.1] - 2026-08-07
 
 ### Fixed

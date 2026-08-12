@@ -7,6 +7,32 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.52.2] - 2026-08-13
+
+### Behoben
+
+- **`docker-compose.prod.yml` überschrieb das Backend-Image mit einer lokalen Datei.** Die Datei `backend/src/routes/system.js` war als Single-File-Bind-Mount eingehängt. Ein solcher Mount gewinnt immer gegen die Datei im Image — läuft der Checkout also auf einem älteren Stand oder einem Branch, bekommt der Container still ein anderes Backend als das gebaute Image. Auf der Referenzinstallation lief dadurch ein Backend mit 43 statt 46 Routen; es fehlten `GET /api/system/self-check`, `POST /api/system/self-check/run` und `POST /api/system/telemetry-backfill`, ohne dass ein Deploy je einen Fehler meldete. Der ursprüngliche Zweck des Mounts (`/container-restart` und der `generateVAPIDKeys`-Fix gegen Image-Updates absichern) ist längst erfüllt — beides ist seit Langem im Image. Der Mount ist entfernt; die Datei kommt jetzt wieder aus dem Image und folgt damit jedem Update.
+
+### Hinweis für Installationen vom 2026-08-12
+
+Zwischen **17:43 und 22:27 UTC am 12.08.2026** stand in `main` eine fehlerhafte `deploy/nginx-internal.conf` mit einem doppelten `location /`-Block. nginx startet damit nicht (`[emerg] duplicate location "/"`), der Stack bleibt auf 502 hängen. Wer in diesem Zeitfenster geklont oder gezogen hat, holt den Fix mit einem einfachen `git pull` und startet nginx neu:
+
+```bash
+git pull
+docker compose -f docker-compose.prod.yml up -d --force-recreate nginx
+```
+
+Alle Clones vor oder nach diesem Fenster sind nicht betroffen.
+
+### Geändert (Deploy-Pipeline, nur für Betreiber mit GitHub-Actions-Deploy)
+
+- **Der Deploy respektiert jetzt eine vorhandene `docker-compose.override.yml`.** Bisher war `-f docker-compose.prod.yml` an allen Aufrufstellen fest verdrahtet — mit explizitem `-f` lädt Compose die Override aber nicht mehr automatisch dazu. Host-Anpassungen darin wurden vom Deploy stillschweigend übergangen, während `update.sh` sie beachtete. Ohne Override ändert sich nichts.
+- **Der Post-Deploy-Healthcheck prüft im nginx-Container statt über den Host-Port.** Er testet dieselbe Kette (nginx → Backend) und funktioniert unabhängig davon, ob ein Host-Port gemappt ist. Der Standard `0.0.0.0:8080` bleibt unverändert — der Zugriff aus dem Heimnetz auf eine Raspberry-Pi-Installation hängt daran.
+- **Der Deploy bricht ab, wenn der Server-Checkout nicht `main` folgt**, statt Erfolg zu melden. Zuvor konnte ein Deploy zwei Monate lang grün melden, ohne die Host-Dateien je zu aktualisieren.
+- **Ursache dafür behoben:** Das Deploy-Skript setzte am Ende `git update-index --skip-worktree` auf die Overlay-Dateien — genau diese Bits ließen den `git reset --hard` im *nächsten* Lauf scheitern (`Entry '…' not uptodate. Cannot merge.`). Ein Deploy vergiftete den folgenden. Die Bits werden jetzt vor dem Reset gelöst.
+
+---
+
 ## [v3.52.1] - 2026-08-07
 
 ### Behoben
