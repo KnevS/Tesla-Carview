@@ -7,6 +7,17 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.52.3] - 2026-08-14
+
+### Behoben
+
+- **Grüne Wochenreports blieben als offene Issues liegen.** Der wöchentliche Commit-Quality-Report legt auch dann ein Issue an, wenn alles in Ordnung ist („✅ … Alle Commits konform"). Geschlossen hat sie niemand — am 14.08.2026 lagen drei solcher Erfolgsmeldungen seit Wochen offen (#256, #264, #278). Eine Issue-Liste, in der Erfolge stehen bleiben, verliert genau die Aussagekraft, für die sie da ist: Man sieht nicht mehr auf einen Blick, ob etwas Aufmerksamkeit braucht. Die drei Altfälle sind geschlossen, der Nachweis bleibt in ihnen vollständig lesbar.
+- **Neuer Workflow `report-autoclose.yml`**, damit das nicht wiederkehrt: Ein Report mit den Labels `quality` oder `weekly-report`, dessen Titel mit ✅ beginnt, wird beim Anlegen sofort mit Begründung geschlossen. Meldet ein Report ein Problem (❌/⚠️ oder ein anderer Titel), bleibt er unangetastet offen. Bewusst titel- und labelbasiert statt autorbasiert — der Report kommt von einem Agenten unter einem echten Nutzerkonto, ein Autorfilter würde alle handgeschriebenen Issues miterfassen.
+
+### Geändert
+
+- **Entwicklungsstand in `CLAUDE.md` nachgezogen** — er stand noch auf v3.51.11, während `main` bereits bei v3.52.2 war. Die Versionen v3.51.12 bis v3.52.2 sind ergänzt.
+
 ## [v3.52.2] - 2026-08-13
 
 ### Behoben

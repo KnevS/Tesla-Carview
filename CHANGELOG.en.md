@@ -7,6 +7,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.52.3] - 2026-08-14
+
+### Fixed
+
+- **Green weekly reports piled up as open issues.** The weekly commit quality report opens an issue even when everything is fine („✅ … all commits conform"). Nobody ever closed them — on 2026-08-14 three such success reports had been sitting open for weeks (#256, #264, #278). An issue list in which successes remain open loses exactly the value it exists for: you can no longer tell at a glance whether anything needs attention. The three stale ones are closed; the record inside them remains fully readable.
+- **New workflow `report-autoclose.yml`** so this does not come back: A report labelled `quality` or `weekly-report` whose title starts with ✅ is closed with a reason as soon as it is opened. A report signalling a problem (❌/⚠️ or any other title) is left untouched and stays open. Deliberately matched on title and label rather than author — the report is filed by an agent under a real user account, so an author filter would catch every hand-written issue as well.
+
+### Changed
+
+- **Development status in `CLAUDE.md` brought up to date** — it still read v3.51.11 while `main` was already at v3.52.2. Versions v3.51.12 through v3.52.2 have been added.
+
 ## [v3.52.2] - 2026-08-13
 
 ### Fixed
