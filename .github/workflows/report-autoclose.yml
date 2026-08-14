@@ -1,0 +1,76 @@
+name: Report Auto-Close
+
+# Der wöchentliche Commit-Quality-Report legt auch dann ein Issue an, wenn alles
+# in Ordnung ist („✅ … Alle Commits konform"). Solche Erfolgsmeldungen wurden
+# nie geschlossen und sammelten sich an — am 14.08.2026 lagen drei davon seit
+# Wochen offen. Eine Issue-Liste, in der Erfolge stehen bleiben, verliert ihre
+# Aussagekraft für die Fälle, die wirklich Aufmerksamkeit brauchen.
+#
+# Dieser Workflow schließt einen Report sofort wieder, wenn sein Titel ihn als
+# Erfolg ausweist (führendes ✅). Der Nachweis bleibt im geschlossenen Issue
+# vollständig lesbar. Meldet ein Report ein Problem (❌/⚠️ oder ein anderer
+# Titel), bleibt er unangetastet offen — genau dafür ist die Liste da.
+#
+# Bewusst titel- und labelbasiert statt autorbasiert: Der Report wird von einem
+# Agenten unter Svens Account angelegt, nicht von einem Bot-Konto; auf den Autor
+# zu filtern würde also alle handgeschriebenen Issues mit erfassen.
+
+on:
+  issues:
+    types: [opened, reopened, labeled]
+
+permissions:
+  issues: write
+
+concurrency:
+  group: report-autoclose-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  autoclose:
+    name: Erfolgs-Report schließen
+    runs-on: ubuntu-latest
+    # Nur Reports mit den bekannten Labels — alles andere ist tabu.
+    if: |
+      contains(github.event.issue.labels.*.name, 'quality') ||
+      contains(github.event.issue.labels.*.name, 'weekly-report')
+    steps:
+      - name: Titel prüfen und ggf. schließen
+        env:
+          # Untrusted input: der Titel wird NIE in eine Kommandozeile
+          # interpoliert, sondern nur als Shell-Variable gelesen.
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          # Erfolg = Titel beginnt mit ✅ (optional führende Leerzeichen).
+          if ! printf '%s' "$ISSUE_TITLE" | grep -qE '^[[:space:]]*✅'; then
+            echo "Kein Erfolgs-Report (Titel beginnt nicht mit ✅) — Issue #$ISSUE_NUMBER bleibt offen."
+            {
+              echo "### Report bleibt offen"
+              echo
+              echo "Issue #$ISSUE_NUMBER ist kein Erfolgs-Report — es braucht Aufmerksamkeit."
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          echo "Erfolgs-Report erkannt — schließe Issue #$ISSUE_NUMBER."
+
+          COMMENT_FILE=$(mktemp)
+          {
+            echo "Automatisch geschlossen: Der Report meldet ein grünes Ergebnis (✅) und braucht keine Bearbeitung."
+            echo
+            echo "Der Nachweis bleibt hier vollständig lesbar. Meldet ein künftiger Report ein Problem, bleibt er offen — siehe \`.github/workflows/report-autoclose.yml\`."
+          } > "$COMMENT_FILE"
+
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body-file "$COMMENT_FILE"
+          gh issue close "$ISSUE_NUMBER" --repo "$REPO" --reason completed
+
+          {
+            echo "### Erfolgs-Report geschlossen"
+            echo
+            echo "Issue #$ISSUE_NUMBER meldete ein grünes Ergebnis und wurde automatisch geschlossen."
+          } >> "$GITHUB_STEP_SUMMARY"
