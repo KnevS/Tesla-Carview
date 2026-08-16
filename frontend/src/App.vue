@@ -48,6 +48,10 @@
          nicht erreichbar ist (Deploy laeuft). Schliesst sich von alleine,
          sobald /api/health wieder antwortet. -->
     <MaintenanceOverlay />
+    <!-- Dezenter Hinweis waehrend einer Drosselung (HTTP 429). api.js
+         wiederholt die betroffenen Requests selbst — der Hinweis verhindert
+         nur, dass eine kurz unvollstaendige Seite wie ein Fehler wirkt. -->
+    <ThrottleNotice />
     <!-- Einstellungs-Wizard: erscheint beim ersten Login oder wenn manuell
          aus den Einstellungen gestartet. -->
     <SettingsWizard v-if="showWizard" @close="showWizard = false" @done="showWizard = false" />
@@ -65,6 +69,7 @@ import AppFooter from './components/AppFooter.vue';
 import LegalAcceptanceModal  from './components/LegalAcceptanceModal.vue';
 import InstallPrompt         from './components/InstallPrompt.vue';
 import MaintenanceOverlay    from './components/MaintenanceOverlay.vue';
+import ThrottleNotice        from './components/ThrottleNotice.vue';
 import DemoBanner            from './components/DemoBanner.vue';
 import NoticesBanner         from './components/NoticesBanner.vue';
 import SettingsWizard        from './components/SettingsWizard.vue';

@@ -4,6 +4,7 @@
     "cancel": "Cancelar",
     "delete": "Eliminar",
     "loading": "Cargando...",
+    "throttled": "El servidor está limitando las solicitudes: se reintentará automáticamente.",
     "yes": "Sí",
     "no": "No",
     "back": "Volver",

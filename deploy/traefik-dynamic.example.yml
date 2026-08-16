@@ -1,0 +1,101 @@
+# Traefik-Beispiel (File-Provider) fuer TeslaView
+# ---------------------------------------------------------------------------
+# Gegenstueck zu nginx-host.conf.template — fuer Installationen, bei denen
+# nicht nginx, sondern Traefik die TLS-Terminierung uebernimmt.
+#
+# Einbinden: Datei nach /opt/traefik/dynamic/teslaview.yml kopieren,
+# `example.com` durch die eigene Domain ersetzen. Der File-Provider laedt
+# mit `watch: true` automatisch neu, ein Traefik-Neustart ist nicht noetig.
+#
+# WICHTIG — die zwei Werte, an denen sich in der Praxis alles entscheidet:
+#
+#   1. /api/tiles/ MUSS aus dem allgemeinen API-Limit heraus.
+#      Der OSM-Tile-Proxy laeuft unter /api/tiles/{z}/{x}/{y}; ein einziger
+#      Zoom-Schritt laedt 50-150 Kacheln. Mit dem API-Burst zusammen ist der
+#      Eimer sofort leer und JEDER weitere /api/-Call bekommt 429 — die App
+#      rendert danach halb, bis der User neu laedt.
+#
+#   2. Der Burst der uebrigen API muss einen Seitenwechsel abdecken.
+#      Ein Wechsel im SPA feuert 15-26 Requests (Dashboard ~15,
+#      Charging/Battery je +11, Routenplaner +18). Ein Burst von 20 ist
+#      dafuer zu klein. Die Dauerrate (120/min) reicht dagegen aus — der
+#      Fehler steckt fast immer im Burst, nicht im Durchschnitt.
+#
+# Seit v3.52.4 wiederholt das Frontend gedrosselte Requests selbst
+# (getaktet, mit Retry-After). Das faengt Spitzen ab, ersetzt aber kein
+# passend eingestelltes Limit.
+# ---------------------------------------------------------------------------
+
+http:
+  middlewares:
+    # Brute-Force-Schutz nur fuer den Login-Endpoint.
+    tv-rl-login:
+      rateLimit:
+        average: 10
+        burst: 3
+        period: 1m
+
+    # Allgemeines API-Limit. burst >= 60, damit ein Seitenwechsel
+    # vollstaendig durchgeht (s. Punkt 2 oben).
+    tv-rl-api:
+      rateLimit:
+        average: 120
+        burst: 60
+        period: 1m
+
+    # Karten-Kacheln: eigenes, grosszuegiges Limit (s. Punkt 1 oben).
+    tv-rl-tiles:
+      rateLimit:
+        average: 1200
+        burst: 300
+        period: 1m
+
+  routers:
+    # Catch-all: App-Shell, statische Assets, alles ohne eigenes Limit.
+    teslaview:
+      rule: "Host(`example.com`)"
+      entryPoints: [websecure]
+      tls:
+        certResolver: letsencrypt
+      service: teslaview-svc
+
+    # Hoehere Priority = wird zuerst geprueft. Der spezifischere Pfad muss
+    # gewinnen, sonst greift wieder das allgemeine API-Limit.
+    teslaview-api:
+      rule: "Host(`example.com`) && PathPrefix(`/api/`)"
+      entryPoints: [websecure]
+      tls:
+        certResolver: letsencrypt
+      priority: 105
+      middlewares:
+        - tv-rl-api
+      service: teslaview-svc
+
+    teslaview-tiles:
+      rule: "Host(`example.com`) && PathPrefix(`/api/tiles/`)"
+      entryPoints: [websecure]
+      tls:
+        certResolver: letsencrypt
+      priority: 115
+      middlewares:
+        - tv-rl-tiles
+      service: teslaview-svc
+
+    teslaview-login:
+      rule: "Host(`example.com`) && Path(`/api/auth/login`)"
+      entryPoints: [websecure]
+      tls:
+        certResolver: letsencrypt
+      priority: 110
+      middlewares:
+        - tv-rl-login
+      service: teslaview-svc
+
+  services:
+    teslaview-svc:
+      loadBalancer:
+        servers:
+          # Der nginx-Container aus docker-compose.prod.yml. Traefik und der
+          # Container muessen sich ein Docker-Netz teilen.
+          - url: "http://tesla-carview-nginx:80"
+        passHostHeader: true

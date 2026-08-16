@@ -4,6 +4,7 @@
     "cancel": "Cancel",
     "delete": "Delete",
     "loading": "Loading...",
+    "throttled": "The server is throttling requests — retrying automatically.",
     "yes": "Yes",
     "no": "No",
     "back": "Back",

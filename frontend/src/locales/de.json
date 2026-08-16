@@ -4,6 +4,7 @@
     "cancel": "Abbrechen",
     "delete": "Löschen",
     "loading": "Lade...",
+    "throttled": "Server drosselt gerade Anfragen — wird automatisch wiederholt.",
     "yes": "Ja",
     "no": "Nein",
     "back": "Zurück",
