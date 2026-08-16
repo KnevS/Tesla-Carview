@@ -17,7 +17,7 @@
 Від GPS-треків і дорожнього журналу до планування маршрутів із графіками зарядки та записами обслуговування:
 усі дані автомобіля залишаються на вашому власному сервері.
 
-Працює на: **Linux-серверах** (x86_64), **Raspberry Pi 4/5** (ARM64), локальній розробці.
+Працює на: **Linux-серверах** (x86_64), **Raspberry Pi 4/5** (ARM64), **Windows** (Docker Desktop + WSL2, без команд до автомобіля), локальній розробці.
 
 <!-- Operator-Hinweis im Footer / Footer note for operators:
      Wer Tesla Carview selbst hostet, kann die eigenen Kontaktdaten

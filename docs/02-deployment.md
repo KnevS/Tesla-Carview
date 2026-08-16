@@ -2,16 +2,19 @@
 
 > 🇬🇧 [Read in English](02-deployment.en.md)
 
-Tesla Carview läuft auf **allen gängigen Linux-Plattformen**:
+Tesla Carview läuft auf **allen gängigen Plattformen**:
 
 | Plattform | Architektur | Getestet |
 |---|---|---|
 | Linux-Server (VPS, Dedicated) | x86_64 | ✓ |
 | Raspberry Pi 4 / 5 | ARM64 | ✓ |
 | Raspberry Pi 3 (und älter) | ARMv7 | ✗ ¹ |
+| Windows (Docker Desktop + WSL2) | x86_64 | ✓ ² |
 | Lokale Entwicklung (Mac/Windows/Linux) | alle | ✓ |
 
 ¹ **Raspberry Pi 3 und älter (32-Bit-ARM) werden seit v3.51.0 nicht mehr unterstützt.** Node.js veröffentlicht ab Version 24 keine ARMv7-Images mehr — weder alpine noch Debian —, deshalb lässt sich das Backend-Image dort nicht mehr bauen. `deploy/setup.sh` bricht auf solchen Systemen mit einer Erklärung ab, statt erst beim Image-Pull zu scheitern.
+
+² **Windows läuft, ist aber nicht CI-getestet.** Die Anwendung steckt vollständig in Linux-Containern; Windows ist nur der Host. Details und die zwei Einschränkungen: Abschnitt „Windows (Docker Desktop)" am Ende dieser Seite.
 
 
 ---
@@ -244,3 +247,44 @@ Woher ein 429 kommt, verrät die Antwort selbst:
 - `x-retry-in`-Header → **Traefik**
 - HTML-Fehlerseite ohne Zusatz-Header → **nginx** (`limit_req`)
 - `ratelimit-limit` / `ratelimit-remaining` → **die App** (express-rate-limit)
+
+---
+
+## Windows (Docker Desktop)
+
+Die Anwendung läuft vollständig in Linux-Containern — Windows ist nur der Host. Mit **Docker Desktop im WSL2-Modus** startet derselbe Stack wie auf einem Linux-Server. `setup.sh` funktioniert dort nicht (bash, apt, systemd, certbot); an seiner Stelle steht `deploy/setup-windows.ps1`.
+
+```powershell
+git clone https://github.com/KnevS/Tesla-Carview.git
+cd Tesla-Carview
+powershell -ExecutionPolicy Bypass -File .\deploy\setup-windows.ps1
+```
+
+Das Skript erzeugt `backend\.env` samt zufälligem `JWT_SECRET`, legt eine `docker-compose.override.yml` für Windows an und startet den Stack. Danach im Browser: `http://localhost:8080`.
+
+### Zwei Einschränkungen — beide gemessen, keine davon umgehbar
+
+1. **Keine Fahrzeugbefehle.** Signed Commands laufen über den `tesla-http-proxy`. Der braucht den Bind-Mount `/etc/tesla-proxy` und die feste UID 988 — beides gibt es unter Windows nicht. Der Service bleibt deshalb aus; das Backend startet trotzdem, weil sein `depends_on` auf `required: false` steht. Alles Lesende — Fahrten, Ladevorgänge, Auswertungen, Fahrtenbuch, Routenplaner — ist vollständig nutzbar.
+2. **`host.docker.internal` zeigt woanders hin.** Docker Desktop trägt diesen Namen selbst in die `/etc/hosts` jedes Containers ein, und der Eintrag gewinnt gegen den Netzwerk-Alias aus der Compose-Datei. Gemessen: Der Name löst dann auf das Host-Gateway (172.17.0.1) auf statt auf den Proxy-Container — Fahrzeugbefehle gingen still ans falsche Ziel. Wer den Proxy trotzdem betreibt, setzt in `backend\.env` deshalb `TESLA_PROXY_BASE=https://tesla-carview-proxy:4443`.
+
+### Zwei `.env`-Dateien nicht verwechseln
+
+Die Anwendung liest `backend\.env` (als `env_file` in den Container gereicht). Compose selbst liest eine `.env` in der **Projektwurzel** und ersetzt damit die `${...}`-Platzhalter in den Compose-Dateien (`TESLA_PROXY_CONFIG_DIR`, `TESLA_PROXY_UID`, `OLLAMA_MEMORY_LIMIT`). Nachgemessen, weil es genau anders herum naheliegt: Ein Eintrag in `backend/.env` hat auf die Interpolation **keine** Wirkung. Vorlage: `.env.example` in der Projektwurzel.
+
+### HTTPS ist nicht Windows-spezifisch
+
+Tesla verlangt eine öffentlich erreichbare HTTPS-Adresse — für die Anmeldung, die Partner-Registrierung und Fleet Telemetry. Das gilt für jede Heiminstallation gleichermaßen, unabhängig vom Betriebssystem. Die Wege (DynDNS, Cloudflare Tunnel, VPS) stehen in [14-network-access.md](14-network-access.md).
+
+### Updates
+
+`deploy/update.sh` ist ein Bash-Skript und läuft unter Windows nicht. Stattdessen:
+
+```powershell
+git pull
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml pull
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d
+```
+
+### Was „nicht CI-getestet" heißt
+
+Das Docker Build Gate baut Linux-Images für amd64 und arm64; ein Windows-Host wird nirgends automatisiert geprüft. Der Weg ist beschrieben und die Fallstricke oben sind an einem echten Docker-Daemon gemessen — laufend verifiziert wird er aber nur von denen, die ihn gehen.

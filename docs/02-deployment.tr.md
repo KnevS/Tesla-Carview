@@ -4,16 +4,19 @@
 
 > 🇩🇪 [Auf Deutsch lesen](02-deployment.md)
 
-Tesla Carview **tüm yaygın Linux platformlarında** çalışır:
+Tesla Carview **tüm yaygın platformlarda** çalışır:
 
 | Platform | Mimari | Test edildi |
 |---|---|---|
 | Linux sunucu (VPS, dedicated) | x86_64 | ✓ |
 | Raspberry Pi 4 / 5 | ARM64 | ✓ |
 | Raspberry Pi 3 (ve öncesi) | ARMv7 | ✗ ¹ |
+| Windows (Docker Desktop + WSL2) | x86_64 | ✓ ² |
 | Yerel geliştirme (Mac/Windows/Linux) | tümü | ✓ |
 
 ¹ **Raspberry Pi 3 ve öncesi (32 bit ARM) v3.51.0'dan itibaren desteklenmiyor.** Node.js 24. sürümden itibaren ARMv7 imajı yayınlamıyor — ne alpine ne de Debian —, bu nedenle backend imajı orada artık derlenemiyor. `deploy/setup.sh` bu sistemlerde imaj indirmede hata vermek yerine bir açıklamayla durur.
+
+² **Windows çalışır, ancak CI ile test edilmez.** Uygulama tamamen Linux konteynerlerinde yaşar; Windows yalnızca ana makinedir. Ayrıntılar ve iki kısıt: bu sayfanın sonundaki „Windows (Docker Desktop)" bölümü.
 
 
 ---
@@ -246,3 +249,44 @@ Bir 429’un nereden geldiğini yanıtın kendisi söyler:
 - `x-retry-in` başlığı → **Traefik**
 - Ek başlık içermeyen HTML hata sayfası → **nginx** (`limit_req`)
 - `ratelimit-limit` / `ratelimit-remaining` → **uygulama** (express-rate-limit)
+
+---
+
+## Windows (Docker Desktop)
+
+Uygulama tamamen Linux konteynerlerinde çalışır — Windows yalnızca ana makinedir. **WSL2 modundaki Docker Desktop** ile bir Linux sunucudakiyle aynı yığın başlar. `setup.sh` orada çalışmaz (bash, apt, systemd, certbot); yerine `deploy/setup-windows.ps1` vardır.
+
+```powershell
+git clone https://github.com/KnevS/Tesla-Carview.git
+cd Tesla-Carview
+powershell -ExecutionPolicy Bypass -File .\deploy\setup-windows.ps1
+```
+
+Betik rastgele bir `JWT_SECRET` ile `backend\.env` oluşturur, Windows için bir `docker-compose.override.yml` yazar ve yığını başlatır. Ardından `http://localhost:8080` adresini açın.
+
+### İki kısıt — ikisi de ölçüldü, hiçbiri aşılamaz
+
+1. **Araç komutu yok.** İmzalı komutlar `tesla-http-proxy` üzerinden gider; bu da `/etc/tesla-proxy` bind mount’unu ve sabit 988 UID’sini gerektirir — ikisi de Windows’ta yoktur. Servis bu yüzden kapalı kalır; `depends_on` `required: false` olduğu için backend yine de başlar. Okuma tarafındaki her şey — seyahatler, şarjlar, analizler, seyir defteri, rota planlayıcı — eksiksiz çalışır.
+2. **`host.docker.internal` başka yeri gösterir.** Docker Desktop bu adı her konteynerin `/etc/hosts` dosyasına kendisi yazar ve bu kayıt, compose dosyasındaki ağ takma adını yener. Ölçüldü: ad o zaman proxy konteyneri yerine ana makine ağ geçidine (172.17.0.1) çözümlenir — araç komutları sessizce yanlış hedefe gitti. Proxy’yi yine de çalıştıranlar `backend\.env` içine `TESLA_PROXY_BASE=https://tesla-carview-proxy:4443` yazmalıdır.
+
+### İki `.env` dosyasını karıştırmayın
+
+Uygulama `backend\.env` dosyasını okur (konteynere `env_file` olarak verilir). Compose ise **proje kökündeki** bir `.env` dosyasını okur ve compose dosyalarındaki `${...}` yer tutucularını onunla değiştirir (`TESLA_PROXY_CONFIG_DIR`, `TESLA_PROXY_UID`, `OLLAMA_MEMORY_LIMIT`). Tersi doğal göründüğü için ölçüldü: `backend/.env` içindeki bir girdinin bu değiştirmeye **hiçbir** etkisi yoktur. Şablon: proje kökündeki `.env.example`.
+
+### HTTPS Windows’a özgü bir konu değildir
+
+Tesla; oturum açma, iş ortağı kaydı ve Fleet Telemetry için herkese açık erişilebilir bir HTTPS adresi ister. Bu, işletim sisteminden bağımsız olarak her ev kurulumu için aynıdır. Yollar (DynDNS, Cloudflare Tunnel, VPS) [14-network-access.tr.md](14-network-access.tr.md) içindedir.
+
+### Güncellemeler
+
+`deploy/update.sh` bir bash betiğidir ve Windows’ta çalışmaz. Bunun yerine:
+
+```powershell
+git pull
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml pull
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d
+```
+
+### „CI ile test edilmez" ne demek
+
+Docker build gate, amd64 ve arm64 için Linux imajları üretir; hiçbir yerde bir Windows ana makinesi otomatik denetlenmez. Yol belgelenmiştir ve yukarıdaki tuzaklar gerçek bir Docker daemon’una karşı ölçülmüştür — ama sürekli doğrulaması yalnızca bu yolu yürüyenlerce yapılır.

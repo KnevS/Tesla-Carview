@@ -17,7 +17,7 @@
 Desde los recorridos GPS y el libro de ruta hasta la planificación de rutas con paradas de carga y el historial de mantenimiento:
 todos los datos del vehículo permanecen en tu propio servidor.
 
-Funciona en: **servidores Linux** (x86_64), **Raspberry Pi 4/5** (ARM64), desarrollo local.
+Funciona en: **servidores Linux** (x86_64), **Raspberry Pi 4/5** (ARM64), **Windows** (Docker Desktop + WSL2, sin comandos al vehículo), desarrollo local.
 
 <!-- Operator-Hinweis im Footer / Footer note for operators:
      Wer Tesla Carview selbst hostet, kann die eigenen Kontaktdaten
