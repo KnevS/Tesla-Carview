@@ -224,3 +224,25 @@ docker compose -f docker-compose.prod.yml logs -f backend
 # logs nginx:
 tail -f /var/log/nginx/tesla-carview.access.log
 ```
+
+---
+
+## Λειτουργία πίσω από δικό σας reverse proxy
+
+Αν εγκαταστήσετε το `setup.sh` σε **λειτουργία proxy** (υπάρχει ήδη nginx, Caddy ή Traefik), δεν δημιουργείται καμία ρύθμιση nginx και πρέπει να στήσετε μόνοι σας τα όρια ρυθμού. Αν λείπουν ή είναι πολύ αυστηρά, η εφαρμογή πέφτει σε HTTP 429 και δείχνει χαλασμένη: μισοφορτωμένες σελίδες που φαινομενικά τις διορθώνει μόνο μια ανανέωση.
+
+| Διαδρομή | Σύσταση | Γιατί |
+|---|---|---|
+| `/api/auth/login` | 10/λεπτό, burst 3 | Προστασία από brute force |
+| `/api/tiles/` | 1200/λεπτό, burst 300 | Ένα zoom στον χάρτη φορτώνει 50–150 πλακίδια μαζί |
+| `/api/` (υπόλοιπα) | 120/λεπτό, **burst ≥ 60** | Μια αλλαγή σελίδας στέλνει 15–26 αιτήματα |
+
+Η πιο ειδική διαδρομή πρέπει να υπερισχύει: αν το `/api/tiles/` πέσει στο γενικό όριο του API, ένα μόνο zoom στον χάρτη κλειδώνει ολόκληρο το API. Το κρίσιμο μέγεθος δεν είναι ο σταθερός ρυθμός αλλά το burst.
+
+Έτοιμα πρότυπα υπάρχουν στο αποθετήριο: [`deploy/nginx-host.conf.template`](../deploy/nginx-host.conf.template) και [`deploy/traefik-dynamic.example.yml`](../deploy/traefik-dynamic.example.yml).
+
+Από πού προήλθε ένα 429 το δείχνει η ίδια η απόκριση:
+
+- Κεφαλίδα `x-retry-in` → **Traefik**
+- Σελίδα σφάλματος HTML χωρίς πρόσθετες κεφαλίδες → **nginx** (`limit_req`)
+- `ratelimit-limit` / `ratelimit-remaining` → **η εφαρμογή** (express-rate-limit)

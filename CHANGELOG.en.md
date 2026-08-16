@@ -7,6 +7,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.52.5] - 2026-08-16
+
+### Documentation
+
+- **Proxy mode never mentioned the rate limits — exactly the gap that produced v3.52.4.** `setup.sh` asks during setup whether a reverse proxy is already running; in that mode it creates **no** nginx configuration and previously printed only `proxy_pass http://127.0.0.1:8080;`. What limits your own proxy has to reproduce was documented nowhere — neither in the script nor in `docs/02-deployment.*`, which did not mention proxy mode at all. Anyone following those instructions inevitably ended up with the failure mode from v3.52.4: a map zoom (50–150 tiles via `/api/tiles/`) and a page change (15–26 API calls) share one tight limit, the app renders half, and only a reload appears to help.
+
+  Closed in all three places someone would look: `setup.sh` now prints the three recommended limits during setup; `docs/02-deployment.*` (×7) gains the section "Running behind your own reverse proxy" with a table, a pointer to the templates and the rule for telling which instance sent a 429; the handbook (×6) gains a troubleshooting entry so that users without server access can place the symptom too.
+
+  **Left untouched:** README ×7 — it covers features, not operations; its only "proxy" matches concern `tesla-http-proxy`, a different topic (checked, not assumed).
+
 ## [v3.52.4] - 2026-08-16
 
 ### Fixed

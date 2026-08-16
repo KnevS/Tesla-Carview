@@ -893,6 +893,9 @@ Fleet Telemetry iki adım gerektirir: (1) uygulamayı Tesla'da kaydet (Ayarlar �
 **Backend başlamıyor**
 Logları kontrol et: `docker logs tesla-carview-backend`. Sık nedenler: eksik `.env` değişkenleri (`JWT_SECRET`, `TESLA_CLIENT_ID`), veritabanı taşıma hataları.
 
+**Sayfalar eksik yükleniyor – yalnızca yeniden yükleme işe yarıyor**
+Genelde sağ altta kısa süre „sunucu istekleri kısıtlıyor" uyarısı görünür. v3.52.4’ten beri uygulama etkilenen istekleri otomatik olarak yineler. Sorun sürüyorsa – özellikle bir haritada yakınlaştırmadan hemen sonra – öndeki ters proxy’nin hız sınırı fazla dardır. Yöneticiler için: `docs/02-deployment.tr.md`, „Kendi ters proxy’niz arkasında çalıştırma" bölümü.
+
 ## ❤️ Uygulama senin için bir değer ifade ediyorsa {#donations}
 
 Tesla Carview, **kendi kendine barındırılan özel kullanım için** ücretsizdir ve reklamsızdır (lisans: PolyForm Noncommercial 1.0.0 — ticari yeniden satış veya üçüncü taraflar için SaaS barındırma izni yoktur). Geri vermek istersen aşağıdaki kuruluşlar desteğine sevinir.

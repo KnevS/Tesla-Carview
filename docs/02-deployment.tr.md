@@ -224,3 +224,25 @@ docker compose -f docker-compose.prod.yml logs -f backend
 # nginx logları:
 tail -f /var/log/nginx/tesla-carview.access.log
 ```
+
+---
+
+## Kendi ters proxy’niz arkasında çalıştırma
+
+`setup.sh` betiğini **proxy modunda** kurarsanız (nginx, Caddy veya Traefik zaten mevcut), hiçbir nginx yapılandırması oluşturulmaz ve hız sınırlarını kendiniz kurmanız gerekir. Eksik ya da fazla dar olurlarsa uygulama HTTP 429 alır ve bozuk görünür: yarım yüklenen sayfalar, görünüşte yalnızca yeniden yükleme ile düzelen.
+
+| Yol | Öneri | Neden |
+|---|---|---|
+| `/api/auth/login` | 10/dak, burst 3 | Kaba kuvvet koruması |
+| `/api/tiles/` | 1200/dak, burst 300 | Tek bir harita yakınlaştırması 50–150 döşemeyi birden yükler |
+| `/api/` (geri kalan) | 120/dak, **burst ≥ 60** | Bir sayfa geçişi 15–26 istek gönderir |
+
+Daha özel yol kazanmalıdır: `/api/tiles/` genel API sınırına düşerse tek bir harita yakınlaştırması tüm API’yi kilitler. Kritik değer sürekli hız değil, burst’tür.
+
+Hazır şablonlar depoda: [`deploy/nginx-host.conf.template`](../deploy/nginx-host.conf.template) ve [`deploy/traefik-dynamic.example.yml`](../deploy/traefik-dynamic.example.yml).
+
+Bir 429’un nereden geldiğini yanıtın kendisi söyler:
+
+- `x-retry-in` başlığı → **Traefik**
+- Ek başlık içermeyen HTML hata sayfası → **nginx** (`limit_req`)
+- `ratelimit-limit` / `ratelimit-remaining` → **uygulama** (express-rate-limit)

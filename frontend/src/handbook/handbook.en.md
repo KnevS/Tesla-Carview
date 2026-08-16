@@ -1073,6 +1073,9 @@ Fleet Telemetry needs two steps: (1) register the app with Tesla (Settings → "
 **Backend does not start**
 Check the logs: `docker logs tesla-carview-backend`. Common causes: missing `.env` variables (`JWT_SECRET`, `TESLA_CLIENT_ID`), database migration errors.
 
+**Pages load incompletely – only a reload helps**
+Usually a short "the server is throttling requests" notice appears in the bottom right. Since v3.52.4 the app retries affected requests automatically. If it keeps happening – especially right after zooming a map – the rate limit of the reverse proxy in front is too tight. For operators: `docs/02-deployment.en.md`, section "Running behind your own reverse proxy".
+
 ## ❤️ If the app is worth something to you {#donations}
 
 Tesla Carview is free and ad-free **for private, self-hosted use** (license: PolyForm Noncommercial 1.0.0 — commercial resale or SaaS hosting for third parties is not permitted). If you would like to give something back, these organisations would appreciate your support.

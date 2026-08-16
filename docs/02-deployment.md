@@ -222,3 +222,25 @@ docker compose -f docker-compose.prod.yml logs -f backend
 # Nginx-Logs:
 tail -f /var/log/nginx/tesla-carview.access.log
 ```
+
+---
+
+## Betrieb hinter einem eigenen Reverse-Proxy
+
+Wer `setup.sh` im **Proxy-Modus** installiert (nginx, Caddy oder Traefik ist bereits vorhanden), bekommt keine nginx-Konfiguration angelegt und muss die Rate-Limits selbst nachbauen. Fehlen sie oder sind sie zu eng, läuft die App in HTTP 429 und wirkt kaputt: halb geladene Seiten, die scheinbar nur ein Neuladen repariert.
+
+| Pfad | Empfehlung | Warum |
+|---|---|---|
+| `/api/auth/login` | 10/min, Burst 3 | Brute-Force-Schutz |
+| `/api/tiles/` | 1200/min, Burst 300 | Ein Karten-Zoom lädt 50–150 Kacheln auf einmal |
+| `/api/` (Rest) | 120/min, **Burst ≥ 60** | Ein Seitenwechsel feuert 15–26 Anfragen |
+
+Der spezifischere Pfad muss gewinnen: Fällt `/api/tiles/` unter das allgemeine API-Limit, sperrt ein einziger Karten-Zoom die gesamte API aus. Nicht die Dauerrate ist dabei der kritische Wert, sondern der Burst.
+
+Fertige Vorlagen liegen im Repository: [`deploy/nginx-host.conf.template`](../deploy/nginx-host.conf.template) und [`deploy/traefik-dynamic.example.yml`](../deploy/traefik-dynamic.example.yml).
+
+Woher ein 429 kommt, verrät die Antwort selbst:
+
+- `x-retry-in`-Header → **Traefik**
+- HTML-Fehlerseite ohne Zusatz-Header → **nginx** (`limit_req`)
+- `ratelimit-limit` / `ratelimit-remaining` → **die App** (express-rate-limit)
