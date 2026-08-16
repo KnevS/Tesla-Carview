@@ -17,6 +17,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   New non-blocking `ThrottleNotice` (i18n ×7) so that a briefly incomplete page does not look like an error. **Deliberately without claiming a cause:** the browser only sees *that* throttling happens — it cannot tell proxy from app.
 
+  **What the retry does NOT cover:** the map tiles themselves. Leaflet loads them through `<img>` elements (`lib/tiles.js`), not through axios — the interceptor never sees them. For those, only the reverse-proxy exemption plus the tile retry already present there applies. The frontend fix protects the *other* API calls, which until now were rejected with 429 as collateral damage.
+
   Newly documented for self-hosters running their own proxy: `deploy/traefik-dynamic.example.yml` (the counterpart to `nginx-host.conf.template`) plus a table in `deploy/README.md` listing the three limits and how to tell which instance sent a 429 (`x-retry-in` → Traefik, HTML error page → nginx, `ratelimit-*` → app).
 
   **Note to self:** the sustained rate was not the problem, the burst was — 120/min covers the demand, 20 at once does not. And a limit corrected in one place has to travel along whenever the edge layer changes; the host nginx config has carried the fix since PR #213 but was no longer in the request path at all.

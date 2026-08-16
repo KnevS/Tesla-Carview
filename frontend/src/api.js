@@ -26,6 +26,10 @@ api.interceptors.request.use(async config => {
 //
 // Ein 429 heisst: die Anfrage wurde NICHT verarbeitet. Sie darf also auch
 // fuer POST/PUT gefahrlos wiederholt werden.
+//
+// NICHT abgedeckt: die Kacheln selbst. Leaflet laedt sie ueber <img>
+// (lib/tiles.js), die laufen nie durch axios. Fuer sie zaehlt allein die
+// Ausnahme am Reverse-Proxy — siehe deploy/README.md.
 const THROTTLE_MAX_RETRIES = 3;
 const THROTTLE_MAX_WAIT_MS = 4000;
 // Gemeinsamer Takt fuer ALLE gedrosselten Requests: sonst laufen 20 Retries
