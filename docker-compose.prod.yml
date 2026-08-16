@@ -53,7 +53,14 @@ services:
     networks:
       - tesla-net
     depends_on:
-      - tesla-proxy
+      # `required: false` (Compose >= 2.20): der Proxy darf per profile
+      # abgeschaltet sein, ohne dass das Backend mitfaellt. Gebraucht wird er
+      # ausschliesslich fuer Signed Commands (Fahrzeugbefehle) — auf Windows
+      # laesst er sich nicht betreiben (Bind-Mount /etc/tesla-proxy + UID 988),
+      # dort laeuft der Stack ohne ihn. Reihenfolge bleibt sonst unveraendert.
+      tesla-proxy:
+        condition: service_started
+        required: false
     deploy:
       resources:
         limits:
@@ -164,7 +171,10 @@ services:
     image: tesla/vehicle-command:latest
     container_name: tesla-carview-proxy
     restart: unless-stopped
-    user: "988:988"
+    # UID/GID des Host-Users, dem die Schluessel unter TESLA_PROXY_CONFIG_DIR
+    # gehoeren. Auf Debian/Ubuntu legt setup.sh dafuer den User 988 an; auf
+    # anderen Systemen kann die Nummer abweichen → ueber .env ueberschreibbar.
+    user: "${TESLA_PROXY_UID:-988}:${TESLA_PROXY_GID:-988}"
     command:
       - -port
       - "4443"
@@ -177,7 +187,12 @@ services:
       - -key-file
       - /config/tesla_priv.pem
     volumes:
-      - /etc/tesla-proxy:/config:ro
+      # Verzeichnis mit server.key/server.crt/tesla_priv.pem. Absolut und
+      # Linux-spezifisch — deshalb ueberschreibbar (.env), damit der Pfad auf
+      # anderen Hosts nicht hart verdrahtet ist. Achtung: fehlt die Quelle,
+      # legt Docker sie als LEERES Verzeichnis an und der Container startet
+      # trotzdem (gemessen) — er scheitert dann erst am fehlenden Key.
+      - ${TESLA_PROXY_CONFIG_DIR:-/etc/tesla-proxy}:/config:ro
     networks:
       tesla-net:
         aliases:

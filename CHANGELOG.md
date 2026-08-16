@@ -7,6 +7,23 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.53.0] - 2026-08-16
+
+### Neu
+
+- **Windows als Host (Docker Desktop + WSL2).** Anlass war eine Interessenten-Anfrage. Die Anwendung steckt ohnehin vollständig in Linux-Containern — Windows ist nur der Host, der Stack ist derselbe. Was fehlte, war der Weg dorthin und die Kenntnis der Fallstricke. Beides gibt es jetzt: `deploy/setup-windows.ps1` erzeugt `backend\.env` (inkl. zufälligem `JWT_SECRET` aus dem Krypto-RNG), schreibt eine passende `docker-compose.override.yml` und startet den Stack. `setup.sh` bleibt Linux-only (bash, apt, systemd, certbot).
+
+  **Zwei Einschränkungen, beide an einem echten Docker-Daemon gemessen statt vermutet:**
+
+  1. **Keine Fahrzeugbefehle.** `tesla-http-proxy` braucht den Bind-Mount `/etc/tesla-proxy` und die feste UID 988. Unter Windows bleibt der Service aus; das Backend startet trotzdem, weil sein `depends_on` jetzt auf `required: false` steht (Compose ≥ 2.20). Verifiziert: Mit Windows-Override enthält der Stack nur noch backend/frontend/nginx — **ohne** den sonst fälligen „depends on undefined service"-Abbruch. Alles Lesende bleibt vollständig.
+  2. **`host.docker.internal` zeigt unter Docker Desktop woanders hin.** Der Daemon trägt den Namen selbst in die `/etc/hosts` jedes Containers ein, und dieser Eintrag **gewinnt gegen den Netzwerk-Alias** aus der Compose-Datei. Gemessen: mit Eintrag löst der Name auf das Host-Gateway (172.17.0.1) auf, ohne Eintrag auf den Proxy-Container. Signed Commands wären damit still am falschen Ziel gelandet. `PROXY_BASE` in `teslaApi.js` war hart verdrahtet und ist jetzt über `TESLA_PROXY_BASE` überschreibbar — der Linux-Default bleibt unverändert.
+
+  **Weitere Härtung, die auch Linux zugutekommt:** `TESLA_PROXY_CONFIG_DIR` und `TESLA_PROXY_UID`/`GID` ersetzen die hart kodierten Werte `/etc/tesla-proxy` und `988:988`. Neu ist dafür ein `.env.example` in der **Projektwurzel** — mit dem ausdrücklichen Hinweis, dass Compose seine `${...}`-Platzhalter aus *dieser* Datei ersetzt und ein Eintrag in `backend/.env` dafür **wirkungslos** ist (nachgemessen, weil die umgekehrte Annahme näherliegt).
+
+  **Bewusst nicht gebaut:** eine Windows-eigene HTTPS-Lösung. Tesla verlangt eine öffentlich erreichbare HTTPS-Adresse für Anmeldung, Partner-Registrierung und Fleet Telemetry — das gilt für jede Heiminstallation gleichermaßen und steht seit jeher in `14-network-access.*`.
+
+  **Ehrlich ausgewiesen:** Der Docker-Build-Gate baut Linux-Images für amd64/arm64; **ein Windows-Host wird nirgends automatisiert geprüft.** Die Plattform-Tabelle in `docs/02-deployment.*` (×7) führt Windows deshalb mit einer Fußnote „läuft, aber nicht CI-getestet", und die README-Plattformzeile (×7) nennt die Einschränkung „ohne Fahrzeugbefehle" direkt mit.
+
 ## [v3.52.5] - 2026-08-16
 
 ### Dokumentation

@@ -17,7 +17,7 @@
 From GPS tracks and the logbook to route planning with charging schedules and maintenance records:
 all vehicle data stays on your own server.
 
-Runs on: **Linux servers** (x86_64), **Raspberry Pi 4/5** (ARM64), local development.
+Runs on: **Linux servers** (x86_64), **Raspberry Pi 4/5** (ARM64), **Windows** (Docker Desktop + WSL2, without vehicle commands), local development.
 
 <!-- Operator-Hinweis im Footer / Footer note for operators:
      Wer Tesla Carview selbst hostet, kann die eigenen Kontaktdaten

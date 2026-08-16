@@ -2,16 +2,19 @@
 
 > 🇩🇪 [Auf Deutsch lesen](02-deployment.md)
 
-Tesla Carview runs on **all common Linux platforms**:
+Tesla Carview runs on **all common platforms**:
 
 | Platform | Architecture | Tested |
 |---|---|---|
 | Linux server (VPS, dedicated) | x86_64 | ✓ |
 | Raspberry Pi 4 / 5 | ARM64 | ✓ |
 | Raspberry Pi 3 (and older) | ARMv7 | ✗ ¹ |
+| Windows (Docker Desktop + WSL2) | x86_64 | ✓ ² |
 | Local development (Mac/Windows/Linux) | all | ✓ |
 
 ¹ **Raspberry Pi 3 and older (32-bit ARM) are no longer supported as of v3.51.0.** Node.js ships no ARMv7 images from version 24 onwards — neither alpine nor Debian — so the backend image can no longer be built there. `deploy/setup.sh` stops on such systems with an explanation instead of failing later at image pull.
+
+² **Windows works, but is not CI-tested.** The application lives entirely in Linux containers; Windows is only the host. Details and the two limitations: section "Windows (Docker Desktop)" at the end of this page.
 
 
 ---
@@ -244,3 +247,44 @@ The response itself tells you where a 429 came from:
 - `x-retry-in` header → **Traefik**
 - HTML error page without extra headers → **nginx** (`limit_req`)
 - `ratelimit-limit` / `ratelimit-remaining` → **the app** (express-rate-limit)
+
+---
+
+## Windows (Docker Desktop)
+
+The application runs entirely in Linux containers — Windows is only the host. With **Docker Desktop in WSL2 mode** the same stack starts as on a Linux server. `setup.sh` does not work there (bash, apt, systemd, certbot); `deploy/setup-windows.ps1` takes its place.
+
+```powershell
+git clone https://github.com/KnevS/Tesla-Carview.git
+cd Tesla-Carview
+powershell -ExecutionPolicy Bypass -File .\deploy\setup-windows.ps1
+```
+
+The script creates `backend\.env` including a random `JWT_SECRET`, writes a `docker-compose.override.yml` for Windows and starts the stack. Then open `http://localhost:8080`.
+
+### Two limitations — both measured, neither avoidable
+
+1. **No vehicle commands.** Signed commands go through `tesla-http-proxy`, which needs the bind mount `/etc/tesla-proxy` and the fixed UID 988 — neither exists on Windows. The service therefore stays off; the backend still starts because its `depends_on` is set to `required: false`. Everything read-only — trips, charging, analytics, logbook, route planner — works fully.
+2. **`host.docker.internal` points somewhere else.** Docker Desktop injects that name into every container's `/etc/hosts`, and that entry beats the network alias from the compose file. Measured: the name then resolves to the host gateway (172.17.0.1) instead of the proxy container — vehicle commands silently went to the wrong target. If you run the proxy anyway, set `TESLA_PROXY_BASE=https://tesla-carview-proxy:4443` in `backend\.env`.
+
+### Do not confuse the two `.env` files
+
+The application reads `backend\.env` (passed into the container as `env_file`). Compose itself reads a `.env` in the **project root** and uses it to substitute the `${...}` placeholders in the compose files (`TESLA_PROXY_CONFIG_DIR`, `TESLA_PROXY_UID`, `OLLAMA_MEMORY_LIMIT`). Measured, because the opposite feels natural: an entry in `backend/.env` has **no** effect on that substitution. Template: `.env.example` in the project root.
+
+### HTTPS is not Windows-specific
+
+Tesla requires a publicly reachable HTTPS address — for login, partner registration and Fleet Telemetry. That applies to every home installation alike, regardless of operating system. The options (DynDNS, Cloudflare Tunnel, VPS) are in [14-network-access.en.md](14-network-access.en.md).
+
+### Updates
+
+`deploy/update.sh` is a bash script and does not run on Windows. Instead:
+
+```powershell
+git pull
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml pull
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d
+```
+
+### What "not CI-tested" means
+
+The Docker build gate builds Linux images for amd64 and arm64; no Windows host is checked automatically anywhere. The path is documented and the pitfalls above were measured against a real Docker daemon — but it is continuously verified only by the people who walk it.

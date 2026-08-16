@@ -4,16 +4,19 @@
 
 > 🇩🇪 [Auf Deutsch lesen](02-deployment.md) · 🇬🇧 [Read in English](02-deployment.en.md)
 
-Tesla Carview працює на **усіх поширених платформах Linux**:
+Tesla Carview працює на **усіх поширених платформах**:
 
 | Платформа | Архітектура | Перевірено |
 |---|---|---|
 | Сервер Linux (VPS, виділений) | x86_64 | ✓ |
 | Raspberry Pi 4 / 5 | ARM64 | ✓ |
 | Raspberry Pi 3 (і старіші) | ARMv7 | ✗ ¹ |
+| Windows (Docker Desktop + WSL2) | x86_64 | ✓ ² |
 | Локальна розробка (Mac/Windows/Linux) | усі | ✓ |
 
 ¹ **Raspberry Pi 3 і старіші (32-бітний ARM) більше не підтримуються, починаючи з v3.51.0.** Node.js не публікує образи ARMv7 з версії 24 — ані alpine, ані Debian —, тому образ бекенду там більше не збирається. `deploy/setup.sh` на таких системах зупиняється з поясненням, замість того щоб впасти пізніше під час завантаження образу.
+
+² **Windows працює, але не перевіряється в CI.** Застосунок повністю живе в Linux-контейнерах; Windows — лише хост. Подробиці й два обмеження: розділ «Windows (Docker Desktop)» у кінці цієї сторінки.
 
 
 ---
@@ -246,3 +249,44 @@ tail -f /var/log/nginx/tesla-carview.access.log
 - Заголовок `x-retry-in` → **Traefik**
 - HTML-сторінка помилки без додаткових заголовків → **nginx** (`limit_req`)
 - `ratelimit-limit` / `ratelimit-remaining` → **застосунок** (express-rate-limit)
+
+---
+
+## Windows (Docker Desktop)
+
+Застосунок повністю працює в Linux-контейнерах — Windows лише хост. З **Docker Desktop у режимі WSL2** запускається той самий стек, що й на Linux-сервері. `setup.sh` там не працює (bash, apt, systemd, certbot); замість нього є `deploy/setup-windows.ps1`.
+
+```powershell
+git clone https://github.com/KnevS/Tesla-Carview.git
+cd Tesla-Carview
+powershell -ExecutionPolicy Bypass -File .\deploy\setup-windows.ps1
+```
+
+Скрипт створює `backend\.env` з випадковим `JWT_SECRET`, записує `docker-compose.override.yml` для Windows і запускає стек. Далі відкрийте `http://localhost:8080`.
+
+### Два обмеження — обидва виміряні, жодного не обійти
+
+1. **Жодних команд до автомобіля.** Підписані команди йдуть через `tesla-http-proxy`, якому потрібні bind-mount `/etc/tesla-proxy` і фіксований UID 988 — нічого з цього в Windows немає. Тому сервіс лишається вимкненим; бекенд усе одно стартує, бо його `depends_on` має `required: false`. Усе, що на читання — поїздки, зарядки, аналітика, журнал, планувальник маршруту — працює повністю.
+2. **`host.docker.internal` вказує в інше місце.** Docker Desktop сам додає це ім’я до `/etc/hosts` кожного контейнера, і цей запис перемагає мережевий alias із compose-файлу. Виміряно: ім’я тоді резолвиться на шлюз хоста (172.17.0.1) замість контейнера проксі — команди тихо йшли не туди. Хто все ж запускає проксі, ставить у `backend\.env` значення `TESLA_PROXY_BASE=https://tesla-carview-proxy:4443`.
+
+### Не плутайте два файли `.env`
+
+Застосунок читає `backend\.env` (передається в контейнер як `env_file`). Сам Compose читає `.env` у **корені проєкту** і підставляє з нього `${...}` у compose-файлах (`TESLA_PROXY_CONFIG_DIR`, `TESLA_PROXY_UID`, `OLLAMA_MEMORY_LIMIT`). Виміряно, бо природним здається протилежне: запис у `backend/.env` на цю підстановку **не** впливає. Шаблон: `.env.example` у корені проєкту.
+
+### HTTPS — не специфіка Windows
+
+Tesla вимагає публічно доступну HTTPS-адресу — для входу, партнерської реєстрації та Fleet Telemetry. Це однаково стосується будь-якої домашньої інсталяції, незалежно від операційної системи. Варіанти (DynDNS, Cloudflare Tunnel, VPS) описані в [14-network-access.uk.md](14-network-access.uk.md).
+
+### Оновлення
+
+`deploy/update.sh` — bash-скрипт і в Windows не виконується. Натомість:
+
+```powershell
+git pull
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml pull
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d
+```
+
+### Що означає «не перевіряється в CI»
+
+Docker build gate збирає Linux-образи для amd64 і arm64; жодного Windows-хоста ніде не перевіряють автоматично. Шлях описано, а пастки вище виміряно на справжньому Docker-демоні — але постійно перевіряють його лише ті, хто ним іде.

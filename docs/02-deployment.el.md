@@ -4,16 +4,19 @@
 
 > 🇩🇪 [Auf Deutsch lesen](02-deployment.md)
 
-Το Tesla Carview τρέχει σε **όλες τις συνηθισμένες πλατφόρμες Linux**:
+Το Tesla Carview τρέχει σε **όλες τις συνηθισμένες πλατφόρμες**:
 
 | Πλατφόρμα | Αρχιτεκτονική | Δοκιμασμένο |
 |---|---|---|
 | Διακομιστής Linux (VPS, dedicated) | x86_64 | ✓ |
 | Raspberry Pi 4 / 5 | ARM64 | ✓ |
 | Raspberry Pi 3 (και παλαιότερα) | ARMv7 | ✗ ¹ |
+| Windows (Docker Desktop + WSL2) | x86_64 | ✓ ² |
 | Τοπική ανάπτυξη (Mac/Windows/Linux) | όλα | ✓ |
 
 ¹ **Το Raspberry Pi 3 και παλαιότερα (32-bit ARM) δεν υποστηρίζονται πλέον από την v3.51.0.** Η Node.js δεν δημοσιεύει εικόνες ARMv7 από την έκδοση 24 και μετά — ούτε alpine ούτε Debian —, οπότε η εικόνα του backend δεν μπορεί πλέον να χτιστεί εκεί. Το `deploy/setup.sh` σταματά σε τέτοια συστήματα με σχετική εξήγηση, αντί να αποτύχει αργότερα στο κατέβασμα της εικόνας.
+
+² **Τα Windows δουλεύουν, αλλά δεν ελέγχονται από CI.** Η εφαρμογή ζει εξ ολοκλήρου σε Linux containers· τα Windows είναι μόνο ο host. Λεπτομέρειες και οι δύο περιορισμοί: ενότητα «Windows (Docker Desktop)» στο τέλος αυτής της σελίδας.
 
 
 ---
@@ -246,3 +249,44 @@ tail -f /var/log/nginx/tesla-carview.access.log
 - Κεφαλίδα `x-retry-in` → **Traefik**
 - Σελίδα σφάλματος HTML χωρίς πρόσθετες κεφαλίδες → **nginx** (`limit_req`)
 - `ratelimit-limit` / `ratelimit-remaining` → **η εφαρμογή** (express-rate-limit)
+
+---
+
+## Windows (Docker Desktop)
+
+Η εφαρμογή τρέχει εξ ολοκλήρου σε Linux containers — τα Windows είναι μόνο ο host. Με **Docker Desktop σε λειτουργία WSL2** ξεκινά η ίδια στοίβα όπως σε έναν Linux server. Το `setup.sh` δεν λειτουργεί εκεί (bash, apt, systemd, certbot)· τη θέση του παίρνει το `deploy/setup-windows.ps1`.
+
+```powershell
+git clone https://github.com/KnevS/Tesla-Carview.git
+cd Tesla-Carview
+powershell -ExecutionPolicy Bypass -File .\deploy\setup-windows.ps1
+```
+
+Το script δημιουργεί το `backend\.env` με τυχαίο `JWT_SECRET`, γράφει ένα `docker-compose.override.yml` για Windows και ξεκινά τη στοίβα. Έπειτα ανοίξτε `http://localhost:8080`.
+
+### Δύο περιορισμοί — και οι δύο μετρημένοι, κανένας παρακάμψιμος
+
+1. **Καμία εντολή προς το όχημα.** Οι υπογεγραμμένες εντολές περνούν από τον `tesla-http-proxy`, που χρειάζεται το bind mount `/etc/tesla-proxy` και το σταθερό UID 988 — τίποτα από τα δύο δεν υπάρχει στα Windows. Η υπηρεσία μένει έτσι εκτός· το backend ξεκινά ούτως ή άλλως, επειδή το `depends_on` του είναι σε `required: false`. Όλα τα αναγνωστικά — διαδρομές, φορτίσεις, αναλύσεις, ημερολόγιο, σχεδιαστής διαδρομής — λειτουργούν πλήρως.
+2. **Το `host.docker.internal` δείχνει αλλού.** Το Docker Desktop γράφει αυτό το όνομα μόνο του στο `/etc/hosts` κάθε container, και η εγγραφή αυτή υπερισχύει του network alias από το compose. Μετρήθηκε: το όνομα τότε αναλύεται στο host gateway (172.17.0.1) αντί για το container του proxy — οι εντολές πήγαιναν σιωπηλά σε λάθος προορισμό. Όποιος τρέχει παρ' όλα αυτά τον proxy, βάζει στο `backend\.env` το `TESLA_PROXY_BASE=https://tesla-carview-proxy:4443`.
+
+### Μην μπερδεύετε τα δύο αρχεία `.env`
+
+Η εφαρμογή διαβάζει το `backend\.env` (δίνεται στο container ως `env_file`). Το ίδιο το Compose διαβάζει ένα `.env` στη **ρίζα του project** και με αυτό αντικαθιστά τα `${...}` στα αρχεία compose (`TESLA_PROXY_CONFIG_DIR`, `TESLA_PROXY_UID`, `OLLAMA_MEMORY_LIMIT`). Μετρήθηκε, γιατί το αντίθετο μοιάζει φυσικό: μια εγγραφή στο `backend/.env` **δεν** επηρεάζει αυτήν την αντικατάσταση. Πρότυπο: `.env.example` στη ρίζα του project.
+
+### Το HTTPS δεν αφορά ειδικά τα Windows
+
+Η Tesla απαιτεί δημόσια προσβάσιμη διεύθυνση HTTPS — για τη σύνδεση, την εγγραφή συνεργάτη και το Fleet Telemetry. Αυτό ισχύει το ίδιο για κάθε οικιακή εγκατάσταση, ανεξαρτήτως λειτουργικού. Οι τρόποι (DynDNS, Cloudflare Tunnel, VPS) βρίσκονται στο [14-network-access.el.md](14-network-access.el.md).
+
+### Ενημερώσεις
+
+Το `deploy/update.sh` είναι bash script και δεν τρέχει στα Windows. Αντ' αυτού:
+
+```powershell
+git pull
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml pull
+docker compose -f docker-compose.prod.yml -f docker-compose.override.yml up -d
+```
+
+### Τι σημαίνει «δεν ελέγχεται από CI»
+
+Το Docker build gate χτίζει Linux images για amd64 και arm64· κανένας Windows host δεν ελέγχεται αυτόματα πουθενά. Η διαδρομή είναι τεκμηριωμένη και οι παγίδες παραπάνω μετρήθηκαν σε πραγματικό Docker daemon — αλλά επαληθεύεται συνεχώς μόνο από όσους την ακολουθούν.

@@ -17,7 +17,7 @@
 Από διαδρομές GPS και ημερολόγιο διαδρομών έως σχεδιασμό διαδρομής με προγραμματισμό φόρτισης και αρχεία συντήρησης:
 όλα τα δεδομένα του οχήματος παραμένουν στον δικό σας server.
 
-Εκτελείται σε: **Linux servers** (x86_64), **Raspberry Pi 4/5** (ARM64), τοπική ανάπτυξη.
+Εκτελείται σε: **Linux servers** (x86_64), **Raspberry Pi 4/5** (ARM64), **Windows** (Docker Desktop + WSL2, χωρίς εντολές οχήματος), τοπική ανάπτυξη.
 
 <!-- Operator-Hinweis im Footer / Footer note for operators:
      Wer Tesla Carview selbst hostet, kann die eigenen Kontaktdaten

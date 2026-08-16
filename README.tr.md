@@ -17,7 +17,7 @@
 GPS izlerinden ve seyir defterinden, şarj planlamalı rota oluşturma ve bakım kayıtlarına kadar:
 tüm araç verileriniz kendi sunucunuzda kalır.
 
-Çalıştığı ortamlar: **Linux sunucuları** (x86_64), **Raspberry Pi 4/5** (ARM64), yerel geliştirme.
+Çalıştığı ortamlar: **Linux sunucuları** (x86_64), **Raspberry Pi 4/5** (ARM64), **Windows** (Docker Desktop + WSL2, araç komutları olmadan), yerel geliştirme.
 
 <!-- Operator-Hinweis im Footer / Footer note for operators:
      Wer Tesla Carview selbst hostet, kann die eigenen Kontaktdaten

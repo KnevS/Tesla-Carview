@@ -13,7 +13,20 @@ import {
 } from './teslaUsage.js';
 
 const proxyAgent = new https.Agent({ rejectUnauthorized: false });
-const PROXY_BASE  = 'https://host.docker.internal:4443';
+// Adresse des tesla-http-proxy (Signed Commands).
+//
+// Default `host.docker.internal` deckt beide Linux-Faelle ab: den Proxy als
+// Container (Netzwerk-Alias in docker-compose.prod.yml) und den Proxy als
+// systemd-Dienst auf dem Host.
+//
+// Auf Docker Desktop (Windows/macOS) traegt der Daemon `host.docker.internal`
+// selbst als /etc/hosts-Eintrag in JEDEN Container ein — und /etc/hosts
+// gewinnt gegen den Netzwerk-Alias. Gemessen: mit dem Eintrag loest der Name
+// auf das Host-Gateway auf (172.17.0.1) statt auf den Proxy-Container.
+// Signed Commands landeten dort still beim falschen Ziel. Deshalb ist die
+// Adresse ueberschreibbar — unter Docker Desktop gehoert
+// `TESLA_PROXY_BASE=https://tesla-carview-proxy:4443` in die .env.
+const PROXY_BASE = process.env.TESLA_PROXY_BASE || 'https://host.docker.internal:4443';
 
 const getAuthBase    = () => process.env.TESLA_AUTH_BASE || 'https://auth.tesla.com/oauth2/v3';
 const getFleetApiUrl = () => process.env.TESLA_AUDIENCE  || 'https://fleet-api.prd.eu.vn.cloud.tesla.com';
