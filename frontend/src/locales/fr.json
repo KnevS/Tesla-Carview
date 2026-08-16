@@ -4,6 +4,7 @@
     "cancel": "Annuler",
     "delete": "Supprimer",
     "loading": "Chargement...",
+    "throttled": "Le serveur limite les requêtes — nouvelle tentative automatique.",
     "yes": "Oui",
     "no": "Non",
     "back": "Retour",

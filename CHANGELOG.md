@@ -7,6 +7,20 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.52.4] - 2026-08-16
+
+### Behoben
+
+- **„Ich muss oft neu laden, um eine andere Seite zu öffnen" — 429 durch zu knappen Burst am Reverse-Proxy.** Gemessen an der Referenzinstallation: 40 parallele Anfragen auf `/api/health` ergaben 20× 200 und 20× 429; der Header `x-retry-in` weist die Drosselung dem vorgelagerten Traefik zu, nicht der App (deren eigenes Limit meldete zeitgleich noch 93 von 120 frei). Der Traefik-Router für `PathPrefix(/api/)` hing an einer Rate-Limit-Middleware mit `burst: 20` — und dieser Pfad umfasst auch `/api/tiles/{z}/{x}/{y}`, den OSM-Kachel-Proxy. **Damit wiederholte sich auf der Traefik-Ebene exakt der Fehler, der für nginx längst behoben war** (eigene `zone=tiles`, PR #213): Ein Karten-Zoom lädt 50–150 Kacheln in einem Rutsch und leert den Burst-Eimer vollständig. Auch ohne Karte reicht es aber schon: Ein Seitenwechsel im SPA feuert 15–26 API-Calls (Dashboard ~15 inkl. der immer eingehängten Widgets, Laden/Batterie je +11, Routenplaner +18) — mehr, als `burst: 20` durchlässt.
+
+  **Die eigentliche Härtung steckt im Frontend:** `api.js` behandelte 429 überhaupt nicht. Die Promise rejectete, die View blieb ohne Daten stehen, und das Neuladen wirkte wie eine Lösung — es wartete in Wahrheit nur, bis sich der Eimer wieder gefüllt hatte. Jetzt werden gedrosselte Anfragen bis zu dreimal wiederholt: Wartezeit aus `x-retry-in` (Traefik) bzw. `retry-after` (nginx/express), sonst exponentiell, gedeckelt auf 4 s. **Alle Retries laufen über einen gemeinsamen Takt** und werden um 150 ms gestaffelt — ohne das liefen 20 gleichzeitig abgewiesene Requests auch gleichzeitig wieder in dasselbe Limit. Ein 429 heißt, dass die Anfrage nicht verarbeitet wurde; sie darf deshalb auch für POST/PUT wiederholt werden.
+
+  Neuer, nicht blockierender Hinweis `ThrottleNotice` (i18n ×7), damit eine kurz unvollständige Seite nicht wie ein Fehler aussieht. **Bewusst ohne Ursachen-Behauptung:** Der Browser sieht nur, *dass* gedrosselt wird — ob Proxy oder App, kann er nicht unterscheiden.
+
+  Für Selfhoster mit eigenem Proxy neu dokumentiert: `deploy/traefik-dynamic.example.yml` (Gegenstück zu `nginx-host.conf.template`) und eine Tabelle in `deploy/README.md` mit den drei Limits und der Erkennungsregel, welche Instanz ein 429 geschickt hat (`x-retry-in` → Traefik, HTML-Fehlerseite → nginx, `ratelimit-*` → App).
+
+  **Merke:** Nicht die Dauerrate war falsch, sondern der Burst — 120/min deckt den Bedarf, 20 auf einen Schlag nicht. Und: Ein Limit, das an einer Stelle korrigiert wurde, muss bei jedem Wechsel der Edge-Schicht mitwandern; die nginx-Config auf dem Host trägt den Fix seit PR #213, war aber gar nicht mehr im Anfrageweg.
+
 ## [v3.52.3] - 2026-08-14
 
 ### Behoben

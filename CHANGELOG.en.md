@@ -7,6 +7,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.52.4] - 2026-08-16
+
+### Fixed
+
+- **"I often have to reload before another page will open" — 429s caused by too small a burst at the reverse proxy.** Measured against the reference installation: 40 parallel requests to `/api/health` returned 20× 200 and 20× 429, and the `x-retry-in` header attributes the throttling to the Traefik instance in front, not to the app (whose own limiter still reported 93 of 120 remaining at the same moment). The Traefik router for `PathPrefix(/api/)` used a rate-limit middleware with `burst: 20` — and that path also covers `/api/tiles/{z}/{x}/{y}`, the OSM tile proxy. **This repeated at the Traefik layer exactly the mistake that had long been fixed for nginx** (a dedicated `zone=tiles`, PR #213): one map zoom loads 50–150 tiles at once and empties the bucket completely. Even without a map it is enough: a page change in the SPA fires 15–26 API calls (dashboard ~15 including the always-mounted widgets, charging/battery +11 each, route planner +18) — more than `burst: 20` lets through.
+
+  **The real hardening is in the frontend:** `api.js` did not handle 429 at all. The promise simply rejected, the view was left without data, and reloading looked like a fix — while in truth it only waited for the bucket to refill. Throttled requests are now retried up to three times: the delay comes from `x-retry-in` (Traefik) or `retry-after` (nginx/express), otherwise it backs off exponentially, capped at 4 s. **All retries share one schedule** and are spaced 150 ms apart — without that, 20 simultaneously rejected requests would run into the same limit simultaneously again. A 429 means the request was not processed, so it is safe to retry for POST/PUT as well.
+
+  New non-blocking `ThrottleNotice` (i18n ×7) so that a briefly incomplete page does not look like an error. **Deliberately without claiming a cause:** the browser only sees *that* throttling happens — it cannot tell proxy from app.
+
+  Newly documented for self-hosters running their own proxy: `deploy/traefik-dynamic.example.yml` (the counterpart to `nginx-host.conf.template`) plus a table in `deploy/README.md` listing the three limits and how to tell which instance sent a 429 (`x-retry-in` → Traefik, HTML error page → nginx, `ratelimit-*` → app).
+
+  **Note to self:** the sustained rate was not the problem, the burst was — 120/min covers the demand, 20 at once does not. And a limit corrected in one place has to travel along whenever the edge layer changes; the host nginx config has carried the fix since PR #213 but was no longer in the request path at all.
+
 ## [v3.52.3] - 2026-08-14
 
 ### Fixed

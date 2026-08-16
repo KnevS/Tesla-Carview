@@ -4,6 +4,7 @@
     "cancel": "İptal",
     "delete": "Sil",
     "loading": "Yükleniyor...",
+    "throttled": "Sunucu istekleri kısıtlıyor — otomatik olarak yeniden denenecek.",
     "yes": "Evet",
     "no": "Hayır",
     "back": "Geri",
