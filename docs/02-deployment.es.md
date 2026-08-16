@@ -224,3 +224,25 @@ docker compose -f docker-compose.prod.yml logs -f backend
 # logs de nginx:
 tail -f /var/log/nginx/tesla-carview.access.log
 ```
+
+---
+
+## Funcionamiento detrás de un proxy inverso propio
+
+Si instalas `setup.sh` en **modo proxy** (ya tienes nginx, Caddy o Traefik), no se crea ninguna configuración de nginx y tendrás que reproducir los límites de tasa por tu cuenta. Si faltan o son demasiado estrictos, la aplicación acaba en HTTP 429 y parece rota: páginas cargadas a medias que solo una recarga parece arreglar.
+
+| Ruta | Recomendación | Por qué |
+|---|---|---|
+| `/api/auth/login` | 10/min, ráfaga 3 | Protección contra fuerza bruta |
+| `/api/tiles/` | 1200/min, ráfaga 300 | Un zoom del mapa carga 50–150 teselas de golpe |
+| `/api/` (resto) | 120/min, **ráfaga ≥ 60** | Un cambio de página lanza 15–26 peticiones |
+
+La ruta más específica debe ganar: si `/api/tiles/` cae bajo el límite general de la API, un solo zoom del mapa bloquea toda la API. El valor crítico no es la tasa sostenida, sino la ráfaga.
+
+En el repositorio hay plantillas listas para usar: [`deploy/nginx-host.conf.template`](../deploy/nginx-host.conf.template) y [`deploy/traefik-dynamic.example.yml`](../deploy/traefik-dynamic.example.yml).
+
+La propia respuesta indica de dónde viene un 429:
+
+- Cabecera `x-retry-in` → **Traefik**
+- Página de error HTML sin cabeceras adicionales → **nginx** (`limit_req`)
+- `ratelimit-limit` / `ratelimit-remaining` → **la aplicación** (express-rate-limit)

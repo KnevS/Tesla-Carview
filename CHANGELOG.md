@@ -7,6 +7,16 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.52.5] - 2026-08-16
+
+### Dokumentation
+
+- **Proxy-Modus verschwieg die Rate-Limits — genau die Lücke, durch die v3.52.4 entstand.** `setup.sh` fragt beim Setup, ob bereits ein Reverse-Proxy läuft; in diesem Modus legt es **keine** nginx-Konfiguration an und gab bisher nur `proxy_pass http://127.0.0.1:8080;` aus. Was der eigene Proxy an Limits nachbauen muss, stand nirgends — weder im Skript noch in `docs/02-deployment.*`, das den Proxy-Modus überhaupt nicht erwähnte. Wer dieser Anleitung folgte, landete zwangsläufig bei dem Fehlerbild aus v3.52.4: Ein Karten-Zoom (50–150 Kacheln über `/api/tiles/`) und ein Seitenwechsel (15–26 API-Calls) teilen sich ein knappes Limit, die App rendert halb, und nur ein Neuladen scheint zu helfen.
+
+  Geschlossen an allen drei Stellen, an denen jemand danach sucht: `setup.sh` gibt die drei empfohlenen Limits jetzt direkt beim Setup aus; `docs/02-deployment.*` (×7) bekommt den Abschnitt „Betrieb hinter einem eigenen Reverse-Proxy" mit Tabelle, Vorlagen-Verweis und der Erkennungsregel, welche Instanz ein 429 geschickt hat; das Handbuch (×6) einen Fehlerbehebungs-Eintrag, damit auch Nutzer ohne Serverzugang das Symptom einordnen können.
+
+  **Nicht angefasst:** README ×7 — dort geht es um Funktionen, nicht um Betrieb; die einzigen „Proxy"-Treffer betreffen `tesla-http-proxy` und damit ein anderes Thema (geprüft, nicht angenommen).
+
 ## [v3.52.4] - 2026-08-16
 
 ### Behoben

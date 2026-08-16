@@ -152,6 +152,18 @@ if [ "$DEPLOY_MODE" = "2" ]; then
     echo -e "${YELLOW}Proxy-Modus – nginx-Konfiguration uebersprungen.${RESET}"
     echo "  Docker lauscht auf Port 8080. Bitte in deinem Proxy weiterleiten:"
     echo "    proxy_pass http://127.0.0.1:8080;"
+    echo ""
+    # Ohne diesen Hinweis endet der Proxy-Modus regelmaessig in 429ern: ein
+    # Karten-Zoom laedt 50-150 Kacheln ueber /api/tiles/, ein Seitenwechsel
+    # 15-26 API-Calls. Faellt beides unter EIN knappes Limit, rendert die App
+    # halb und der Nutzer haelt sie fuer kaputt.
+    echo -e "${YELLOW}  WICHTIG – Rate-Limits im eigenen Proxy nachbauen:${RESET}"
+    echo "    /api/auth/login   10/min,   Burst 3     (Brute-Force-Schutz)"
+    echo "    /api/tiles/       1200/min, Burst 300   (ein Karten-Zoom = 50-150 Kacheln)"
+    echo "    /api/ (Rest)      120/min,  Burst >= 60 (ein Seitenwechsel = 15-26 Requests)"
+    echo "  Der spezifischere Pfad muss gewinnen — sonst sperrt ein Karten-Zoom"
+    echo "  die gesamte API aus. Vorlagen: deploy/nginx-host.conf.template und"
+    echo "  deploy/traefik-dynamic.example.yml, Details in docs/02-deployment.md."
 elif [ -n "$DOMAIN" ]; then
     # Temporaere HTTP-Config fuer certbot-Challenge
     cat > /etc/nginx/sites-available/tesla-carview <<EOF
