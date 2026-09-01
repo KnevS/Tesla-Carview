@@ -25,7 +25,7 @@
  */
 
 import { exec } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { getMasterDb, getAllTenants, getDb } from '../db/database.js';
 import { auditLog } from './auditService.js';
@@ -156,7 +156,14 @@ async function runOnce() {
         sum.user_invites_purged = ui.changes;
       } catch { /* Tabelle u.U. noch nicht da */ }
 
-      db.exec('PRAGMA wal_checkpoint(TRUNCATE)');
+      // Checkpoint als pragma() statt exec(), damit das Ergebnis auswertbar
+      // ist: SQLite meldet {busy, log, checkpointed} und scheitert STILL,
+      // wenn ein Leser eine Momentaufnahme haelt. Ein Checkpoint, der nichts
+      // tut und nichts sagt, ist genau der Fehlermodus, der die WAL wachsen
+      // laesst, ohne dass es jemand bemerkt.
+      const cpBefore = db.pragma('wal_checkpoint(TRUNCATE)')?.[0];
+      if (cpBefore?.busy) sum.wal_checkpoint_busy = true;
+
       // VACUUM nur, wenn die DB > 50 MB ist — sonst lohnt es nicht.
       const size = db.prepare(
         'SELECT page_count * page_size AS s FROM pragma_page_count(), pragma_page_size()'
@@ -164,8 +171,21 @@ async function runOnce() {
       if (size > 50 * 1024 * 1024) {
         db.exec('VACUUM');
         sum.vacuumed = true;
+        // VACUUM schreibt die KOMPLETTE Datenbank in die WAL. Ohne diesen
+        // zweiten Checkpoint bleibt sie in DB-Groesse liegen — auf einer
+        // realen Instanz stand neben einer 60-MB-Datenbank eine 60-MB-WAL,
+        // also der doppelte Platzbedarf, Tag fuer Tag neu erzeugt. Bei der
+        // Master-DB stand der Checkpoint schon immer nach dem VACUUM.
+        const cpAfter = db.pragma('wal_checkpoint(TRUNCATE)')?.[0];
+        if (cpAfter?.busy) sum.wal_checkpoint_busy_after_vacuum = true;
       }
       sum.size_after = size;
+      // WAL-Groesse mitschreiben: macht ein Checkpoint-Problem im Audit-Log
+      // sichtbar, statt es erst bei knappem Plattenplatz auffallen zu lassen.
+      try {
+        const walPath = `${db.name}-wal`;
+        sum.wal_bytes = existsSync(walPath) ? statSync(walPath).size : 0;
+      } catch { /* Groesse ist Diagnose, kein Grund den Lauf abzubrechen */ }
 
       auditLog(db, null, 'system_maintenance', null, sum);
     } catch (e) {
