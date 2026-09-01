@@ -55,6 +55,7 @@ Para los datos del vehículo en tiempo real (batería, climatización, TPMS, str
 |---|---|
 | **Dashboard** | Estadísticas generales, último viaje, gráfico de distancia mensual |
 | **Viajes** | Traza GPS en el mapa, consumo, velocidad, SoC a lo largo del tiempo |
+| **Periodo y selección** (v3.54.0) | Filtra la lista de viajes por periodo (selección rápida o límites libres desde/hasta) con un total calculado en el servidor de kilómetros, energía (kWh) y número de viajes; el modo de selección suma viajes marcados individualmente |
 | **Métricas de viaje** (v3.37.0) | Análisis tabular por viaje: duración, distancia, consumo, velocidad y potencia como mín/máx/media — ordenable, con tarjetas de resumen y exportación CSV |
 | **Mapa de calor** (v3.41.0) | Mapa de calor geográfico con cuatro capas conmutables: viajes (densidad inicio/fin), sesiones de carga, puntos de carga definidos y trayectos (como líneas) — rango temporal seleccionable, colores de capa ajustables, sin plugins de mapa externos |
 | **Análisis de zonas** (v3.39.0) | Analiza el detalle del viaje por zonas: rangos de velocidad, zonas propias (geocercas/lugares de carga) o un tramo libre — valores en tabla + resaltado en el mapa, marcadores (Vmax, potencia máxima, regeneración, paradas) |

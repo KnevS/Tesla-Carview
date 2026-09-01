@@ -55,6 +55,7 @@ Pour les données véhicule en direct (batterie, climatisation, TPMS, flux de t�
 |---|---|
 | **Tableau de bord** | Statistiques globales, dernier trajet, graphique mensuel des distances |
 | **Trajets** | Trace GPS sur carte, consommation, vitesse, SoC dans le temps |
+| **Période et sélection** (v3.54.0) | Filtrer la liste des trajets par période (choix rapides ou bornes libres du/au) avec un total calculé côté serveur : kilomètres, énergie (kWh) et nombre de trajets ; le mode sélection additionne les trajets cochés |
 | **Données de trajet** (v3.37.0) | Analyse tabulaire par trajet : durée, distance, consommation, vitesse et puissance en min/max/moy — triable, avec cartes de synthèse et export CSV |
 | **Carte de chaleur** (v3.41.0) | Carte de chaleur géographique avec quatre couches activables : trajets (densité départ/arrivée), sessions de charge, points de charge définis et itinéraires (en lignes) — plage temporelle réglable, couleurs de couche personnalisables, sans plugin cartographique externe |
 | **Analyse par zones** (v3.39.0) | Analyser le détail du trajet par zones : plages de vitesse, zones propres (géorepérages/lieux de charge) ou section libre — valeurs en tableau + mise en évidence sur la carte, repères (Vmax, puissance max, régénération, arrêts) |

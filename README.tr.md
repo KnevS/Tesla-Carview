@@ -55,6 +55,7 @@ Canlı araç verileri (batarya, klima, TPMS, telemetri akışı) için **tek bir
 |---|---|
 | **Pano (Dashboard)** | Genel istatistikler, son yolculuk, aylık mesafe grafiği |
 | **Yolculuklar** | Harita üzerinde GPS izi, tüketim, hız, zamana göre SoC |
+| **Dönem ve seçim** (v3.54.0) | Yolculuk listesini döneme göre filtreleyin (hızlı seçim veya serbest başlangıç/bitiş sınırları); sunucuda hesaplanan toplam kilometre, enerji (kWh) ve yolculuk sayısı; seçim modu tek tek işaretlenen yolculukları toplar |
 | **Sürüş Değerleri** (v3.37.0) | Sürüş başına tablo halinde analiz: süre, mesafe, tüketim, hız ve güç min/maks/ortalama — sıralanabilir, özet kartları ve CSV dışa aktarma |
 | **Isı haritası** (v3.41.0) | Dört katmanı açılıp kapanabilen coğrafi ısı haritası: sürüşler (başlangıç/bitiş yoğunluğu), şarj oturumları, tanımlı şarj noktaları ve güzergâhlar (çizgi olarak) — seçilebilir zaman aralığı, ayarlanabilir katman renkleri, harici harita eklentisi yok |
 | **Bölge analizi** (v3.39.0) | Sürüş detayını bölgelere göre incele: hız aralıkları, kendi coğrafi sınır/şarj konumu bölgelerin veya serbest kesit — tablo değerleri + haritada vurgulama, işaretçiler (Vmax, tepe güç, geri kazanım, duraklar) |
