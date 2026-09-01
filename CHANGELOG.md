@@ -15,6 +15,8 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
   Fehlt die Energie (reine GPS-Fahrten über OwnTracks tragen kein `energy_used_kwh`), bleibt der Wert weg statt „0,0 kWh" zu behaupten — eine Null wäre hier keine Messung, sondern eine Falschaussage.
 
+- **Die kWh-Summe sagt jetzt, worauf sie sich stützt.** Tragen nicht alle Fahrten des Zeitraums einen Energiewert (reine GPS-Fahrten haben keinen), steht ein `*` am Wert und der Tooltip nennt das Verhältnis: „Summe aus 8 von 12 Fahrten — der tatsächliche Verbrauch liegt also höher." Ohne diesen Hinweis liest man die Zahl als Gesamtverbrauch, obwohl Fahrten fehlen. Dafür liefert `/api/trips/stats` neu das Feld `energy_trips`.
+
 ### Behoben
 
 - **Der Ø-Verbrauch war unbrauchbar hoch.** `/api/trips/stats` rechnete `AVG(kWh ÷ km)` über die Einzelfahrten — ein ungewichteter Mittelwert. Eine 400-Meter-Fahrt mit Vorklimatisierung (0,8 kWh ⇒ 200 kWh/100 km) zählte damit genauso viel wie eine Autobahnetappe. Auf einem realen Bestand meldete die Kachel dadurch **96 kWh/100 km**. Im Test hebt eine einzige solche Kurzfahrt den Wert von 17,8 auf 78,3.

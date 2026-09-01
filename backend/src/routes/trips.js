@@ -118,6 +118,11 @@ router.get('/stats', (req, res) => {
          COALESCE(SUM(distance_km), 0) as total_km,
          COALESCE(AVG(distance_km), 0) as avg_km,
          COALESCE(SUM(energy_used_kwh), 0) as total_energy_kwh,
+         -- Wie viele Fahrten tragen ueberhaupt einen Energiewert? Ohne diese
+         -- Zahl liest sich die kWh-Summe wie „Verbrauch im Zeitraum", waehrend
+         -- sie in Wahrheit nur die Fahrten MIT Messwert umfasst — bei Bestaenden
+         -- mit vielen reinen GPS-Fahrten ist das ein grosser Unterschied.
+         COUNT(CASE WHEN energy_used_kwh IS NOT NULL AND distance_km > 0 THEN 1 END) as energy_trips,
          COALESCE(SUM(CASE WHEN end_time > start_time THEN end_time - start_time ELSE 0 END), 0) as total_duration_s,
          -- Verbrauch GEWICHTET: Gesamtenergie durch Gesamtstrecke, nicht der
          -- Mittelwert der Einzelfahrten. AVG(kWh/km) zaehlt eine 400-m-Fahrt

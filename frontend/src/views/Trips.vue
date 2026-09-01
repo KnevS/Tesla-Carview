@@ -75,7 +75,16 @@
                eine Falschaussage, kein Messwert. -->
           <template v-if="stats.total_energy_kwh > 0">
             <span class="text-gray-400 ml-1">·</span>
-            <span class="font-semibold ml-1">{{ (+stats.total_energy_kwh).toFixed(1) }} kWh</span>
+            <!-- Tragen nicht alle Fahrten des Zeitraums einen Energiewert,
+                 wird das am Wert kenntlich gemacht — sonst liest man die
+                 Summe als Gesamtverbrauch, obwohl Fahrten fehlen. -->
+            <span class="font-semibold ml-1"
+              :class="energyIncomplete ? 'underline decoration-dotted underline-offset-4 decoration-gray-500 cursor-help' : ''"
+              v-tooltip="energyIncomplete
+                ? $t('trips.energyPartial', { withEnergy: stats.energy_trips, total: stats.total_trips })
+                : $t('trips.energyCompleteTooltip')">
+              {{ (+stats.total_energy_kwh).toFixed(1) }} kWh<span v-if="energyIncomplete">*</span>
+            </span>
           </template>
           <span class="text-gray-400 ml-1 whitespace-nowrap">· {{ $t('trips.countLabel', { count: stats.total_trips || 0 }) }}</span>
         </div>
@@ -494,6 +503,12 @@ const selection = computed(() => {
     (a, t) => a + (t.end_time && t.start_time && t.end_time > t.start_time ? t.end_time - t.start_time : 0), 0);
   return { count: list.length, km, kwh, durationS, consumption: km > 0 && kwh > 0 ? kwh / km * 100 : null };
 });
+
+/** Liegt fuer mindestens eine Fahrt des Zeitraums kein Energiewert vor?
+ *  Dann ist die kWh-Summe eine Untergrenze, nicht der Gesamtverbrauch. */
+const energyIncomplete = computed(() =>
+  stats.value.energy_trips != null && stats.value.energy_trips < (stats.value.total_trips || 0)
+);
 
 const fmtDuration = secs => {
   const h = Math.floor(secs / 3600), m = Math.round((secs % 3600) / 60);

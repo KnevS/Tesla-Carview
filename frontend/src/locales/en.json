@@ -255,7 +255,9 @@
     "selectTrip": "Select trip",
     "selectionCount": "{count} selected",
     "energy": "Energy",
-    "duration": "Duration"
+    "duration": "Duration",
+    "energyPartial": "Sum over {withEnergy} of {total} trips — the rest carry no energy value (e.g. GPS-only trips), so the actual consumption is higher.",
+    "energyCompleteTooltip": "Total energy used in the selected period"
   },
   "webhooks": {
     "intro": "Send app events (trip end, charging end, service due) to your own HTTP endpoints. Every POST is HMAC-SHA256 signed; verify the {signatureHeader} header against the secret shown once on creation.",

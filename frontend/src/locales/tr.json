@@ -255,7 +255,9 @@
     "selectTrip": "Sürüşü seç",
     "selectionCount": "{count} seçildi",
     "energy": "Enerji",
-    "duration": "Süre"
+    "duration": "Süre",
+    "energyPartial": "{total} yolculuğun {withEnergy} tanesinin toplamı — diğerlerinde enerji değeri yok (ör. salt GPS yolculukları), gerçek tüketim daha yüksektir.",
+    "energyCompleteTooltip": "Seçilen dönemde tüketilen toplam enerji"
   },
   "webhooks": {
     "intro": "Uygulama olaylarını (yolculuk sonu, şarj sonu, servis zamanı) kendi HTTP uç noktalarına gönder. Her POST HMAC-SHA256 ile imzalanır; {signatureHeader} başlığını oluşturma anında bir kez gösterilen sırla doğrula.",

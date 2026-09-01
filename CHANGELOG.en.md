@@ -15,6 +15,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   When energy is missing (GPS-only trips via OwnTracks carry no `energy_used_kwh`), the value is omitted rather than claiming "0.0 kWh" — a zero there would be a false statement, not a measurement.
 
+- **The kWh total now says what it rests on.** When not every trip in the period carries an energy value (GPS-only trips don't), a `*` marks the figure and the tooltip gives the ratio: "sum over 8 of 12 trips — actual consumption is therefore higher". Without it the number reads as total consumption while trips are missing. `/api/trips/stats` returns a new `energy_trips` field for this.
+
 ### Fixed
 
 - **Average consumption was uselessly high.** `/api/trips/stats` computed `AVG(kWh ÷ km)` across individual trips — an unweighted mean. A 400-metre trip with preconditioning (0.8 kWh ⇒ 200 kWh/100 km) counted as much as a motorway leg. On a real dataset the tile reported **96 kWh/100 km**. In the test, a single such short trip lifts the value from 17.8 to 78.3.
