@@ -4,6 +4,7 @@ import protobuf from 'protobufjs';
 import { getDb, getTenantByVin } from '../db/database.js';
 import { recordCall } from './teslaUsage.js';
 import { buildTlmFromPoint, sendToAbrp } from './abrpService.js';
+import { usableBatteryKwh } from './vehicleModel.js';
 
 const PROTO = `
 syntax = "proto3";
@@ -66,7 +67,6 @@ const GEAR_MAP = { 0: null, 1: null, 2: 'P', 3: 'R', 4: 'N', 5: 'D', 6: null };
 
 // Nutzbare Batteriekapazität für die Verbrauchsschätzung aus dem SoC-Delta —
 // gleicher Wert und gleiche Formel wie im Polling-Pfad (dataSync.js).
-const MODEL_Y_USABLE_KWH = 75;
 
 // ── Minimaler FlatBuffers-Leser (Little-Endian) ──────────────────────────────
 // Tesla-Fahrzeuge senden die Telemetrie als FlatBuffers-Envelope; die
@@ -343,9 +343,13 @@ export function enrichClosedTrip(db, tripId) {
   const endSoc   = trip.end_soc           ?? lastPt('soc');
   const startOdo = trip.start_odometer_km ?? firstPt('odometer_km');
   const endOdo   = trip.end_odometer_km   ?? lastPt('odometer_km');
+  // Kapazitaet des tatsaechlichen Fahrzeugs statt einer festen Model-Y-Zahl:
+  // fuer ein Model S lagen die 75 kWh rund 20 kWh daneben, und der Fehler
+  // geht 1:1 in den ausgewiesenen Verbrauch ein.
+  const vehicle  = db.prepare('SELECT model, vin, trim_badging FROM vehicles WHERE id=?').get(trip.vehicle_id);
   const energy   = trip.energy_used_kwh   ?? (
     startSoc != null && endSoc != null && startSoc > endSoc
-      ? (startSoc - endSoc) / 100 * MODEL_Y_USABLE_KWH
+      ? (startSoc - endSoc) / 100 * usableBatteryKwh(vehicle)
       : null
   );
 

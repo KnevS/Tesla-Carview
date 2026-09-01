@@ -7,6 +7,7 @@ import { requireCanEditVehicles, requireCanAddVehicles } from '../middleware/aut
 import { getVehicles, getVehicleData } from '../services/teslaApi.js';
 import { registerVin } from '../db/database.js';
 import { assertVehicleAccess, guardAccess } from '../middleware/vehicleAccess.js';
+import { modelFromVin } from '../services/vehicleModel.js';
 
 const router = Router();
 
@@ -48,10 +49,17 @@ router.post('/sync', requireCanAddVehicles, async (req, res) => {
       ON CONFLICT(tesla_id) DO UPDATE SET
         vin          = excluded.vin,
         display_name = excluded.display_name,
-        model        = excluded.model
+        -- Nie mit NULL ueberschreiben: die Fleet-API liefert kein
+        -- model_name, ein Sync haette ein einmal gesetztes Modell sonst
+        -- wieder geleert.
+        model        = COALESCE(excluded.model, vehicles.model)
     `);
     for (const v of list) {
-      upsert.run(String(v.id), v.vin, v.display_name, v.model_name);
+      // Die Fleet-Fahrzeugliste kennt kein `model_name` (die alte Owner-API
+      // schon) — dann aus der VIN ableiten, die die Baureihe an Stelle 4
+      // traegt. Ohne das bleibt `model` dauerhaft leer, und daran haengen
+      // WLTP-Vergleich und Akkukapazitaet.
+      upsert.run(String(v.id), v.vin, v.display_name, v.model_name ?? modelFromVin(v.vin));
       if (v.vin) registerVin(v.vin, req.tenantId);
     }
     const vehicles = db.prepare('SELECT * FROM vehicles').all();

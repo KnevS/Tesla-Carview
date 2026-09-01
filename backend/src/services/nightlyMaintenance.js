@@ -30,6 +30,7 @@ import path from 'node:path';
 import { getMasterDb, getAllTenants, getDb } from '../db/database.js';
 import { auditLog } from './auditService.js';
 import { runSelfCheck, selfCheckDue } from './selfCheck.js';
+import { modelFromVin } from './vehicleModel.js';
 
 const TARGET_HOUR_DE   = 3;   // 03:30 Europe/Berlin
 const TARGET_MINUTE_DE = 30;
@@ -133,6 +134,22 @@ async function runOnce() {
         'DELETE FROM audit_logs WHERE created_at < ?'
       ).run(now - AUDIT_MAX_AGE_S);
       sum.audit_purged = audit.changes;
+
+      // Fehlendes Fahrzeugmodell aus der VIN nachtragen. Instanzen, die
+      // ueber die Fleet-API angelegt wurden, haben `model` nie gefuellt
+      // bekommen (die Fahrzeugliste dort kennt kein model_name) — und
+      // ohne Modell bleiben WLTP-Vergleich und Akkukapazitaet blind.
+      // Nur NULL-Werte werden ergaenzt, ein vorhandener Wert nie ueberschrieben.
+      try {
+        let filled = 0;
+        for (const v of db.prepare('SELECT id, vin FROM vehicles WHERE model IS NULL AND vin IS NOT NULL').all()) {
+          const m = modelFromVin(v.vin);
+          if (!m) continue;
+          db.prepare('UPDATE vehicles SET model=? WHERE id=? AND model IS NULL').run(m, v.id);
+          filled++;
+        }
+        if (filled) sum.vehicle_model_backfilled = filled;
+      } catch { /* Backfill ist Kuer, darf den Wartungslauf nie kippen */ }
 
       // Wöchentlicher Betriebs-Selbsttest (Security + Backup-Integrität).
       // Darf den Wartungslauf nie abbrechen.
