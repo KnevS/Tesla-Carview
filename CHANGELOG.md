@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.56.1] - 2026-09-01
+
+### Behoben
+
+- **Der Hygiene-Check meldete eine intakte Instanz als kaputt.** `scripts/hygiene-check.sh` prüfte nur, ob `backend/.env` *existiert* — nicht, ob der laufende Nutzer sie lesen darf. Auf dem Server gehört die Datei root und trägt 0600; ein Aufruf ohne `sudo` las sie als leer und meldete alle elf Pflicht-Schlüssel als fehlend. Genau so verliert ein Check seinen Wert: Wer den Fehlalarm einmal kennt, überliest beim nächsten Mal den echten Befund. Jetzt wird „vorhanden, aber nicht lesbar" als Hinweis mit Eigentümer, Rechten und dem `sudo`-Aufruf ausgegeben, und nur eine wirklich fehlende Datei bleibt ein Fehler.
+
+---
+
 ## [v3.56.0] - 2026-09-01
 
 ### Neu
