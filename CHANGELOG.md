@@ -7,6 +7,20 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.56.3] - 2026-09-01
+
+### Behoben
+
+- **Die nächtliche Wartung ließ täglich eine WAL-Datei in Datenbankgröße liegen.** Pro Mandant lief erst `wal_checkpoint(TRUNCATE)`, dann `VACUUM` — und VACUUM schreibt die **komplette** Datenbank in die WAL. Die blieb bis zum nächsten Lauf liegen: neben einer 58-MB-Datenbank eine 58-MB-WAL, also der doppelte Platzbedarf, jede Nacht neu erzeugt. Bei der Master-DB stand der Checkpoint schon immer nach dem VACUUM, bei den Mandanten-DBs davor. Jetzt wird nach dem VACUUM erneut gekürzt.
+
+  An einer Kopie einer echten Datenbank gemessen: Checkpoint → WAL 0,0 MB, VACUUM → WAL 58,0 MB, zweiter Checkpoint → WAL 0,0 MB.
+
+- **Der Checkpoint konnte still scheitern.** Er lief über `exec()`, dessen Rückgabe niemand ansah. SQLite meldet `{busy, log, checkpointed}` und tut nichts, wenn ein Leser eine Momentaufnahme hält — ein Checkpoint, der nichts tut und nichts sagt, lässt die WAL wachsen, bis der Plattenplatz auffällt. Jetzt über `pragma()` mit Auswertung; ein `busy` landet als `wal_checkpoint_busy` im Wartungs-Audit. Zusätzlich schreibt jeder Lauf die WAL-Größe (`wal_bytes`) mit, damit ein Rückstau sichtbar wird, statt entdeckt werden zu müssen.
+
+> Nachtrag zur Auslieferung: Der Code dieser Version ging bereits mit PR #313 live, dort fehlten aber Versions-Bump und Changelog-Eintrag — beides wird hier nachgezogen. Zwischen dem Merge von #313 und dieser Version meldete `/api/health` deshalb `3.56.2`, obwohl der Fix bereits lief.
+
+---
+
 ## [v3.56.2] - 2026-09-01
 
 ### Behoben
