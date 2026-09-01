@@ -791,17 +791,17 @@
       <div class="border-t border-gray-700 pt-4 space-y-3">
         <div class="flex items-center justify-between">
           <h3 class="font-medium text-sm"
-            v-tooltip="'Reihenfolge und Sichtbarkeit der Navigationspunkte individuell anpassen. Änderungen werden lokal gespeichert.'">
+            v-tooltip="'Reihenfolge und Sichtbarkeit der Navigationspunkte individuell anpassen. Änderungen werden im Profil gespeichert und gelten auf allen Geräten.'">
             🧭 Navigationsleiste anpassen
           </h3>
-          <button @click="navStore.reset()" class="text-xs text-gray-500 hover:text-gray-300 transition"
+          <button @click="navReset()" class="text-xs text-gray-500 hover:text-gray-300 transition"
             v-tooltip="'Reihenfolge und Sichtbarkeit auf Standardwerte zurücksetzen'">
             Zurücksetzen
           </button>
         </div>
         <p class="text-xs text-gray-500">
           Reihenfolge mit ↑↓ ändern · Auge zum Ein-/Ausblenden ·
-          Änderungen wirken auf Desktop-Dropdowns + Mobile-Strip, lokal gespeichert.
+          Änderungen wirken auf Desktop-Dropdowns + Mobile-Strip und werden im Profil gespeichert.
         </p>
         <!-- Items sind nach Gruppen-Zugehoerigkeit (Übersicht / Auswertung
              / Admin) farbig gerahmt, damit klar ist, wo sie in der Bar
@@ -811,9 +811,9 @@
             class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-gray-800 transition border-l-2"
             :class="groupBorder(link.group)">
             <div class="flex flex-col gap-0.5">
-              <button @click="navStore.moveUp(link.key)" :disabled="idx === 0"
+              <button @click="navUp(link.key)" :disabled="idx === 0"
                 class="text-gray-500 hover:text-white disabled:opacity-20 leading-none text-xs transition">▲</button>
-              <button @click="navStore.moveDown(link.key)" :disabled="idx === navStore.allLinks.length - 1"
+              <button @click="navDown(link.key)" :disabled="idx === navStore.allLinks.length - 1"
                 class="text-gray-500 hover:text-white disabled:opacity-20 leading-none text-xs transition">▼</button>
             </div>
             <span class="w-6 flex items-center justify-center"><AppIcon :name="link.icon" :size="18" /></span>
@@ -821,7 +821,7 @@
               {{ link.label }}
               <span class="text-[10px] uppercase tracking-wide text-gray-500 ml-1">{{ groupLabel(link.group) }}</span>
             </span>
-            <button @click="navStore.toggleVisible(link.key)"
+            <button @click="navToggle(link.key)"
               v-tooltip="link.visible ? 'Ausblenden' : 'Einblenden'"
               class="text-lg leading-none transition"
               :class="link.visible ? 'text-gray-400 hover:text-white' : 'text-gray-700 hover:text-gray-400'">
@@ -1047,6 +1047,7 @@ import api from '../api.js';
 import { useAuthStore } from '../store/auth.js';
 import { useAppStore }  from '../store/index.js';
 import { useNavStore }   from '../store/nav.js';
+import { usePrefsStore } from '../store/prefs.js';
 import GeofenceManager from '../components/GeofenceManager.vue';
 import AppIcon from '../components/AppIcon.vue';
 import WebhookManager from '../components/WebhookManager.vue';
@@ -1061,6 +1062,26 @@ const { isCollapsed, toggle } = usePageLayout('settings', SETTINGS_SECTIONS);
 const auth     = useAuthStore();
 const appStore = useAppStore();
 const navStore = useNavStore();
+const prefsStore = usePrefsStore();
+
+/** Navigations-Anpassung anwenden UND ins Profil schreiben.
+ *
+ *  Der Nav-Store allein speichert nur in localStorage. Sobald aber im
+ *  Einrichtungs-Assistenten einmal eine Reihenfolge gesetzt wurde, traegt
+ *  der Server `nav_order`/`nav_hidden` — und prefs.load() spielt diesen
+ *  Stand bei jedem App-Start ueber den lokalen zurueck. Eine hier
+ *  ein-/ausgeblendete Ansicht war dann beim naechsten Laden wieder weg.
+ *  Deshalb beide Seiten schreiben, wie es der Assistent auch tut. */
+function persistNav() {
+  prefsStore.set({
+    nav_order:  [...navStore.order],
+    nav_hidden: [...navStore.hidden],
+  });
+}
+function navToggle(key) { navStore.toggleVisible(key); persistNav(); }
+function navUp(key)     { navStore.moveUp(key);        persistNav(); }
+function navDown(key)   { navStore.moveDown(key);      persistNav(); }
+function navReset()     { navStore.reset();            persistNav(); }
 
 function launchWizard() {
   if (typeof window.__launchWizard === 'function') window.__launchWizard();
