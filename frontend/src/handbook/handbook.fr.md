@@ -107,6 +107,14 @@ Chaque utilisateur connecté a sa propre page sur `/my-tracking` (« 📱 Mon GP
 **Analyse par zones dans le détail du trajet** (ouvrir un trajet → carte « Analyse par zones ») : analyse un trajet par zones, chaque mode en tableau avec mise en évidence sur la carte. Trois modes : **zones de vitesse** (plages avec distance, temps, puissance moyenne et énergie nette par plage — les cases colorent les sections correspondantes, le reste est grisé), **mes zones** (quels géorepérages/lieux de charge le trajet touche, avec heure d'entrée/sortie, durée et distance dans la zone — cercles de zone affichables) et **section** (plage libre via curseurs de/à avec toutes les valeurs). En plus, la case **📍 Repères** sur la carte GPS marque Vmax, puissance max, plus forte régénération et arrêts (≥ 1 min).
 
 
+### 🗓️ Période et sélection dans la liste des trajets {#fahrten-zeitraum}
+
+Au-dessus de la liste des trajets se trouve une **barre de période** : choix rapides (7 jours, 30 jours, ce mois-ci, mois dernier, cette année) ou bornes libres **du/au**. À droite s'affiche le **total de la période** — kilomètres et nombre de trajets. Ce total est calculé côté serveur sur *tous* les trajets de la période, pas seulement sur les 50 chargés : « charger plus » ne le modifie pas. Les cartes statistiques suivent la même période, ainsi que les filtres de type et de conducteur.
+
+Pour une sélection ciblée, le bouton **Sélectionner** : chaque trajet reçoit une case à cocher, « tous les chargés » sélectionne toute la liste. Une barre en bas d'écran additionne les trajets cochés — nombre, distance, énergie, consommation moyenne et temps de conduite. Pratique pour « combien a représenté ce déplacement professionnel ? » quand les trajets ne tombent pas dans une période calendaire. Seuls les trajets chargés peuvent être cochés ; pour le total d'une période, utilisez la barre de période.
+
+Un clic sur un jour dans la carte de chaleur d'activité ouvre la liste des trajets avec ce jour comme période.
+
 ## 🔋 Tableau santé batterie (Companion Phase 1) {#battery-health}
 
 **Santé & prévision (v3.27–v3.28) :** projection linéaire de l’autonomie normalisée à 100 % avec bande de confiance (dégradation par an, autonomie dans 3 ans, temps jusqu’à 80 %), plus une alerte de décharge à l’arrêt en cas de hausse durable. Statistiques pures, pas d’IA.

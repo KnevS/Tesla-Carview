@@ -7,6 +7,27 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.54.0] - 2026-09-01
+
+### Neu
+
+- **Zeitraum und Markierung in der Fahrten-Auswertung.** Die Frage „wie viele Kilometer waren es in diesem Zeitraum?" ließ sich bisher nur über das Fahrtenbuch oder den Jahresbericht beantworten. Die Fahrtenliste hat jetzt eine eigene Zeitraum-Leiste: Schnellwahl (7 Tage, 30 Tage, dieser Monat, letzter Monat, dieses Jahr) oder freie Von/Bis-Grenzen. Rechts daneben steht die Summe des Zeitraums.
+
+  Die Summe kommt **serverseitig** aus `/api/trips/stats` mit denselben Filtern wie die Liste — nicht aus den geladenen Zeilen. Das ist der Unterschied zwischen richtig und plausibel: die Liste ist auf 50 Fahrten paginiert, eine clientseitige Summe hätte bei jedem größeren Zeitraum still zu wenig angezeigt.
+
+  Zusätzlich der Modus **Markieren**: Häkchen je Fahrt, „Alle geladenen" in der Abschnittsleiste, und eine fixe Leiste am unteren Rand mit Anzahl, Strecke, Energie, Ø-Verbrauch und Fahrzeit der Markierung. Diese Summe bezieht sich bewusst nur auf geladene Fahrten — für „alles im Zeitraum" ist die Zeitraum-Summe zuständig.
+
+  Das Datumsfeld rechnet in **lokaler** Zeit (`von` = 00:00, `bis` = 23:59:59 des gewählten Tages). Ein am 1. gewählter Monatsanfang landet damit nicht wegen UTC-Versatz im Vortag.
+
+### Behoben
+
+- **Der Typ-Filter der Fahrtenliste war wirkungslos.** Das Frontend schickte `trip_type` an `GET /api/trips`, der Handler hat den Parameter nie gelesen — „Dienstfahrten" zeigte weiterhin alles. Jetzt wird er ausgewertet (gegen eine feste Werteliste geprüft, nicht durchgereicht).
+- **Die Statistik-Karten ignorierten die Filter der Liste.** `/api/trips/stats` bekam nur `vehicle_id`; Fahrer- und Typ-Filter blieben außen vor. Liste und Kacheln beschrieben also verschiedene Mengen — mit Zeitraum wäre das sofort sichtbar falsch geworden. Beide Endpunkte teilen sich jetzt denselben Filter-Aufbau (`tripFilter()`).
+- **Der Datums-Link der Aktivitäts-Heatmap ging ins Leere.** Ein Klick auf einen Tag navigiert seit jeher auf `/trips?date=YYYY-MM-DD`, die Fahrtenliste hat die Query aber nie ausgewertet — man landete auf der ungefilterten Liste. Der Tag wird jetzt als Zeitraum übernommen.
+- **`/api/trips/logbook` schränkte nicht auf eigene Fahrzeuge ein.** Liste, Statistik und Fahrtwerte hatten den `restrictToOwnVehicles`-Guard, der Fahrtenbuch-Endpunkt nicht: ein normaler Nutzer konnte darüber Fahrten fremder Fahrzeuge desselben Mandanten lesen. Admins sehen weiterhin alles.
+
+---
+
 ## [v3.53.0] - 2026-08-16
 
 ### Neu
