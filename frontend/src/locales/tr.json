@@ -223,7 +223,7 @@
     "totalKm": "Toplam km",
     "totalKmTooltip": "Kaydedilmiş tüm yolculuk kilometrelerinin toplamı",
     "avgConsumption": "Ort. tüketim",
-    "avgConsumptionTooltip": "100 km başına ortalama enerji tüketimi",
+    "avgConsumptionTooltip": "Seçilen dönemdeki toplam enerjinin toplam mesafeye bölümü. Enerji verisi olmayan sürüşler hariç tutulur.",
     "privateKm": "Özel yolculuklar",
     "privateKmTooltip": "Özel yolculuk olarak sınıflandırılan kilometre",
     "businessKm": "İş yolculukları",

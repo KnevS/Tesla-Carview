@@ -223,7 +223,7 @@
     "totalKm": "Total km",
     "totalKmTooltip": "Sum of all recorded trip kilometres",
     "avgConsumption": "Avg. consumption",
-    "avgConsumptionTooltip": "Average energy consumption per 100 km",
+    "avgConsumptionTooltip": "Total energy divided by total distance in the selected period. Trips without recorded energy are excluded.",
     "privateKm": "Private trips",
     "privateKmTooltip": "Distance classified as private trips",
     "businessKm": "Business trips",

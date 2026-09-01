@@ -223,7 +223,7 @@
     "totalKm": "Km totales",
     "totalKmTooltip": "Suma de todos los kilómetros registrados",
     "avgConsumption": "Consumo med.",
-    "avgConsumptionTooltip": "Consumo medio de energía por 100 km",
+    "avgConsumptionTooltip": "Energía total dividida por la distancia total del periodo seleccionado. Los viajes sin energía registrada quedan fuera.",
     "privateKm": "Viajes privados",
     "privateKmTooltip": "Kilometraje clasificado como viajes privados",
     "businessKm": "Viajes laborales",

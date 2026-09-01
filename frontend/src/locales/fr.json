@@ -223,7 +223,7 @@
     "totalKm": "Total km",
     "totalKmTooltip": "Somme de tous les kilomètres enregistrés",
     "avgConsumption": "Conso. moy.",
-    "avgConsumptionTooltip": "Consommation énergétique moyenne pour 100 km",
+    "avgConsumptionTooltip": "Énergie totale divisée par la distance totale sur la période sélectionnée. Les trajets sans énergie enregistrée sont exclus.",
     "privateKm": "Trajets privés",
     "privateKmTooltip": "Kilométrage classé comme trajets privés",
     "businessKm": "Trajets pro",
