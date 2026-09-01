@@ -154,7 +154,15 @@ section "4. .env-Konfiguration"
 ENV_FILE="$APP_DIR/backend/.env"
 ENV_EXAMPLE="$APP_DIR/backend/.env.example"
 
-if [[ -f "$ENV_FILE" && -f "$ENV_EXAMPLE" ]]; then
+# Die .env gehoert auf dem Server root und traegt 0600 — laeuft der Check
+# als normaler Nutzer, ist sie zwar da, aber nicht lesbar. Ohne diese
+# Unterscheidung meldete der Check dann JEDEN Pflichtschluessel als fehlend
+# (auf der Referenzinstanz 11 Stueck) und behauptete damit einen Ausfall,
+# den es nicht gibt. Ein Check, der Fehlalarm schlaegt, wird ignoriert —
+# und verdeckt beim naechsten Mal den echten Befund.
+if [[ -f "$ENV_FILE" && ! -r "$ENV_FILE" ]]; then
+  info ".env vorhanden, aber für den aktuellen Nutzer nicht lesbar ($(stat -c '%U:%G %a' "$ENV_FILE" 2>/dev/null || stat -f '%Su:%Sg %Lp' "$ENV_FILE" 2>/dev/null || echo 'root, 0600')) — Prüfung übersprungen. Für die Inhaltsprüfung: sudo bash scripts/hygiene-check.sh"
+elif [[ -f "$ENV_FILE" && -f "$ENV_EXAMPLE" ]]; then
   MISSING_REQ=(); MISSING_OPT=(); PREV_OPTIONAL=0
   while IFS= read -r line; do
     if [[ "$line" =~ ^# ]]; then

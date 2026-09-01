@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.56.1] - 2026-09-01
+
+### Fixed
+
+- **The hygiene check reported a healthy instance as broken.** `scripts/hygiene-check.sh` only tested whether `backend/.env` *exists*, not whether the running user may read it. On the server the file is owned by root with 0600, so a call without `sudo` read it as empty and reported all eleven required keys as missing. That is exactly how a check loses its value: once you know the false alarm, you skim past the real finding next time. It now reports "present but not readable" as a note naming owner, permissions and the `sudo` invocation, and only a genuinely missing file stays an error.
+
+---
+
 ## [v3.56.0] - 2026-09-01
 
 ### Added
