@@ -7,6 +7,18 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.57.0] - 2026-09-01
+
+### Added
+
+- **Vehicle model derived from the VIN, battery capacity taken from the vehicle.** The Fleet API's vehicle list carries no `model_name` — the old Owner API did. On Fleet instances `vehicles.model` therefore stayed empty forever, with two consequences: the WLTP comparison column in the trip list always showed "—", and the energy estimate used a **hard-coded Model Y capacity of 75 kWh** — about 20 kWh off for a Model S, and that error feeds straight into the reported consumption.
+
+  The information was there all along: the VIN encodes the series in position 4, and `trim_badging` carries the capacity as a number ("p74d" = Performance, 74 kWh, dual motor). New `services/vehicleModel.js` with `modelFromVin()`, `resolveModel()` and `usableBatteryKwh()`; the latter prefers the badging (vehicle-exact), then a per-series value, then the previous default. A badging without a plausible number (40–130 kWh) is discarded rather than letting a model year pass as a capacity.
+
+  Vehicle sync now stores the model and **never overwrites an existing value with NULL** (otherwise the next sync would blank what was just filled in). Existing vehicles without a model are backfilled once from the VIN by nightly maintenance.
+
+---
+
 ## [v3.56.3] - 2026-09-01
 
 ### Fixed

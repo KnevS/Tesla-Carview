@@ -4,9 +4,9 @@ import { maybeFuzz } from './gpsFuzzing.js';
 import { dispatch as dispatchWebhook } from './webhookDispatcher.js';
 import { buildTlmFromState, sendToAbrp } from './abrpService.js';
 import { notifySentryAlert, notifyAllInTenant } from './notifyService.js';
+import { usableBatteryKwh } from './vehicleModel.js';
 
 const BATTERY_SNAPSHOT_INTERVAL = 15 * 60;
-const MODEL_Y_USABLE_KWH = 75;
 const milesToKm = m => m * 1.60934;
 
 export async function syncVehicleState(db, vehicle, state, tenantId = null) {
@@ -252,8 +252,10 @@ function finishOdometerTrip(db, vehicle, charge, odomKm, now, outsideTempC = nul
   const distKm   = odomKm && active.start_odometer_km != null ? odomKm - active.start_odometer_km : null;
   const startSoc = active.start_soc;
   const endSoc   = charge?.battery_level ?? null;
+  // Kapazitaet des tatsaechlichen Fahrzeugs — s. vehicleModel.js.
+  const vehicleRow = db.prepare('SELECT model, vin, trim_badging FROM vehicles WHERE id=?').get(active.vehicle_id);
   const energyKwh = startSoc != null && endSoc != null && startSoc > endSoc
-    ? (startSoc - endSoc) / 100 * MODEL_Y_USABLE_KWH
+    ? (startSoc - endSoc) / 100 * usableBatteryKwh(vehicleRow)
     : null;
 
   // outside_temp_avg_c: aktuell der Wert beim Trip-Abschluss
