@@ -107,6 +107,14 @@ Every signed-in user has their own page at `/my-tracking` ("📱 My GPS" in the 
 **Zone analysis in the trip detail** (open a trip → "Zone analysis" card): analyses a single trip by zones, each as a table with matching highlighting on the map. Three modes: **speed zones** (speed bands with distance, time, average power and net energy per band — checkboxes colour the matching track sections, deselected ones are dimmed), **my zones** (which of your geofences/charging locations the trip touches, with entry/exit time, duration and distance inside the zone — zone circles can be shown on the map) and **section** (freely chosen range via from/to sliders with all key figures). In addition, the **📍 Hints** checkbox on the GPS map marks Vmax, peak power, strongest regeneration and stops (≥ 1 min).
 
 
+### 🗓️ Period & selection in the trip list {#fahrten-zeitraum}
+
+Above the trip list sits a **period bar**: quick presets (7 days, 30 days, this month, last month, this year) or free **from/to** bounds. On the right you get the **period total** — distance and trip count. That total is calculated on the server across *all* trips in the period, not just the 50 loaded ones, so "load more" doesn't change it. The stat tiles below follow the same period plus the type and driver filters.
+
+For an ad-hoc selection use the **Select** button: every trip gets a checkbox, "all loaded" ticks the whole list. A bar at the bottom of the screen sums up the ticked trips — count, distance, energy, average consumption and driving time. Handy for "what did this business trip add up to?" when the trips don't fall neatly into a calendar period. Only loaded trips can be ticked; for the total of a whole period, use the period bar.
+
+Clicking a day in the activity heatmap opens the trip list with that day as the period.
+
 ## 🔋 Battery health dashboard (Companion Phase 1) {#battery-health}
 
 `/battery` ships six sections since v3.6.0 that give you honest answers on the key battery questions — **statistics only, no AI, no data leaving the box**:

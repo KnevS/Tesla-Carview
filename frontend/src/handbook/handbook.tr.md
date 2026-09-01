@@ -107,6 +107,14 @@ Oturum açmış her kullanıcının `/my-tracking` ("📱 Benim GPS'im" navigasy
 **Sürüş detayında bölge analizi** (bir sürüşü aç → «Bölge analizi» kartı): tek bir sürüşü bölgelere göre inceler; her mod tablo + haritada vurgulama sunar. Üç mod: **hız bölgeleri** (aralık başına mesafe, süre, ortalama güç ve net enerji — onay kutuları ilgili kesimleri renklendirir, seçilmeyenler soluklaşır), **bölgelerim** (sürüşün hangi coğrafi sınırlara/şarj konumlarına değdiği; giriş/çıkış saati, süre ve bölgedeki mesafe — bölge daireleri haritada gösterilebilir) ve **kesit** (başlangıç/bitiş kaydırıcılarıyla serbest aralık, tüm değerlerle). Ayrıca GPS haritasındaki **📍 İpuçları** kutusu Vmax, en yüksek güç, en güçlü geri kazanım ve durakları (≥ 1 dk) işaretler.
 
 
+### 🗓️ Yolculuk listesinde dönem ve seçim {#fahrten-zeitraum}
+
+Yolculuk listesinin üzerinde bir **dönem çubuğu** bulunur: hızlı seçim (7 gün, 30 gün, bu ay, geçen ay, bu yıl) veya serbest **başlangıç/bitiş** sınırları. Sağda **dönem toplamı** görünür — kilometre ve yolculuk sayısı. Bu toplam sunucuda dönemdeki *tüm* yolculuklar üzerinden hesaplanır, yalnızca yüklenen 50 tanesi üzerinden değil; „daha fazla yükle" onu değiştirmez. Altındaki istatistik kartları aynı dönemi ve ayrıca tür ile sürücü filtrelerini izler.
+
+Belirli bir seçim için **Seç** düğmesi vardır: her yolculuğa bir onay kutusu gelir, „yüklenenlerin tümü" listenin tamamını işaretler. Ekranın altındaki çubuk işaretli yolculukları toplar — sayı, mesafe, enerji, ortalama tüketim ve sürüş süresi. Yolculuklar takvim dönemine düzgün oturmadığında „bu iş seyahati toplamda ne tuttu?" sorusu için pratiktir. Yalnızca yüklenmiş yolculuklar işaretlenebilir; bir dönemin tamamının toplamı için dönem çubuğu kullanılır.
+
+Etkinlik ısı haritasında bir güne tıklamak yolculuk listesini o gün dönem olarak seçili şekilde açar.
+
 ## 🔋 Batarya sağlık paneli (Companion Aşama 1) {#battery-health}
 
 **Sağlık ve tahmin (v3.27–v3.28):** %100 SoC’ye normalize edilmiş menzilin güven bandıyla doğrusal projeksiyonu (yıllık yıpranma, 3 yıl içindeki menzil, %80’e kalan süre), ayrıca kalıcı artışta park tüketimi uyarısı. Saf istatistik, yapay zeka yok.

@@ -107,6 +107,14 @@ Cada usuario autenticado tiene su propia página en `/my-tracking` («📱 Mi GP
 **Análisis de zonas en el detalle del viaje** (abrir un viaje → tarjeta «Análisis de zonas»): analiza un viaje por zonas, cada modo como tabla con resaltado en el mapa. Tres modos: **zonas de velocidad** (rangos con distancia, tiempo, potencia media y energía neta por rango — las casillas colorean los tramos correspondientes, lo no seleccionado se atenúa), **mis zonas** (qué geocercas/lugares de carga toca el viaje, con hora de entrada/salida, duración y distancia en la zona — círculos de zona en el mapa) y **tramo** (rango libre con reguladores desde/hasta y todas las cifras). Además, la casilla **📍 Indicaciones** en el mapa GPS marca Vmax, potencia máxima, mayor regeneración y paradas (≥ 1 min).
 
 
+### 🗓️ Periodo y selección en la lista de viajes {#fahrten-zeitraum}
+
+Sobre la lista de viajes hay una **barra de periodo**: selección rápida (7 días, 30 días, este mes, mes pasado, este año) o límites libres **desde/hasta**. A la derecha aparece el **total del periodo** — kilómetros y número de viajes. Ese total se calcula en el servidor sobre *todos* los viajes del periodo, no solo sobre los 50 cargados: «cargar más» no lo cambia. Las tarjetas de estadísticas siguen el mismo periodo y además los filtros de tipo y conductor.
+
+Para una selección concreta está el botón **Seleccionar**: cada viaje recibe una casilla y «todos los cargados» marca la lista entera. Una barra en la parte inferior suma los viajes marcados — número, distancia, energía, consumo medio y tiempo de conducción. Útil para «¿cuánto sumó este viaje de trabajo?» cuando los trayectos no encajan en un periodo de calendario. Solo pueden marcarse viajes cargados; para el total de un periodo completo está la barra de periodo.
+
+Al hacer clic en un día del mapa de calor de actividad, la lista de viajes se abre con ese día como periodo.
+
 ## 🔋 Panel salud de batería (Companion Fase 1) {#battery-health}
 
 **Salud y pronóstico (v3.27–v3.28):** proyección lineal de la autonomía normalizada al 100 % con banda de confianza (degradación anual, autonomía en 3 años, tiempo hasta el 80 %), más un aviso de consumo en reposo ante un aumento sostenido. Estadística pura, sin IA.

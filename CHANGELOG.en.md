@@ -7,6 +7,27 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.54.0] - 2026-09-01
+
+### Added
+
+- **Period and selection in the trip analysis.** Answering "how many kilometres was that in this period?" previously required the logbook or the annual report. The trip list now has its own period bar: quick presets (7 days, 30 days, this month, last month, this year) or free from/to bounds, with the period total right next to it.
+
+  That total comes from `/api/trips/stats` **server-side**, using the same filters as the list — not from the loaded rows. This is the difference between correct and merely plausible: the list is paginated at 50 trips, so a client-side sum would have quietly under-reported every larger period.
+
+  Plus a **selection** mode: a checkbox per trip, "all loaded" in the section header, and a fixed bar at the bottom showing count, distance, energy, average consumption and driving time of the selection. That sum deliberately covers loaded trips only — "everything in the period" is what the period total is for.
+
+  The date fields work in **local** time (`from` = 00:00, `to` = 23:59:59 of the chosen day), so picking the 1st of a month doesn't slip into the previous day through a UTC offset.
+
+### Fixed
+
+- **The trip list's type filter did nothing.** The frontend sent `trip_type` to `GET /api/trips`, but the handler never read it — picking "business" still showed everything. It is now applied (validated against a fixed list of values, not passed through).
+- **The stat cards ignored the list's filters.** `/api/trips/stats` only received `vehicle_id`; driver and type filters never reached it, so the list and the tiles described different sets — which a period filter would have made visibly wrong. Both endpoints now share one filter builder (`tripFilter()`).
+- **The activity heatmap's date link led nowhere.** Clicking a day has always navigated to `/trips?date=YYYY-MM-DD`, but the trip list never evaluated the query — you ended up on the unfiltered list. The day is now applied as the period.
+- **`/api/trips/logbook` did not restrict to your own vehicles.** The list, stats and metrics endpoints had the `restrictToOwnVehicles` guard, the logbook endpoint did not: a regular user could read trips of other vehicles in the same tenant through it. Admins still see everything.
+
+---
+
 ## [v3.53.0] - 2026-08-16
 
 ### Added
