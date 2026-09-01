@@ -7,6 +7,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.55.0] - 2026-09-01
+
+### Fixed
+
+- **Route lines on the heatmap were hard to see.** The layer used a pale violet (`#a78bfa`) at 2 px and 55 % opacity — on the light OSM tiles that disappeared, especially where many trips overlap. Now: strong magenta (`#c026d3`), 3 px, 80 % opacity. Magenta doesn't otherwise occur on the map and doesn't clash with red (trips), green (charging) or blue (charging locations). Anyone who never changed the colour gets the new one automatically; a custom choice is left alone.
+- **Showing and hiding views didn't stick.** "Settings → Customise navigation bar" wrote order and visibility to browser storage only, while the setup wizard stores the same values in the profile. Once anything had been saved there, `prefs.load()` replayed the profile state over the local choice on every app start — a view you had just unhidden was gone again after the next load. Both paths now write to the same profile, so the choice also applies on other devices.
+
+---
+
 ## [v3.54.0] - 2026-09-01
 
 ### Added

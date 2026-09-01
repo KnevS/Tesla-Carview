@@ -7,6 +7,15 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.55.0] - 2026-09-01
+
+### Behoben
+
+- **Fahrwege in der Heatmap waren kaum zu erkennen.** Die Ebene lag auf blassem Violett (`#a78bfa`), 2 px breit und mit 55 % Deckkraft — auf den hellen OSM-Kacheln ging das unter, besonders wo sich viele Fahrten überlagern. Neu: kräftiges Magenta (`#c026d3`), 3 px, 80 % Deckkraft. Magenta kommt im Kartenbild sonst nicht vor und beißt sich nicht mit Rot (Fahrten), Grün (Ladevorgänge) oder Blau (Ladeorte). Wer die Farbe nie selbst geändert hat, bekommt die neue automatisch; eine eigene Farbwahl bleibt unangetastet.
+- **Ein- und ausgeblendete Ansichten hielten nicht.** „Einstellungen → Navigationsleiste anpassen" schrieb Reihenfolge und Sichtbarkeit nur in den Browser-Speicher, während der Einrichtungs-Assistent dieselben Werte im Profil ablegt. Sobald dort einmal etwas gespeichert war, spielte `prefs.load()` bei jedem App-Start den Profil-Stand über die lokale Auswahl — eine gerade eingeblendete Ansicht war nach dem nächsten Laden wieder verschwunden. Beide Wege schreiben jetzt in dasselbe Profil, damit die Auswahl auch auf anderen Geräten gilt.
+
+---
+
 ## [v3.54.0] - 2026-09-01
 
 ### Neu

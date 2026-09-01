@@ -72,9 +72,20 @@ const appStore = useAppStore();
 
 // ── Anpassbare Layer-Farben (localStorage, pro Browser) ──
 const COLOR_KEY = 'tesla-carview-heatmap-colors';
-const DEFAULT_COLORS = { trips: '#ef4444', charging: '#22c55e', locations: '#3b82f6', routes: '#a78bfa' };
+// Fahrwege lagen bis v3.55.0 auf einem blassen Violett (#a78bfa) —
+// auf den hellen OSM-Kacheln waren die duennen Linien kaum zu sehen.
+// Magenta kommt im Kartenbild sonst nicht vor und beisst sich nicht mit
+// Rot (Fahrten), Gruen (Ladevorgaenge) oder Blau (Ladeorte).
+const LEGACY_ROUTE_COLOR = '#a78bfa';
+const DEFAULT_COLORS = { trips: '#ef4444', charging: '#22c55e', locations: '#3b82f6', routes: '#c026d3' };
 function loadColors() {
-  try { return { ...DEFAULT_COLORS, ...(JSON.parse(localStorage.getItem(COLOR_KEY)) || {}) }; }
+  try {
+    const saved = JSON.parse(localStorage.getItem(COLOR_KEY)) || {};
+    // Wer den alten Default nie angefasst hat, bekommt den neuen — sonst
+    // bliebe die schlecht sichtbare Farbe fuer Bestandsnutzer stehen.
+    if (saved.routes === LEGACY_ROUTE_COLOR) delete saved.routes;
+    return { ...DEFAULT_COLORS, ...saved };
+  }
   catch { return { ...DEFAULT_COLORS }; }
 }
 const colors = reactive(loadColors());
@@ -179,10 +190,11 @@ function render() {
     )).addTo(map);
   }
   if (show.routes && routeLines.value.length) {
-    // Fahrwege UNTER die Dichte-Punkte legen (zuerst zeichnen reicht nicht,
-    // deshalb dünne, halbtransparente Linien).
+    // Fahrwege liegen UNTER den Dichte-Punkten (bringToBack). Bei weight 2
+    // und 0.55 Deckkraft gingen sie auf den Kacheln unter — 3 px und 0.8
+    // sind auch bei vielen ueberlagerten Linien noch klar erkennbar.
     layers.routes = L.layerGroup(routeLines.value.map(l =>
-      L.polyline(l.pts, { color: colors.routes, weight: 2, opacity: 0.55 })
+      L.polyline(l.pts, { color: colors.routes, weight: 3, opacity: 0.8 })
     )).addTo(map);
     layers.routes.eachLayer(pl => pl.bringToBack());
   }
