@@ -118,8 +118,23 @@ router.get('/stats', (req, res) => {
          COALESCE(SUM(distance_km), 0) as total_km,
          COALESCE(AVG(distance_km), 0) as avg_km,
          COALESCE(SUM(energy_used_kwh), 0) as total_energy_kwh,
+         -- Wie viele Fahrten tragen ueberhaupt einen Energiewert? Ohne diese
+         -- Zahl liest sich die kWh-Summe wie „Verbrauch im Zeitraum", waehrend
+         -- sie in Wahrheit nur die Fahrten MIT Messwert umfasst — bei Bestaenden
+         -- mit vielen reinen GPS-Fahrten ist das ein grosser Unterschied.
+         COUNT(CASE WHEN energy_used_kwh IS NOT NULL AND distance_km > 0 THEN 1 END) as energy_trips,
          COALESCE(SUM(CASE WHEN end_time > start_time THEN end_time - start_time ELSE 0 END), 0) as total_duration_s,
-         COALESCE(AVG(energy_used_kwh / NULLIF(distance_km, 0) * 100), 0) as avg_consumption,
+         -- Verbrauch GEWICHTET: Gesamtenergie durch Gesamtstrecke, nicht der
+         -- Mittelwert der Einzelfahrten. AVG(kWh/km) zaehlt eine 400-m-Fahrt
+         -- mit Vorklimatisierung (0,8 kWh → 200 kWh/100 km) genauso stark wie
+         -- eine Autobahnetappe und trieb den Wert dadurch ins Absurde —
+         -- gemeldet mit 96 kWh/100 km auf einem realen Bestand.
+         -- Fahrten ohne Energiewert (reine GPS-Fahrten) bleiben in BEIDEN
+         -- Summen aussen vor, sonst druecken ihre Kilometer den Schnitt.
+         COALESCE(
+           SUM(CASE WHEN energy_used_kwh IS NOT NULL AND distance_km > 0 THEN energy_used_kwh END)
+           / NULLIF(SUM(CASE WHEN energy_used_kwh IS NOT NULL AND distance_km > 0 THEN distance_km END), 0)
+           * 100, 0) as avg_consumption,
          COALESCE(SUM(CASE WHEN trip_type='private'  THEN distance_km ELSE 0 END), 0) as private_km,
          COALESCE(SUM(CASE WHEN trip_type='business' THEN distance_km ELSE 0 END), 0) as business_km,
          COALESCE(SUM(CASE WHEN trip_type='commute'  THEN distance_km ELSE 0 END), 0) as commute_km,

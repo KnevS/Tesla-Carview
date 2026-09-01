@@ -223,7 +223,7 @@
     "totalKm": "Total km",
     "totalKmTooltip": "Somme de tous les kilomètres enregistrés",
     "avgConsumption": "Conso. moy.",
-    "avgConsumptionTooltip": "Consommation énergétique moyenne pour 100 km",
+    "avgConsumptionTooltip": "Énergie totale divisée par la distance totale sur la période sélectionnée. Les trajets sans énergie enregistrée sont exclus.",
     "privateKm": "Trajets privés",
     "privateKmTooltip": "Kilométrage classé comme trajets privés",
     "businessKm": "Trajets pro",
@@ -255,7 +255,9 @@
     "selectTrip": "Sélectionner le trajet",
     "selectionCount": "{count} sélectionné(s)",
     "energy": "Énergie",
-    "duration": "Durée"
+    "duration": "Durée",
+    "energyPartial": "Somme sur {withEnergy} trajets sur {total} — les autres n'ont pas de valeur d'énergie (p. ex. trajets GPS seuls), la consommation réelle est donc plus élevée.",
+    "energyCompleteTooltip": "Énergie totale consommée sur la période sélectionnée"
   },
   "webhooks": {
     "intro": "Envoie les événements de l'application (fin de trajet, fin de charge, entretien dû) vers tes propres points HTTP. Chaque POST est signé HMAC-SHA256 ; vérifie l'en-tête {signatureHeader} avec le secret affiché une seule fois à la création.",
