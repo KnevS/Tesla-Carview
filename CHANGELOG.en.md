@@ -7,6 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.56.2] - 2026-09-01
+
+### Fixed
+
+- **The hygiene check aborted after section 5 — checks 6 and 7 never ran on the server.** `command -v docker` only proves the *client* is installed. Without daemon permissions the queries return empty results: the check then reported "all containers healthy" while having seen nothing, and died on `docker images | wc -l` (a failure under `set -o pipefail`, the end of the script under `set -e`). **Database integrity and the TLS expiry check therefore never executed** — precisely the two whose absence you notice only when it is too late. Daemon reachability is now tested up front and the section honestly skipped when permissions are missing; the queries can no longer end the run.
+- **The selection's energy figure did not carry the caveat yet.** Since v3.56.0 the period total marks itself with `*` when not all trips carry an energy value — the summary bar for ticked trips did not, although the same gap arises there. Both now behave alike.
+
+### Changed
+
+- Handbook (6 languages): the section on the period total still described the behaviour from before the `*` marker ("energy only appears when …"). It now explains the marker and its tooltip.
+
+---
+
 ## [v3.56.1] - 2026-09-01
 
 ### Fixed
