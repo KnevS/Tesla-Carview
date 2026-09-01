@@ -12,6 +12,58 @@ import {
 
 const router = Router();
 
+const TRIP_TYPES = ['private', 'business', 'commute'];
+
+/** Wandelt einen Zeitraum-Parameter in Unix-Sekunden um.
+ *  Akzeptiert Unix-Sekunden (so schickt es die UI — sie rechnet das
+ *  im Datumsfeld gewaehlte LOKALE Datum in Mitternacht bzw. Tagesende
+ *  um, damit kein UTC-Versatz entsteht) und `YYYY-MM-DD` fuer direkte
+ *  API-Nutzung (dann UTC-Mitternacht, bei `end` das Tagesende).
+ *  Unlesbares → null, der Filter entfaellt dann einfach. */
+function toUnixSeconds(value, { end = false } = {}) {
+  if (value == null || value === '') return null;
+  const raw = String(value);
+  if (/^\d+$/.test(raw)) return parseInt(raw, 10);
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(raw);
+  if (!m) return null;
+  const base = Math.floor(Date.UTC(+m[1], +m[2] - 1, +m[3]) / 1000);
+  return end ? base + 86399 : base;
+}
+
+/** Gemeinsame WHERE-Klausel fuer Fahrten-Liste UND -Aggregate.
+ *
+ *  Wichtig fuer die Auswertung: /trips und /trips/stats muessen exakt
+ *  dieselbe Menge beschreiben, sonst zeigt die Statistik-Karte andere
+ *  Kilometer als die Liste darunter (genau das war vorher der Fall —
+ *  die Liste filterte nach Fahrer, die Statistik nicht).
+ *
+ *  Unterstuetzt: vehicle_id, driver_id ('null' = Fahrten ohne Fahrer),
+ *  trip_type sowie den Zeitraum from/to. `to` ist INKLUSIV (gleiche
+ *  „bis Tagesende"-Semantik wie der Audit-Log-Filter).
+ *
+ *  `prefix` ist das Spalten-Praefix ('t.' bei JOIN-Queries, sonst '').
+ *  restrictToOwnVehicles bleibt immer Teil der Klausel — Nicht-Admins
+ *  sehen nur ihre eigenen Fahrzeuge. */
+function tripFilter(req, prefix = '') {
+  const { vehicle_id, driver_id, trip_type, from, to } = req.query;
+  const conds  = [];
+  const params = [];
+  if (vehicle_id) { conds.push(`${prefix}vehicle_id = ?`); params.push(vehicle_id); }
+  if (driver_id === 'null') { conds.push(`${prefix}driver_id IS NULL`); }
+  else if (driver_id) { conds.push(`${prefix}driver_id = ?`); params.push(driver_id); }
+  if (TRIP_TYPES.includes(trip_type)) { conds.push(`${prefix}trip_type = ?`); params.push(trip_type); }
+  const fromTs = toUnixSeconds(from);
+  const toTs   = toUnixSeconds(to, { end: true });
+  if (fromTs != null) { conds.push(`${prefix}start_time >= ?`); params.push(fromTs); }
+  if (toTs   != null) { conds.push(`${prefix}start_time <= ?`); params.push(toTs); }
+  const restrict = restrictToOwnVehicles(req, `${prefix}vehicle_id`);
+  return {
+    where:  'WHERE ' + (conds.length ? conds.join(' AND ') : '1=1') + restrict.fragment,
+    params: [...params, ...restrict.params],
+    range:  { from: fromTs, to: toTs },
+  };
+}
+
 /** Helper: lehnt Aenderungen an einem Finanzamt-exportierten (locked)
  *  Trip ab. Wird oben in jedem schreibenden Handler aufgerufen. */
 function checkLocked(req, res, trip) {
@@ -24,21 +76,15 @@ function checkLocked(req, res, trip) {
 
 router.get('/', (req, res) => {
   const db = req.db;
-  const { vehicle_id, limit = 50, offset = 0, driver_id, sort } = req.query;
+  const { limit = 50, offset = 0, sort } = req.query;
   try {
-    const conds = [];
-    const params = [];
-    if (vehicle_id) { conds.push('t.vehicle_id = ?'); params.push(vehicle_id); }
-    if (driver_id === 'null') { conds.push('t.driver_id IS NULL'); }
-    else if (driver_id) { conds.push('t.driver_id = ?'); params.push(driver_id); }
-    // Auf eigene Fahrzeuge einschraenken — Admins sehen alles im Tenant.
-    const restrict = restrictToOwnVehicles(req, 't.vehicle_id');
-    const where = conds.length
-      ? 'WHERE ' + conds.join(' AND ') + restrict.fragment
-      : (restrict.fragment ? 'WHERE 1=1' + restrict.fragment : '');
-    params.push(...restrict.params, +limit, +offset);
+    // Filter (Fahrzeug/Fahrer/Typ/Zeitraum) kommt aus tripFilter, damit
+    // die Liste und die Statistik-Karten darueber deckungsgleich sind.
+    const { where, params } = tripFilter(req, 't.');
     // Sortierreihenfolge: desc (Default, neueste zuerst) oder asc.
     const orderDir = sort === 'asc' ? 'ASC' : 'DESC';
+    const lim = Math.max(1, +limit || 50);
+    const off = Math.max(0, +offset || 0);
     const trips = db.prepare(
       `SELECT t.*, v.display_name as vehicle_name, v.model as vehicle_model,
               d.name as driver_name, d.color as driver_color
@@ -46,7 +92,7 @@ router.get('/', (req, res) => {
        JOIN vehicles v ON v.id = t.vehicle_id
        LEFT JOIN drivers d ON d.id = t.driver_id
        ${where} ORDER BY t.start_time ${orderDir} LIMIT ? OFFSET ?`
-    ).all(...params);
+    ).all(...params, lim, off);
     // WLTP-Delta pro Trip aus (model, distance, energy) berechnen.
     // Liefert null wenn Daten unvollstaendig — Frontend zeigt dann '—'.
     for (const t of trips) {
@@ -60,22 +106,19 @@ router.get('/', (req, res) => {
 
 router.get('/stats', (req, res) => {
   const db = req.db;
-  const { vehicle_id } = req.query;
   try {
-    const restrict = restrictToOwnVehicles(req, 'vehicle_id');
-    const conds  = [];
-    const params = [];
-    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
-    const where = conds.length || restrict.fragment
-      ? 'WHERE ' + (conds.length ? conds.join(' AND ') : '1=1') + restrict.fragment
-      : '';
-    params.push(...restrict.params);
+    // Identische Filter wie GET /trips — inkl. Zeitraum from/to. Damit
+    // beantwortet dieser Endpunkt die Frage „wie viele Kilometer hat die
+    // aktuelle Auswahl?" auch dann korrekt, wenn die Liste darunter
+    // paginiert ist (limit=50) und gar nicht alle Fahrten geladen sind.
+    const { where, params, range } = tripFilter(req);
     const stats = db.prepare(
       `SELECT
          COUNT(*) as total_trips,
          COALESCE(SUM(distance_km), 0) as total_km,
          COALESCE(AVG(distance_km), 0) as avg_km,
          COALESCE(SUM(energy_used_kwh), 0) as total_energy_kwh,
+         COALESCE(SUM(CASE WHEN end_time > start_time THEN end_time - start_time ELSE 0 END), 0) as total_duration_s,
          COALESCE(AVG(energy_used_kwh / NULLIF(distance_km, 0) * 100), 0) as avg_consumption,
          COALESCE(SUM(CASE WHEN trip_type='private'  THEN distance_km ELSE 0 END), 0) as private_km,
          COALESCE(SUM(CASE WHEN trip_type='business' THEN distance_km ELSE 0 END), 0) as business_km,
@@ -83,7 +126,9 @@ router.get('/stats', (req, res) => {
          COUNT(CASE WHEN trip_type != 'private' THEN 1 END) as classified_trips
        FROM trips ${where}`
     ).get(...params);
-    res.json(stats);
+    // Zeitraum zurueckspiegeln, damit die UI anzeigen kann, worauf sich
+    // die Summe bezieht (null = unbeschraenkt).
+    res.json({ ...stats, range_from: range.from, range_to: range.to });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -112,24 +157,18 @@ router.get('/stats', (req, res) => {
  * (min/max/Ø aus Punkten). Fehlt die Telemetrie (z.B. reine OwnTracks-Fahrt),
  * sind die Punkt-Kennzahlen `null` → Frontend zeigt „—".
  *
- * Query: vehicle_id?, driver_id?, limit=100, offset=0, sort=desc|asc.
+ * Query: vehicle_id?, driver_id?, trip_type?, from?, to?, limit=100,
+ *        offset=0, sort=desc|asc.
  * Interne Basiseinheit km/h + km + kWh; Umrechnung passiert im Frontend
  * (useUnits), damit die CSV-/Tabellenwerte konsistent zur restlichen App sind.
  * Schutz: restrictToOwnVehicles + optional vehicle_id/driver_id.
  */
 router.get('/metrics', (req, res) => {
   const db = req.db;
-  const { vehicle_id, driver_id, limit = 100, offset = 0, sort } = req.query;
+  const { limit = 100, offset = 0, sort } = req.query;
   try {
-    const conds  = [];
-    const params = [];
-    if (vehicle_id) { conds.push('t.vehicle_id = ?'); params.push(vehicle_id); }
-    if (driver_id === 'null') { conds.push('t.driver_id IS NULL'); }
-    else if (driver_id) { conds.push('t.driver_id = ?'); params.push(driver_id); }
-    const restrict = restrictToOwnVehicles(req, 't.vehicle_id');
-    const where = conds.length
-      ? 'WHERE ' + conds.join(' AND ') + restrict.fragment
-      : (restrict.fragment ? 'WHERE 1=1' + restrict.fragment : '');
+    // Gleicher Filter wie Liste/Statistik — inkl. Zeitraum from/to.
+    const { where, params } = tripFilter(req, 't.');
     const orderDir = sort === 'asc' ? 'ASC' : 'DESC';
     // limit=0 → alle Fahrten (SQLite: LIMIT -1 = unbegrenzt).
     const lim = +limit === 0 ? -1 : Math.min(1000, Math.max(1, +limit || 100));
@@ -175,7 +214,7 @@ router.get('/metrics', (req, res) => {
        ${where}
        ORDER BY t.start_time ${orderDir}
        LIMIT ? OFFSET ?`
-    ).all(...params, ...restrict.params, lim, off);
+    ).all(...params, lim, off);
 
     // Abgeleitete Felder in JS: Dauer (s) + Verbrauch (kWh/100km).
     for (const r of rows) {
@@ -241,11 +280,16 @@ router.get('/logbook', (req, res) => {
   try {
     const conds = [];
     const params = [];
-    if (vehicle_id) { conds.push('vehicle_id = ?'); params.push(vehicle_id); }
-    if (trip_type)  { conds.push('trip_type = ?');  params.push(trip_type); }
-    if (year)  { conds.push("strftime('%Y', datetime(start_time,'unixepoch')) = ?"); params.push(year); }
-    if (month) { conds.push("strftime('%m', datetime(start_time,'unixepoch')) = ?"); params.push(month.padStart(2,'0')); }
-    const where = conds.length ? 'WHERE ' + conds.join(' AND ') : '';
+    if (vehicle_id) { conds.push('t.vehicle_id = ?'); params.push(vehicle_id); }
+    if (trip_type)  { conds.push('t.trip_type = ?');  params.push(trip_type); }
+    if (year)  { conds.push("strftime('%Y', datetime(t.start_time,'unixepoch')) = ?"); params.push(year); }
+    if (month) { conds.push("strftime('%m', datetime(t.start_time,'unixepoch')) = ?"); params.push(month.padStart(2,'0')); }
+    // Ohne diese Einschraenkung lieferte das Fahrtenbuch einem normalen
+    // User auch Fahrten fremder Fahrzeuge im selben Tenant (Liste und
+    // Statistik hatten den Guard, /logbook fehlte er).
+    const restrict = restrictToOwnVehicles(req, 't.vehicle_id');
+    const where = 'WHERE ' + (conds.length ? conds.join(' AND ') : '1=1') + restrict.fragment;
+    params.push(...restrict.params);
     // Sortierreihenfolge: desc (Default, neueste zuerst) oder asc.
     const orderDir = sort === 'asc' ? 'ASC' : 'DESC';
     const trips = db.prepare(

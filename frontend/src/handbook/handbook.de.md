@@ -107,6 +107,14 @@ Jeder eingeloggte Nutzer hat unter `/my-tracking` („📱 Mein GPS" in der Navi
 **Zonen-Analyse im Fahrtdetail** (Fahrt öffnen → Karte „Zonen-Analyse"): wertet eine einzelne Fahrt nach Zonen aus, jeweils tabellarisch und mit Hervorhebung auf der Karte. Drei Modi: **Tempo-Zonen** (Geschwindigkeits-Bereiche mit Strecke, Zeit, Ø-Leistung und Netto-Energie je Bereich — Häkchen färbt die zugehörigen Streckenabschnitte, Abgewähltes wird ausgegraut), **Meine Zonen** (welche deiner Geofences/Ladeorte die Fahrt berührt, mit Ein-/Ausfahrtszeit, Dauer und Strecke in der Zone — Zonen-Kreise einblendbar) und **Abschnitt** (frei wählbarer Bereich per Von/Bis-Regler mit allen Kennzahlen). Zusätzlich blendet die Checkbox **📍 Hinweise** an der GPS-Karte Marker für Vmax, höchste Leistung, stärkste Rekuperation und Stopps (≥ 1 min) ein.
 
 
+### 🗓️ Zeitraum & Markierung in der Fahrtenliste {#fahrten-zeitraum}
+
+Über der Fahrtenliste steht eine **Zeitraum-Leiste**: Schnellwahl (7 Tage, 30 Tage, dieser Monat, letzter Monat, dieses Jahr) oder freie **Von/Bis**-Grenzen. Rechts steht die **Summe des Zeitraums** — Kilometer und Anzahl. Diese Summe wird auf dem Server über *alle* Fahrten des Zeitraums gerechnet, nicht nur über die geladenen 50: „Mehr laden" ändert sie also nicht. Die Statistik-Kacheln darunter (Gesamt-km, Ø Verbrauch, Privat, Dienst) folgen demselben Zeitraum und zusätzlich den Filtern für Typ und Fahrer.
+
+Für eine gezielte Auswahl gibt es den Knopf **Markieren**: pro Fahrt erscheint ein Häkchen, „Alle geladenen" markiert die ganze Liste. Am unteren Bildschirmrand summiert eine Leiste die markierten Fahrten — Anzahl, Strecke, Energie, Ø-Verbrauch und Fahrzeit. Praktisch für „was hat diese Dienstreise zusammen gekostet?", wenn die Fahrten nicht sauber in einen Kalenderzeitraum fallen. Markiert werden können nur geladene Fahrten; für die Gesamtsumme eines Zeitraums ist die Zeitraum-Leiste zuständig.
+
+Ein Klick auf einen Tag in der Aktivitäts-Heatmap öffnet die Fahrtenliste direkt mit diesem Tag als Zeitraum.
+
 ## 🔋 Battery-Health-Dashboard (Companion Phase 1) {#battery-health}
 
 Unter `/battery` findest du seit v3.6.0 sechs Sektionen, die dir ehrliche Antworten auf die wichtigsten Akku-Fragen geben — **rein statistisch, ohne KI, ohne Datenabfluss**:
