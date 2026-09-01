@@ -109,7 +109,7 @@ Every signed-in user has their own page at `/my-tracking` ("📱 My GPS" in the 
 
 ### 🗓️ Period & selection in the trip list {#fahrten-zeitraum}
 
-Above the trip list sits a **period bar**: quick presets (7 days, 30 days, this month, last month, this year) or free **from/to** bounds. On the right you get the **period total** — distance and trip count. That total is calculated on the server across *all* trips in the period, not just the 50 loaded ones, so "load more" doesn't change it. The stat tiles below follow the same period plus the type and driver filters.
+Above the trip list sits a **period bar**: quick presets (7 days, 30 days, this month, last month, this year) or free **from/to** bounds. On the right you get the **period total** — distance, energy used and trip count. Energy only appears when the trips actually carry it (GPS-only trips without vehicle data don't). That total is calculated on the server across *all* trips in the period, not just the 50 loaded ones, so "load more" doesn't change it. The stat tiles below follow the same period plus the type and driver filters.
 
 For an ad-hoc selection use the **Select** button: every trip gets a checkbox, "all loaded" ticks the whole list. A bar at the bottom of the screen sums up the ticked trips — count, distance, energy, average consumption and driving time. Handy for "what did this business trip add up to?" when the trips don't fall neatly into a calendar period. Only loaded trips can be ticked; for the total of a whole period, use the period bar.
 

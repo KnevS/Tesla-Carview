@@ -109,7 +109,7 @@ Cada usuario autenticado tiene su propia página en `/my-tracking` («📱 Mi GP
 
 ### 🗓️ Periodo y selección en la lista de viajes {#fahrten-zeitraum}
 
-Sobre la lista de viajes hay una **barra de periodo**: selección rápida (7 días, 30 días, este mes, mes pasado, este año) o límites libres **desde/hasta**. A la derecha aparece el **total del periodo** — kilómetros y número de viajes. Ese total se calcula en el servidor sobre *todos* los viajes del periodo, no solo sobre los 50 cargados: «cargar más» no lo cambia. Las tarjetas de estadísticas siguen el mismo periodo y además los filtros de tipo y conductor.
+Sobre la lista de viajes hay una **barra de periodo**: selección rápida (7 días, 30 días, este mes, mes pasado, este año) o límites libres **desde/hasta**. A la derecha aparece el **total del periodo** — kilómetros, energía consumida y número de viajes. La energía solo aparece si los viajes la tienen registrada (los viajes solo con GPS, sin datos del vehículo, no la tienen). Ese total se calcula en el servidor sobre *todos* los viajes del periodo, no solo sobre los 50 cargados: «cargar más» no lo cambia. Las tarjetas de estadísticas siguen el mismo periodo y además los filtros de tipo y conductor.
 
 Para una selección concreta está el botón **Seleccionar**: cada viaje recibe una casilla y «todos los cargados» marca la lista entera. Una barra en la parte inferior suma los viajes marcados — número, distancia, energía, consumo medio y tiempo de conducción. Útil para «¿cuánto sumó este viaje de trabajo?» cuando los trayectos no encajan en un periodo de calendario. Solo pueden marcarse viajes cargados; para el total de un periodo completo está la barra de periodo.
 

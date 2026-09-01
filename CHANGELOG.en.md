@@ -7,6 +7,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.56.0] - 2026-09-01
+
+### Added
+
+- **Energy used in the period total.** Next to distance and trip count, the trip list now also shows the **total energy in kWh** for the selected period — the same server-side calculation across every trip in the period, not just the loaded ones. The bar now answers both questions at once: "how far?" and "how much electricity?".
+
+  When energy is missing (GPS-only trips via OwnTracks carry no `energy_used_kwh`), the value is omitted rather than claiming "0.0 kWh" — a zero there would be a false statement, not a measurement.
+
+---
+
 ## [v3.55.0] - 2026-09-01
 
 ### Fixed

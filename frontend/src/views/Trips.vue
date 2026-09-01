@@ -70,7 +70,14 @@
         <div class="sm:ml-auto text-sm">
           <span class="text-gray-400">{{ $t('trips.rangeSumLabel') }}</span>
           <span class="font-semibold ml-1">{{ fmtDistance(stats.total_km || 0, 0) }}</span>
-          <span class="text-gray-400 ml-1">· {{ $t('trips.countLabel', { count: stats.total_trips || 0 }) }}</span>
+          <!-- Energie nur zeigen, wenn welche erfasst ist: reine GPS-Fahrten
+               (OwnTracks) haben kein energy_used_kwh — „0,0 kWh" waere dort
+               eine Falschaussage, kein Messwert. -->
+          <template v-if="stats.total_energy_kwh > 0">
+            <span class="text-gray-400 ml-1">·</span>
+            <span class="font-semibold ml-1">{{ (+stats.total_energy_kwh).toFixed(1) }} kWh</span>
+          </template>
+          <span class="text-gray-400 ml-1 whitespace-nowrap">· {{ $t('trips.countLabel', { count: stats.total_trips || 0 }) }}</span>
         </div>
       </div>
     </div>

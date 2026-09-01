@@ -7,6 +7,16 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.56.0] - 2026-09-01
+
+### Neu
+
+- **Verbrauchte Energie in der Zeitraum-Summe.** Die Fahrtenliste zeigt neben Kilometern und Fahrtenzahl jetzt auch die **Gesamtenergie in kWh** für den gewählten Zeitraum — dieselbe serverseitige Rechnung über alle Fahrten des Zeitraums, nicht nur über die geladenen. Damit beantwortet die Leiste beide Fragen auf einmal: „wie weit?" und „wie viel Strom?".
+
+  Fehlt die Energie (reine GPS-Fahrten über OwnTracks tragen kein `energy_used_kwh`), bleibt der Wert weg statt „0,0 kWh" zu behaupten — eine Null wäre hier keine Messung, sondern eine Falschaussage.
+
+---
+
 ## [v3.55.0] - 2026-09-01
 
 ### Behoben
