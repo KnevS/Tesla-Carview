@@ -202,7 +202,16 @@ fi
 # ─── 5. Docker-Gesundheit ─────────────────────────────────────────────────
 section "5. Docker-Container + Images"
 
-if command -v docker &>/dev/null; then
+# `command -v docker` sagt nur, dass der Client installiert ist. Ohne
+# Gruppenmitgliedschaft (oder sudo) antwortet der Daemon mit „permission
+# denied" — die Abfragen liefern dann leere Ergebnisse, und der Check
+# meldete daraufhin „Alle Container gesund", obwohl er nichts gesehen hat.
+# Schlimmer noch: `docker images | wc -l` scheitert unter `set -o pipefail`,
+# und `set -e` beendete das Skript an dieser Stelle — die Abschnitte 6
+# (DB-Integrität) und 7 (TLS-Ablauf) liefen auf dem Server deshalb NIE.
+if command -v docker &>/dev/null && ! docker ps -q >/dev/null 2>&1; then
+  info "Docker-Daemon nicht erreichbar (fehlende Rechte?) — Abschnitt übersprungen. Vollständig: sudo bash scripts/hygiene-check.sh"
+elif command -v docker &>/dev/null; then
   COMPOSE_FILE="$APP_DIR/docker-compose.prod.yml"
   if [[ -f "$COMPOSE_FILE" ]]; then
     UNHEALTHY=$(docker compose -f "$COMPOSE_FILE" ps --format json 2>/dev/null \
@@ -226,7 +235,7 @@ for line in lines:
   fi
 
   # Dangling Images
-  DANGLING=$(docker images -f "dangling=true" -q 2>/dev/null | wc -l | tr -d ' ')
+  DANGLING=$(docker images -f "dangling=true" -q 2>/dev/null | wc -l | tr -d ' ' || echo 0)
   if [[ "$DANGLING" -gt 0 ]]; then
     warn "$DANGLING dangling Docker-Images — belasten Disk"
     if [[ "$FIX" -eq 1 ]]; then
@@ -239,7 +248,7 @@ for line in lines:
   fi
 
   # Volumes ohne Referenz
-  ORPHAN_VOL=$(docker volume ls -f "dangling=true" -q 2>/dev/null | wc -l | tr -d ' ')
+  ORPHAN_VOL=$(docker volume ls -f "dangling=true" -q 2>/dev/null | wc -l | tr -d ' ' || echo 0)
   [[ "$ORPHAN_VOL" -gt 3 ]] && warn "$ORPHAN_VOL verwaiste Docker-Volumes" || ok "Volumes OK ($ORPHAN_VOL verwaist)"
 fi
 

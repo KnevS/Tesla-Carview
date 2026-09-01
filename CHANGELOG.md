@@ -7,6 +7,19 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.56.2] - 2026-09-01
+
+### Behoben
+
+- **Der Hygiene-Check brach nach Abschnitt 5 ab — die Prüfungen 6 und 7 liefen auf dem Server nie.** `command -v docker` sagt nur, dass der *Client* installiert ist. Fehlen die Rechte am Daemon, liefern die Abfragen leere Ergebnisse: Der Check meldete daraufhin „Alle Container gesund", obwohl er nichts gesehen hatte, und starb anschließend an `docker images | wc -l` (unter `set -o pipefail` ein Fehlschlag, unter `set -e` das Ende des Skripts). Damit kamen **Datenbank-Integrität und TLS-Ablaufprüfung nie zur Ausführung** — ausgerechnet die beiden Prüfungen, deren Ausbleiben man erst bemerkt, wenn es zu spät ist. Jetzt wird die Erreichbarkeit des Daemons vorab geprüft und der Abschnitt bei fehlenden Rechten ehrlich übersprungen; die Abfragen können die Ausführung nicht mehr beenden.
+- **Die Energie-Angabe der Markierung trug den Vorbehalt noch nicht.** Die Zeitraum-Summe markiert seit v3.56.0 mit `*`, wenn nicht alle Fahrten einen Energiewert tragen — die Summenleiste der markierten Fahrten tat das nicht, obwohl dort dieselbe Lücke entsteht. Beide Stellen verhalten sich jetzt gleich.
+
+### Geändert
+
+- Handbuch (6 Sprachen): Der Abschnitt zur Zeitraum-Summe beschrieb noch den Stand vor dem `*`-Marker („Energie erscheint nur, wenn …"). Er erklärt jetzt den Marker und den Tooltip.
+
+---
+
 ## [v3.56.1] - 2026-09-01
 
 ### Behoben

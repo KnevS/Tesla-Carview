@@ -222,7 +222,14 @@
           </span>
           <span v-if="selection.kwh > 0">
             <span class="text-gray-400">{{ $t('trips.energy') }}</span>
-            <span class="font-semibold ml-1">{{ selection.kwh.toFixed(1) }} kWh</span>
+            <span class="font-semibold ml-1"
+              :class="selection.energyTrips < selection.count
+                ? 'underline decoration-dotted underline-offset-4 decoration-gray-500 cursor-help' : ''"
+              v-tooltip="selection.energyTrips < selection.count
+                ? $t('trips.energyPartial', { withEnergy: selection.energyTrips, total: selection.count })
+                : $t('trips.energyCompleteTooltip')">
+              {{ selection.kwh.toFixed(1) }} kWh<span v-if="selection.energyTrips < selection.count">*</span>
+            </span>
           </span>
           <span v-if="selection.consumption">
             <span class="text-gray-400">{{ $t('trips.consumption') }}</span>
@@ -499,9 +506,14 @@ const selection = computed(() => {
   const list = trips.value.filter(t => selected.value.has(t.id));
   const km  = list.reduce((a, t) => a + (t.distance_km || 0), 0);
   const kwh = list.reduce((a, t) => a + (t.energy_used_kwh || 0), 0);
+  // Wie viele der markierten Fahrten tragen ueberhaupt einen Energiewert?
+  // Ohne diese Zahl gilt hier derselbe Trugschluss wie bei der Zeitraum-
+  // Summe: die kWh-Angabe liest sich als Verbrauch ALLER markierten Fahrten.
+  const energyTrips = list.filter(t => t.energy_used_kwh != null && t.distance_km > 0).length;
   const durationS = list.reduce(
     (a, t) => a + (t.end_time && t.start_time && t.end_time > t.start_time ? t.end_time - t.start_time : 0), 0);
-  return { count: list.length, km, kwh, durationS, consumption: km > 0 && kwh > 0 ? kwh / km * 100 : null };
+  return { count: list.length, km, kwh, durationS, energyTrips,
+           consumption: km > 0 && kwh > 0 ? kwh / km * 100 : null };
 });
 
 /** Liegt fuer mindestens eine Fahrt des Zeitraums kein Energiewert vor?
