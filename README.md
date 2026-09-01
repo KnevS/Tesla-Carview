@@ -55,6 +55,7 @@ Für Live-Vehicle-Daten (Akku, Klima, TPMS, Telemetry-Stream) gibt es **nur eine
 |---|---|
 | **Dashboard** | Gesamtstatistiken, letzte Fahrt, monatliches Kilometerdiagramm |
 | **Fahrten** | GPS-Track auf Karte, Verbrauch, Geschwindigkeit, SoC-Verlauf |
+| **Zeitraum & Markierung** (v3.54.0) | Fahrtenliste nach Zeitraum filtern (Schnellwahl oder freie Von/Bis-Grenzen) mit serverseitiger Summe aus Kilometern, Energie (kWh) und Fahrtenzahl; Markier-Modus summiert einzeln ausgewählte Fahrten |
 | **Fahrtwerte** (v3.37.0) | Tabellarische Analyse pro Fahrt: Dauer, Strecke, Verbrauch, Geschwindigkeit und Leistung jeweils als Min/Max/Ø — sortierbar, mit Summen-Kacheln und CSV-Export |
 | **Heatmap** (v3.41.0) | Geografische Karten-Heatmap mit vier ein-/ausblendbaren Layern: Fahrten (Start/Ziel-Dichte), Ladevorgänge, definierte Ladeorte und Fahrwege (Routen-Linien) — Zeitraum wählbar, Ebenen-Farben frei anpassbar, ohne externe Karten-Plugins |
 | **Zonen-Analyse** (v3.39.0) | Fahrtdetail nach Zonen auswerten: Tempo-Bereiche, eigene Geofence-/Ladeort-Zonen oder freier Abschnitt — tabellarische Werte + Karten-Hervorhebung, Hinweis-Marker (Vmax, Spitzenleistung, Rekuperation, Stopps) |

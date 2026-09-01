@@ -55,6 +55,7 @@ For live vehicle data (battery, climate, TPMS, telemetry stream) there is **only
 |---|---|
 | **Dashboard** | Overall statistics, latest trip, monthly distance chart |
 | **Trips** | GPS track on map, consumption, speed, SoC over time |
+| **Period & selection** (v3.54.0) | Filter the trip list by period (presets or free from/to bounds) with a server-side total of distance, energy (kWh) and trip count; selection mode sums individually ticked trips |
 | **Trip Metrics** (v3.37.0) | Tabular per-trip analysis: duration, distance, consumption, speed and power each as min/max/avg — sortable, with summary tiles and CSV export |
 | **Heatmap** (v3.41.0) | Geographic map heatmap with four toggleable layers: trips (start/end density), charging sessions, defined charging spots and routes (as lines) — selectable time range, freely adjustable layer colours, no external map plugins |
 | **Zone analysis** (v3.39.0) | Analyse the trip detail by zones: speed bands, own geofence/charging-spot zones or a free section — tabular values + map highlighting, hint markers (Vmax, peak power, regeneration, stops) |
