@@ -60,7 +60,7 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: 22
 
       - name: Git-Identität setzen
         run: |
@@ -89,6 +89,11 @@ jobs:
             echo "$ws: $VULNS Vulnerabilities gemeldet"
             if [ "$VULNS" -gt 0 ]; then
               npm audit fix --ignore-scripts || true
+              # Rebuild lockfile: audit fix leaves package-lock.json in a
+              # partially-resolved state; npm audit in CI then gets a 400
+              # "Invalid package tree" from the registry. npm install
+              # regenerates a fully consistent lockfile before we commit.
+              npm install --ignore-scripts || true
             fi
             popd >/dev/null
 
