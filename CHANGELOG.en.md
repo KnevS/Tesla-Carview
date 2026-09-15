@@ -7,6 +7,16 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.57.2] - 2026-09-15
+
+### Updated (major dependencies)
+
+- **Passkeys on SimpleWebAuthn 14: `@simplewebauthn/server` 14.0.2 and `@simplewebauthn/browser` 14.0.0.** According to the release notes, the only breaking change is the Node 22 minimum. The runtime images run node 26 and CI has run Node 24 since v3.57.1, so both qualify. The signatures of `generateRegistrationOptions`, `verifyRegistrationResponse`, `generateAuthenticationOptions`, `verifyAuthenticationResponse`, `startRegistration` and `startAuthentication` are unchanged for the calls in `routes/passkey.js`, `routes/pair.js`, `store/auth.js`, `PairLogin.vue`, `Profile.vue` and `Settings.vue`. Both packages move together, so server and browser never speak different majors.
+
+  Checked with a software authenticator before the update (ES256, using exactly the app's calls and storage format): a **passkey registered with v13 authenticates with v14**, so existing passkeys keep working. Registration and login also run entirely on v14, and a wrong challenge is rejected. New: during registration the server now offers **ML-DSA-44** (post-quantum, COSE −48) as the preferred algorithm when the runtime supports it, and node 26 does. Today's authenticators still pick ES256 or EdDSA. On first use, Node 26 logs a one-time `ExperimentalWarning` about Web Crypto ML-DSA support. That is expected and not an error.
+
+---
+
 ## [v3.57.1] - 2026-09-15
 
 ### Security
