@@ -5,10 +5,11 @@ on:
     branches: ['**']
   pull_request:
     branches: [main]
-  # security-autofix.yml pusht seinen Fix-Branch mit GITHUB_TOKEN — solche
-  # Pushes triggern keine push/pull_request-Workflows (GitHub-Rekursions-
-  # schutz). Der Autofix-Job stößt die Required-Checks deshalb explizit per
-  # workflow_dispatch auf dem Branch an.
+  # security-autofix.yml pusht seinen Fix-Branch ohne Secret
+  # SECURITY_AUTOFIX_TOKEN mit GITHUB_TOKEN — solche Pushes triggern keine
+  # push-Workflows (GitHub-Rekursionsschutz), und die pull_request-Läufe
+  # des Bot-PRs warten seit 06/2026 auf Freigabe. Der Autofix-Job stößt die
+  # Required-Checks deshalb explizit per workflow_dispatch auf dem Branch an.
   workflow_dispatch:
 
 env:

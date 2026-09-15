@@ -7,13 +7,29 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.57.3] - 2026-09-15
+
+### CI / Infrastruktur
+
+- **Der Security-Autofix-PR blieb still hängen, jetzt meldet er es und lässt sich dauerhaft freischalten.** Die HIGH-CVEs aus v3.57.1 lagen vom 03. bis 15.09. als fertiger Fix in PR #316, und keine der Absicherungen schlug an. Ursache ist eine GitHub-Änderung vom Juni 2026: Die `pull_request`-Läufe eines PRs, den `github-actions[bot]` erstellt oder aktualisiert, stehen auf `action_required`, bis jemand mit Schreibrecht sie freigibt. Der Bot hat keine gemergten Beiträge und gilt deshalb als First-Time-Contributor (Repo-Einstellung `first_time_contributors`). Die per `workflow_dispatch` nachgeschobenen Required Checks waren alle 13 grün. Der PR blieb trotzdem **BLOCKED**, und `GITHUB_TOKEN` kann sich nicht selbst freigeben.
+
+  `security-autofix.yml` nimmt jetzt ein optionales Secret `SECURITY_AUTOFIX_TOKEN` (GitHub-App-Token oder fine-grained PAT, nur dieses Repo, Contents + Pull requests: write). Ist es gesetzt, laufen Push und PR-Erstellung über dieses Token. Die PR-Checks starten dann regulär ohne Freigabe, und der doppelte Dispatch entfällt. Ohne Secret bleibt das bisherige Verhalten. Zusätzlich steht dann aber ein unübersehbarer Freigabe-Hinweis im PR-Body, als Annotation und im Step-Summary. Die Sicherheitseinstellung `first_time_contributors` bleibt für das öffentliche Repo bewusst unverändert.
+
+  Beide Pfade sind lokal mit gestubbtem `git`/`gh` durchgespielt. Mit Token: Push + PR, kein Dispatch. Ohne Token: Push + PR mit Hinweis, Dispatch mit `GITHUB_TOKEN`, Warnung mit PR-Link.
+
+### Doku
+
+- `CLAUDE.md` „Aktueller Entwicklungsstand" von v3.56.0 auf v3.57.3 nachgezogen.
+
+---
+
 ## [v3.57.2] - 2026-09-15
 
 ### Aktualisiert (Major-Dependencies)
 
 - **Passkeys auf SimpleWebAuthn 14: `@simplewebauthn/server` 14.0.2 und `@simplewebauthn/browser` 14.0.0.** Laut Release-Notes ist der einzige Breaking Change die Mindestversion Node 22. Die Laufzeit-Images laufen auf node 26 und die CI seit v3.57.1 auf Node 24, beides passt also. Die Signaturen von `generateRegistrationOptions`, `verifyRegistrationResponse`, `generateAuthenticationOptions`, `verifyAuthenticationResponse`, `startRegistration` und `startAuthentication` sind für die Aufrufe in `routes/passkey.js`, `routes/pair.js`, `store/auth.js`, `PairLogin.vue`, `Profile.vue` und `Settings.vue` unverändert. Beide Pakete gehen gemeinsam: Server und Browser sollen keine unterschiedlichen Hauptversionen sprechen.
 
-  Vor dem Update mit einem Software-Authenticator geprüft (ES256, genau die Aufrufe und das Speicherformat der App): Ein **mit v13 registrierter Passkey meldet sich mit v14 an**, sodass bestehende Passkeys weiter funktionieren. Registrierung und Login laufen auch vollständig mit v14, eine falsche Challenge wird abgelehnt. Neu bietet der Server bei der Registrierung **ML-DSA-44** (Post-Quanten, COSE −48) als bevorzugten Algorithmus an, sofern die Laufzeit ihn unterstützt; node 26 tut das. Heutige Authenticatoren wählen weiterhin ES256 oder EdDSA. Node 26 schreibt beim ersten Aufruf einmalig eine `ExperimentalWarning` zur Web-Crypto-ML-DSA-Unterstützung ins Log. Das ist erwartet und kein Fehler.
+  Vor dem Update mit einem Software-Authenticator geprüft (ES256, genau die Aufrufe und das Speicherformat der App): Ein **mit v13 registrierter Passkey meldet sich mit v14 an**, sodass bestehende Passkeys weiter funktionieren. Registrierung und Login laufen auch vollständig mit v14, eine falsche Challenge wird abgelehnt. Neu bietet der Server bei der Registrierung **ML-DSA-44** (Post-Quanten, COSE −48) als bevorzugten Algorithmus an, sofern die Laufzeit ihn unterstützt; node 26 tut das. Heutige Authenticatoren wählen weiterhin ES256 oder EdDSA. Node 26 schreibt beim Start des Backends einmalig zwei `ExperimentalWarning`s zur Web-Crypto-ML-DSA-Unterstützung ins Log (auf Produktion nach dem Deploy bestätigt). Das ist erwartet und kein Fehler.
 
 ---
 
