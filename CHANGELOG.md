@@ -7,6 +7,20 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.57.1] - 2026-09-15
+
+### Sicherheit
+
+- **Vier HIGH-CVEs im Backend geschlossen: multer und nodemailer.** `multer` 2.2.0 hatte drei Denial-of-Service-Lücken: Dateideskriptor-Leck bei abgebrochenen Uploads, präparierte Multipart-Feldnamen und überlange Array-Indizes. Behoben ab 2.3.0, eingespielt ist 2.4.0. Bei `nodemailer` 9.0.6 lagen ein quadratischer Adress-Parser (DoS über eine präparierte Empfängerliste) sowie drei mittlere Lücken vor, darunter eine Umgehung der Empfänger-Domain-Prüfung. Behoben mit 9.1.1.
+- **Zwei mittlere `qs`-CVEs geschlossen, ohne Express 5.** Dependabot hatte dafür Express 4 → 5 vorgeschlagen (#317). Das ist ein Major-Sprung mit Breaking Changes, den `.github/dependabot.yml` bewusst ausschließt. Nötig ist er nicht: `express` 4.22.3 und `body-parser` 1.20.8 ziehen `qs` 6.16.0 bereits innerhalb der 4.x-Linie. Im Baum liegt jetzt nur noch eine `qs`-Kopie. `npm audit` meldet für Backend und Frontend 0 Findings.
+
+### Wartung
+
+- **Offene Patch-/Minor-Updates aus den Dependabot-Gruppen in einem Schritt.** Backend: `@aws-sdk/client-s3`, `express-rate-limit` 8.7, `otpauth` 9.5.2, `pdfkit` 0.20.2, `zod` 4.6, `eslint` 10.10 und `globals` 17.12. Frontend: `dompurify` 3.4.15, `marked` 18.0.13, `vite` 8.3 und `eslint` 10.10. Seit dem 03.09. lagen bis zu zehn PRs offen, und keiner war mergebar. Solange die CVEs auf `main` lagen, schlugen die Security-Checks in **jedem** PR fehl, auch in reinen Frontend-PRs. Einzeln gemergt hätte jeder Merge die übrigen Bot-PRs per `update-branch` ohne Checks zurückgelassen.
+- **CI von Node 20 auf Node 24.** Node 20 ist seit dem 30.04.2026 ohne Support. `better-sqlite3`, `geoip-lite` und `vue-i18n` verlangen inzwischen Node ≥ 22, deshalb warnte jeder CI-Lauf mit `EBADENGINE`. Node 24 ist die aktive LTS-Linie bis April 2028 und bringt dieselbe npm-Hauptversion mit wie die Docker-Images (node 26). Umgestellt sind `ci.yml`, `security.yml` und `security-autofix.yml`, zusammen sechs Stellen.
+
+---
+
 ## [v3.57.0] - 2026-09-01
 
 ### Neu

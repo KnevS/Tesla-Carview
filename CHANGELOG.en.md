@@ -7,6 +7,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.57.1] - 2026-09-15
+
+### Security
+
+- **Four HIGH CVEs closed in the backend: multer and nodemailer.** `multer` 2.2.0 had three denial-of-service holes: a file-descriptor leak on aborted uploads, crafted multipart field names and oversized array indices. They are fixed as of 2.3.0, and 2.4.0 is installed. `nodemailer` 9.0.6 had a quadratic address parser (DoS through a crafted recipient list) plus three moderate issues, including a bypass of the recipient-domain check. Fixed with 9.1.1.
+- **Two moderate `qs` CVEs closed without Express 5.** Dependabot had proposed Express 4 → 5 for this (#317). That is a major jump with breaking changes, and `.github/dependabot.yml` deliberately excludes it. It isn't needed: `express` 4.22.3 and `body-parser` 1.20.8 already pull in `qs` 6.16.0 within the 4.x line. The tree now holds a single `qs` copy. `npm audit` reports 0 findings for backend and frontend.
+
+### Maintenance
+
+- **Pending patch/minor updates from the Dependabot groups, in one step.** Backend: `@aws-sdk/client-s3`, `express-rate-limit` 8.7, `otpauth` 9.5.2, `pdfkit` 0.20.2, `zod` 4.6, `eslint` 10.10 and `globals` 17.12. Frontend: `dompurify` 3.4.15, `marked` 18.0.13, `vite` 8.3 and `eslint` 10.10. Since 3 September up to ten PRs had been open, and none of them could be merged. While the CVEs sat on `main`, the security checks failed in **every** PR, including frontend-only ones. Merged one by one, each merge would have left the remaining bot PRs without checks via `update-branch`.
+- **CI moved from Node 20 to Node 24.** Node 20 has been out of support since 30 April 2026. `better-sqlite3`, `geoip-lite` and `vue-i18n` now require Node ≥ 22, so every CI run warned with `EBADENGINE`. Node 24 is the active LTS line until April 2028 and ships the same npm major as the Docker images (node 26). The change covers `ci.yml`, `security.yml` and `security-autofix.yml`, six places in total.
+
+---
+
 ## [v3.57.0] - 2026-09-01
 
 ### Added
