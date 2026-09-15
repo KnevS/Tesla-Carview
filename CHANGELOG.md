@@ -7,6 +7,22 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.57.3] - 2026-09-15
+
+### CI / Infrastruktur
+
+- **Der Security-Autofix-PR blieb still hängen, jetzt meldet er es und lässt sich dauerhaft freischalten.** Die HIGH-CVEs aus v3.57.1 lagen vom 03. bis 15.09. als fertiger Fix in PR #316, und keine der Absicherungen schlug an. Ursache ist eine GitHub-Änderung vom Juni 2026: Die `pull_request`-Läufe eines PRs, den `github-actions[bot]` erstellt oder aktualisiert, stehen auf `action_required`, bis jemand mit Schreibrecht sie freigibt. Der Bot hat keine gemergten Beiträge und gilt deshalb als First-Time-Contributor (Repo-Einstellung `first_time_contributors`). Die per `workflow_dispatch` nachgeschobenen Required Checks waren alle 13 grün. Der PR blieb trotzdem **BLOCKED**, und `GITHUB_TOKEN` kann sich nicht selbst freigeben.
+
+  `security-autofix.yml` nimmt jetzt ein optionales Secret `SECURITY_AUTOFIX_TOKEN` (GitHub-App-Token oder fine-grained PAT, nur dieses Repo, Contents + Pull requests: write). Ist es gesetzt, laufen Push und PR-Erstellung über dieses Token. Die PR-Checks starten dann regulär ohne Freigabe, und der doppelte Dispatch entfällt. Ohne Secret bleibt das bisherige Verhalten. Zusätzlich steht dann aber ein unübersehbarer Freigabe-Hinweis im PR-Body, als Annotation und im Step-Summary. Die Sicherheitseinstellung `first_time_contributors` bleibt für das öffentliche Repo bewusst unverändert.
+
+  Beide Pfade sind lokal mit gestubbtem `git`/`gh` durchgespielt. Mit Token: Push + PR, kein Dispatch. Ohne Token: Push + PR mit Hinweis, Dispatch mit `GITHUB_TOKEN`, Warnung mit PR-Link.
+
+### Doku
+
+- `CLAUDE.md` „Aktueller Entwicklungsstand" von v3.56.0 auf v3.57.3 nachgezogen.
+
+---
+
 ## [v3.57.2] - 2026-09-15
 
 ### Aktualisiert (Major-Dependencies)

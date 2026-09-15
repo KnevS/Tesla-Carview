@@ -7,6 +7,22 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.57.3] - 2026-09-15
+
+### CI / Infrastructure
+
+- **The security autofix PR stalled silently; it now says so and can be unblocked permanently.** The HIGH CVEs fixed in v3.57.1 had sat as a finished fix in PR #316 from 3 to 15 September, and no safeguard fired. The cause is a GitHub change from June 2026: `pull_request` runs of a PR created or updated by `github-actions[bot]` stay `action_required` until someone with write access approves them. The bot has no merged contributions and therefore counts as a first-time contributor (repo setting `first_time_contributors`). All 13 required checks, re-run via `workflow_dispatch`, were green. The PR stayed **BLOCKED** anyway, and `GITHUB_TOKEN` cannot approve its own runs.
+
+  `security-autofix.yml` now accepts an optional secret `SECURITY_AUTOFIX_TOKEN` (a GitHub App token or a fine-grained PAT, this repo only, Contents + Pull requests: write). When it is set, push and PR creation go through that token. The PR checks then start normally without approval, and the duplicate dispatch is skipped. Without the secret the previous behaviour stays. In addition, an unmissable approval notice now appears in the PR body, as an annotation and in the step summary. The `first_time_contributors` security setting is deliberately left unchanged for this public repo.
+
+  Both paths were exercised locally with stubbed `git`/`gh`. With the token: push + PR, no dispatch. Without it: push + PR with the notice, dispatch with `GITHUB_TOKEN`, warning with the PR link.
+
+### Docs
+
+- `CLAUDE.md` "current development state" brought up from v3.56.0 to v3.57.3.
+
+---
+
 ## [v3.57.2] - 2026-09-15
 
 ### Updated (major dependencies)

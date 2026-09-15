@@ -29,8 +29,24 @@ name: Security Autofix
 #     (GitHub-Rekursionsschutz). workflow_dispatch ist davon ausgenommen,
 #     deshalb stößt der Job die Required-Check-Workflows (CI, Security,
 #     Gitleaks) nach dem Push selbst per Dispatch auf dem Autofix-Branch
-#     an; die Check-Runs hängen am Head-SHA und erfüllen damit die
-#     Branch-Protection.
+#     an; die Check-Runs hängen am Head-SHA.
+#   - **Seit Juni 2026 reicht das nicht mehr:** GitHub hält die
+#     `pull_request`-Läufe eines von github-actions[bot] erstellten oder
+#     aktualisierten PRs auf `action_required`, bis jemand mit Schreibrecht
+#     sie freigibt (github.blog/changelog/2026-06-11). Der Bot hat keine
+#     gemergten Beiträge und gilt deshalb als First-Time-Contributor. Solange
+#     die Freigabe fehlt, bleibt der PR BLOCKED, auch wenn alle Required Checks
+#     aus den Dispatch-Läufen grün sind. So lag PR #316 (multer/nodemailer,
+#     4 HIGH) vom 03. bis 15.09.2026 offen. GITHUB_TOKEN kann sich nicht
+#     selbst freigeben.
+#     Lösung 1 (dauerhaft): Secret `SECURITY_AUTOFIX_TOKEN` hinterlegen,
+#     entweder ein GitHub-App-Installation-Token oder ein fine-grained PAT
+#     nur für dieses Repo mit Contents + Pull requests: write. Dann pusht und
+#     öffnet der Job mit diesem Token, die PR-Checks laufen ohne Freigabe,
+#     und der Dispatch entfällt.
+#     Lösung 2 (Fallback ohne Secret): Der Job schreibt einen deutlichen
+#     Freigabe-Hinweis in PR-Body, Step-Summary und Annotation, damit der
+#     PR nicht still hängt.
 #
 # Hinweis native Deps (argon2, better-sqlite3): für `npm audit`/`npm audit
 # fix` ist kein Build nötig, deshalb laufen alle npm-Schritte mit
@@ -56,7 +72,11 @@ jobs:
     name: npm audit fix · backend + frontend
     runs-on: ubuntu-latest
     steps:
+      # Mit SECURITY_AUTOFIX_TOKEN pusht `git push` später als dieses Token
+      # (checkout hinterlegt die Credentials) → normale PR-Checks ohne Freigabe.
       - uses: actions/checkout@v7
+        with:
+          token: ${{ secrets.SECURITY_AUTOFIX_TOKEN || github.token }}
 
       - uses: actions/setup-node@v7
         with:
@@ -122,7 +142,11 @@ jobs:
       - name: Branch + PR erstellen/aktualisieren (idempotent)
         if: steps.fix.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Mit SECURITY_AUTOFIX_TOKEN läuft PR-Erstellung als dieses Token,
+          # ohne Secret wie bisher als github-actions[bot] (siehe Kopfkommentar).
+          GH_TOKEN: ${{ secrets.SECURITY_AUTOFIX_TOKEN || secrets.GITHUB_TOKEN }}
+          DISPATCH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HAS_AUTOFIX_TOKEN: ${{ secrets.SECURITY_AUTOFIX_TOKEN != '' }}
           BODY_FILE: ${{ steps.fix.outputs.body_file }}
         run: |
           set -euo pipefail
@@ -132,6 +156,17 @@ jobs:
           git add -u
           git commit -m "fix(security): npm audit fix - automated CVE remediation (semver-compatible)"
           git push --force origin "$BRANCH"
+
+          if [ "$HAS_AUTOFIX_TOKEN" != "true" ]; then
+            {
+              echo ""
+              echo "> [!WARNING]"
+              echo "> **Workflow approval required before this PR can merge.** It was opened with \`GITHUB_TOKEN\`, and since June 2026 GitHub holds the \`pull_request\` runs of bot-created PRs as *action_required* until someone with write access approves them. The PR stays **BLOCKED** until then, even when the dispatched checks are green."
+              echo ">"
+              echo "> → Open the PR's *Checks* and choose **Approve workflows to run** (after each daily update of this branch)."
+              echo "> → Permanent fix: store a GitHub App token or a fine-grained PAT (this repo only, Contents + Pull requests: write) as the secret \`SECURITY_AUTOFIX_TOKEN\`."
+            } >> "$BODY_FILE"
+          fi
 
           gh label create security --color D93F0B \
             --description "Security-relevant findings and fixes" --force || true
@@ -150,9 +185,19 @@ jobs:
             fi
           fi
 
-          # GITHUB_TOKEN-Push triggert keine push/pull_request-Workflows —
-          # Required-Checks deshalb explizit per workflow_dispatch anstoßen
-          # (Check-Runs hängen am Head-SHA des PR-Branches).
+          if [ "$HAS_AUTOFIX_TOKEN" = "true" ]; then
+            # Push und PR kamen vom Token → push/pull_request-Workflows laufen
+            # regulär und ohne Freigabe. Ein zusätzlicher Dispatch würde nur
+            # doppelte Läufe erzeugen (und sich mit den PR-Läufen gegenseitig
+            # canceln), deshalb entfällt er hier.
+            echo "::notice::Autofix-PR mit SECURITY_AUTOFIX_TOKEN erstellt — PR-Checks laufen ohne Freigabe"
+            exit 0
+          fi
+
+          # Ohne Token: GITHUB_TOKEN-Push triggert keine push/pull_request-
+          # Workflows — Required-Checks deshalb explizit per workflow_dispatch
+          # anstoßen (Check-Runs hängen am Head-SHA des PR-Branches). Mergebar
+          # wird der PR trotzdem erst nach der Freigabe (Kopfkommentar).
           #
           # Diese Liste MUSS alle Required Checks der Branch-Protection
           # abdecken. Fehlt einer, bleibt sein Check auf „Expected" stehen
@@ -161,8 +206,17 @@ jobs:
           # mit v3.50.1 dazu; sein `changes`-Job setzt bei Nicht-PR-Events
           # bewusst `docker=true`, damit auch der Multi-Arch-Job meldet.
           for wf in ci.yml security.yml gitleaks.yml docker-build-gate.yml; do
-            gh workflow run "$wf" --ref "$BRANCH" || echo "::warning::Dispatch $wf fehlgeschlagen"
+            GH_TOKEN="$DISPATCH_TOKEN" gh workflow run "$wf" --ref "$BRANCH" || echo "::warning::Dispatch $wf fehlgeschlagen"
           done
+
+          PR_URL=$(gh pr list --head "$BRANCH" --state open --json url --jq '.[0].url // empty')
+          echo "::warning title=Autofix-PR braucht Freigabe::${PR_URL:-$BRANCH} — GitHub hält die pull_request-Läufe bot-erstellter PRs auf action_required. PR öffnen → Approve workflows to run, oder Secret SECURITY_AUTOFIX_TOKEN hinterlegen."
+          {
+            echo "### ⚠️ Freigabe nötig"
+            echo ""
+            echo "Der Autofix-PR ${PR_URL:-auf \`$BRANCH\`} ist erst nach **Approve workflows to run** mergebar."
+            echo "Dauerhaft: Secret \`SECURITY_AUTOFIX_TOKEN\` hinterlegen (siehe Kopfkommentar von \`security-autofix.yml\`)."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Ergebnis ins Step-Summary
         if: always()
