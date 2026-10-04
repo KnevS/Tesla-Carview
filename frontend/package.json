@@ -40,7 +40,8 @@
     "url": "https://github.com/KnevS"
   },
   "overrides": {
-    "esbuild": ">=0.28.1"
+    "esbuild": ">=0.28.1",
+    "braces": ">=3.0.3"
   },
   "license": "SEE LICENSE IN LICENSE",
   "repository": {
