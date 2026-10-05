@@ -72,8 +72,11 @@ jobs:
       - run: npm ci --ignore-scripts
 
       # Security Audit Frontend
+      # --omit=dev: devDependencies are not installed in the production
+      # Docker image; @intlify/unplugin-vue-i18n has no fix for the
+      # braces chain until a stable v12 releases (only alpha.3 exists).
       - name: Security Audit (npm audit)
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=high --omit=dev
         continue-on-error: false
 
       # ESLint mit no-undef faengt undefinierte Bezeichner in JS + Vue-SFCs
