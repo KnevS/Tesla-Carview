@@ -7,6 +7,23 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.57.4] - 2026-10-08
+
+### Behoben
+
+- **Kurze Telemetrie-Fahrten bekamen nie einen Verbrauch.** Der Ladestand aus Fleet Telemetry kommt als Dezimalwert („82.3"), wurde aber beim Speichern auf ganze Prozent gerundet. Eine Fahrt über 2,2 km braucht etwa 0,4 kWh, also rund 0,5 % SoC. Nach dem Runden waren Start- und End-SoC oft gleich, und `enrichClosedTrip()` setzte keinen Verbrauch. Auf der Referenzinstanz betraf das rund 130 Fahrten (Ø 2,2 km). Der SoC wird jetzt mit einer Nachkommastelle gespeichert (`socVal()` in `fleetTelemetry.js`); die INTEGER-Affinität der Spalten speichert solche Werte verlustfrei als REAL. Gegen eine frisch migrierte Mandanten-DB geprüft: 82,3 % → 81,8 % ergibt 0,375 kWh, vorher `NULL`. Die Fahrtansichten zeigen den SoC weiter in ganzen Prozent (`lib/soc.js`). Bereits gespeicherte Fahrten lassen sich nicht nachträglich korrigieren, weil der Nachkommaanteil nie gespeichert wurde.
+- **Nach einem Update ließ sich eine Ansicht erst nach manuellem Neuladen öffnen.** Ein Tab, der vor einem Deploy geöffnet wurde, fragt beim ersten Klick auf eine noch nicht geladene Ansicht einen alten Chunk-Hash an. nginx antwortet darauf mit 404. Den vorhandenen Schutz in `swUpdate.js` umgingen zwei Fälle: Firefox meldet „error loading dynamically imported module", und bei fehlendem View-CSS wirft Vite „Unable to preload CSS" samt `vite:preloadError`-Event. Beide Muster fehlten. In allen Fällen lud der Schutz außerdem die **alte** Route neu, der Klick ging verloren. Jetzt werden beide Muster und das Vite-Event erkannt, die App lädt direkt die angeklickte Route, und ein Loop-Schutz über `sessionStorage` (10 s) verhindert Endlos-Reloads. Mit Playwright gegen einen Server geprüft, der nach dem Laden alle neuen Chunks mit 404 beantwortet: Die alte Version bleibt auf `/login`, die neue öffnet `/handbook`, sowohl bei fehlendem JS als auch bei fehlendem CSS. Ein dauerhaft fehlender Chunk löst genau einen Reload aus.
+
+### Sicherheit
+
+- **CRITICAL in `proxy-addr` und HIGH in `source-map-js` geschlossen, CI wieder grün** (PR #355). `proxy-addr` 2.0.8 behebt IP-Spoofing über IPv4-gemappte IPv6-Adressen in Trust-Subnetzen, `source-map-js` 1.2.2 eine HIGH-Lücke im Frontend-Build. Seit dem 03.10. war die CI aller PRs rot: `braces` (GHSA-vfj7-8cjw-p6xm) hing nur an devDependencies ohne verfügbaren Fix (`nodemon` → `chokidar`, `@intlify/unplugin-vue-i18n` → `fast-glob`). `nodemon` ist durch `node --watch` ersetzt. Das Frontend-Audit prüft mit `--omit=dev` nur noch Pakete, die tatsächlich ausgeliefert werden; das Build-Bundle enthält keine `node_modules`.
+
+### Doku
+
+- Handbuch ×6: Fahrtenliste (Kurzfahrten ohne Energiewert bis v3.57.3) und Fehlerbehebung „erst ein Neuladen hilft" (Update bei offenem Tab).
+
+---
+
 ## [v3.57.3] - 2026-09-15
 
 ### CI / Infrastruktur

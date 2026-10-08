@@ -181,7 +181,7 @@
               </div>
               <div class="hidden md:block">
                 <p class="text-gray-400">{{ $t('trips.soc') }}</p>
-                <p class="font-semibold">{{ trip.start_soc ?? '–' }}% → {{ trip.end_soc ?? '–' }}%</p>
+                <p class="font-semibold">{{ fmtSoc(trip.start_soc) }}% → {{ fmtSoc(trip.end_soc) }}%</p>
               </div>
             </div>
           </RouterLink>
@@ -285,6 +285,7 @@ import { formatLocation } from '../lib/location.js';
 import { useSortDirection } from '../composables/useSortDirection.js';
 import { usePageLayout } from '../composables/usePageLayout.js';
 import api from '../api.js';
+import { fmtSoc } from '../lib/soc.js';
 
 const { t, locale } = useI18n();
 const route       = useRoute();

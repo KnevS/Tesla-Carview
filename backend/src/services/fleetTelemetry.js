@@ -228,6 +228,15 @@ function extractPoint(data) {
   return Object.keys(point).length > 0 ? point : null;
 }
 
+// SoC mit einer Nachkommastelle speichern statt auf ganze Prozent zu runden.
+// Tesla streamt den SoC als Dezimalwert ("82.3"); die Rundung machte bei
+// Kurzstrecken (Ø 2,2 km ≈ 0,5 % SoC) Start- und End-SoC gleich, und die
+// Fahrt bekam nie einen Verbrauch. Die INTEGER-Affinitaet der Spalten
+// speichert Nicht-Ganzzahlen verlustfrei als REAL.
+function socVal(soc) {
+  return soc ? Math.round(soc * 10) / 10 : null;
+}
+
 function storePoint(vin, ts, point) {
   const tenant = getTenantByVin(vin);
   if (!tenant) return;
@@ -243,7 +252,7 @@ function storePoint(vin, ts, point) {
   let tripId = activeTrip?.id ?? null;
 
   if (point.gear && point.gear !== 'P' && !activeTrip) {
-    const soc           = point.soc ? Math.round(point.soc) : null;
+    const soc           = socVal(point.soc);
     const defaultDriver = db.prepare('SELECT id FROM drivers WHERE is_default=1 LIMIT 1').get();
     const result = db.prepare(
       `INSERT INTO trips (vehicle_id, start_time, start_lat, start_lon, start_soc, start_odometer_km, source, driver_id)
@@ -260,7 +269,7 @@ function storePoint(vin, ts, point) {
   }
 
   if (activeTrip && (point.gear === 'P' || point.gear === null)) {
-    const soc = point.soc ? Math.round(point.soc) : null;
+    const soc = socVal(point.soc);
     db.prepare(
       `UPDATE trips SET end_time=?, end_lat=?, end_lon=?, end_soc=?, end_odometer_km=? WHERE id=?`
     ).run(ts, point.lat ?? null, point.lon ?? null, soc, point.odometer_km ?? null, activeTrip.id);
@@ -309,7 +318,7 @@ function storePoint(vin, ts, point) {
     vehicle.id, tripId, ts,
     point.lat ?? null, point.lon ?? null,
     point.speed_kmh ?? null, point.gear ?? null, powerKw,
-    point.soc ? Math.round(point.soc) : null, point.odometer_km ?? null,
+    socVal(point.soc), point.odometer_km ?? null,
   );
 
   // ABRP Live-Telemetrie (best-effort)

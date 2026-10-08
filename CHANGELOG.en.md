@@ -7,6 +7,23 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.57.4] - 2026-10-08
+
+### Fixed
+
+- **Short telemetry trips never got a consumption value.** Fleet Telemetry sends the state of charge as a decimal ("82.3"), but it was rounded to whole percent when stored. A 2.2 km trip uses about 0.4 kWh, roughly 0.5 % SoC. After rounding, start and end SoC were often equal and `enrichClosedTrip()` set no consumption. On the reference instance this affected about 130 trips (avg. 2.2 km). The SoC is now stored with one decimal (`socVal()` in `fleetTelemetry.js`); the columns' INTEGER affinity stores such values losslessly as REAL. Checked against a freshly migrated tenant DB: 82.3 % → 81.8 % yields 0.375 kWh, previously `NULL`. Trip views still show the SoC in whole percent (`lib/soc.js`). Trips already stored cannot be corrected, because the decimal part was never saved.
+- **After an update, a view only opened after a manual reload.** A tab opened before a deploy requests an old chunk hash on the first click to a view that is not loaded yet, and nginx answers 404. Two cases bypassed the existing guard in `swUpdate.js`: Firefox reports "error loading dynamically imported module", and a missing view CSS makes Vite throw "Unable to preload CSS" together with a `vite:preloadError` event. Both patterns were missing. In every case the guard also reloaded the **old** route, so the click was lost. Both patterns and the Vite event are now handled, the app loads the clicked route directly, and a `sessionStorage` loop guard (10 s) prevents endless reloads. Checked with Playwright against a server that answers all new chunks with 404 after the first load: the old version stays on `/login`, the new one opens `/handbook`, for missing JS and missing CSS alike. A permanently missing chunk triggers exactly one reload.
+
+### Security
+
+- **CRITICAL in `proxy-addr` and HIGH in `source-map-js` closed, CI green again** (PR #355). `proxy-addr` 2.0.8 fixes IP spoofing via IPv4-mapped IPv6 addresses in trust subnets; `source-map-js` 1.2.2 fixes a HIGH issue in the frontend build. Since 3 October the CI of every PR had been red: `braces` (GHSA-vfj7-8cjw-p6xm) came only through devDependencies with no available fix (`nodemon` → `chokidar`, `@intlify/unplugin-vue-i18n` → `fast-glob`). `nodemon` is replaced by `node --watch`. The frontend audit now runs with `--omit=dev` and only checks packages that actually ship; the build bundle contains no `node_modules`.
+
+### Docs
+
+- Handbook ×6: trip list (short trips without energy value up to v3.57.3) and troubleshooting "only a reload helps" (update while the tab was open).
+
+---
+
 ## [v3.57.3] - 2026-09-15
 
 ### CI / Infrastructure

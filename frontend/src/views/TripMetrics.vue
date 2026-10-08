@@ -95,7 +95,7 @@
               <td class="px-3 py-2 text-right">{{ fmtPower(r.max_power_kw) }}</td>
               <td class="px-3 py-2 text-right">{{ fmtPower(r.min_power_kw) }}</td>
               <td class="px-3 py-2 text-right text-gray-400">
-                <span v-if="r.start_soc != null && r.end_soc != null">{{ r.start_soc }}→{{ r.end_soc }} %</span>
+                <span v-if="r.start_soc != null && r.end_soc != null">{{ fmtSoc(r.start_soc) }}→{{ fmtSoc(r.end_soc) }} %</span>
                 <span v-else>—</span>
               </td>
             </tr>
@@ -117,6 +117,7 @@ import { useAppStore } from '../store/index.js';
 import { useUnits } from '../store/prefs.js';
 import InfoTip from '../components/InfoTip.vue';
 import api from '../api.js';
+import { fmtSoc } from '../lib/soc.js';
 
 const { t, locale } = useI18n();
 const appStore = useAppStore();
