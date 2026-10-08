@@ -323,12 +323,12 @@
         <div class="flex flex-wrap gap-6 mb-4">
           <div v-tooltip="'Batterieladezustand zu Fahrtbeginn'">
             <p class="text-gray-400 text-sm">Start SoC</p>
-            <p class="text-3xl font-bold text-green-400">{{ trip.start_soc }}%</p>
+            <p class="text-3xl font-bold text-green-400">{{ fmtSoc(trip.start_soc) }}%</p>
           </div>
           <div class="text-2xl self-center text-gray-500">→</div>
           <div v-tooltip="'Batterieladezustand bei Fahrtende — unter 20% wird rot markiert'">
             <p class="text-gray-400 text-sm">End SoC</p>
-            <p class="text-3xl font-bold" :class="trip.end_soc < 20 ? 'text-red-400' : 'text-yellow-400'">{{ trip.end_soc }}%</p>
+            <p class="text-3xl font-bold" :class="trip.end_soc < 20 ? 'text-red-400' : 'text-yellow-400'">{{ fmtSoc(trip.end_soc) }}%</p>
           </div>
           <div class="ml-auto text-right">
             <p class="text-gray-400 text-sm">Verbrauch gesamt</p>
@@ -391,6 +391,7 @@ import { useUnits, usePrefsStore } from '../store/prefs.js';
 import api from '../api.js';
 import { formatLocation } from '../lib/location.js';
 import { osmTileLayer } from '../lib/tiles.js';
+import { fmtSoc } from '../lib/soc.js';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip);
 
