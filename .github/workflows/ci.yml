@@ -71,9 +71,11 @@ jobs:
       # (Supply-Chain-Schutz). Frontend hat keine native Deps.
       - run: npm ci --ignore-scripts
 
-      # Security Audit Frontend
+      # Security Audit Frontend (production deps only — @intlify/unplugin-vue-i18n
+      # is a build tool in devDependencies with no available fix for GHSA-vfj7-8cjw-p6xm;
+      # production bundles contain no node_modules at all)
       - name: Security Audit (npm audit)
-        run: npm audit --audit-level=high
+        run: npm audit --audit-level=high --omit=dev
         continue-on-error: false
 
       # ESLint mit no-undef faengt undefinierte Bezeichner in JS + Vue-SFCs
