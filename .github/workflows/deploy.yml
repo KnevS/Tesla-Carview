@@ -327,6 +327,44 @@ jobs:
               exit 1
             fi
 
+            # ── Demo-Frontend: privates Bundle nachbauen ─────────────────
+            # Die Demo-Instanz serviert NICHT das GHCR-Frontend-Image, sondern
+            # einen Bind-Mount auf $APP_DIR/frontend-dist-private — kompiliert
+            # mit der vollstaendigen Demo.vue aus dem privaten Overlay
+            # ($PRIVATE_REPO). Seit das server-seitige Frontend-Build hier
+            # entfernt wurde (#84), baute nur noch das manuelle
+            # deploy/update.sh dieses Bundle; das Demo-Frontend blieb dadurch
+            # bei jedem Release stehen (am 2026-10-08 auf 06bb416, waehrend
+            # Prod und Demo-Backend schon v3.57.4 liefen).
+            #
+            # Neu gebaut wird nur, wenn sich frontend/ seit dem Commit des
+            # aktuellen Bundles (Hash im Dateinamen index-<sha>.js) geaendert
+            # hat. Prod ist an dieser Stelle schon gesund — scheitert der
+            # Build, bleibt das alte Bundle aktiv und der Deploy nur gelb.
+            PRIVATE_DIST="$APP_DIR/frontend-dist-private"
+            if [ -d "$PRIVATE_REPO" ] && [ -d "$PRIVATE_DIST" ]; then
+              HEAD_SHORT="$(sudo git rev-parse --short=7 HEAD)"
+              BUNDLE_SHA="$(grep -o 'assets/index-[0-9a-f]*\.js' "$PRIVATE_DIST/index.html" 2>/dev/null | head -1 | sed 's#assets/index-##; s#\.js##')"
+              if [ -n "$BUNDLE_SHA" ] \
+                 && sudo git cat-file -e "${BUNDLE_SHA}^{commit}" 2>/dev/null \
+                 && sudo git diff --quiet "$BUNDLE_SHA" HEAD -- frontend/; then
+                echo "==> Demo-Frontend aktuell (Bundle $BUNDLE_SHA, keine frontend/-Aenderung bis $HEAD_SHORT)"
+              else
+                echo "==> Demo-Frontend: privates Bundle bauen (${BUNDLE_SHA:-unbekannt} → $HEAD_SHORT) …"
+                if sudo docker build --build-arg GIT_HASH="$HEAD_SHORT" \
+                     -t tesla-carview-frontend-private:local "$APP_DIR/frontend" >/tmp/demo-frontend-build.log 2>&1 \
+                   && sudo docker run --rm --entrypoint sh \
+                        -v "$PRIVATE_DIST":/out tesla-carview-frontend-private:local \
+                        -c 'test -f /usr/share/nginx/html/index.html && find /out -mindepth 1 -delete && cp -a /usr/share/nginx/html/. /out/'; then
+                  echo "    ✓ Demo-Frontend jetzt auf $HEAD_SHORT"
+                else
+                  echo "::warning::Demo-Frontend-Build fehlgeschlagen — altes Bundle bleibt aktiv."
+                  tail -20 /tmp/demo-frontend-build.log || true
+                fi
+                sudo docker image rm tesla-carview-frontend-private:local >/dev/null 2>&1 || true
+              fi
+            fi
+
             sudo docker image prune -f
             GIT_HASH=$(sudo git rev-parse --short HEAD)
             echo "Deployment erfolgreich + Healthcheck OK: $(date) | $GIT_HASH"
