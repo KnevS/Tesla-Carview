@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.57.5] - 2026-10-08
+
+### CI / Infrastructure
+
+- **The demo frontend stayed on an old build with every release.** The demo instance does not serve the GHCR frontend image but a bind mount on `frontend-dist-private/`, compiled with the full `Demo.vue` from the private overlay. Since the server-side frontend build was removed from `deploy.yml` (#84), only the manual `deploy/update.sh` built this bundle. On 8 October the demo therefore served the frontend of `06bb416`, while prod and the demo backend already ran v3.57.4. `deploy.yml` now rebuilds the private bundle after the successful prod health check, but only if `frontend/` changed since the commit of the current bundle (hash from `index-<sha>.js`). If the build fails, the old bundle stays active and the deploy reports a warning instead of an error. The decision logic was checked locally with stubbed `sudo`/`docker`: unchanged `frontend/` → no build; changed `frontend/` or unknown bundle hash → build. Changes made only in the private overlay do not trigger a rebuild.
+
+---
+
 ## [v3.57.4] - 2026-10-08
 
 ### Fixed
