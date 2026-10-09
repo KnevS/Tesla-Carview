@@ -1003,6 +1003,18 @@ The **weather consumption correlation** shows how outside temperature affects yo
 
 Buckets with fewer than 2 trips are not shown. Bar colour transitions from green (efficient) through yellow to red (inefficient).
 
+## 🕵️ Sleep detective {#sleep-detective}
+
+Under **Sleep monitor** (`/sleep`), the **Sleep detective** section answers "why won't my car sleep?". It is based on Fleet Telemetry: Tesla only streams data while the car is awake. A dense stream while parked means "awake", a gap means "asleep". The last 14 days are analysed.
+
+- **Awake while parked:** share of parked time (excluding driving and charging) during which the car was awake. A healthy car usually falls asleep 15–30 minutes after parking.
+- **Loss while parked:** battery loss per day, plus the projected energy and monthly cost at your home electricity price. About 0.5–1 % per day is normal.
+- **Daily breakdown:** one bar per day with driving, charging, awake while parked, asleep and no data. A day without telemetry only counts as "asleep" if the sleep monitor confirms it.
+- **Findings:** data-backed hints, e.g. the average power draw while awake and parked (around 250 W fits Sentry Mode, above 800 W points to climate control), sleep phases that end after a few minutes, or regular wake-ups on a fixed schedule.
+- **Parked periods:** every period between two drives or charges with duration, awake share, loss and cost.
+
+Without active Fleet Telemetry the section stays empty and says so.
+
 ## ❄️ Climate Statistics {#climate-stats}
 
 The **Climate Statistics** page (`/climate`) shows daily usage of your vehicle's climate system:

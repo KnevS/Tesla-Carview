@@ -836,6 +836,18 @@ Değerler seçilen dönem için (4/8/12 hafta) hesaplanır ve trend grafiğinde 
 
 **Tüketim-sıcaklık korelasyonu**, dış sıcaklığın tüketiminizi nasıl etkilediğini gösterir. Çubuk grafik tüm sürüşleri 6 sıcaklık aralığına göre gruplar (< −10 °C ile > 30 °C). Renkler yeşilden (verimli) kırmızıya (verimsiz) geçer.
 
+## 🕵️ Uyku dedektifi {#sleep-detective}
+
+**Uyku monitörü** (`/sleep`) altındaki **Uyku dedektifi** bölümü „Arabam neden uyumuyor?" sorusunu yanıtlar. Temeli Fleet Telemetry'dir: Tesla yalnızca araç uyanıkken veri gönderir. Park hâlinde yoğun veri akışı „uyanık", boşluk ise „uyuyor" demektir. Son 14 gün analiz edilir.
+
+- **Park hâlinde uyanık:** park süresinin (sürüş ve şarj hariç) aracın uyanık olduğu oranı. Sağlıklı bir araç genelde park ettikten 15–30 dakika sonra uykuya geçer.
+- **Park hâlinde kayıp:** günlük şarj kaybı ile ev elektrik fiyatınla tahmini aylık enerji ve maliyet. Günde yaklaşık %0,5–1 normaldir.
+- **Günlük dağılım:** her gün için sürüş, şarj, park hâlinde uyanık, uyuyor ve veri yok içeren bir çubuk. Telemetrisiz bir gün yalnızca uyku monitörü doğrularsa „uyuyor" sayılır.
+- **Bulgular:** verilere dayalı ipuçları; örn. park hâlinde uyanıkken ortalama güç çekimi (yaklaşık 250 W Nöbetçi Modu'na, 800 W üzeri klimaya işaret eder), birkaç dakika sonra biten uyku evreleri veya sabit aralıklarla düzenli uyanmalar.
+- **Park dönemleri:** iki sürüş veya şarj arasındaki her dönem; süre, uyanık oranı, kayıp ve maliyetle.
+
+Fleet Telemetry etkin değilse bölüm boş kalır ve bunu belirtir.
+
 ## ❄️ İklim İstatistikleri {#climate-stats}
 
 **İklim İstatistikleri** sayfası (`/climate`) aracınızın günlük klima sistemi kullanımını gösterir:
