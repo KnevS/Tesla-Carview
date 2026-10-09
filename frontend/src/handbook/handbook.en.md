@@ -1015,6 +1015,17 @@ Under **Sleep monitor** (`/sleep`), the **Sleep detective** section answers "why
 
 Without active Fleet Telemetry the section stays empty and says so.
 
+## 🏆 Year in review {#year-review}
+
+The **Year in review** (`/rueckblick`, under "Analytics") sums up a calendar year in numbers, the current year up to today. Earlier years are available via the year buttons.
+
+- **Year card:** kilometres, trips, CO₂ saved and how many times around the Earth that is. "Save as image" turns it into a portrait PNG (1080 × 1350), "Share" opens the share sheet on your phone. The image contains only numbers, no locations.
+- **Driving:** hours at the wheel, days on the road, average consumption, CO₂ saved and kilometres per month.
+- **Charging:** energy charged, share charged at home, charging cost, fast charges.
+- **Highlights:** longest and coldest trip, busiest and most efficient month, favourite charging spot, cheapest charge.
+
+If not every trip has a measured energy value, the review projects consumption and CO₂ to the total distance using your average and says so. CO₂ uses the same assumptions as the CO₂ balance (grid mix 363 g/kWh, reference petrol car 6.5 l/100 km). Charging cost only counts charges with a recorded price.
+
 ## 🥶 Winter {#winter}
 
 The **Winter** view (`/winter`, under "Analytics") shows what cold costs your own car. Everything is calculated from your trips of the last 12 months, without assumed curves.

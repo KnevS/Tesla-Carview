@@ -124,7 +124,8 @@
       "label": "Solar fazlası",
       "tooltip": "Yalnızca güneş fazlasıyla şarj — fazlayı Home Assistant'tan okur ve şarj akımını türetir"
     },
-    "winter": "Kış"
+    "winter": "Kış",
+    "yearReview": "Yıl özeti"
   },
   "dashboard": {
     "title": "Gösterge paneli",
@@ -3391,5 +3392,42 @@
     "tip_short": "Kısa sürüşleri birleştir: İlk kilometrelerde çok enerji batarya ve kabine gider.",
     "tip_tires": "Lastik basıncını kontrol et: Her 10 °C soğumada yaklaşık 0,1 bar düşer.",
     "chip": "15–25 °C'ye göre {sign}%{pct} ({temp} °C'de)"
+  },
+  "yearReview": {
+    "title": "Yıl özeti",
+    "subtitle": "Sürüş yılın rakamlarla.",
+    "yearToDate": "{year} bugüne kadar",
+    "fullYear": "{year} yılı",
+    "cardTitle": "Yolda geçen {year} yılım",
+    "km": "Kilometre",
+    "trips": "Sürüş",
+    "co2": "Tasarruf edilen CO₂",
+    "kwh100": "Ort. tüketim",
+    "earth": "× Dünya turu",
+    "drivingHours": "Direksiyonda saat",
+    "daysDriven": "Yolda geçen gün",
+    "sectionDriving": "Sürüş",
+    "sectionCharging": "Şarj",
+    "sectionHighlights": "Öne çıkanlar",
+    "sectionMonths": "Aylık kilometre",
+    "charged": "Şarj edilen",
+    "homeShare": "Evde şarj",
+    "cost": "Şarj maliyeti",
+    "costPartial": "enerjinin yalnızca %{pct}'inin fiyatı var",
+    "avgPrice": "Ort. fiyat",
+    "dcSessions": "Hızlı şarj",
+    "longest": "En uzun sürüş",
+    "coldest": "En soğuk sürüş",
+    "busiest": "En yoğun ay",
+    "bestEff": "En verimli ay",
+    "favorite": "Favori şarj noktası",
+    "cheapest": "En ucuz şarj",
+    "estimated": "Tüketim ve CO₂ toplam mesafeye yansıtılmıştır: mesafenin %{pct}'inde ölçülmüş enerji değeri var.",
+    "saveImage": "Resim olarak kaydet",
+    "share": "Paylaş",
+    "imageNote": "Resim yalnızca rakam içerir, konum içermez.",
+    "noData": "{year} için henüz sürüş yok.",
+    "trees": "yaklaşık {n} ağacın bir yılda bağladığı kadar",
+    "times": "{n}×"
   }
 }

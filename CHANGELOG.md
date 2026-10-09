@@ -7,6 +7,20 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.60.0] - 2026-10-09
+
+### Neu
+
+- **Jahresrückblick: das Fahrzeugjahr in Zahlen.** Neue Ansicht `/rueckblick` (Nav „Auswertung"), Rechenlogik in `services/yearReview.js`, Endpunkt `GET /api/year-review/:vehicleId?year=&tz=`. Jahresgrenzen gelten in der Zeitzone des Browsers, im laufenden Jahr bis heute, frühere Jahre über einen Jahreswähler.
+  - **Jahreskarte** mit Kilometern, Fahrten, eingespartem CO₂ und Erdumrundungen. „Als Bild speichern" zeichnet sie ohne zusätzliche Bibliothek auf ein Canvas (PNG 1080 × 1350, lange Übersetzungen werden auf die Breite verkleinert), „Teilen" nutzt die Web Share API. Das Bild enthält nur Zahlen, keine Orte.
+  - **Fahren:** Stunden am Steuer, Tage unterwegs, Ø-Verbrauch, CO₂ und Kilometer pro Monat. **Laden:** Energie, Heimanteil (gleiche Heim-Definition wie Ladepreis-Ranking und Abrechnung), Kosten, Schnellladungen. **Höhepunkte:** längste und kälteste Fahrt, fleißigster und effizientester Monat (ab 100 km mit Energiewert), Lieblings-Ladeort, günstigste bezahlte Ladung ab 5 kWh.
+  - Datenehrlichkeit: Fahrten ohne Energiewert gehen nicht als 0 kWh ein. Verbrauch und CO₂ werden mit dem energiegewichteten Durchschnitt auf die Gesamtstrecke hochgerechnet, der gemessene Anteil wird ausgewiesen. CO₂ nutzt die Faktoren der CO₂-Bilanz. Ladekosten zählen nur bepreiste Ladungen, die Abdeckung steht daneben.
+- `services/timeZone.js` bündelt `localMidnight()` und `validTimeZone()` (vorher in Schlaf-Detektiv und Schlaf-Route).
+
+Geprüft: Service mit synthetischen Daten (CO₂ nachgerechnet), end-to-end mit Playwright auf 1440 px und 390 px, PNG-Download 1080 × 1350 angesehen. Dabei aufgefallen: `StatCard` liest einen deutschen Tausenderpunkt („1.698") als Dezimalpunkt; die betroffenen Kacheln zeigen ihren Text deshalb ohne Zähl-Animation. i18n ×7, Handbuch ×6, README ×7.
+
+---
+
 ## [v3.59.1] - 2026-10-09
 
 ### Behoben

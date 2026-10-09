@@ -124,7 +124,8 @@
       "label": "PV-Überschuss",
       "tooltip": "Nur mit Solarüberschuss laden — liest den Überschuss aus Home Assistant und leitet die Ladestromstärke ab"
     },
-    "winter": "Winter"
+    "winter": "Winter",
+    "yearReview": "Jahresrückblick"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -3400,5 +3401,42 @@
     "tip_short": "Kurzstrecken bündeln: Auf den ersten Kilometern fließt viel Energie in Akku und Innenraum.",
     "tip_tires": "Reifendruck prüfen: Pro 10 °C Abkühlung sinkt er um etwa 0,1 bar.",
     "chip": "{sign}{pct} % ggü. 15–25 °C (bei {temp} °C)"
+  },
+  "yearReview": {
+    "title": "Jahresrückblick",
+    "subtitle": "Dein Fahrzeugjahr in Zahlen.",
+    "yearToDate": "{year} bis heute",
+    "fullYear": "Das Jahr {year}",
+    "cardTitle": "Mein Autojahr {year}",
+    "km": "Kilometer",
+    "trips": "Fahrten",
+    "co2": "CO₂ gespart",
+    "kwh100": "Ø Verbrauch",
+    "earth": "× um die Erde",
+    "drivingHours": "Stunden am Steuer",
+    "daysDriven": "Tage unterwegs",
+    "sectionDriving": "Fahren",
+    "sectionCharging": "Laden",
+    "sectionHighlights": "Höhepunkte",
+    "sectionMonths": "Kilometer pro Monat",
+    "charged": "Geladen",
+    "homeShare": "Zuhause geladen",
+    "cost": "Ladekosten",
+    "costPartial": "nur {pct} % der Energie mit Preis",
+    "avgPrice": "Ø Preis",
+    "dcSessions": "Schnellladungen",
+    "longest": "Längste Fahrt",
+    "coldest": "Kälteste Fahrt",
+    "busiest": "Fleißigster Monat",
+    "bestEff": "Effizientester Monat",
+    "favorite": "Lieblings-Ladeort",
+    "cheapest": "Günstigste Ladung",
+    "estimated": "Verbrauch und CO₂ sind auf die Gesamtstrecke hochgerechnet: {pct} % der Strecke haben einen gemessenen Energiewert.",
+    "saveImage": "Als Bild speichern",
+    "share": "Teilen",
+    "imageNote": "Das Bild enthält nur Zahlen, keine Orte.",
+    "noData": "Für {year} gibt es noch keine Fahrten.",
+    "trees": "so viel, wie rund {n} Bäume in einem Jahr binden",
+    "times": "{n}×"
   }
 }

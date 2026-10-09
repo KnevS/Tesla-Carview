@@ -124,7 +124,8 @@
       "label": "Excedente solar",
       "tooltip": "Cargar solo con excedente solar — lee el excedente de Home Assistant y deriva la corriente de carga"
     },
-    "winter": "Invierno"
+    "winter": "Invierno",
+    "yearReview": "Resumen del año"
   },
   "dashboard": {
     "title": "Panel",
@@ -3391,5 +3392,42 @@
     "tip_short": "Agrupa los trayectos cortos: en los primeros kilómetros va mucha energía a la batería y al habitáculo.",
     "tip_tires": "Revisa la presión de los neumáticos: baja unos 0,1 bar por cada 10 °C de enfriamiento.",
     "chip": "{sign}{pct} % frente a 15–25 °C (a {temp} °C)"
+  },
+  "yearReview": {
+    "title": "Resumen del año",
+    "subtitle": "Tu año al volante en cifras.",
+    "yearToDate": "{year} hasta hoy",
+    "fullYear": "El año {year}",
+    "cardTitle": "Mi {year} en la carretera",
+    "km": "Kilómetros",
+    "trips": "Trayectos",
+    "co2": "CO₂ ahorrado",
+    "kwh100": "Consumo medio",
+    "earth": "× alrededor de la Tierra",
+    "drivingHours": "Horas al volante",
+    "daysDriven": "Días en ruta",
+    "sectionDriving": "Conducción",
+    "sectionCharging": "Carga",
+    "sectionHighlights": "Lo más destacado",
+    "sectionMonths": "Kilómetros por mes",
+    "charged": "Cargado",
+    "homeShare": "Cargado en casa",
+    "cost": "Coste de carga",
+    "costPartial": "solo el {pct} % de la energía tiene precio",
+    "avgPrice": "Precio medio",
+    "dcSessions": "Cargas rápidas",
+    "longest": "Trayecto más largo",
+    "coldest": "Trayecto más frío",
+    "busiest": "Mes más activo",
+    "bestEff": "Mes más eficiente",
+    "favorite": "Punto de carga favorito",
+    "cheapest": "Carga más barata",
+    "estimated": "El consumo y el CO₂ se proyectan a la distancia total: el {pct} % de la distancia tiene un valor de energía medido.",
+    "saveImage": "Guardar como imagen",
+    "share": "Compartir",
+    "imageNote": "La imagen solo contiene cifras, ningún lugar.",
+    "noData": "Aún no hay trayectos en {year}.",
+    "trees": "lo que absorben unos {n} árboles en un año",
+    "times": "{n}×"
   }
 }
