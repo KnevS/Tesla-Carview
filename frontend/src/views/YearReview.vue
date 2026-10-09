@@ -41,13 +41,11 @@
         :title="$t('yearReview.sectionDriving')" icon="🚗"
         :collapsed="isCollapsed('driving')" @toggle="toggle('driving')" @move="(f,t,p) => moveSection(f,t,p)">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <!-- Mit Tausendertrenner formatierte Werte ohne Zaehl-Animation: StatCard
-               liest „1.698" (de) sonst als 1,698. -->
           <StatCard :label="$t('yearReview.drivingHours')" :value="data.driving.driving_hours" icon="clock" />
           <StatCard :label="$t('yearReview.daysDriven')" :value="data.driving.days_driven" icon="calendar" />
           <StatCard :label="$t('yearReview.kwh100')" :value="data.energy.kwh_100km != null ? fmtNum(data.energy.kwh_100km, 1) : '—'" sub="kWh / 100 km" :decimals="1" icon="gauge" />
           <StatCard :label="$t('yearReview.co2')" :value="data.energy.co2_saved_kg != null ? fmtNum(data.energy.co2_saved_kg, 0) : '—'"
-            sub="kg" icon="sparkles" :animate="false"
+            sub="kg" icon="sparkles"
             :tooltip="data.energy.trees_equivalent ? $t('yearReview.trees', { n: data.energy.trees_equivalent }) : undefined" />
         </div>
         <p v-if="data.energy.coverage < 0.95" class="text-xs text-gray-500 mt-3">
@@ -72,11 +70,11 @@
         :title="$t('yearReview.sectionCharging')" icon="⚡"
         :collapsed="isCollapsed('charging')" @toggle="toggle('charging')" @move="(f,t,p) => moveSection(f,t,p)">
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard :label="$t('yearReview.charged')" :value="fmtNum(data.charging.kwh, 0)" :sub="`kWh · ${data.charging.sessions}×`" icon="bolt" :animate="false" />
+          <StatCard :label="$t('yearReview.charged')" :value="fmtNum(data.charging.kwh, 0)" :sub="`kWh · ${data.charging.sessions}×`" icon="bolt" />
           <StatCard :label="$t('yearReview.homeShare')" :value="data.charging.home_share_pct != null ? data.charging.home_share_pct + ' %' : '—'" icon="home" />
           <StatCard :label="$t('yearReview.cost')" :value="data.charging.cost != null ? fmtNum(data.charging.cost, 0) + ' €' : '—'"
             :sub="data.charging.cost_coverage != null && data.charging.cost_coverage < 0.95 ? $t('yearReview.costPartial', { pct: Math.round(data.charging.cost_coverage * 100) }) : (data.charging.avg_price_kwh != null ? `${$t('yearReview.avgPrice')} ${fmtNum(data.charging.avg_price_kwh, 2)} €/kWh` : undefined)"
-            icon="wallet" :animate="false" />
+            icon="wallet" />
           <StatCard :label="$t('yearReview.dcSessions')" :value="data.charging.dc_sessions" icon="pulse" />
         </div>
       </SortableSection>
