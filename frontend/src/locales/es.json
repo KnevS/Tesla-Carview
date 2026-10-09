@@ -2314,7 +2314,7 @@
       "intro": "¿Por qué no duerme tu coche? Análisis de los últimos {days} días: Tesla solo envía telemetría mientras el coche está despierto.",
       "awakeParked": "Despierto aparcado",
       "lossParked": "Pérdida aparcado",
-      "perDay": "%/día",
+      "perDay": "al día",
       "kwhMonth": "≈ kWh / mes",
       "costMonth": "≈ coste / mes",
       "tipAwake": "Parte del tiempo aparcado (sin conducción ni carga) en que el coche estuvo despierto.",

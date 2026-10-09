@@ -2559,7 +2559,7 @@
       "intro": "Why won't your car sleep? Analysis of the last {days} days: Tesla only streams telemetry while the car is awake.",
       "awakeParked": "Awake while parked",
       "lossParked": "Loss while parked",
-      "perDay": "%/day",
+      "perDay": "per day",
       "kwhMonth": "≈ kWh / month",
       "costMonth": "≈ cost / month",
       "tipAwake": "Share of parked time (excluding driving and charging) during which the car was awake.",

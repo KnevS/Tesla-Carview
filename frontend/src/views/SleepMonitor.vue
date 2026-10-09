@@ -21,32 +21,34 @@
       :title="$t('sleep.detective.section')" icon="🕵️"
       :collapsed="isCollapsed('detective')" @toggle="toggle('detective')" @move="(f,t,p) => moveSection(f,t,p)">
       <div v-if="detective" class="space-y-5">
-        <p class="text-gray-400 text-sm">{{ $t('sleep.detective.intro', { days: detective.days }) }}</p>
+        <p class="text-gray-400 text-sm">{{ $t('sleep.detective.intro', { days: detective.window_days }) }}</p>
 
         <template v-if="detective.has_telemetry && detective.summary">
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard
               :label="$t('sleep.detective.awakeParked')"
               :value="detective.summary.awake_share != null ? Math.round(detective.summary.awake_share * 100) + ' %' : '—'"
-              :sub="detective.summary.parked_awake_h + ' / ' + detective.summary.parked_h + ' ' + $t('sleep.hours')"
+              :sub="fmtNum(detective.summary.parked_awake_h, 1) + ' / ' + fmtNum(detective.summary.parked_h, 1) + ' ' + $t('sleep.hours')"
               icon="gauge"
               :tooltip="$t('sleep.detective.tipAwake')"
             />
             <StatCard
               :label="$t('sleep.detective.lossParked')"
-              :value="detective.summary.loss_pct_per_day != null ? fmtNum(detective.summary.loss_pct_per_day, 1) + ' ' + $t('sleep.detective.perDay') : '—'"
+              :value="detective.summary.loss_pct_per_day != null ? fmtNum(detective.summary.loss_pct_per_day, 1) : '—'"
+              :sub="'% ' + $t('sleep.detective.perDay')"
+              :decimals="1"
               icon="battery"
               :tooltip="$t('sleep.detective.tipLoss')"
             />
             <StatCard
               :label="$t('sleep.detective.kwhMonth')"
-              :value="detective.summary.kwh_per_month != null ? fmtNum(detective.summary.kwh_per_month, 1) + ' kWh' : '—'"
+              :value="detective.summary.kwh_per_month != null ? Math.round(detective.summary.kwh_per_month) : '—'"
               icon="bolt"
               :tooltip="$t('sleep.detective.tipKwh')"
             />
             <StatCard
               :label="$t('sleep.detective.costMonth')"
-              :value="detective.summary.cost_per_month != null ? fmtNum(detective.summary.cost_per_month, 2) + ' €' : '—'"
+              :value="detective.summary.cost_per_month != null ? Math.round(detective.summary.cost_per_month) + ' €' : '—'"
               :sub="detective.summary.home_price_kwh == null ? $t('sleep.detective.noPrice') : undefined"
               icon="wallet"
               :tooltip="$t('sleep.detective.tipCost')"
@@ -60,7 +62,7 @@
               <li v-for="h in detective.hints" :key="h.code"
                 class="rounded-lg px-3 py-2 text-sm border"
                 :class="hintClass(h.severity)">
-                {{ $t(`sleep.detective.hint_${h.code}`, h.params || {}) }}
+                {{ $t(`sleep.detective.hint_${h.code}`, hintParams(h.params)) }}
               </li>
             </ul>
           </div>
@@ -133,7 +135,7 @@
 
         <ul v-else class="space-y-2">
           <li v-for="h in detective.hints" :key="h.code" class="rounded-lg px-3 py-2 text-sm border" :class="hintClass(h.severity)">
-            {{ $t(`sleep.detective.hint_${h.code}`, h.params || {}) }}
+            {{ $t(`sleep.detective.hint_${h.code}`, hintParams(h.params)) }}
           </li>
         </ul>
       </div>
@@ -270,6 +272,12 @@ function hintClass(severity) {
   if (severity === 'medium') return 'border-amber-500/40 bg-amber-500/10 text-amber-100';
   if (severity === 'ok')     return 'border-green-500/40 bg-green-500/10 text-green-200';
   return 'border-gray-600 bg-gray-800/60 text-gray-300';
+}
+
+// Zahlen in den Befund-Texten im Format der Oberflaechensprache (6,3 statt 6.3).
+function hintParams(params = {}) {
+  return Object.fromEntries(Object.entries(params).map(([k, v]) =>
+    [k, typeof v === 'number' ? v.toLocaleString(locale.value) : v]));
 }
 
 function segWidth(d, key) {

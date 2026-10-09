@@ -2314,7 +2314,7 @@
       "intro": "Araban neden uyumuyor? Son {days} günün analizi: Tesla telemetriyi yalnızca araç uyanıkken gönderir.",
       "awakeParked": "Park hâlinde uyanık",
       "lossParked": "Park hâlinde kayıp",
-      "perDay": "%/gün",
+      "perDay": "günlük",
       "kwhMonth": "≈ kWh / ay",
       "costMonth": "≈ maliyet / ay",
       "tipAwake": "Park süresinin (sürüş ve şarj hariç) aracın uyanık olduğu oranı.",

@@ -113,7 +113,7 @@ router.get('/:vehicleId/detective', async (req, res) => {
     `).all(vehicleId, from);
 
     res.json({
-      days,
+      window_days: days,
       ...analyzeStandby({
         points, trips, charges, sleepEvents, from, now,
         tz: validTimeZone(req.query.tz),

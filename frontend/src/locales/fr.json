@@ -2314,7 +2314,7 @@
       "intro": "Pourquoi ta voiture ne dort-elle pas ? Analyse des {days} derniers jours : Tesla n'envoie la télémétrie que lorsque la voiture est éveillée.",
       "awakeParked": "Éveillée à l'arrêt",
       "lossParked": "Perte à l'arrêt",
-      "perDay": "%/jour",
+      "perDay": "par jour",
       "kwhMonth": "≈ kWh / mois",
       "costMonth": "≈ coût / mois",
       "tipAwake": "Part du temps à l'arrêt (hors conduite et recharge) pendant laquelle la voiture était éveillée.",

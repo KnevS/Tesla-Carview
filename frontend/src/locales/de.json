@@ -2559,7 +2559,7 @@
       "intro": "Warum schläft dein Auto nicht? Auswertung der letzten {days} Tage: Tesla sendet Telemetrie nur, solange das Auto wach ist.",
       "awakeParked": "Wach im Stand",
       "lossParked": "Verlust im Stand",
-      "perDay": "%/Tag",
+      "perDay": "pro Tag",
       "kwhMonth": "≈ kWh / Monat",
       "costMonth": "≈ Kosten / Monat",
       "tipAwake": "Anteil der Standzeit (ohne Fahrt und Laden), in der das Auto wach war.",
