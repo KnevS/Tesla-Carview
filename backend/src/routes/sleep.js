@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { assertVehicleAccess, guardAccess } from '../middleware/vehicleAccess.js';
 import { analyzeStandby } from '../services/sleepDetective.js';
 import { usableBatteryKwh } from '../services/vehicleModel.js';
+import { validTimeZone } from '../services/timeZone.js';
 
 const router = Router();
 
@@ -76,11 +77,6 @@ function homePriceKwh(db, vehicleId) {
      ORDER BY is_default DESC LIMIT 1`
   ).get(vehicleId);
   return loc?.rate_kwh ?? null;
-}
-
-function validTimeZone(tz) {
-  if (!tz || typeof tz !== 'string' || tz.length > 64) return 'UTC';
-  try { new Intl.DateTimeFormat('en-US', { timeZone: tz }); return tz; } catch { return 'UTC'; }
 }
 
 // GET /api/sleep/:vehicleId/detective?days=14&tz=Europe/Berlin
