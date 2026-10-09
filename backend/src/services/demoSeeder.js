@@ -36,6 +36,18 @@ const TRIP_PURPOSES = [
 ];
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+// Synthetische Aussentemperatur (Jahresgang Stuttgart + Tagesstreuung) und
+// der dazu passende Mehrverbrauch bei Kaelte — damit die Winter-Auswertung
+// auch in der Demo eine plausible Kurve zeigt. Reine Demo-Werte.
+function demoTemp(ts) {
+  const doy = (new Date(ts * 1000).getUTCDate() - 1) + new Date(ts * 1000).getUTCMonth() * 30.4;
+  const season = 10 - 9.5 * Math.cos(2 * Math.PI * (doy - 15) / 365);
+  return Math.round((season + (Math.random() - 0.5) * 12) * 10) / 10;
+}
+function coldFactor(tempC) {
+  return 1 + 0.013 * Math.max(0, 18 - tempC);
+}
+
 function jitter(value, percent) {
   const delta = value * percent * (Math.random() * 2 - 1);
   return value + delta;
@@ -81,8 +93,8 @@ export function seedNewDemoUser(db, userId, username) {
        (vehicle_id, start_time, end_time, start_lat, start_lon, end_lat, end_lon,
         start_address, end_address, distance_km, energy_used_kwh,
         start_soc, end_soc, start_odometer_km, end_odometer_km,
-        trip_type, purpose, source)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'demo')`
+        trip_type, purpose, outside_temp_avg_c, source)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'demo')`
   );
   const chargeStmt = db.prepare(
     `INSERT INTO charging_sessions
@@ -107,7 +119,8 @@ export function seedNewDemoUser(db, userId, username) {
       const km   = Math.round(jitter(tpl.km, 0.12) * 10) / 10;
       const durS = Math.max(300, Math.round(km / 50 * 3600 + Math.random() * 600));
       const startSoc = Math.max(15, Math.min(95, soc));
-      const used = km / 100 * (15 + Math.random() * 4); // 15–19 kWh/100km
+      const tempC = demoTemp(dayCursor);
+      const used = km / 100 * (15 + Math.random() * 4) * coldFactor(tempC); // 15–19 kWh/100km bei Waerme
       const usedSoc = Math.max(1, Math.round(used / MODEL_Y_USABLE_KWH * 100));
       const endSoc = Math.max(10, startSoc - usedSoc);
       const tripType = Math.random() < 0.3 ? 'business'
@@ -119,7 +132,7 @@ export function seedNewDemoUser(db, userId, username) {
         tpl.from, tpl.to, km, Math.round(used * 100) / 100,
         startSoc, endSoc,
         Math.round(odometer), Math.round(odometer + km),
-        tripType, pick(TRIP_PURPOSES),
+        tripType, pick(TRIP_PURPOSES), tempC,
       );
       odometer += km;
       soc = endSoc;
@@ -163,8 +176,9 @@ export function seedNewDemoUser(db, userId, username) {
   for (let d = 14; d >= 0; d--) {
     const tp = bizTemplates[d % bizTemplates.length], km = Math.round(tp.km * (0.9 + Math.random()*0.2) * 10)/10;
     const dur = Math.max(300, Math.round(km/55*3600)), ts0 = startTs + (21-d)*86400 + 8*3600;
-    const used = km/100*14.5, usedSoc = Math.max(1,Math.round(used/75*100)), endSoc = Math.max(10, bizSoc - usedSoc);
-    tripStmt.run(vehicleId2, ts0, ts0+dur, tp.lat1, tp.lon1, tp.lat2, tp.lon2, tp.from, tp.to, km, Math.round(used*10)/10, bizSoc, endSoc, bizOdo, bizOdo+km, "business", "Kundentermin");
+    const tempC = demoTemp(ts0);
+    const used = km/100*14.5*coldFactor(tempC), usedSoc = Math.max(1,Math.round(used/75*100)), endSoc = Math.max(10, bizSoc - usedSoc);
+    tripStmt.run(vehicleId2, ts0, ts0+dur, tp.lat1, tp.lon1, tp.lat2, tp.lon2, tp.from, tp.to, km, Math.round(used*10)/10, bizSoc, endSoc, bizOdo, bizOdo+km, "business", "Kundentermin", tempC);
     bizOdo += km; bizSoc = endSoc < 30 ? 85 : endSoc;
   }
 
@@ -192,8 +206,8 @@ export function tickDemoActivity(db) {
        (vehicle_id, start_time, end_time, start_lat, start_lon, end_lat, end_lon,
         start_address, end_address, distance_km, energy_used_kwh,
         start_soc, end_soc, start_odometer_km, end_odometer_km,
-        trip_type, purpose, source)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'demo')`
+        trip_type, purpose, outside_temp_avg_c, source)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'demo')`
   );
   const stmtUpdateVehicle = db.prepare(
     'UPDATE vehicles SET state_updated_at=? WHERE id=?'
@@ -209,7 +223,8 @@ export function tickDemoActivity(db) {
 
     const tpl   = pick(TRIP_TEMPLATES);
     const km    = Math.round(jitter(tpl.km, 0.18) * 10) / 10;
-    const used  = km / 100 * (15 + Math.random() * 4);
+    const tempC = demoTemp(now);
+    const used  = km / 100 * (15 + Math.random() * 4) * coldFactor(tempC);
     const dur   = Math.max(360, Math.round(km / 50 * 3600 + Math.random() * 600));
     const endSoc = Math.max(15, startSoc - Math.round(used / MODEL_Y_USABLE_KWH * 100));
     const tripType = Math.random() < 0.3 ? 'business' : 'private';
@@ -220,7 +235,7 @@ export function tickDemoActivity(db) {
       startSoc, endSoc,
       Math.round(last.km ?? 12500),
       Math.round((last.km ?? 12500) + km),
-      tripType, pick(TRIP_PURPOSES),
+      tripType, pick(TRIP_PURPOSES), tempC,
     );
     stmtUpdateVehicle.run(now, v.id);
     touched++;

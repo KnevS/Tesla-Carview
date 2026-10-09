@@ -405,6 +405,14 @@ function runTenantMigrations(db) {
   if (!tCols.includes('outside_temp_avg_c')) {
     db.exec('ALTER TABLE trips ADD COLUMN outside_temp_avg_c REAL');
   }
+  // Herkunft der Aussentemperatur: NULL = Fahrzeug (Polling-Pfad),
+  // 'weather' = nachgetragen aus Open-Meteo (services/weatherBackfill.js),
+  // 'none' = Wetterdienst hatte keinen Wert (nicht erneut versuchen).
+  // Fleet Telemetry liefert keine Aussentemperatur — ohne Nachtrag haetten
+  // Telemetrie-Fahrten nie einen Wert.
+  if (!tCols.includes('outside_temp_source')) {
+    db.exec('ALTER TABLE trips ADD COLUMN outside_temp_source TEXT');
+  }
   // BMF-Pflichtangaben fuers elektronische Fahrtenbuch:
   //   business_partner: bei Dienstfahrten der aufgesuchte Geschaeftspartner
   //   locked_at:        wenn ans Finanzamt exportiert → keine Aenderung mehr
