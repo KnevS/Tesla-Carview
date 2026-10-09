@@ -5,6 +5,7 @@ import { validate } from '../middleware/validate.js';
 import { logChanges, isLocked } from '../services/tripAudit.js';
 import { recordTripChange, verifyChain, tripHistory } from '../services/tripLedger.js';
 import { wltpDeltaPct } from '../services/wltp.js';
+import { baselineKwh100, coldSurcharge, BASE_MIN_C, BASE_MAX_C } from '../services/winterAnalysis.js';
 import {
   assertVehicleAccess, assertTripAccess,
   restrictToOwnVehicles, guardAccess,
@@ -696,7 +697,18 @@ router.get('/:id', (req, res) => {
        )`
     ).get(trip.id);
 
-    res.json({ ...trip, points, regen_kwh: regenRow?.regen_kwh ?? 0 });
+    // Kaelte-Aufschlag gegen den eigenen Verbrauch bei 15–25 °C (letzte 12
+    // Monate desselben Fahrzeugs) — nur bei Fahrten unter 15 °C.
+    let cold_surcharge = null;
+    if (trip.outside_temp_avg_c != null && trip.outside_temp_avg_c < BASE_MIN_C) {
+      const ref = db.prepare(
+        `SELECT distance_km, energy_used_kwh, outside_temp_avg_c FROM trips
+         WHERE vehicle_id=? AND start_time>=? AND outside_temp_avg_c BETWEEN ? AND ?`
+      ).all(trip.vehicle_id, trip.start_time - 365 * 86400, BASE_MIN_C, BASE_MAX_C);
+      cold_surcharge = coldSurcharge(trip, baselineKwh100(ref));
+    }
+
+    res.json({ ...trip, points, regen_kwh: regenRow?.regen_kwh ?? 0, cold_surcharge });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
