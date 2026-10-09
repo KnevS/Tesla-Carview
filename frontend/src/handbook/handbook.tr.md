@@ -848,6 +848,20 @@ Değerler seçilen dönem için (4/8/12 hafta) hesaplanır ve trend grafiğinde 
 
 Fleet Telemetry etkin değilse bölüm boş kalır ve bunu belirtir.
 
+## 🥶 Kış {#winter}
+
+**Kış** görünümü (`/winter`, „Analiz" altında) soğuğun kendi aracına neye mal olduğunu gösterir. Her şey son 12 aydaki sürüşlerinden, varsayılan bir eğri olmadan hesaplanır.
+
+- **Soğukta ek tüketim:** en soğuk sıcaklık aralığındaki ek tüketim; referans, 15–25 °C'deki sürüşlerinin medyanıdır.
+- **Ayaz menzili:** hava tahmini ve benzer sıcaklıklardaki tüketimine göre bugün ve sonraki 6 gün için menzil; tam bataryayla ve mevcut şarj seviyesiyle.
+- **Sıcaklığa göre tüketim:** 5 °C'lik aralıklarda medyan tüketim (aralık başına en az 3 sürüş).
+- **Soğuk sürüşler:** 15 °C'nin altındaki son sürüşler ve ek tüketimleri. Sürüş detayında aynı değer gösterilir.
+- **İpuçları:** örn. şarj kablosu takılıyken ön klimatizasyon, kalkış saatini planlama, yüksek kabin sıcaklığı yerine koltuk ısıtması.
+
+**Dış sıcaklık tamamlama:** Fleet Telemetry dış sıcaklık sağlamaz. Uygulama eksik değerleri gece (ve başlangıçtan kısa süre sonra bir kez) Open-Meteo verileriyle tamamlar. Yalnızca 0,1°'ye (yaklaşık 11 km) yuvarlanmış koordinatlar ve tarih gönderilir. 2 km'den kısa sürüşler analizlere dahil edilmez.
+
+**Ön klimatizasyon hatırlatması:** Yarın her zamanki kalkış saatinde sıcaklık 5 °C'nin altındaysa, akşamdan şarj kablosu takılıyken ön klimatizasyon öneren bir bildirim alırsın.
+
 ## ❄️ İklim İstatistikleri {#climate-stats}
 
 **İklim İstatistikleri** sayfası (`/climate`) aracınızın günlük klima sistemi kullanımını gösterir:

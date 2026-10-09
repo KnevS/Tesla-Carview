@@ -7,6 +7,26 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.59.0] - 2026-10-09
+
+### Added
+
+- **Winter: what cold costs your own car.** New view `/winter` (nav "Analytics"), logic in `services/winterAnalysis.js`, endpoint `GET /api/winter/:vehicleId`. Everything is plain statistics over your own trips of the last 12 months, with no assumed curve shape:
+  - The **reference** is the median of trips at 15–25 °C (from 5 trips), where an EV hardly heats or cools.
+  - **Consumption by temperature** in 5 °C bands (median, from 3 trips per band) with the surcharge against the reference.
+  - **Cold surcharge per trip** below 15 °C, as a table of recent cold trips and as a chip in the trip detail (`cold_surcharge` in `GET /api/trips/:id`).
+  - **Frost range** for today and the next 6 days: daily mean from the Open-Meteo forecast, consumption from `consumptionModel` at a similar temperature, range with a full battery and with the current charge level (latest telemetry SoC, otherwise the state cache).
+  - **Winter tips**. Short trips under 2 km and outliers outside 5–60 kWh/100 km are excluded.
+- **Filling in outside temperature for trips** (`services/weatherBackfill.js`). Fleet Telemetry provides no outside temperature; only the polling path wrote `outside_temp_avg_c`. Telemetry and OwnTracks trips therefore never had a value. Nightly maintenance (step 3e, up to 60 calls per tenant) and a run 2 minutes after startup (up to 30 calls) now fill in missing values from Open-Meteo: forecast API up to ~85 days back, older trips from the ERA5 archive. Privacy: only coordinates rounded to 0.1° (~11 km grid) and the date leave the server, and trips in the same grid cell share one request. New column `trips.outside_temp_source` (NULL = vehicle, `weather` = filled in, `none` = no value available, don't retry). The demo seeder now produces a synthetic annual curve with matching extra consumption.
+
+### Fixed
+
+- **The frost preconditioning suggestion was never generated since v3.7.0.** `generatePreconditionForVehicle()` read `vehicles.latitude`/`longitude`, which don't exist. Every nightly companion run threw "no such column" and aborted for the tenant (anomaly notifications still arrived because the 6-hour run skips the suggestion). The position now comes from `services/vehiclePosition.js` (latest telemetry or track point, otherwise the last trip's destination), and a failure for one vehicle no longer aborts the run. Two time zone bugs fixed along the way: "tomorrow" was determined in UTC and the typical departure time in the server time zone (UTC in the container), while the forecast hours are local time. Both now use the forecast's `utc_offset_seconds`. Only rounded coordinates go to Open-Meteo here too. The push text now suggests preconditioning while plugged in. Checked with a test vehicle at −75° latitude: suggestion created for tomorrow 09:00 local time.
+
+Checked: temperature backfill with stubbed and real Open-Meteo (forecast and archive), winter analysis with 120 synthetic trips (+33 % surcharge at −10 to −5 °C for a seeded +1.3 %/K), end-to-end with Playwright at 1440 px and 390 px. i18n ×7, handbook ×6, README ×7.
+
+---
+
 ## [v3.58.0] - 2026-10-09
 
 ### Added

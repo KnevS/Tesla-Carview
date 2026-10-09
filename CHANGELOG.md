@@ -7,6 +7,26 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.59.0] - 2026-10-09
+
+### Neu
+
+- **Winter: was Kälte beim eigenen Auto kostet.** Neue Ansicht `/winter` (Nav „Auswertung"), Rechenlogik in `services/winterAnalysis.js`, Endpunkt `GET /api/winter/:vehicleId`. Alles ist reine Statistik über die eigenen Fahrten der letzten 12 Monate, ohne angenommene Kurvenform:
+  - **Referenz** ist der Median der Fahrten bei 15–25 °C (ab 5 Fahrten), weil ein E-Auto dort praktisch weder heizt noch kühlt.
+  - **Verbrauch nach Temperatur** in 5-°C-Stufen (Median, ab 3 Fahrten je Stufe) mit Aufschlag gegen die Referenz.
+  - **Kälte-Aufschlag je Fahrt** unter 15 °C, als Tabelle der letzten kalten Fahrten und als Chip im Fahrtdetail (`cold_surcharge` in `GET /api/trips/:id`).
+  - **Frost-Reichweite** für heute und die nächsten 6 Tage: Tagesmittel aus der Open-Meteo-Vorhersage, Verbrauch aus `consumptionModel` bei ähnlicher Temperatur, Reichweite mit vollem Akku und mit aktuellem Ladestand (jüngster Telemetrie-SoC, sonst State-Cache).
+  - **Winter-Tipps** und Kurzstrecken unter 2 km sowie Ausreißer außerhalb von 5–60 kWh/100 km bleiben draußen.
+- **Außentemperatur für Fahrten nachtragen** (`services/weatherBackfill.js`). Fleet Telemetry liefert keine Außentemperatur, nur der Polling-Pfad schrieb `outside_temp_avg_c`. Telemetrie- und OwnTracks-Fahrten hatten deshalb nie einen Wert. Jetzt ergänzt die Nacht-Wartung (Schritt 3e, bis 60 Abrufe je Mandant) und ein Lauf 2 Minuten nach dem Start (bis 30 Abrufe) fehlende Werte aus Open-Meteo: Forecast-API bis ~85 Tage zurück, ältere Fahrten aus dem ERA5-Archiv. Datenschutz: Es gehen nur auf 0,1° gerundete Koordinaten (Raster ~11 km) und das Datum hinaus, Fahrten im selben Rasterfeld teilen sich einen Abruf. Neue Spalte `trips.outside_temp_source` (NULL = Fahrzeug, `weather` = nachgetragen, `none` = kein Wert verfügbar, nicht erneut versuchen). Der Demo-Seeder erzeugt dazu eine synthetische Jahreskurve mit passendem Mehrverbrauch.
+
+### Behoben
+
+- **Die Vorklimatisieren-Empfehlung bei Frost wurde seit v3.7.0 nie erzeugt.** `generatePreconditionForVehicle()` las `vehicles.latitude`/`longitude`, die Spalten gibt es nicht. Jeder nächtliche Companion-Lauf warf „no such column" und brach für den Mandanten ab (die Anomalie-Benachrichtigungen kamen trotzdem an, weil der 6-Stunden-Lauf die Empfehlung überspringt). Die Position kommt jetzt aus `services/vehiclePosition.js` (jüngster Telemetrie- oder Trackpunkt, sonst Ziel der letzten Fahrt), ein Fehler bei einem Fahrzeug bricht den Lauf nicht mehr ab. Zwei Zeitzonenfehler gleich mit: „morgen" wurde in UTC bestimmt und die typische Abfahrtszeit in der Server-Zeitzone (im Container UTC), die Vorhersage-Stunden sind aber Ortszeit. Beides rechnet jetzt mit dem `utc_offset_seconds` der Vorhersage. Auch hier gehen nur gerundete Koordinaten an Open-Meteo. Der Push-Text empfiehlt jetzt, am Ladekabel vorzuklimatisieren. Geprüft mit einem Testfahrzeug bei −75° Breite: Empfehlung für morgen 09:00 Ortszeit erzeugt.
+
+Geprüft: Temperatur-Nachtrag mit gestubbtem und echtem Open-Meteo (Forecast und Archiv), Winter-Auswertung mit 120 synthetischen Fahrten (Aufschlag +33 % bei −10 bis −5 °C bei eingespielten +1,3 %/K), end-to-end mit Playwright auf 1440 px und 390 px. i18n ×7, Handbuch ×6, README ×7.
+
+---
+
 ## [v3.58.0] - 2026-10-09
 
 ### Neu

@@ -834,6 +834,20 @@ Dans **Moniteur de sommeil** (`/sleep`), la section **Détective du sommeil** r�
 
 Sans Fleet Telemetry active, la section reste vide et l'indique.
 
+## 🥶 Hiver {#winter}
+
+La vue **Hiver** (`/winter`, sous « Analyse ») montre ce que le froid coûte à ta voiture. Tout est calculé à partir de tes trajets des 12 derniers mois, sans courbe supposée.
+
+- **Surconsommation par temps froid :** surcoût dans la tranche de température la plus froide par rapport à ta référence, la médiane de tes trajets à 15–25 °C.
+- **Autonomie par grand froid :** autonomie pour aujourd'hui et les 6 jours suivants d'après la prévision et ta consommation à des températures similaires, batterie pleine et avec la charge actuelle.
+- **Consommation selon la température :** consommation médiane par tranches de 5 °C (à partir de 3 trajets par tranche).
+- **Trajets par temps froid :** les derniers trajets sous 15 °C avec leur surcoût. Le détail du trajet affiche la même valeur.
+- **Conseils :** p. ex. préconditionner branché, planifier l'heure de départ, sièges chauffants plutôt qu'un habitacle très chaud.
+
+**Température extérieure :** Fleet Telemetry ne fournit pas de température extérieure. L'application complète les valeurs manquantes la nuit (et une fois peu après le démarrage) avec des données Open-Meteo. Seules des coordonnées arrondies à 0,1° (environ 11 km) et la date sont envoyées. Les trajets de moins de 2 km sont exclus des analyses.
+
+**Rappel de préconditionnement :** si demain il fait moins de 5 °C à ton heure de départ habituelle, tu reçois la veille une notification suggérant de préconditionner branché.
+
 ## ❄️ Statistiques climatiques {#climate-stats}
 
 La page **Statistiques climatiques** (`/climate`) affiche l'utilisation quotidienne du système climatique :

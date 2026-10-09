@@ -1012,6 +1012,20 @@ Unter **Schlaf-Monitor** (`/sleep`) beantwortet der Abschnitt **Schlaf-Detektiv*
 
 Ohne aktive Fleet Telemetry bleibt der Abschnitt leer und weist darauf hin.
 
+## 🥶 Winter {#winter}
+
+Die Ansicht **Winter** (`/winter`, unter „Auswertung") zeigt, was Kälte bei deinem eigenen Auto kostet. Alles wird aus deinen Fahrten der letzten 12 Monate berechnet, ohne angenommene Kurven.
+
+- **Mehrverbrauch bei Kälte:** Aufschlag in der kältesten Temperaturstufe gegenüber deiner Referenz. Referenz ist der Median deiner Fahrten bei 15–25 °C, dort heizt und kühlt ein E-Auto praktisch nicht.
+- **Frost-Reichweite:** Reichweite für heute und die nächsten 6 Tage aus der Wettervorhersage und deinem Verbrauch bei ähnlicher Temperatur, mit vollem Akku und mit dem aktuellen Ladestand.
+- **Verbrauch nach Temperatur:** Median-Verbrauch in 5-°C-Stufen (ab 3 Fahrten je Stufe).
+- **Kalte Fahrten:** die letzten Fahrten unter 15 °C mit ihrem Aufschlag. Im Fahrtdetail zeigt ein Hinweis-Chip denselben Wert.
+- **Tipps:** z. B. am Ladekabel vorklimatisieren, Abfahrtszeit planen, Sitzheizung statt hoher Innenraumtemperatur.
+
+**Außentemperatur nachtragen:** Fleet Telemetry liefert keine Außentemperatur. Fehlende Werte ergänzt die App deshalb nachts (und einmal kurz nach dem Start) aus Wetterdaten von Open-Meteo. Dafür gehen nur auf 0,1° gerundete Koordinaten (rund 11 km) und das Datum an den Dienst. Kurzstrecken unter 2 km bleiben in allen Auswertungen draußen, weil dort die Heizenergie den Wert pro 100 km verzerrt.
+
+**Vorklimatisieren-Erinnerung:** Liegt die Temperatur zu deiner üblichen Abfahrtszeit morgen unter 5 °C, kommt am Vorabend eine Benachrichtigung mit dem Hinweis, am Ladekabel vorzuklimatisieren.
+
 ## ❄️ Klimastatistiken {#climate-stats}
 
 Die **Klimastatistiken**-Seite (`/climate`) zeigt die tägliche Nutzung des Klimasystems deines Fahrzeugs:
