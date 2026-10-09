@@ -21,6 +21,7 @@ export const PREF_KEYS = {
   NOTIF_BATTERY:  'notif_low_battery',
   NOTIF_BATTERY_T:'notif_low_battery_threshold',
   WIZARD_DONE:    'wizard_completed',
+  NEWS_SEEN:      'news_seen',
 };
 
 export const DASHBOARD_CARD_DEFS = [
@@ -51,6 +52,7 @@ const DEFAULTS = {
   notif_low_battery:          false,
   notif_low_battery_threshold: 20,
   wizard_completed: false,
+  news_seen: null,   // id (Version) der zuletzt gelesenen Neuigkeit, s. news/news.js
 };
 
 const LS_KEY = 'tcv-prefs';

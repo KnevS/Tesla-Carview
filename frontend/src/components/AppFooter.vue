@@ -24,6 +24,7 @@
         </li>
       </ul>
       <ul class="legal-links">
+        <li v-if="authStore.isAuthenticated"><RouterLink to="/news">📣 {{ $t('news.title') }}</RouterLink></li>
         <li><RouterLink to="/legal/imprint">{{ $t('footer.imprint') }}</RouterLink></li>
         <li><RouterLink to="/legal/privacy">{{ $t('footer.privacy') }}</RouterLink></li>
         <li><RouterLink to="/legal/terms">{{ $t('footer.terms') }}</RouterLink></li>
@@ -48,6 +49,10 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { AI_TRANSLATED_LOCALES } from '../plugins/i18n.js';
+import { useAuthStore } from '../store/auth.js';
+
+// Neuigkeiten-Link auch auf dem Handy erreichbar (dort ist die NavBar aus).
+const authStore = useAuthStore();
 
 defineProps({
   showVersion: { type: Boolean, default: false },

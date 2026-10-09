@@ -8,6 +8,8 @@
          zeigt pro nicht-dismissed Notice einen ein-/ausklappbaren Banner.
          Admin kann dismissen, danach fuer den Tenant weg. -->
     <NoticesBanner v-if="authStore.isAuthenticated" />
+    <!-- Neuigkeiten: Info-Hinweis auf Neuerungen dieser Version (news/news.js) -->
+    <NewsBanner v-if="authStore.isAuthenticated" />
     <!-- Nevs-Edition: technischer Status-Streifen ueber der NavBar.
          Nur sichtbar wenn data-design="editorial" und eingeloggt. -->
     <EditorialStatusBar v-if="authStore.isAuthenticated" />
@@ -72,6 +74,7 @@ import MaintenanceOverlay    from './components/MaintenanceOverlay.vue';
 import ThrottleNotice        from './components/ThrottleNotice.vue';
 import DemoBanner            from './components/DemoBanner.vue';
 import NoticesBanner         from './components/NoticesBanner.vue';
+import NewsBanner            from './components/NewsBanner.vue';
 import SettingsWizard        from './components/SettingsWizard.vue';
 import EditorialStatusBar    from './components/EditorialStatusBar.vue';
 import MobileTabBar          from './components/MobileTabBar.vue';
