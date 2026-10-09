@@ -822,6 +822,18 @@ Los valores se calculan para el período seleccionado (4/8/12 semanas) y se mues
 
 La **correlación consumo-temperatura** muestra cómo la temperatura exterior influye en tu consumo. El gráfico de barras agrupa todos los viajes en 6 rangos de temperatura (< −10 °C a > 30 °C). Los colores van de verde (eficiente) a rojo (ineficiente).
 
+## 🕵️ Detective del sueño {#sleep-detective}
+
+En **Monitor de sueño** (`/sleep`), la sección **Detective del sueño** responde a «¿por qué no duerme mi coche?». Se basa en Fleet Telemetry: Tesla solo envía datos mientras el coche está despierto. Un flujo denso de datos aparcado significa «despierto», un hueco significa «dormido». Se analizan los últimos 14 días.
+
+- **Despierto aparcado:** parte del tiempo aparcado (sin conducción ni carga) en que el coche estuvo despierto. Un coche sano suele dormirse 15–30 minutos después de aparcar.
+- **Pérdida aparcado:** pérdida de carga al día, más la energía y el coste mensual proyectados con tu precio de electricidad doméstica. Lo normal es un 0,5–1 % al día.
+- **Desglose diario:** una barra por día con conducción, carga, despierto aparcado, dormido y sin datos. Un día sin telemetría solo cuenta como «dormido» si el monitor de sueño lo confirma.
+- **Hallazgos:** indicios basados en datos, p. ej. el consumo medio despierto y aparcado (unos 250 W encajan con el modo Centinela, más de 800 W apuntan a climatización), fases de sueño que terminan a los pocos minutos o despertares regulares a intervalos fijos.
+- **Periodos aparcado:** cada periodo entre dos trayectos o cargas con duración, parte despierto, pérdida y coste.
+
+Sin Fleet Telemetry activa, la sección queda vacía y lo indica.
+
 ## ❄️ Estadísticas climáticas {#climate-stats}
 
 La página **Estadísticas climáticas** (`/climate`) muestra el uso diario del sistema de climatización:

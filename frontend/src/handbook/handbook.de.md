@@ -1000,6 +1000,18 @@ Die **Wetter-Verbrauchskorrelation** zeigt, wie Außentemperatur deinen Verbrauc
 
 Balken mit weniger als 2 Fahrten werden nicht angezeigt. Die Farbe der Balken wechselt von Grün (günstig) über Gelb zu Rot (ungünstig).
 
+## 🕵️ Schlaf-Detektiv {#sleep-detective}
+
+Unter **Schlaf-Monitor** (`/sleep`) beantwortet der Abschnitt **Schlaf-Detektiv** die Frage „Warum schläft mein Auto nicht?". Grundlage ist Fleet Telemetry: Tesla sendet Daten nur, solange das Auto wach ist. Ein dichter Datenstrom im Stand heißt also „wach", eine Lücke heißt „schläft". Ausgewertet werden die letzten 14 Tage.
+
+- **Wach im Stand:** Anteil der Standzeit (ohne Fahrt und Laden), in der das Auto wach war. Ein gesundes Auto schläft meist 15–30 Minuten nach dem Abstellen ein.
+- **Verlust im Stand:** Ladestandsverlust pro Tag, dazu die hochgerechnete Energie und die Kosten pro Monat mit deinem Heimstrompreis. Normal sind etwa 0,5–1 % pro Tag.
+- **Tagesverlauf:** je Tag ein Balken mit Fahrt, Laden, wach im Stand, schläft und keine Daten. Ein Tag ohne Telemetrie zählt nur dann als „schläft", wenn der Schlaf-Monitor das bestätigt.
+- **Befunde:** datenbelegte Hinweise, z. B. die mittlere Leistungsaufnahme im wachen Stand (rund 250 W passen zum Wächter-Modus, über 800 W zu Klimatisierung), Schlafphasen, die nach wenigen Minuten wieder enden, oder regelmäßiges Aufwachen in festem Takt.
+- **Standphasen:** jede Phase zwischen zwei Fahrten oder Ladungen mit Dauer, Wachanteil, Verlust und Kosten.
+
+Ohne aktive Fleet Telemetry bleibt der Abschnitt leer und weist darauf hin.
+
 ## ❄️ Klimastatistiken {#climate-stats}
 
 Die **Klimastatistiken**-Seite (`/climate`) zeigt die tägliche Nutzung des Klimasystems deines Fahrzeugs:

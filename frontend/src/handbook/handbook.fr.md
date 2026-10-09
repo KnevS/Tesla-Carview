@@ -822,6 +822,18 @@ Les valeurs sont calculées pour la période sélectionnée (4/8/12 semaines) et
 
 La **corrélation consommation-météo** montre comment la température extérieure influence votre consommation. Le diagramme à barres regroupe tous les trajets en 6 plages de température (< −10 °C à > 30 °C). Les couleurs passent de vert (efficace) à rouge (inefficace).
 
+## 🕵️ Détective du sommeil {#sleep-detective}
+
+Dans **Moniteur de sommeil** (`/sleep`), la section **Détective du sommeil** répond à « pourquoi ma voiture ne dort-elle pas ? ». Elle s'appuie sur Fleet Telemetry : Tesla n'envoie des données que lorsque la voiture est éveillée. Un flux dense à l'arrêt signifie « éveillée », un trou signifie « endormie ». Les 14 derniers jours sont analysés.
+
+- **Éveillée à l'arrêt :** part du temps à l'arrêt (hors conduite et recharge) pendant laquelle la voiture était éveillée. Une voiture saine s'endort généralement 15 à 30 minutes après le stationnement.
+- **Perte à l'arrêt :** perte de charge par jour, ainsi que l'énergie et le coût mensuel projetés avec ton prix d'électricité domestique. Environ 0,5–1 % par jour est normal.
+- **Répartition journalière :** une barre par jour avec conduite, recharge, éveillée à l'arrêt, endormie et pas de données. Un jour sans télémétrie ne compte comme « endormie » que si le moniteur de sommeil le confirme.
+- **Constats :** indices fondés sur les données, p. ex. la consommation moyenne éveillée à l'arrêt (environ 250 W correspond au mode Sentinelle, plus de 800 W à la climatisation), des phases de sommeil qui se terminent au bout de quelques minutes ou des réveils réguliers à intervalle fixe.
+- **Périodes à l'arrêt :** chaque période entre deux trajets ou recharges avec durée, part éveillée, perte et coût.
+
+Sans Fleet Telemetry active, la section reste vide et l'indique.
+
 ## ❄️ Statistiques climatiques {#climate-stats}
 
 La page **Statistiques climatiques** (`/climate`) affiche l'utilisation quotidienne du système climatique :
