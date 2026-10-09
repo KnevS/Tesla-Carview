@@ -1012,6 +1012,17 @@ Unter **Schlaf-Monitor** (`/sleep`) beantwortet der Abschnitt **Schlaf-Detektiv*
 
 Ohne aktive Fleet Telemetry bleibt der Abschnitt leer und weist darauf hin.
 
+## 🏆 Jahresrückblick {#year-review}
+
+Der **Jahresrückblick** (`/rueckblick`, unter „Auswertung") fasst ein Kalenderjahr in Zahlen zusammen, im laufenden Jahr bis heute. Über die Jahres-Schaltflächen lassen sich frühere Jahre aufrufen.
+
+- **Jahreskarte:** Kilometer, Fahrten, eingespartes CO₂ und wie oft das um die Erde reicht. „Als Bild speichern" erzeugt daraus ein PNG im Hochformat (1080 × 1350), „Teilen" öffnet auf dem Handy das Teilen-Menü. Das Bild enthält nur Zahlen, keine Orte.
+- **Fahren:** Stunden am Steuer, Tage unterwegs, Ø-Verbrauch, eingespartes CO₂ und Kilometer pro Monat.
+- **Laden:** geladene Energie, Anteil zu Hause, Ladekosten, Schnellladungen.
+- **Höhepunkte:** längste und kälteste Fahrt, fleißigster und effizientester Monat, Lieblings-Ladeort, günstigste Ladung.
+
+Hat nicht jede Fahrt einen gemessenen Energiewert, rechnet der Rückblick Verbrauch und CO₂ mit deinem Durchschnitt auf die Gesamtstrecke hoch und weist das aus. CO₂ nutzt dieselben Annahmen wie die CO₂-Bilanz (Strommix 363 g/kWh, Vergleichs-Benziner 6,5 l/100 km). Ladekosten zählen nur Ladungen mit hinterlegtem Preis.
+
 ## 🥶 Winter {#winter}
 
 Die Ansicht **Winter** (`/winter`, unter „Auswertung") zeigt, was Kälte bei deinem eigenen Auto kostet. Alles wird aus deinen Fahrten der letzten 12 Monate berechnet, ohne angenommene Kurven.

@@ -848,6 +848,17 @@ Değerler seçilen dönem için (4/8/12 hafta) hesaplanır ve trend grafiğinde 
 
 Fleet Telemetry etkin değilse bölüm boş kalır ve bunu belirtir.
 
+## 🏆 Yıl özeti {#year-review}
+
+**Yıl özeti** (`/rueckblick`, „Analiz" altında) bir takvim yılını rakamlarla özetler; içinde bulunulan yıl için bugüne kadar. Önceki yıllar yıl düğmeleriyle açılır.
+
+- **Yıl kartı:** kilometre, sürüş, tasarruf edilen CO₂ ve bunun kaç Dünya turu ettiği. „Resim olarak kaydet" dikey bir PNG (1080 × 1350) üretir, „Paylaş" telefonda paylaşım menüsünü açar. Resim yalnızca rakam içerir, konum içermez.
+- **Sürüş:** direksiyonda saat, yolda geçen gün, ortalama tüketim, tasarruf edilen CO₂ ve aylık kilometre.
+- **Şarj:** şarj edilen enerji, evde şarj payı, şarj maliyeti, hızlı şarjlar.
+- **Öne çıkanlar:** en uzun ve en soğuk sürüş, en yoğun ve en verimli ay, favori şarj noktası, en ucuz şarj.
+
+Her sürüşte ölçülmüş enerji değeri yoksa özet tüketimi ve CO₂'yi ortalamanla toplam mesafeye yansıtır ve bunu belirtir. CO₂, CO₂ bilançosuyla aynı varsayımları kullanır. Şarj maliyeti yalnızca fiyatı girilmiş şarjları sayar.
+
 ## 🥶 Kış {#winter}
 
 **Kış** görünümü (`/winter`, „Analiz" altında) soğuğun kendi aracına neye mal olduğunu gösterir. Her şey son 12 aydaki sürüşlerinden, varsayılan bir eğri olmadan hesaplanır.

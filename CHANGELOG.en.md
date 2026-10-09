@@ -7,6 +7,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.60.0] - 2026-10-09
+
+### Added
+
+- **Year in review: your driving year in numbers.** New view `/rueckblick` (nav "Analytics"), logic in `services/yearReview.js`, endpoint `GET /api/year-review/:vehicleId?year=&tz=`. Year boundaries apply in the browser's time zone, the current year up to today, earlier years via a year picker.
+  - **Year card** with kilometres, trips, CO₂ saved and laps around the Earth. "Save as image" draws it onto a canvas without an extra library (PNG 1080 × 1350, long translations are scaled to fit), "Share" uses the Web Share API. The image contains only numbers, no locations.
+  - **Driving:** hours at the wheel, days on the road, average consumption, CO₂ and kilometres per month. **Charging:** energy, home share (same home definition as the charging price ranking and billing), cost, fast charges. **Highlights:** longest and coldest trip, busiest and most efficient month (from 100 km with an energy value), favourite charging spot, cheapest paid charge from 5 kWh.
+  - Data honesty: trips without an energy value don't count as 0 kWh. Consumption and CO₂ are projected to the total distance with the energy-weighted average, and the measured share is shown. CO₂ uses the CO₂ balance factors. Charging cost only counts priced charges, with the coverage shown alongside.
+- `services/timeZone.js` bundles `localMidnight()` and `validTimeZone()` (previously in the sleep detective and the sleep route).
+
+Checked: service with synthetic data (CO₂ recalculated), end-to-end with Playwright at 1440 px and 390 px, PNG download 1080 × 1350 reviewed. Noticed along the way: `StatCard` reads a German thousands separator ("1.698") as a decimal point; the affected tiles therefore show their text without the count-up animation. i18n ×7, handbook ×6, README ×7.
+
+---
+
 ## [v3.59.1] - 2026-10-09
 
 ### Fixed

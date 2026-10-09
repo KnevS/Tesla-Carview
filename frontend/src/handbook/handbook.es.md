@@ -834,6 +834,17 @@ En **Monitor de sueño** (`/sleep`), la sección **Detective del sueño** respon
 
 Sin Fleet Telemetry activa, la sección queda vacía y lo indica.
 
+## 🏆 Resumen del año {#year-review}
+
+El **Resumen del año** (`/rueckblick`, en «Análisis») resume un año natural en cifras; el año en curso hasta hoy. Los años anteriores se abren con los botones de año.
+
+- **Tarjeta del año:** kilómetros, trayectos, CO₂ ahorrado y cuántas vueltas a la Tierra supone. «Guardar como imagen» genera un PNG vertical (1080 × 1350) y «Compartir» abre el menú de compartir del móvil. La imagen solo contiene cifras, ningún lugar.
+- **Conducción:** horas al volante, días en ruta, consumo medio, CO₂ ahorrado y kilómetros por mes.
+- **Carga:** energía cargada, parte cargada en casa, coste de carga, cargas rápidas.
+- **Lo más destacado:** trayecto más largo y más frío, mes más activo y más eficiente, punto de carga favorito, carga más barata.
+
+Si no todos los trayectos tienen un valor de energía medido, el resumen proyecta consumo y CO₂ a la distancia total con tu media y lo indica. El CO₂ usa los mismos supuestos que el balance de CO₂. El coste de carga solo cuenta cargas con precio registrado.
+
 ## 🥶 Invierno {#winter}
 
 La vista **Invierno** (`/winter`, en «Análisis») muestra lo que el frío le cuesta a tu propio coche. Todo se calcula con tus trayectos de los últimos 12 meses, sin curvas supuestas.
