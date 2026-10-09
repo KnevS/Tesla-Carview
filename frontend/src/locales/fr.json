@@ -124,7 +124,8 @@
       "label": "Surplus solaire",
       "tooltip": "Charger uniquement avec le surplus solaire — lit le surplus depuis Home Assistant et en déduit le courant de charge"
     },
-    "winter": "Hiver"
+    "winter": "Hiver",
+    "yearReview": "Bilan de l'année"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -3391,5 +3392,42 @@
     "tip_short": "Regrouper les petits trajets : les premiers kilomètres consomment beaucoup d'énergie pour la batterie et l'habitacle.",
     "tip_tires": "Vérifier la pression des pneus : elle baisse d'environ 0,1 bar par 10 °C de refroidissement.",
     "chip": "{sign}{pct} % vs 15–25 °C (à {temp} °C)"
+  },
+  "yearReview": {
+    "title": "Bilan de l'année",
+    "subtitle": "Ton année au volant en chiffres.",
+    "yearToDate": "{year} jusqu'à aujourd'hui",
+    "fullYear": "L'année {year}",
+    "cardTitle": "Mon année {year} sur la route",
+    "km": "Kilomètres",
+    "trips": "Trajets",
+    "co2": "CO₂ économisé",
+    "kwh100": "Conso. moyenne",
+    "earth": "× le tour de la Terre",
+    "drivingHours": "Heures au volant",
+    "daysDriven": "Jours sur la route",
+    "sectionDriving": "Conduite",
+    "sectionCharging": "Recharge",
+    "sectionHighlights": "Temps forts",
+    "sectionMonths": "Kilomètres par mois",
+    "charged": "Rechargé",
+    "homeShare": "Rechargé à domicile",
+    "cost": "Coût de recharge",
+    "costPartial": "seulement {pct} % de l'énergie a un prix",
+    "avgPrice": "Prix moyen",
+    "dcSessions": "Recharges rapides",
+    "longest": "Trajet le plus long",
+    "coldest": "Trajet le plus froid",
+    "busiest": "Mois le plus actif",
+    "bestEff": "Mois le plus efficace",
+    "favorite": "Lieu de recharge préféré",
+    "cheapest": "Recharge la moins chère",
+    "estimated": "La consommation et le CO₂ sont extrapolés à la distance totale : {pct} % de la distance a une valeur d'énergie mesurée.",
+    "saveImage": "Enregistrer en image",
+    "share": "Partager",
+    "imageNote": "L'image ne contient que des chiffres, aucun lieu.",
+    "noData": "Aucun trajet pour {year} pour l'instant.",
+    "trees": "autant qu'environ {n} arbres en absorbent en un an",
+    "times": "{n}×"
   }
 }

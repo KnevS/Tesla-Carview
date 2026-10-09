@@ -834,6 +834,17 @@ Dans **Moniteur de sommeil** (`/sleep`), la section **Détective du sommeil** r�
 
 Sans Fleet Telemetry active, la section reste vide et l'indique.
 
+## 🏆 Bilan de l'année {#year-review}
+
+Le **Bilan de l'année** (`/rueckblick`, sous « Analyse ») résume une année civile en chiffres, l'année en cours jusqu'à aujourd'hui. Les années précédentes s'ouvrent via les boutons d'année.
+
+- **Carte de l'année :** kilomètres, trajets, CO₂ économisé et combien de tours de la Terre cela représente. « Enregistrer en image » produit un PNG portrait (1080 × 1350), « Partager » ouvre le menu de partage du téléphone. L'image ne contient que des chiffres, aucun lieu.
+- **Conduite :** heures au volant, jours sur la route, consommation moyenne, CO₂ économisé et kilomètres par mois.
+- **Recharge :** énergie rechargée, part à domicile, coût de recharge, recharges rapides.
+- **Temps forts :** trajet le plus long et le plus froid, mois le plus actif et le plus efficace, lieu de recharge préféré, recharge la moins chère.
+
+Si tous les trajets n'ont pas de valeur d'énergie mesurée, le bilan extrapole consommation et CO₂ à la distance totale avec ta moyenne et l'indique. Le CO₂ reprend les hypothèses du bilan CO₂. Le coût de recharge ne compte que les recharges avec un prix enregistré.
+
 ## 🥶 Hiver {#winter}
 
 La vue **Hiver** (`/winter`, sous « Analyse ») montre ce que le froid coûte à ta voiture. Tout est calculé à partir de tes trajets des 12 derniers mois, sans courbe supposée.

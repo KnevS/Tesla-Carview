@@ -124,7 +124,8 @@
       "label": "Solar surplus",
       "tooltip": "Charge only from solar surplus — reads the surplus from Home Assistant and derives the charging current"
     },
-    "winter": "Winter"
+    "winter": "Winter",
+    "yearReview": "Year in review"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -3400,5 +3401,42 @@
     "tip_short": "Combine short trips: in the first kilometres a lot of energy goes into the battery and cabin.",
     "tip_tires": "Check tyre pressure: it drops by about 0.1 bar per 10 °C of cooling.",
     "chip": "{sign}{pct} % vs. 15–25 °C (at {temp} °C)"
+  },
+  "yearReview": {
+    "title": "Year in review",
+    "subtitle": "Your driving year in numbers.",
+    "yearToDate": "{year} so far",
+    "fullYear": "The year {year}",
+    "cardTitle": "My {year} on the road",
+    "km": "Kilometres",
+    "trips": "Trips",
+    "co2": "CO₂ saved",
+    "kwh100": "Avg. consumption",
+    "earth": "× around the Earth",
+    "drivingHours": "Hours at the wheel",
+    "daysDriven": "Days on the road",
+    "sectionDriving": "Driving",
+    "sectionCharging": "Charging",
+    "sectionHighlights": "Highlights",
+    "sectionMonths": "Kilometres per month",
+    "charged": "Charged",
+    "homeShare": "Charged at home",
+    "cost": "Charging cost",
+    "costPartial": "only {pct} % of the energy has a price",
+    "avgPrice": "Avg. price",
+    "dcSessions": "Fast charges",
+    "longest": "Longest trip",
+    "coldest": "Coldest trip",
+    "busiest": "Busiest month",
+    "bestEff": "Most efficient month",
+    "favorite": "Favourite charging spot",
+    "cheapest": "Cheapest charge",
+    "estimated": "Consumption and CO₂ are projected to the total distance: {pct} % of the distance has a measured energy value.",
+    "saveImage": "Save as image",
+    "share": "Share",
+    "imageNote": "The image contains only numbers, no locations.",
+    "noData": "There are no trips for {year} yet.",
+    "trees": "as much as about {n} trees absorb in a year",
+    "times": "{n}×"
   }
 }

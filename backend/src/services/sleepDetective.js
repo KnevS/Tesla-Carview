@@ -23,6 +23,8 @@
  * Reine Rechenlogik ohne DB-Zugriff — die Route liefert die Zeilen.
  */
 
+import { localMidnight } from './timeZone.js';
+
 // Groesster Abstand zweier Telemetrie-Punkte, der noch als durchgehend wach
 // gilt. Ein waches Auto streamt im Sekundenbereich; Luecken darueber sind
 // Schlaf oder Funkloch.
@@ -51,20 +53,6 @@ const round2 = v => Math.round(v * 100) / 100;
 function dayKeyFormatter(tz) {
   const f = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit' });
   return t => f.format(new Date(t * 1000));
-}
-
-/** Unix-Zeit von Mitternacht des Tages `key` (YYYY-MM-DD) in der Zeitzone `tz`. */
-function localMidnight(key, tz) {
-  const [y, m, d] = key.split('-').map(Number);
-  const guess = Date.UTC(y, m - 1, d) / 1000;
-  // Versatz der Zone zu UTC an diesem Tag bestimmen (beruecksichtigt Sommerzeit).
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: tz, hourCycle: 'h23',
-    year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit',
-  }).formatToParts(new Date(guess * 1000));
-  const p = Object.fromEntries(parts.map(x => [x.type, Number(x.value)]));
-  const asUtc = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute, p.second) / 1000;
-  return guess - (asUtc - guess);
 }
 
 /** Ueberlappungen zusammenfassen; Eingabe [{start, end}], end darf null sein (laeuft noch). */
