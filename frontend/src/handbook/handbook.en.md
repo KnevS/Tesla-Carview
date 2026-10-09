@@ -1015,6 +1015,12 @@ Under **Sleep monitor** (`/sleep`), the **Sleep detective** section answers "why
 
 Without active Fleet Telemetry the section stays empty and says so.
 
+## 📣 What's new {#news}
+
+TeslaView shows what an update brings right in the app. After an update a short **info notice** about the latest change appears at the top, with "Take a look" (straight to the feature), "All news" and ✕ to dismiss. A dot on the **megaphone icon** in the navigation bar marks unread news. The **What's new** page (`/news`, also via the footer link, e.g. on your phone) lists all entries with version and date.
+
+The list belongs to the installed version: you see exactly what your installation contains, without contacting a third-party server. What you have read is remembered per user.
+
 ## 🏆 Year in review {#year-review}
 
 The **Year in review** (`/rueckblick`, under "Analytics") sums up a calendar year in numbers, the current year up to today. Earlier years are available via the year buttons.

@@ -7,6 +7,19 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.61.0] - 2026-10-09
+
+### Neu
+
+- **Neuigkeiten in der App.** Was ein Update bringt, zeigt TeslaView jetzt selbst an:
+  - **Info-Hinweis** oben in der App (`NewsBanner.vue`) zur neuesten ungelesenen Neuerung, mit „Ansehen" (direkt zur Funktion), „Alle Neuigkeiten" und ✕.
+  - **Megafon-Symbol** in der Navigationsleiste mit Punkt bei ungelesenen Neuigkeiten, dazu ein Link im Seitenfuß (auf dem Handy ist die Navigationsleiste ausgeblendet).
+  - **Seite `/news`** mit allen Einträgen, Version und Datum.
+
+  Die Einträge liegen in `frontend/src/news/news.js` (sieben Sprachen) und werden mit dem Frontend ausgeliefert. Jede Installation zeigt also genau die Neuerungen ihrer eigenen Version, ohne Abfrage bei einem zentralen Server. Der Lesestand steht pro Nutzer in der Präferenz `news_seen`. Ohne gespeicherten Stand gilt nur der neueste Eintrag als ungelesen, damit Bestandsnutzer nach dem Update nicht eine Liste alter Neuerungen vorfinden. Die Website zeigt dieselben Einträge im Abschnitt „Neuigkeiten". End-to-end mit Playwright geprüft: Hinweis und Punkt erscheinen, „Alle Neuigkeiten" öffnet `/news`, nach dem Neuladen sind beide weg; 390 px ohne Überlauf. i18n ×7, Handbuch ×6, README ×7.
+
+---
+
 ## [v3.60.1] - 2026-10-09
 
 ### Behoben

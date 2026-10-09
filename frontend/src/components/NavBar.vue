@@ -47,6 +47,15 @@
 
         <LangSwitcher compact />
 
+        <RouterLink to="/news" class="icon-btn relative" v-tooltip="$t('news.title')" :aria-label="$t('news.title')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z" />
+            <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+            <path d="M18.5 5.5a9 9 0 0 1 0 13" />
+          </svg>
+          <span v-if="hasUnreadNews" class="absolute top-1 right-1 w-2 h-2 rounded-full bg-sky-400" aria-hidden="true"></span>
+        </RouterLink>
         <RouterLink to="/handbook" class="icon-btn" v-tooltip="$t('auth.handbook')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -94,10 +103,15 @@ import NavGroup     from './NavGroup.vue';
 import LangSwitcher from './LangSwitcher.vue';
 import VehicleSilhouette from './VehicleSilhouette.vue';
 import AppIcon from './AppIcon.vue';
+import { usePrefsStore } from '../store/prefs.js';
+import { unreadNews } from '../news/news.js';
 
 const appStore  = useAppStore();
 const authStore = useAuthStore();
 const navStore  = useNavStore();
+const prefsStore = usePrefsStore();
+// Punkt am Megafon, solange es ungelesene Neuigkeiten gibt.
+const hasUnreadNews = computed(() => prefsStore.loaded && unreadNews(prefsStore.data.news_seen).length > 0);
 const router    = useRouter();
 const route     = useRoute();
 const { t }     = useI18n();
