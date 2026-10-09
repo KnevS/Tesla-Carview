@@ -7,6 +7,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.59.1] - 2026-10-09
+
+### Behoben
+
+- **Temperatur-Nachtrag markierte ältere Fahrten fälschlich als „kein Wert".** Der erste Lauf auf der Referenzinstanz versorgte 550 von 656 Fahrten mit 30 Abrufen, markierte aber 83 als `none` (endgültig, kein erneuter Versuch). Ursache: Die Forecast-API von Open-Meteo liefert laut Doku rund 92 Tage zurück, gemessen kommen ab etwa 84 Tagen aber nur `null`-Werte. Die Grenze lag bei 85 Tagen, die ältesten Fahrten einer Forecast-Gruppe gingen damit leer aus. Jetzt gehen Fahrten älter als 60 Tage ins ERA5-Archiv, und `none` wird nur noch gesetzt, wenn auch das Archiv keinen Wert hat. Eine Lücke der Forecast-API wird beim nächsten Lauf erneut versucht. Eine einmalige Migration (`migration.weather_none_reset_v3591`) gibt die betroffenen Fahrten wieder frei. Mit echten Abrufen geprüft: Fahrten vor 10, 70 und 84 Tagen und eine zurückgesetzte Altlast bekommen alle einen Wert.
+
+---
+
 ## [v3.59.0] - 2026-10-09
 
 ### Neu
