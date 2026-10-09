@@ -3429,5 +3429,15 @@
     "noData": "{year} için henüz sürüş yok.",
     "trees": "yaklaşık {n} ağacın bir yılda bağladığı kadar",
     "times": "{n}×"
+  },
+  "news": {
+    "title": "Yenilikler",
+    "subtitle": "TeslaView sürümündeki yenilikler.",
+    "bannerLabel": "{version} sürümünde yeni",
+    "open": "Göz at",
+    "all": "Tüm yenilikler",
+    "more": "{n} tane daha",
+    "dismiss": "Gizle",
+    "new": "yeni"
   }
 }

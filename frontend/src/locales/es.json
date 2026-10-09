@@ -3429,5 +3429,15 @@
     "noData": "Aún no hay trayectos en {year}.",
     "trees": "lo que absorben unos {n} árboles en un año",
     "times": "{n}×"
+  },
+  "news": {
+    "title": "Novedades",
+    "subtitle": "Lo nuevo en tu versión de TeslaView.",
+    "bannerLabel": "Nuevo en {version}",
+    "open": "Ver",
+    "all": "Todas las novedades",
+    "more": "{n} más",
+    "dismiss": "Ocultar",
+    "new": "nuevo"
   }
 }

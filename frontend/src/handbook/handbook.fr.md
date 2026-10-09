@@ -834,6 +834,12 @@ Dans **Moniteur de sommeil** (`/sleep`), la section **Détective du sommeil** r�
 
 Sans Fleet Telemetry active, la section reste vide et l'indique.
 
+## 📣 Nouveautés {#news}
+
+TeslaView affiche directement dans l'app ce qu'apporte une mise à jour. Après une mise à jour, un bref **message d'information** sur la dernière nouveauté apparaît en haut, avec « Voir » (direct vers la fonction), « Toutes les nouveautés » et ✕ pour le masquer. Un point sur l'**icône mégaphone** de la barre de navigation signale les nouveautés non lues. La page **Nouveautés** (`/news`, aussi via le lien du pied de page, p. ex. sur téléphone) liste toutes les entrées avec version et date.
+
+La liste fait partie de la version installée : tu vois exactement ce que contient ton installation, sans interroger de serveur tiers. Ce que tu as lu est mémorisé par utilisateur.
+
 ## 🏆 Bilan de l'année {#year-review}
 
 Le **Bilan de l'année** (`/rueckblick`, sous « Analyse ») résume une année civile en chiffres, l'année en cours jusqu'à aujourd'hui. Les années précédentes s'ouvrent via les boutons d'année.

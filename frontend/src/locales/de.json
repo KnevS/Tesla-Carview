@@ -3438,5 +3438,15 @@
     "noData": "Für {year} gibt es noch keine Fahrten.",
     "trees": "so viel, wie rund {n} Bäume in einem Jahr binden",
     "times": "{n}×"
+  },
+  "news": {
+    "title": "Neuigkeiten",
+    "subtitle": "Was in deiner TeslaView-Version neu ist.",
+    "bannerLabel": "Neu in {version}",
+    "open": "Ansehen",
+    "all": "Alle Neuigkeiten",
+    "more": "{n} weitere",
+    "dismiss": "Ausblenden",
+    "new": "neu"
   }
 }

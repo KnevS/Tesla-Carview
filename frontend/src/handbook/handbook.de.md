@@ -1012,6 +1012,12 @@ Unter **Schlaf-Monitor** (`/sleep`) beantwortet der Abschnitt **Schlaf-Detektiv*
 
 Ohne aktive Fleet Telemetry bleibt der Abschnitt leer und weist darauf hin.
 
+## 📣 Neuigkeiten {#news}
+
+Was ein Update Neues bringt, zeigt TeslaView direkt in der App. Nach einem Update erscheint oben ein kurzer **Info-Hinweis** zur neuesten Neuerung, mit „Ansehen" (führt direkt zur Funktion), „Alle Neuigkeiten" und ✕ zum Ausblenden. Am **Megafon-Symbol** in der Navigationsleiste zeigt ein Punkt ungelesene Neuigkeiten an. Die Seite **Neuigkeiten** (`/news`, auch über den Link im Seitenfuß, etwa auf dem Handy) listet alle Einträge mit Version und Datum.
+
+Die Liste gehört zur installierten Version: Du siehst genau, was deine Installation enthält, ohne Abfrage bei einem fremden Server. Was du gelesen hast, merkt sich die App pro Benutzer.
+
 ## 🏆 Jahresrückblick {#year-review}
 
 Der **Jahresrückblick** (`/rueckblick`, unter „Auswertung") fasst ein Kalenderjahr in Zahlen zusammen, im laufenden Jahr bis heute. Über die Jahres-Schaltflächen lassen sich frühere Jahre aufrufen.

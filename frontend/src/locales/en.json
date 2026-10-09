@@ -3438,5 +3438,15 @@
     "noData": "There are no trips for {year} yet.",
     "trees": "as much as about {n} trees absorb in a year",
     "times": "{n}×"
+  },
+  "news": {
+    "title": "What's new",
+    "subtitle": "What's new in your TeslaView version.",
+    "bannerLabel": "New in {version}",
+    "open": "Take a look",
+    "all": "All news",
+    "more": "{n} more",
+    "dismiss": "Dismiss",
+    "new": "new"
   }
 }

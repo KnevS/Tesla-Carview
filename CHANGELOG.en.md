@@ -7,6 +7,19 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.61.0] - 2026-10-09
+
+### Added
+
+- **What's new, right in the app.** TeslaView now shows what an update brings:
+  - **Info notice** at the top of the app (`NewsBanner.vue`) for the latest unread change, with "Take a look" (straight to the feature), "All news" and ✕.
+  - **Megaphone icon** in the navigation bar with a dot for unread news, plus a footer link (the navigation bar is hidden on phones).
+  - **Page `/news`** with all entries, version and date.
+
+  The entries live in `frontend/src/news/news.js` (seven languages) and ship with the frontend. Each installation therefore shows exactly the changes of its own version, without contacting a central server. Read state is stored per user in the `news_seen` preference. Without a stored state only the newest entry counts as unread, so existing users don't face a list of old changes after updating. The website shows the same entries in its "News" section. Checked end-to-end with Playwright: notice and dot appear, "All news" opens `/news`, both are gone after a reload; no overflow at 390 px. i18n ×7, handbook ×6, README ×7.
+
+---
+
 ## [v3.60.1] - 2026-10-09
 
 ### Fixed
