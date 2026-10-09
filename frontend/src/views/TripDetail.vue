@@ -336,6 +336,16 @@
           </div>
         </div>
 
+        <!-- Kaelte-Aufschlag gegen den eigenen Verbrauch bei 15–25 °C -->
+        <RouterLink v-if="trip.cold_surcharge" to="/winter"
+          class="inline-flex items-center gap-1.5 mb-4 px-2.5 py-1 rounded-full text-xs border border-sky-500/40 bg-sky-500/10 text-sky-200 hover:bg-sky-500/20">
+          🥶 {{ $t('winter.chip', {
+            sign: trip.cold_surcharge.pct > 0 ? '+' : '',
+            pct: trip.cold_surcharge.pct,
+            temp: trip.cold_surcharge.temp_c.toLocaleString(locale),
+          }) }}
+        </RouterLink>
+
         <!-- Rekuperation — wird nur angezeigt wenn Daten vorhanden -->
         <template v-if="trip.regen_kwh > 0">
           <div class="border-t border-gray-700 pt-3 space-y-3">
@@ -396,7 +406,7 @@ import { fmtSoc } from '../lib/soc.js';
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip);
 
 const route   = useRoute();
-const { t }   = useI18n();
+const { t, locale } = useI18n();
 const trip    = ref(null);
 const loading = ref(true);
 const sliderIdx = ref(0);

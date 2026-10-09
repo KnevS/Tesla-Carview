@@ -123,7 +123,8 @@
     "pvSolar": {
       "label": "PV-Überschuss",
       "tooltip": "Nur mit Solarüberschuss laden — liest den Überschuss aus Home Assistant und leitet die Ladestromstärke ab"
-    }
+    },
+    "winter": "Winter"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -3362,5 +3363,42 @@
     "noVehicle": "Kein Fahrzeug ausgewählt.",
     "applyStart": "Ladestrom auf {amps} A gesetzt, Laden gestartet.",
     "applyStop": "Laden gestoppt — nicht genug Überschuss."
+  },
+  "winter": {
+    "title": "Winter",
+    "subtitle": "Was Kälte bei deinem Auto wirklich kostet – berechnet aus deinen eigenen Fahrten.",
+    "sectionForecast": "Frost-Reichweite",
+    "sectionCurve": "Verbrauch nach Temperatur",
+    "sectionTrips": "Kalte Fahrten",
+    "sectionTips": "Tipps für den Winter",
+    "tileFrost": "Mehrverbrauch bei Kälte",
+    "tileFrostSub": "{from} bis {to} °C ggü. 15–25 °C",
+    "tileBaseline": "Referenz 15–25 °C",
+    "tileRangeToday": "Reichweite heute",
+    "tileRangeTodaySub": "bei 100 % · jetzt {now} km",
+    "tipFrost": "Mittlerer Mehrverbrauch in der kältesten Temperaturstufe mit genügend Fahrten.",
+    "tipBaseline": "Median deiner Fahrten bei 15–25 °C. In diesem Bereich heizt und kühlt ein E-Auto praktisch nicht.",
+    "tipRange": "Reichweite mit vollem Akku bei der heutigen Temperatur, aus deinem Verbrauch bei ähnlichen Temperaturen.",
+    "coverage": "{withTemp} von {total} Fahrten haben eine Außentemperatur, davon {weather} aus Wetterdaten nachgetragen.",
+    "noBaseline": "Noch zu wenig Fahrten bei 15–25 °C für einen Vergleich. Ab fünf solchen Fahrten erscheint der Aufschlag.",
+    "noData": "Noch keine Fahrten mit Außentemperatur. Fehlende Werte werden nachts aus Wetterdaten ergänzt.",
+    "fcNow": "jetzt {km} km",
+    "fcBasisOverall": "keine Fahrten bei ähnlicher Temperatur, Gesamtschnitt",
+    "fcToday": "Heute",
+    "fcNoForecast": "Keine Wettervorhersage verfügbar (Position unbekannt oder Wetterdienst nicht erreichbar).",
+    "curveTrips": "{n} Fahrten",
+    "colDate": "Datum",
+    "colTemp": "Temperatur",
+    "colDistance": "Strecke",
+    "colConsumption": "Verbrauch",
+    "colSurcharge": "Aufschlag",
+    "privacy": "Für Wetterdaten gehen nur auf rund 11 km gerundete Koordinaten an Open-Meteo.",
+    "tip_precondition": "Am Ladekabel vorklimatisieren: Die Heizenergie kommt dann aus dem Netz statt aus dem Akku.",
+    "tip_departure": "Abfahrtszeit planen: Endet das Laden kurz vor der Abfahrt, startet der Akku warm.",
+    "tip_seat": "Sitz- und Lenkradheizung statt hoher Innenraumtemperatur: Sie wärmen direkt und brauchen deutlich weniger Energie.",
+    "tip_supercharger": "Vor dem Supercharger das Ziel ins Navi eingeben: Der Akku wird vorgewärmt und lädt schneller.",
+    "tip_short": "Kurzstrecken bündeln: Auf den ersten Kilometern fließt viel Energie in Akku und Innenraum.",
+    "tip_tires": "Reifendruck prüfen: Pro 10 °C Abkühlung sinkt er um etwa 0,1 bar.",
+    "chip": "{sign}{pct} % ggü. 15–25 °C (bei {temp} °C)"
   }
 }

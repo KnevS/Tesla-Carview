@@ -1015,6 +1015,20 @@ Under **Sleep monitor** (`/sleep`), the **Sleep detective** section answers "why
 
 Without active Fleet Telemetry the section stays empty and says so.
 
+## 🥶 Winter {#winter}
+
+The **Winter** view (`/winter`, under "Analytics") shows what cold costs your own car. Everything is calculated from your trips of the last 12 months, without assumed curves.
+
+- **Extra consumption in the cold:** surcharge in the coldest temperature band against your reference. The reference is the median of your trips at 15–25 °C, where an EV hardly heats or cools.
+- **Frost range:** range for today and the next 6 days from the weather forecast and your consumption at similar temperatures, with a full battery and with the current charge level.
+- **Consumption by temperature:** median consumption in 5 °C bands (from 3 trips per band).
+- **Cold trips:** the latest trips below 15 °C with their surcharge. The trip detail shows the same value as a chip.
+- **Tips:** e.g. precondition while plugged in, plan your departure time, use seat heating instead of a high cabin temperature.
+
+**Filling in outside temperature:** Fleet Telemetry does not provide outside temperature. The app therefore fills in missing values overnight (and once shortly after startup) from Open-Meteo weather data. Only coordinates rounded to 0.1° (about 11 km) and the date are sent. Short trips under 2 km are excluded from all analyses because heating energy distorts the per-100-km value there.
+
+**Preconditioning reminder:** If tomorrow's temperature at your usual departure time is below 5 °C, you get a notification the evening before suggesting preconditioning while plugged in.
+
 ## ❄️ Climate Statistics {#climate-stats}
 
 The **Climate Statistics** page (`/climate`) shows daily usage of your vehicle's climate system:

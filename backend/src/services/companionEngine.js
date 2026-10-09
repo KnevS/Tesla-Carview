@@ -9,6 +9,7 @@
  * Wird vom nightlyMaintenance.runOnce() aufgerufen — pro Tenant, pro
  * Vehicle. Idempotent durch UNIQUE(vehicle_id, hash).
  */
+import { lastKnownPosition } from './vehiclePosition.js';
 import { createHash } from 'node:crypto';
 import { getAllTenants, getDb, getMasterDb } from '../db/database.js';
 import { notify } from './notifyService.js';
@@ -306,8 +307,13 @@ async function fetchWeather(lat, lon) {
   }
 }
 
-/** Häufigste Abfahrts-Zeitscheibe (HH:MM) aus den letzten 30 Tagen. */
-function deriveTypicalDeparture(db, vehicleId, lookbackS) {
+/**
+ * Häufigste Abfahrts-Zeitscheibe (HH:MM) aus den letzten 30 Tagen — in der
+ * Ortszeit des Fahrzeugs (`utcOffsetS` aus der Wettervorhersage). Vorher
+ * rechnete das mit der Zeitzone des Servers; im Container ist das UTC, die
+ * Vorhersage-Stunden sind aber Ortszeit — der Vergleich lag 1–2 h daneben.
+ */
+function deriveTypicalDeparture(db, vehicleId, lookbackS, utcOffsetS = 0) {
   const since = Math.floor(Date.now() / 1000) - lookbackS;
   const trips = db.prepare(
     `SELECT start_time FROM trips WHERE vehicle_id=? AND start_time >= ?`
@@ -316,9 +322,9 @@ function deriveTypicalDeparture(db, vehicleId, lookbackS) {
   // Buckets nach Stunde+Minute-Quartal
   const counts = {};
   for (const t of trips) {
-    const d = new Date(t.start_time * 1000);
-    const h = d.getHours();
-    const q = Math.floor(d.getMinutes() / 15) * 15;
+    const d = new Date((t.start_time + utcOffsetS) * 1000);
+    const h = d.getUTCHours();
+    const q = Math.floor(d.getUTCMinutes() / 15) * 15;
     const key = `${String(h).padStart(2, '0')}:${String(q).padStart(2, '0')}`;
     counts[key] = (counts[key] || 0) + 1;
   }
@@ -328,29 +334,23 @@ function deriveTypicalDeparture(db, vehicleId, lookbackS) {
 
 /** Erzeugt morgige Vorklim-Empfehlung wenn Temp <5°C oder >30°C zur typ. Abfahrt. */
 async function generatePreconditionForVehicle(db, vehicleId) {
-  const v = db.prepare(
-    'SELECT id, display_name, vin, latitude, longitude FROM vehicles WHERE id=?'
-  ).get(vehicleId);
-  if (!v || v.latitude == null || v.longitude == null) {
-    // Fallback: letzte bekannte GPS-Position aus telemetry_points o.ä.
-    const fallback = db.prepare(
-      `SELECT lat, lon FROM telemetry_points WHERE vehicle_id=? AND lat IS NOT NULL
-       ORDER BY timestamp DESC LIMIT 1`
-    ).get(vehicleId);
-    if (!fallback) return null;
-    v.latitude = fallback.lat;
-    v.longitude = fallback.lon;
-  }
+  // `vehicles` hat keine Positionsspalten — die fruehere Abfrage auf
+  // vehicles.latitude warf „no such column" und verhinderte jede Empfehlung.
+  const v = db.prepare('SELECT id, display_name, vin FROM vehicles WHERE id=?').get(vehicleId);
+  if (!v) return null;
+  const pos = lastKnownPosition(db, vehicleId);
+  if (!pos) return null;
 
-  const depart = deriveTypicalDeparture(db, vehicleId, PRECONDITION_LOOKBACK_DAYS * 86400);
+  // Nur gerundete Koordinaten an den Wetterdienst (Raster ~11 km).
+  const wx = await fetchWeather(Math.round(pos.lat * 10) / 10, Math.round(pos.lon * 10) / 10);
+  if (!wx?.hourly?.time?.length) return null;
+  const offsetS = wx.utc_offset_seconds ?? 0;
+
+  const depart = deriveTypicalDeparture(db, vehicleId, PRECONDITION_LOOKBACK_DAYS * 86400, offsetS);
   if (!depart) return null;
 
-  const wx = await fetchWeather(v.latitude, v.longitude);
-  if (!wx?.hourly?.time?.length) return null;
-
-  // Morgen-Datum + Departure-Zeit → Index in hourly
-  const tomorrow = new Date(Date.now() + 86400 * 1000);
-  const dateStr = tomorrow.toISOString().slice(0, 10);
+  // Morgen in Ortszeit + Departure-Zeit → Index in hourly (Ortszeit-Strings)
+  const dateStr = new Date((Date.now() / 1000 + offsetS + 86400) * 1000).toISOString().slice(0, 10);
   const targetTs = `${dateStr}T${depart}`;
   const idx = wx.hourly.time.findIndex(t => t >= targetTs);
   if (idx < 0) return null;
@@ -395,7 +395,7 @@ async function notifyOpenSuggestions(db, tenantId) {
       ? `Frostige Abfahrt morgen — Vorklima empfohlen`
       : `Hitze morgen — Vorklima empfohlen`;
     const body = `${det.vehicle_label}: ${r.expected_temp_c.toFixed(1)} °C um ${r.expected_departure_hhmm} — `
-      + (cold ? 'Akku rechtzeitig warm fahren spart Reichweite.'
+      + (cold ? 'Am besten am Ladekabel vorklimatisieren: Die Heizenergie kommt dann aus dem Netz statt aus dem Akku.'
               : 'Innenraum vorab kühlen, Akku schont sich beim Tritt aufs Gas.');
 
     // Push parallel an alle User des Fahrzeugs
@@ -432,8 +432,14 @@ export async function runCompanionCycle({ skipPreconditions = false } = {}) {
         summary.anomalies_found += persistAnomalies(db, v.id, [...found, ...tireFound]);
 
         if (!skipPreconditions) {
-          const sug = await generatePreconditionForVehicle(db, v.id);
-          if (sug) summary.suggestions_created++;
+          // Ein Fehler bei einem Fahrzeug darf weder die uebrigen Fahrzeuge
+          // noch die Benachrichtigungen unten fuer diesen Mandanten kippen.
+          try {
+            const sug = await generatePreconditionForVehicle(db, v.id);
+            if (sug) summary.suggestions_created++;
+          } catch (e) {
+            console.error('[CompanionEngine] Vorklima-Empfehlung Fahrzeug', v.id, 'Fehler:', e.message);
+          }
         }
       }
       summary.anomalies_notified  += await notifyNewAnomalies(db, tenant.id);

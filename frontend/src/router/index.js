@@ -105,6 +105,7 @@ const routes = [
   { path: '/routes',        component: RoutePlanner,  meta: { title: 'Routenplaner' } },
   { path: '/system',        component: System,        meta: { title: 'System' } },
   { path: '/grok',          component: () => import('../views/GrokChat.vue'),    meta: { title: 'Grok Chat' } },
+  { path: '/winter',        component: () => import('../views/Winter.vue'), meta: { title: 'Winter' } },
   { path: '/sleep',         component: () => import('../views/SleepMonitor.vue'), meta: { title: 'Schlaf-Monitor' } },
   { path: '/climate',       component: () => import('../views/ClimateStats.vue'),  meta: { title: 'Klimastatistiken' } },
   { path: '/energy',        component: () => import('../views/EnergyReport.vue'), meta: { title: 'Energiebericht' } },
