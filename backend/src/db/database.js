@@ -1078,6 +1078,20 @@ function runTenantMigrations(db) {
   // dadurch ~38 % zu niedrige Geschwindigkeiten in Fahrtwerten/Charts.
   // Einmalig ×1,60934 nachziehen; der Marker verhindert Doppel-Konvertierung.
   // Der Demo-Seeder schreibt keine telemetry_points — Demo bleibt unberührt.
+  // v3.59.0 markierte Fahrten an der Grenze der Forecast-API (≥ ~84 Tage
+  // zurueck, dort liefert sie nur null) faelschlich als „kein Wert"
+  // (outside_temp_source='none'). Einmalig zuruecksetzen, damit der
+  // Nachtrag sie ueber das Archiv erneut holt.
+  const WEATHER_NONE_RESET_MARKER = 'migration.weather_none_reset_v3591';
+  if (!db.prepare('SELECT value FROM tenant_settings WHERE key=?').get(WEATHER_NONE_RESET_MARKER)) {
+    const r = db.prepare(
+      "UPDATE trips SET outside_temp_source=NULL WHERE outside_temp_source='none' AND outside_temp_avg_c IS NULL"
+    ).run();
+    db.prepare('INSERT OR REPLACE INTO tenant_settings (key, value) VALUES (?, ?)')
+      .run(WEATHER_NONE_RESET_MARKER, JSON.stringify({ reset: r.changes, at: Math.floor(Date.now() / 1000) }));
+    if (r.changes) console.log(`[Migration] weather_none_reset: ${r.changes} Fahrten fuer erneuten Temperatur-Nachtrag freigegeben`);
+  }
+
   const SPEED_FIX_MARKER = 'migration.telemetry_speed_mph_fix';
   const SPEED_FIX_CUTOFF = 1783106745; // 2026-07-03T19:25:45Z (Commit 1e395f7 + 20 min Deploy-Puffer)
   const speedFixDone = db.prepare(
