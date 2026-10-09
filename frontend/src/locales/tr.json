@@ -123,7 +123,8 @@
     "pvSolar": {
       "label": "Solar fazlası",
       "tooltip": "Yalnızca güneş fazlasıyla şarj — fazlayı Home Assistant'tan okur ve şarj akımını türetir"
-    }
+    },
+    "winter": "Kış"
   },
   "dashboard": {
     "title": "Gösterge paneli",
@@ -3353,5 +3354,42 @@
     "noVehicle": "Araç seçilmedi.",
     "applyStart": "Şarj akımı {amps} A olarak ayarlandı, şarj başladı.",
     "applyStop": "Şarj durduruldu — yeterli fazla yok."
+  },
+  "winter": {
+    "title": "Kış",
+    "subtitle": "Soğuğun aracına gerçekte neye mal olduğu, kendi sürüşlerinden hesaplanmış.",
+    "sectionForecast": "Ayaz menzili",
+    "sectionCurve": "Sıcaklığa göre tüketim",
+    "sectionTrips": "Soğuk sürüşler",
+    "sectionTips": "Kış ipuçları",
+    "tileFrost": "Soğukta ek tüketim",
+    "tileFrostSub": "{from} – {to} °C, 15–25 °C'ye göre",
+    "tileBaseline": "Referans 15–25 °C",
+    "tileRangeToday": "Bugünkü menzil",
+    "tileRangeTodaySub": "%100'de · şu an {now} km",
+    "tipFrost": "Yeterli sürüş içeren en soğuk sıcaklık aralığındaki ortalama ek tüketim.",
+    "tipBaseline": "15–25 °C'deki sürüşlerinin medyanı. Bu aralıkta bir elektrikli araç neredeyse ısıtma ya da soğutma yapmaz.",
+    "tipRange": "Bugünkü sıcaklıkta tam bataryayla menzil; benzer sıcaklıklardaki tüketimine göre.",
+    "coverage": "{total} sürüşten {withTemp} tanesinde dış sıcaklık var, bunların {weather} tanesi hava durumu verisinden tamamlandı.",
+    "noBaseline": "Karşılaştırma için 15–25 °C'de henüz yeterli sürüş yok. Beş sürüşten sonra ek tüketim görünür.",
+    "noData": "Henüz dış sıcaklığı olan sürüş yok. Eksik değerler gece hava durumu verisinden tamamlanır.",
+    "fcNow": "şu an {km} km",
+    "fcBasisOverall": "benzer sıcaklıkta sürüş yok, genel ortalama",
+    "fcToday": "Bugün",
+    "fcNoForecast": "Hava tahmini yok (konum bilinmiyor veya hava servisine ulaşılamıyor).",
+    "curveTrips": "{n} sürüş",
+    "colDate": "Tarih",
+    "colTemp": "Sıcaklık",
+    "colDistance": "Mesafe",
+    "colConsumption": "Tüketim",
+    "colSurcharge": "Ek",
+    "privacy": "Hava durumu için Open-Meteo'ya yalnızca yaklaşık 11 km'ye yuvarlanmış koordinatlar gönderilir.",
+    "tip_precondition": "Şarj kablosu takılıyken ön klimatize et: Isıtma enerjisi bataryadan değil şebekeden gelir.",
+    "tip_departure": "Kalkış saatini planla: Şarj kalkıştan hemen önce biterse batarya sıcak başlar.",
+    "tip_seat": "Yüksek kabin sıcaklığı yerine koltuk ve direksiyon ısıtması kullan: Doğrudan ısıtır ve çok daha az enerji harcar.",
+    "tip_supercharger": "Supercharger'ı navigasyona hedef olarak gir: Batarya önceden ısınır ve daha hızlı şarj olur.",
+    "tip_short": "Kısa sürüşleri birleştir: İlk kilometrelerde çok enerji batarya ve kabine gider.",
+    "tip_tires": "Lastik basıncını kontrol et: Her 10 °C soğumada yaklaşık 0,1 bar düşer.",
+    "chip": "15–25 °C'ye göre {sign}%{pct} ({temp} °C'de)"
   }
 }

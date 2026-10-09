@@ -123,7 +123,8 @@
     "pvSolar": {
       "label": "Excedente solar",
       "tooltip": "Cargar solo con excedente solar — lee el excedente de Home Assistant y deriva la corriente de carga"
-    }
+    },
+    "winter": "Invierno"
   },
   "dashboard": {
     "title": "Panel",
@@ -3353,5 +3354,42 @@
     "noVehicle": "Ningún vehículo seleccionado.",
     "applyStart": "Corriente de carga fijada en {amps} A, carga iniciada.",
     "applyStop": "Carga detenida — excedente insuficiente."
+  },
+  "winter": {
+    "title": "Invierno",
+    "subtitle": "Lo que el frío le cuesta realmente a tu coche, calculado con tus propios trayectos.",
+    "sectionForecast": "Autonomía con helada",
+    "sectionCurve": "Consumo según temperatura",
+    "sectionTrips": "Trayectos fríos",
+    "sectionTips": "Consejos de invierno",
+    "tileFrost": "Consumo extra con frío",
+    "tileFrostSub": "{from} a {to} °C frente a 15–25 °C",
+    "tileBaseline": "Referencia 15–25 °C",
+    "tileRangeToday": "Autonomía hoy",
+    "tileRangeTodaySub": "al 100 % · ahora {now} km",
+    "tipFrost": "Consumo extra medio en el tramo de temperatura más frío con suficientes trayectos.",
+    "tipBaseline": "Mediana de tus trayectos a 15–25 °C. En este rango un eléctrico apenas calienta ni enfría.",
+    "tipRange": "Autonomía con batería llena a la temperatura de hoy, según tu consumo a temperaturas similares.",
+    "coverage": "{withTemp} de {total} trayectos tienen temperatura exterior, {weather} de ellos completados con datos meteorológicos.",
+    "noBaseline": "Aún hay pocos trayectos a 15–25 °C para comparar. El recargo aparece a partir de cinco.",
+    "noData": "Aún no hay trayectos con temperatura exterior. Los valores que faltan se completan por la noche con datos meteorológicos.",
+    "fcNow": "ahora {km} km",
+    "fcBasisOverall": "sin trayectos a temperatura similar, media general",
+    "fcToday": "Hoy",
+    "fcNoForecast": "No hay previsión meteorológica (posición desconocida o servicio no disponible).",
+    "curveTrips": "{n} trayectos",
+    "colDate": "Fecha",
+    "colTemp": "Temperatura",
+    "colDistance": "Distancia",
+    "colConsumption": "Consumo",
+    "colSurcharge": "Recargo",
+    "privacy": "Para los datos meteorológicos solo se envían a Open-Meteo coordenadas redondeadas a unos 11 km.",
+    "tip_precondition": "Preacondiciona con el cable conectado: la energía de calefacción sale de la red y no de la batería.",
+    "tip_departure": "Planifica la hora de salida: si la carga termina poco antes de salir, la batería arranca caliente.",
+    "tip_seat": "Usa la calefacción de asientos y volante en lugar de una temperatura alta en el habitáculo: calientan directamente y gastan mucha menos energía.",
+    "tip_supercharger": "Introduce el Supercharger como destino en el navegador: la batería se precalienta y carga más rápido.",
+    "tip_short": "Agrupa los trayectos cortos: en los primeros kilómetros va mucha energía a la batería y al habitáculo.",
+    "tip_tires": "Revisa la presión de los neumáticos: baja unos 0,1 bar por cada 10 °C de enfriamiento.",
+    "chip": "{sign}{pct} % frente a 15–25 °C (a {temp} °C)"
   }
 }

@@ -123,7 +123,8 @@
     "pvSolar": {
       "label": "Surplus solaire",
       "tooltip": "Charger uniquement avec le surplus solaire — lit le surplus depuis Home Assistant et en déduit le courant de charge"
-    }
+    },
+    "winter": "Hiver"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -3353,5 +3354,42 @@
     "noVehicle": "Aucun véhicule sélectionné.",
     "applyStart": "Courant de charge réglé sur {amps} A, charge démarrée.",
     "applyStop": "Charge arrêtée — surplus insuffisant."
+  },
+  "winter": {
+    "title": "Hiver",
+    "subtitle": "Ce que le froid coûte vraiment à ta voiture, calculé à partir de tes propres trajets.",
+    "sectionForecast": "Autonomie par grand froid",
+    "sectionCurve": "Consommation selon la température",
+    "sectionTrips": "Trajets par temps froid",
+    "sectionTips": "Conseils pour l'hiver",
+    "tileFrost": "Surconsommation par temps froid",
+    "tileFrostSub": "{from} à {to} °C vs 15–25 °C",
+    "tileBaseline": "Référence 15–25 °C",
+    "tileRangeToday": "Autonomie aujourd'hui",
+    "tileRangeTodaySub": "à 100 % · maintenant {now} km",
+    "tipFrost": "Surconsommation moyenne dans la tranche de température la plus froide avec assez de trajets.",
+    "tipBaseline": "Médiane de tes trajets à 15–25 °C. Dans cette plage, une voiture électrique ne chauffe ni ne refroidit presque pas.",
+    "tipRange": "Autonomie batterie pleine à la température du jour, d'après ta consommation à des températures similaires.",
+    "coverage": "{withTemp} trajets sur {total} ont une température extérieure, dont {weather} complétés par des données météo.",
+    "noBaseline": "Pas encore assez de trajets à 15–25 °C pour comparer. La surconsommation s'affiche à partir de cinq.",
+    "noData": "Pas encore de trajets avec température extérieure. Les valeurs manquantes sont complétées la nuit à partir de données météo.",
+    "fcNow": "maintenant {km} km",
+    "fcBasisOverall": "aucun trajet à température similaire, moyenne générale",
+    "fcToday": "Aujourd'hui",
+    "fcNoForecast": "Aucune prévision météo disponible (position inconnue ou service injoignable).",
+    "curveTrips": "{n} trajets",
+    "colDate": "Date",
+    "colTemp": "Température",
+    "colDistance": "Distance",
+    "colConsumption": "Consommation",
+    "colSurcharge": "Surcoût",
+    "privacy": "Pour les données météo, seules des coordonnées arrondies à environ 11 km sont envoyées à Open-Meteo.",
+    "tip_precondition": "Préconditionner branché : l'énergie de chauffage vient alors du réseau et non de la batterie.",
+    "tip_departure": "Planifier l'heure de départ : si la recharge se termine juste avant le départ, la batterie démarre chaude.",
+    "tip_seat": "Sièges et volant chauffants plutôt qu'un habitacle très chaud : ils chauffent directement et consomment bien moins.",
+    "tip_supercharger": "Saisir le Superchargeur comme destination : la batterie est préchauffée et charge plus vite.",
+    "tip_short": "Regrouper les petits trajets : les premiers kilomètres consomment beaucoup d'énergie pour la batterie et l'habitacle.",
+    "tip_tires": "Vérifier la pression des pneus : elle baisse d'environ 0,1 bar par 10 °C de refroidissement.",
+    "chip": "{sign}{pct} % vs 15–25 °C (à {temp} °C)"
   }
 }

@@ -123,7 +123,8 @@
     "pvSolar": {
       "label": "Solar surplus",
       "tooltip": "Charge only from solar surplus — reads the surplus from Home Assistant and derives the charging current"
-    }
+    },
+    "winter": "Winter"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -3362,5 +3363,42 @@
     "noVehicle": "No vehicle selected.",
     "applyStart": "Charging current set to {amps} A, charging started.",
     "applyStop": "Charging stopped — not enough surplus."
+  },
+  "winter": {
+    "title": "Winter",
+    "subtitle": "What cold really costs your car, calculated from your own trips.",
+    "sectionForecast": "Frost range",
+    "sectionCurve": "Consumption by temperature",
+    "sectionTrips": "Cold trips",
+    "sectionTips": "Winter tips",
+    "tileFrost": "Extra consumption in the cold",
+    "tileFrostSub": "{from} to {to} °C vs. 15–25 °C",
+    "tileBaseline": "Reference 15–25 °C",
+    "tileRangeToday": "Range today",
+    "tileRangeTodaySub": "at 100 % · now {now} km",
+    "tipFrost": "Average extra consumption in the coldest temperature band with enough trips.",
+    "tipBaseline": "Median of your trips at 15–25 °C. In this range an EV hardly heats or cools.",
+    "tipRange": "Range with a full battery at today's temperature, from your consumption at similar temperatures.",
+    "coverage": "{withTemp} of {total} trips have an outside temperature, {weather} of them filled in from weather data.",
+    "noBaseline": "Not enough trips at 15–25 °C for a comparison yet. The surcharge appears once there are five.",
+    "noData": "No trips with outside temperature yet. Missing values are filled in from weather data overnight.",
+    "fcNow": "now {km} km",
+    "fcBasisOverall": "no trips at a similar temperature, overall average",
+    "fcToday": "Today",
+    "fcNoForecast": "No weather forecast available (position unknown or weather service unreachable).",
+    "curveTrips": "{n} trips",
+    "colDate": "Date",
+    "colTemp": "Temperature",
+    "colDistance": "Distance",
+    "colConsumption": "Consumption",
+    "colSurcharge": "Surcharge",
+    "privacy": "For weather data only coordinates rounded to about 11 km are sent to Open-Meteo.",
+    "tip_precondition": "Precondition while plugged in: the heating energy then comes from the grid instead of the battery.",
+    "tip_departure": "Plan your departure time: if charging ends shortly before you leave, the battery starts warm.",
+    "tip_seat": "Use seat and steering wheel heating instead of a high cabin temperature: they warm you directly and need far less energy.",
+    "tip_supercharger": "Enter the Supercharger as navigation destination: the battery is preheated and charges faster.",
+    "tip_short": "Combine short trips: in the first kilometres a lot of energy goes into the battery and cabin.",
+    "tip_tires": "Check tyre pressure: it drops by about 0.1 bar per 10 °C of cooling.",
+    "chip": "{sign}{pct} % vs. 15–25 °C (at {temp} °C)"
   }
 }
