@@ -1,6 +1,8 @@
 // © 2025-2026 Sven Krische · TeslaView · PolyForm Noncommercial 1.0.0 · https://github.com/KnevS/Tesla-Carview
 import { Router } from 'express';
 import { assertVehicleAccess, guardAccess } from '../middleware/vehicleAccess.js';
+import { analyzeStandby } from '../services/sleepDetective.js';
+import { usableBatteryKwh } from '../services/vehicleModel.js';
 
 const router = Router();
 
@@ -46,6 +48,79 @@ router.get('/:vehicleId', async (req, res) => {
     };
 
     res.json({ events, stats });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * Energiegewichteter Heimstrompreis der letzten 12 Monate — dieselbe
+ * Heim-Definition wie das Ladepreis-Ranking. Rueckfall: der am Heim-Ladeort
+ * gepflegte Tarif. Ohne beides gibt es keine Kostenschaetzung.
+ */
+function homePriceKwh(db, vehicleId) {
+  const since = Math.floor(Date.now() / 1000) - 365 * 86400;
+  const row = db.prepare(`
+    SELECT SUM(cs.cost) AS cost, SUM(cs.energy_added_kwh) AS kwh
+    FROM charging_sessions cs
+    LEFT JOIN charging_locations cl ON cl.id = cs.location_id
+    WHERE cs.vehicle_id = ? AND cs.start_time >= ? AND cs.end_time IS NOT NULL
+      AND cs.energy_added_kwh > 0 AND cs.cost IS NOT NULL AND COALESCE(cs.is_free, 0) = 0
+      AND (cs.is_home_charged = 1 OR cl.type = 'home'
+           OR (cs.location_id IS NULL AND cs.charger_type NOT IN ('Supercharger','DC')))
+  `).get(vehicleId, since);
+  if (row?.kwh > 0 && row.cost > 0) return Math.round(row.cost / row.kwh * 10000) / 10000;
+  const loc = db.prepare(
+    `SELECT rate_kwh FROM charging_locations
+     WHERE type='home' AND rate_kwh > 0 AND (vehicle_id = ? OR vehicle_id IS NULL)
+     ORDER BY is_default DESC LIMIT 1`
+  ).get(vehicleId);
+  return loc?.rate_kwh ?? null;
+}
+
+function validTimeZone(tz) {
+  if (!tz || typeof tz !== 'string' || tz.length > 64) return 'UTC';
+  try { new Intl.DateTimeFormat('en-US', { timeZone: tz }); return tz; } catch { return 'UTC'; }
+}
+
+// GET /api/sleep/:vehicleId/detective?days=14&tz=Europe/Berlin
+// „Warum schlaeft mein Auto nicht?" — Rechenlogik in services/sleepDetective.js.
+router.get('/:vehicleId/detective', async (req, res) => {
+  try {
+    const vehicleId = parseInt(req.params.vehicleId);
+    const days      = Math.min(30, Math.max(3, parseInt(req.query.days) || 14));
+    if (guardAccess(res, () => assertVehicleAccess(req.db, vehicleId, req.user))) return;
+
+    const now  = Math.floor(Date.now() / 1000);
+    const from = now - days * 86400;
+    const vehicle = req.db.prepare('SELECT model, vin, trim_badging FROM vehicles WHERE id=?').get(vehicleId);
+
+    const points = req.db.prepare(`
+      SELECT timestamp, trip_id, gear, soc, power_kw FROM telemetry_points
+      WHERE vehicle_id=? AND timestamp>=? ORDER BY timestamp
+    `).all(vehicleId, from);
+    const trips = req.db.prepare(`
+      SELECT start_time, end_time FROM trips
+      WHERE vehicle_id=? AND (end_time IS NULL OR end_time>=?) AND start_time<=?
+    `).all(vehicleId, from, now);
+    const charges = req.db.prepare(`
+      SELECT start_time, end_time FROM charging_sessions
+      WHERE vehicle_id=? AND (end_time IS NULL OR end_time>=?) AND start_time<=?
+    `).all(vehicleId, from, now);
+    const sleepEvents = req.db.prepare(`
+      SELECT sleep_at, wake_at, duration_min FROM vehicle_sleep_events
+      WHERE vehicle_id=? AND (wake_at IS NULL OR wake_at>=?)
+    `).all(vehicleId, from);
+
+    res.json({
+      days,
+      ...analyzeStandby({
+        points, trips, charges, sleepEvents, from, now,
+        tz: validTimeZone(req.query.tz),
+        batteryKwh: usableBatteryKwh(vehicle),
+        homePrice: homePriceKwh(req.db, vehicleId),
+      }),
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
