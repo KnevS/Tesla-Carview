@@ -13,12 +13,17 @@
  * fuer eine Lufttemperatur reicht das, ein Fahrtziel laesst sich daraus
  * nicht ablesen. Fahrten im selben Rasterfeld teilen sich einen Abruf.
  *
- * Juengere Fahrten (bis ~85 Tage) kommen aus der Forecast-API, aeltere aus
- * dem Archiv (ERA5, einige Tage Verzug).
+ * Juengere Fahrten (bis 60 Tage) kommen aus der Forecast-API, aeltere aus
+ * dem Archiv (ERA5, einige Tage Verzug). Als endgueltig „kein Wert"
+ * (`none`) markiert wird eine Fahrt nur, wenn auch das Archiv nichts hat —
+ * eine Luecke der Forecast-API wird beim naechsten Lauf erneut versucht.
  */
 
 const CELL_DEG        = 0.1;
-const RECENT_DAYS     = 85;     // Forecast-API reicht ~92 Tage zurueck
+// Die Forecast-API liefert laut Doku ~92 Tage zurueck, gemessen kommen ab
+// etwa 84 Tagen aber nur noch null-Werte (2026-10-09). Mit 60 Tagen bleibt
+// Abstand; aeltere Fahrten gehen ins ERA5-Archiv.
+const RECENT_DAYS     = 60;
 const ARCHIVE_LAG_D   = 6;      // ERA5-Daten erscheinen mit Verzug
 const MATCH_MARGIN_S  = 1800;   // Stundenwerte bis 30 min vor/nach der Fahrt zaehlen
 const NEAREST_MAX_S   = 2 * 3600;
@@ -115,7 +120,8 @@ export async function backfillTripTemperatures(db, { maxCalls = 20, fetchImpl = 
     for (const t of g.trips) {
       const temp = tripTempFromHourly(hourly, t.start_time, t.end_time);
       if (temp != null) { updated += setTemp.run(temp, t.id).changes; }
-      else { unavailable += setNone.run(t.id).changes; }
+      else if (g.archive) { unavailable += setNone.run(t.id).changes; }
+      else { unavailable++; }
     }
   }
   return { candidates: trips.length, calls, updated, unavailable, cells: groups.size };

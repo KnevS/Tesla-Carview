@@ -7,6 +7,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.59.1] - 2026-10-09
+
+### Fixed
+
+- **The temperature backfill wrongly marked older trips as "no value".** The first run on the reference instance filled 550 of 656 trips with 30 requests but marked 83 as `none` (final, no retry). Cause: according to its docs, Open-Meteo's forecast API reaches about 92 days back, but measured it returns only `null` from about 84 days back. The cutoff was 85 days, so the oldest trips of a forecast group came back empty. Trips older than 60 days now go to the ERA5 archive, and `none` is only set when the archive has no value either. A gap in the forecast API is retried on the next run. A one-time migration (`migration.weather_none_reset_v3591`) releases the affected trips. Checked with real requests: trips from 10, 70 and 84 days ago and a reset leftover all get a value.
+
+---
+
 ## [v3.59.0] - 2026-10-09
 
 ### Added
