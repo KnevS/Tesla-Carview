@@ -7,6 +7,21 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.58.0] - 2026-10-09
+
+### Neu
+
+- **Schlaf-Detektiv: „Warum schläft mein Auto nicht?"** Neuer Abschnitt im Schlaf-Monitor (`/sleep`), Rechenlogik in `services/sleepDetective.js`, Endpunkt `GET /api/sleep/:vehicleId/detective`. Anlass war ein Befund auf der Referenzinstanz: Das Auto streamte rund um die Uhr Telemetrie, auch nachts, und der Schlaf-Monitor sah fast nur 15-Minuten-Schlafphasen. Der Monitor erkennt Übergänge nur im 15-Minuten-Takt des Listen-Polls. Wie lange das Auto im Stand tatsächlich wach war, steckt dagegen in den Fleet-Telemetry-Punkten, denn Tesla streamt nur, solange das Auto wach ist. Der Detektiv wertet die letzten 14 Tage aus:
+  - **Wach im Stand** als Anteil der Standzeit ohne Fahrt und Laden (Punktabstand ≤ 5 min gilt als wach).
+  - **Verlust im Stand** in % pro Tag, hochgerechnet auf kWh und Kosten pro Monat. Der Heimstrompreis wird energiegewichtet aus den Heimladungen der letzten 12 Monate bestimmt, mit derselben Heim-Definition wie das Ladepreis-Ranking, Rückfall auf den Tarif des Heim-Ladeorts.
+  - **Tagesverlauf** je Tag in Fahrt, Laden, wach im Stand, schläft und keine Daten, mit Tagesgrenzen in der Zeitzone des Browsers.
+  - **Befunde** aus den Daten: Leistungsaufnahme im wachen Stand (≥ 150 W passt zum Wächter-Modus, ≥ 800 W zu Klimatisierung; nur ab 20 % Wachanteil, weil jedes Auto direkt nach dem Parken kurz mehrere hundert Watt zieht), Schlafphasen ≤ 20 min, regelmäßiges Aufwachen in festem Takt und hoher Verlust ab 1,5 % pro Tag.
+  - **Standphasen** zwischen Fahrten und Ladungen mit Wachanteil, Verlust und Kosten.
+
+  Datenehrlichkeit: Zeit vor dem ersten Telemetrie-Punkt und Tage ohne Telemetrie zählen nur dann als „schläft", wenn der Schlaf-Monitor das bestätigt, sonst als „keine Daten". Der Ladestand an den Phasengrenzen muss höchstens 30 Minuten entfernt liegen, und eine laufende Phase bekommt nur mit frischem Messwert einen Verlust. Mit vier synthetischen Szenarien geprüft (wach mit 250 W, schläft gut, stündlich geweckt, ohne Telemetrie) und end-to-end mit Playwright auf 1440 px und 390 px. i18n ×7, Handbuch ×6, README ×7.
+
+---
+
 ## [v3.57.5] - 2026-10-08
 
 ### CI / Infrastruktur

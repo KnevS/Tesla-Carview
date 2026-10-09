@@ -7,6 +7,21 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.58.0] - 2026-10-09
+
+### Added
+
+- **Sleep detective: "Why won't my car sleep?"** New section in the sleep monitor (`/sleep`), logic in `services/sleepDetective.js`, endpoint `GET /api/sleep/:vehicleId/detective`. It came out of a finding on the reference instance: the car streamed telemetry around the clock, including at night, and the sleep monitor saw almost only 15-minute sleep phases. The monitor only detects transitions at the 15-minute rate of the list poll. How long the car was actually awake while parked is in the Fleet Telemetry points instead, because Tesla only streams while the car is awake. The detective analyses the last 14 days:
+  - **Awake while parked** as a share of parked time excluding driving and charging (points ≤ 5 min apart count as awake).
+  - **Loss while parked** in % per day, projected to kWh and cost per month. The home electricity price is energy-weighted from home charges of the last 12 months, using the same home definition as the charging price ranking, with the home location's tariff as fallback.
+  - **Daily breakdown** into driving, charging, awake while parked, asleep and no data, with day boundaries in the browser's time zone.
+  - **Findings** from the data: power draw while awake and parked (≥ 150 W fits Sentry Mode, ≥ 800 W climate control; only from a 20 % awake share, because every car draws a few hundred watts right after parking), sleep phases ≤ 20 min, regular wake-ups on a fixed schedule and high loss from 1.5 % per day.
+  - **Parked periods** between drives and charges with awake share, loss and cost.
+
+  Data honesty: time before the first telemetry point and days without telemetry only count as "asleep" when the sleep monitor confirms it, otherwise as "no data". The state of charge at period boundaries must be at most 30 minutes away, and an ongoing period only gets a loss with a fresh reading. Checked with four synthetic scenarios (awake at 250 W, sleeps well, woken hourly, no telemetry) and end-to-end with Playwright at 1440 px and 390 px. i18n ×7, handbook ×6, README ×7.
+
+---
+
 ## [v3.57.5] - 2026-10-08
 
 ### CI / Infrastructure
