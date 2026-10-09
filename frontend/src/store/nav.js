@@ -36,6 +36,7 @@ export const NAV_GROUPS = [
       { key: 'energy',      to: '/energy',           icon: 'sparkles',    emojiFallback: '🌿', label: 'Energiebericht',   tooltip: 'Wöchentliche Effizienztrends, kWh/100 km und Eco-Score' },
       { key: 'co2',         to: '/co2',              icon: 'leaf',        emojiFallback: '🌱', label: 'CO₂-Bilanz',       tooltip: 'Eingespartes CO₂ im Vergleich zu einem fiktiven Verbrenner' },
       { key: 'sleep',       to: '/sleep',            icon: 'moon',        emojiFallback: '😴', label: 'Schlaf-Monitor',   tooltip: 'Wann schläft das Auto – und wie viel Energie verliert es im Stand?' },
+      { key: 'yearReview',  to: '/rueckblick',       icon: 'calendar',    emojiFallback: '🏆', label: 'Jahresrückblick',  tooltip: 'Dein Fahrzeugjahr in Zahlen: Kilometer, Fahrten, CO₂, Laden und Höhepunkte, als teilbares Bild' },
       { key: 'winter',      to: '/winter',           icon: 'thermometer', emojiFallback: '🥶', label: 'Winter',           tooltip: 'Was Kälte beim eigenen Auto kostet: Verbrauch nach Temperatur, Frost-Reichweite der nächsten Tage und Tipps' },
       { key: 'climate',     to: '/climate',          icon: 'thermometer', emojiFallback: '❄️', label: 'Klimastatistiken', tooltip: 'Klimaanlagen- und Sitzheizungsnutzung nach Tag – inkl. Vorklimatisierungen' },
       { key: 'logbook',     to: '/logbook',          icon: 'tool',        emojiFallback: '📓', label: 'Betriebsbuch',     tooltip: 'Wartungen, Reparaturen, Reifen, Inspektionen und Notizen zum Fahrzeug' },
@@ -84,7 +85,7 @@ export const NAV_GROUPS = [
 const GROUP_ORDER = {
   vehicle:   ['dashboard', 'telemetry', 'control', 'battery'],
   analytics: ['trips', 'fahrtwerte', 'fahrtenbuch', 'heatmap',
-              'charging', 'energy', 'co2', 'winter', 'climate', 'sleep',
+              'charging', 'energy', 'co2', 'yearReview', 'winter', 'climate', 'sleep',
               'abrechnung', 'dienstwagensteuer', 'tco', 'logbook', 'export'],
   plan:      ['routes', 'chargers', 'chargingLocations', 'chargePlanner', 'pvSolar', 'nearby',
               'mytracking', 'automations', 'grok', 'launcher'],
