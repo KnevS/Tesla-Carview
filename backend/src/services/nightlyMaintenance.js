@@ -320,6 +320,14 @@ async function runOnce() {
     result.tasks.telemetry_backfill_error = e.message;
   }
 
+  // 3e. Aussentemperatur fuer Fahrten ohne Wert aus Open-Meteo nachtragen
+  // (Fleet Telemetry liefert keine) — Grundlage der Winter-Auswertung.
+  try {
+    result.tasks.weather_backfill = await runWeatherBackfill(WEATHER_CALLS_NIGHTLY);
+  } catch (e) {
+    result.tasks.weather_backfill_error = e.message;
+  }
+
   // 4. Optional: Auto-Update aus dem Git-Repo (opt-in)
   if (process.env.AUTO_UPDATE_ENABLED === 'true') {
     const repoDir = process.env.UPDATE_REPO_DIR || '/opt/tesla-carview';
@@ -363,6 +371,29 @@ function tick() {
   });
 }
 
+// Open-Meteo-Abrufe je Mandant und Lauf. Nachts grosszuegiger; beim Start
+// nur ein erster Schub, damit eine frische Installation (oder das Update,
+// das den Nachtrag einfuehrt) nicht bis 03:30 auf Temperaturen wartet.
+const WEATHER_CALLS_NIGHTLY = 60;
+const WEATHER_CALLS_STARTUP = 30;
+const WEATHER_STARTUP_DELAY_MS = 2 * 60 * 1000;
+
+async function runWeatherBackfill(maxCalls) {
+  const { backfillTripTemperatures } = await import('./weatherBackfill.js');
+  const out = [];
+  for (const tenant of getAllTenants()) {
+    if (tenant.status === 'suspended' || tenant.is_demo) continue;
+    let tdb;
+    try { tdb = getDb(tenant.id); } catch { continue; }
+    try {
+      out.push({ tenant: tenant.slug, ...(await backfillTripTemperatures(tdb, { maxCalls })) });
+    } catch (e) {
+      out.push({ tenant: tenant.slug, error: e.message });
+    }
+  }
+  return out;
+}
+
 export function startNightlyMaintenance() {
   console.log(
     '[NightlyMaintenance] Scheduler aktiv —',
@@ -373,6 +404,11 @@ export function startNightlyMaintenance() {
     tick();
     setInterval(tick, CHECK_EVERY_MS);
   }, STARTUP_DELAY_MS);
+  setTimeout(() => {
+    runWeatherBackfill(WEATHER_CALLS_STARTUP)
+      .then(r => console.log('[WeatherBackfill] Start-Lauf:', JSON.stringify(r)))
+      .catch(e => console.warn('[WeatherBackfill] Start-Lauf fehlgeschlagen:', e.message));
+  }, WEATHER_STARTUP_DELAY_MS);
 }
 
 // Admin-Endpoint kann das manuell triggern — z.B. wenn die DB stark

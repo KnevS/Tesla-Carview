@@ -834,6 +834,20 @@ En **Monitor de sueño** (`/sleep`), la sección **Detective del sueño** respon
 
 Sin Fleet Telemetry activa, la sección queda vacía y lo indica.
 
+## 🥶 Invierno {#winter}
+
+La vista **Invierno** (`/winter`, en «Análisis») muestra lo que el frío le cuesta a tu propio coche. Todo se calcula con tus trayectos de los últimos 12 meses, sin curvas supuestas.
+
+- **Consumo extra con frío:** recargo en el tramo de temperatura más frío frente a tu referencia, la mediana de tus trayectos a 15–25 °C.
+- **Autonomía con helada:** autonomía para hoy y los próximos 6 días según la previsión y tu consumo a temperaturas similares, con batería llena y con la carga actual.
+- **Consumo según temperatura:** consumo mediano en tramos de 5 °C (a partir de 3 trayectos por tramo).
+- **Trayectos fríos:** los últimos trayectos por debajo de 15 °C con su recargo. El detalle del trayecto muestra el mismo valor.
+- **Consejos:** p. ej. preacondicionar con el cable conectado, planificar la hora de salida, calefacción de asientos en lugar de un habitáculo muy caliente.
+
+**Temperatura exterior:** Fleet Telemetry no proporciona temperatura exterior. La app completa los valores que faltan por la noche (y una vez poco después de arrancar) con datos de Open-Meteo. Solo se envían coordenadas redondeadas a 0,1° (unos 11 km) y la fecha. Los trayectos de menos de 2 km quedan fuera de los análisis.
+
+**Recordatorio de preacondicionamiento:** si mañana hace menos de 5 °C a tu hora habitual de salida, recibes un aviso la víspera con la sugerencia de preacondicionar con el cable conectado.
+
 ## ❄️ Estadísticas climáticas {#climate-stats}
 
 La página **Estadísticas climáticas** (`/climate`) muestra el uso diario del sistema de climatización:
