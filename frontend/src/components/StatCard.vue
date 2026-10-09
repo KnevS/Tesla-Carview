@@ -25,7 +25,7 @@
                nutzen wir NumberFlow fuers Count-Up. Sonst (Strings mit
                Einheit, '–', etc.) zeigen wir den fertigen Wert direkt. -->
           <NumberFlow v-if="numeric != null"
-            :value="numeric" :decimals="decimals" :prefix="prefix" :suffix="suffix" />
+            :value="numeric" :decimals="effectiveDecimals" :locale="locale" :prefix="prefix" :suffix="suffix" />
           <template v-else>{{ value }}</template>
         </p>
         <p v-if="sub" class="text-gray-400 text-sm mt-1">{{ sub }}</p>
@@ -45,7 +45,9 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import NumberFlow from './NumberFlow.vue';
+import { parseDisplayNumber } from '../lib/displayNumber.js';
 import AppIcon from './AppIcon.vue';
 
 /** Wenn `icon` ein gepflegter AppIcon-Name ist (a-z, dash erlaubt),
@@ -70,29 +72,26 @@ const props = defineProps({
   // NumberFlow nicht benutzt — fuer Werte, die nicht hochzaehlen sollen
   // (z.B. „Online", „—"). Default: true, mit smartem Auto-Detect.
   animate:  { type: Boolean, default: true },
-  decimals: { type: Number, default: 0 },
+  // null = Nachkommastellen aus dem Anzeigetext uebernehmen („16,5" → 1).
+  decimals: { type: Number, default: null },
 });
 
 const isEmoji = computed(() => !props.icon || !ICON_NAME_RX.test(props.icon));
 
-/** Extrahiert eine Zahl + Prefix/Suffix aus value, wenn moeglich. So
- *  funktioniert das Count-Up auch bei Werten wie „123 km" oder „45,3 €"
- *  ohne dass der Aufrufer was umstellen muss. */
+const { locale } = useI18n();
+
+/** Zerlegt `value` in Zahl + Prefix/Suffix, damit auch „1.698 kWh" oder
+ *  „16,5 %" hochzaehlen koennen — sprachbewusst, siehe lib/displayNumber.js.
+ *  Was keine eindeutige Zahl ist (Datum, Uhrzeit, „3/5"), bleibt Text. */
 const parsed = computed(() => {
-  if (!props.animate) return { num: null, prefix: '', suffix: '' };
+  const none = { num: null, prefix: '', suffix: '', decimals: 0 };
+  if (!props.animate) return none;
   const v = props.value;
-  if (typeof v === 'number') return { num: v, prefix: '', suffix: '' };
-  if (typeof v !== 'string') return { num: null, prefix: '', suffix: '' };
-  // Bsp.: „12 850 km" → num=12850, suffix=' km'
-  // Bsp.: „45,32 €"   → num=45.32 (decimal-aware), suffix=' €'
-  const m = v.match(/^(.*?)([-+]?[0-9.,\s']+)(.*)$/);
-  if (!m) return { num: null, prefix: '', suffix: '' };
-  const raw = m[2].replace(/[\s']/g, '').replace(',', '.');
-  const num = parseFloat(raw);
-  if (!Number.isFinite(num)) return { num: null, prefix: '', suffix: '' };
-  return { num, prefix: m[1], suffix: m[3] };
+  if (typeof v === 'number') return Number.isFinite(v) ? { num: v, prefix: '', suffix: '', decimals: 0 } : none;
+  return parseDisplayNumber(v, locale.value) ?? none;
 });
 
+const effectiveDecimals = computed(() => props.decimals ?? parsed.value.decimals);
 const numeric = computed(() => parsed.value.num);
 const prefix  = computed(() => parsed.value.prefix);
 const suffix  = computed(() => parsed.value.suffix);

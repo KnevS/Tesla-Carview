@@ -7,6 +7,20 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.60.1] - 2026-10-09
+
+### Behoben
+
+- **Kennzahl-Kacheln zeigten Zahlen falsch an.** `StatCard` zerlegt einen fertig formatierten Text wie „1.698 kWh", um ihn hochzuzählen. Dabei wurde jedes Komma zum Punkt und dann `parseFloat` gerufen. Vier Fehler daraus:
+  - Ein deutscher Tausenderpunkt wurde zum Dezimalpunkt: „1.698 kWh" erschien als „2kWh".
+  - Ohne ausdrückliches `decimals` wurde auf ganze Zahlen gerundet: Im Fahrtdetail stand „487km" statt „487,3 km" und „17kWh/100km" statt „16,8".
+  - Das Leerzeichen vor der Einheit verschwand („36km", „30min").
+  - `NumberFlow` formatierte immer deutsch, auch bei englischer Oberfläche.
+
+  Neu ist `lib/displayNumber.js` mit `parseDisplayNumber()`. Leerzeichen und Apostroph gelten als Tausendertrenner. Bei Punkt und Komma ist das letzte Zeichen der Dezimaltrenner, und ein mehrdeutiges „1.698" / „1,698" entscheidet die Oberflächensprache. Nur gültige Tausendergruppen zählen als Zahl. Datum, Uhrzeit, „3/5" oder Versionsnummern bleiben Text, statt falsch animiert zu werden. Die Nachkommastellen übernimmt `StatCard` jetzt aus dem Text (`decimals` ist standardmäßig `null`), `NumberFlow` bekommt die Sprache der Oberfläche. Die Umgehungen mit `:animate="false"` in Jahresrückblick und Winter-Ansicht sind entfernt. Geprüft mit 24 Fällen in mehreren Sprachen und im Browser auf Deutsch und Englisch: „1.698" / „1,698", „487,3 km" / „487.3 km", „16,8 kWh/100km".
+
+---
+
 ## [v3.60.0] - 2026-10-09
 
 ### Neu

@@ -7,6 +7,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.60.1] - 2026-10-09
+
+### Fixed
+
+- **KPI tiles displayed numbers incorrectly.** `StatCard` splits a pre-formatted text like "1.698 kWh" so it can count up. It turned every comma into a dot and called `parseFloat`. Four bugs came from that:
+  - A German thousands separator became a decimal point: "1.698 kWh" showed as "2kWh".
+  - Without an explicit `decimals`, values were rounded to integers: the trip detail showed "487km" instead of "487.3 km" and "17kWh/100km" instead of "16.8".
+  - The space before the unit disappeared ("36km", "30min").
+  - `NumberFlow` always formatted in German, even with an English UI.
+
+  New `lib/displayNumber.js` with `parseDisplayNumber()`. Spaces and apostrophes count as thousands separators. With both dot and comma, the last one is the decimal separator, and an ambiguous "1.698" / "1,698" is decided by the UI language. Only valid thousands groups count as a number. Dates, times, "3/5" or version numbers stay text instead of being animated wrongly. `StatCard` now takes the decimals from the text (`decimals` defaults to `null`), and `NumberFlow` gets the UI language. The `:animate="false"` workarounds in the year review and winter view are removed. Checked with 24 cases in several languages and in the browser in German and English: "1.698" / "1,698", "487,3 km" / "487.3 km", "16,8 kWh/100km".
+
+---
+
 ## [v3.60.0] - 2026-10-09
 
 ### Added

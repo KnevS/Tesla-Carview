@@ -15,7 +15,6 @@
           :value="data.coldest_bucket?.vs_baseline_pct != null ? signed(data.coldest_bucket.vs_baseline_pct) : '—'"
           :sub="data.coldest_bucket ? $t('winter.tileFrostSub', { from: data.coldest_bucket.from_c, to: data.coldest_bucket.to_c }) : undefined"
           icon="thermometer"
-          :animate="false"
           :tooltip="$t('winter.tipFrost')"
         />
         <StatCard
