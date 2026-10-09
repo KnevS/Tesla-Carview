@@ -96,7 +96,9 @@ technisch keine PRs unterstützt). Gilt auch für `teslaview-web`.
 
 1. Branch `feat/…` / `fix/…` / `docs/…` / `chore/…` von aktuellem `origin/main`
 2. Commits nach den Konventionen oben; Version-Bump + CHANGELOG DE/EN
-   gehören in denselben PR
+   gehören in denselben PR; bei sichtbarer Neuerung außerdem ein Eintrag in
+   `frontend/src/news/news.js` (7 Sprachen) und derselbe Eintrag im
+   Neuigkeiten-Abschnitt der Marketing-Seite (`teslaview-web`, `news*` in i18n.js)
 3. PR öffnen (`gh pr create`) — CI, Security und Secret-Scan müssen grün sein
 4. Squash-Merge (`gh pr merge --squash --delete-branch`) — Historie bleibt
    linear, PR-Nummer landet im Commit-Titel
@@ -124,8 +126,9 @@ technisch keine PRs unterstützt). Gilt auch für `teslaview-web`.
 
 ### Aktuell (Stand 2026-10-09)
 
-- **Version:** v3.60.1
+- **Version:** v3.61.0
 - **Zuletzt geliefert:**
+  - **v3.61.0 (Neuigkeiten in der App):** `frontend/src/news/news.js` (Einträge ×7 Sprachen, mit dem Frontend ausgeliefert) → `NewsBanner.vue` (Info-Hinweis), `/news`, Megafon mit Punkt in der NavBar, Footer-Link. Lesestand = Präferenz `news_seen`. Website-Abschnitt „Neuigkeiten“ mit denselben Einträgen.
   - **v3.60.1 (StatCard-Zahlen):** `lib/displayNumber.js#parseDisplayNumber` zerlegt formatierte Anzeigewerte sprachbewusst (Tausender- vs. Dezimaltrenner, Nachkommastellen aus dem Text, Leerzeichen vor der Einheit bleibt, Nicht-Zahlen bleiben Text); `NumberFlow` bekommt die UI-Sprache. Vorher „1.698“ → „2“, „487,3 km“ → „487km“.
   - **v3.60.0 (Jahresrückblick):** `/rueckblick`, `services/yearReview.js` (reine Aggregation) + `GET /api/year-review/:vehicleId?year=&tz=`; teilbares PNG per Canvas ohne Bibliothek, nur Zahlen. Verbrauch/CO₂ auf die Gesamtstrecke hochgerechnet (Fahrten ohne Energiewert nie als 0 kWh). `services/timeZone.js` (`localMidnight`, `validTimeZone`) ist jetzt die gemeinsame Quelle. (Der dort notierte StatCard-Tausenderpunkt-Fehler ist mit v3.60.1 behoben.)
   - **v3.59.1 (Temperatur-Nachtrag: falsche `none`-Markierung):** Open-Meteo-Forecast liefert ab ~84 Tagen zurück nur `null` (gemessen, nicht laut Doku) → Grenze auf 60 Tage, `none` nur noch nach leerem Archiv-Abruf, Reset-Migration `migration.weather_none_reset_v3591`. **Merke:** Bei externen APIs die dokumentierte Reichweite messen, bevor eine endgültige Markierung daran hängt.

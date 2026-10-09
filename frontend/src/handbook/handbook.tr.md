@@ -848,6 +848,12 @@ Değerler seçilen dönem için (4/8/12 hafta) hesaplanır ve trend grafiğinde 
 
 Fleet Telemetry etkin değilse bölüm boş kalır ve bunu belirtir.
 
+## 📣 Yenilikler {#news}
+
+TeslaView, bir güncellemenin getirdiklerini doğrudan uygulamada gösterir. Güncellemeden sonra üstte en yeni yenilik hakkında kısa bir **bilgi notu** görünür; „Göz at" (doğrudan işleve), „Tüm yenilikler" ve gizlemek için ✕ bulunur. Gezinme çubuğundaki **megafon simgesinde** bir nokta okunmamış yenilikleri gösterir. **Yenilikler** sayfası (`/news`, alt bilgideki bağlantıyla da, örn. telefonda) tüm girdileri sürüm ve tarihle listeler.
+
+Liste kurulu sürüme aittir: Kurulumunun tam olarak neyi içerdiğini, yabancı bir sunucuya sormadan görürsün. Okuduklarını uygulama kullanıcı başına hatırlar.
+
 ## 🏆 Yıl özeti {#year-review}
 
 **Yıl özeti** (`/rueckblick`, „Analiz" altında) bir takvim yılını rakamlarla özetler; içinde bulunulan yıl için bugüne kadar. Önceki yıllar yıl düğmeleriyle açılır.
