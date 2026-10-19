@@ -10,7 +10,12 @@ name: Image Refresh
 # Ohne Commit auf main baut niemand, und der CVE-Scan auf dem Server meldet
 # den Fund jeden Tag neu.
 #
-# Ablauf (taeglich, vor dem Demo-Update um 03:00 Europe/Berlin):
+# Wartungsfenster: Neustarts nur zwischen 02:00 und 05:00 Europe/Berlin.
+# GitHub-Cron kennt nur UTC, deshalb zwei Termine (00:20 und 01:20 UTC);
+# weiter laeuft nur der, der in Berlin auf 02:20 faellt (Sommer- wie
+# Winterzeit). Deploy landet gegen 02:35, vor dem Demo-Update um 03:00.
+#
+# Ablauf:
 #   1. veroeffentlichtes :main-Image scannen (behebbare HIGH/CRITICAL)
 #   2. Kandidat frisch bauen (--pull --no-cache) und ebenso scannen
 #   3. hat der Kandidat bei einer Komponente weniger Funde → CI auf main
@@ -23,7 +28,8 @@ name: Image Refresh
 # Das Repo ist oeffentlich: Log und Summary nennen nur Zaehler, keine Funde.
 on:
   schedule:
-    - cron: '47 22 * * *'
+    - cron: '20 0 * * *'
+    - cron: '20 1 * * *'
   workflow_dispatch:
 
 permissions:
@@ -47,12 +53,25 @@ jobs:
     outputs:
       rebuild: ${{ steps.cmp.outputs.rebuild }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - name: Wartungsfenster (02:00 Europe/Berlin)?
+        id: win
+        run: |
+          h=$(TZ=Europe/Berlin date +%H)
+          if [ "$GITHUB_EVENT_NAME" = schedule ] && [ "$h" != 02 ]; then
+            echo "::notice::Berlin $h Uhr — der andere Termin liegt im Fenster."
+            echo "go=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.win.outputs.go == 'true'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: main
           persist-credentials: false
 
       - name: Veroeffentlichte Images und frische Kandidaten vergleichen
+        if: steps.win.outputs.go == 'true'
         id: cmp
         run: |
           set -euo pipefail
