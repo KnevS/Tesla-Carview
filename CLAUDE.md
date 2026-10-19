@@ -124,10 +124,11 @@ technisch keine PRs unterstützt). Gilt auch für `teslaview-web`.
 > - **Was zuletzt geschah:** oberster Eintrag in [`CHANGELOG.md`](CHANGELOG.md) / [`CHANGELOG.en.md`](CHANGELOG.en.md)
 > - **Letzte Commits:** `git log --oneline -15 origin/main`
 
-### Aktuell (Stand 2026-10-09)
+### Aktuell (Stand 2026-10-19)
 
-- **Version:** v3.61.0
+- **Version:** v3.61.1
 - **Zuletzt geliefert:**
+  - **v3.61.1 (Images frischen sich selbst auf):** `apk upgrade` in beiden Dockerfiles + `image-refresh.yml` (täglich: veröffentlichtes `:main` gegen frischen Neubau scannen, bei weniger Funden CI auf main dispatchen → Deploy per workflow_run). **Merke:** Offizielle Basis-Images werden nur bei Versionswechsel neu gebaut, Alpine-Paketfixes kommen oft Wochen früher — ohne `apk upgrade` + regelmäßigen Neubau bleibt jeder Fund liegen.
   - **v3.61.0 (Neuigkeiten in der App):** `frontend/src/news/news.js` (Einträge ×7 Sprachen, mit dem Frontend ausgeliefert) → `NewsBanner.vue` (Info-Hinweis), `/news`, Megafon mit Punkt in der NavBar, Footer-Link. Lesestand = Präferenz `news_seen`. Website-Abschnitt „Neuigkeiten“ mit denselben Einträgen.
   - **v3.60.1 (StatCard-Zahlen):** `lib/displayNumber.js#parseDisplayNumber` zerlegt formatierte Anzeigewerte sprachbewusst (Tausender- vs. Dezimaltrenner, Nachkommastellen aus dem Text, Leerzeichen vor der Einheit bleibt, Nicht-Zahlen bleiben Text); `NumberFlow` bekommt die UI-Sprache. Vorher „1.698“ → „2“, „487,3 km“ → „487km“.
   - **v3.60.0 (Jahresrückblick):** `/rueckblick`, `services/yearReview.js` (reine Aggregation) + `GET /api/year-review/:vehicleId?year=&tz=`; teilbares PNG per Canvas ohne Bibliothek, nur Zahlen. Verbrauch/CO₂ auf die Gesamtstrecke hochgerechnet (Fahrten ohne Energiewert nie als 0 kWh). `services/timeZone.js` (`localMidnight`, `validTimeZone`) ist jetzt die gemeinsame Quelle. (Der dort notierte StatCard-Tausenderpunkt-Fehler ist mit v3.60.1 behoben.)

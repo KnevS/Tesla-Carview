@@ -7,6 +7,17 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.61.1] - 2026-10-19
+
+### Security
+
+- **Images pull Alpine security updates themselves and are rebuilt automatically when needed.** The daily CVE scan on the server reported 2 HIGH (libexpat CVE-2026-77214, libx11 CVE-2026-88806) in every nginx-based image, including the frontend. The fixes were already in the Alpine repository, but the official `nginx:alpine` had not been rebuilt yet. Without a commit to `main`, nothing would have rebuilt the images either.
+  - `frontend/Dockerfile` (runtime stage) and `backend/Dockerfile` run `apk upgrade --no-cache`.
+  - New workflow `image-refresh.yml`: daily at 02:20 Europe/Berlin (maintenance window 02:00–05:00, DST-aware) it scans the published `:main` images and builds fresh candidates (`--pull --no-cache`). If the rebuild removes findings, it starts CI on `main`; deploy follows as usual, the demo picks it up at 03:00. If the rebuild brings nothing, nothing happens, so there is no nightly deploy without benefit.
+  - `ci.yml` now also builds and pushes the images on `workflow_dispatch` on `main`.
+
+---
+
 ## [v3.61.0] - 2026-10-09
 
 ### Added

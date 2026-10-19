@@ -1,0 +1,124 @@
+name: Image Refresh
+
+# Baut die veroeffentlichten Images neu, sobald ein Neubau ohne Code-Aenderung
+# CVEs behebt.
+#
+# Hintergrund: Basis-Images wie nginx:alpine werden nur bei neuer nginx- oder
+# Alpine-Version neu gebaut. Paket-Fixes liegen im Alpine-Repo oft Wochen
+# frueher bereit (10/2026: libexpat, libx11 — 2 HIGH in jedem nginx-Image).
+# Beide Dockerfiles holen sie per `apk upgrade`, aber nur, wenn jemand baut.
+# Ohne Commit auf main baut niemand, und der CVE-Scan auf dem Server meldet
+# den Fund jeden Tag neu.
+#
+# Wartungsfenster: Neustarts nur zwischen 02:00 und 05:00 Europe/Berlin.
+# GitHub-Cron kennt nur UTC, deshalb zwei Termine (00:20 und 01:20 UTC);
+# weiter laeuft nur der, der in Berlin auf 02:20 faellt (Sommer- wie
+# Winterzeit). Deploy landet gegen 02:35, vor dem Demo-Update um 03:00.
+#
+# Ablauf:
+#   1. veroeffentlichtes :main-Image scannen (behebbare HIGH/CRITICAL)
+#   2. Kandidat frisch bauen (--pull --no-cache) und ebenso scannen
+#   3. hat der Kandidat bei einer Komponente weniger Funde → CI auf main
+#      per workflow_dispatch starten. CI baut und pusht beide Images,
+#      deploy.yml folgt ueber workflow_run, die Demo zieht um 03:00 nach.
+#
+# Kein Neubau, wenn der Kandidat nichts besser macht (Fix noch nicht
+# im Paket-Repo): sonst wuerde jede Nacht ohne Gewinn deployt.
+#
+# Das Repo ist oeffentlich: Log und Summary nennen nur Zaehler, keine Funde.
+on:
+  schedule:
+    - cron: '20 0 * * *'
+    - cron: '20 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: image-refresh
+  cancel-in-progress: false
+
+env:
+  # Gepinnt wie auf dem Server (cve-scan.sh) und in vehicle-command-hardened.
+  TRIVY: aquasec/trivy:0.75.0@sha256:af6acf9a6b85dfe389a1941505c0ce9efef52a4719635e1a962f022a3d855daa
+
+jobs:
+  check:
+    name: Neubau noetig?
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    outputs:
+      rebuild: ${{ steps.cmp.outputs.rebuild }}
+    steps:
+      - name: Wartungsfenster (02:00 Europe/Berlin)?
+        id: win
+        run: |
+          h=$(TZ=Europe/Berlin date +%H)
+          if [ "$GITHUB_EVENT_NAME" = schedule ] && [ "$h" != 02 ]; then
+            echo "::notice::Berlin $h Uhr — der andere Termin liegt im Fenster."
+            echo "go=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "go=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.win.outputs.go == 'true'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Veroeffentlichte Images und frische Kandidaten vergleichen
+        if: steps.win.outputs.go == 'true'
+        id: cmp
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/trivy"
+          count() {
+            docker save "$1" > "$RUNNER_TEMP/trivy/img.tar"
+            docker run --rm -v "$RUNNER_TEMP/trivy:/w" "$TRIVY" image \
+              --input /w/img.tar --scanners vuln --severity HIGH,CRITICAL \
+              --ignore-unfixed --no-progress --quiet --format json \
+              | jq '[.Results[]?.Vulnerabilities[]?] | length'
+          }
+
+          rebuild=false
+          {
+            echo "| Komponente | :main | Neubau |"
+            echo "|---|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+          for c in backend frontend; do
+            img="ghcr.io/knevs/tesla-carview/$c:main"
+            docker pull -q "$img" >/dev/null
+            old=$(count "$img")
+            docker build -q --pull --no-cache -t "tcv-refresh/$c:cand" "./$c" >/dev/null
+            new=$(count "tcv-refresh/$c:cand")
+            echo "$c: veroeffentlicht $old, Neubau $new behebbare HIGH/CRITICAL"
+            echo "| $c | $old | $new |" >> "$GITHUB_STEP_SUMMARY"
+            if [ "$new" -lt "$old" ]; then rebuild=true; fi
+            docker image rm -f "$img" "tcv-refresh/$c:cand" >/dev/null
+          done
+          echo "rebuild=$rebuild" >> "$GITHUB_OUTPUT"
+          if [ "$rebuild" = true ]; then
+            echo "::notice::Neubau behebt Funde — CI auf main wird gestartet."
+          else
+            echo "::notice::Neubau bringt nichts — keine Aktion."
+          fi
+
+  rebuild:
+    name: CI auf main starten
+    needs: check
+    if: needs.check.outputs.rebuild == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      # workflow_dispatch ist die Ausnahme vom GITHUB_TOKEN-Rekursionsschutz:
+      # der Lauf startet trotz Bot-Token. deploy.yml haengt per workflow_run
+      # an CI und rollt die neuen Images aus.
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: gh workflow run ci.yml --ref main

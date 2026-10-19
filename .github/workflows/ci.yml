@@ -137,7 +137,9 @@ jobs:
   build-backend:
     name: Docker – build & push backend
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # workflow_dispatch auf main: Neubau ohne Code-Aenderung, ausgeloest von
+    # image-refresh.yml, wenn neue Basis-Pakete veroeffentlichte CVEs beheben.
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     needs: [backend, frontend]
     permissions:
       packages: write
@@ -169,13 +171,15 @@ jobs:
           build-args: |
             GIT_HASH=${{ github.sha }}
             GIT_BRANCH=${{ github.ref_name }}
-            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            BUILD_DATE=${{ github.event.head_commit.timestamp || github.event.repository.updated_at }}
 
   # ─── Docker: Frontend ────────────────────────────────────────────────────
   build-frontend:
     name: Docker – build & push frontend
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    # workflow_dispatch auf main: Neubau ohne Code-Aenderung, ausgeloest von
+    # image-refresh.yml, wenn neue Basis-Pakete veroeffentlichte CVEs beheben.
+    if: (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'
     needs: [backend, frontend]
     permissions:
       packages: write
