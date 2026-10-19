@@ -15,6 +15,9 @@ ENV GIT_BRANCH=$GIT_BRANCH
 ENV BUILD_DATE=$BUILD_DATE
 WORKDIR /app
 COPY package*.json ./
+# apk upgrade: Alpine-Paket-Fixes, die node:26-alpine noch nicht enthaelt
+# (siehe frontend/Dockerfile, Neubau via image-refresh.yml).
+#
 # python3 + make + g++ werden von better-sqlite3 (node-gyp) zum Kompilieren benötigt
 #
 # npm wird nach der Installation entfernt: Der Container startet mit
@@ -25,7 +28,8 @@ COPY package*.json ./
 # Update behebt: node:24/26-alpine liefern tar 7.5.16, der Fix für
 # CVE-2026-59873 (CRITICAL) liegt in 7.5.19. Nebeneffekt: Wer Code im
 # Container ausführen kann, kann nichts nachinstallieren.
-RUN apk add --no-cache python3 make g++ \
+RUN apk upgrade --no-cache \
+ && apk add --no-cache python3 make g++ \
  && npm ci --omit=dev \
  && apk del python3 make g++ \
  && rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx

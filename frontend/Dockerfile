@@ -14,9 +14,8 @@
 # alle dieselben 4 behebbaren Findings (3 HIGH, 1 CRITICAL). Es sind
 # Node-eigene gebuendelte Pakete, unabhaengig von der Distro.
 #
-# Der Runtime-Layer bleibt nginx:alpine (kleines Image, kein Node noetig)
-# und ist mit 0 behebbaren HIGH/CRITICAL sauber. Die CVEs dieser
-# Builder-Stage laufen nie mit: uebernommen wird nur /app/dist.
+# Der Runtime-Layer bleibt nginx:alpine (kleines Image, kein Node noetig).
+# Die CVEs dieser Builder-Stage laufen nie mit: uebernommen wird nur /app/dist.
 FROM node:26-bookworm-slim AS builder
 WORKDIR /app
 COPY package*.json ./
@@ -29,6 +28,11 @@ ARG GIT_HASH=local
 RUN GIT_HASH=${GIT_HASH} npm run build
 
 FROM nginx:alpine
+# Das offizielle nginx:alpine wird nur bei neuer nginx-/Alpine-Version neu
+# gebaut. Paket-Fixes liegen im Alpine-Repo oft Wochen frueher bereit
+# (10/2026: libexpat CVE-2026-77214, libx11 CVE-2026-88806). apk upgrade
+# holt sie bei jedem Build; image-refresh.yml stoesst den Neubau an.
+RUN apk upgrade --no-cache
 COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
