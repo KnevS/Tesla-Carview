@@ -7,6 +7,20 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.61.2] - 2026-10-24
+
+### Security
+
+- **Four new backend CVEs closed, CI on `main` green again.** New advisories were published shortly after the nightly `npm audit fix` (#377), and CI and Security had been red on `main` since:
+  - `multer` 2.5.0 (HIGH, GHSA-q7qp-rjg7-q26m: DoS via a pending asynchronous `fileFilter`)
+  - `zod` 4.6.7 (HIGH, GHSA-mrhx-c7xc-m3w5: memory exhaustion on large collections)
+  - `body-parser` 1.20.9 (HIGH, GHSA-27r3-jxmh-p828: DoS via trailing bytes after a compressed body)
+  - `nodemailer` 10.2.1 (MODERATE, three `addressparser` bugs)
+- The minimum versions in `backend/package.json` are raised to the patched releases so a later lockfile cannot fall back below them. Also included: the patch group (`@aws-sdk/client-s3`, `dotenv`, `protobufjs`) and `follow-redirects` 1.16.1.
+- Dependabot's individual PRs (#374, #378–#383) are folded into this one. Each failed the audit on its own because the other vulnerabilities were still open.
+
+---
+
 ## [v3.61.1] - 2026-10-19
 
 ### Security
