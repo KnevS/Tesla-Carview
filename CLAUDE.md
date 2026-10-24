@@ -124,10 +124,11 @@ technisch keine PRs unterstützt). Gilt auch für `teslaview-web`.
 > - **Was zuletzt geschah:** oberster Eintrag in [`CHANGELOG.md`](CHANGELOG.md) / [`CHANGELOG.en.md`](CHANGELOG.en.md)
 > - **Letzte Commits:** `git log --oneline -15 origin/main`
 
-### Aktuell (Stand 2026-10-19)
+### Aktuell (Stand 2026-10-24)
 
-- **Version:** v3.61.1
+- **Version:** v3.61.2
 - **Zuletzt geliefert:**
+  - **v3.61.2 (vier Backend-CVEs, Sammel-PR statt Einzel-PRs):** multer 2.5.0, zod 4.6.7, body-parser 1.20.9, nodemailer 10.2.1, Untergrenzen in `package.json` angehoben. Die Advisories kamen Stunden nach dem nächtlichen Autofix (#377), `main` stand rot. **Merke:** Lockfiles nur mit npm 11 (Node 24, wie CI) neu erzeugen. npm 10 schreibt die Metadaten um und wirft u. a. die `libc`-Felder raus (`npx -y npm@11 install --package-lock-only`).
   - **v3.61.1 (Images frischen sich selbst auf):** `apk upgrade` in beiden Dockerfiles + `image-refresh.yml` (täglich: veröffentlichtes `:main` gegen frischen Neubau scannen, bei weniger Funden CI auf main dispatchen → Deploy per workflow_run). **Merke:** Offizielle Basis-Images werden nur bei Versionswechsel neu gebaut, Alpine-Paketfixes kommen oft Wochen früher — ohne `apk upgrade` + regelmäßigen Neubau bleibt jeder Fund liegen.
   - **v3.61.0 (Neuigkeiten in der App):** `frontend/src/news/news.js` (Einträge ×7 Sprachen, mit dem Frontend ausgeliefert) → `NewsBanner.vue` (Info-Hinweis), `/news`, Megafon mit Punkt in der NavBar, Footer-Link. Lesestand = Präferenz `news_seen`. Website-Abschnitt „Neuigkeiten“ mit denselben Einträgen.
   - **v3.60.1 (StatCard-Zahlen):** `lib/displayNumber.js#parseDisplayNumber` zerlegt formatierte Anzeigewerte sprachbewusst (Tausender- vs. Dezimaltrenner, Nachkommastellen aus dem Text, Leerzeichen vor der Einheit bleibt, Nicht-Zahlen bleiben Text); `NumberFlow` bekommt die UI-Sprache. Vorher „1.698“ → „2“, „487,3 km“ → „487km“.
