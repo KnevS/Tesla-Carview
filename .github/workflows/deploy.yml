@@ -7,6 +7,12 @@ on:
     workflows: ["CI"]
     types: [completed]
     branches: [main]
+  # Nachholtermin: Ein Deploy, der tagsüber am Wartungsfenster scheitert,
+  # wird nachts nachgeholt. Zwei UTC-Termine, damit einer sommers wie winters
+  # (und trotz verspätetem GitHub-Cron) zwischen 02 und 05 Uhr Berlin liegt.
+  schedule:
+    - cron: '40 0 * * *'
+    - cron: '40 1 * * *'
   workflow_dispatch:
 
 # Secrets (in GitHub Repository Settings → Secrets):
@@ -29,15 +35,46 @@ jobs:
     # For workflow_run: only deploy when CI succeeded. For manual dispatch: always.
     if: >
       github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'schedule' ||
       github.event.workflow_run.conclusion == 'success'
+    permissions:
+      contents: read
+      actions: read
     outputs:
       ready: ${{ steps.check.outputs.ready }}
     steps:
+      - uses: actions/checkout@v7
+        if: github.event_name == 'schedule'
+        with:
+          fetch-depth: 0
+
       - id: check
         env:
           HOST: ${{ secrets.DEPLOY_HOST }}
           KEY:  ${{ secrets.DEPLOY_SSH_KEY }}
+          GH_TOKEN: ${{ github.token }}
         run: |
+          # Automatische Deploys starten Container neu und laufen deshalb nur
+          # im Wartungsfenster 02:00–05:00 Europe/Berlin; manuell immer.
+          h=$(TZ=Europe/Berlin date +%H)
+          if [ "$GITHUB_EVENT_NAME" != workflow_dispatch ] && { [ "$h" -lt 2 ] || [ "$h" -ge 5 ]; }; then
+            echo "::notice::Berlin $h Uhr, außerhalb des Wartungsfensters - wird nachts nachgeholt."
+            echo "ready=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          # Nachholtermin: nur wenn main weiter ist als der zuletzt ausgerollte
+          # Stand (Tag deployed-prod) und CI für diesen Commit grün war.
+          if [ "$GITHUB_EVENT_NAME" = schedule ]; then
+            done_sha=$(git rev-parse -q --verify 'refs/tags/deployed-prod^{commit}' || true)
+            if [ "$done_sha" = "$GITHUB_SHA" ]; then
+              echo "::notice::Produktion ist auf ${GITHUB_SHA:0:7} - nichts nachzuholen."
+              echo "ready=false" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+            ci=$(gh run list -R "$GITHUB_REPOSITORY" -w CI -c "$GITHUB_SHA" --json conclusion -q '.[0].conclusion')
+            if [ "$ci" != success ]; then
+              echo "::notice::CI für ${GITHUB_SHA:0:7} nicht grün (${ci:-kein Lauf}) - kein Nachholen."
+              echo "ready=false" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+          fi
           if [ -n "$HOST" ] && [ -n "$KEY" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
           else
@@ -51,6 +88,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: read
+      contents: write
     env:
       GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GHCR_ACTOR: ${{ github.actor }}
@@ -368,3 +406,11 @@ jobs:
             sudo docker image prune -f
             GIT_HASH=$(sudo git rev-parse --short HEAD)
             echo "Deployment erfolgreich + Healthcheck OK: $(date) | $GIT_HASH"
+
+      # Merkt den ausgerollten Stand für den nächtlichen Nachholtermin.
+      - name: Ausgerollten Stand markieren
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          git tag -f deployed-prod "$SHA"
+          git push -f origin refs/tags/deployed-prod
