@@ -7,6 +7,11 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [Unreleased]
+
+### Betrieb
+- Automatische Deploys starten Container nur noch im Wartungsfenster 02:00–05:00 (Berlin); außerhalb wird übersprungen und nachts per Nachholtermin ausgerollt, sobald `main` weiter ist als der Tag `deployed-prod`
+
 ## [v3.61.2] - 2026-10-24
 
 ### Sicherheit
