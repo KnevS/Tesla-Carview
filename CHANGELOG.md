@@ -10,6 +10,7 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 ## [Unreleased]
 
 ### Betrieb
+- DB-Snapshot wird atomar geschrieben (`.part` → Umbenennen) und Reste abgebrochener Läufe werden entfernt: Ein Neustart mitten im Komprimieren hatte am 27.10. einen abgeschnittenen Snapshot erzeugt und die rohe Datenbank unverschlüsselt im Volume liegen lassen
 - Automatische Deploys starten Container nur noch im Wartungsfenster 02:00–05:00 (Berlin); außerhalb wird übersprungen und nachts per Nachholtermin ausgerollt, sobald `main` weiter ist als der Tag `deployed-prod`
 
 ## [v3.61.2] - 2026-10-24
