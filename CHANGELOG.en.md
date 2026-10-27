@@ -10,6 +10,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Operations
+- DB snapshot is written atomically (`.part` → rename) and leftovers of aborted runs are removed: a restart during compression on 27 Oct produced a truncated snapshot and left the raw database unencrypted in the volume
 - Automatic deploys only restart containers inside the 02:00–05:00 (Berlin) maintenance window; outside it they are skipped and caught up at night once `main` is ahead of the `deployed-prod` tag
 
 ## [v3.61.2] - 2026-10-24

@@ -289,15 +289,34 @@ export async function writeDbSnapshot(db, tenant, targetDir, retentionDays) {
   const rawPath = join(targetDir, `${base}.db`);
   const gzPath  = join(targetDir, `${base}.db.gz`);
 
-  try { if (existsSync(rawPath)) unlinkSync(rawPath); } catch { /* ignore */ }
+  // Reste eines abgebrochenen Laufs entfernen (auch von Vortagen): Stirbt der
+  // Prozess zwischen VACUUM und Gzip, bliebe sonst die rohe DB unverschluesselt
+  // im Volume liegen.
+  // Exakter Namensabgleich statt Praefix: Slug `a` darf nicht die Dateien von
+  // Mandant `a-b` treffen.
+  const slugRe = tenant.slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const ownFile = suffix => new RegExp(`^tesla-carview-snapshot-${slugRe}-\\d{4}-\\d{2}-\\d{2}\\.(?:${suffix})$`);
+  const leftover = ownFile('db|db\\.gz\\.part');
+  try {
+    readdirSync(targetDir)
+      .filter(f => leftover.test(f))
+      .forEach(f => { try { unlinkSync(join(targetDir, f)); } catch { /* ignore */ } });
+  } catch { /* ignore */ }
   // Parameterbindung statt String-Interpolation — der Pfad landet sonst
   // ungeprueft in einer SQL-Anweisung.
   db.prepare('VACUUM INTO ?').run(rawPath);
 
+  // Erst unter `.part` schreiben und nach vollstaendigem Gzip umbenennen:
+  // sanitize-backups.sh verschluesselt jede `*.db.gz`, die 10 Minuten
+  // unveraendert ist — ein abgebrochener Lauf ergab so am 27.10.2026 einen
+  // abgeschnittenen, aber gueltig aussehenden Snapshot.
+  const partPath = `${gzPath}.part`;
   try {
-    await pipeline(createReadStream(rawPath), createGzip({ level: 6 }), createWriteStream(gzPath));
+    await pipeline(createReadStream(rawPath), createGzip({ level: 6 }), createWriteStream(partPath));
+    renameSync(partPath, gzPath);
   } finally {
     try { unlinkSync(rawPath); } catch { /* ignore */ }
+    try { if (existsSync(partPath)) unlinkSync(partPath); } catch { /* ignore */ }
   }
 
   // Eigene, kuerzere Aufbewahrung als beim JSON: Snapshots dienen der schnellen
@@ -307,8 +326,7 @@ export async function writeDbSnapshot(db, tenant, targetDir, retentionDays) {
     try {
       readdirSync(targetDir)
         // `.enc` wie bei den JSON-Sicherungen, siehe saveLocal().
-        .filter(f => f.startsWith(`tesla-carview-snapshot-${tenant.slug}-`)
-                  && (f.endsWith('.db.gz') || f.endsWith('.db.gz.enc')))
+        .filter(f => ownFile('db\\.gz|db\\.gz\\.enc').test(f))
         .forEach(f => {
           try {
             const full = join(targetDir, f);
