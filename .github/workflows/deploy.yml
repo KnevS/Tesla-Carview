@@ -237,6 +237,9 @@ jobs:
             # frontend-dist-private/-Volume eingehaengt — dieser Mount ist
             # entfernt (s. #84), das Image-Bundle wird direkt serviert.
             echo "$GHCR_TOKEN" | sudo docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
+            # Auch bei Abbruch abmelden: Ein liegengebliebenes, abgelaufenes
+            # Token ließ am 27.10. jeden Pull als root mit "denied" scheitern.
+            trap 'sudo docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
 
             # Deploy-Sequenz: pull → stop → rm → up
             #
