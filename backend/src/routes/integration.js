@@ -7,7 +7,8 @@
  * Ladezustand und führt drei Ladebefehle aus — mehr nicht.
  *
  * Sicherheit:
- *   • Ein Token gilt für genau ein Fahrzeug eines Mandanten.
+ *   • Ein Token gilt für genau ein Fahrzeug eines Mandanten und nur, solange
+ *     sein Ersteller aktiver Admin ist.
  *   • Gespeichert wird nur der SHA-256; Klartext gibt es einmal beim Anlegen.
  *   • scope 'read' = Ladezustand lesen; 'charge' zusätzlich Ladebefehle.
  *   • Keine VIN, kein Standort, keine Fahrten in den Antworten.
@@ -97,6 +98,10 @@ function requireIntegrationToken(req, res, next) {
   const tenant = getTenantById(row.tenant_id);
   if (!tenant || tenant.status === 'suspended') return res.status(403).json({ error: 'Mandant pausiert' });
   try { req.db = getDb(row.tenant_id); } catch { return res.status(401).json({ error: 'Nicht authentifiziert' }); }
+  // Der Token lebt nur so lange wie die Admin-Rechte dessen, der ihn angelegt hat:
+  // gelöschte, deaktivierte oder herabgestufte Admins nehmen ihre Tokens mit.
+  const owner = req.db.prepare('SELECT role, is_active FROM users WHERE id=?').get(row.created_by);
+  if (!owner || owner.role !== 'admin' || !owner.is_active) return res.status(401).json({ error: 'Nicht authentifiziert' });
   master.prepare('UPDATE integration_tokens SET last_used_at=unixepoch() WHERE id=?').run(row.id);
   req.integration = { ...row, scopes: row.scopes.split(',') };
   next();
