@@ -8,7 +8,8 @@
   stoppt das Laden am Fahrzeug (Fleet-API + Virtual Key nötig).
 
   Datenquellen: GET/PUT /api/pv/config (Admin), GET /api/pv/status,
-  POST /api/pv/:vehicleId/apply.
+  POST /api/pv/:vehicleId/apply. Darunter (Admin): Integrations-Tokens für
+  Hausautomationen, die selbst regeln (IntegrationTokens.vue).
 -->
 <template>
   <div class="space-y-6">
@@ -119,6 +120,9 @@
         <p v-if="cfgError" class="text-xs text-red-400">{{ cfgError }}</p>
       </div>
     </div>
+
+    <!-- Anbindung einer Hausautomation (ioBroker, Home Assistant, …) per Token -->
+    <IntegrationTokens v-if="isAdmin" />
   </div>
 </template>
 
@@ -128,6 +132,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '../store/auth.js';
 import { useAppStore } from '../store/index.js';
 import InfoTip from '../components/InfoTip.vue';
+import IntegrationTokens from '../components/IntegrationTokens.vue';
 import api from '../api.js';
 
 const { t } = useI18n();

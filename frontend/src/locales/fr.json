@@ -3439,5 +3439,23 @@
     "more": "{n} de plus",
     "dismiss": "Masquer",
     "new": "nouveau"
+  },
+  "integration": {
+    "title": "Connecter la domotique (ioBroker, Home Assistant, …)",
+    "intro": "Une domotique qui connaît le surplus photovoltaïque lit l’état de charge avec un jeton et, si autorisé, règle le courant de charge et démarre ou arrête la charge. Pas de VIN, pas de position, pas de trajets.",
+    "subtitle": "Un jeton par véhicule. Il n’est affiché qu’une seule fois.",
+    "label": "Nom",
+    "vehicle": "Véhicule",
+    "allowCharge": "Autoriser le pilotage de la charge",
+    "allowChargeTip": "Régler le courant, démarrer/arrêter la charge. Au plus une commande par minute ; chaque commande est inscrite au journal d’audit.",
+    "create": "Créer un jeton",
+    "createdOnce": "Copiez-le maintenant et saisissez-le dans votre domotique : le jeton ne sera plus affiché.",
+    "endpoint": "Adresse",
+    "rights": "Droits",
+    "readOnly": "lecture",
+    "readCharge": "lecture + charge",
+    "lastUsed": "Dernière utilisation",
+    "revoke": "Révoquer",
+    "revokeConfirm": "Révoquer le jeton « {label} » ? La domotique perd immédiatement l’accès."
   }
 }

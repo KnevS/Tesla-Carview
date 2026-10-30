@@ -337,6 +337,8 @@ Der Ladeplaner rechnet ausschließlich auf der Tarifkurve — es wird **kein Bef
 
 **Status & Anwenden** — Die Ansicht zeigt den aktuellen Überschuss, die empfohlene Ladestromstärke (`Überschuss ÷ (Spannung × Phasen)`, gedeckelt) und ob genug Überschuss vorhanden ist. „Jetzt anwenden" setzt den Ladestrom und startet bzw. stoppt das Laden am Fahrzeug — dafür ist die **Fleet-API mit Virtual Key** nötig. Unter der Tesla-Mindeststromstärke (5 A) wird nicht geladen.
 
+**Hausautomation anbinden (v3.62.0)** — Regelt eine Hausautomation wie ioBroker oder Home Assistant den Überschuss selbst, erzeugt ein Admin unten auf der Seite einen **Integrations-Token** je Fahrzeug. Damit liest sie den Ladezustand (`GET /api/integration/v1/charging`: eingesteckt, lädt, Ladestrom, Leistung, SoC, Ladelimit) und darf – nur wenn „Laden steuern erlauben“ gesetzt ist – Ladestrom setzen sowie Laden starten und stoppen (`POST /api/integration/v1/charging` mit `{"action":"start"|"stop"|"amps","amps":5–48}`, Header `Authorization: Bearer tvi_…`). Der Token wird nur einmal angezeigt und lässt sich jederzeit widerrufen. Antworten enthalten keine VIN, keinen Standort und keine Fahrten; Lesen weckt das Auto nicht. Höchstens ein Ladebefehl pro Minute, jeder steht im Audit-Log.
+
 ## 🔐 Sicherheit {#security}
 
 - 🔑 **Passkey / WebAuthn** — Passwortloser Login mit Fingerabdruck, Face ID oder Hardware-Key

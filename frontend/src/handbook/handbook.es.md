@@ -272,6 +272,8 @@ La **carga con excedente solar** (nav «Planificación → Excedente solar», `/
 
 **Estado y aplicar** — La vista muestra el excedente actual, la corriente de carga recomendada (`excedente ÷ (tensión × fases)`, limitada) y si hay excedente suficiente. «Aplicar ahora» fija la corriente e inicia o detiene la carga en el vehículo — para ello se necesita la **Fleet API con clave virtual**. Por debajo de la corriente mínima de Tesla (5 A) no carga.
 
+**Conectar domótica (v3.62.0)** — Si una domótica como ioBroker o Home Assistant regula el excedente, un administrador crea al final de la página un **token de integración** por vehículo. Con él lee el estado de carga (`GET /api/integration/v1/charging`) y, solo si se permite, ajusta la corriente e inicia o detiene la carga (`POST /api/integration/v1/charging`, cabecera `Authorization: Bearer tvi_…`). El token se muestra una sola vez y se puede revocar. Sin VIN, sin ubicación, sin viajes; leer no despierta el coche. Como máximo un comando por minuto, todos en el registro de auditoría.
+
 ## 🔐 Seguridad {#security}
 
 - 🔑 **Passkey / WebAuthn** — Inicio de sesión sin contraseña con huella digital, Face ID o llave hardware

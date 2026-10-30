@@ -3439,5 +3439,23 @@
     "more": "{n} tane daha",
     "dismiss": "Gizle",
     "new": "yeni"
+  },
+  "integration": {
+    "title": "Ev otomasyonu bağla (ioBroker, Home Assistant, …)",
+    "intro": "PV fazlasını bilen bir ev otomasyonu, bir token ile şarj durumunu okur ve izin verilirse şarj akımını ayarlar, şarjı başlatır veya durdurur. VIN yok, konum yok, sürüş yok.",
+    "subtitle": "Araç başına bir token. Yalnızca bir kez gösterilir.",
+    "label": "Ad",
+    "vehicle": "Araç",
+    "allowCharge": "Şarj kontrolüne izin ver",
+    "allowChargeTip": "Şarj akımını ayarla, şarjı başlat/durdur. Dakikada en fazla bir komut; her komut denetim günlüğüne yazılır.",
+    "create": "Token oluştur",
+    "createdOnce": "Şimdi kopyalayıp ev otomasyonuna girin – token tekrar gösterilmeyecek.",
+    "endpoint": "Adres",
+    "rights": "Yetkiler",
+    "readOnly": "okuma",
+    "readCharge": "okuma + şarj",
+    "lastUsed": "Son kullanım",
+    "revoke": "İptal et",
+    "revokeConfirm": "“{label}” tokenı iptal edilsin mi? Ev otomasyonu erişimi hemen kaybeder."
   }
 }

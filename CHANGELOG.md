@@ -9,6 +9,15 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ## [Unreleased]
 
+---
+
+## [v3.62.0] - 2026-10-30
+
+### Neu
+- **Hausautomation anbinden:** Integrations-Tokens je Fahrzeug (Admin, unter „PV-Überschuss“). `GET /api/integration/v1/charging` liefert den Ladezustand (zuhause ja/nein gegen die Heim-Ladeorte, ohne Koordinaten; eingesteckt, lädt, Ladestrom angefordert/maximal/ist, Leistung, Spannung, Phasen, geladene kWh, Ladelimit, SoC) plus die frischesten Telemetriewerte (SoC, Akkuleistung). `POST /api/integration/v1/charging` setzt den Ladestrom (5–48 A) und startet/stoppt das Laden – nur mit Recht „laden“. Damit regelt eine Hausautomation wie ioBroker das PV-Überschussladen selbst, auch wenn kein Home Assistant im Spiel ist.
+- Sicherheit: Token gilt nur, solange sein Ersteller aktiver Admin ist (gebunden an ID und Anlagezeitpunkt, damit eine neu vergebene ID nichts erbt); gespeichert wird nur der SHA-256 des Tokens (`integration_tokens` in `master.db`), Klartext einmalig bei Erzeugung; keine VIN, kein Standort, keine Fahrten in den Antworten; eigenes Rate-Limit (20/min) und höchstens ein Ladebefehl pro Minute je Token; jeder Befehl im Audit-Log; Widerruf sofort wirksam.
+- `vehicle_state_cache` speichert jetzt auch den Ladezustand aus `charge_state` (`charging_state`, Ladelimit, Ladestrom, Leistung, Phasen, `charge_updated_at`), damit Lesen das Auto nicht weckt.
+
 ### Betrieb
 - DB-Snapshot wird atomar geschrieben (`.part` → Umbenennen) und Reste abgebrochener Läufe werden entfernt: Ein Neustart mitten im Komprimieren hatte am 27.10. einen abgeschnittenen Snapshot erzeugt und die rohe Datenbank unverschlüsselt im Volume liegen lassen
 - Automatische Deploys starten Container nur noch im Wartungsfenster 02:00–05:00 (Berlin); außerhalb wird übersprungen und nachts per Nachholtermin ausgerollt, sobald `main` weiter ist als der Tag `deployed-prod`

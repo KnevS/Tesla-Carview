@@ -272,6 +272,8 @@ Planlayıcı yalnızca tarife eğrisi üzerinde hesaplar: araca **hiçbir komut 
 
 **Durum ve uygulama** — Görünüm, mevcut fazlayı, önerilen şarj akımını (`fazla ÷ (gerilim × faz)`, sınırlı) ve yeterli fazla olup olmadığını gösterir. "Şimdi uygula" akımı ayarlar ve araçta şarjı başlatır/durdurur — bunun için **Virtual Key ile Fleet API** gerekir. Tesla asgari akımının (5 A) altında şarj etmez.
 
+**Ev otomasyonu bağlama (v3.62.0)** — ioBroker veya Home Assistant gibi bir ev otomasyonu fazlayı kendisi yönetiyorsa, yönetici sayfanın altında araç başına bir **entegrasyon tokenı** oluşturur. Bununla şarj durumu okunur (`GET /api/integration/v1/charging`) ve yalnızca izin verilirse şarj akımı ayarlanır, şarj başlatılır veya durdurulur (`POST /api/integration/v1/charging`, başlık `Authorization: Bearer tvi_…`). Token yalnızca bir kez gösterilir ve iptal edilebilir. VIN, konum ve sürüş yok; okuma aracı uyandırmaz. Dakikada en fazla bir komut, hepsi denetim günlüğünde.
+
 ## 🔐 Güvenlik {#security}
 
 - 🔑 **Passkey / WebAuthn** — Parmak izi, Face ID veya donanım anahtarıyla parolasız giriş

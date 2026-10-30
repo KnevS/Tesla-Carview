@@ -3439,5 +3439,23 @@
     "more": "{n} más",
     "dismiss": "Ocultar",
     "new": "nuevo"
+  },
+  "integration": {
+    "title": "Conectar domótica (ioBroker, Home Assistant, …)",
+    "intro": "Una domótica que conoce el excedente fotovoltaico lee el estado de carga con un token y, si se permite, ajusta la corriente de carga e inicia o detiene la carga. Sin VIN, sin ubicación, sin viajes.",
+    "subtitle": "Un token por vehículo. Solo se muestra una vez.",
+    "label": "Nombre",
+    "vehicle": "Vehículo",
+    "allowCharge": "Permitir controlar la carga",
+    "allowChargeTip": "Ajustar la corriente, iniciar/detener la carga. Como máximo un comando por minuto; cada comando queda en el registro de auditoría.",
+    "create": "Crear token",
+    "createdOnce": "Cópialo ahora e introdúcelo en tu domótica: el token no se volverá a mostrar.",
+    "endpoint": "Dirección",
+    "rights": "Permisos",
+    "readOnly": "leer",
+    "readCharge": "leer + cargar",
+    "lastUsed": "Último uso",
+    "revoke": "Revocar",
+    "revokeConfirm": "¿Revocar el token «{label}»? La domótica pierde el acceso de inmediato."
   }
 }

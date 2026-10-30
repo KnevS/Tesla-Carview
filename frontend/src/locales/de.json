@@ -3448,5 +3448,23 @@
     "more": "{n} weitere",
     "dismiss": "Ausblenden",
     "new": "neu"
+  },
+  "integration": {
+    "title": "Hausautomation anbinden (ioBroker, Home Assistant, …)",
+    "intro": "Eine Hausautomation, die den PV-Überschuss selbst kennt, liest über einen Token den Ladezustand und darf – wenn erlaubt – Ladestrom setzen sowie Laden starten und stoppen. Keine VIN, kein Standort, keine Fahrten.",
+    "subtitle": "Token je Fahrzeug. Er wird nur einmal angezeigt.",
+    "label": "Bezeichnung",
+    "vehicle": "Fahrzeug",
+    "allowCharge": "Laden steuern erlauben",
+    "allowChargeTip": "Ladestrom setzen, Laden starten/stoppen. Höchstens ein Befehl pro Minute; jeder Befehl steht im Audit-Log.",
+    "create": "Token erzeugen",
+    "createdOnce": "Jetzt kopieren und in der Hausautomation eintragen – der Token wird nicht noch einmal angezeigt.",
+    "endpoint": "Adresse",
+    "rights": "Rechte",
+    "readOnly": "lesen",
+    "readCharge": "lesen + laden",
+    "lastUsed": "Zuletzt genutzt",
+    "revoke": "Widerrufen",
+    "revokeConfirm": "Token „{label}“ widerrufen? Die Hausautomation verliert sofort den Zugriff."
   }
 }

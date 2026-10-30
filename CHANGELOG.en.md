@@ -9,6 +9,15 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+---
+
+## [v3.62.0] - 2026-10-30
+
+### Added
+- **Connect home automation:** integration tokens per vehicle (admin, below "Solar surplus"). `GET /api/integration/v1/charging` returns the charging state (at home yes/no against the home charging locations, no coordinates; plugged in, charging, requested/max/actual current, power, voltage, phases, energy added, charge limit, SoC) plus the freshest telemetry values (SoC, pack power). `POST /api/integration/v1/charging` sets the charging current (5–48 A) and starts/stops charging – only with the "charge" right. This lets a home automation such as ioBroker run solar surplus charging itself, without Home Assistant.
+- Security: a token is valid only while its creator is an active admin (bound to ID and creation time so a reused ID inherits nothing); only the SHA-256 of the token is stored (`integration_tokens` in `master.db`), plain text shown once on creation; no VIN, no location, no trips in responses; own rate limit (20/min) and at most one charge command per minute per token; every command in the audit log; revocation takes effect immediately.
+- `vehicle_state_cache` now also stores the charging state from `charge_state` (`charging_state`, charge limit, current, power, phases, `charge_updated_at`) so reading never wakes the car.
+
 ### Operations
 - DB snapshot is written atomically (`.part` → rename) and leftovers of aborted runs are removed: a restart during compression on 27 Oct produced a truncated snapshot and left the raw database unencrypted in the volume
 - Automatic deploys only restart containers inside the 02:00–05:00 (Berlin) maintenance window; outside it they are skipped and caught up at night once `main` is ahead of the `deployed-prod` tag

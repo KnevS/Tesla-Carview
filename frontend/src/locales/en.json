@@ -3448,5 +3448,23 @@
     "more": "{n} more",
     "dismiss": "Dismiss",
     "new": "new"
+  },
+  "integration": {
+    "title": "Connect home automation (ioBroker, Home Assistant, …)",
+    "intro": "A home automation that knows your PV surplus reads the charging state with a token and – if allowed – sets the charging current and starts or stops charging. No VIN, no location, no trips.",
+    "subtitle": "One token per vehicle. It is shown only once.",
+    "label": "Name",
+    "vehicle": "Vehicle",
+    "allowCharge": "Allow charge control",
+    "allowChargeTip": "Set charging current, start/stop charging. At most one command per minute; every command is written to the audit log.",
+    "create": "Create token",
+    "createdOnce": "Copy it now and enter it in your home automation – the token will not be shown again.",
+    "endpoint": "Endpoint",
+    "rights": "Rights",
+    "readOnly": "read",
+    "readCharge": "read + charge",
+    "lastUsed": "Last used",
+    "revoke": "Revoke",
+    "revokeConfirm": "Revoke token “{label}”? The home automation loses access immediately."
   }
 }

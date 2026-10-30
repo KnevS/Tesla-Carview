@@ -70,6 +70,7 @@ import hvacRoutes              from './routes/hvac.js';
 import communityRoutes         from './routes/community.js';
 import telegramRoutes          from './routes/telegram.js';
 import owntracksRoutes         from './routes/owntracks.js';
+import integrationRoutes       from './routes/integration.js';
 import tcoRoutes               from './routes/tco.js';
 import meshRoutes              from './routes/mesh.js';
 import noticesRoutes           from './routes/notices.js';
@@ -137,6 +138,7 @@ app.use('/api/demo',        demoRoutes);                    // signup + status �
 app.use('/api/pair',       pairRoutes);                     // QR-Pair-Login: init + poll + info + confirm — public
 app.use('/api/telegram',   telegramRoutes);                 // Webhook öffentlich; Link/Status benötigt Auth intern
 app.use('/api/owntracks',  owntracksRoutes);                // /webhook öffentlich (token in url), Geräte-Verwaltung admin-only
+app.use('/api/integration', integrationRoutes);            // /v1/* mit Integrations-Token (Bearer tvi_…), Token-Verwaltung admin-only
 
 // Alle weiteren Routen benötigen einen gültigen JWT + Mandanten-DB (req.db)
 app.use(requireAuth);

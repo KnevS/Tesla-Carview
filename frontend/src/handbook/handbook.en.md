@@ -340,6 +340,8 @@ The planner works purely on the tariff curve — **no command is sent to the veh
 
 **Status & apply** — The view shows the current surplus, the recommended charging current (`surplus ÷ (voltage × phases)`, capped) and whether there is enough surplus. "Apply now" sets the charging current and starts or stops charging on the vehicle — this needs the **Fleet API with a virtual key**. Below the Tesla minimum current (5 A) it won't charge.
 
+**Connect home automation (v3.62.0)** — If a home automation such as ioBroker or Home Assistant controls the surplus itself, an admin creates an **integration token** per vehicle at the bottom of the page. It reads the charging state (`GET /api/integration/v1/charging`: plugged in, charging, current, power, SoC, charge limit) and – only if “Allow charge control” is set – may set the charging current and start or stop charging (`POST /api/integration/v1/charging` with `{"action":"start"|"stop"|"amps","amps":5–48}`, header `Authorization: Bearer tvi_…`). The token is shown only once and can be revoked at any time. Responses contain no VIN, no location and no trips; reading never wakes the car. At most one charge command per minute, each one is written to the audit log.
+
 ## 🔐 Security {#security}
 
 - 🔑 **Passkey / WebAuthn** — Passwordless login with fingerprint, Face ID or hardware key

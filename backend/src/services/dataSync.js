@@ -167,6 +167,22 @@ export async function syncVehicleState(db, vehicle, state, tenantId = null) {
       updated_at    = excluded.updated_at
   `).run(vehicle.id, charge?.battery_level, now);
 
+  // Ladezustand für die Integrations-API (/api/integration/v1/charging) —
+  // nur wenn charge_state mitkam, sonst bleibt der letzte Stand samt Zeitstempel.
+  if (charge?.charging_state) {
+    db.prepare(`
+      UPDATE vehicle_state_cache SET
+        charging_state=?, charge_limit_soc=?, charge_current_request=?, charge_current_max=?,
+        charger_power_kw=?, charger_actual_current=?, charger_voltage=?, charger_phases=?,
+        charge_energy_added_kwh=?, charge_updated_at=?
+      WHERE vehicle_id=?
+    `).run(
+      charge.charging_state, charge.charge_limit_soc ?? null, charge.charge_current_request ?? null,
+      charge.charge_current_request_max ?? null, charge.charger_power ?? null, charge.charger_actual_current ?? null,
+      charge.charger_voltage ?? null, charge.charger_phases ?? null, charge.charge_energy_added ?? null, now, vehicle.id,
+    );
+  }
+
   // Lade-Tracking
   if (charge?.charging_state === 'Charging') {
     handleCharging(db, vehicle, charge, drive, now);

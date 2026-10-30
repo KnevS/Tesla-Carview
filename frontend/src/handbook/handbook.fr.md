@@ -272,6 +272,8 @@ La **charge sur surplus solaire** (nav « Planification → Surplus solaire », 
 
 **État et application** — La vue affiche le surplus actuel, le courant de charge recommandé (`surplus ÷ (tension × phases)`, plafonné) et s'il y a assez de surplus. « Appliquer » règle le courant et démarre ou arrête la charge du véhicule — cela nécessite la **Fleet API avec clé virtuelle**. Sous le courant minimal Tesla (5 A), pas de charge.
 
+**Connecter la domotique (v3.62.0)** — Si une domotique comme ioBroker ou Home Assistant pilote elle-même le surplus, un administrateur crée en bas de page un **jeton d’intégration** par véhicule. Il permet de lire l’état de charge (`GET /api/integration/v1/charging`) et, seulement si autorisé, de régler le courant et de démarrer ou arrêter la charge (`POST /api/integration/v1/charging`, en-tête `Authorization: Bearer tvi_…`). Le jeton n’est affiché qu’une fois et peut être révoqué. Pas de VIN, pas de position, pas de trajets ; la lecture ne réveille pas la voiture. Au plus une commande par minute, toutes inscrites au journal d’audit.
+
 ## 🔐 Sécurité {#security}
 
 - 🔑 **Passkey / WebAuthn** — Connexion sans mot de passe avec empreinte digitale, Face ID ou clé matérielle
