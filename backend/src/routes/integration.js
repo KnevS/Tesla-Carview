@@ -11,7 +11,8 @@
  *     sein Ersteller aktiver Admin ist.
  *   • Gespeichert wird nur der SHA-256; Klartext gibt es einmal beim Anlegen.
  *   • scope 'read' = Ladezustand lesen; 'charge' zusätzlich Ladebefehle.
- *   • Keine VIN, kein Standort, keine Fahrten in den Antworten.
+ *   • Keine VIN, kein Standort, keine Fahrten in den Antworten – nur at_home
+ *     (ja/nein) gegen die Heim-Ladeorte, damit nicht unterwegs eingegriffen wird.
  *   • Lesen kommt aus vehicle_state_cache (kein Wecken, keine Tesla-Kosten).
  *   • Befehle höchstens alle COMMAND_GAP_S Sekunden je Token (Tesla berechnet
  *     Fleet-API-Befehle), jeder Befehl landet im Audit-Log.
@@ -33,6 +34,7 @@ import { requireAuth, requireAdmin } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import { apiProxyPost } from '../services/teslaApi.js';
 import { auditLog } from '../services/auditService.js';
+import { lastKnownPosition } from '../services/vehiclePosition.js';
 
 const router = Router();
 const PREFIX = 'tvi_';
@@ -61,10 +63,11 @@ router.post('/tokens', requireAuth, requireAdmin, validate(z.object({
   }
   const token = PREFIX + randomBytes(32).toString('base64url');
   const sc = [...new Set(['read', ...scopes])].join(',');
+  const since = req.db.prepare('SELECT created_at FROM users WHERE id=?').get(req.user.sub)?.created_at ?? null;
   const info = getMasterDb().prepare(
-    `INSERT INTO integration_tokens (tenant_id, vehicle_id, created_by, label, token_hash, token_hint, scopes)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).run(req.tenantId, vehicle_id, req.user.sub, label, hash(token), token.slice(-4), sc);
+    `INSERT INTO integration_tokens (tenant_id, vehicle_id, created_by, created_by_since, label, token_hash, token_hint, scopes)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+  ).run(req.tenantId, vehicle_id, req.user.sub, since, label, hash(token), token.slice(-4), sc);
   auditLog(req.db, req.user.sub, 'integration_token_create', req, { id: info.lastInsertRowid, vehicle_id, scopes: sc });
   const base = process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`;
   res.status(201).json({ id: info.lastInsertRowid, token, endpoint: `${base}/api/integration/v1/charging` });
@@ -100,11 +103,30 @@ function requireIntegrationToken(req, res, next) {
   try { req.db = getDb(row.tenant_id); } catch { return res.status(401).json({ error: 'Nicht authentifiziert' }); }
   // Der Token lebt nur so lange wie die Admin-Rechte dessen, der ihn angelegt hat:
   // gelöschte, deaktivierte oder herabgestufte Admins nehmen ihre Tokens mit.
-  const owner = req.db.prepare('SELECT role, is_active FROM users WHERE id=?').get(row.created_by);
-  if (!owner || owner.role !== 'admin' || !owner.is_active) return res.status(401).json({ error: 'Nicht authentifiziert' });
+  // created_at mitvergleichen: Eine nach Löschen neu vergebene ID gehört einem anderen Benutzer.
+  const owner = req.db.prepare('SELECT role, is_active, created_at FROM users WHERE id=?').get(row.created_by);
+  if (!owner || owner.role !== 'admin' || !owner.is_active || owner.created_at !== row.created_by_since) {
+    return res.status(401).json({ error: 'Nicht authentifiziert' });
+  }
   master.prepare('UPDATE integration_tokens SET last_used_at=unixepoch() WHERE id=?').run(row.id);
   req.integration = { ...row, scopes: row.scopes.split(',') };
   next();
+}
+
+// Steht das Fahrzeug an einem Heim-Ladeort? Nur ja/nein/unbekannt – die Hausautomation
+// braucht das, um nicht z. B. am Supercharger einzugreifen; Koordinaten verlassen TeslaView nicht.
+function atHome(db, vehicleId) {
+  const pos = lastKnownPosition(db, vehicleId);
+  const homes = db.prepare(
+    "SELECT lat, lon, radius_m FROM charging_locations WHERE type='home' AND lat IS NOT NULL AND (vehicle_id=? OR vehicle_id IS NULL)"
+  ).all(vehicleId);
+  if (!pos || !homes.length) return null;
+  const m = (a, b) => {
+    const r = Math.PI / 180, dLat = (b.lat - a.lat) * r, dLon = (b.lon - a.lon) * r;
+    const h = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin(dLon / 2) ** 2;
+    return 2 * 6371000 * Math.asin(Math.sqrt(h));
+  };
+  return homes.some(hm => m(pos, hm) <= (hm.radius_m || 200));
 }
 
 router.get('/v1/charging', integrationRateLimit, requireIntegrationToken, (req, res) => {
@@ -129,6 +151,7 @@ router.get('/v1/charging', integrationRateLimit, requireIntegrationToken, (req, 
   ).get(req.integration.vehicle_id, now - 3600);
   res.json({
     vehicle:           v.display_name,
+    at_home:           atHome(req.db, req.integration.vehicle_id),
     battery_level:     v.battery_level,
     charging_state:    v.charging_state,          // Disconnected | Stopped | Starting | Charging | Complete | NoPower
     plugged_in:        v.charging_state ? v.charging_state !== 'Disconnected' : null,

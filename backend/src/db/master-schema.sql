@@ -147,6 +147,7 @@ CREATE TABLE IF NOT EXISTS integration_tokens (
   tenant_id     TEXT    NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   vehicle_id    INTEGER NOT NULL,
   created_by    INTEGER NOT NULL,
+  created_by_since INTEGER,          -- users.created_at des Erstellers: IDs gelöschter Benutzer kann SQLite neu vergeben
   label         TEXT    NOT NULL,
   token_hash    TEXT    NOT NULL UNIQUE,
   token_hint    TEXT    NOT NULL,
