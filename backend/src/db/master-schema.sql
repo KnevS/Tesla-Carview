@@ -137,6 +137,27 @@ CREATE TABLE IF NOT EXISTS owntracks_devices (
 CREATE INDEX IF NOT EXISTS idx_owntracks_token  ON owntracks_devices(device_token);
 CREATE INDEX IF NOT EXISTS idx_owntracks_tenant ON owntracks_devices(tenant_id);
 
+-- Integrations-Tokens (v3.62.0): Hausautomationen (ioBroker, Home Assistant, …)
+-- lesen den Ladezustand eines Fahrzeugs und dürfen – nur mit scope 'charge' –
+-- Ladestrom setzen und Laden starten/stoppen. Gespeichert wird nur der
+-- SHA-256 des Tokens; der Klartext wird genau einmal beim Anlegen angezeigt.
+-- Pre-Auth-Lookup per Hash → liegt in master.db (wie owntracks_devices).
+CREATE TABLE IF NOT EXISTS integration_tokens (
+  id            INTEGER PRIMARY KEY,
+  tenant_id     TEXT    NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  vehicle_id    INTEGER NOT NULL,
+  created_by    INTEGER NOT NULL,
+  label         TEXT    NOT NULL,
+  token_hash    TEXT    NOT NULL UNIQUE,
+  token_hint    TEXT    NOT NULL,
+  scopes        TEXT    NOT NULL DEFAULT 'read',
+  is_active     INTEGER NOT NULL DEFAULT 1,
+  last_used_at  INTEGER,
+  last_command_at INTEGER,
+  created_at    INTEGER DEFAULT (unixepoch())
+);
+CREATE INDEX IF NOT EXISTS idx_integration_tokens_tenant ON integration_tokens(tenant_id);
+
 -- ─── TeslaView Mesh — Phase 1: Aggregations-Backbone ─────────────────────
 --
 -- Föderiertes, privacy-preserving Schwarm-Netzwerk zwischen selbsthostenden

@@ -874,6 +874,24 @@ function runTenantMigrations(db) {
     try { db.exec(sql); } catch { /* Spalte existiert bereits */ }
   }
 
+  // Migration: Ladezustand im vehicle_state_cache (Integrations-API, v3.62.0).
+  // Wird bei jedem Sync mit charge_state geschrieben, damit Hausautomationen
+  // den Stand lesen können, ohne das Fahrzeug zu wecken.
+  for (const sql of [
+    "ALTER TABLE vehicle_state_cache ADD COLUMN charging_state          TEXT",
+    "ALTER TABLE vehicle_state_cache ADD COLUMN charge_limit_soc        INTEGER",
+    "ALTER TABLE vehicle_state_cache ADD COLUMN charge_current_request  INTEGER",
+    "ALTER TABLE vehicle_state_cache ADD COLUMN charge_current_max      INTEGER",
+    "ALTER TABLE vehicle_state_cache ADD COLUMN charger_power_kw        REAL",
+    "ALTER TABLE vehicle_state_cache ADD COLUMN charger_actual_current  INTEGER",
+    "ALTER TABLE vehicle_state_cache ADD COLUMN charger_voltage         INTEGER",
+    "ALTER TABLE vehicle_state_cache ADD COLUMN charger_phases          INTEGER",
+    "ALTER TABLE vehicle_state_cache ADD COLUMN charge_energy_added_kwh REAL",
+    "ALTER TABLE vehicle_state_cache ADD COLUMN charge_updated_at       INTEGER",
+  ]) {
+    try { db.exec(sql); } catch { /* Spalte existiert bereits */ }
+  }
+
   // Migration: billing_periods.vehicle_id ON DELETE CASCADE nachrüsten.
   // SQLite unterstützt kein ALTER TABLE ADD CONSTRAINT → Tabelle neu anlegen.
   {

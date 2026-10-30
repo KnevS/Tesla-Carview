@@ -15,6 +15,16 @@
  */
 export const NEWS = [
   {
+    id: 'v3.62.0', date: '2026-10-30', icon: '🏠', path: '/pv-solar',
+    de: { title: 'Hausautomation anbinden', body: 'ioBroker, Home Assistant & Co. können jetzt mit einem eigenen Token den Ladezustand lesen und auf Wunsch den Ladestrom setzen sowie das Laden starten und stoppen, etwa für PV-Überschussladen. Ohne VIN und Standort, jeder Befehl steht im Audit-Log.' },
+    en: { title: 'Connect your home automation', body: 'ioBroker, Home Assistant & co. can now read the charging state with their own token and, if you allow it, set the charging current and start or stop charging, for example for solar surplus charging. No VIN or location, every command is written to the audit log.' },
+    es: { title: 'Conecta tu domótica', body: 'ioBroker, Home Assistant y otros pueden leer ahora el estado de carga con su propio token y, si lo permites, ajustar la corriente e iniciar o detener la carga, por ejemplo para cargar con excedente solar. Sin VIN ni ubicación; cada comando queda en el registro de auditoría.' },
+    fr: { title: 'Connecte ta domotique', body: "ioBroker, Home Assistant, etc. peuvent désormais lire l'état de charge avec leur propre jeton et, si tu l'autorises, régler le courant et démarrer ou arrêter la charge, par exemple pour charger avec le surplus solaire. Sans VIN ni position ; chaque commande est inscrite au journal d'audit." },
+    tr: { title: 'Ev otomasyonunu bağla', body: 'ioBroker, Home Assistant vb. artık kendi tokenlarıyla şarj durumunu okuyabilir ve izin verirsen şarj akımını ayarlayıp şarjı başlatıp durdurabilir; örneğin güneş fazlasıyla şarj için. VIN ve konum yok, her komut denetim günlüğüne yazılır.' },
+    el: { title: 'Σύνδεσε τον οικιακό αυτοματισμό', body: 'Το ioBroker, το Home Assistant κ.ά. μπορούν πλέον να διαβάζουν την κατάσταση φόρτισης με δικό τους token και, αν το επιτρέψεις, να ρυθμίζουν το ρεύμα και να ξεκινούν ή να σταματούν τη φόρτιση, π.χ. για φόρτιση με ηλιακό πλεόνασμα. Χωρίς VIN ή τοποθεσία· κάθε εντολή καταγράφεται.' },
+    uk: { title: 'Підключіть домашню автоматизацію', body: 'ioBroker, Home Assistant тощо тепер можуть власним токеном читати стан заряджання і, якщо ви дозволите, задавати струм та запускати чи зупиняти заряджання — наприклад, для заряджання від надлишку сонячної енергії. Без VIN і місцеперебування, кожна команда — в журналі аудиту.' },
+  },
+  {
     id: 'v3.61.0', date: '2026-10-09', icon: '📣', path: '/news',
     de: { title: 'Neuigkeiten direkt in der App', body: 'Was mit einem Update neu dazukommt, erscheint jetzt hier und als kurzer Hinweis oben in der App. Ein Klick führt direkt zur neuen Funktion.' },
     en: { title: "What's new, right in the app", body: 'Whatever an update adds now shows up here and as a short notice at the top of the app. One click takes you straight to the new feature.' },
