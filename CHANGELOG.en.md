@@ -9,6 +9,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+- **Nightly deploy catches up reliably again:** GitHub started the fixed catch-up schedules (00:40/01:40 UTC) very late (05:30–09:00 UTC), so they missed the 02–05 maintenance window every night and production stayed on an old version for days. The catch-up now runs hourly (runs without work end within seconds), so one reliably lands in the window.
+- Security: `npm audit fix` (backend and frontend, lockfiles only) for the new `minimatch` advisory (high) that turned the required checks red.
+- Merges made with `GITHUB_TOKEN` (e.g. Dependabot auto-merge) do not trigger CI on `main`; the catch-up skipped such versions forever ("no run"). It now dispatches CI itself and deploys at the next slot inside the window.
+- Alert instead of a silent backlog: if production lags behind `main` (tag `deployed-prod`) for more than 3 days, the run fails once a day at 12:00 and thereby sends a GitHub notification.
+
 ---
 
 ## [v3.62.0] - 2026-10-30
