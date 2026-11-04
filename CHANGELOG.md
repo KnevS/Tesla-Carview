@@ -11,6 +11,7 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ### Behoben
 - **Nacht-Deploy holt Stände wieder zuverlässig nach:** Die festen Nachholtermine (00:40/01:40 UTC) startete GitHub stark verspätet (05:30–09:00 UTC), sie verfehlten das Wartungsfenster 02–05 Uhr jede Nacht und Produktion blieb tagelang auf einem alten Stand. Jetzt läuft der Nachholtermin stündlich (Läufe ohne Arbeit enden nach Sekunden), sodass verlässlich einer ins Fenster fällt.
+- Sicherheit: `npm audit fix` (Backend und Frontend, nur Lockfiles) für die neue `minimatch`-Meldung (hoch), die die Pflichtprüfungen rot färbte.
 - Merges mit `GITHUB_TOKEN` (z. B. Dependabot-Automerge) lösen auf `main` keine CI aus; der Nachholtermin übersprang solche Stände dauerhaft („kein Lauf“). Er stößt die CI jetzt selbst an und rollt beim nächsten Termin im Fenster aus.
 - Alarm statt stillem Stau: Hängt Produktion seit über 3 Tagen hinter `main` (Tag `deployed-prod`), schlägt der Lauf einmal täglich um 12 Uhr fehl und meldet sich damit per GitHub-Benachrichtigung.
 
