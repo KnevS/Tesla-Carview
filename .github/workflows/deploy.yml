@@ -8,11 +8,12 @@ on:
     types: [completed]
     branches: [main]
   # Nachholtermin: Ein Deploy, der tagsüber am Wartungsfenster scheitert,
-  # wird nachts nachgeholt. Zwei UTC-Termine, damit einer sommers wie winters
-  # (und trotz verspätetem GitHub-Cron) zwischen 02 und 05 Uhr Berlin liegt.
+  # wird nachts nachgeholt. Stündlich (Minute 17, abseits der vollen Stunde),
+  # weil GitHub geplante Läufe stark verspätet startet: die früheren festen
+  # Termine 00:40/01:40 UTC liefen 10–11/2026 erst 05:30–09:00 UTC an und
+  # verfehlten das Fenster jede Nacht. Läufe ohne Arbeit enden nach Sekunden.
   schedule:
-    - cron: '40 0 * * *'
-    - cron: '40 1 * * *'
+    - cron: '17 * * * *'
   workflow_dispatch:
 
 # Secrets (in GitHub Repository Settings → Secrets):
@@ -40,7 +41,7 @@ jobs:
        github.event.workflow_run.head_repository.full_name == github.repository)
     permissions:
       contents: read
-      actions: read
+      actions: write   # Nachholtermin stößt fehlende CI-Läufe auf main an
     outputs:
       ready: ${{ steps.check.outputs.ready }}
     steps:
@@ -55,13 +56,7 @@ jobs:
           KEY:  ${{ secrets.DEPLOY_SSH_KEY }}
           GH_TOKEN: ${{ github.token }}
         run: |
-          # Automatische Deploys starten Container neu und laufen deshalb nur
-          # im Wartungsfenster 02:00–05:00 Europe/Berlin; manuell immer.
           h=$(TZ=Europe/Berlin date +%H)
-          if [ "$GITHUB_EVENT_NAME" != workflow_dispatch ] && { [ "$h" -lt 2 ] || [ "$h" -ge 5 ]; }; then
-            echo "::notice::Berlin $h Uhr, außerhalb des Wartungsfensters - wird nachts nachgeholt."
-            echo "ready=false" >> "$GITHUB_OUTPUT"; exit 0
-          fi
           # Nachholtermin: nur wenn main weiter ist als der zuletzt ausgerollte
           # Stand (Tag deployed-prod) und CI für diesen Commit grün war.
           if [ "$GITHUB_EVENT_NAME" = schedule ]; then
@@ -70,11 +65,42 @@ jobs:
               echo "::notice::Produktion ist auf ${GITHUB_SHA:0:7} - nichts nachzuholen."
               echo "ready=false" >> "$GITHUB_OUTPUT"; exit 0
             fi
-            ci=$(gh run list -R "$GITHUB_REPOSITORY" -w CI -c "$GITHUB_SHA" --json conclusion -q '.[0].conclusion')
-            if [ "$ci" != success ]; then
-              echo "::notice::CI für ${GITHUB_SHA:0:7} nicht grün (${ci:-kein Lauf}) - kein Nachholen."
-              echo "ready=false" >> "$GITHUB_OUTPUT"; exit 0
+            # Alarm statt stillem Stau: hängt Produktion seit über 3 Tagen
+            # hinter main, schlägt der Lauf einmal täglich (12 Uhr Berlin) fehl.
+            if [ -n "$done_sha" ]; then
+              first=$(git log --reverse --format=%ct "$done_sha..$GITHUB_SHA" | head -1)
+            else
+              first=$(git log -1 --format=%ct "$GITHUB_SHA")
             fi
+            age_h=$(( ( $(date +%s) - ${first:-$(date +%s)} ) / 3600 ))
+            if [ "$age_h" -ge 72 ] && [ "$h" = 12 ]; then
+              echo "::error::Produktion hängt seit ${age_h} h hinter main (${done_sha:-kein Tag deployed-prod} → ${GITHUB_SHA}). Deploy prüfen."
+              exit 1
+            fi
+            # Merges mit GITHUB_TOKEN (Dependabot-Automerge, Bots) lösen auf
+            # main keine CI aus (GitHub-Rekursionsschutz). Ohne CI-Lauf würde
+            # der Nachholtermin den Stand nie ausrollen – CI dann anstoßen,
+            # der nächste Termin im Fenster rollt aus.
+            ci=$(gh run list -R "$GITHUB_REPOSITORY" -w CI -c "$GITHUB_SHA" --json status,conclusion -q '.[0] // empty | "\(.status) \(.conclusion)"')
+            case "$ci" in
+              "completed success") ;;
+              "")
+                gh workflow run ci.yml -R "$GITHUB_REPOSITORY" --ref main
+                echo "::notice::Kein CI-Lauf für ${GITHUB_SHA:0:7} - CI angestoßen, Ausrollen beim nächsten Termin."
+                echo "ready=false" >> "$GITHUB_OUTPUT"; exit 0 ;;
+              completed*)
+                echo "::notice::CI für ${GITHUB_SHA:0:7} nicht grün (${ci#completed }) - kein Nachholen."
+                echo "ready=false" >> "$GITHUB_OUTPUT"; exit 0 ;;
+              *)
+                echo "::notice::CI für ${GITHUB_SHA:0:7} läuft noch - Ausrollen beim nächsten Termin."
+                echo "ready=false" >> "$GITHUB_OUTPUT"; exit 0 ;;
+            esac
+          fi
+          # Automatische Deploys starten Container neu und laufen deshalb nur
+          # im Wartungsfenster 02:00–05:00 Europe/Berlin; manuell immer.
+          if [ "$GITHUB_EVENT_NAME" != workflow_dispatch ] && { [ "$h" -lt 2 ] || [ "$h" -ge 5 ]; }; then
+            echo "::notice::Berlin $h Uhr, außerhalb des Wartungsfensters - wird nachts nachgeholt."
+            echo "ready=false" >> "$GITHUB_OUTPUT"; exit 0
           fi
           if [ -n "$HOST" ] && [ -n "$KEY" ]; then
             echo "ready=true" >> "$GITHUB_OUTPUT"
