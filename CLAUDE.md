@@ -124,9 +124,9 @@ technisch keine PRs unterstützt). Gilt auch für `teslaview-web`.
 > - **Was zuletzt geschah:** oberster Eintrag in [`CHANGELOG.md`](CHANGELOG.md) / [`CHANGELOG.en.md`](CHANGELOG.en.md)
 > - **Letzte Commits:** `git log --oneline -15 origin/main`
 
-### Aktuell (Stand 2026-11-04)
+### Aktuell (Stand 2026-11-19)
 
-- **Version:** v3.62.0
+- **Version:** v3.63.0 (PR offen: Ladezustand aus dem Telemetrie-Stream; Merge + Config-Push am Fahrzeug stehen aus)
 - **Zuletzt geliefert:**
   - **Unreleased (Deploy-Nachholtermin zuverlässig, #401):** `deploy.yml` holt stündlich (`17 * * * *`) statt 00:40/01:40 UTC nach — GitHub startete die festen Termine 5–7,5 h verspätet, jeder Lauf verfehlte das Fenster 02–05 Uhr, v3.62.0 lag tagelang nur auf `main`. Fehlt für den Commit ein CI-Lauf (Merges mit `GITHUB_TOKEN`, z. B. Dependabot-Automerge, lösen keine Push-CI aus), stößt der Termin `ci.yml` an. Alarm: > 72 h hinter `deployed-prod` → Lauf schlägt täglich 12 Uhr fehl. Dazu `npm audit fix` (minimatch). **Merke:** Zeitkritische Logik nie an einen einzelnen GitHub-Cron hängen.
   - **v3.62.0 (Hausautomation anbinden — Integrations-Tokens):** `routes/integration.js`, Tabelle `integration_tokens` in `master.db` (nur SHA-256, Klartext einmalig, Präfix `tvi_`), Verwaltung `GET/POST/DELETE /api/integration/tokens` (Admin), Maschinen-Endpunkte `GET/POST /api/integration/v1/charging` (Bearer-Token, eigenes Rate-Limit 20/min, Ladebefehle nur mit scope `charge`, max. 1/min je Token, Audit-Log). UI: `components/IntegrationTokens.vue` unten in `PvSolar.vue`, i18n ×7. `vehicle_state_cache` hat jetzt Ladespalten (`charging_state`, `charge_limit_soc`, `charge_current_request`/`_max`, `charger_power_kw`, `charger_actual_current`, `charger_voltage`, `charger_phases`, `charge_energy_added_kwh`, `charge_updated_at`), geschrieben in `syncVehicleState`. **Merke:** Bei aktiver Fleet-Telemetry kommt `charge_state` nur mit dem (stündlichen) Poller — deshalb liefert der Endpunkt zusätzlich `telemetry.soc`/`pack_power_kw` aus den letzten `telemetry_points`. Die Telemetrie-Konfiguration streamt (noch) keine Ladefelder (`DetailedChargeState`, `ChargeAmps`, `ACChargingPower`) — wäre der nächste Schritt für minutengenauen Ladezustand. Anlass: ioBroker-PV-Überschussladen über das Auto, weil die Wallbox für die Arbeitgeber-Abrechnung bei Monta bleiben muss.
