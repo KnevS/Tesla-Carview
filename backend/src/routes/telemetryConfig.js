@@ -237,6 +237,11 @@ async function configureOne(db, v, domain, ca) {
         Soc:          { interval_seconds: 10 },
         PackVoltage:  { interval_seconds: 10 },
         PackCurrent:  { interval_seconds: 10 },
+        // Ladezustand für /api/integration/v1/charging. Intervall 30 s: fein genug
+        // für Ladeerkennung, kürzer als der stündliche Poller. Tesla-Beispiel nutzt 1 s.
+        DetailedChargeState: { interval_seconds: 30 },
+        ACChargingPower:     { interval_seconds: 30 },
+        ChargeAmps:          { interval_seconds: 30 },
       },
       // alert_types bewusst weggelassen: TeslaView wertet keine Alerts aus,
       // und ungültige Werte (früher 'autopilot') lässt Tesla die ganze
