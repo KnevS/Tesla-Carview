@@ -61,9 +61,18 @@ const FIELD = {
   Soc:          8,   // Tesla-Field-Enum: Soc = 8 (früher fälschlich 12)
   Gear:         10,
   Location:     21,
+  ACChargingPower:  37,   // kW, Eingangsleistung des AC-Laders (netzseitig)
+  ChargeAmps:       49,   // A, tatsächlicher Ladestrom
+  DetailedChargeState: 179,
 };
 
 const GEAR_MAP = { 0: null, 1: null, 2: 'P', 3: 'R', 4: 'N', 5: 'D', 6: null };
+
+// Tesla-Enum DetailedChargeStateValue → Strings wie in der Integrations-API
+// (routes/integration.js, Feld charging_state). 0 = Unknown → null.
+const CHARGE_STATE_MAP = {
+  1: 'Disconnected', 2: 'NoPower', 3: 'Starting', 4: 'Charging', 5: 'Complete', 6: 'Stopped',
+};
 
 // Nutzbare Batteriekapazität für die Verbrauchsschätzung aus dem SoC-Delta —
 // gleicher Wert und gleiche Formel wie im Polling-Pfad (dataSync.js).
@@ -218,6 +227,9 @@ function extractPoint(data) {
       case FIELD.PackVoltage:  point.voltage   = numVal(v); break;
       case FIELD.PackCurrent:  point.current   = numVal(v); break;
       case FIELD.Soc:          point.soc       = numVal(v); break;
+      case FIELD.DetailedChargeState: point.charging_state = CHARGE_STATE_MAP[v?.detailed_charge_state_value] ?? null; break;
+      case FIELD.ACChargingPower:     point.charger_power_kw = numVal(v); break;
+      case FIELD.ChargeAmps:          point.charger_actual_current = numVal(v); break;
       case FIELD.Odometer: {
         const km = numVal(v);
         point.odometer_km = km != null ? km * 1.60934 : null;
@@ -306,6 +318,25 @@ function storePoint(vin, ts, point) {
       .then(({ geocodeTrip }) => geocodeTrip(db, closedTripId))
       .catch(() => {});
     tripId = null;
+  }
+
+  // Ladezustand aus dem Stream in vehicle_state_cache spiegeln, damit die
+  // Integrations-API (routes/integration.js) minutengenau statt nur stündlich
+  // mit dem Poller liefert. UPDATE statt INSERT: fehlt die Cache-Zeile, bleibt
+  // es ein No-op und der Poller legt sie an. COALESCE: fehlende Felder in
+  // dieser Nachricht überschreiben keine bekannten Werte.
+  if (point.charging_state != null) {
+    db.prepare(
+      `UPDATE vehicle_state_cache SET
+         charging_state = ?,
+         charger_power_kw = COALESCE(?, charger_power_kw),
+         charger_actual_current = COALESCE(?, charger_actual_current),
+         charge_updated_at = ?
+       WHERE vehicle_id = ?`
+    ).run(
+      point.charging_state, point.charger_power_kw ?? null,
+      point.charger_actual_current ?? null, ts, vehicle.id,
+    );
   }
 
   const powerKw = point.voltage && point.current ? (point.voltage * point.current) / 1000 : null;
