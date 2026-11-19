@@ -17,6 +17,14 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ---
 
+## [v3.63.0] - 2026-11-19
+
+### Neu
+- **Ladezustand aus dem Telemetrie-Stream:** Die Fleet-Telemetrie fordert `DetailedChargeState`, `ACChargingPower` und `ChargeAmps` alle 30 Sekunden an und spiegelt sie nach `vehicle_state_cache`. `/api/integration/v1/charging` liefert den Ladezustand damit frisch, statt auf den stündlichen Poller zu warten. Die Konfiguration wird beim nächsten Setzen an das Fahrzeug übertragen.
+
+### Behoben
+- Ladeerkennung für Hausautomationen: Ohne Telemetrie-Ladefelder meldete die Integrations-API ein angestecktes, ladendes Fahrzeug bis zu einer Stunde lang als nicht angesteckt. Das ließ Stopp-Regeln ins Leere laufen.
+
 ## [v3.62.0] - 2026-10-30
 
 ### Neu

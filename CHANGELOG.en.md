@@ -17,6 +17,14 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [v3.63.0] - 2026-11-19
+
+### Added
+- **Charging state from the telemetry stream:** fleet telemetry now requests `DetailedChargeState`, `ACChargingPower` and `ChargeAmps` every 30 seconds and mirrors them into `vehicle_state_cache`. `/api/integration/v1/charging` therefore returns a fresh charging state instead of waiting for the hourly poller. The configuration is sent to the vehicle the next time it is set.
+
+### Fixed
+- Charge detection for home automation: without the telemetry charging fields, the integration API could report a plugged-in, charging vehicle as unplugged for up to an hour, so stop rules did not fire.
+
 ## [v3.62.0] - 2026-10-30
 
 ### Added
