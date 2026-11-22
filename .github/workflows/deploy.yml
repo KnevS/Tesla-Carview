@@ -17,10 +17,11 @@ on:
   workflow_dispatch:
 
 # Secrets (in GitHub Repository Settings → Secrets):
-#   DEPLOY_HOST      – IP oder Hostname des Zielservers
-#   DEPLOY_USER      – SSH-Benutzer (z.B. root oder deploy)
-#   DEPLOY_SSH_KEY   – privater SSH-Key (ed25519 empfohlen)
-#   DEPLOY_APP_DIR   – Pfad auf dem Server (Standard: /opt/tesla-carview)
+#   DEPLOY_HOST        – IP oder Hostname des Zielservers
+#   DEPLOY_USER        – SSH-Benutzer
+#   DEPLOY_SSH_KEY     – privater SSH-Key (ed25519); auf dem Server per Pförtner auf „deploy <commit>“ beschränkt
+#   DEPLOY_KNOWN_HOSTS – Host-Schlüssel des Servers (festgenagelt)
+# Die eigentliche Deploy-Logik liegt root-eigen auf dem Server: deploy/server/tesla-carview-deploy.
 
 concurrency:
   group: deploy-production
@@ -130,325 +131,35 @@ jobs:
         with:
           fetch-depth: 0  # merge-base beim Markieren des Stands
 
-      - name: Deploy via SSH
+      - name: Deploy via SSH (Pförtner erlaubt nur „deploy <commit>“)
         id: ssh
-        uses: appleboy/ssh-action@v1
-        with:
-          capture_stdout: true
-          host: ${{ secrets.DEPLOY_HOST }}
-          username: ${{ secrets.DEPLOY_USER }}
-          key: ${{ secrets.DEPLOY_SSH_KEY }}
-          envs: GHCR_TOKEN,GHCR_ACTOR,ALLOW_STALE_CHECKOUT
-          command_timeout: 30m
-          script: |
-            APP_DIR="${{ secrets.DEPLOY_APP_DIR }}"
-            APP_DIR="${APP_DIR:-/opt/tesla-carview}"
-            cd "$APP_DIR"
+        env:
+          HOST: ${{ secrets.DEPLOY_HOST }}
+          USER_: ${{ secrets.DEPLOY_USER }}
+          KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          KNOWN: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+        run: |
+          # Der Server-Schlüssel ist festgenagelt (DEPLOY_KNOWN_HOSTS) – kein Vertrauen beim ersten Kontakt.
+          # Das Deploy-Skript liegt root-eigen auf dem Server (deploy/server/tesla-carview-deploy);
+          # per SSH geht nur der Commit, der GHCR-Zugang über die Standardeingabe.
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy && chmod 600 ~/.ssh/deploy
+          printf '%s\n' "$KNOWN" > ~/.ssh/known_hosts
+          git fetch -q origin main
+          SHA=$(git rev-parse origin/main)
+          ARG=""; [ "$ALLOW_STALE_CHECKOUT" = "true" ] && ARG=" --allow-stale"
+          set -o pipefail
+          printf '%s\n%s\n' "$GHCR_ACTOR" "$GHCR_TOKEN" \
+            | ssh -i ~/.ssh/deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o BatchMode=yes \
+                  -o ConnectTimeout=30 -o ServerAliveInterval=30 "$USER_@$HOST" "deploy ${SHA}${ARG}" \
+            | tee deploy-output.txt
+          DEPLOYED=$(sed -n 's/^DEPLOYED_SHA=\([0-9a-f]\{40\}\)$/\1/p' deploy-output.txt | tail -1)
+          echo "deployed_sha=$DEPLOYED" >> "$GITHUB_OUTPUT"
 
-            # ── Compose-Dateien bestimmen ────────────────────────────────
-            # Bisher war ueberall `-f docker-compose.prod.yml` fest
-            # verdrahtet. Mit explizitem -f laedt Compose die
-            # docker-compose.override.yml aber NICHT mehr automatisch dazu —
-            # anders als bei einem nackten `docker compose`. Jede
-            # Host-Anpassung in der override wurde vom Deploy also
-            # stillschweigend uebergangen, waehrend update.sh sie beachtete:
-            # zwei Deploy-Wege, zwei verschiedene Ergebnisse.
-            #
-            # Konkret auf iland: die override setzt `ports: !reset []` fuer
-            # nginx, weil Traefik direkt am Container haengt. Der Deploy
-            # erstellte nginx trotzdem mit 0.0.0.0:8080 — ein Port, der am
-            # TLS-Abschluss, den sec-headers und dem Login-Rate-Limit
-            # vorbeifuehrt.
-            #
-            # Fuer Fremd-Installationen aendert sich nichts: die override ist
-            # gitignored, existiert dort also nicht, und der Zweig greift
-            # nicht.
-            COMPOSE="-f $APP_DIR/docker-compose.prod.yml"
-            if [ -f "$APP_DIR/docker-compose.override.yml" ]; then
-              COMPOSE="$COMPOSE -f $APP_DIR/docker-compose.override.yml"
-              echo "==> docker-compose.override.yml gefunden — wird mitgeladen"
-            fi
-            sudo git fetch origin main
-
-            # ── skip-worktree-Bits loesen, BEVOR resettet wird ────────────
-            # Weiter unten setzt dieses Skript `update-index --skip-worktree`
-            # auf die tc-private-Overlay-Dateien, damit git sie nicht als
-            # modifiziert meldet. Genau diese Bits lassen aber den `reset
-            # --hard` im *naechsten* Deploy scheitern:
-            #
-            #   Fehler: Entry 'backend/src/routes/demo.js' not uptodate.
-            #           Cannot merge.
-            #
-            # Ein Deploy vergiftete damit den folgenden. Real passiert am
-            # 2026-06-08: ab da lief der Reset nie wieder durch, der
-            # Arbeitsbaum blieb zwei Monate auf v3.13.1 stehen — unbemerkt,
-            # weil das Skript kein `set -e` hat und Erfolg meldete.
-            #
-            # Die Bits werden generisch ueber `ls-files -v` gelesen (Marker
-            # ist ein grosses S; Kleinbuchstaben stehen fuer
-            # assume-unchanged) und nicht ueber eine feste Dateiliste —
-            # sonst laeuft es wieder auf, sobald das Overlay eine weitere
-            # Datei bekommt.
-            SKIPPED="$(sudo git ls-files -v | awk '/^S/ {print substr($0,3)}')"
-            if [ -n "$SKIPPED" ]; then
-              echo "==> skip-worktree loesen vor dem Reset:"
-              echo "$SKIPPED" | while IFS= read -r f; do
-                [ -n "$f" ] || continue
-                echo "    $f"
-                sudo git update-index --no-skip-worktree -- "$f"
-              done
-            fi
-
-            sudo git reset --hard origin/main
-
-            # ── Sync-Verifikation ────────────────────────────────────────
-            # Lehre aus dem 2026-08-12 entdeckten Ausfall: Der Arbeitsbaum
-            # unter /opt/tesla-carview folgte seit dem 2026-06-08 nicht mehr
-            # `main` — der Reset lief nicht mehr durch (belegt per Reflog),
-            # der Checkout stand auf einem Feature-Branch und hing auf
-            # v3.13.1 fest. Weil dieses Skript kein `set -e` hat, lief der
-            # Deploy trotzdem weiter und meldete Erfolg. Zwei Monate lang
-            # fiel das niemandem auf.
-            #
-            # Das ist deshalb gefaehrlich, weil docker compose die Datei
-            # docker-compose.prod.yml und alle Bind-Mounts aus genau diesem
-            # Arbeitsbaum liest: Container-Images waren aktuell, die
-            # Host-Dateien nicht. Konkret lief das Backend mit 43 statt 46
-            # Routen, weil ein gemountetes system.js eingefroren war.
-            #
-            # Ab hier gilt: kein Deploy auf einem Arbeitsbaum, der nicht
-            # `main` entspricht.
-            HEAD_SHA="$(sudo git rev-parse HEAD)"
-            MAIN_SHA="$(sudo git rev-parse origin/main)"
-            CUR_BRANCH="$(sudo git rev-parse --abbrev-ref HEAD)"
-
-            if [ "$HEAD_SHA" != "$MAIN_SHA" ]; then
-              echo "::error::Arbeitsbaum folgt origin/main nicht — Deploy abgebrochen."
-              echo "  Verzeichnis : $APP_DIR"
-              echo "  Branch      : $CUR_BRANCH"
-              echo "  HEAD        : $HEAD_SHA"
-              echo "  origin/main : $MAIN_SHA"
-              echo ""
-              echo "  Der Reset oben hat nicht gegriffen. Haeufige Ursachen:"
-              echo "    - Checkout steht auf einem Feature-Branch statt main"
-              echo "    - DEPLOY_APP_DIR zeigt woanders hin als der fest"
-              echo "      verdrahtete compose-Pfad /opt/tesla-carview"
-              echo "    - lokale Aenderungen/Rechte verhindern den Reset"
-              echo ""
-              echo "  Diagnose auf dem Server:"
-              echo "    sudo git -C $APP_DIR status"
-              echo "    sudo git -C $APP_DIR reflog -5"
-              echo ""
-              echo "  Notausgang: Repository-Variable ALLOW_STALE_CHECKOUT=true"
-              echo "  laesst den Deploy trotzdem laufen (nur fuer Incidents)."
-              if [ "$ALLOW_STALE_CHECKOUT" = "true" ]; then
-                echo "::warning::ALLOW_STALE_CHECKOUT=true — Deploy laeuft trotz nicht-synchronem Arbeitsbaum weiter."
-              else
-                exit 1
-              fi
-            else
-              echo "==> Arbeitsbaum synchron mit origin/main ($CUR_BRANCH @ $(sudo git rev-parse --short HEAD))"
-            fi
-
-            PRIVATE_REPO="/opt/tc-private.git"
-            if [ -d "$PRIVATE_REPO" ]; then
-              sudo git --git-dir="$PRIVATE_REPO" --work-tree="$APP_DIR" checkout -f HEAD -- .
-              sudo git update-index --skip-worktree \
-                backend/src/routes/demo.js \
-                backend/src/services/demoLifecycle.js \
-                frontend/src/views/Demo.vue
-            fi
-            # Backend- und Frontend-Bundle kommen direkt aus den GHCR-Images.
-            # Frueher wurde das Frontend hier server-seitig gebaut und per
-            # frontend-dist-private/-Volume eingehaengt — dieser Mount ist
-            # entfernt (s. #84), das Image-Bundle wird direkt serviert.
-            echo "$GHCR_TOKEN" | sudo docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
-            # Auch bei Abbruch abmelden: Ein liegengebliebenes, abgelaufenes
-            # Token ließ am 27.10. jeden Pull als root mit "denied" scheitern.
-            trap 'sudo docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
-
-            # Deploy-Sequenz: pull → stop → rm → up
-            #
-            # Frueher: ein einziges `up -d --pull always backend frontend` —
-            # das schaeftert intermittierend mit
-            #   "Container Error when allocating new name: Conflict …"
-            #   "cannot remove container …: container is running: stop the
-            #    container before removing or force remove"
-            # weil docker compose den alten Container nicht zuverlaessig
-            # stoppt bevor der neue denselben Namen beansprucht. Der zurueck-
-            # bleibende Container bekommt einen Random-Prefix und der Deploy
-            # meldet trotzdem "success".
-            #
-            # Robuste Sequenz: erst pullen (kein Downtime), dann gestoppter
-            # Container sauber entfernen (kein Name-Conflict), dann hoch-
-            # ziehen. Downtime ~10-15s; akzeptabel fuer ein Deployment.
-            echo "==> Neue Images aus GHCR ziehen …"
-            sudo docker compose $COMPOSE pull backend frontend
-
-            echo "==> Container stoppen (sauberer Shutdown vor Recreate) …"
-            sudo docker compose $COMPOSE stop backend frontend || true
-
-            echo "==> Container entfernen (vermeidet Name-Konflikt beim Up) …"
-            sudo docker compose $COMPOSE rm -f backend frontend || true
-
-            # Falls ein vorheriger Deploy einen Random-Prefix-Container hinter-
-            # lassen hat (selten, aber moeglich vor diesem Fix), raeumen wir
-            # ihn jetzt mit auf damit der saubere Name wieder frei ist.
-            for name in tesla-carview-backend tesla-carview-frontend; do
-              for c in $(sudo docker ps -aq --filter "name=_${name}\$"); do
-                echo "==> Verwaister Random-Prefix-Container: $c"
-                sudo docker rm -f "$c" || true
-              done
-            done
-
-            echo "==> Container hochziehen …"
-            sudo docker compose $COMPOSE up -d backend frontend
-
-            # Ollama (gebundelter lokaler LLM-Runtime, ab v3.5.0). Idempotent:
-            # wenn schon up → no-op, sonst starten.
-            #
-            # Wichtig: explizites Service-Argument bei `compose up` overridet
-            # die Profile-Filter (Docker-Compose-Quirk). Damit das per
-            # `services.ollama.profiles: [disabled]` Override tatsaechlich
-            # respektiert wird (siehe README — Hosts mit < 4 GB RAM), pruefen
-            # wir zuerst ob ollama im disabled-Profile steckt.
-            #
-            # `compose --profile disabled config --services` listet die
-            # Services die im disabled-Profile sind. Erscheint ollama dort,
-            # ist der Service per Override abgeschaltet — skip.
-            if sudo docker compose $COMPOSE \
-                 --profile disabled config --services 2>/dev/null | grep -q '^ollama$'; then
-              echo "==> Ollama per disabled-Profile abgeschaltet — skip"
-            else
-              echo "==> Ollama sicherstellen (idempotent) …"
-              sudo docker compose $COMPOSE up -d ollama || \
-                echo "Ollama-Service nicht gestartet — OK"
-            fi
-
-            sudo docker logout ghcr.io
-            # nginx immer neu erstellen (nicht nur restart) — stellt sicher,
-            # dass die Port-Konfiguration aus den geladenen Compose-Dateien
-            # tatsaechlich angewendet wird. `restart` belaesst den Container
-            # unveraendert; Port-Bindings werden nur bei Container-Erstellung
-            # gesetzt. Dieses Muster behebt den 2026-08-07-Ausfall, bei dem
-            # der nginx-Container das Mapping verloren hatte und jeder Deploy
-            # es nur neu startete statt zu korrigieren.
-            #
-            # Welche Bindung dabei herauskommt, haengt vom Host ab und ist
-            # bewusst nicht mehr hart auf 8080 festgelegt:
-            #   * ohne override  → 0.0.0.0:8080:80 aus docker-compose.prod.yml
-            #                      (Standard fuer Fremd-Installationen, z.B.
-            #                      Zugriff aus dem LAN auf einen Raspi)
-            #   * mit override   → `ports: !reset []`, also gar kein
-            #                      Host-Mapping; Traefik erreicht den
-            #                      Container ueber das traefik-proxy-Netz
-            echo "==> nginx neu erstellen (wendet die Port-Konfiguration an) …"
-            sudo docker compose $COMPOSE \
-              up -d --force-recreate nginx
-
-            # traefik-proxy ist nicht in docker-compose.prod.yml definiert und
-            # muss nach dem Recreate (neuer Container) manuell verbunden werden.
-            if ! sudo docker inspect tesla-carview-nginx \
-                --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' \
-                2>/dev/null | grep -q "traefik-proxy"; then
-              echo "==> nginx nicht in traefik-proxy — network connect"
-              sudo docker network connect traefik-proxy tesla-carview-nginx
-            fi
-
-            # Post-Deploy-Healthcheck (Lehre aus dem 502 vom 2026-06-21):
-            # Kommt das Backend nach dem Deploy nicht hoch, soll der Deploy
-            # ROT werden statt still "success" zu melden.
-            #
-            # Geprueft wird IM nginx-Container gegen dessen eigenen Port 80.
-            # Frueher lief der Check gegen den Host-Port 8080 — das war an
-            # zwei Setups gebunden, die so nicht mehr gelten:
-            #
-            #   * Der urspruengliche Kommentar sprach von einem
-            #     "Host-nginx-Edge" auf 127.0.0.1:8080. Auf iland gibt es
-            #     keinen Host-nginx (mehr): Traefik belegt 80/443 und
-            #     erreicht den nginx-Container direkt ueber das
-            #     traefik-proxy-Netz.
-            #   * Seit die docker-compose.override.yml mitgeladen wird,
-            #     greift dort `ports: !reset []` — es GIBT dann bewusst kein
-            #     Host-Mapping mehr. Ein Check gegen :8080 wuerde jeden
-            #     Deploy scheitern lassen, obwohl alles korrekt ist.
-            #
-            # Der Weg ueber den Container testet dieselbe Kette
-            # (nginx → backend) und funktioniert in beiden Betriebsarten:
-            # mit Host-Port (Fremd-Installationen) wie ohne (Traefik-only).
-            # 127.0.0.1 statt localhost: im Container loest `localhost` auf
-            # [::1] auf, nginx hoert aber nur auf 0.0.0.0:80 (IPv4) — mit
-            # `localhost` gaebe es "Connection refused" bei voll intaktem
-            # Stack. Am laufenden Container verifiziert.
-            echo "==> Healthcheck: nginx-Container → http://127.0.0.1/api/health …"
-            HEALTH_OK=""
-            for i in $(seq 1 12); do
-              sleep 3
-              if sudo docker exec tesla-carview-nginx \
-                   wget -q -O /dev/null -T 5 "http://127.0.0.1/api/health" 2>/dev/null; then
-                HEALTH_OK="yes"; echo "Healthcheck OK nach ~$((i*3))s"; break
-              fi
-              echo "Versuch $i/12: Backend ueber nginx noch nicht bereit …"
-            done
-            if [ -z "$HEALTH_OK" ]; then
-              echo "FEHLER: Backend antwortet nach dem Deploy nicht auf http://127.0.0.1/api/health im nginx-Container (Down/502)."
-              echo "Letzte Backend-Logs:"; sudo docker logs --tail 30 tesla-carview-backend 2>&1 || true
-              echo "Letzte nginx-Logs:";   sudo docker logs --tail 15 tesla-carview-nginx 2>&1 || true
-              echo "nginx-Port-Mapping (leer = Traefik-only, das ist ok):"
-              sudo docker ps --filter name=tesla-carview-nginx --format '{{.Ports}}' || true
-              exit 1
-            fi
-
-            # ── Demo-Frontend: privates Bundle nachbauen ─────────────────
-            # Die Demo-Instanz serviert NICHT das GHCR-Frontend-Image, sondern
-            # einen Bind-Mount auf $APP_DIR/frontend-dist-private — kompiliert
-            # mit der vollstaendigen Demo.vue aus dem privaten Overlay
-            # ($PRIVATE_REPO). Seit das server-seitige Frontend-Build hier
-            # entfernt wurde (#84), baute nur noch das manuelle
-            # deploy/update.sh dieses Bundle; das Demo-Frontend blieb dadurch
-            # bei jedem Release stehen (am 2026-10-08 auf 06bb416, waehrend
-            # Prod und Demo-Backend schon v3.57.4 liefen).
-            #
-            # Neu gebaut wird nur, wenn sich frontend/ seit dem Commit des
-            # aktuellen Bundles (Hash im Dateinamen index-<sha>.js) geaendert
-            # hat. Prod ist an dieser Stelle schon gesund — scheitert der
-            # Build, bleibt das alte Bundle aktiv und der Deploy nur gelb.
-            PRIVATE_DIST="$APP_DIR/frontend-dist-private"
-            if [ -d "$PRIVATE_REPO" ] && [ -d "$PRIVATE_DIST" ]; then
-              HEAD_SHORT="$(sudo git rev-parse --short=7 HEAD)"
-              BUNDLE_SHA="$(grep -o 'assets/index-[0-9a-f]*\.js' "$PRIVATE_DIST/index.html" 2>/dev/null | head -1 | sed 's#assets/index-##; s#\.js##')"
-              if [ -n "$BUNDLE_SHA" ] \
-                 && sudo git cat-file -e "${BUNDLE_SHA}^{commit}" 2>/dev/null \
-                 && sudo git diff --quiet "$BUNDLE_SHA" HEAD -- frontend/; then
-                echo "==> Demo-Frontend aktuell (Bundle $BUNDLE_SHA, keine frontend/-Aenderung bis $HEAD_SHORT)"
-              else
-                echo "==> Demo-Frontend: privates Bundle bauen (${BUNDLE_SHA:-unbekannt} → $HEAD_SHORT) …"
-                if sudo docker build --build-arg GIT_HASH="$HEAD_SHORT" \
-                     -t tesla-carview-frontend-private:local "$APP_DIR/frontend" >/tmp/demo-frontend-build.log 2>&1 \
-                   && sudo docker run --rm --entrypoint sh \
-                        -v "$PRIVATE_DIST":/out tesla-carview-frontend-private:local \
-                        -c 'test -f /usr/share/nginx/html/index.html && find /out -mindepth 1 -delete && cp -a /usr/share/nginx/html/. /out/'; then
-                  echo "    ✓ Demo-Frontend jetzt auf $HEAD_SHORT"
-                else
-                  echo "::warning::Demo-Frontend-Build fehlgeschlagen — altes Bundle bleibt aktiv."
-                  tail -20 /tmp/demo-frontend-build.log || true
-                fi
-                sudo docker image rm tesla-carview-frontend-private:local >/dev/null 2>&1 || true
-              fi
-            fi
-
-            sudo docker image prune -f
-            GIT_HASH=$(sudo git rev-parse --short HEAD)
-            echo "Deployment erfolgreich + Healthcheck OK: $(date) | $GIT_HASH"
-            echo "DEPLOYED_SHA=$(sudo git rev-parse HEAD)"
-
-      # Merkt den ausgerollten Stand für den nächtlichen Nachholtermin.
-      # Markiert wird der Commit, den der Server tatsächlich ausgecheckt hat.
       - name: Ausgerollten Stand markieren
         env:
-          OUT: ${{ steps.ssh.outputs.stdout }}
+          SHA: ${{ steps.ssh.outputs.deployed_sha }}
         run: |
-          SHA=$(printf '%s\n' "$OUT" | sed -n 's/^DEPLOYED_SHA=\([0-9a-f]\{40\}\)$/\1/p' | tail -1)
           [ -n "$SHA" ] || { echo "::warning::Server meldete keinen Commit - Tag bleibt."; exit 0; }
           git fetch -q origin main
           git merge-base --is-ancestor "$SHA" origin/main || { echo "::error::$SHA liegt nicht auf main"; exit 1; }

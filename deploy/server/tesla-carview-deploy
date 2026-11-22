@@ -1,0 +1,132 @@
+#!/bin/bash
+# Server-seitiges Deployment von Tesla Carview.
+# Wird NUR über den Pförtner aufgerufen (deploy-gate, Label des GitHub-Actions-Schlüssels):
+#   deploy <40-stelliger Commit> [--allow-stale]
+# Standardeingabe: Zeile 1 = GHCR-Benutzer, Zeile 2 = GHCR-Token (kurzlebiges GITHUB_TOKEN des Laufs).
+# Installiert root-eigen nach /usr/local/lib/tesla-carview/deploy (deploy/server/install-deploy-gate.sh),
+# damit weder ein Deploy noch die Anwendung dieses Skript verändern kann.
+# Inhaltlich identisch mit dem früher per SSH gesendeten Skript aus deploy.yml – plus Prüfung,
+# dass der angeforderte Commit der aktuelle Stand von origin/main ist.
+set -euo pipefail
+SHA="${1:-}"; ALLOW_STALE_CHECKOUT=""
+[ "${2:-}" = "--allow-stale" ] && ALLOW_STALE_CHECKOUT=true
+[[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "deploy: ungültiger Commit" >&2; exit 1; }
+IFS= read -r GHCR_ACTOR || true
+IFS= read -r GHCR_TOKEN || true
+[ -n "$GHCR_ACTOR" ] && [ -n "$GHCR_TOKEN" ] || { echo "deploy: GHCR-Zugang fehlt (stdin)" >&2; exit 1; }
+
+APP_DIR=/opt/tesla-carview
+cd "$APP_DIR"
+COMPOSE="-f $APP_DIR/docker-compose.prod.yml"
+if [ -f "$APP_DIR/docker-compose.override.yml" ]; then
+  COMPOSE="$COMPOSE -f $APP_DIR/docker-compose.override.yml"
+  echo "==> docker-compose.override.yml gefunden — wird mitgeladen"
+fi
+
+sudo git fetch origin main
+MAIN_SHA="$(sudo git rev-parse origin/main)"
+if [ "$MAIN_SHA" != "$SHA" ]; then
+  echo "::error::Angeforderter Commit $SHA ist nicht der aktuelle Stand von origin/main ($MAIN_SHA) — Deploy abgebrochen."
+  exit 1
+fi
+# skip-worktree der privaten Demo-Dateien vor dem Reset lösen
+SKIPPED="$(sudo git ls-files -v | awk '/^S/ {print substr($0,3)}')"
+if [ -n "$SKIPPED" ]; then
+  echo "==> skip-worktree loesen vor dem Reset:"
+  echo "$SKIPPED" | while IFS= read -r f; do [ -n "$f" ] || continue; echo "    $f"; sudo git update-index --no-skip-worktree -- "$f"; done
+fi
+sudo git reset --hard origin/main
+HEAD_SHA="$(sudo git rev-parse HEAD)"
+CUR_BRANCH="$(sudo git rev-parse --abbrev-ref HEAD)"
+if [ "$HEAD_SHA" != "$MAIN_SHA" ]; then
+  echo "::error::Arbeitsbaum folgt origin/main nicht — Deploy abgebrochen."
+  echo "  Verzeichnis : $APP_DIR"; echo "  Branch      : $CUR_BRANCH"; echo "  HEAD        : $HEAD_SHA"; echo "  origin/main : $MAIN_SHA"
+  echo "  Diagnose: sudo git -C $APP_DIR status ; sudo git -C $APP_DIR reflog -5"
+  echo "  Notausgang (nur Incidents): Repository-Variable ALLOW_STALE_CHECKOUT=true"
+  if [ "$ALLOW_STALE_CHECKOUT" = "true" ]; then
+    echo "::warning::ALLOW_STALE_CHECKOUT=true — Deploy laeuft trotz nicht-synchronem Arbeitsbaum weiter."
+  else
+    exit 1
+  fi
+else
+  echo "==> Arbeitsbaum synchron mit origin/main ($CUR_BRANCH @ $(sudo git rev-parse --short HEAD))"
+fi
+
+# Privates Demo-Overlay einblenden
+PRIVATE_REPO="/opt/tc-private.git"
+if [ -d "$PRIVATE_REPO" ]; then
+  sudo git --git-dir="$PRIVATE_REPO" --work-tree="$APP_DIR" checkout -f HEAD -- .
+  sudo git update-index --skip-worktree backend/src/routes/demo.js backend/src/services/demoLifecycle.js frontend/src/views/Demo.vue
+fi
+
+echo "$GHCR_TOKEN" | sudo docker login ghcr.io -u "$GHCR_ACTOR" --password-stdin
+unset GHCR_TOKEN
+trap 'sudo docker logout ghcr.io >/dev/null 2>&1 || true' EXIT
+echo "==> Neue Images aus GHCR ziehen …"
+sudo docker compose $COMPOSE pull backend frontend
+echo "==> Container stoppen (sauberer Shutdown vor Recreate) …"
+sudo docker compose $COMPOSE stop backend frontend || true
+echo "==> Container entfernen (vermeidet Name-Konflikt beim Up) …"
+sudo docker compose $COMPOSE rm -f backend frontend || true
+for name in tesla-carview-backend tesla-carview-frontend; do
+  for c in $(sudo docker ps -aq --filter "name=_${name}\$"); do
+    echo "==> Verwaister Random-Prefix-Container: $c"; sudo docker rm -f "$c" || true
+  done
+done
+echo "==> Container hochziehen …"
+sudo docker compose $COMPOSE up -d backend frontend
+if sudo docker compose $COMPOSE --profile disabled config --services 2>/dev/null | grep -q '^ollama$'; then
+  echo "==> Ollama per disabled-Profile abgeschaltet — skip"
+else
+  echo "==> Ollama sicherstellen (idempotent) …"
+  sudo docker compose $COMPOSE up -d ollama || echo "Ollama-Service nicht gestartet — OK"
+fi
+sudo docker logout ghcr.io
+echo "==> nginx neu erstellen (wendet die Port-Konfiguration an) …"
+sudo docker compose $COMPOSE up -d --force-recreate nginx
+if ! sudo docker inspect tesla-carview-nginx --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' 2>/dev/null | grep -q "traefik-proxy"; then
+  echo "==> nginx nicht in traefik-proxy — network connect"
+  sudo docker network connect traefik-proxy tesla-carview-nginx
+fi
+
+echo "==> Healthcheck: nginx-Container → http://127.0.0.1/api/health …"
+HEALTH_OK=""
+for i in $(seq 1 12); do
+  sleep 3
+  if sudo docker exec tesla-carview-nginx wget -q -O /dev/null -T 5 "http://127.0.0.1/api/health" 2>/dev/null; then
+    HEALTH_OK="yes"; echo "Healthcheck OK nach ~$((i*3))s"; break
+  fi
+  echo "Versuch $i/12: Backend ueber nginx noch nicht bereit …"
+done
+if [ -z "$HEALTH_OK" ]; then
+  echo "FEHLER: Backend antwortet nach dem Deploy nicht auf http://127.0.0.1/api/health im nginx-Container (Down/502)."
+  echo "Letzte Backend-Logs:"; sudo docker logs --tail 30 tesla-carview-backend 2>&1 || true
+  echo "Letzte nginx-Logs:";   sudo docker logs --tail 15 tesla-carview-nginx 2>&1 || true
+  echo "nginx-Port-Mapping (leer = Traefik-only, das ist ok):"; sudo docker ps --filter name=tesla-carview-nginx --format '{{.Ports}}' || true
+  exit 1
+fi
+
+# Demo-Frontend (privates Bundle) nur bei Frontend-Änderungen neu bauen
+PRIVATE_DIST="$APP_DIR/frontend-dist-private"
+if [ -d "$PRIVATE_REPO" ] && [ -d "$PRIVATE_DIST" ]; then
+  HEAD_SHORT="$(sudo git rev-parse --short=7 HEAD)"
+  BUNDLE_SHA="$(grep -o 'assets/index-[0-9a-f]*\.js' "$PRIVATE_DIST/index.html" 2>/dev/null | head -1 | sed 's#assets/index-##; s#\.js##')"
+  if [ -n "$BUNDLE_SHA" ] && sudo git cat-file -e "${BUNDLE_SHA}^{commit}" 2>/dev/null && sudo git diff --quiet "$BUNDLE_SHA" HEAD -- frontend/; then
+    echo "==> Demo-Frontend aktuell (Bundle $BUNDLE_SHA, keine frontend/-Aenderung bis $HEAD_SHORT)"
+  else
+    echo "==> Demo-Frontend: privates Bundle bauen (${BUNDLE_SHA:-unbekannt} → $HEAD_SHORT) …"
+    if sudo docker build --build-arg GIT_HASH="$HEAD_SHORT" -t tesla-carview-frontend-private:local "$APP_DIR/frontend" >/tmp/demo-frontend-build.log 2>&1 \
+       && sudo docker run --rm --entrypoint sh -v "$PRIVATE_DIST":/out tesla-carview-frontend-private:local \
+            -c 'test -f /usr/share/nginx/html/index.html && find /out -mindepth 1 -delete && cp -a /usr/share/nginx/html/. /out/'; then
+      echo "    ✓ Demo-Frontend jetzt auf $HEAD_SHORT"
+    else
+      echo "::warning::Demo-Frontend-Build fehlgeschlagen — altes Bundle bleibt aktiv."; tail -20 /tmp/demo-frontend-build.log || true
+    fi
+    sudo docker image rm tesla-carview-frontend-private:local >/dev/null 2>&1 || true
+  fi
+fi
+
+sudo docker image prune -f
+GIT_HASH=$(sudo git rev-parse --short HEAD)
+echo "Deployment erfolgreich + Healthcheck OK: $(date) | $GIT_HASH"
+echo "DEPLOYED_SHA=$(sudo git rev-parse HEAD)"

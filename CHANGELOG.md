@@ -9,6 +9,9 @@ Format folgt [Keep a Changelog](https://keepachangelog.com/de/1.0.0/).
 
 ## [Unreleased]
 
+### Sicherheit
+- **Strenger Deploy-Pförtner:** Der Deploy-Schlüssel aus GitHub Actions darf auf dem Server nur noch `deploy <commit>` auslösen. Bisher führte der Pförtner jeden gesendeten Befehl aus – wer an das Deploy-Secret kam, hätte über `sudo docker` faktisch Root-Rechte gehabt. Die Deploy-Logik liegt jetzt root-eigen auf dem Server (`deploy/server/tesla-carview-deploy`), prüft, dass der Commit der aktuelle Stand von `main` ist, und bekommt den GHCR-Zugang über die Standardeingabe statt über Umgebungsvariablen der SSH-Verbindung. Der Server-Schlüssel ist festgenagelt (`DEPLOY_KNOWN_HOSTS`), `appleboy/ssh-action` entfällt. Zwei seit über 60 Tagen unbenutzte Deploy-Schlüssel wurden entfernt.
+
 ### Behoben
 - **Nacht-Deploy holt Stände wieder zuverlässig nach:** Die festen Nachholtermine (00:40/01:40 UTC) startete GitHub stark verspätet (05:30–09:00 UTC), sie verfehlten das Wartungsfenster 02–05 Uhr jede Nacht und Produktion blieb tagelang auf einem alten Stand. Jetzt läuft der Nachholtermin stündlich (Läufe ohne Arbeit enden nach Sekunden), sodass verlässlich einer ins Fenster fällt.
 - Sicherheit: `npm audit fix` (Backend und Frontend, nur Lockfiles) für die neue `minimatch`-Meldung (hoch), die die Pflichtprüfungen rot färbte.
