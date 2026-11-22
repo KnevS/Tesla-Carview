@@ -1,0 +1,23 @@
+#!/bin/bash
+# Pförtner (Forced Command) für die Deploy-Schlüssel aus GitHub Actions:
+#   restrict,command="/usr/local/lib/deploy-gate/gate <label>" ssh-ed25519 …   (in ~sven/.ssh/authorized_keys)
+# Jedes Label darf GENAU eine Aktion auslösen; alles andere (Shell, beliebige Befehle,
+# Verkettungen) wird abgelehnt und protokolliert. Die Standardeingabe geht an das Deploy-Skript
+# (Tesla Carview: GHCR-Zugang). Installiert root-eigen nach /usr/local/lib/deploy-gate/gate.
+label="${1:-unbekannt}"
+log=/home/sven/.ssh/deploy-gate.log
+cmd=$(printf '%s' "${SSH_ORIGINAL_COMMAND:-}" | tr -d '\r' | head -c 200 | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+from="${SSH_CLIENT%% *}"
+pattern=""; handler=""
+case "$label" in
+  tcv-20260510)  pattern='^deploy ([0-9a-f]{40})( --allow-stale)?$'; handler=/usr/local/lib/tesla-carview/deploy ;;
+  teslaview-web) pattern='^deploy ([0-9a-f]{40})$';                  handler=/usr/local/lib/teslaview-web/deploy ;;
+esac
+if [ -n "$pattern" ] && [[ "$cmd" =~ $pattern ]]; then
+  printf '%s %s OK von %s: %s\n' "$(date -Is)" "$label" "$from" "$cmd" >> "$log"
+  if [ -n "${BASH_REMATCH[2]:-}" ]; then exec "$handler" "${BASH_REMATCH[1]}" --allow-stale; fi
+  exec "$handler" "${BASH_REMATCH[1]}"
+fi
+printf '%s %s ABGELEHNT von %s: %q\n' "$(date -Is)" "$label" "$from" "${cmd:0:80}" >> "$log"
+echo "deploy-gate: für diesen Schlüssel ist nur „deploy <commit>“ erlaubt" >&2
+exit 1

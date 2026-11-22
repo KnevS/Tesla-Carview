@@ -9,6 +9,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Security
+- **Strict deploy gate:** The GitHub Actions deploy key can now only trigger `deploy <commit>` on the server. Previously the gate executed any command it received — anyone obtaining the deploy secret would effectively have had root via `sudo docker`. The deploy logic now lives root-owned on the server (`deploy/server/tesla-carview-deploy`), verifies that the commit is the current `main`, and receives the GHCR credentials via stdin instead of SSH environment variables. The server host key is pinned (`DEPLOY_KNOWN_HOSTS`), `appleboy/ssh-action` is gone. Two deploy keys unused for more than 60 days were removed.
+
 ### Fixed
 - **Nightly deploy catches up reliably again:** GitHub started the fixed catch-up schedules (00:40/01:40 UTC) very late (05:30–09:00 UTC), so they missed the 02–05 maintenance window every night and production stayed on an old version for days. The catch-up now runs hourly (runs without work end within seconds), so one reliably lands in the window.
 - Security: `npm audit fix` (backend and frontend, lockfiles only) for the new `minimatch` advisory (high) that turned the required checks red.
