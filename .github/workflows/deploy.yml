@@ -152,7 +152,18 @@ jobs:
           printf '%s\n%s\n' "$GHCR_ACTOR" "$GHCR_TOKEN" \
             | ssh -i ~/.ssh/deploy -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o BatchMode=yes \
                   -o ConnectTimeout=30 -o ServerAliveInterval=30 "$USER_@$HOST" "deploy ${SHA}${ARG}" \
-            | tee deploy-output.txt
+            | tee deploy-output.txt \
+            || {
+              rc=$?
+              # Exit 255 = SSH unreachable (server likely in nightly maintenance window).
+              # For schedule runs only: skip gracefully - the next cron slot will retry.
+              # For workflow_run / workflow_dispatch: still fail hard.
+              if [ "$rc" -eq 255 ] && [ "$GITHUB_EVENT_NAME" = schedule ]; then
+                echo "::warning::Server nicht erreichbar (SSH exit 255, cron-Lauf) – nächster Termin holt nach."
+                exit 0
+              fi
+              exit "$rc"
+            }
           DEPLOYED=$(sed -n 's/^DEPLOYED_SHA=\([0-9a-f]\{40\}\)$/\1/p' deploy-output.txt | tail -1)
           echo "deployed_sha=$DEPLOYED" >> "$GITHUB_OUTPUT"
 
